@@ -1,4 +1,5 @@
-third-party-libs/
+third-party/
+out/build/
 
 # Prerequisites
 *.d
