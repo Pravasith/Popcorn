@@ -23,10 +23,14 @@ set(GLFW_BUILD_EXAMPLES
 
 set(SOURCE_FILES main.cpp)
 
+# Include libraries like GLAD
+add_subdirectory("third-party")
+
 add_executable(${PROJECT} ${SOURCE_FILES})
 
 find_package(glfw3 REQUIRED)
+find_package(REQUIRED)
 
-target_link_libraries(${PROJECT} PUBLIC glfw)
+target_link_libraries(${PROJECT} PUBLIC glad glfw)
 
 # target_compile_features(${PROJECT} PUBLIC cxx_std_17)
