@@ -8,8 +8,15 @@ check_create_folder() {
     # Check if the folder exists
     if [ ! -d "$folder" ]; then
         # If the folder doesn't exist, create it
-        sudo mkdir "$folder"
-        echo "Folder '$folder' created."
+        if [ $# -eq 1 ]; then
+            mkdir "$folder"
+            echo "Folder '$folder' created."
+        else
+            if [ "$2" -eq 1 ]; then
+                sudo mkdir "$folder"
+                echo "Folder '$folder' created."
+            fi
+        fi
     else
         echo "Folder '$folder' already exists. Skipped creating."
     fi
@@ -55,7 +62,8 @@ cp "$repos_dir/glad/src/glad.c" "$glad_src_dir/glad.c"
 glad_install_dir="/usr/include/glad"
 khr_install_dir="/usr/include/glad"
 
-check_create_folder "$glad_install_dir"
+# 2nd arg 1 means sudo
+check_create_folder "$glad_install_dir" 1
 sudo cp "$repos_dir/glad/include/glad/glad.h" "$glad_install_dir/glad.h"
 
 echo "Installing GLAD complete"
