@@ -68,4 +68,8 @@ sudo cp "$repos_dir/glad/include/glad/glad.h" "$glad_install_dir/glad.h"
 
 echo "Installing GLAD complete"
 
+echo "Copying CMakeLists.txt to third-party..."
+cp "$repos_dir/CMakeLists.txt" "$vendor/CMakeLists.txt"
+echo "Copying CMakeLists.txt to third-party complete"
+
 echo "Installation successful."

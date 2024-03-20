@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-set(PROJECT EMMA)
+set(PROJECT GOOD_STUFF)
 
 project(${PROJECT} VERSION 1.0.0)
 
@@ -29,7 +29,6 @@ add_subdirectory("third-party")
 add_executable(${PROJECT} ${SOURCE_FILES})
 
 find_package(glfw3 REQUIRED)
-find_package(REQUIRED)
 
 target_link_libraries(${PROJECT} PUBLIC glad glfw)
 
