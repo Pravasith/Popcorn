@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.22)
 set(PROJECT GOOD_STUFF)
 
 project(${PROJECT} VERSION 1.0.0)
+message("Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
 
 # Specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
