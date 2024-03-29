@@ -25,7 +25,7 @@ check_create_folder() {
 # INSTALL THIRD PARTY LIBS
 curr_dir=${PWD}
 vendor="$curr_dir/third-party"
-repos_dir="$curr_dir/repos"
+repos_dir="$curr_dir/ext-repos"
 
 # rm -rf "$vendor"
 check_create_folder "$vendor"
@@ -33,7 +33,7 @@ check_create_folder "$vendor"
 # CLONE GLFW
 echo "Cloning GLFW..."
 
-glfw_src_dir="$vendor/glfw"
+glfw_src_dir="$repos_dir/glfw"
 check_create_folder "$glfw_src_dir"
 
 git clone "git@github.com:glfw/glfw.git" "$glfw_src_dir"
@@ -69,7 +69,7 @@ sudo cp "$repos_dir/glad/include/glad/glad.h" "$glad_install_dir/glad.h"
 echo "Installing GLAD complete"
 
 echo "Copying CMakeLists.txt to third-party..."
-cp "$repos_dir/CMakeLists.txt" "$vendor/CMakeLists.txt"
+cp "$repos_dir/glad-cmake.txt" "$vendor/CMakeLists.txt"
 echo "Copying CMakeLists.txt to third-party complete"
 
 echo "Installation successful."

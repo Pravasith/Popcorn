@@ -1,5 +1,6 @@
 third-party/
 out/build/
+ext-repos/glfw
 
 # Prerequisites
 *.d
