@@ -26,9 +26,10 @@ check_create_folder() {
 curr_dir=${PWD}
 vendor="$curr_dir/third-party"
 repos_dir="$curr_dir/ext-repos"
+win64_dir="$curr_dir/win64"
 
-# rm -rf "$vendor"
 check_create_folder "$vendor"
+check_create_folder "$win64_dir"
 
 # CLONE GLFW
 echo "Cloning GLFW..."
@@ -50,6 +51,22 @@ cd "$glfw_build_dir"
 cmake ..
 sudo make install
 cd "$curr_dir"
+
+# INSTALL GLFW FOR WINDOWS
+echo "Generating Win64 Binaries..."
+glfw_win64_build_dir="$glfw_src_dir/win64-build"
+glfw_win64_install_dir="$win64_dir/glfw"
+
+check_create_folder "$glfw_win64_build_dir"
+cmake -DCMAKE_INSTALL_PREFIX="$glfw_win64_install_dir" -S "$glfw_src_dir" -B "$glfw_win64_build_dir" -D CMAKE_TOOLCHAIN_FILE=CMake/x86_64-w64-mingw32.cmake
+
+check_create_folder "$glfw_win64_install_dir"
+cd "$glfw_win64_build_dir"
+sudo make install
+
+echo "Generating Win64 Binaries complete"
+cd "$curr_dir"
+
 echo "Installing GLFW complete"
 
 # INSTALL GLAD

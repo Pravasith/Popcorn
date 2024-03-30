@@ -1,6 +1,7 @@
 third-party/
 out/build/
 ext-repos/glfw
+win64/
 
 # Prerequisites
 *.d
