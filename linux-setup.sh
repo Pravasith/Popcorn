@@ -72,9 +72,13 @@ echo "Installing GLFW complete"
 # INSTALL GLAD
 echo "Installing GLAD..."
 glad_src_dir="$vendor/glad"
+glad_win64_dir="$win64_dir/glad"
+
 check_create_folder "$glad_src_dir"
+check_create_folder "$glad_win64_dir"
 
 cp "$repos_dir/glad/src/glad.c" "$glad_src_dir/glad.c"
+cp -r "$repos_dir/glad/include" "$glad_win64_dir"
 
 glad_install_dir="/usr/include/glad"
 khr_install_dir="/usr/include/glad"

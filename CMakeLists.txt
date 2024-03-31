@@ -10,8 +10,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-include(CheckIncludeFiles)
-check_include_files(stdio.h HAVE_STDIO_H)
+set(WINDOWS_BINARIES_DIR ${CMAKE_SOURCE_DIR}/win64)
+set(GLAD_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/win64/glad/include)
+include_directories(${GLAD_INCLUDE_DIR})
 
 set(GLFW_BUILD_DOCS
     OFF
@@ -32,7 +33,11 @@ add_subdirectory("third-party")
 
 add_executable(${PROJECT} ${SOURCE_FILES})
 
+set(glfw3_DIR ${WINDOWS_BINARIES_DIR}/glfw/lib/cmake/glfw3)
 find_package(glfw3 REQUIRED)
+
+# Include GLAD headers for the project
+target_include_directories(${PROJECT} PUBLIC ${GLAD_INCLUDE_DIR})
 
 target_link_libraries(${PROJECT} PUBLIC glad glfw)
 
