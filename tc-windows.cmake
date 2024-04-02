@@ -5,13 +5,12 @@ set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)
 
 # where is the target environment located
 set(WINDOWS_BINARIES_DIR ${CMAKE_SOURCE_DIR}/win64)
-set(CMAKE_FIND_ROOT_PATH /usr/x86_64-w64-mingw32 ${WINDOWS_BINARIES_DIR}/glfw3
+set(CMAKE_FIND_ROOT_PATH /usr/x86_64-w64-mingw32 ${WINDOWS_BINARIES_DIR}/glfw
                          ${WINDOWS_BINARIES_DIR}/glad)
 
-set(GLAD glad)
-
 # Specify the variable to store the header file path
-set(GLAD_INCLUDE_DIR ${WINDOWS_BINARIES_DIR}/glad)
+set(GLAD_INCLUDE_DIR ${WINDOWS_BINARIES_DIR}/glad/include)
+include_directories(${GLAD_INCLUDE_DIR})
 
 # Use find_path to locate the header file path
 find_path(GLAD_INCLUDE_DIR glad.h PATHS ${WINDOWS_BINARIES_DIR}/glad/include)
@@ -30,3 +29,4 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 # search headers and libraries in the target environment
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)

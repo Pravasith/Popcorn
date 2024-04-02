@@ -10,10 +10,36 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(WINDOWS_BINARIES_DIR ${CMAKE_SOURCE_DIR}/win64)
-set(GLAD_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/win64/glad/include)
-include_directories(${GLAD_INCLUDE_DIR})
+# STATIC stuff (Windows)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  set(BUILD_FOR_WIN TRUE)
+  # Include the toolchain file for cross-compilation
+  # include(${CMAKE_TOOLCHAIN_FILE})
+endif()
 
+option(STATIC_BUILD "Build a static binary." ${BUILD_FOR_WIN})
+
+if(STATIC_BUILD)
+  set(CMAKE_EXE_LINKER_FLAGS "-static")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" CONFIG)
+  set(BUILD_SHARED_LIBS OFF)
+endif()
+
+set(WINDOWS_BINARIES_DIR ${CMAKE_SOURCE_DIR}/win64)
+
+set(GLAD_INCLUDE_DIR ${WINDOWS_BINARIES_DIR}/glad/include)
+
+set(SOURCE_FILES main.cpp)
+
+# Include libraries like GLAD
+add_subdirectory("third-party")
+
+add_executable(${PROJECT} ${SOURCE_FILES})
+
+find_package(OpenGL REQUIRED)
+find_package(glfw3 REQUIRED)
+
+# GLFW build settings
 set(GLFW_BUILD_DOCS
     OFF
     CACHE BOOL "" FORCE)
@@ -26,19 +52,6 @@ set(GLFW_BUILD_EXAMPLES
     OFF
     CACHE BOOL "" FORCE)
 
-set(SOURCE_FILES main.cpp)
-
-# Include libraries like GLAD
-add_subdirectory("third-party")
-
-add_executable(${PROJECT} ${SOURCE_FILES})
-
-set(glfw3_DIR ${WINDOWS_BINARIES_DIR}/glfw/lib/cmake/glfw3)
-find_package(glfw3 REQUIRED)
-
-# Include GLAD headers for the project
-target_include_directories(${PROJECT} PUBLIC ${GLAD_INCLUDE_DIR})
-
-target_link_libraries(${PROJECT} PUBLIC glad glfw)
+target_link_libraries(${PROJECT} PUBLIC glad glfw OpenGL::GL)
 
 # target_compile_features(${PROJECT} PUBLIC cxx_std_17)
