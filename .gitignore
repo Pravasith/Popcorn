@@ -1,5 +1,8 @@
 third-party/
-out/build/
+
+build/linux/
+build/windows/
+
 ext-repos/glfw
 win64/
 
