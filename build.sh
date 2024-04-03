@@ -15,7 +15,7 @@ if [ "$platform" = "l" ]; then
     make
 elif [ "$platform" = "w" ]; then
     echo "You are compiling for Windows."
-    cd "$PWD"/build/windows
+    cd "$PWD"/build/win64
     rm -rf *
     cmake -DCMAKE_TOOLCHAIN_FILE=../../tc-windows.cmake ../../
     make

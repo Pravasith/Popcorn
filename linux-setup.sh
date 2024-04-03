@@ -93,4 +93,15 @@ echo "Copying CMakeLists.txt to third-party..."
 cp "$repos_dir/glad-cmake.txt" "$vendor/CMakeLists.txt"
 echo "Copying CMakeLists.txt to third-party complete"
 
+
+echo "Creating build directories..."
+build_dir="$curr_dir/build"
+win64_build_dir="$build_dir/win64"
+linux_build_dir="$build_dir/linux"
+
+check_create_folder "$build_dir"
+check_create_folder "$win64_build_dir"
+check_create_folder "$linux_build_dir"
+echo "Creating build directories complete"
+
 echo "Installation successful."
