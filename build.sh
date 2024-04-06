@@ -11,7 +11,7 @@ if [ "$platform" = "l" ]; then
     echo "You are compiling for Linux."
     cd "$PWD"/build/linux
     rm -rf *
-    cmake ../../
+    cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ../../
     make
 elif [ "$platform" = "w" ]; then
     echo "You are compiling for Windows."
