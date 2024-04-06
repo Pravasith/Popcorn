@@ -2,7 +2,11 @@
 
 class Engine {
 public:
-  static Engine *Get(char *dir);
+  static void Create() { Engine::Create("Engine Window"); };
+  static void Create(const char *dir);
+
+  static Engine *Get();
+
   static void Destroy();
 
 private:
