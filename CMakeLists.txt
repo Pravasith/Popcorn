@@ -52,13 +52,13 @@ set(GLFW_BUILD_EXAMPLES
     OFF
     CACHE BOOL "" FORCE)
 
-# Engine
+# Implimentation dirs
 add_subdirectory("src")
 
-# Include directories
+# Include dirs
 include_directories(include)
 
-# Target include directories
+# Lib Engine - include dirs
 target_include_directories(
   Engine
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -67,7 +67,6 @@ target_include_directories(
 )
 
 target_link_libraries(${PROJECT} PUBLIC Engine)
-
 target_link_libraries(${PROJECT} PUBLIC glad glfw OpenGL::GL)
 
 # target_compile_features(${PROJECT} PUBLIC cxx_std_17)

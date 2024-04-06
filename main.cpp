@@ -1,9 +1,10 @@
 #include "Engine.h"
-/* #include "include/engine/core/Engine.h" */
 #include <iostream>
 
-int main() {
-  Engine::Get();
-  std::cout << "MAIN FILE" << "\n";
+int main(int argc, char **argv) {
+  Engine::Get(argv[0]);
+  Engine::Destroy();
+
+  std::cout << "FROM MAIN" << "\n";
   return EXIT_SUCCESS;
 }
