@@ -5,6 +5,7 @@ build/windows/
 
 ext-repos/glfw
 win64/
+.cache/
 
 # Prerequisites
 *.d
