@@ -5,16 +5,13 @@ Engine *Engine::instance = nullptr;
 
 Engine *Engine::Get() { return instance; }
 
-void Engine::Create(const char *dir) {
-  std::cout << "DIR: " << dir << "\n";
-  std::cout << "BEFORE:" << instance << "\n";
+void Engine::Start() {
   if (!instance) {
     instance = new Engine();
   }
-  std::cout << "AFTER:" << instance << "\n";
 }
 
-void Engine::Destroy() {
+void Engine::Stop() {
   if (instance) {
     delete instance;
     instance = nullptr;

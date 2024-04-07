@@ -1,0 +1,17 @@
+[
+{
+  "directory": "/home/prav/personal/opengl-experiments/build/linux",
+  "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/engine/core -std=c++17 -o CMakeFiles/GOOD_STUFF.dir/main.cpp.o -c /home/prav/personal/opengl-experiments/main.cpp",
+  "file": "/home/prav/personal/opengl-experiments/main.cpp"
+},
+{
+  "directory": "/home/prav/personal/opengl-experiments/build/linux/third-party",
+  "command": "/usr/bin/cc -Dglad_EXPORTS  -fPIC -o CMakeFiles/glad.dir/glad/glad.c.o -c /home/prav/personal/opengl-experiments/third-party/glad/glad.c",
+  "file": "/home/prav/personal/opengl-experiments/third-party/glad/glad.c"
+},
+{
+  "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
+  "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/engine/core -std=c++17 -o CMakeFiles/Engine.dir/engine/core/Engine.cpp.o -c /home/prav/personal/opengl-experiments/src/engine/core/Engine.cpp",
+  "file": "/home/prav/personal/opengl-experiments/src/engine/core/Engine.cpp"
+}
+]

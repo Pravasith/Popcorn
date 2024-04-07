@@ -2,11 +2,11 @@
 #include <iostream>
 
 int main(int argc, char **argv) {
-  Engine::Create();
+  Engine::Start();
   /* OR */
   /* Engine::Create(argv[0]); */
 
-  Engine::Destroy();
+  Engine::Stop();
 
   std::cout << "FROM MAIN" << "\n";
   return EXIT_SUCCESS;
