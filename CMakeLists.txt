@@ -23,11 +23,10 @@ if(STATIC_BUILD)
   set(CMAKE_EXE_LINKER_FLAGS "-static")
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" CONFIG)
   set(BUILD_SHARED_LIBS OFF)
+
+  set(WINDOWS_BINARIES_DIR ${CMAKE_SOURCE_DIR}/win64)
+  set(GLAD_INCLUDE_DIR ${WINDOWS_BINARIES_DIR}/glad/include)
 endif()
-
-set(WINDOWS_BINARIES_DIR ${CMAKE_SOURCE_DIR}/win64)
-
-set(GLAD_INCLUDE_DIR ${WINDOWS_BINARIES_DIR}/glad/include)
 
 set(SOURCE_FILES main.cpp)
 
@@ -55,18 +54,26 @@ set(GLFW_BUILD_EXAMPLES
 # Implimentation dirs
 add_subdirectory("src")
 
-# Include dirs
-include_directories(include)
+# Include dirs include_directories(include)
 
-# Lib Engine - include dirs
+# # However, if you want to create a library that only provides include #
+# directories and possibly compile options, you can create an interface library.
+# # Interface libraries do not contain any implementation files, but they can #
+# still be useful for propagating include directories and compile options to #
+# other targets. add_library(common_include_dirs INTERFACE) # This is an
+# "interface library". target_include_directories( common_include_dirs INTERFACE
+# ${CMAKE_CURRENT_SOURCE_DIR}/include
+# ${CMAKE_CURRENT_SOURCE_DIR}/include/engine/core)
+
 target_include_directories(
-  Engine
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-         ${CMAKE_CURRENT_SOURCE_DIR}/include/engine/core
-         # Add more directories if needed
-)
+  Engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+                ${CMAKE_CURRENT_SOURCE_DIR}/include/engine/core)
 
-target_link_libraries(${PROJECT} PUBLIC Engine)
-target_link_libraries(${PROJECT} PUBLIC glad glfw OpenGL::GL)
+target_include_directories(
+  Window PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+                ${CMAKE_CURRENT_SOURCE_DIR}/include/engine/core)
+
+target_link_libraries(${PROJECT} PRIVATE glad glfw OpenGL::GL)
+target_link_libraries(${PROJECT} PRIVATE Window Engine)
 
 # target_compile_features(${PROJECT} PUBLIC cxx_std_17)

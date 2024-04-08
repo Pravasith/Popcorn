@@ -13,5 +13,10 @@
   "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
   "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/engine/core -std=c++17 -o CMakeFiles/Engine.dir/engine/core/Engine.cpp.o -c /home/prav/personal/opengl-experiments/src/engine/core/Engine.cpp",
   "file": "/home/prav/personal/opengl-experiments/src/engine/core/Engine.cpp"
+},
+{
+  "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
+  "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/engine/core -std=c++17 -o CMakeFiles/Window.dir/engine/core/Window.cpp.o -c /home/prav/personal/opengl-experiments/src/engine/core/Window.cpp",
+  "file": "/home/prav/personal/opengl-experiments/src/engine/core/Window.cpp"
 }
 ]

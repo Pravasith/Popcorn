@@ -3,15 +3,14 @@
 
 Window *Window::instance = nullptr;
 
-Window *Window::Get(char *dir) {
-  /* std::cout << "BEFORE:" << instance << "\n"; */
+void Window::Create(const char *dir) {
+  std::cout << dir << '\n';
   if (!instance) {
     instance = new Window();
   }
-  /* std::cout << "AFTER:" << instance << "\n"; */
-
-  return instance;
 }
+
+Window *Window::Get() { return instance; }
 
 void Window::Destroy() {
   if (instance) {
@@ -20,5 +19,5 @@ void Window::Destroy() {
   }
 }
 
-Window::Window() { std::cout << "ENGINE STARTED" << "\n"; };
-Window::~Window() { std::cout << "ENGINE STOPPED" << "\n"; };
+Window::Window() { std::cout << "WINDOW CREATED" << "\n"; };
+Window::~Window() { std::cout << "WINDOW DESTROYED" << "\n"; };
