@@ -6,7 +6,7 @@
 },
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux/third-party",
-  "command": "/usr/bin/cc -Dglad_EXPORTS  -fPIC -o CMakeFiles/glad.dir/glad/glad.c.o -c /home/prav/personal/opengl-experiments/third-party/glad/glad.c",
+  "command": "/usr/bin/cc    -o CMakeFiles/glad.dir/glad/glad.c.o -c /home/prav/personal/opengl-experiments/third-party/glad/glad.c",
   "file": "/home/prav/personal/opengl-experiments/third-party/glad/glad.c"
 },
 {

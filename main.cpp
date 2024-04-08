@@ -1,6 +1,5 @@
 #include "Engine.h"
 #include "Window.h"
-#include <iostream>
 
 int main(int argc, char **argv) {
   Engine::Start();
@@ -8,6 +7,5 @@ int main(int argc, char **argv) {
   Window::Destroy();
   Engine::Stop();
 
-  std::cout << "FROM MAIN" << "\n";
-  return EXIT_SUCCESS;
+  return 0;
 }
