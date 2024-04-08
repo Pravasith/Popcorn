@@ -65,7 +65,9 @@ target_include_directories(
   Window PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
                 ${CMAKE_CURRENT_SOURCE_DIR}/include/engine/core)
 
-target_link_libraries(${PROJECT} PRIVATE Window glad glfw)
+target_link_libraries(Window PRIVATE glad glfw)
+
+# FINAL PROJECT LINKING
 target_link_libraries(${PROJECT} PRIVATE Window Engine)
 
 # target_compile_features(${PROJECT} PUBLIC cxx_std_17)
