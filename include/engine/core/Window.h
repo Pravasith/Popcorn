@@ -1,4 +1,5 @@
 #pragma once
+
 #include <glad/glad.h>
 // A LINE BREAK FOR FORMATTING
 #include <GLFW/glfw3.h>
@@ -16,8 +17,11 @@ private:
   Window();
   ~Window();
 
-  static void InitGLFW();
-  static void CreateGLFWWindow();
+  static void Init();
+  static void CreateWindow();
+
+  static void InitGraphicsLib();
+  static void SetGraphicsViewport();
 
   static Window *instance;
   static const char *__dir;

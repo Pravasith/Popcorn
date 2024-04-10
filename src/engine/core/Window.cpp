@@ -1,5 +1,6 @@
 #include "Window.h"
-#include <GLFW/glfw3.h>
+#include "GLAD_Funcs.h"
+#include "GLFW_Funcs.h"
 #include <iostream>
 
 Window *Window::instance = nullptr;
@@ -23,27 +24,29 @@ void Window::Destroy() {
 }
 
 Window::Window() {
-  InitGLFW();
-  CreateGLFWWindow();
+  Init();
+  CreateWindow();
   std::cout << "WINDOW CREATED" << "\n";
 };
 
 Window::~Window() { std::cout << "WINDOW DESTROYED" << "\n"; };
 
-void Window::InitGLFW() {
-  glfwInit();
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+void Window::Init() {
+  GLFW_Funcs::Init();
+  /* OR ANY OTHER LIB FUNCTION CALL */
 }
 
-void Window::CreateGLFWWindow() {
-  __glfw_window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
-
-  if (!__glfw_window) {
-    std::cout << "Failed to create GLFW window" << std::endl;
-    glfwTerminate();
-  }
-
-  glfwMakeContextCurrent(__glfw_window);
+void Window::CreateWindow() {
+  GLFW_Funcs::Create_Window(__glfw_window, __dir);
+  /* OR ANY OTHER LIB FUNCTION CALL */
 }
+
+void Window::InitGraphicsLib() {
+  GLAD_Funcs::Init();
+  /* OR ANY OTHER LIB FUNCTION CALL */
+};
+
+void Window::SetGraphicsViewport() {
+  GLAD_Funcs::Set_Viewport(0, 0, 800, 600);
+  /* OR ANY OTHER LIB FUNCTION CALL */
+};
