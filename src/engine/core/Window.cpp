@@ -26,13 +26,23 @@ void Window::Destroy() {
 Window::Window() {
   Init();
   CreateWindow();
+
+  InitGraphicsLib();
+  SetGraphicsViewport();
+
+  while (!glfwWindowShouldClose(__glfw_window)) {
+    glfwSwapBuffers(__glfw_window);
+    glfwPollEvents();
+  }
+
+  glfwTerminate();
   std::cout << "WINDOW CREATED" << "\n";
 };
 
 Window::~Window() { std::cout << "WINDOW DESTROYED" << "\n"; };
 
 void Window::Init() {
-  GLFW_Funcs::Init();
+  GLFW_Funcs::Init(GLAD_Funcs::Set_Viewport);
   /* OR ANY OTHER LIB FUNCTION CALL */
 }
 
@@ -42,7 +52,7 @@ void Window::CreateWindow() {
 }
 
 void Window::InitGraphicsLib() {
-  GLAD_Funcs::Init();
+  GLAD_Funcs::Init(GLFW_Funcs::Get_Proc_Address);
   /* OR ANY OTHER LIB FUNCTION CALL */
 };
 

@@ -1,12 +1,16 @@
 #pragma once
 
+#include "Utilities.h"
 #include <glad/glad.h>
 // A LINE BREAK FOR FORMATTING
-#include "GLFW_Funcs.h"
 
 namespace GLAD_Funcs {
-static void Init() {
-  if (!gladLoadGLLoader((GLADloadproc)GLFW_Funcs::Get_Proc_Address)) {
+
+typedef void (*GLFW_Glproc_Type)(void);
+typedef GLFW_Glproc_Type (*GLFW_Get_Proc_Address)(const char *);
+
+static void Init(GLFW_Get_Proc_Address get_proc_address_cb) {
+  if (!gladLoadGLLoader((GLADloadproc)get_proc_address_cb)) {
     write_log("Failed to initialize GLAD");
   }
 }
