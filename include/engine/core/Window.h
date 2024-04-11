@@ -23,6 +23,10 @@ private:
   static void InitGraphicsLib();
   static void SetGraphicsViewport();
 
+  static void StartMainGameLoop();
+
+  static void TerminateWindow();
+
   static Window *instance;
   static const char *__dir;
   static GLFWwindow *__glfw_window;

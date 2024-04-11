@@ -42,18 +42,29 @@ static void Init(Set_Graphics_Viewport_Type set_graphics_viewport_cb) {
 #endif
 }
 
-static void Create_Window(GLFWwindow *glfw_window, const char *dir) {
-  glfw_window = glfwCreateWindow(800, 600, dir, NULL, NULL);
+static void Create_Window(GLFWwindow **glfw_window, const char *dir) {
+  *glfw_window = glfwCreateWindow(800, 600, dir, NULL, NULL);
 
   if (!glfw_window) {
     write_log("Failed to create GLFW Window");
     glfwTerminate();
   }
 
-  glfwMakeContextCurrent(glfw_window);
-  glfwSetWindowCloseCallback(glfw_window, glfw_window_close_callback);
-  glfwSetFramebufferSizeCallback(glfw_window, glfw_framebuffer_size_callback);
+  glfwMakeContextCurrent(*glfw_window);
+  glfwSetWindowCloseCallback(*glfw_window, glfw_window_close_callback);
+  glfwSetFramebufferSizeCallback(*glfw_window, glfw_framebuffer_size_callback);
 }
+
+static void Main_Game_Loop(GLFWwindow *glfw_window
+                           /* , void(*gameloop_cb) */
+) {
+  while (!glfwWindowShouldClose(glfw_window)) {
+    glfwSwapBuffers(glfw_window);
+    glfwPollEvents();
+  }
+}
+
+static void Terminate() { glfwTerminate(); }
 
 // PURE GLFW FUNCS
 static GLFWglproc Get_Proc_Address(const char *procname) {

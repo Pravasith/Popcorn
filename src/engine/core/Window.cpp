@@ -9,8 +9,8 @@ GLFWwindow *Window::__glfw_window = nullptr;
 
 void Window::Create(const char *dir) {
   if (!instance) {
-    instance = new Window();
     __dir = dir;
+    instance = new Window();
   }
 }
 
@@ -26,20 +26,17 @@ void Window::Destroy() {
 Window::Window() {
   Init();
   CreateWindow();
+  std::cout << "WINDOW CREATED" << "\n";
 
   InitGraphicsLib();
   SetGraphicsViewport();
-
-  while (!glfwWindowShouldClose(__glfw_window)) {
-    glfwSwapBuffers(__glfw_window);
-    glfwPollEvents();
-  }
-
-  glfwTerminate();
-  std::cout << "WINDOW CREATED" << "\n";
+  StartMainGameLoop();
 };
 
-Window::~Window() { std::cout << "WINDOW DESTROYED" << "\n"; };
+Window::~Window() {
+  TerminateWindow();
+  std::cout << "WINDOW DESTROYED" << "\n";
+};
 
 void Window::Init() {
   GLFW_Funcs::Init(GLAD_Funcs::Set_Viewport);
@@ -47,7 +44,7 @@ void Window::Init() {
 }
 
 void Window::CreateWindow() {
-  GLFW_Funcs::Create_Window(__glfw_window, __dir);
+  GLFW_Funcs::Create_Window(&__glfw_window, __dir);
   /* OR ANY OTHER LIB FUNCTION CALL */
 }
 
@@ -60,3 +57,13 @@ void Window::SetGraphicsViewport() {
   GLAD_Funcs::Set_Viewport(0, 0, 800, 600);
   /* OR ANY OTHER LIB FUNCTION CALL */
 };
+
+void Window::StartMainGameLoop() {
+  GLFW_Funcs::Main_Game_Loop(__glfw_window);
+  /* OR ANY OTHER LIB FUNCTION CALL */
+}
+
+void Window::TerminateWindow() {
+  GLFW_Funcs::Terminate();
+  /* OR ANY OTHER LIB FUNCTION CALL */
+}

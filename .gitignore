@@ -7,6 +7,9 @@ ext-repos/glfw
 win64/
 .cache/
 
+# Logs
+common_logs.txt
+
 # Prerequisites
 *.d
 
