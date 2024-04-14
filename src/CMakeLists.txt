@@ -1,4 +1,4 @@
-set(CORE_IMPL_INCLUDE_DIR engine/core)
+set(CORE_IMPL_INCLUDE_DIR Popcorn/core)
 
-add_library(Engine ${CORE_IMPL_INCLUDE_DIR}/Engine.cpp)
 add_library(Window ${CORE_IMPL_INCLUDE_DIR}/Window.cpp)
+add_library(PopcornEngine ${CORE_IMPL_INCLUDE_DIR}/Application.cpp)

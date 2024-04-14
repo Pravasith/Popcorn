@@ -58,16 +58,17 @@ add_subdirectory("src")
 include_directories(include)
 
 target_include_directories(
-  Engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-                ${CMAKE_CURRENT_SOURCE_DIR}/include/engine/core)
+  Window PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+                ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/core)
 
 target_include_directories(
-  Window PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-                ${CMAKE_CURRENT_SOURCE_DIR}/include/engine/core)
+  PopcornEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+                       ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/core)
 
-target_link_libraries(Window PRIVATE glad glfw)
+target_link_libraries(Window PUBLIC glad glfw)
+target_link_libraries(PopcornEngine PRIVATE Window)
 
 # FINAL PROJECT LINKING
-target_link_libraries(${PROJECT} PRIVATE Window Engine)
+target_link_libraries(${PROJECT} PRIVATE PopcornEngine)
 
 # target_compile_features(${PROJECT} PUBLIC cxx_std_17)

@@ -1,11 +1,8 @@
-#include "Engine.h"
-#include "Window.h"
+#include "Application.h"
 
 int main(int argc, char **argv) {
-  Engine::Start();
-  Window::Create(argv[0]);
-  Window::Destroy();
-  Engine::Stop();
+  Application::Start();
+  Application::Stop();
 
   return 0;
 }
