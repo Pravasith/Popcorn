@@ -22,6 +22,9 @@ void Application::Stop() {
 Application::Application() {
   std::cout << "ENGINE STARTED" << "\n";
   Window::Create("Popcorn Application");
-  Window::Destroy();
 };
-Application::~Application() { std::cout << "ENGINE STOPPED" << "\n"; };
+
+Application::~Application() {
+  Window::Destroy();
+  std::cout << "ENGINE STOPPED" << "\n";
+};
