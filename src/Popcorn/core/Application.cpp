@@ -1,8 +1,9 @@
 #include "Application.h"
-#include "Window.h"
+#include "Utilities.h"
 #include <iostream>
 
 Application *Application::instance = nullptr;
+Window *Application::window = nullptr;
 
 Application *Application::Get() { return instance; }
 
@@ -22,6 +23,11 @@ void Application::Stop() {
 Application::Application() {
   std::cout << "ENGINE STARTED" << "\n";
   Window::Create("Popcorn Application");
+  window = Window::Get();
+
+  if (!window) {
+    write_log("Failed to create Window instance in Application");
+  }
 };
 
 Application::~Application() {

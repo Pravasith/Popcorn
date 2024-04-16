@@ -1,4 +1,5 @@
 #pragma once
+#include "Window.h"
 
 class Application {
 public:
@@ -11,4 +12,5 @@ private:
   ~Application();
 
   static Application *instance;
+  static Window *window;
 };

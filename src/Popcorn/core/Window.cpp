@@ -35,6 +35,8 @@ Window::Window() {
 
 Window::~Window() {
   TerminateWindow();
+  __glfw_window = nullptr;
+
   std::cout << "WINDOW DESTROYED" << "\n";
 };
 
@@ -44,6 +46,7 @@ void Window::Init() {
 }
 
 void Window::CreateWindow() {
+  std::cout << "BEFORE: " << __glfw_window << '\n';
   GLFW_Funcs::Create_Window(&__glfw_window, __dir);
   /* OR ANY OTHER LIB FUNCTION CALL */
 }
