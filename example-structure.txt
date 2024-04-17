@@ -1,0 +1,66 @@
+game_engine/
+│
+├── include/
+│   ├── engine/
+│   │   ├── core/
+│   │   │   ├── Application.h
+│   │   │   ├── Window.h
+│   │   │   ├── Input.h
+│   │   │   ├── Time.h
+│   │   │   └── ...
+│   │   ├── graphics/
+│   │   │   ├── Renderer.h
+│   │   │   ├── Shader.h
+│   │   │   ├── Texture.h
+│   │   │   ├── Mesh.h
+│   │   │   └── ...
+│   │   ├── physics/
+│   │   │   ├── Collider.h
+│   │   │   ├── Rigidbody.h
+│   │   │   └── ...
+│   │   └── ...
+│   ├── thirdparty/
+│   │   ├── glm/
+│   │   │   ├── glm.hpp
+│   │   │   └── ...
+│   │   └── ...
+│   └── ...
+│
+├── src/
+│   ├── core/
+│   │   ├── Application.cpp
+│   │   ├── Window.cpp
+│   │   ├── Input.cpp
+│   │   ├── Time.cpp
+│   │   └── ...
+│   ├── graphics/
+│   │   ├── Renderer.cpp
+│   │   ├── Shader.cpp
+│   │   ├── Texture.cpp
+│   │   ├── Mesh.cpp
+│   │   └── ...
+│   ├── physics/
+│   │   ├── Collider.cpp
+│   │   ├── Rigidbody.cpp
+│   │   └── ...
+│   └── ...
+│
+├── examples/
+│   ├── example1.cpp
+│   ├── example2.cpp
+│   └── ...
+│
+├── tests/
+│   ├── test1.cpp
+│   ├── test2.cpp
+│   └── ...
+│
+├── assets/
+│   ├── textures/
+│   ├── models/
+│   ├── shaders/
+│   └── ...
+│
+├── CMakeLists.txt
+├── README.md
+└── ...
