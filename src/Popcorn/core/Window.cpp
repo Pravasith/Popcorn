@@ -3,6 +3,7 @@
 #include "GLFW_Funcs.h"
 #include <iostream>
 
+ENGINE_NAMESPACE_BEGIN
 Window *Window::instance = nullptr;
 const char *Window::__dir = nullptr;
 GLFWwindow *Window::__glfw_window = nullptr;
@@ -36,6 +37,7 @@ Window::Window() {
 Window::~Window() {
   TerminateWindow();
   __glfw_window = nullptr;
+  std::cout << "AFTER: " << __glfw_window << '\n';
 
   std::cout << "WINDOW DESTROYED" << "\n";
 };
@@ -70,3 +72,4 @@ void Window::TerminateWindow() {
   GLFW_Funcs::Terminate();
   /* OR ANY OTHER LIB FUNCTION CALL */
 }
+ENGINE_NAMESPACE_END

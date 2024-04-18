@@ -2,6 +2,7 @@
 #include "Utilities.h"
 #include <iostream>
 
+ENGINE_NAMESPACE_BEGIN
 Application *Application::instance = nullptr;
 Window *Application::window = nullptr;
 
@@ -34,3 +35,4 @@ Application::~Application() {
   Window::Destroy();
   std::cout << "ENGINE STOPPED" << "\n";
 };
+ENGINE_NAMESPACE_END

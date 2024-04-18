@@ -1,7 +1,7 @@
 [
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux",
-  "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/core -std=c++17 -o CMakeFiles/GOOD_STUFF.dir/main.cpp.o -c /home/prav/personal/opengl-experiments/main.cpp",
+  "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/core -std=c++17 -o CMakeFiles/Game.dir/main.cpp.o -c /home/prav/personal/opengl-experiments/main.cpp",
   "file": "/home/prav/personal/opengl-experiments/main.cpp"
 },
 {

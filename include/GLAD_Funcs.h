@@ -1,9 +1,11 @@
 #pragma once
 
+#include "Global_Macros.h"
 #include "Utilities.h"
 #include <glad/glad.h>
 // A LINE BREAK FOR FORMATTING
 
+ENGINE_NAMESPACE_BEGIN
 namespace GLAD_Funcs {
 
 typedef void (*GLFW_Glproc_Type)(void);
@@ -20,3 +22,4 @@ static void Set_Viewport(GLint x, GLint y, GLsizei width, GLsizei height) {
 }
 
 }; // namespace GLAD_Funcs
+ENGINE_NAMESPACE_END

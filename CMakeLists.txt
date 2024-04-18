@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-set(PROJECT GOOD_STUFF)
+set(PROJECT Game)
 
 project(${PROJECT} VERSION 1.0.0)
 message("Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")

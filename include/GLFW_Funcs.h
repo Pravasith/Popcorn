@@ -1,9 +1,11 @@
 #pragma once
 
+#include "Global_Macros.h"
 #include "Utilities.h"
 #include <GLFW/glfw3.h>
 #include <cstdio>
 
+ENGINE_NAMESPACE_BEGIN
 namespace GLFW_Funcs {
 
 // CALLBACKS -- START
@@ -72,3 +74,4 @@ static GLFWglproc Get_Proc_Address(const char *procname) {
 };
 
 }; // namespace GLFW_Funcs
+ENGINE_NAMESPACE_END

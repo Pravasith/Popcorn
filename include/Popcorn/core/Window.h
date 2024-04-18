@@ -1,8 +1,11 @@
 #pragma once
 
+#include "Global_Macros.h"
 #include <glad/glad.h>
 // A LINE BREAK FOR FORMATTING
 #include <GLFW/glfw3.h>
+
+ENGINE_NAMESPACE_BEGIN
 
 class Window {
 public:
@@ -31,3 +34,5 @@ private:
   static const char *__dir;
   static GLFWwindow *__glfw_window;
 };
+
+ENGINE_NAMESPACE_END
