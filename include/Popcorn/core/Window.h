@@ -9,30 +9,28 @@ ENGINE_NAMESPACE_BEGIN
 
 class Window {
 public:
+  static void Create(const char *windowName);
+  // Default constructor
   static void Create() { Window::Create("Game Window"); };
-  static void Create(const char *dir);
-
   static Window *Get();
-
   static void Destroy();
 
 private:
   Window();
   ~Window();
 
-  static void Init();
-  static void CreateWindow();
+  void Init();
+  void CreateOSWindow();
+  void InitGraphicsLib();
+  void SetGraphicsViewport();
+  void StartMainGameLoop();
+  void TerminateWindow();
 
-  static void InitGraphicsLib();
-  static void SetGraphicsViewport();
+  GLFWwindow *m_glfw_window;
 
-  static void StartMainGameLoop();
-
-  static void TerminateWindow();
-
-  static Window *instance;
-  static const char *__dir;
-  static GLFWwindow *__glfw_window;
+private:
+  static Window *s_instance;
+  static const char *s_window_name;
 };
 
 ENGINE_NAMESPACE_END

@@ -14,7 +14,7 @@ private:
   Input();
   ~Input();
 
-  static Input *instance;
+  static Input *s_instance;
 };
 
 ENGINE_NAMESPACE_END

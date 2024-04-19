@@ -4,29 +4,28 @@
 #include <iostream>
 
 ENGINE_NAMESPACE_BEGIN
-Window *Window::instance = nullptr;
-const char *Window::__dir = nullptr;
-GLFWwindow *Window::__glfw_window = nullptr;
+Window *Window::s_instance = nullptr;
+const char *Window::s_window_name = nullptr;
 
-void Window::Create(const char *dir) {
-  if (!instance) {
-    __dir = dir;
-    instance = new Window();
+void Window::Create(const char *windowName) {
+  if (!s_instance) {
+    s_window_name = windowName;
+    s_instance = new Window();
   }
 }
 
-Window *Window::Get() { return instance; }
+Window *Window::Get() { return s_instance; }
 
 void Window::Destroy() {
-  if (instance) {
-    delete instance;
-    instance = nullptr;
+  if (s_instance) {
+    delete s_instance;
+    s_instance = nullptr;
   }
 }
 
 Window::Window() {
   Init();
-  CreateWindow();
+  CreateOSWindow();
   std::cout << "WINDOW CREATED" << "\n";
 
   InitGraphicsLib();
@@ -36,8 +35,7 @@ Window::Window() {
 
 Window::~Window() {
   TerminateWindow();
-  __glfw_window = nullptr;
-  std::cout << "AFTER: " << __glfw_window << '\n';
+  m_glfw_window = nullptr;
 
   std::cout << "WINDOW DESTROYED" << "\n";
 };
@@ -47,9 +45,8 @@ void Window::Init() {
   /* OR ANY OTHER LIB FUNCTION CALL */
 }
 
-void Window::CreateWindow() {
-  std::cout << "BEFORE: " << __glfw_window << '\n';
-  GLFW_Funcs::Create_Window(&__glfw_window, __dir);
+void Window::CreateOSWindow() {
+  GLFW_Funcs::Create_Window(&m_glfw_window, s_window_name);
   /* OR ANY OTHER LIB FUNCTION CALL */
 }
 
@@ -64,7 +61,7 @@ void Window::SetGraphicsViewport() {
 };
 
 void Window::StartMainGameLoop() {
-  GLFW_Funcs::Main_Game_Loop(__glfw_window);
+  GLFW_Funcs::Main_Game_Loop(m_glfw_window);
   /* OR ANY OTHER LIB FUNCTION CALL */
 }
 

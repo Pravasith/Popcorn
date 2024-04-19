@@ -15,8 +15,10 @@ private:
   Application();
   ~Application();
 
-  static Application *instance;
-  static Window *window;
+  static Application *s_instance;
+
+private:
+  Window *m_window;
 };
 
 ENGINE_NAMESPACE_END
