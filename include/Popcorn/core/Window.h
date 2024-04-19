@@ -6,7 +6,6 @@
 #include <GLFW/glfw3.h>
 
 ENGINE_NAMESPACE_BEGIN
-
 class Window {
 public:
   static void Create(const char *windowName);
@@ -32,5 +31,4 @@ private:
   static Window *s_instance;
   static const char *s_window_name;
 };
-
 ENGINE_NAMESPACE_END
