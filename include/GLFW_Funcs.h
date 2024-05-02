@@ -1,11 +1,13 @@
 #pragma once
 
+/* #include <glad/glad.h> */
+#include <string>
+
 #include "Global_Macros.h"
 #include "Utilities.h"
 #include <GLFW/glfw3.h>
 #include <cstdint>
 #include <cstdio>
-#include <string>
 
 ENGINE_NAMESPACE_BEGIN
 namespace GLFW_Funcs {
@@ -70,8 +72,8 @@ static void GLFW_CreateWindow(GLFWwindow **glfw_window, std::string &title,
    * glfw_framebuffer_size_callback); */
 }
 
-static void Main_Game_Loop(GLFWwindow *glfw_window
-                           /* , void(*gameloop_cb) */
+static void GLFW_WindowLoop(GLFWwindow *glfw_window
+                            /* , void(*gameloop_cb) */
 ) {
   while (!glfwWindowShouldClose(glfw_window)) {
     glfwSwapBuffers(glfw_window);

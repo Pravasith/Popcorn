@@ -14,5 +14,7 @@ Window *Window::Create(const Props &props) {
   return nullptr;
 };
 
+/* Window::~Window() { std::cout << "MAIN WINDOW DESTROYED LALALA" << std::endl;
+ * }; */
 /* #endif */
 ENGINE_NAMESPACE_END
