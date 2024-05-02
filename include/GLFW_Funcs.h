@@ -3,7 +3,9 @@
 #include "Global_Macros.h"
 #include "Utilities.h"
 #include <GLFW/glfw3.h>
+#include <cstdint>
 #include <cstdio>
+#include <string>
 
 ENGINE_NAMESPACE_BEGIN
 namespace GLFW_Funcs {
@@ -13,27 +15,36 @@ typedef void (*Set_Graphics_Viewport_Type)(int, int, int, int);
 static Set_Graphics_Viewport_Type __Set_Graphics_Viewport_Cb = nullptr;
 
 static void glfw_error_callback(int error, const char *description) {
-  fprintf(stderr, "Error: %s\n", description);
+  fprintf(stderr, "GLFW Error: %s\n", description);
   write_log(description);
-  throw("glfw error");
+  throw("GLFW error, see common_logs file");
 }
 
 static void glfw_window_close_callback(GLFWwindow *window) {
-  write_log("Window Closed");
+  write_log("GLFW: Window Closed");
 }
 
 static void glfw_framebuffer_size_callback(GLFWwindow *window, int w, int h) {
   __Set_Graphics_Viewport_Cb(0, 0, w, h);
 }
+
 // CALLBACKS -- END
 
-static void Init(Set_Graphics_Viewport_Type set_graphics_viewport_cb) {
-  glfwInit();
-  glfwSetErrorCallback(glfw_error_callback);
+/* TYPES */
+typedef GLFWwindow GLFW_OSWindowType;
 
-  // Used in glfw_framebuffer_size_callback function
-  if (__Set_Graphics_Viewport_Cb != nullptr)
-    __Set_Graphics_Viewport_Cb = set_graphics_viewport_cb;
+/* static void Init(Set_Graphics_Viewport_Type set_graphics_viewport_cb) { */
+// Used in glfw_framebuffer_size_callback function
+/* if (__Set_Graphics_Viewport_Cb != nullptr) */
+/*   __Set_Graphics_Viewport_Cb = set_graphics_viewport_cb; */
+
+static void GLFW_Init() {
+  int success = glfwInit();
+  if (!success) {
+    write_log("GLFW Error: Couldn't initiate GLFW");
+  };
+
+  glfwSetErrorCallback(glfw_error_callback);
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -44,8 +55,9 @@ static void Init(Set_Graphics_Viewport_Type set_graphics_viewport_cb) {
 #endif
 }
 
-static void Create_Window(GLFWwindow **glfw_window, const char *dir) {
-  *glfw_window = glfwCreateWindow(800, 600, dir, NULL, NULL);
+static void GLFW_CreateWindow(GLFWwindow **glfw_window, std::string &title,
+                              uint16_t w, uint16_t h) {
+  *glfw_window = glfwCreateWindow((int)w, (int)h, title.c_str(), NULL, NULL);
 
   if (!glfw_window) {
     write_log("Failed to create GLFW Window");
@@ -54,7 +66,8 @@ static void Create_Window(GLFWwindow **glfw_window, const char *dir) {
 
   glfwMakeContextCurrent(*glfw_window);
   glfwSetWindowCloseCallback(*glfw_window, glfw_window_close_callback);
-  glfwSetFramebufferSizeCallback(*glfw_window, glfw_framebuffer_size_callback);
+  /* glfwSetFramebufferSizeCallback(*glfw_window,
+   * glfw_framebuffer_size_callback); */
 }
 
 static void Main_Game_Loop(GLFWwindow *glfw_window
@@ -66,7 +79,7 @@ static void Main_Game_Loop(GLFWwindow *glfw_window
   }
 }
 
-static void Terminate() { glfwTerminate(); }
+static void GLFW_Terminate() { glfwTerminate(); }
 
 // PURE GLFW FUNCS
 static GLFWglproc Get_Proc_Address(const char *procname) {

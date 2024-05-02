@@ -1,6 +1,7 @@
-#include "Window.h"
 #include "GLAD_Funcs.h"
+// LB
 #include "GLFW_Funcs.h"
+#include "Window.h"
 #include <iostream>
 
 ENGINE_NAMESPACE_BEGIN
