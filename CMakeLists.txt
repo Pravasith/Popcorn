@@ -74,7 +74,6 @@ target_include_directories(
                        ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core)
 
 target_link_libraries(WindowWin64Linux PUBLIC glad glfw)
-
 target_link_libraries(Window PUBLIC WindowWin64Linux)
 target_link_libraries(PopcornEngine PRIVATE Window)
 

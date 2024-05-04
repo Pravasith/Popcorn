@@ -8,15 +8,13 @@
 ENGINE_NAMESPACE_BEGIN
 class WindowWin64Linux : public Window {
 public:
-  void Init(const Props &props);
+  static Window *Get(const Props &props);
   void Terminate();
 
   void OnUpdate() override;
   uint16_t GetWidth() const override;
   uint16_t GetHeight() const override;
   void *GetOSWindow() const override;
-
-  ~WindowWin64Linux() override;
 
   void SetGraphicsAPI(
       // Enum -> OpenGl or Vulkan
@@ -28,6 +26,9 @@ public:
   );
 
   /* void SetGraphicsContext(); */
+private:
+  WindowWin64Linux(const Props &props);
+  ~WindowWin64Linux() override;
 
 private:
   std::string m_title;

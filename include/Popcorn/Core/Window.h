@@ -25,6 +25,10 @@ public:
   virtual uint16_t GetHeight() const = 0;
   virtual void *GetOSWindow() const = 0;
 
-  virtual ~Window() = default;
+  virtual ~Window();
+
+protected:
+  Window();
+  static Window *s_window_instance;
 };
 ENGINE_NAMESPACE_END
