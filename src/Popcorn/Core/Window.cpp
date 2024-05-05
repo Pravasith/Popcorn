@@ -4,21 +4,23 @@
 #include <ostream>
 
 ENGINE_NAMESPACE_BEGIN
-Window *Window::s_window_instance = nullptr;
 
-Window *Window::Create(const Props &props) {
-  std::cout << "MAIN WINDOW CREATED LALALA" << std::endl;
+void Window::Create(const Props &props) {
+  std::cout << "\n---- MAIN WINDOW CREATED: " << props.Title << " ----"
+            << std::endl;
   /* #ifdef IS_WINDOWS_OR_LINUX */
-  return WindowWin64Linux::Get(props);
+  WindowWin64Linux::Init(props);
   /* #else */
   /* write_log("Error Creating Window - Wrong platform!"); */
   /* #endif */
-
-  return nullptr;
 };
 
-Window::Window() {
-  std::cout << "LALALA Window Constructor called" << std::endl;
+void Window::Destroy() { WindowWin64Linux::Terminate(); };
+
+Window::Window(){
+    /* std::cout << "LALALA Window Constructor called" << std::endl; */
 };
-Window::~Window() { std::cout << "MAIN WINDOW DESTROYED LALALA" << std::endl; };
+Window::~Window() {
+  std::cout << "--- MAIN WINDOW DESTROYED ---\n" << std::endl;
+};
 ENGINE_NAMESPACE_END

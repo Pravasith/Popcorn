@@ -8,8 +8,8 @@
 ENGINE_NAMESPACE_BEGIN
 class WindowWin64Linux : public Window {
 public:
-  static Window *Get(const Props &props);
-  void Terminate();
+  static Window *Init(const Props &props);
+  static void Terminate();
 
   void OnUpdate() override;
   uint16_t GetWidth() const override;
@@ -30,8 +30,12 @@ private:
   WindowWin64Linux(const Props &props);
   ~WindowWin64Linux() override;
 
+  void StartWindowLoop();
+
 private:
   std::string m_title;
+
   static GLFW_Funcs::GLFW_OSWindowType *s_os_window;
+  static WindowWin64Linux *s_instance;
 };
 ENGINE_NAMESPACE_END

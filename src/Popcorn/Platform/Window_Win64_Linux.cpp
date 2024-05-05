@@ -1,6 +1,7 @@
 #include "Window_Win64_Linux.h"
 #include "GLFW_Funcs.h"
 #include "Global_Macros.h"
+#include "Utilities.h"
 #include <cstdint>
 #include <iostream>
 #include <ostream>
@@ -9,45 +10,52 @@ ENGINE_NAMESPACE_BEGIN
 using namespace GLFW_Funcs;
 
 GLFW_OSWindowType *WindowWin64Linux::s_os_window = nullptr;
+WindowWin64Linux *WindowWin64Linux::s_instance = nullptr;
 
-Window *WindowWin64Linux::Get(const Props &props) {
-  /* m_title = props.Title; */
-
-  if (!s_window_instance) {
-    s_window_instance = new WindowWin64Linux(props);
-    return s_window_instance;
+Window *WindowWin64Linux::Init(const Props &props) {
+  if (!s_instance) {
+    s_instance = new WindowWin64Linux(props);
   }
 
-  return nullptr;
+  return s_instance;
 }
 
-WindowWin64Linux::WindowWin64Linux(const Props &props)
-    // Delete this
-    : m_title(props.Title)
-// Delete this
-{
-  /* m_title = props.Title; */
-  std::cout << "Win64 Class " << m_title << " created." << std::endl;
+WindowWin64Linux::WindowWin64Linux(const Props &props) : m_title(props.Title) {
+  std::cout << "  -- Win64::Class: " << m_title << " created." << std::endl;
 
   GLFW_Init();
+  std::cout << "    -- GLFW init." << std::endl;
   GLFW_CreateWindow(&s_os_window, m_title, props.W, props.H);
-  GLFW_WindowLoop(s_os_window);
 
-  Terminate();
+  if (!s_os_window) {
+    write_log("No OS Window yet!");
+  } else {
+    StartWindowLoop();
+  }
 }
 
-WindowWin64Linux::~WindowWin64Linux() {
-  if (s_window_instance) {
-    delete s_window_instance;
-    s_window_instance = nullptr;
-  }
+void WindowWin64Linux::StartWindowLoop() { GLFW_WindowLoop(s_os_window); }
 
-  std::cout << "Win64 Class " << m_title << " terminated." << std::endl;
+WindowWin64Linux::~WindowWin64Linux() {
+  GLFW_Terminate();
+
+  std::cout << "    -- GLFW killed." << std::endl;
+  std::cout << "  -- Win64::Class: " << m_title << " terminated." << std::endl;
 };
 
 void WindowWin64Linux::Terminate() {
-  GLFW_Terminate();
-  std::cout << "Win64 Class GLFW terminated." << std::endl;
+  if (!s_os_window || !s_instance) {
+    write_log("Error: WindowWin64Linux Terminate -- s_os_window or s_instance "
+              "of class not found.");
+  }
+
+  else {
+    // No need to delete bc GLFW_Terminate() handles deletion
+    s_os_window = nullptr;
+
+    delete s_instance;
+    s_instance = nullptr;
+  }
 }
 
 void WindowWin64Linux::OnUpdate() {}
