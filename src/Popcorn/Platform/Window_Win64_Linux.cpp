@@ -21,10 +21,10 @@ Window *WindowWin64Linux::Init(const Props &props) {
 }
 
 WindowWin64Linux::WindowWin64Linux(const Props &props) : m_title(props.Title) {
-  std::cout << "  -- Win64::Class: " << m_title << " created." << std::endl;
+  std::cout << "  -- Win64::Class: " << m_title << " created.\n";
 
   GLFW_Init();
-  std::cout << "    -- GLFW init." << std::endl;
+  std::cout << "    -- GLFW init.\n";
   GLFW_CreateWindow(&s_os_window, m_title, props.W, props.H);
 
   if (!s_os_window) {
@@ -39,8 +39,8 @@ void WindowWin64Linux::StartWindowLoop() { GLFW_WindowLoop(s_os_window); }
 WindowWin64Linux::~WindowWin64Linux() {
   GLFW_Terminate();
 
-  std::cout << "    -- GLFW killed." << std::endl;
-  std::cout << "  -- Win64::Class: " << m_title << " terminated." << std::endl;
+  std::cout << "    -- GLFW killed.\n";
+  std::cout << "  -- Win64::Class: " << m_title << " terminated.\n";
 };
 
 void WindowWin64Linux::Terminate() {

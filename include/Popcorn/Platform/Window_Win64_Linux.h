@@ -2,11 +2,12 @@
 
 #include "GLFW_Funcs.h"
 #include "Global_Macros.h"
+#include "Popcorn/Events/Publisher.h"
 #include "Window.h"
 #include <cstdint>
 
 ENGINE_NAMESPACE_BEGIN
-class WindowWin64Linux : public Window {
+class WindowWin64Linux : public Window, public Publisher {
 public:
   static Window *Init(const Props &props);
   static void Terminate();

@@ -15,7 +15,13 @@ void Window::Create(const Props &props) {
   /* #endif */
 };
 
-void Window::Destroy() { WindowWin64Linux::Terminate(); };
+void Window::Destroy() {
+  /* #ifdef IS_WINDOWS_OR_LINUX */
+  WindowWin64Linux::Terminate();
+  /* #else */
+  /* write_log("Error Creating Window - Wrong platform!"); */
+  /* #endif */
+};
 
 Window::Window(){
     /* std::cout << "LALALA Window Constructor called" << std::endl; */

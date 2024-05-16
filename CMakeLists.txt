@@ -57,6 +57,7 @@ add_subdirectory("src")
 # Include dirs
 include_directories(include)
 
+# TODO: Refactor these
 target_include_directories(
   Window
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -67,13 +68,19 @@ target_include_directories(
   WindowWin64Linux
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core
+         # ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform)
+
+target_include_directories(
+  Events PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+                ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events)
 
 target_include_directories(
   PopcornEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
                        ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core)
 
 target_link_libraries(WindowWin64Linux PUBLIC glad glfw)
+target_link_libraries(WindowWin64Linux PUBLIC Events)
 target_link_libraries(Window PUBLIC WindowWin64Linux)
 target_link_libraries(PopcornEngine PRIVATE Window)
 

@@ -27,12 +27,12 @@ void Application::Stop() {
 
 Application::Application() {
   std::cout << "ENGINE STARTED" << "\n";
-  const std::string &title = "Popcorn Application";
-  Window::Create(Window::Props(title));
+  ;
+  Window::Create(Window::Props("Popcorn Engine"));
   Window::Destroy();
 
-  Window::Create(Window::Props("Lily"));
-  Window::Destroy();
+  /* Window::Create(Window::Props("Sakura")); */
+  /* Window::Destroy(); */
 };
 
 Application::~Application() { std::cout << "ENGINE STOPPED" << "\n"; };

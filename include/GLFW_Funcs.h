@@ -1,6 +1,5 @@
 #pragma once
 
-/* #include <glad/glad.h> */
 #include <string>
 
 #include "Global_Macros.h"
@@ -17,7 +16,6 @@ typedef void (*Set_Graphics_Viewport_Type)(int, int, int, int);
 static Set_Graphics_Viewport_Type __Set_Graphics_Viewport_Cb = nullptr;
 
 static void glfw_error_callback(int error, const char *description) {
-  fprintf(stderr, "GLFW Error: %s\n", description);
   write_log(description);
   throw("GLFW error, see common_logs file");
 }

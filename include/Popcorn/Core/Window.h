@@ -6,6 +6,7 @@
 
 ENGINE_NAMESPACE_BEGIN
 class Window {
+  /* Multiple window creation not supported at the moment */
 public:
   struct Props {
     std::string Title;
@@ -28,5 +29,6 @@ public:
 protected:
   Window();
   virtual ~Window();
+  /* = default; */
 };
 ENGINE_NAMESPACE_END
