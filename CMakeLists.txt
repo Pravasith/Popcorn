@@ -68,7 +68,6 @@ target_include_directories(
   WindowWin64Linux
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core
-         # ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform)
 
 target_include_directories(

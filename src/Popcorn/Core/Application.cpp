@@ -13,10 +13,9 @@ void Application::Start() {
   if (!s_instance) {
     s_instance = new Application();
 
-    auto winptr = Window::Create(Window::Props("Popcorn EngineX"));
-    /* std::cout << "WIN PTR: " << winptr << '\n'; */
-    winptr->Subscribe(s_instance);
-    winptr->Loop();
+    Window::Create(Window::Props("Popcorn Engine A"));
+    Window::AddEventListener(s_instance);
+    Window::StartLoop();
 
   } else {
     write_log(

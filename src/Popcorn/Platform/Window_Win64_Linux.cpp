@@ -20,12 +20,6 @@ Window *WindowWin64Linux::Init(const Props &props) {
   return s_instance;
 }
 
-void WindowWin64Linux::Loop() {
-  s_instance->PublishEvent("WINDOW LOOP STARTED!!!");
-  std::cout << "LOOP LOOP" << '\n';
-  StartWindowLoop();
-}
-
 WindowWin64Linux::WindowWin64Linux(const Props &props) : m_title(props.Title) {
   std::cout << "  -- Win64::Class: " << m_title << " created.\n";
 
@@ -37,7 +31,11 @@ WindowWin64Linux::WindowWin64Linux(const Props &props) : m_title(props.Title) {
   }
 }
 
-void WindowWin64Linux::StartWindowLoop() { GLFW_WindowLoop(s_os_window); }
+void WindowWin64Linux::StartWindowLoop() {
+  s_instance->PublishEvent("WINDOW LOOP STARTED!!!");
+  std::cout << "LOOP LOOP" << '\n';
+  GLFW_WindowLoop(s_os_window);
+}
 
 WindowWin64Linux::~WindowWin64Linux() {
   GLFW_Terminate();
@@ -61,7 +59,6 @@ void WindowWin64Linux::Terminate() {
   }
 }
 
-void WindowWin64Linux::OnUpdate() {}
 uint16_t WindowWin64Linux::GetWidth() const { return 1; }
 uint16_t WindowWin64Linux::GetHeight() const { return 1; }
 void *WindowWin64Linux::GetOSWindow() const { return nullptr; }

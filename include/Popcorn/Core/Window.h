@@ -7,7 +7,13 @@
 
 ENGINE_NAMESPACE_BEGIN
 class Window : public Publisher {
+
+  /* ---- NOTE ---- */
   /* Multiple window creation not supported at the moment */
+  /* So multiple calls to Window::Create will result in  */
+  /* same window pointer */
+  /* ---- END NOTE ---- */
+
 public:
   struct Props {
     std::string Title;
@@ -19,11 +25,11 @@ public:
         : Title(title), W(w), H(h){};
   };
 
-  static Window *Create(const Props &props = Props());
+  static void Create(const Props &props = Props());
+  static void AddEventListener(const Subscriber *);
+  static void StartLoop();
   static void Destroy();
 
-  virtual void Loop();
-  virtual void OnUpdate() = 0;
   virtual uint16_t GetWidth() const = 0;
   virtual uint16_t GetHeight() const = 0;
   virtual void *GetOSWindow() const = 0;
@@ -32,5 +38,8 @@ protected:
   Window();
   virtual ~Window();
   /* = default; */
+
+private:
+  static void *s_platform_window_instance;
 };
 ENGINE_NAMESPACE_END

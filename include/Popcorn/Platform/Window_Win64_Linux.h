@@ -11,20 +11,10 @@ public:
   static Window *Init(const Props &props);
   static void Terminate();
 
-  void OnUpdate() override;
   uint16_t GetWidth() const override;
   uint16_t GetHeight() const override;
   void *GetOSWindow() const override;
-  void Loop() override;
 
-  void SetGraphicsAPI(
-      // Enum -> OpenGl or Vulkan
-      /* #ifdef OPENGL */
-      /*   // Set graphics Enum to OpenGL */
-      /* #else */
-      /*   // Set graphics Enum to other.. etc */
-      /* #endif */
-  );
   void StartWindowLoop();
 
   /* void SetGraphicsContext(); */
