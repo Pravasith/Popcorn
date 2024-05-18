@@ -5,6 +5,8 @@
 
 void Publisher::Subscribe(const Subscriber *subscriber) {
   m_subscribers.push_back(subscriber);
+  std::cout << "      --- m_subscribers in Publisher: " << ", Size = "
+            << m_subscribers.size() << '\n';
 };
 
 void Publisher::Unsubscribe(const Subscriber *subscriber) {
@@ -16,15 +18,17 @@ void Publisher::Unsubscribe(const Subscriber *subscriber) {
 };
 
 void Publisher::PublishEvent(const std::string &e) {
+  std::cout << "PUBLISH CALLED" << '\n';
+
   for (const Subscriber *s : m_subscribers) {
     s->OnEvent(e);
   }
 };
 
-Publisher::Publisher() {
-  std::cout << "      --- m_subscribers in Publisher: " << ", Size = "
-            << m_subscribers.size() << '\n';
-}
+/* Publisher::Publisher() { */
+/*   std::cout << "      --- m_subscribers in Publisher: " << ", Size = " */
+/*             << m_subscribers.size() << '\n'; */
+/* } */
 
 Publisher::~Publisher() {
   m_subscribers.clear();

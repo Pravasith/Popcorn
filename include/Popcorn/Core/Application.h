@@ -1,13 +1,15 @@
 #pragma once
 
 #include "Global_Macros.h"
+#include "Subscriber.h"
 
 ENGINE_NAMESPACE_BEGIN
-class Application {
+class Application : public Subscriber {
 public:
   static void Start();
   static Application *Get();
   static void Stop();
+  void OnEvent(const std::string &s) const override;
 
 private:
   Application();

@@ -20,17 +20,20 @@ Window *WindowWin64Linux::Init(const Props &props) {
   return s_instance;
 }
 
+void WindowWin64Linux::Loop() {
+  s_instance->PublishEvent("WINDOW LOOP STARTED!!!");
+  std::cout << "LOOP LOOP" << '\n';
+  StartWindowLoop();
+}
+
 WindowWin64Linux::WindowWin64Linux(const Props &props) : m_title(props.Title) {
   std::cout << "  -- Win64::Class: " << m_title << " created.\n";
 
   GLFW_Init();
   std::cout << "    -- GLFW init.\n";
   GLFW_CreateWindow(&s_os_window, m_title, props.W, props.H);
-
   if (!s_os_window) {
     write_log("No OS Window yet!");
-  } else {
-    StartWindowLoop();
   }
 }
 

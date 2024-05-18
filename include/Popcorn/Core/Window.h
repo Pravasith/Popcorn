@@ -1,11 +1,12 @@
 #pragma once
 
 #include "Global_Macros.h"
+#include "Publisher.h"
 #include <cstdint>
 #include <string>
 
 ENGINE_NAMESPACE_BEGIN
-class Window {
+class Window : public Publisher {
   /* Multiple window creation not supported at the moment */
 public:
   struct Props {
@@ -18,9 +19,10 @@ public:
         : Title(title), W(w), H(h){};
   };
 
-  static void Create(const Props &props = Props());
+  static Window *Create(const Props &props = Props());
   static void Destroy();
 
+  virtual void Loop();
   virtual void OnUpdate() = 0;
   virtual uint16_t GetWidth() const = 0;
   virtual uint16_t GetHeight() const = 0;

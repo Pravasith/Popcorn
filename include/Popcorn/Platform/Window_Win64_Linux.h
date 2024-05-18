@@ -2,12 +2,11 @@
 
 #include "GLFW_Funcs.h"
 #include "Global_Macros.h"
-#include "Popcorn/Events/Publisher.h"
 #include "Window.h"
 #include <cstdint>
 
 ENGINE_NAMESPACE_BEGIN
-class WindowWin64Linux : public Window, public Publisher {
+class WindowWin64Linux : public Window {
 public:
   static Window *Init(const Props &props);
   static void Terminate();
@@ -16,6 +15,7 @@ public:
   uint16_t GetWidth() const override;
   uint16_t GetHeight() const override;
   void *GetOSWindow() const override;
+  void Loop() override;
 
   void SetGraphicsAPI(
       // Enum -> OpenGl or Vulkan
@@ -25,13 +25,12 @@ public:
       /*   // Set graphics Enum to other.. etc */
       /* #endif */
   );
+  void StartWindowLoop();
 
   /* void SetGraphicsContext(); */
 private:
   WindowWin64Linux(const Props &props);
   ~WindowWin64Linux() override;
-
-  void StartWindowLoop();
 
 private:
   std::string m_title;

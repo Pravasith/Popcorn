@@ -5,11 +5,15 @@
 
 ENGINE_NAMESPACE_BEGIN
 
-void Window::Create(const Props &props) {
+Window *Window::Create(const Props &props) {
   std::cout << "\n---- MAIN WINDOW CREATED: " << props.Title << " ----"
             << std::endl;
   /* #ifdef IS_WINDOWS_OR_LINUX */
-  WindowWin64Linux::Init(props);
+  auto win = WindowWin64Linux::Init(props);
+  if (win)
+    return win;
+
+  return nullptr;
   /* #else */
   /* write_log("Error Creating Window - Wrong platform!"); */
   /* #endif */
@@ -22,6 +26,8 @@ void Window::Destroy() {
   /* write_log("Error Creating Window - Wrong platform!"); */
   /* #endif */
 };
+
+void Window::Loop() {};
 
 Window::Window(){
     /* std::cout << "LALALA Window Constructor called" << std::endl; */

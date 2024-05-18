@@ -76,8 +76,10 @@ target_include_directories(
                 ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events)
 
 target_include_directories(
-  PopcornEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-                       ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core)
+  PopcornEngine
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events
+         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core)
 
 target_link_libraries(WindowWin64Linux PUBLIC glad glfw)
 target_link_libraries(WindowWin64Linux PUBLIC Events)
