@@ -9,7 +9,7 @@
 ENGINE_NAMESPACE_BEGIN
 using namespace GLFW_Funcs;
 
-GLFW_OSWindowType *WindowWin64Linux::s_os_window = nullptr;
+GLFW_Types::GLFW_OSWindow_T *WindowWin64Linux::s_os_window = nullptr;
 WindowWin64Linux *WindowWin64Linux::s_instance = nullptr;
 
 Window *WindowWin64Linux::Init(const Props &props) {
@@ -33,7 +33,6 @@ WindowWin64Linux::WindowWin64Linux(const Props &props) : m_title(props.Title) {
 
 void WindowWin64Linux::StartWindowLoop() {
   s_instance->PublishEvent("WINDOW LOOP STARTED!!!");
-  std::cout << "LOOP LOOP" << '\n';
   GLFW_WindowLoop(s_os_window);
 }
 
@@ -60,7 +59,14 @@ void WindowWin64Linux::Terminate() {
 }
 
 uint16_t WindowWin64Linux::GetWidth() const { return 1; }
+
 uint16_t WindowWin64Linux::GetHeight() const { return 1; }
-void *WindowWin64Linux::GetOSWindow() const { return nullptr; }
+
+void *WindowWin64Linux::GetOSWindow() const {
+  if (s_os_window)
+    return s_os_window;
+
+  return nullptr;
+}
 
 ENGINE_NAMESPACE_END

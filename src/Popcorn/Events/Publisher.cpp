@@ -1,8 +1,10 @@
 #include "Publisher.h"
+#include "Global_Macros.h"
 #include <algorithm>
 #include <iostream>
 #include <string>
 
+ENGINE_NAMESPACE_BEGIN
 void Publisher::Subscribe(const Subscriber *subscriber) {
   m_subscribers.push_back(subscriber);
   std::cout << "      --- m_subscribers in Publisher: " << ", Size = "
@@ -36,3 +38,4 @@ Publisher::~Publisher() {
   std::cout << "      --- m_subscribers in Publisher: " << ", Size = "
             << m_subscribers.size() << '\n';
 }
+ENGINE_NAMESPACE_END

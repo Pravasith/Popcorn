@@ -1,9 +1,11 @@
 #pragma once
 
+#include "Global_Macros.h"
 #include "Subscriber.h"
 #include <string>
 #include <vector>
 
+ENGINE_NAMESPACE_BEGIN
 class Publisher {
 public:
   virtual ~Publisher() = 0;
@@ -14,3 +16,4 @@ public:
 private:
   std::vector<const Subscriber *> m_subscribers;
 };
+ENGINE_NAMESPACE_END

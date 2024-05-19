@@ -9,11 +9,15 @@
 #include <cstdio>
 
 ENGINE_NAMESPACE_BEGIN
-namespace GLFW_Funcs {
+namespace GLFW_Types {
 
-// CALLBACKS -- START
-typedef void (*Set_Graphics_Viewport_Type)(int, int, int, int);
-static Set_Graphics_Viewport_Type __Set_Graphics_Viewport_Cb = nullptr;
+typedef void (*Set_Graphics_Viewport_T)(int, int, int, int);
+static Set_Graphics_Viewport_T __Set_Graphics_Viewport_Cb = nullptr;
+typedef GLFWwindow GLFW_OSWindow_T;
+
+}; // namespace GLFW_Types
+
+namespace GLFW_Funcs {
 
 static void glfw_error_callback(int error, const char *description) {
   write_log(description);
@@ -25,13 +29,12 @@ static void glfw_window_close_callback(GLFWwindow *window) {
 }
 
 static void glfw_framebuffer_size_callback(GLFWwindow *window, int w, int h) {
-  __Set_Graphics_Viewport_Cb(0, 0, w, h);
+  /* __Set_Graphics_Viewport_Cb(0, 0, w, h); */
 }
 
 // CALLBACKS -- END
 
 /* TYPES */
-typedef GLFWwindow GLFW_OSWindowType;
 
 /* static void Init(Set_Graphics_Viewport_Type set_graphics_viewport_cb) { */
 // Used in glfw_framebuffer_size_callback function
