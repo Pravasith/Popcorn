@@ -11,9 +11,6 @@ enum class Event_T {
   WindowResize,
 
   // Application Events
-  AppTick,
-  AppUpdate,
-  AppRender,
 
   // Keyboard Events
   KeyPressed,
@@ -27,5 +24,18 @@ enum class Event_T {
   MouseScrolled
 };
 
-class Event {};
+class Event {
+public:
+  explicit Event(Event_T eventType) : m_type(eventType){};
+  virtual ~Event() = default;
+
+  [[nodiscard]] virtual Event_T GetEventType() const = 0;
+
+private:
+  Event_T m_type;
+};
+
+class WindowEvent : public Event {
+  /* explicit WindowEvent(); */
+};
 ENGINE_NAMESPACE_END

@@ -65,12 +65,6 @@ target_include_directories(
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform)
 
 target_include_directories(
-  WindowWin64Linux
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core
-         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform)
-
-target_include_directories(
   Events PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
                 ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events)
 
@@ -80,9 +74,8 @@ target_include_directories(
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core)
 
-target_link_libraries(WindowWin64Linux PRIVATE glad glfw)
-target_link_libraries(WindowWin64Linux PUBLIC Events)
-target_link_libraries(Window PRIVATE WindowWin64Linux)
+target_link_libraries(Window PRIVATE glad glfw)
+target_link_libraries(Window PUBLIC Events)
 target_link_libraries(PopcornEngine PRIVATE Window)
 
 # FINAL PROJECT LINKING
