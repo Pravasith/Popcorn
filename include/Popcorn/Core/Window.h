@@ -11,7 +11,7 @@ class Window : public Publisher {
   /* ---- NOTE ---- */
   /* Multiple window creation not supported at the moment */
   /* So multiple calls to Window::Create will result in  */
-  /* same window pointer */
+  /* a same window pointer */
   /* ---- END NOTE ---- */
 
 public:
