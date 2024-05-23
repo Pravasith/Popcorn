@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Global_Macros.h"
+#include "Popcorn/Core/Base.h"
 
 ENGINE_NAMESPACE_BEGIN
-enum class Event_T {
+enum class EventType {
   None = 0,
 
   // Window Events
@@ -24,15 +25,20 @@ enum class Event_T {
   MouseScrolled
 };
 
+enum EventCategory {
+
+  KeyboardEvent = bit_shift_left(1),
+};
+
 class Event {
 public:
-  explicit Event(Event_T eventType) : m_type(eventType){};
+  explicit Event(EventType eventType) : m_type(eventType){};
   virtual ~Event() = default;
 
-  [[nodiscard]] virtual Event_T GetEventType() const = 0;
+  [[nodiscard]] virtual EventType GetEventType() const = 0;
 
 private:
-  Event_T m_type;
+  EventType m_type;
 };
 
 class WindowEvent : public Event {

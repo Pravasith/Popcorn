@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Global_Macros.h"
-#include "Publisher.h"
+#include "Popcorn/Events/Publisher.h"
 #include <cstdint>
 #include <string>
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Global_Macros.h"
-#include "Subscriber.h"
+#include "Popcorn/Events/Subscriber.h"
 
 ENGINE_NAMESPACE_BEGIN
 class Application : public Subscriber {

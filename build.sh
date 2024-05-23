@@ -17,6 +17,7 @@ if [ "$platform" = "l" ]; then
     make
     echo $PWD
     cd $src_dir
+
 elif [ "$platform" = "w" ]; then
     echo "You are compiling for Windows."
     cd "$src_dir"/build/win64
@@ -26,6 +27,7 @@ elif [ "$platform" = "w" ]; then
     make
     echo $PWD
     cd $src_dir
+
 else
     echo "Invalid input. Please enter 'L' for Linux or 'W' for Windows."
 fi
