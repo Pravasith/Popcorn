@@ -1,10 +1,13 @@
 #include "Window_Win64_Linux.h"
 #include "GLFW_Funcs.h"
 #include "Global_Macros.h"
+#include "MouseEvent.h"
 #include "Utilities.h"
+#include "WindowEvent.h"
 #include <cstdint>
 #include <iostream>
 #include <ostream>
+#include <string>
 
 ENGINE_NAMESPACE_BEGIN
 using namespace GLFW_Funcs;
@@ -25,16 +28,31 @@ WindowWin64Linux::WindowWin64Linux(const Props &props) : m_title(props.Title) {
 
   GLFW_Init();
   std::cout << "    -- GLFW init.\n";
+
   GLFW_CreateWindow(&s_os_window, m_title, props.W, props.H);
+  GLFW_SetWindowCallbacks(
+      s_os_window,
+
+      // Window Close Callback
+      [](GLFW_Types::GLFW_OSWindow_T *os_window) {
+        WindowCloseEvent winCloseEvt;
+        s_instance->PublishEvent(winCloseEvt);
+      },
+
+      // Mouse Position Callback
+      [](GLFW_Types::GLFW_OSWindow_T *os_window, double x, double y) {
+        MouseMovedEvent mMoveEvt((float)x, (float)y);
+        s_instance->PublishEvent(mMoveEvt);
+      }
+
+  );
+
   if (!s_os_window) {
     write_log("No OS Window yet!");
   }
 }
 
-void WindowWin64Linux::StartWindowLoop() {
-  s_instance->PublishEvent("WINDOW LOOP STARTED!!!");
-  GLFW_WindowLoop(s_os_window);
-}
+void WindowWin64Linux::StartWindowLoop() { GLFW_WindowLoop(s_os_window); }
 
 WindowWin64Linux::~WindowWin64Linux() {
   GLFW_Terminate();

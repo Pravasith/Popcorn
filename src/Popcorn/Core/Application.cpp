@@ -13,7 +13,7 @@ void Application::Start() {
   if (!s_instance) {
     s_instance = new Application();
 
-    Window::Create(Window::Props("Popcorn Engine A"));
+    Window::Create(Window::Props("Popcorn Engine", 400, 400));
     Window::AddEventListener(s_instance);
     Window::StartLoop();
 
@@ -23,8 +23,15 @@ void Application::Start() {
   }
 }
 
-void Application::OnEvent(const std::string &s) const {
-  std::cout << "INSIDE APPLICATION EVENT: " << s << "\n";
+void Application::OnEvent(const Event &e) const {
+  std::cout << "INSIDE APPLICATION: ";
+  if (e.BelongsToCategory(EventCategory::MouseEvent)) {
+    std::cout << e.PrintDebugData();
+  };
+
+  if (e.BelongsToCategory(EventCategory::WindowEvent)) {
+    std::cout << e.PrintDebugData();
+  };
 };
 
 void Application::Stop() {

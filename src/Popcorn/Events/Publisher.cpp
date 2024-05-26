@@ -2,7 +2,6 @@
 #include "Global_Macros.h"
 #include <algorithm>
 #include <iostream>
-#include <string>
 
 ENGINE_NAMESPACE_BEGIN
 void Publisher::Subscribe(const Subscriber *subscriber) {
@@ -19,9 +18,7 @@ void Publisher::Unsubscribe(const Subscriber *subscriber) {
   };
 };
 
-void Publisher::PublishEvent(const std::string &e) {
-  std::cout << "PUBLISH CALLED" << '\n';
-
+void Publisher::PublishEvent(const Event &e) {
   for (const Subscriber *s : m_subscribers) {
     s->OnEvent(e);
   }

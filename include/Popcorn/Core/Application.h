@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Global_Macros.h"
+#include "Popcorn/Events/Event.h"
 #include "Popcorn/Events/Subscriber.h"
 
 ENGINE_NAMESPACE_BEGIN
@@ -9,7 +10,7 @@ public:
   static void Start();
   static Application *Get();
   static void Stop();
-  void OnEvent(const std::string &s) const override;
+  void OnEvent(const Event &) const override;
 
 private:
   Application();
