@@ -4,8 +4,6 @@
 /* #else */
 /* write_log("Error Importing Platform!"); */
 /* #endif */
-#include <iostream>
-#include <ostream>
 
 ENGINE_NAMESPACE_BEGIN
 
@@ -25,12 +23,11 @@ void Window::Create(const Props &props) {
   /* write_log("Error Creating Window - Wrong platform!"); */
   /* #endif */
 
-  std::cout << "\n---- MAIN WINDOW CREATED: " << props.Title << " ----"
-            << std::endl;
+  PC_PRINT_DEBUG("MAIN WINDOW CREATED", 2, "WINDOW");
 };
 
 void Window::AddEventListener(const Subscriber *s) {
-  std::cout << "    -- WINDOW SUBSCRIPTION ADDED.\n";
+  PC_PRINT_DEBUG("WINDOW SUBSCRIPTION ADDED", 2, "WINDOW");
 
   /* #ifdef IS_WINDOWS_OR_LINUX */
   (static_cast<WindowWin64Linux *>(s_platform_window_instance))->Subscribe(s);
@@ -60,7 +57,5 @@ void Window::StartLoop() {
 Window::Window(){
     /* std::cout << "LALALA Window Constructor called" << std::endl; */
 };
-Window::~Window() {
-  std::cout << "--- MAIN WINDOW DESTROYED ---\n" << std::endl;
-};
+Window::~Window() { PC_PRINT_DEBUG("MAIN WINDOW DESTROYED", 2, "WINDOW"); };
 ENGINE_NAMESPACE_END

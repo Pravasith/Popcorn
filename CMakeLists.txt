@@ -1,3 +1,8 @@
+#
+
+# -----------------------------------------------------------------------
+# BASIC SETTINGS --- START
+# -----------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.22)
 
 set(PROJECT Game)
@@ -9,14 +14,39 @@ message("Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+# -----------------------------------------------------------------------
+# BASIC SETTINGS --- END
+# -----------------------------------------------------------------------
 
-# STATIC stuff (Windows)
+#
+
+# -----------------------------------------------------------------------
+# OS FLAGS --- START
+# -----------------------------------------------------------------------
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  set(BUILD_FOR_LINUX TRUE)
+endif()
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set(BUILD_FOR_WIN TRUE)
   # Include the toolchain file for cross-compilation
   # include(${CMAKE_TOOLCHAIN_FILE})
 endif()
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(BUILD_FOR_MACOS TRUE)
+  # Include the toolchain file for cross-compilation
+  # include(${CMAKE_TOOLCHAIN_FILE})
+endif()
+# -----------------------------------------------------------------------
+# OS FLAGS --- END
+# -----------------------------------------------------------------------
+
+#
+
+# -----------------------------------------------------------------------
+# STATIC BUILD SETTINGS (OPTIONAL) --- START
+# -----------------------------------------------------------------------
 option(STATIC_BUILD "Build a static binary." ${BUILD_FOR_WIN})
 
 if(STATIC_BUILD)
@@ -27,18 +57,39 @@ if(STATIC_BUILD)
   # set(WINDOWS_BINARIES_DIR ${CMAKE_SOURCE_DIR}/win64) set(GLAD_INCLUDE_DIR
   # ${WINDOWS_BINARIES_DIR}/glad/include)
 endif()
+# -----------------------------------------------------------------------
+# STATIC BUILD SETTINGS (OPTIONAL) --- END
+# -----------------------------------------------------------------------
 
+#
+
+# -----------------------------------------------------------------------
+# SET EXECUTABLE --- START
+# -----------------------------------------------------------------------
 set(SOURCE_FILES main.cpp)
-
-# Third party libraries
-add_subdirectory("third-party")
-
 add_executable(${PROJECT} ${SOURCE_FILES})
+# -----------------------------------------------------------------------
+# SET EXECUTABLE --- END
+# -----------------------------------------------------------------------
+
+#
+
+# -----------------------------------------------------------------------
+# ADD THIRD PARTY LIBS --- START
+# -----------------------------------------------------------------------
+add_subdirectory("third-party")
 
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
+# -----------------------------------------------------------------------
+# ADD THIRD PARTY LIBS --- END
+# -----------------------------------------------------------------------
 
-# GLFW build settings
+#
+
+# -----------------------------------------------------------------------
+# GLFW SETTINGS --- START
+# -----------------------------------------------------------------------
 set(GLFW_BUILD_DOCS
     OFF
     CACHE BOOL "" FORCE)
@@ -50,11 +101,19 @@ set(GLFW_BUILD_TESTS
 set(GLFW_BUILD_EXAMPLES
     OFF
     CACHE BOOL "" FORCE)
+# -----------------------------------------------------------------------
+# GLFW SETTINGS --- END
+# -----------------------------------------------------------------------
 
-# Implimentation dirs
+#
+
+# -----------------------------------------------------------------------
+# SET IMPLEMENTATION AND INCLUDE DIRS --- START
+# -----------------------------------------------------------------------
+# Main implementation dir
 add_subdirectory("src")
 
-# Include dirs
+# Main include dir
 include_directories(include)
 
 # TODO: Refactor these
@@ -71,12 +130,38 @@ target_include_directories(
 target_include_directories(
   PopcornEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
                        ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core)
+# -----------------------------------------------------------------------
+# SET IMPLEMENTATION AND INCLUDE DIRS --- END
+# -----------------------------------------------------------------------
 
+#
+
+# -----------------------------------------------------------------------
+# DEBUG FLAG --- START
+# -----------------------------------------------------------------------
+option(PC_DEBUG "Use debug mode for compiling" ON)
+# option(PC_DEBUG "Use debug mode for compiling" OFF)
+
+if(PC_DEBUG)
+  target_compile_definitions(Window PUBLIC "PC_DEBUG")
+endif()
+# -----------------------------------------------------------------------
+# DEBUG FLAG --- END
+# -----------------------------------------------------------------------
+
+#
+
+# -----------------------------------------------------------------------
+# LINKING LIBS --- START
+# -----------------------------------------------------------------------
 target_link_libraries(Window PRIVATE glad glfw)
 target_link_libraries(Window PUBLIC Events)
 target_link_libraries(PopcornEngine PRIVATE Window)
 
 # FINAL PROJECT LINKING
 target_link_libraries(${PROJECT} PRIVATE PopcornEngine)
+# -----------------------------------------------------------------------
+# LINKING LIBS --- END
+# -----------------------------------------------------------------------
 
 # target_compile_features(${PROJECT} PUBLIC cxx_std_17)

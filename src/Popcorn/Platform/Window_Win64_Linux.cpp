@@ -5,8 +5,6 @@
 #include "Utilities.h"
 #include "WindowEvent.h"
 #include <cstdint>
-#include <iostream>
-#include <ostream>
 #include <string>
 
 ENGINE_NAMESPACE_BEGIN
@@ -24,10 +22,10 @@ Window *WindowWin64Linux::Init(const Props &props) {
 }
 
 WindowWin64Linux::WindowWin64Linux(const Props &props) : m_title(props.Title) {
-  std::cout << "  -- Win64::Class: " << m_title << " created.\n";
+  PC_PRINT_DEBUG("WIN64 CLASS " << m_title << "CREATED", 3, "WIN64");
 
   GLFW_Init();
-  std::cout << "    -- GLFW init.\n";
+  PC_PRINT_DEBUG("GLFW INIT", 4, "WIN64");
 
   GLFW_CreateWindow(&s_os_window, m_title, props.W, props.H);
   GLFW_SetWindowCallbacks(
@@ -57,8 +55,10 @@ void WindowWin64Linux::StartWindowLoop() { GLFW_WindowLoop(s_os_window); }
 WindowWin64Linux::~WindowWin64Linux() {
   GLFW_Terminate();
 
-  std::cout << "    -- GLFW killed.\n";
-  std::cout << "  -- Win64::Class: " << m_title << " terminated.\n";
+  PC_PRINT_DEBUG("GLFW KILLED", 4, "WIN64");
+  PC_PRINT_DEBUG("WIN64 CLASS "
+                 "DESTROYED",
+                 3, "WIN64");
 };
 
 void WindowWin64Linux::Terminate() {

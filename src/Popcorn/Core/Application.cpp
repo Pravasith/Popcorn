@@ -13,7 +13,7 @@ void Application::Start() {
   if (!s_instance) {
     s_instance = new Application();
 
-    Window::Create(Window::Props("Popcorn Engine", 400, 400));
+    Window::Create(Window::Props("Popcorn Engine", 500, 500));
     Window::AddEventListener(s_instance);
     Window::StartLoop();
 
@@ -24,7 +24,7 @@ void Application::Start() {
 }
 
 void Application::OnEvent(const Event &e) const {
-  std::cout << "INSIDE APPLICATION: ";
+
   if (e.BelongsToCategory(EventCategory::MouseEvent)) {
     std::cout << e.PrintDebugData();
   };
@@ -44,12 +44,12 @@ void Application::Stop() {
 }
 
 Application::Application() {
-  std::cout << "ENGINE STARTED" << "\n";
-  ;
+
+  PC_PRINT_DEBUG("ENGINE STARTED", 0, "APP");
 
   /* Window::Create(Window::Props("Sakura")); */
   /* Window::Destroy(); */
 };
 
-Application::~Application() { std::cout << "ENGINE STOPPED" << "\n"; };
+Application::~Application() { PC_PRINT_DEBUG("ENGINE STOPPED", 0, "APP"); };
 ENGINE_NAMESPACE_END
