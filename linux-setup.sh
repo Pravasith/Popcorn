@@ -62,7 +62,6 @@ glfw_submodule_build_dir="$glfw_submodule_dir/build"
 check_create_folder "$glfw_submodule_build_dir"
 
 echo "Building GLFW for Linux..."
-
 # CREATE GLFW SUBMODULE BUILD DIR FOR LINUX
 glfw_submodule_build_linux_dir="$glfw_submodule_build_dir/linux"
 check_create_folder "$glfw_submodule_build_linux_dir"
@@ -77,6 +76,23 @@ cd "$glfw_submodule_build_linux_dir"
 make install
 
 echo "Building GLFW for Linux complete"
+
+echo "Building GLFW for Windows..."
+# CREATE GLFW SUBMODULE BUILD DIR FOR WINDOWS
+glfw_submodule_build_windows_dir="$glfw_submodule_build_dir/windows"
+check_create_folder "$glfw_submodule_build_windows_dir"
+
+# CREATE GLFW VENDOR DIR FOR WINDOWS
+glfw_vendor_windows_dir="$vendor_windows_dir/glfw"
+check_create_folder "$glfw_vendor_windows_dir"
+
+cmake -DCMAKE_INSTALL_PREFIX="$glfw_vendor_windows_dir" -S "$glfw_submodule_dir" -B "$glfw_submodule_build_windows_dir"
+
+cd "$glfw_submodule_build_windows_dir"
+make install
+
+echo "Building GLFW for Windows complete"
+
 echo "Building GLFW complete"
 
 echo "Installing vendor/third-party submodules complete"
