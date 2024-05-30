@@ -20,7 +20,7 @@ static void pc_print(const std::string &msg, uint lvl, const std::string &tag) {
   ss << ">> ";
 
   for (int i = 0; i < lvl; ++i) {
-    ss << ' ';
+    ss << "  ";
   }
 
   ss << "---- " << tag << ": " << msg << '\n';
