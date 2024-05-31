@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 check_create_folder() {
     local folder="$1"
 
@@ -74,6 +73,7 @@ cmake -DCMAKE_INSTALL_PREFIX="$glfw_vendor_linux_dir" -S "$glfw_submodule_dir" -
 
 cd "$glfw_submodule_build_linux_dir"
 make install
+cd "$curr_dir"
 
 echo "Building GLFW for Linux complete"
 
@@ -90,75 +90,27 @@ cmake -DCMAKE_INSTALL_PREFIX="$glfw_vendor_windows_dir" -S "$glfw_submodule_dir"
 
 cd "$glfw_submodule_build_windows_dir"
 make install
+cd "$curr_dir"
 
 echo "Building GLFW for Windows complete"
-
 echo "Building GLFW complete"
 
 echo "Installing vendor/third-party submodules complete"
 
+# INSTALL GLAD
+echo "Installing GLAD..."
+glad_submodule_dir="$submodules_dir/glad"
 
-# # INSTALL GLFW
-# echo "Installing GLFW..."
-# glfw_build_dir="$glfw_src_dir/build"
-#
-#
-# check_create_folder "$glfw_build_dir"
-# cd "$glfw_build_dir"
-# cmake ..
-# sudo make install
-# cd "$curr_dir"
-#
-# # INSTALL GLFW FOR WINDOWS
-# echo "Generating Win64 Binaries..."
-# glfw_win64_build_dir="$glfw_src_dir/win64-build"
-# glfw_win64_install_dir="$win64_dir/glfw"
-#
-# check_create_folder "$glfw_win64_build_dir"
-# cmake -DCMAKE_INSTALL_PREFIX="$glfw_win64_install_dir" -S "$glfw_src_dir" -B "$glfw_win64_build_dir" -D CMAKE_TOOLCHAIN_FILE=CMake/x86_64-w64-mingw32.cmake
-#
-# check_create_folder "$glfw_win64_install_dir"
-# cd "$glfw_win64_build_dir"
-# sudo make install
-#
-# echo "Generating Win64 Binaries complete"
-# cd "$curr_dir"
-#
-# echo "Installing GLFW complete"
-#
-# # INSTALL GLAD
-# echo "Installing GLAD..."
-# glad_src_dir="$vendor/glad"
-# glad_win64_dir="$win64_dir/glad"
-#
-# check_create_folder "$glad_src_dir"
-# check_create_folder "$glad_win64_dir"
-#
-# cp "$repos_dir/glad/src/glad.c" "$glad_src_dir/glad.c"
-# cp -r "$repos_dir/glad/include" "$glad_win64_dir"
-#
-# glad_install_dir="/usr/include/glad"
-# khr_install_dir="/usr/include/glad"
-#
-# # 2nd arg 1 means sudo
-# check_create_folder "$glad_install_dir" 1
-# sudo cp "$repos_dir/glad/include/glad/glad.h" "$glad_install_dir/glad.h"
-#
-# echo "Installing GLAD complete"
-#
-# echo "Copying CMakeLists.txt to third-party..."
-# cp "$repos_dir/glad-cmake.txt" "$vendor/CMakeLists.txt"
-# echo "Copying CMakeLists.txt to third-party complete"
-#
-#
-# echo "Creating build directories..."
-# build_dir="$curr_dir/build"
-# win64_build_dir="$build_dir/win64"
-# linux_build_dir="$build_dir/linux"
-#
-# check_create_folder "$build_dir"
-# check_create_folder "$win64_build_dir"
-# check_create_folder "$linux_build_dir"
-# echo "Creating build directories complete"
-#
-# echo "--- Environment setup for Linux based systems complete"
+# COPY GLAD FILES FROM SUBMODULES TO VENDOR
+cp -r "$glad_submodule_dir" "$vendor_linux_dir"
+cp -r "$glad_submodule_dir" "$vendor_windows_dir"
+
+echo "Installing GLAD complete"
+
+# COPY CMAKELISTS FROM SUBMODULES TO VENDOR
+echo "Copying CMakeLists.txt to third-party..."
+cp "$submodules_dir/CMakeLists.txt" "$vendor_linux_dir"
+cp "$submodules_dir/CMakeLists.txt" "$vendor_windows_dir"
+echo "Copying CMakeLists.txt to third-party complete"
+
+echo "--- Environment setup for Linux based systems complete"

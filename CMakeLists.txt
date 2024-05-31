@@ -77,7 +77,7 @@ add_executable(${PROJECT} ${SOURCE_FILES})
 # -----------------------------------------------------------------------
 # ADD THIRD PARTY LIBS --- START
 # -----------------------------------------------------------------------
-add_subdirectory("third-party")
+add_subdirectory("third-party/linux")
 
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
@@ -113,8 +113,14 @@ set(GLFW_BUILD_EXAMPLES
 # Main implementation dir
 add_subdirectory("src")
 
-# Main include dir
-include_directories(include)
+# INCLUDE DIRS FOR LINUX
+include_directories(
+  # POPCORN INTERNAL INCLUDES
+  include
+  # THIRD PARTY INCLUDES
+  ${CMAKE_CURRENT_SOURCE_DIR}/third-party/linux
+  ${CMAKE_CURRENT_SOURCE_DIR}/third-party/linux/glad
+  ${CMAKE_CURRENT_SOURCE_DIR}/third-party/linux/glfw)
 
 # TODO: Refactor these
 target_include_directories(

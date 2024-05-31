@@ -4,7 +4,7 @@ set(CMAKE_C_COMPILER x86_64-w64-mingw32-gcc)
 set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)
 
 # where is the target environment located
-set(WINDOWS_BINARIES_DIR ${CMAKE_SOURCE_DIR}/win64)
+set(WINDOWS_BINARIES_DIR ${CMAKE_SOURCE_DIR}/third-party/windows)
 set(CMAKE_FIND_ROOT_PATH /usr/x86_64-w64-mingw32 ${WINDOWS_BINARIES_DIR}/glfw
                          ${WINDOWS_BINARIES_DIR}/glad)
 
