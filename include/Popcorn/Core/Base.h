@@ -11,7 +11,8 @@ ENGINE_NAMESPACE_BEGIN
 constexpr std::size_t bit_shift_left(std::size_t n) { return 1 << n; }
 
 #ifdef PC_DEBUG
-static void pc_print(const std::string &msg, uint lvl, const std::string &tag) {
+static void pc_print(const std::string &msg, unsigned int lvl,
+                     const std::string &tag) {
   std::stringstream ss;
 
   if (lvl > 20)
