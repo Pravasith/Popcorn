@@ -69,7 +69,8 @@ check_create_folder "$glfw_submodule_build_linux_dir"
 glfw_vendor_linux_dir="$vendor_linux_dir/glfw"
 check_create_folder "$glfw_vendor_linux_dir"
 
-cmake -DCMAKE_INSTALL_PREFIX="$glfw_vendor_linux_dir" -S "$glfw_submodule_dir" -B "$glfw_submodule_build_linux_dir"
+cmake -DCMAKE_INSTALL_PREFIX="$glfw_vendor_linux_dir" \
+    -S "$glfw_submodule_dir" -B "$glfw_submodule_build_linux_dir"
 
 cd "$glfw_submodule_build_linux_dir"
 make install
@@ -86,7 +87,9 @@ check_create_folder "$glfw_submodule_build_windows_dir"
 glfw_vendor_windows_dir="$vendor_windows_dir/glfw"
 check_create_folder "$glfw_vendor_windows_dir"
 
-cmake -DCMAKE_INSTALL_PREFIX="$glfw_vendor_windows_dir" -S "$glfw_submodule_dir" -B "$glfw_submodule_build_windows_dir"
+cmake -DCMAKE_INSTALL_PREFIX="$glfw_vendor_windows_dir" \
+    -S "$glfw_submodule_dir" -B "$glfw_submodule_build_windows_dir" \
+    -D CMAKE_TOOLCHAIN_FILE=CMake/x86_64-w64-mingw32.cmake
 
 cd "$glfw_submodule_build_windows_dir"
 make install
