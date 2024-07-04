@@ -1,5 +1,9 @@
 #!/bin/bash
+#
 
+# -----------------------------------------------------------------------
+# UTIL FUNCS --- START
+# -----------------------------------------------------------------------
 check_create_folder() {
     local folder="$1"
 
@@ -19,9 +23,18 @@ check_create_folder() {
         echo "Folder '$folder' already exists. Skipped creating."
     fi
 }
+# -----------------------------------------------------------------------
+# UTIL FUNCS --- END
+# -----------------------------------------------------------------------
 
-# EXTERNAL DEPENDENCIES
+#
+
+# -----------------------------------------------------------------------
+# INSTALL THESE EXTERNAL DEPENDENCIES
 # sudo apt install libwayland-dev libxkbcommon-dev xorg-dev
+# -----------------------------------------------------------------------
+
+#
 
 echo "--- Starting environment setup for Linux based systems..."
 # DIR -- PROJECT PARENT SRC DIR
@@ -46,20 +59,40 @@ check_create_folder "$vendor_linux_dir"
 vendor_mac_os_dir="$vendor_dir/mac-os"
 check_create_folder "$vendor_mac_os_dir"
 
-# INSTALL SUBMODULES
+#
+
+# -----------------------------------------------------------------------
+# CLONE SUBMODULE REPOS --- START
+# -----------------------------------------------------------------------
 echo "Cloning vendor/third-party submodules..."
 git submodule init
 git submodule update
 echo "Cloning vendor/third-party submodules complete"
+# -----------------------------------------------------------------------
+# CLONE SUBMODULE REPOS --- END
+# -----------------------------------------------------------------------
 
+
+#
+
+# -----------------------------------------------------------------------
+# INSTALL SUBMODULES --- START
+# -----------------------------------------------------------------------
 echo "Installing vendor/third-party submodules..."
 
+#
+
+# -----------------------------------------------------------------------
+# SUBMODULE INSTALL - GLFW --- START
+# -----------------------------------------------------------------------
 echo "Building GLFW..."
 glfw_submodule_dir="$submodules_dir/glfw"
 
 glfw_submodule_build_dir="$glfw_submodule_dir/build"
 check_create_folder "$glfw_submodule_build_dir"
 
+# LINUX
+# -----------------------------------------------------------------------
 echo "Building GLFW for Linux..."
 # CREATE GLFW SUBMODULE BUILD DIR FOR LINUX
 glfw_submodule_build_linux_dir="$glfw_submodule_build_dir/linux"
@@ -78,6 +111,8 @@ cd "$curr_dir"
 
 echo "Building GLFW for Linux complete"
 
+# WINDOWS
+# -----------------------------------------------------------------------
 echo "Building GLFW for Windows..."
 # CREATE GLFW SUBMODULE BUILD DIR FOR WINDOWS
 glfw_submodule_build_windows_dir="$glfw_submodule_build_dir/windows"
@@ -97,18 +132,65 @@ cd "$curr_dir"
 
 echo "Building GLFW for Windows complete"
 echo "Building GLFW complete"
+# -----------------------------------------------------------------------
+# SUBMODULE INSTALL - GLFW --- END
+# -----------------------------------------------------------------------
 
-echo "Installing vendor/third-party submodules complete"
+#
 
-# INSTALL GLAD
+
+# -----------------------------------------------------------------------
+# SUBMODULE INSTALL - GLAD --- START
+# -----------------------------------------------------------------------
 echo "Installing GLAD..."
 glad_submodule_dir="$submodules_dir/glad"
 
 # COPY GLAD FILES FROM SUBMODULES TO VENDOR
+#
+# LINUX
+# -----------------------------------------------------------------------
 cp -r "$glad_submodule_dir" "$vendor_linux_dir"
+# WINDOWS
+# -----------------------------------------------------------------------
 cp -r "$glad_submodule_dir" "$vendor_windows_dir"
 
 echo "Installing GLAD complete"
+# -----------------------------------------------------------------------
+# SUBMODULE INSTALL - GLAD --- END
+# -----------------------------------------------------------------------
+
+#
+
+# -----------------------------------------------------------------------
+# SUBMODULE INSTALL - IMGUI --- START
+# -----------------------------------------------------------------------
+
+
+echo "Building ImGui..."
+
+imgui_submodule_dir="$submodules_dir/imgui"
+
+imgui_submodule_build_dir="$imgui_submodule_dir/build"
+check_create_folder "$imgui_submodule_build_dir"
+
+# TODO -- COMPLETE IMGUI SETUP
+
+# LINUX
+# -----------------------------------------------------------------------
+echo "Building ImGui for Linux..."
+# -----------------------------------------------------------------------
+# SUBMODULE INSTALL - IMGUI --- END
+# -----------------------------------------------------------------------
+
+#
+
+#
+echo "Installing vendor/third-party submodules complete"
+# -----------------------------------------------------------------------
+# INSTALL SUBMODULES --- END
+# -----------------------------------------------------------------------
+
+#
 
 # COPY CMAKELISTS FROM SUBMODULES TO VENDOR
 echo "Copying CMakeLists.txt to third-party..."
