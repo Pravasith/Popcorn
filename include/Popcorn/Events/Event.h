@@ -55,6 +55,9 @@ public:
            (static_cast<uint_fast16_t>(evtCategory));
   };
 
+  void SetIsHandled(const bool isHandled) { m_is_handled = isHandled; };
+  bool IsHandled() const { return m_is_handled; }
+
   // DEBUG ONLY
   [[nodiscard]] virtual const char *GetEventTypeName() const = 0;
   [[nodiscard]] virtual std::string PrintDebugData() const {
@@ -65,6 +68,7 @@ public:
 private:
   EventType m_type;
   EventCategory m_category;
+  bool m_is_handled = false;
 };
 
 ENGINE_NAMESPACE_END
