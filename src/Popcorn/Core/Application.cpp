@@ -27,17 +27,23 @@ void Application::Start() {
     Window::Create(Window::Props("Popcorn Engine", 500, 500));
     Window::AddSubscriber(s_instance);
 
-    assert(!s_is_game_loop_running && "GAME LOOP ALREADY RUNNING!");
-
-    s_is_game_loop_running = true;
-    Window::StartLoop();
   } else {
     write_log(
         "Attempt to create Application class, when instance already exists");
   }
 }
 
-void Application::Run() {};
+void Application::Run() {
+  assert(!s_is_game_loop_running && "GAME LOOP ALREADY RUNNING!");
+
+  s_is_game_loop_running = true;
+
+  while (s_is_game_loop_running) {
+    Window::StartLoop();
+  }
+
+  s_is_game_loop_running = false;
+};
 
 void Application::Stop() {
   Window::Destroy();

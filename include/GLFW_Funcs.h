@@ -61,10 +61,10 @@ static void GLFW_SetWindowCallbacks(GLFWwindow *glfwWindow,
 }
 
 static void GLFW_WindowLoop(GLFWwindow *glfwWindow) {
-  while (!glfwWindowShouldClose(glfwWindow)) {
-    glfwSwapBuffers(glfwWindow);
-    glfwPollEvents();
-  }
+  /* while (!glfwWindowShouldClose(glfwWindow)) { */
+  glfwSwapBuffers(glfwWindow);
+  glfwPollEvents();
+  /* } */
 }
 
 static void GLFW_Terminate() { glfwTerminate(); }
