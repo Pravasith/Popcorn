@@ -25,7 +25,7 @@ void Application::Start() {
     s_instance = new Application();
 
     Window::Create(Window::Props("Popcorn Engine", 500, 500));
-    Window::Subscribe(s_instance);
+    Window::AddSubscriber(s_instance);
 
     assert(!s_is_game_loop_running && "GAME LOOP ALREADY RUNNING!");
 
