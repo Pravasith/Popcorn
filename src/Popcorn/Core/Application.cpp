@@ -1,7 +1,9 @@
 #include "Application.h"
+#include "Event.h"
 #include "Utilities.h"
 #include "Window.h"
 #include <cassert>
+#include <cstdint>
 #include <iostream>
 #include <string>
 
@@ -41,8 +43,6 @@ void Application::Run() {
   while (s_is_game_loop_running) {
     Window::StartLoop();
   }
-
-  s_is_game_loop_running = false;
 };
 
 void Application::Stop() {
@@ -59,6 +59,15 @@ void Application::OnEvent(const Event &e) const {
   };
 
   if (e.BelongsToCategory(EventCategory::WindowEvent)) {
+    std::cout << e.PrintDebugData();
+
+    if (static_cast<uint_fast16_t>(e.GetEventType()) &
+        static_cast<uint_fast16_t>(EventType::WindowClose)) {
+      s_is_game_loop_running = false;
+    }
+  };
+
+  if (e.BelongsToCategory(EventCategory::KeyboardEvent)) {
     std::cout << e.PrintDebugData();
   };
 };

@@ -53,12 +53,14 @@ static void GLFW_CreateWindow(GLFWwindow **glfwWindow, std::string &title,
 
 static void GLFW_SetWindowCallbacks(GLFWwindow *glfwWindow,
                                     GLFWwindowclosefun glfwWindowCloseCb,
-                                    GLFWcursorposfun glfwCursorPosCb
-
-) {
+                                    GLFWcursorposfun glfwCursorPosCb,
+                                    GLFWkeyfun glfwKeyCb) {
   glfwSetWindowCloseCallback(glfwWindow, glfwWindowCloseCb);
   glfwSetCursorPosCallback(glfwWindow, glfwCursorPosCb);
+  glfwSetKeyCallback(glfwWindow, glfwKeyCb);
 }
+
+enum class GLFW_KEY_ACTIONS {};
 
 static void GLFW_WindowLoop(GLFWwindow *glfwWindow) {
   /* while (!glfwWindowShouldClose(glfwWindow)) { */

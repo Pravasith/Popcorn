@@ -12,21 +12,24 @@ ENGINE_NAMESPACE_BEGIN
 class MouseMovedEvent : public Event {
 public:
   MouseMovedEvent(const float xPos, const float yPos)
-      : Event{EventType::MouseMoved, EventCategory::MouseEvent}, m_xpos{xPos},
-        m_ypos{yPos} {};
+      // EXPLICITLY INIT BASE CLASS
+      : Event{EventType::MouseMoved, EventCategory::MouseEvent},
+        // INIT MEMBERS
+        m_x_pos{xPos}, m_y_pos{yPos} {};
+
   EVENT_OVERRIDE_METHODS(MouseMoved);
 
-  [[nodiscard]] float_t GetXPos() { return m_xpos; };
-  [[nodiscard]] float_t GetYPos() { return m_ypos; };
+  [[nodiscard]] float_t GetXPos() const { return m_x_pos; };
+  [[nodiscard]] float_t GetYPos() const { return m_y_pos; };
 
   [[nodiscard]] std::string PrintDebugData() const override {
     std::stringstream ss;
-    ss << "X: " << m_xpos << ", Y: " << m_ypos << '\n';
+    ss << "X: " << m_x_pos << ", Y: " << m_y_pos << '\n';
 
     return ss.str();
   };
 
 private:
-  float m_xpos = 0, m_ypos = 0;
+  float m_x_pos = 0, m_y_pos = 0;
 };
 ENGINE_NAMESPACE_END

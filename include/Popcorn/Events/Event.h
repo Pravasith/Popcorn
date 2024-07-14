@@ -10,22 +10,22 @@ ENGINE_NAMESPACE_BEGIN
 enum class EventType {
   None = 0,
 
-  // Window Events
-  WindowClose,
-  WindowResize,
-
   // Application Events
 
+  // Window Events
+  WindowClose = bit_shift_left(1),
+  WindowResize = bit_shift_left(2),
+
   // Keyboard Events
-  KeyPressed,
-  KeyReleased,
-  KeyTyped,
+  KeyPressed = bit_shift_left(3),
+  KeyReleased = bit_shift_left(4),
+  KeyTyped = bit_shift_left(5),
 
   // Mouse Events
-  MouseButtonPressed,
-  MouseButtonReleased,
-  MouseMoved,
-  MouseScrolled
+  MouseButtonPressed = bit_shift_left(6),
+  MouseButtonReleased = bit_shift_left(7),
+  MouseMoved = bit_shift_left(8),
+  MouseScrolled = bit_shift_left(9),
 };
 
 enum class EventCategory {
@@ -36,11 +36,6 @@ enum class EventCategory {
   MouseEvent = bit_shift_left(4),
   /* ControllerEvent = bit_shift_left(5), */
 };
-
-// Debug only
-// LOOK IN Global_Macros.h file
-#define EVENT_OVERRIDE_METHODS(name)                                           \
-  [[nodiscard]] ENUM_TO_STRING(EventType, name);
 
 class Event {
 public:
@@ -55,11 +50,21 @@ public:
            (static_cast<uint_fast16_t>(evtCategory));
   };
 
-  void SetIsHandled(const bool isHandled) { m_is_handled = isHandled; };
   bool IsHandled() const { return m_is_handled; }
+  void SetIsHandled(const bool isHandled) { m_is_handled = isHandled; };
 
-  // DEBUG ONLY
+  // -----------------------------------------------------------------------
+  // EVENT_OVERRIDE_METHODS Macro --- START -- DEBUG ONLY
+  // -----------------------------------------------------------------------
+// LOOK IN Global_Macros.h file
+#define EVENT_OVERRIDE_METHODS(name)                                           \
+  [[nodiscard]] ENUM_TO_STRING(EventType, name);
+
   [[nodiscard]] virtual const char *GetEventTypeName() const = 0;
+  // -----------------------------------------------------------------------
+  // EVENT_OVERRIDE_METHODS Macro --- END -- DEBUG ONLY
+  // -----------------------------------------------------------------------
+
   [[nodiscard]] virtual std::string PrintDebugData() const {
     return "From base class -- virtual method \"PrintDebugData\" not defined "
            "in derived class\n";
