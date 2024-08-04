@@ -38,7 +38,7 @@ public:
   [[nodiscard]] std::string PrintDebugData() const override {
     std::stringstream ss;
 
-    ss << "Key Pressed: " << GetKeyCode() << ", Scan Code: " << '\n';
+    ss << "Key Pressed: " << GetKeyCode() << '\n';
     return ss.str();
   };
 
@@ -58,7 +58,7 @@ public:
   [[nodiscard]] std::string PrintDebugData() const override {
     std::stringstream ss;
 
-    ss << "Key Released: " << GetKeyCode() << ", Scan Code: " << '\n';
+    ss << "Key Released: " << GetKeyCode() << '\n';
     return ss.str();
   };
 

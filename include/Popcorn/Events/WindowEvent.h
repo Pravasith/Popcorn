@@ -6,10 +6,10 @@ ENGINE_NAMESPACE_BEGIN
 
 class WindowCloseEvent : public Event {
 public:
-  WindowCloseEvent()
-      : Event{EventType::WindowClose, EventCategory::WindowEvent} {};
+  WindowCloseEvent(){};
 
-  EVENT_OVERRIDE_METHODS(WindowClose)
+  EVENT_CATEGORY_OVERRIDE_METHODS(WindowEvent)
+  EVENT_TYPE_OVERRIDE_METHODS(WindowClose)
 
   [[nodiscard]] std::string PrintDebugData() const override {
     std::stringstream ss;

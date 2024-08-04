@@ -49,8 +49,24 @@ WindowWin64Linux::WindowWin64Linux(const Props &props) : m_title(props.Title) {
          int action, int mods) {
         // GLFW ACTIONS
         // 0 = KEY_PRESS, 1 = KEY_RELEASE, 2 = KEY_REPEAT
-        KeyPressedEvent kPressEvt(key, scan_code);
-        s_instance->PublishEvent(kPressEvt);
+
+        switch (action) {
+        case GLFW_PRESS: {
+          KeyPressedEvent event(key, 0);
+          s_instance->PublishEvent(event);
+          break;
+        }
+        case GLFW_RELEASE: {
+          KeyReleasedEvent event(key);
+          s_instance->PublishEvent(event);
+          break;
+        }
+        case GLFW_REPEAT: {
+          KeyPressedEvent event(key, true);
+          s_instance->PublishEvent(event);
+          break;
+        }
+        }
       }
 
   );
