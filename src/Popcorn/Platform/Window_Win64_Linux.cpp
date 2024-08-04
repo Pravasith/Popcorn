@@ -1,6 +1,7 @@
 #include "Window_Win64_Linux.h"
 #include "GLFW_Funcs.h"
 #include "Global_Macros.h"
+#include "KeyEvent.h"
 #include "MouseEvent.h"
 #include "Utilities.h"
 #include "WindowEvent.h"
@@ -41,6 +42,31 @@ WindowWin64Linux::WindowWin64Linux(const Props &props) : m_title(props.Title) {
       [](GLFW_Types::GLFW_OSWindow_T *os_window, double x, double y) {
         MouseMovedEvent mMoveEvt((float)x, (float)y);
         s_instance->PublishEvent(mMoveEvt);
+      },
+
+      // Key Callback
+      [](GLFW_Types::GLFW_OSWindow_T *os_window, int key, int scan_code,
+         int action, int mods) {
+        // GLFW ACTIONS
+        // 0 = KEY_PRESS, 1 = KEY_RELEASE, 2 = KEY_REPEAT
+
+        switch (action) {
+        case GLFW_PRESS: {
+          KeyPressedEvent event(key, 0);
+          s_instance->PublishEvent(event);
+          break;
+        }
+        case GLFW_RELEASE: {
+          KeyReleasedEvent event(key);
+          s_instance->PublishEvent(event);
+          break;
+        }
+        case GLFW_REPEAT: {
+          KeyPressedEvent event(key, true);
+          s_instance->PublishEvent(event);
+          break;
+        }
+        }
       }
 
   );

@@ -26,7 +26,7 @@ public:
   };
 
   static void Create(const Props &props = Props());
-  static void AddEventListener(const Subscriber *);
+  static void AddSubscriber(const Subscriber *);
   static void StartLoop();
   static void Destroy();
 

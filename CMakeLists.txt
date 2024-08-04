@@ -144,8 +144,11 @@ target_include_directories(
                 ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events)
 
 target_include_directories(
-  PopcornEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-                       ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core)
+  PopcornEngine
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events
+         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core)
+
 # -----------------------------------------------------------------------
 # SET IMPLEMENTATION AND INCLUDE DIRS --- END
 # -----------------------------------------------------------------------
@@ -172,7 +175,7 @@ endif()
 # -----------------------------------------------------------------------
 target_link_libraries(Window PRIVATE glad glfw)
 target_link_libraries(Window PUBLIC Events)
-target_link_libraries(PopcornEngine PRIVATE Window)
+target_link_libraries(PopcornEngine PRIVATE Window Events)
 
 # FINAL PROJECT LINKING
 target_link_libraries(${PROJECT} PRIVATE PopcornEngine)

@@ -26,7 +26,7 @@ void Window::Create(const Props &props) {
   PC_PRINT_DEBUG("MAIN WINDOW CREATED", 2, "WINDOW");
 };
 
-void Window::AddEventListener(const Subscriber *s) {
+void Window::AddSubscriber(const Subscriber *s) {
   PC_PRINT_DEBUG("WINDOW SUBSCRIPTION ADDED", 2, "WINDOW");
 
   /* #ifdef IS_WINDOWS_OR_LINUX */

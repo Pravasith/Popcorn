@@ -1,11 +1,24 @@
 #include "Application.h"
+#include "Event.h"
 #include "Utilities.h"
 #include "Window.h"
+#include <cassert>
+#include <cstdint>
 #include <iostream>
 #include <string>
 
 ENGINE_NAMESPACE_BEGIN
 Application *Application::s_instance = nullptr;
+bool Application::s_is_game_loop_running = false;
+
+Application::Application() {
+  PC_PRINT_DEBUG("ENGINE STARTED", 0, "APP");
+
+  /* Window::Create(Window::Props("Sakura")); */
+  /* Window::Destroy(); */
+};
+
+Application::~Application() { PC_PRINT_DEBUG("ENGINE STOPPED", 0, "APP"); };
 
 Application *Application::Get() { return s_instance; }
 
@@ -14,8 +27,7 @@ void Application::Start() {
     s_instance = new Application();
 
     Window::Create(Window::Props("Popcorn Engine", 500, 500));
-    Window::AddEventListener(s_instance);
-    Window::StartLoop();
+    Window::AddSubscriber(s_instance);
 
   } else {
     write_log(
@@ -23,19 +35,17 @@ void Application::Start() {
   }
 }
 
-void Application::OnEvent(const Event &e) const {
+void Application::Run() {
+  assert(!s_is_game_loop_running && "GAME LOOP ALREADY RUNNING!");
 
-  if (e.BelongsToCategory(EventCategory::MouseEvent)) {
-    std::cout << e.PrintDebugData();
-  };
+  s_is_game_loop_running = true;
 
-  if (e.BelongsToCategory(EventCategory::WindowEvent)) {
-    std::cout << e.PrintDebugData();
-  };
+  while (s_is_game_loop_running) {
+    Window::StartLoop();
+  }
 };
 
 void Application::Stop() {
-
   Window::Destroy();
   if (s_instance) {
     delete s_instance;
@@ -43,13 +53,23 @@ void Application::Stop() {
   }
 }
 
-Application::Application() {
+void Application::OnEvent(const Event &e) const {
+  if (e.BelongsToCategory(EventCategory::MouseEvent)) {
+    std::cout << e.PrintDebugData();
+  };
 
-  PC_PRINT_DEBUG("ENGINE STARTED", 0, "APP");
+  if (e.BelongsToCategory(EventCategory::WindowEvent)) {
+    std::cout << e.PrintDebugData();
 
-  /* Window::Create(Window::Props("Sakura")); */
-  /* Window::Destroy(); */
+    if (static_cast<uint_fast16_t>(e.GetEventType()) &
+        static_cast<uint_fast16_t>(EventType::WindowClose)) {
+      s_is_game_loop_running = false;
+    }
+  };
+
+  if (e.BelongsToCategory(EventCategory::KeyboardEvent)) {
+    std::cout << e.PrintDebugData();
+  };
 };
 
-Application::~Application() { PC_PRINT_DEBUG("ENGINE STOPPED", 0, "APP"); };
 ENGINE_NAMESPACE_END

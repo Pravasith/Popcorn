@@ -10,11 +10,11 @@ ENGINE_NAMESPACE_BEGIN
 enum class EventType {
   None = 0,
 
+  // Application Events
+
   // Window Events
   WindowClose,
   WindowResize,
-
-  // Application Events
 
   // Keyboard Events
   KeyPressed,
@@ -25,7 +25,7 @@ enum class EventType {
   MouseButtonPressed,
   MouseButtonReleased,
   MouseMoved,
-  MouseScrolled
+  MouseScrolled,
 };
 
 enum class EventCategory {
@@ -37,34 +37,46 @@ enum class EventCategory {
   /* ControllerEvent = bit_shift_left(5), */
 };
 
-// Debug only
-// LOOK IN Global_Macros.h file
-#define EVENT_OVERRIDE_METHODS(name)                                           \
+// HASH DEFINE START ----------------------------------------------------------
+#define EVENT_TYPE_OVERRIDE_METHODS(name)                                      \
+  [[nodiscard]] static const EventType GetStaticEventType() {                  \
+    return EventType::name;                                                    \
+  };                                                                           \
+  [[nodiscard]] virtual const EventType GetEventType() const override {        \
+    return GetStaticEventType();                                               \
+  };                                                                           \
   [[nodiscard]] ENUM_TO_STRING(EventType, name);
+
+#define EVENT_CATEGORY_OVERRIDE_METHODS(category)                              \
+  [[nodiscard]] const int GetEvtCategory() const override {                    \
+    return static_cast<int>(EventCategory::category);                          \
+  };
+// HASH DEFINE END -------------------------------------------------------------
 
 class Event {
 public:
-  explicit Event(EventType eventType, EventCategory eventCategory)
-      : m_type{eventType}, m_category{eventCategory} {};
   virtual ~Event() = default;
 
-  [[nodiscard]] EventType GetEventType() const { return m_type; };
+  [[nodiscard]] virtual const EventType GetEventType() const = 0;
+  [[nodiscard]] virtual const int GetEvtCategory() const = 0;
+
+  bool IsHandled() const { return m_is_handled; }
+  void SetIsHandled(const bool isHandled) { m_is_handled = isHandled; };
 
   bool BelongsToCategory(const EventCategory evtCategory) const {
-    return static_cast<uint_fast16_t>(m_category) &
-           (static_cast<uint_fast16_t>(evtCategory));
+    return static_cast<int>(evtCategory) & GetEvtCategory();
   };
 
   // DEBUG ONLY
   [[nodiscard]] virtual const char *GetEventTypeName() const = 0;
+  // DEBUG ONLY
   [[nodiscard]] virtual std::string PrintDebugData() const {
     return "From base class -- virtual method \"PrintDebugData\" not defined "
            "in derived class\n";
   };
 
 private:
-  EventType m_type;
-  EventCategory m_category;
+  bool m_is_handled = false;
 };
 
 ENGINE_NAMESPACE_END
