@@ -148,6 +148,7 @@ target_include_directories(
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core)
+
 # -----------------------------------------------------------------------
 # SET IMPLEMENTATION AND INCLUDE DIRS --- END
 # -----------------------------------------------------------------------

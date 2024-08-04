@@ -1,57 +1,69 @@
+
 #pragma once
 #include "Event.h"
 
 #include "Global_Macros.h"
+#include "Popcorn/Input/KeyCodes.h"
 
 ENGINE_NAMESPACE_BEGIN
-class KeyPressedEvent : public Event {
+using namespace Key;
+
+class KeyEvent : public Event {
 public:
-  // TODO: ADD CUSTOM KEY CODES
-  KeyPressedEvent(const int keyCode, const int keyScanCode)
+  KeyEvent() = delete;
+  virtual ~KeyEvent() = default;
+
+  [[nodiscard]] const KeyCode GetKeyCode() const { return m_key_code; };
+
+  EVENT_CATEGORY_OVERRIDE_METHODS(KeyboardEvent);
+
+protected:
+  KeyEvent(const KeyCode keyCode)
       // EXPLICITLY INIT BASE CLASS
-      : Event(EventType::KeyPressed, EventCategory::KeyboardEvent),
-        // INIT MEMBERS
-        m_key_code{keyCode}, m_key_scan_code{keyScanCode} {};
-
-  EVENT_OVERRIDE_METHODS(KeyPressed);
-
-  [[nodiscard]] int GetKeyCode() { return m_key_code; };
-  [[nodiscard]] int GetKeyScanCode() { return m_key_scan_code; };
-
-  [[nodiscard]] std::string PrintDebugData() const override {
-    std::stringstream ss;
-    ss << "Key Pressed: " << m_key_code << ", Scan Code: " << m_key_scan_code
-       << '\n';
-    return ss.str();
-  };
+      : m_key_code{keyCode} {};
 
 private:
-  int m_key_code, m_key_scan_code;
+  KeyCode m_key_code;
 };
 
-class KeyReleasedEvent : public Event {
+class KeyPressedEvent : public KeyEvent {
 public:
-  // TODO: ADD CUSTOM KEY CODES
-  KeyReleasedEvent(const int keyCode, const int keyScanCode)
-      // EXPLICITLY INIT BASE CLASS
-      : Event(EventType::KeyReleased, EventCategory::KeyboardEvent),
-        // INIT MEMBERS
-        m_key_code{keyCode}, m_key_scan_code{keyScanCode} {};
+  KeyPressedEvent(const KeyCode keyCode, bool isRepeat = false)
+      : KeyEvent(keyCode), m_is_repeat(isRepeat){};
 
-  EVENT_OVERRIDE_METHODS(KeyReleased);
+  bool IsRepeat() const { return m_is_repeat; }
 
-  [[nodiscard]] int GetKeyCode() { return m_key_code; };
-  [[nodiscard]] int GetKeyScanCode() { return m_key_scan_code; };
+  EVENT_TYPE_OVERRIDE_METHODS(KeyPressed);
 
   [[nodiscard]] std::string PrintDebugData() const override {
     std::stringstream ss;
-    ss << "Key Released: " << m_key_code << ", Scan Code: " << m_key_scan_code
-       << '\n';
+
+    ss << "Key Pressed: " << GetKeyCode() << ", Scan Code: " << '\n';
     return ss.str();
   };
 
 private:
-  int m_key_code, m_key_scan_code;
+  bool m_is_repeat = false;
+};
+
+class KeyReleasedEvent : public KeyEvent {
+public:
+  KeyReleasedEvent(const KeyCode keyCode, bool isRepeat = false)
+      : KeyEvent(keyCode), m_is_repeat(isRepeat){};
+
+  bool IsRepeat() const { return m_is_repeat; }
+
+  EVENT_TYPE_OVERRIDE_METHODS(KeyReleased);
+
+  [[nodiscard]] std::string PrintDebugData() const override {
+    std::stringstream ss;
+
+    ss << "Key Released: " << GetKeyCode() << ", Scan Code: " << '\n';
+    return ss.str();
+  };
+
+private:
+  bool m_is_repeat = false;
 };
 
 ENGINE_NAMESPACE_END
