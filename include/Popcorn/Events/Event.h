@@ -2,7 +2,6 @@
 
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
-#include <cstdint>
 #include <string>
 #include <sys/types.h>
 
@@ -77,6 +76,25 @@ public:
 
 private:
   bool m_is_handled = false;
+};
+
+class EventDispatcher {
+public:
+  EventDispatcher(Event &e) : m_event(e) {}
+
+  template <typename T, typename F> bool Dispatch(const F &eventCb) {
+    if (T::GetStaticEventType() == m_event.GetEventType()) {
+      m_event.SetIsHandled(
+          // m_event.IsHandled() |
+          eventCb(static_cast<T &>(m_event)));
+      return true;
+    }
+
+    return false;
+  };
+
+private:
+  Event &m_event;
 };
 
 ENGINE_NAMESPACE_END

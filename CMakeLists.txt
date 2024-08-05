@@ -140,8 +140,10 @@ target_include_directories(
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform)
 
 target_include_directories(
-  Events PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-                ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events)
+  Events
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Input
+         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events)
 
 target_include_directories(
   PopcornEngine

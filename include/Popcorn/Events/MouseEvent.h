@@ -9,12 +9,14 @@ template <typename T> class MouseMovedEvent : public Event {
 public:
   MouseMovedEvent(const T x, const T y) : m_coords({x, y}){};
 
-  struct coords {
+private:
+  struct Coords {
     T x = 0;
     T y = 0;
   };
 
-  coords GetCoords() const { return m_coords; };
+public:
+  Coords &GetCoords() const { return &m_coords; };
 
   EVENT_CATEGORY_OVERRIDE_METHODS(MouseEvent);
   EVENT_TYPE_OVERRIDE_METHODS(MouseMoved);
@@ -26,7 +28,7 @@ public:
   };
 
 private:
-  coords m_coords;
+  Coords m_coords;
 };
 
 ENGINE_NAMESPACE_END

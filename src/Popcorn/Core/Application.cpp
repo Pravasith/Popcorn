@@ -2,8 +2,8 @@
 #include "Event.h"
 #include "Utilities.h"
 #include "Window.h"
+#include "WindowEvent.h"
 #include <cassert>
-#include <cstdint>
 #include <iostream>
 #include <string>
 
@@ -14,7 +14,7 @@ bool Application::s_is_game_loop_running = false;
 Application::Application() {
   PC_PRINT_DEBUG("ENGINE STARTED", 0, "APP");
 
-  /* Window::Create(Window::Props("Sakura")); */
+  /* Window::Create(Window::Props("Ramen")); */
   /* Window::Destroy(); */
 };
 
@@ -53,18 +53,28 @@ void Application::Stop() {
   }
 }
 
-void Application::OnEvent(const Event &e) const {
+bool Application::OnWindowResize(WindowResizeEvent &e) const {
+  std::cout << "FROM NEW: " << e.PrintDebugData();
+  return true;
+};
+
+bool Application::OnWindowClose(WindowCloseEvent &e) const {
+  std::cout << "FROM NEW: " << e.PrintDebugData();
+  s_is_game_loop_running = false;
+  return true;
+};
+
+void Application::OnEvent(Event &e) const {
+
+  EventDispatcher dispatch(e);
+  dispatch.Dispatch<WindowResizeEvent>(
+      PC_BIND_EVENT_FUNC(WindowResizeEvent, OnWindowResize));
+
+  dispatch.Dispatch<WindowCloseEvent>(
+      PC_BIND_EVENT_FUNC(WindowCloseEvent, OnWindowClose));
+
   if (e.BelongsToCategory(EventCategory::MouseEvent)) {
     std::cout << e.PrintDebugData();
-  };
-
-  if (e.BelongsToCategory(EventCategory::WindowEvent)) {
-    std::cout << e.PrintDebugData();
-
-    if (static_cast<uint_fast16_t>(e.GetEventType()) &
-        static_cast<uint_fast16_t>(EventType::WindowClose)) {
-      s_is_game_loop_running = false;
-    }
   };
 
   if (e.BelongsToCategory(EventCategory::KeyboardEvent)) {

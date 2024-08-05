@@ -13,7 +13,7 @@ public:
   virtual void OnDetach();
   virtual void OnUpdate() = 0;
 
-  void OnEvent(const Event &) const override;
+  void OnEvent(Event &) const override;
 };
 
 ENGINE_NAMESPACE_END
