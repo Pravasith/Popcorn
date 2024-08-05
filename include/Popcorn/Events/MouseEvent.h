@@ -16,7 +16,7 @@ private:
   };
 
 public:
-  Coords GetCoords() const { return m_coords; };
+  Coords &GetCoords() const { return &m_coords; };
 
   EVENT_CATEGORY_OVERRIDE_METHODS(MouseEvent);
   EVENT_TYPE_OVERRIDE_METHODS(MouseMoved);

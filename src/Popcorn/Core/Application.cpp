@@ -4,7 +4,6 @@
 #include "Window.h"
 #include "WindowEvent.h"
 #include <cassert>
-#include <functional>
 #include <iostream>
 #include <string>
 
@@ -15,7 +14,7 @@ bool Application::s_is_game_loop_running = false;
 Application::Application() {
   PC_PRINT_DEBUG("ENGINE STARTED", 0, "APP");
 
-  /* Window::Create(Window::Props("Sakura")); */
+  /* Window::Create(Window::Props("Ramen")); */
   /* Window::Destroy(); */
 };
 
