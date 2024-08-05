@@ -2,7 +2,9 @@
 #include "Event.h"
 #include "Utilities.h"
 #include "Window.h"
+#include "WindowEvent.h"
 #include <cassert>
+#include <functional>
 #include <iostream>
 #include <string>
 
@@ -52,22 +54,24 @@ void Application::Stop() {
   }
 }
 
+bool Application::OnWindowResize(WindowResizeEvent &e) {
+  std::cout << "FROM NEW: " << e.PrintDebugData();
+  return true;
+};
+
 void Application::OnEvent(Event &e) const {
+
+  EventDispatcher dispatch(e);
+  dispatch.Dispatch<WindowResizeEvent>(
+      std::bind(&Application::OnWindowResize, this, std::placeholders::_1));
+
   if (e.BelongsToCategory(EventCategory::MouseEvent)) {
     std::cout << e.PrintDebugData();
   };
 
   if (e.BelongsToCategory(EventCategory::WindowEvent)) {
-
-    std::cout << e.PrintDebugData();
-
     if (static_cast<int>(e.GetEventType()) &
-        static_cast<int>(EventType::WindowResize)) {
-      std::cout << e.PrintDebugData();
-    }
-
-    else if (static_cast<int>(e.GetEventType()) &
-             static_cast<int>(EventType::WindowClose)) {
+        static_cast<int>(EventType::WindowClose)) {
       s_is_game_loop_running = false;
     }
   };

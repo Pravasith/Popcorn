@@ -4,6 +4,7 @@
 #include "LayerStack.h"
 #include "Popcorn/Events/Event.h"
 #include "Popcorn/Events/Subscriber.h"
+#include "WindowEvent.h"
 
 ENGINE_NAMESPACE_BEGIN
 class Application : public Subscriber {
@@ -14,6 +15,7 @@ public:
   static void Stop();
 
   void OnEvent(Event &) const override;
+  bool OnWindowResize(WindowResizeEvent &);
 
   LayerStack &GetLayerStack() const { return *m_layer_stack; };
   bool IsGameLoopRunning() const { return s_is_game_loop_running; };

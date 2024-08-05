@@ -80,7 +80,18 @@ private:
 
 class EventDispatcher {
 public:
-  EventDispatcher(Event &e) : m_event(e) { e.SetIsHandled(true); }
+  EventDispatcher(Event &e) : m_event(e) {}
+
+  template <typename T, typename F> bool Dispatch(F &&eventCb) {
+    if (T::GetStaticEventType() == m_event.GetEventType()) {
+      m_event.SetIsHandled(
+          // m_event.IsHandled() |
+          eventCb(static_cast<T &>(m_event)));
+      return true;
+    }
+
+    return false;
+  };
 
 private:
   Event &m_event;
