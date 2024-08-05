@@ -15,7 +15,8 @@ public:
   static void Stop();
 
   void OnEvent(Event &) const override;
-  bool OnWindowResize(WindowResizeEvent &);
+  bool OnWindowResize(WindowResizeEvent &) const;
+  bool OnWindowClose(WindowCloseEvent &) const;
 
   LayerStack &GetLayerStack() const { return *m_layer_stack; };
   bool IsGameLoopRunning() const { return s_is_game_loop_running; };

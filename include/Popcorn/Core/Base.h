@@ -38,4 +38,17 @@ static void pc_print(const std::string &msg, unsigned int lvl,
 #define PC_PRINT_DEBUG(msg, lvl, tag)
 #endif
 
+// VARIANT 1: (std::bind -- slow)
+// #define PC_BIND_EVENT_FUNC(eventType, func) \
+      // std::bind(&func, this, std::placeholders::_1)
+
+// VARIANT 2: lambda with event name
+#define PC_BIND_EVENT_FUNC(eventType, eventCbFunc)                             \
+  [this](eventType &e) { return this->eventCbFunc(e); }
+
+// VARIANT 3: lambda with variadic templates -- from Cherno's Hazel Engine
+// #define PC_BIND_EVENT_FUNC(eventType) \
+      // [this](auto &&...args) -> decltype(auto) {
+//   return this->eventType(std::forward<decltype(args)>(args)...); }
+
 ENGINE_NAMESPACE_END

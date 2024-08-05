@@ -54,8 +54,14 @@ void Application::Stop() {
   }
 }
 
-bool Application::OnWindowResize(WindowResizeEvent &e) {
+bool Application::OnWindowResize(WindowResizeEvent &e) const {
   std::cout << "FROM NEW: " << e.PrintDebugData();
+  return true;
+};
+
+bool Application::OnWindowClose(WindowCloseEvent &e) const {
+  std::cout << "FROM NEW: " << e.PrintDebugData();
+  s_is_game_loop_running = false;
   return true;
 };
 
@@ -63,17 +69,13 @@ void Application::OnEvent(Event &e) const {
 
   EventDispatcher dispatch(e);
   dispatch.Dispatch<WindowResizeEvent>(
-      std::bind(&Application::OnWindowResize, this, std::placeholders::_1));
+      PC_BIND_EVENT_FUNC(WindowResizeEvent, OnWindowResize));
+
+  dispatch.Dispatch<WindowCloseEvent>(
+      PC_BIND_EVENT_FUNC(WindowCloseEvent, OnWindowClose));
 
   if (e.BelongsToCategory(EventCategory::MouseEvent)) {
     std::cout << e.PrintDebugData();
-  };
-
-  if (e.BelongsToCategory(EventCategory::WindowEvent)) {
-    if (static_cast<int>(e.GetEventType()) &
-        static_cast<int>(EventType::WindowClose)) {
-      s_is_game_loop_running = false;
-    }
   };
 
   if (e.BelongsToCategory(EventCategory::KeyboardEvent)) {

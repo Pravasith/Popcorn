@@ -82,7 +82,7 @@ class EventDispatcher {
 public:
   EventDispatcher(Event &e) : m_event(e) {}
 
-  template <typename T, typename F> bool Dispatch(F &&eventCb) {
+  template <typename T, typename F> bool Dispatch(const F &eventCb) {
     if (T::GetStaticEventType() == m_event.GetEventType()) {
       m_event.SetIsHandled(
           // m_event.IsHandled() |
