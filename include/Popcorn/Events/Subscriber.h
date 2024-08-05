@@ -6,6 +6,6 @@
 ENGINE_NAMESPACE_BEGIN
 class Subscriber {
 public:
-  void virtual OnEvent(const Event &s) const = 0;
+  void virtual OnEvent(Event &) const = 0;
 };
 ENGINE_NAMESPACE_END

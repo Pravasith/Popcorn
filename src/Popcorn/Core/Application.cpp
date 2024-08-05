@@ -52,7 +52,7 @@ void Application::Stop() {
   }
 }
 
-void Application::OnEvent(const Event &e) const {
+void Application::OnEvent(Event &e) const {
   if (e.BelongsToCategory(EventCategory::MouseEvent)) {
     std::cout << e.PrintDebugData();
   };

@@ -13,7 +13,7 @@ public:
   static void Run();
   static void Stop();
 
-  void OnEvent(const Event &) const override;
+  void OnEvent(Event &) const override;
 
   LayerStack &GetLayerStack() const { return *m_layer_stack; };
   bool IsGameLoopRunning() const { return s_is_game_loop_running; };

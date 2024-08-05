@@ -78,4 +78,12 @@ private:
   bool m_is_handled = false;
 };
 
+class EventDispatcher {
+public:
+  EventDispatcher(Event &e) : m_event(e) { e.SetIsHandled(true); }
+
+private:
+  Event &m_event;
+};
+
 ENGINE_NAMESPACE_END

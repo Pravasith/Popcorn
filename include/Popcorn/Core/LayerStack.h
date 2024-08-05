@@ -19,7 +19,7 @@ public:
   void PushOverlay(Layer *);
   void PopOverlay(Layer *);
 
-  void PropagateEvents(const Event &e) {
+  void PropagateEvents(Event &e) {
     for (auto it = m_layer_stack.end(); it < m_layer_stack.begin(); --it) {
       (*it)->OnEvent(e);
       if (e.IsHandled()) {
