@@ -51,13 +51,19 @@ static void GLFW_CreateWindow(GLFWwindow **glfwWindow, std::string &title,
   glfwMakeContextCurrent(*glfwWindow);
 }
 
-static void GLFW_SetWindowCallbacks(GLFWwindow *glfwWindow,
-                                    GLFWwindowclosefun glfwWindowCloseCb,
-                                    GLFWcursorposfun glfwCursorPosCb,
-                                    GLFWkeyfun glfwKeyCb) {
+static void GLFW_SetWindowCallbacks(
+    /* Window Pointer */
+    GLFWwindow *glfwWindow,
+
+    /* Callback Functions */
+    GLFWwindowclosefun glfwWindowCloseCb, GLFWcursorposfun glfwCursorPosCb,
+    GLFWkeyfun glfwKeyCb, GLFWwindowsizefun glfwWindowSizeCb
+
+) {
   glfwSetWindowCloseCallback(glfwWindow, glfwWindowCloseCb);
   glfwSetCursorPosCallback(glfwWindow, glfwCursorPosCb);
   glfwSetKeyCallback(glfwWindow, glfwKeyCb);
+  glfwSetWindowSizeCallback(glfwWindow, glfwWindowSizeCb);
 }
 
 enum class GLFW_KEY_ACTIONS {};

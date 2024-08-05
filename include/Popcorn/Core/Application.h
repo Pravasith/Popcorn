@@ -25,7 +25,9 @@ private:
 private:
   LayerStack *m_layer_stack;
 
+  static bool s_is_window_minimized;
   static bool s_is_game_loop_running;
+
   static Application *s_instance;
 };
 ENGINE_NAMESPACE_END

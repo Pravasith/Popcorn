@@ -32,19 +32,19 @@ WindowWin64Linux::WindowWin64Linux(const Props &props) : m_title(props.Title) {
   GLFW_SetWindowCallbacks(
       s_os_window,
 
-      // Window Close Callback
+      /* Window Close Callback */
       [](GLFW_Types::GLFW_OSWindow_T *os_window) {
         WindowCloseEvent winCloseEvt;
         s_instance->PublishEvent(winCloseEvt);
       },
 
-      // Mouse Position Callback
+      /* Mouse Position Callback */
       [](GLFW_Types::GLFW_OSWindow_T *os_window, double x, double y) {
         MouseMovedEvent mMoveEvt((float)x, (float)y);
         s_instance->PublishEvent(mMoveEvt);
       },
 
-      // Key Callback
+      /* Key Callback */
       [](GLFW_Types::GLFW_OSWindow_T *os_window, int key, int scan_code,
          int action, int mods) {
         // GLFW ACTIONS
@@ -67,6 +67,12 @@ WindowWin64Linux::WindowWin64Linux(const Props &props) : m_title(props.Title) {
           break;
         }
         }
+      },
+
+      /* Window Resize Callback */
+      [](GLFW_Types::GLFW_OSWindow_T *os_window, int width, int height) {
+        WindowResizeEvent event(width, height);
+        s_instance->PublishEvent(event);
       }
 
   );

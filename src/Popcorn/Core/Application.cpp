@@ -3,7 +3,6 @@
 #include "Utilities.h"
 #include "Window.h"
 #include <cassert>
-#include <cstdint>
 #include <iostream>
 #include <string>
 
@@ -59,10 +58,16 @@ void Application::OnEvent(const Event &e) const {
   };
 
   if (e.BelongsToCategory(EventCategory::WindowEvent)) {
+
     std::cout << e.PrintDebugData();
 
-    if (static_cast<uint_fast16_t>(e.GetEventType()) &
-        static_cast<uint_fast16_t>(EventType::WindowClose)) {
+    if (static_cast<int>(e.GetEventType()) &
+        static_cast<int>(EventType::WindowResize)) {
+      std::cout << e.PrintDebugData();
+    }
+
+    else if (static_cast<int>(e.GetEventType()) &
+             static_cast<int>(EventType::WindowClose)) {
       s_is_game_loop_running = false;
     }
   };
