@@ -27,7 +27,7 @@ public:
 
   static void Create(const Props &props = Props());
   static void AddSubscriber(const Subscriber *);
-  static void StartLoop();
+  static void OnUpdate();
   static void Destroy();
 
   virtual uint16_t GetWidth() const = 0;
