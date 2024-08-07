@@ -82,7 +82,7 @@ WindowWin64Linux::WindowWin64Linux(const Props &props) : m_title(props.Title) {
   }
 }
 
-void WindowWin64Linux::StartWindowLoop() { GLFW_WindowLoop(s_os_window); }
+void WindowWin64Linux::OnUpdate() { GLFW_UpdateWindow(s_os_window); }
 
 WindowWin64Linux::~WindowWin64Linux() {
   GLFW_Terminate();

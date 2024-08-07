@@ -45,10 +45,9 @@ void Window::Destroy() {
   /* #endif */
 };
 
-void Window::StartLoop() {
+void Window::OnUpdate() {
   /* #ifdef IS_WINDOWS_OR_LINUX */
-  (static_cast<WindowWin64Linux *>(s_platform_window_instance))
-      ->StartWindowLoop();
+  (static_cast<WindowWin64Linux *>(s_platform_window_instance))->OnUpdate();
   /* #else */
   /* write_log("Error Creating Window - Wrong platform!"); */
   /* #endif */

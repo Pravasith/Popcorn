@@ -15,7 +15,7 @@ public:
   uint16_t GetHeight() const override;
   [[nodiscard]] void *GetOSWindow() const override;
 
-  void StartWindowLoop();
+  void OnUpdate();
 
 private:
   WindowWin64Linux(const Props &props);

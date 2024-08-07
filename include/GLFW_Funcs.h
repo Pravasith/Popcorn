@@ -68,11 +68,9 @@ static void GLFW_SetWindowCallbacks(
 
 enum class GLFW_KEY_ACTIONS {};
 
-static void GLFW_WindowLoop(GLFWwindow *glfwWindow) {
-  /* while (!glfwWindowShouldClose(glfwWindow)) { */
+static void GLFW_UpdateWindow(GLFWwindow *glfwWindow) {
   glfwSwapBuffers(glfwWindow);
   glfwPollEvents();
-  /* } */
 }
 
 static void GLFW_Terminate() { glfwTerminate(); }

@@ -41,7 +41,7 @@ void Application::Run() {
   s_is_game_loop_running = true;
 
   while (s_is_game_loop_running) {
-    Window::StartLoop();
+    Window::OnUpdate();
   }
 };
 
@@ -60,13 +60,14 @@ bool Application::OnWindowResize(WindowResizeEvent &e) const {
 
 bool Application::OnWindowClose(WindowCloseEvent &e) const {
   std::cout << "FROM NEW: " << e.PrintDebugData();
+
   s_is_game_loop_running = false;
   return true;
 };
 
 void Application::OnEvent(Event &e) const {
-
   EventDispatcher dispatch(e);
+
   dispatch.Dispatch<WindowResizeEvent>(
       PC_BIND_EVENT_FUNC(WindowResizeEvent, OnWindowResize));
 
