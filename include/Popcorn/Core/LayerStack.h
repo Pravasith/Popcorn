@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Event.h"
 #include "Global_Macros.h"
 #include "Layer.h"
 #include <cstdint>
@@ -19,12 +18,14 @@ public:
   void PushOverlay(Layer *);
   void PopOverlay(Layer *);
 
-  void PropagateEvents(Event &e) {
+  template <typename F> void IterateBackwards(const F &cb) {
     for (auto it = m_layer_stack.end(); it < m_layer_stack.begin(); --it) {
-      (*it)->OnEvent(e);
-      if (e.IsHandled()) {
-        break;
-      }
+      cb(it);
+
+      // (*it)->OnEvent(e);
+      // if (e.IsHandled()) {
+      //   break;
+      // }
     }
   };
 
