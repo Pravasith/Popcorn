@@ -133,6 +133,9 @@ if(BUILD_FOR_LINUX)
 
   target_include_directories(
     glad PRIVATE ${CMAKE_SOURCE_DIR}/third-party/linux/glad/include)
+
+  target_include_directories(
+    imgui PRIVATE ${CMAKE_SOURCE_DIR}/third-party/linux/imgui)
 endif()
 
 # TODO: Refactor these
@@ -178,7 +181,7 @@ endif()
 # -----------------------------------------------------------------------
 # LINKING LIBS --- START
 # -----------------------------------------------------------------------
-target_link_libraries(Window PRIVATE glad glfw)
+target_link_libraries(Window PRIVATE glad glfw imgui)
 target_link_libraries(Window PUBLIC Events)
 target_link_libraries(PopcornEngine PRIVATE Window Events)
 
