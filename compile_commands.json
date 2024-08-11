@@ -1,7 +1,7 @@
 [
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux",
-  "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/third-party/linux -I/home/prav/personal/opengl-experiments/third-party/linux/glad -I/home/prav/personal/opengl-experiments/third-party/linux/glfw -I/home/prav/personal/opengl-experiments/include/Popcorn/Events -I/home/prav/personal/opengl-experiments/include/Popcorn/Core -std=c++17 -o CMakeFiles/Game.dir/main.cpp.o -c /home/prav/personal/opengl-experiments/main.cpp",
+  "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/third-party/linux -I/home/prav/personal/opengl-experiments/third-party/linux/glad -I/home/prav/personal/opengl-experiments/third-party/linux/glad/include -I/home/prav/personal/opengl-experiments/third-party/linux/glfw -I/home/prav/personal/opengl-experiments/third-party/linux/glfw/include -I/home/prav/personal/opengl-experiments/third-party/linux/imgui -I/home/prav/personal/opengl-experiments/third-party/linux/imgui/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Events -I/home/prav/personal/opengl-experiments/include/Popcorn/Core -std=c++17 -o CMakeFiles/Game.dir/main.cpp.o -c /home/prav/personal/opengl-experiments/main.cpp",
   "file": "/home/prav/personal/opengl-experiments/main.cpp"
 },
 {

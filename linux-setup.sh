@@ -166,27 +166,39 @@ echo "Installing GLAD complete"
 # -----------------------------------------------------------------------
 
 
-echo "Building ImGui..."
-
+echo "Installing ImGui..."
 imgui_submodule_dir="$submodules_dir/imgui"
 imgui_submodule_backends_dir="$imgui_submodule_dir/backends"
 
 imgui_vendor_linux_dir="$vendor_linux_dir/imgui"
 check_create_folder "$imgui_vendor_linux_dir"
+imgui_vendor_linux_include_dir="$imgui_vendor_linux_dir/include"
+check_create_folder "$imgui_vendor_linux_include_dir"
 
 imgui_vendor_windows_dir="$vendor_windows_dir/imgui"
 check_create_folder "$imgui_vendor_windows_dir"
+imgui_vendor_windows_include_dir="$imgui_vendor_windows_dir/include"
+check_create_folder "$imgui_vendor_windows_include_dir"
 
 # COPY IMGUI FILES FROM SUBMODULES TO VENDOR
 #
 # LINUX
 # -----------------------------------------------------------------------
-cp -r "$imgui_submodule_backends_dir/imgui_impl_opengl3.cpp" "$vendor_linux_dir"
-cp -r "$imgui_submodule_backends_dir/imgui_impl_opengl3.h" "$vendor_linux_dir"
+cp -a "$imgui_submodule_dir/."  \
+      "$imgui_vendor_linux_include_dir"
+
+cp -a "$imgui_submodule_backends_dir/imgui_impl_opengl3.cpp" "$imgui_vendor_linux_dir/PopcornImGui.cpp"
+cp -a "$imgui_submodule_backends_dir/imgui_impl_opengl3.h" "$imgui_vendor_linux_dir/PopcornImGui.h"
+
 # WINDOWS
 # -----------------------------------------------------------------------
-cp -r "$glad_submodule_dir" "$vendor_windows_dir"
+cp -a "$imgui_submodule_dir/."  \
+      "$imgui_vendor_windows_include_dir"
 
+cp -a "$imgui_submodule_backends_dir/imgui_impl_opengl3.cpp" "$imgui_vendor_windows_dir/PopcornImGui.cpp"
+cp -a "$imgui_submodule_backends_dir/imgui_impl_opengl3.h" "$imgui_vendor_windows_dir/PopcornImGui.h"
+
+echo "Installing ImGui complete"
 
 
 # -----------------------------------------------------------------------
