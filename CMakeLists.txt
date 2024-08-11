@@ -124,46 +124,15 @@ include_directories(# POPCORN INTERNAL INCLUDES
                     include)
 
 if(BUILD_FOR_LINUX)
-  # LINUX ENV BINARIES LOCATION
-  set(LINUX_BINARIES_DIR ${CMAKE_SOURCE_DIR}/third-party/linux)
+  # THIRD-PARTY INCLUDES LINUX --- FOR OTHER PLATFORMS USE TOOLCHAIN FILES
 
-  # SET CMAKE_FIND ROOT PATHS TO FIND BINARIES OR COMPILERS
-  set(CMAKE_FIND_ROOT_PATH
-      /usr/x86_64-w64-mingw32 ${LINUX_BINARIES_DIR}/glfw
-      ${LINUX_BINARIES_DIR}/glad ${LINUX_BINARIES_DIR}/imgui)
+  # include_directories( third-party/linux third-party/linux/glad
+  # third-party/linux/glad/include third-party/linux/glfw
+  # third-party/linux/glfw/include third-party/linux/imgui
+  # third-party/linux/imgui/include)
 
-  # SPECIFY THE VARIABLE TO STORE THE HEADER FILE PATH
-  set(GLAD_INCLUDE_DIR ${LINUX_BINARIES_DIR}/glad/include)
-  set(GLFW_INCLUDE_DIR ${LINUX_BINARIES_DIR}/glfw/include)
-  set(IMGUI_INCLUDE_DIR ${LINUX_BINARIES_DIR}/imgui/include)
-
-  # FOR OTHER PLATFORMS USE TOOLCHAIN FILES
-  include_directories(
-    # THIRD PARTY INCLUDES
-    ${CMAKE_CURRENT_SOURCE_DIR}/third-party/linux
-    ${CMAKE_CURRENT_SOURCE_DIR}/third-party/linux/glad
-    ${CMAKE_CURRENT_SOURCE_DIR}/third-party/linux/glad/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/third-party/linux/glfw
-    ${CMAKE_CURRENT_SOURCE_DIR}/third-party/linux/glfw/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/third-party/linux/imgui
-    ${CMAKE_CURRENT_SOURCE_DIR}/third-party/linux/imgui/include)
-
-  # USE FIND_PATH TO LOCATE THE HEADER FILE PATH
-  find_path(GLAD_INCLUDE_DIR glad.h PATHS ${LINUX_BINARIES_DIR}/glad/include)
-  find_path(GLFW_INCLUDE_DIR glfw3.h PATHS ${LINUX_BINARIES_DIR}/glfw/include)
-  find_path(IMGUI_INCLUDE_DIR imgui.h PATHS ${LINUX_BINARIES_DIR}/imgui/include)
-
-  # CHECK IF THE HEADER FILE PATH IS FOUND
-  if(GLAD_INCLUDE_DIR
-     AND GLFW_INCLUDE_DIR
-     AND IMGUI_INCLUDE_DIR)
-    message(STATUS "Found GLAD header files: ${GLAD_INCLUDE_DIR}")
-    message(STATUS "Found GLFW header files: ${GLFW_INCLUDE_DIR}")
-  else()
-    message(FATAL_ERROR "Could not find GLAD header files")
-    message(FATAL_ERROR "Could not find GLFW header files")
-    message(FATAL_ERROR "Could not find ImGui header files")
-  endif()
+  target_include_directories(
+    glad PRIVATE ${CMAKE_SOURCE_DIR}/third-party/linux/glad/include)
 endif()
 
 # TODO: Refactor these
