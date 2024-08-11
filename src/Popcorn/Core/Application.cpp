@@ -74,6 +74,12 @@ void Application::OnEvent(Event &e) const {
   dispatch.Dispatch<WindowCloseEvent>(
       PC_BIND_EVENT_FUNC(WindowCloseEvent, OnWindowClose));
 
+  // auto layerStack = Application::GetLayerStack();
+  // layerStack.IterateBackwards([&](Event &e) {
+  //   // auto x = e.PrintDebugData();
+  //   std::cout << e.PrintDebugData();
+  // });
+
   if (e.BelongsToCategory(EventCategory::MouseEvent)) {
     std::cout << e.PrintDebugData();
   };

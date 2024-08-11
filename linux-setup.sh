@@ -45,9 +45,17 @@ submodules_dir="$curr_dir/submodules"
 # NOTE: THIS DIR ALREADY EXISTS
 # check_create_folder "$submodules_dir"
 
-# DIR -- BASE -- 3RD PARTY INCL & SRC FILES
+# DIR -- BASE -- 3RD PARTY INCL. & IMPL. FILES
 vendor_dir="$curr_dir/third-party"
 check_create_folder "$vendor_dir"
+
+# DIR -- PLATFORM SPECIFIC -- INCL. FILES
+include_platform_dir="$curr_dir/include/Popcorn/Platform"
+check_create_folder "$include_platform_dir"
+
+# DIR -- PLATFORM SPECIFIC -- IMPL. FILES
+src_platform_dir="$curr_dir/src/Popcorn/Platform"
+check_create_folder "$src_platform_dir"
 
 # DIR -- PLATFORM SPECIFIC 3RD PARTY INCL & SRC FILES
 vendor_windows_dir="$vendor_dir/windows"
@@ -166,18 +174,35 @@ echo "Installing GLAD complete"
 # -----------------------------------------------------------------------
 
 
-echo "Building ImGui..."
-
+echo "Installing ImGui..."
 imgui_submodule_dir="$submodules_dir/imgui"
+imgui_submodule_backends_dir="$imgui_submodule_dir/backends"
 
-imgui_submodule_build_dir="$imgui_submodule_dir/build"
-check_create_folder "$imgui_submodule_build_dir"
+imgui_vendor_linux_dir="$vendor_linux_dir/imgui"
+check_create_folder "$imgui_vendor_linux_dir"
 
-# TODO -- COMPLETE IMGUI SETUP
+imgui_vendor_windows_dir="$vendor_windows_dir/imgui"
+check_create_folder "$imgui_vendor_windows_dir"
 
+# COPY IMGUI FILES FROM SUBMODULES TO VENDOR
+#
 # LINUX
 # -----------------------------------------------------------------------
-echo "Building ImGui for Linux..."
+cp -a "$imgui_submodule_dir/."  \
+      "$imgui_vendor_linux_dir"
+
+# WINDOWS
+# -----------------------------------------------------------------------
+cp -a "$imgui_submodule_dir/."  \
+      "$imgui_vendor_windows_dir"
+
+
+# COPY PLATFORM FILES FROM SUBMODULES TO PLATFORM -- IN POPCORN INCLUDES
+# cp -a "$imgui_submodule_backends_dir/imgui_impl_opengl3.h" "$include_platform_dir/ImGui_OpenGL_Renderer.h"
+# COPY PLATFORM FILES FROM SUBMODULES TO PLATFORM -- IN POPCORN SRC
+# cp -a "$imgui_submodule_backends_dir/imgui_impl_opengl3.cpp" "$src_platform_dir/ImGui_OpenGL_Renderer.cpp"
+echo "Installing ImGui complete"
+
 # -----------------------------------------------------------------------
 # SUBMODULE INSTALL - IMGUI --- END
 # -----------------------------------------------------------------------

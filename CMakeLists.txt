@@ -124,12 +124,18 @@ include_directories(# POPCORN INTERNAL INCLUDES
                     include)
 
 if(BUILD_FOR_LINUX)
-  # FOR OTHER PLATFORMS USE TOOLCHAIN FILES
-  include_directories(
-    # THIRD PARTY INCLUDES
-    ${CMAKE_CURRENT_SOURCE_DIR}/third-party/linux
-    ${CMAKE_CURRENT_SOURCE_DIR}/third-party/linux/glad
-    ${CMAKE_CURRENT_SOURCE_DIR}/third-party/linux/glfw)
+  # THIRD-PARTY INCLUDES LINUX --- FOR OTHER PLATFORMS USE TOOLCHAIN FILES
+
+  # include_directories( third-party/linux third-party/linux/glad
+  # third-party/linux/glad/include third-party/linux/glfw
+  # third-party/linux/glfw/include third-party/linux/imgui
+  # third-party/linux/imgui/include)
+
+  target_include_directories(
+    glad PRIVATE ${CMAKE_SOURCE_DIR}/third-party/linux/glad/include)
+
+  target_include_directories(
+    imgui INTERFACE ${CMAKE_SOURCE_DIR}/third-party/linux/imgui)
 endif()
 
 # TODO: Refactor these
@@ -175,7 +181,7 @@ endif()
 # -----------------------------------------------------------------------
 # LINKING LIBS --- START
 # -----------------------------------------------------------------------
-target_link_libraries(Window PRIVATE glad glfw)
+target_link_libraries(Window PRIVATE glad glfw imgui)
 target_link_libraries(Window PUBLIC Events)
 target_link_libraries(PopcornEngine PRIVATE Window Events)
 

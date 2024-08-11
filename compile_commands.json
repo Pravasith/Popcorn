@@ -1,13 +1,18 @@
 [
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux",
-  "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/third-party/linux -I/home/prav/personal/opengl-experiments/third-party/linux/glad -I/home/prav/personal/opengl-experiments/third-party/linux/glfw -I/home/prav/personal/opengl-experiments/include/Popcorn/Events -I/home/prav/personal/opengl-experiments/include/Popcorn/Core -std=c++17 -o CMakeFiles/Game.dir/main.cpp.o -c /home/prav/personal/opengl-experiments/main.cpp",
+  "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Events -I/home/prav/personal/opengl-experiments/include/Popcorn/Core -std=c++17 -o CMakeFiles/Game.dir/main.cpp.o -c /home/prav/personal/opengl-experiments/main.cpp",
   "file": "/home/prav/personal/opengl-experiments/main.cpp"
 },
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux/third-party/linux",
-  "command": "/usr/bin/cc    -o CMakeFiles/glad.dir/glad/src/glad.c.o -c /home/prav/personal/opengl-experiments/third-party/linux/glad/src/glad.c",
+  "command": "/usr/bin/cc  -I/home/prav/personal/opengl-experiments/third-party/linux/glad/include  -o CMakeFiles/glad.dir/glad/src/glad.c.o -c /home/prav/personal/opengl-experiments/third-party/linux/glad/src/glad.c",
   "file": "/home/prav/personal/opengl-experiments/third-party/linux/glad/src/glad.c"
+},
+{
+  "directory": "/home/prav/personal/opengl-experiments/build/linux/third-party/linux",
+  "command": "/usr/bin/c++   -std=c++17 -o CMakeFiles/imgui.dir/imgui/imgui.cpp.o -c /home/prav/personal/opengl-experiments/third-party/linux/imgui/imgui.cpp",
+  "file": "/home/prav/personal/opengl-experiments/third-party/linux/imgui/imgui.cpp"
 },
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
@@ -16,12 +21,12 @@
 },
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Core -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform -I/home/prav/personal/opengl-experiments/include/Popcorn/Input -I/home/prav/personal/opengl-experiments/include/Popcorn/Events -std=c++17 -o CMakeFiles/Window.dir/Popcorn/Core/Window.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Core/Window.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Core -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform -I/home/prav/personal/opengl-experiments/third-party/linux/imgui -I/home/prav/personal/opengl-experiments/include/Popcorn/Input -I/home/prav/personal/opengl-experiments/include/Popcorn/Events -std=c++17 -o CMakeFiles/Window.dir/Popcorn/Core/Window.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Core/Window.cpp",
   "file": "/home/prav/personal/opengl-experiments/src/Popcorn/Core/Window.cpp"
 },
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Core -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform -I/home/prav/personal/opengl-experiments/include/Popcorn/Input -I/home/prav/personal/opengl-experiments/include/Popcorn/Events -std=c++17 -o CMakeFiles/Window.dir/Popcorn/Platform/Window_Win64_Linux.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Platform/Window_Win64_Linux.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Core -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform -I/home/prav/personal/opengl-experiments/third-party/linux/imgui -I/home/prav/personal/opengl-experiments/include/Popcorn/Input -I/home/prav/personal/opengl-experiments/include/Popcorn/Events -std=c++17 -o CMakeFiles/Window.dir/Popcorn/Platform/Window_Win64_Linux.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Platform/Window_Win64_Linux.cpp",
   "file": "/home/prav/personal/opengl-experiments/src/Popcorn/Platform/Window_Win64_Linux.cpp"
 },
 {
