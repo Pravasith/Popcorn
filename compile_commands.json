@@ -11,7 +11,7 @@
 },
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux/third-party/linux",
-  "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/third-party/linux/imgui -std=c++17 -o CMakeFiles/imgui.dir/imgui/imgui.cpp.o -c /home/prav/personal/opengl-experiments/third-party/linux/imgui/imgui.cpp",
+  "command": "/usr/bin/c++   -std=c++17 -o CMakeFiles/imgui.dir/imgui/imgui.cpp.o -c /home/prav/personal/opengl-experiments/third-party/linux/imgui/imgui.cpp",
   "file": "/home/prav/personal/opengl-experiments/third-party/linux/imgui/imgui.cpp"
 },
 {
@@ -21,12 +21,12 @@
 },
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Core -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform -I/home/prav/personal/opengl-experiments/include/Popcorn/Input -I/home/prav/personal/opengl-experiments/include/Popcorn/Events -std=c++17 -o CMakeFiles/Window.dir/Popcorn/Core/Window.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Core/Window.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Core -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform -I/home/prav/personal/opengl-experiments/third-party/linux/imgui -I/home/prav/personal/opengl-experiments/include/Popcorn/Input -I/home/prav/personal/opengl-experiments/include/Popcorn/Events -std=c++17 -o CMakeFiles/Window.dir/Popcorn/Core/Window.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Core/Window.cpp",
   "file": "/home/prav/personal/opengl-experiments/src/Popcorn/Core/Window.cpp"
 },
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Core -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform -I/home/prav/personal/opengl-experiments/include/Popcorn/Input -I/home/prav/personal/opengl-experiments/include/Popcorn/Events -std=c++17 -o CMakeFiles/Window.dir/Popcorn/Platform/Window_Win64_Linux.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Platform/Window_Win64_Linux.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Core -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform -I/home/prav/personal/opengl-experiments/third-party/linux/imgui -I/home/prav/personal/opengl-experiments/include/Popcorn/Input -I/home/prav/personal/opengl-experiments/include/Popcorn/Events -std=c++17 -o CMakeFiles/Window.dir/Popcorn/Platform/Window_Win64_Linux.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Platform/Window_Win64_Linux.cpp",
   "file": "/home/prav/personal/opengl-experiments/src/Popcorn/Platform/Window_Win64_Linux.cpp"
 },
 {

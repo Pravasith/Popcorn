@@ -198,9 +198,9 @@ cp -a "$imgui_submodule_dir/."  \
 
 
 # COPY PLATFORM FILES FROM SUBMODULES TO PLATFORM -- IN POPCORN INCLUDES
-cp -a "$imgui_submodule_backends_dir/imgui_impl_opengl3.h" "$include_platform_dir/ImGui_OpenGL_Renderer.h"
+# cp -a "$imgui_submodule_backends_dir/imgui_impl_opengl3.h" "$include_platform_dir/ImGui_OpenGL_Renderer.h"
 # COPY PLATFORM FILES FROM SUBMODULES TO PLATFORM -- IN POPCORN SRC
-cp -a "$imgui_submodule_backends_dir/imgui_impl_opengl3.cpp" "$src_platform_dir/ImGui_OpenGL_Renderer.cpp"
+# cp -a "$imgui_submodule_backends_dir/imgui_impl_opengl3.cpp" "$src_platform_dir/ImGui_OpenGL_Renderer.cpp"
 echo "Installing ImGui complete"
 
 # -----------------------------------------------------------------------

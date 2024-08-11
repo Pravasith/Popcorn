@@ -5,6 +5,9 @@
 /* write_log("Error Importing Platform!"); */
 /* #endif */
 
+// SAME -- IF OPEN_GL ...
+#include "ImGui_OpenGL_Renderer.h"
+
 ENGINE_NAMESPACE_BEGIN
 
 void *Window::s_platform_window_instance = nullptr;
