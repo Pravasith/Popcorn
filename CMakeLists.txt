@@ -134,8 +134,8 @@ if(BUILD_FOR_LINUX)
   target_include_directories(
     glad PRIVATE ${CMAKE_SOURCE_DIR}/third-party/linux/glad/include)
 
-  target_include_directories(
-    imgui INTERFACE ${CMAKE_SOURCE_DIR}/third-party/linux/imgui)
+  target_include_directories(imgui
+                             PUBLIC ${CMAKE_SOURCE_DIR}/third-party/linux/imgui)
 endif()
 
 # TODO: Refactor these

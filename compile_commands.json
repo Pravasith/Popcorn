@@ -11,7 +11,7 @@
 },
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux/third-party/linux",
-  "command": "/usr/bin/c++   -std=c++17 -o CMakeFiles/imgui.dir/imgui/imgui.cpp.o -c /home/prav/personal/opengl-experiments/third-party/linux/imgui/imgui.cpp",
+  "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/third-party/linux/imgui -std=c++17 -o CMakeFiles/imgui.dir/imgui/imgui.cpp.o -c /home/prav/personal/opengl-experiments/third-party/linux/imgui/imgui.cpp",
   "file": "/home/prav/personal/opengl-experiments/third-party/linux/imgui/imgui.cpp"
 },
 {
