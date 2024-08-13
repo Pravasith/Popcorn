@@ -126,10 +126,9 @@ include_directories(# POPCORN INTERNAL INCLUDES
 if(BUILD_FOR_LINUX)
   # THIRD-PARTY INCLUDES LINUX --- FOR OTHER PLATFORMS USE TOOLCHAIN FILES
 
-  # include_directories( third-party/linux third-party/linux/glad
-  # third-party/linux/glad/include third-party/linux/glfw
-  # third-party/linux/glfw/include third-party/linux/imgui
-  # third-party/linux/imgui/include)
+  include_directories(
+    third-party/linux third-party/linux/glad third-party/linux/glfw
+    third-party/linux/imgui third-party/linux/imgui)
 
   target_include_directories(
     glad PRIVATE ${CMAKE_SOURCE_DIR}/third-party/linux/glad/include)

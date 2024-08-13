@@ -12,7 +12,14 @@ ENGINE_NAMESPACE_BEGIN
 ImGuiLayer::ImGuiLayer() {}
 ImGuiLayer::~ImGuiLayer() {}
 
-void ImGuiLayer::OnAttach() { ImGui::CreateContext(); }
+void ImGuiLayer::OnAttach() {
+  ImGui::CreateContext();
+  ImGui::StyleColorsDark();
+
+  ImGuiIO &io = ImGui::GetIO();
+  io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
+  io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
+}
 
 void ImGuiLayer::OnDetach() {}
 
