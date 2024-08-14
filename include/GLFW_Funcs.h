@@ -16,11 +16,13 @@ typedef GLFWwindow GLFW_OSWindow_T;
 }; // namespace GLFW_Types
 
 namespace GLFW_Funcs {
-
 static void glfw_error_callback(int error, const char *description) {
   write_log(description);
   throw("GLFW error, see common_logs file");
 }
+
+static auto GLFW_GetProcAddress = glfwGetProcAddress;
+
 
 static void GLFW_Init() {
   int success = glfwInit();
@@ -38,6 +40,7 @@ static void GLFW_Init() {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 }
+
 
 static void GLFW_CreateWindow(GLFWwindow **glfwWindow, std::string &title,
                               uint16_t w, uint16_t h) {

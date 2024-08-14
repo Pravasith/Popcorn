@@ -125,16 +125,11 @@ include_directories(# POPCORN INTERNAL INCLUDES
 
 if(BUILD_FOR_LINUX)
   # THIRD-PARTY INCLUDES LINUX --- FOR OTHER PLATFORMS USE TOOLCHAIN FILES
+  set(LINUX_BINARIES_DIR ${CMAKE_SOURCE_DIR}/third-party/linux)
 
-  include_directories(
-    third-party/linux third-party/linux/glad third-party/linux/glfw
-    third-party/linux/imgui third-party/linux/imgui)
 
-  target_include_directories(
-    glad PRIVATE ${CMAKE_SOURCE_DIR}/third-party/linux/glad/include)
-
-  target_include_directories(imgui
-                             PUBLIC ${CMAKE_SOURCE_DIR}/third-party/linux/imgui)
+  target_include_directories(glad PUBLIC ${LINUX_BINARIES_DIR}/glad/include)
+  target_include_directories(imgui PUBLIC ${LINUX_BINARIES_DIR}/imgui)
 endif()
 
 # TODO: Refactor these

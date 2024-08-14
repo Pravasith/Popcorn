@@ -1,3 +1,4 @@
+#include <glad/glad.h>
 #include "Window_Win64_Linux.h"
 #include "GLFW_Funcs.h"
 #include "Global_Macros.h"
@@ -28,7 +29,11 @@ WindowWin64Linux::WindowWin64Linux(const Props &props) : m_title(props.Title) {
   GLFW_Init();
   PC_PRINT_DEBUG("GLFW INIT", 4, "WIN64");
 
+  // CREATE GLFW WINDOW AND MAKE CONTEXT CURRENT
   GLFW_CreateWindow(&s_os_window, m_title, props.W, props.H);
+
+  int status = gladLoadGLLoader(GLADloadproc(GLFW_Funcs::GLFW_GetProcAddress));
+
   GLFW_SetWindowCallbacks(
       s_os_window,
 
