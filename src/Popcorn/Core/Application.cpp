@@ -1,5 +1,7 @@
 #include "Application.h"
 #include "Event.h"
+#include "LayerStack.h"
+#include "Popcorn/ImGui/ImGuiLayer.h"
 #include "Utilities.h"
 #include "Window.h"
 #include "WindowEvent.h"
@@ -16,6 +18,9 @@ Application::Application() {
 
   /* Window::Create(Window::Props("Ramen")); */
   /* Window::Destroy(); */
+  m_layer_stack = new LayerStack();
+  ImGuiLayer();
+  // m_layer_stack->PushLayer(x);
 };
 
 Application::~Application() { PC_PRINT_DEBUG("ENGINE STOPPED", 0, "APP"); };

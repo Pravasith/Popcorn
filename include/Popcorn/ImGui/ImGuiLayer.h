@@ -6,13 +6,14 @@
 
 ENGINE_NAMESPACE_BEGIN
 class ImGuiLayer : public Layer {
+public:
   ImGuiLayer();
   ~ImGuiLayer();
 
-  virtual void OnAttach() override;
-  virtual void OnDetach() override;
-  virtual void OnUpdate() override;
-  virtual void OnEvent(Event &) override;
+  void OnAttach() override;
+  void OnDetach() override;
+  void OnUpdate() override;
+  void OnEvent(Event &e) override;
 };
 
 ENGINE_NAMESPACE_END

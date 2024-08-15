@@ -6,7 +6,6 @@
 /* #endif */
 
 // SAME -- IF OPEN_GL ...
-#include "ImGui_OpenGL_Renderer.h"
 
 ENGINE_NAMESPACE_BEGIN
 

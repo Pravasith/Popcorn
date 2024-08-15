@@ -2,11 +2,14 @@
 #include "Event.h"
 #include "Global_Macros.h"
 
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
 #include <imgui.h>
+#include <iostream>
 
 ENGINE_NAMESPACE_BEGIN
-ImGuiLayer::ImGuiLayer() {}
-ImGuiLayer::~ImGuiLayer() {}
+ImGuiLayer::ImGuiLayer() { std::cout << "CONSTRUCT\n"; }
+ImGuiLayer::~ImGuiLayer() { std::cout << "DESTRUCT\n"; }
 
 void ImGuiLayer::OnAttach() {}
 

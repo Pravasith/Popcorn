@@ -127,7 +127,6 @@ if(BUILD_FOR_LINUX)
   # THIRD-PARTY INCLUDES LINUX --- FOR OTHER PLATFORMS USE TOOLCHAIN FILES
   set(LINUX_BINARIES_DIR ${CMAKE_SOURCE_DIR}/third-party/linux)
 
-
   target_include_directories(glad PUBLIC ${LINUX_BINARIES_DIR}/glad/include)
   target_include_directories(imgui PUBLIC ${LINUX_BINARIES_DIR}/imgui)
 endif()
@@ -149,6 +148,7 @@ target_include_directories(
   PopcornEngine
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events
+         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/ImGui
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core)
 
 # -----------------------------------------------------------------------
@@ -175,9 +175,9 @@ endif()
 # -----------------------------------------------------------------------
 # LINKING LIBS --- START
 # -----------------------------------------------------------------------
-target_link_libraries(Window PRIVATE glad glfw imgui)
+target_link_libraries(Window PRIVATE glad glfw)
 target_link_libraries(Window PUBLIC Events)
-target_link_libraries(PopcornEngine PRIVATE Window Events)
+target_link_libraries(PopcornEngine PRIVATE Window imgui)
 
 # FINAL PROJECT LINKING
 target_link_libraries(${PROJECT} PRIVATE PopcornEngine)
