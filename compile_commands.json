@@ -35,6 +35,16 @@
   "file": "/home/prav/personal/opengl-experiments/third-party/linux/imgui/imgui_widgets.cpp"
 },
 {
+  "directory": "/home/prav/personal/opengl-experiments/build/linux/third-party/linux",
+  "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/third-party/linux -I/home/prav/personal/opengl-experiments/third-party/linux/imgui -std=c++17 -o CMakeFiles/ImGui.dir/imgui/backends/imgui_impl_opengl3.cpp.o -c /home/prav/personal/opengl-experiments/third-party/linux/imgui/backends/imgui_impl_opengl3.cpp",
+  "file": "/home/prav/personal/opengl-experiments/third-party/linux/imgui/backends/imgui_impl_opengl3.cpp"
+},
+{
+  "directory": "/home/prav/personal/opengl-experiments/build/linux/third-party/linux",
+  "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/third-party/linux -I/home/prav/personal/opengl-experiments/third-party/linux/imgui -std=c++17 -o CMakeFiles/ImGui.dir/imgui/backends/imgui_impl_glfw.cpp.o -c /home/prav/personal/opengl-experiments/third-party/linux/imgui/backends/imgui_impl_glfw.cpp",
+  "file": "/home/prav/personal/opengl-experiments/third-party/linux/imgui/backends/imgui_impl_glfw.cpp"
+},
+{
   "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
   "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Input -I/home/prav/personal/opengl-experiments/include/Popcorn/Events -std=c++17 -o CMakeFiles/Events.dir/Popcorn/Events/Publisher.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Events/Publisher.cpp",
   "file": "/home/prav/personal/opengl-experiments/src/Popcorn/Events/Publisher.cpp"

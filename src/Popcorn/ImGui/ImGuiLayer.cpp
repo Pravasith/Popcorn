@@ -16,6 +16,7 @@ ImGuiLayer::~ImGuiLayer() { std::cout << "DESTRUCT\n"; }
 void ImGuiLayer::OnAttach() {
 
   Application &app = Application::Get();
+
   m_os_window = app.GetAppWindow().GetOSWindow();
 
   // Decide GL+GLSL versions

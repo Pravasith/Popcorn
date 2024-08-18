@@ -32,12 +32,15 @@ void Application::Start() {
 
   if (!s_instance) {
     s_instance = new Application();
-    s_window = &Window::Create(Window::Props("Popcorn Engine", 500, 500));
+    s_window = Window::Create(Window::Props("Popcorn Engine", 500, 500));
+
     Window::AddSubscriber(s_instance);
 
     s_layer_stack = new LayerStack();
+
     auto imguiLayer = new ImGuiLayer();
     imguiLayer->OnAttach();
+
     s_layer_stack->PushLayer(imguiLayer);
   } else {
     write_log(
