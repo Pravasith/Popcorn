@@ -1,7 +1,7 @@
 #include "Application.h"
 #include "Event.h"
+#include "ImGuiLayer.h"
 #include "LayerStack.h"
-#include "Popcorn/ImGui/ImGuiLayer.h"
 #include "Utilities.h"
 #include "Window.h"
 #include "WindowEvent.h"
@@ -11,6 +11,8 @@
 
 ENGINE_NAMESPACE_BEGIN
 Application *Application::s_instance = nullptr;
+Window *Application::s_window = nullptr;
+LayerStack *Application::s_layer_stack = nullptr;
 bool Application::s_is_game_loop_running = false;
 
 Application::Application() {
@@ -18,22 +20,25 @@ Application::Application() {
 
   /* Window::Create(Window::Props("Ramen")); */
   /* Window::Destroy(); */
-  m_layer_stack = new LayerStack();
-  ImGuiLayer();
-  // m_layer_stack->PushLayer(x);
 };
 
 Application::~Application() { PC_PRINT_DEBUG("ENGINE STOPPED", 0, "APP"); };
 
-Application *Application::Get() { return s_instance; }
+Application &Application::Get() { return *s_instance; }
+Window &Application::GetAppWindow() const { return *s_window; }
 
 void Application::Start() {
+  PC_PRINT_DEBUG("APPLICATION STARTED", 0, "APP");
+
   if (!s_instance) {
     s_instance = new Application();
-
-    Window::Create(Window::Props("Popcorn Engine", 500, 500));
+    s_window = &Window::Create(Window::Props("Popcorn Engine", 500, 500));
     Window::AddSubscriber(s_instance);
 
+    s_layer_stack = new LayerStack();
+    auto imguiLayer = new ImGuiLayer();
+    imguiLayer->OnAttach();
+    s_layer_stack->PushLayer(imguiLayer);
   } else {
     write_log(
         "Attempt to create Application class, when instance already exists");
@@ -44,9 +49,11 @@ void Application::Run() {
   assert(!s_is_game_loop_running && "GAME LOOP ALREADY RUNNING!");
 
   s_is_game_loop_running = true;
+  std::cout << "GAME LOOP\n";
 
   while (s_is_game_loop_running) {
     Window::OnUpdate();
+    // s_layer_stack->UpdateLayerStack();
   }
 };
 
@@ -58,13 +65,9 @@ void Application::Stop() {
   }
 }
 
-bool Application::OnWindowResize(WindowResizeEvent &e) const {
-  std::cout << "FROM NEW: " << e.PrintDebugData();
-  return true;
-};
+bool Application::OnWindowResize(WindowResizeEvent &e) const { return true; };
 
 bool Application::OnWindowClose(WindowCloseEvent &e) const {
-  std::cout << "FROM NEW: " << e.PrintDebugData();
 
   s_is_game_loop_running = false;
   return true;

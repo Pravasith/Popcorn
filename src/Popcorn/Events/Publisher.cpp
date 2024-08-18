@@ -21,6 +21,7 @@ void Publisher::Unsubscribe(const Subscriber *subscriber) {
 void Publisher::PublishEvent(Event &e) {
   for (const Subscriber *s : m_subscribers) {
     s->OnEvent(e);
+
     if (e.IsHandled()) {
       break;
     };

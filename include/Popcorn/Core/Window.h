@@ -25,7 +25,7 @@ public:
         : Title(title), W(w), H(h){};
   };
 
-  static void Create(const Props &props = Props());
+  static Window &Create(const Props &props = Props());
   static void AddSubscriber(const Subscriber *);
   static void OnUpdate();
   static void Destroy();
@@ -41,5 +41,6 @@ protected:
 
 private:
   static void *s_platform_window_instance;
+  static Window *s_instance;
 };
 ENGINE_NAMESPACE_END

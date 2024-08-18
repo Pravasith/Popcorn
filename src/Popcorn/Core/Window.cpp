@@ -1,6 +1,7 @@
 #include "Window.h"
 /* #ifdef IS_WINDOWS_OR_LINUX */
 #include "Window_Win64_Linux.h"
+#include <iostream>
 /* #else */
 /* write_log("Error Importing Platform!"); */
 /* #endif */
@@ -10,8 +11,12 @@
 ENGINE_NAMESPACE_BEGIN
 
 void *Window::s_platform_window_instance = nullptr;
+Window *Window::s_instance = nullptr;
 
-void Window::Create(const Props &props) {
+Window &Window::Create(const Props &props) {
+  if (s_instance) {
+    return *s_instance;
+  };
 
   /* ---- NOTE ---- */
   /* Multiple window creation not supported at the moment */
@@ -26,6 +31,8 @@ void Window::Create(const Props &props) {
   /* #endif */
 
   PC_PRINT_DEBUG("MAIN WINDOW CREATED", 2, "WINDOW");
+
+  return *s_instance;
 };
 
 void Window::AddSubscriber(const Subscriber *s) {

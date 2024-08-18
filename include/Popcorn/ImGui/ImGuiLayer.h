@@ -14,6 +14,9 @@ public:
   void OnDetach() override;
   void OnUpdate() override;
   void OnEvent(Event &e) override;
+
+private:
+  void *m_os_window;
 };
 
 ENGINE_NAMESPACE_END
