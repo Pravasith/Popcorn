@@ -6,6 +6,7 @@
 #include <string>
 
 ENGINE_NAMESPACE_BEGIN
+// ABSTRACT CLASS -- HAS NO INVARIANT OR ANY DATA
 class Window : public Publisher {
 
   /* ---- NOTE ---- */

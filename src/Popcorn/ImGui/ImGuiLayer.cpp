@@ -66,14 +66,25 @@ void ImGuiLayer::OnAttach() {
   ImGui_ImplOpenGL3_Init(glsl_version);
 
   // Our state
-  bool show_demo_window = true;
-  bool show_another_window = false;
-  ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+  static bool show_demo_window = true;
+  static bool show_another_window = false;
 }
 
 void ImGuiLayer::OnDetach() {}
 
-void ImGuiLayer::OnUpdate() { std::cout << "IMGUI UPDATE\n"; }
+void ImGuiLayer::OnUpdate() {
+  // std::cout << "IMGUI UPDATE\n";
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+
+  // if (this.m_show_demo_window)
+  auto show_demo_window = true;
+  ImGui::ShowDemoWindow(&show_demo_window);
+
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
 
 void ImGuiLayer::OnEvent(Event &e) {
   std::cout << e.GetEventTypeName() << '\n';

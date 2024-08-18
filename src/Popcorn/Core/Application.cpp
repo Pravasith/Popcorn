@@ -56,7 +56,7 @@ void Application::Run() {
 
   while (s_is_game_loop_running) {
     Window::OnUpdate();
-    // s_layer_stack->UpdateLayerStack();
+    s_layer_stack->UpdateLayerStack();
   }
 };
 
@@ -71,7 +71,6 @@ void Application::Stop() {
 bool Application::OnWindowResize(WindowResizeEvent &e) const { return true; };
 
 bool Application::OnWindowClose(WindowCloseEvent &e) const {
-
   s_is_game_loop_running = false;
   return true;
 };
