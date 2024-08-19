@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Global_Macros.h"
+#include "ImGuiLayer.h"
 #include "LayerStack.h"
 #include "Popcorn/Events/Event.h"
 #include "Popcorn/Events/Subscriber.h"
@@ -34,6 +35,7 @@ private:
 
   static Application *s_instance;
   static LayerStack *s_layer_stack;
+  static ImGuiLayer *s_imgui_layer;
   static Window *s_window;
 };
 ENGINE_NAMESPACE_END

@@ -13,6 +13,7 @@ ENGINE_NAMESPACE_BEGIN
 Application *Application::s_instance = nullptr;
 Window *Application::s_window = nullptr;
 LayerStack *Application::s_layer_stack = nullptr;
+ImGuiLayer *Application::s_imgui_layer = nullptr;
 bool Application::s_is_game_loop_running = false;
 
 Application::Application() {
@@ -22,7 +23,16 @@ Application::Application() {
   /* Window::Destroy(); */
 };
 
-Application::~Application() { PC_PRINT_DEBUG("ENGINE STOPPED", 0, "APP"); };
+Application::~Application() {
+
+  // DELETE LAYER STACK
+  delete s_layer_stack;
+
+  // DESTROY WINDOW
+  Window::Destroy();
+
+  PC_PRINT_DEBUG("ENGINE STOPPED", 0, "APP");
+};
 
 Application &Application::Get() { return *s_instance; }
 Window &Application::GetAppWindow() const { return *s_window; }
@@ -37,10 +47,11 @@ void Application::Start() {
     Window::AddSubscriber(s_instance);
 
     s_layer_stack = new LayerStack();
-    auto imguiLayer = new ImGuiLayer();
-    imguiLayer->OnAttach();
 
-    s_layer_stack->PushLayer(imguiLayer);
+    s_imgui_layer = new ImGuiLayer();
+    s_imgui_layer->OnAttach();
+
+    s_layer_stack->PushLayer(s_imgui_layer);
   } else {
     write_log(
         "Attempt to create Application class, when instance already exists");
@@ -59,7 +70,8 @@ void Application::Run() {
 };
 
 void Application::Stop() {
-  Window::Destroy();
+
+  // DESTROY WINDOW
   if (s_instance) {
     delete s_instance;
     s_instance = nullptr;
