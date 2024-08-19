@@ -37,7 +37,6 @@ void Application::Start() {
     Window::AddSubscriber(s_instance);
 
     s_layer_stack = new LayerStack();
-
     auto imguiLayer = new ImGuiLayer();
     imguiLayer->OnAttach();
 
@@ -52,7 +51,6 @@ void Application::Run() {
   assert(!s_is_game_loop_running && "GAME LOOP ALREADY RUNNING!");
 
   s_is_game_loop_running = true;
-  std::cout << "GAME LOOP\n";
 
   while (s_is_game_loop_running) {
     Window::OnUpdate();

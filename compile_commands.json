@@ -6,6 +6,11 @@
 },
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux/third-party/linux",
+  "command": "/usr/bin/cc  -I/home/prav/personal/opengl-experiments/third-party/linux/glad/include  -o CMakeFiles/glad.dir/glad/src/glad.c.o -c /home/prav/personal/opengl-experiments/third-party/linux/glad/src/glad.c",
+  "file": "/home/prav/personal/opengl-experiments/third-party/linux/glad/src/glad.c"
+},
+{
+  "directory": "/home/prav/personal/opengl-experiments/build/linux/third-party/linux",
   "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/third-party/linux -I/home/prav/personal/opengl-experiments/third-party/linux/imgui -std=c++17 -o CMakeFiles/ImGui.dir/imgui/imgui.cpp.o -c /home/prav/personal/opengl-experiments/third-party/linux/imgui/imgui.cpp",
   "file": "/home/prav/personal/opengl-experiments/third-party/linux/imgui/imgui.cpp"
 },
@@ -38,11 +43,6 @@
   "directory": "/home/prav/personal/opengl-experiments/build/linux/third-party/linux",
   "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/third-party/linux -I/home/prav/personal/opengl-experiments/third-party/linux/imgui -std=c++17 -o CMakeFiles/ImGui.dir/imgui/backends/imgui_impl_glfw.cpp.o -c /home/prav/personal/opengl-experiments/third-party/linux/imgui/backends/imgui_impl_glfw.cpp",
   "file": "/home/prav/personal/opengl-experiments/third-party/linux/imgui/backends/imgui_impl_glfw.cpp"
-},
-{
-  "directory": "/home/prav/personal/opengl-experiments/build/linux/third-party/linux",
-  "command": "/usr/bin/cc  -I/home/prav/personal/opengl-experiments/third-party/linux/glad/include  -o CMakeFiles/glad.dir/glad/src/glad.c.o -c /home/prav/personal/opengl-experiments/third-party/linux/glad/src/glad.c",
-  "file": "/home/prav/personal/opengl-experiments/third-party/linux/glad/src/glad.c"
 },
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
