@@ -77,15 +77,11 @@ add_executable(${PROJECT} ${SOURCE_FILES})
 # -----------------------------------------------------------------------
 # ADD THIRD PARTY LIBS --- START
 # -----------------------------------------------------------------------
-if(BUILD_FOR_LINUX)
-  add_subdirectory("third-party/linux")
-endif()
+# if(BUILD_FOR_LINUX) add_subdirectory("third-party/linux") endif()
+#
+# if(BUILD_FOR_WIN) add_subdirectory("third-party/windows") endif()
 
-if(BUILD_FOR_WIN)
-  add_subdirectory("third-party/windows")
-endif()
-
-add_subdirectory("third-party/plaform-agnostic")
+add_subdirectory("third-party")
 
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
@@ -133,7 +129,8 @@ if(BUILD_FOR_LINUX)
 endif()
 
 # INCLUDE PLATFORM AGNOSTIC VENDOR DIRS
-set(PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR ${CMAKE_SOURCE_DIR}/third-party/linux)
+set(PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR
+    ${CMAKE_SOURCE_DIR}/third-party/platform-agnostic)
 
 target_include_directories(
   glad PUBLIC ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glad/include)

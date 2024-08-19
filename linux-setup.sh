@@ -206,8 +206,7 @@ echo "Installing vendor/third-party submodules complete"
 
 # COPY CMAKELISTS FROM SUBMODULES TO VENDOR
 echo "Copying CMakeLists.txt to third-party..."
-cp "$submodules_dir/CMakeLists.txt" "$vendor_linux_dir"
-cp "$submodules_dir/CMakeLists.txt" "$vendor_windows_dir"
+cp "$submodules_dir/CMakeLists.txt" "$vendor_dir"
 echo "Copying CMakeLists.txt to third-party complete"
 
 echo "--- Environment setup for Linux based systems complete"
