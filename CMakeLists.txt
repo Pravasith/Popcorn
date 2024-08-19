@@ -77,13 +77,11 @@ add_executable(${PROJECT} ${SOURCE_FILES})
 # -----------------------------------------------------------------------
 # ADD THIRD PARTY LIBS --- START
 # -----------------------------------------------------------------------
-if(BUILD_FOR_LINUX)
-  add_subdirectory("third-party/linux")
-endif()
+# if(BUILD_FOR_LINUX) add_subdirectory("third-party/linux") endif()
+#
+# if(BUILD_FOR_WIN) add_subdirectory("third-party/windows") endif()
 
-if(BUILD_FOR_WIN)
-  add_subdirectory("third-party/windows")
-endif()
+add_subdirectory("third-party")
 
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
@@ -122,15 +120,23 @@ add_subdirectory("src")
 include_directories(# POPCORN INTERNAL INCLUDES
                     include)
 
-# INCLUDE DIRS FOR LINUX
+# INCLUDE LINUX VENDOR DIRS
 if(BUILD_FOR_LINUX)
   # THIRD-PARTY INCLUDES LINUX --- FOR OTHER PLATFORMS USE TOOLCHAIN FILES
   set(LINUX_BINARIES_DIR ${CMAKE_SOURCE_DIR}/third-party/linux)
 
-  target_include_directories(glad PUBLIC ${LINUX_BINARIES_DIR}/glad/include)
-  target_include_directories(ImGui PUBLIC ${LINUX_BINARIES_DIR}
-                                          ${LINUX_BINARIES_DIR}/imgui)
+  # target_include_directories(some-lib PUBLIC ${LINUX_BINARIES_DIR}/some-lib)
 endif()
+
+# INCLUDE PLATFORM AGNOSTIC VENDOR DIRS
+set(PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR
+    ${CMAKE_SOURCE_DIR}/third-party/platform-agnostic)
+
+target_include_directories(
+  glad PUBLIC ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glad/include)
+target_include_directories(
+  ImGui PUBLIC ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}
+               ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/imgui)
 
 # TODO: Refactor these
 target_include_directories(

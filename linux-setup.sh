@@ -67,6 +67,10 @@ check_create_folder "$vendor_linux_dir"
 vendor_mac_os_dir="$vendor_dir/mac-os"
 check_create_folder "$vendor_mac_os_dir"
 
+# DIR -- PLAFORM AGNOSTIC 3RD PARTY INCL & SRC FILES
+vendor_platform_agnostic_dir="$vendor_dir/platform-agnostic"
+check_create_folder "$vendor_platform_agnostic_dir"
+
 #
 
 # -----------------------------------------------------------------------
@@ -155,12 +159,8 @@ glad_submodule_dir="$submodules_dir/glad"
 
 # COPY GLAD FILES FROM SUBMODULES TO VENDOR
 #
-# LINUX
 # -----------------------------------------------------------------------
-cp -r "$glad_submodule_dir" "$vendor_linux_dir"
-# WINDOWS
-# -----------------------------------------------------------------------
-cp -r "$glad_submodule_dir" "$vendor_windows_dir"
+cp -r "$glad_submodule_dir" "$vendor_platform_agnostic_dir"
 
 echo "Installing GLAD complete"
 # -----------------------------------------------------------------------
@@ -173,34 +173,21 @@ echo "Installing GLAD complete"
 # SUBMODULE INSTALL - IMGUI --- START
 # -----------------------------------------------------------------------
 
-
 echo "Installing ImGui..."
 imgui_submodule_dir="$submodules_dir/imgui"
 imgui_submodule_backends_dir="$imgui_submodule_dir/backends"
 
-imgui_vendor_linux_dir="$vendor_linux_dir/imgui"
-check_create_folder "$imgui_vendor_linux_dir"
-
-imgui_vendor_windows_dir="$vendor_windows_dir/imgui"
-check_create_folder "$imgui_vendor_windows_dir"
+imgui_vendor_platform_agnostic_dir="$vendor_platform_agnostic_dir/imgui"
+check_create_folder "$imgui_vendor_platform_agnostic_dir"
 
 # COPY IMGUI FILES FROM SUBMODULES TO VENDOR
 #
-# LINUX
+# LINUX & WINDOWS
 # -----------------------------------------------------------------------
 cp -a "$imgui_submodule_dir/."  \
-      "$imgui_vendor_linux_dir"
-
-# WINDOWS
-# -----------------------------------------------------------------------
-cp -a "$imgui_submodule_dir/."  \
-      "$imgui_vendor_windows_dir"
+      "$imgui_vendor_platform_agnostic_dir"
 
 
-# COPY PLATFORM FILES FROM SUBMODULES TO PLATFORM -- IN POPCORN INCLUDES
-# cp -a "$imgui_submodule_backends_dir/imgui_impl_opengl3.h" "$include_platform_dir/ImGui_OpenGL_Renderer.h"
-# COPY PLATFORM FILES FROM SUBMODULES TO PLATFORM -- IN POPCORN SRC
-# cp -a "$imgui_submodule_backends_dir/imgui_impl_opengl3.cpp" "$src_platform_dir/ImGui_OpenGL_Renderer.cpp"
 echo "Installing ImGui complete"
 
 # -----------------------------------------------------------------------
@@ -219,8 +206,7 @@ echo "Installing vendor/third-party submodules complete"
 
 # COPY CMAKELISTS FROM SUBMODULES TO VENDOR
 echo "Copying CMakeLists.txt to third-party..."
-cp "$submodules_dir/CMakeLists.txt" "$vendor_linux_dir"
-cp "$submodules_dir/CMakeLists.txt" "$vendor_windows_dir"
+cp "$submodules_dir/CMakeLists.txt" "$vendor_dir"
 echo "Copying CMakeLists.txt to third-party complete"
 
 echo "--- Environment setup for Linux based systems complete"

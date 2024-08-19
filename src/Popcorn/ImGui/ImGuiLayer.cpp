@@ -10,14 +10,18 @@
 #include <iostream>
 
 ENGINE_NAMESPACE_BEGIN
-ImGuiLayer::ImGuiLayer() { std::cout << "CONSTRUCT\n"; }
-ImGuiLayer::~ImGuiLayer() { std::cout << "DESTRUCT\n"; }
+ImGuiLayer::ImGuiLayer() {
+  PC_PRINT_DEBUG("IMGUI LAYER OBJ CREATED", 2, "IMGUI_LAYER");
+}
+ImGuiLayer::~ImGuiLayer() {
+  PC_PRINT_DEBUG("IMGUI LAYER OBJ DESTROYED", 2, "IMGUI_LAYER");
+}
 
 void ImGuiLayer::OnAttach() {
-
   Application &app = Application::Get();
-
   m_os_window = app.GetAppWindow().GetOSWindow();
+
+  PC_PRINT_DEBUG("IMGUI LAYER INIT", 3, "IMGUI_LAYER");
 
   // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
