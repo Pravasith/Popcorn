@@ -9,7 +9,6 @@
 #include "WindowEvent.h"
 #include "Window_Win64_Linux.h"
 #include <cstdint>
-#include <iostream>
 #include <string>
 
 ENGINE_NAMESPACE_BEGIN
@@ -90,7 +89,13 @@ WindowWin64Linux::WindowWin64Linux(const Props &props) : m_title(props.Title) {
   }
 }
 
-void WindowWin64Linux::OnUpdate() { GLFW_UpdateWindow(s_os_window); }
+void WindowWin64Linux::OnUpdate() {
+
+  // glViewport(0, 0, WindowWin64Linux::GetWidth(),
+  // WindowWin64Linux::GetHeight());
+
+  GLFW_UpdateWindow(s_os_window);
+}
 
 WindowWin64Linux::~WindowWin64Linux() {
   GLFW_Terminate();

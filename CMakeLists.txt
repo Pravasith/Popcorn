@@ -184,6 +184,10 @@ endif()
 # -----------------------------------------------------------------------
 target_link_libraries(Window PRIVATE glad glfw)
 target_link_libraries(Window PUBLIC Events)
+
+# FOR IMGUI_LAYER
+target_link_libraries(PopcornEngine PRIVATE glad)
+
 target_link_libraries(PopcornEngine PUBLIC ImGui)
 target_link_libraries(PopcornEngine PRIVATE Window)
 
