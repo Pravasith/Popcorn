@@ -6,6 +6,11 @@
 },
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux/third-party",
+  "command": "/usr/bin/cc  -I/home/prav/personal/opengl-experiments/third-party/platform-agnostic/glad/include  -o CMakeFiles/glad.dir/platform-agnostic/glad/src/glad.c.o -c /home/prav/personal/opengl-experiments/third-party/platform-agnostic/glad/src/glad.c",
+  "file": "/home/prav/personal/opengl-experiments/third-party/platform-agnostic/glad/src/glad.c"
+},
+{
+  "directory": "/home/prav/personal/opengl-experiments/build/linux/third-party",
   "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/third-party/platform-agnostic -I/home/prav/personal/opengl-experiments/third-party/platform-agnostic/imgui -std=c++17 -o CMakeFiles/ImGui.dir/platform-agnostic/imgui/imgui.cpp.o -c /home/prav/personal/opengl-experiments/third-party/platform-agnostic/imgui/imgui.cpp",
   "file": "/home/prav/personal/opengl-experiments/third-party/platform-agnostic/imgui/imgui.cpp"
 },
@@ -38,11 +43,6 @@
   "directory": "/home/prav/personal/opengl-experiments/build/linux/third-party",
   "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/third-party/platform-agnostic -I/home/prav/personal/opengl-experiments/third-party/platform-agnostic/imgui -std=c++17 -o CMakeFiles/ImGui.dir/platform-agnostic/imgui/backends/imgui_impl_glfw.cpp.o -c /home/prav/personal/opengl-experiments/third-party/platform-agnostic/imgui/backends/imgui_impl_glfw.cpp",
   "file": "/home/prav/personal/opengl-experiments/third-party/platform-agnostic/imgui/backends/imgui_impl_glfw.cpp"
-},
-{
-  "directory": "/home/prav/personal/opengl-experiments/build/linux/third-party",
-  "command": "/usr/bin/cc  -I/home/prav/personal/opengl-experiments/third-party/platform-agnostic/glad/include  -o CMakeFiles/glad.dir/platform-agnostic/glad/src/glad.c.o -c /home/prav/personal/opengl-experiments/third-party/platform-agnostic/glad/src/glad.c",
-  "file": "/home/prav/personal/opengl-experiments/third-party/platform-agnostic/glad/src/glad.c"
 },
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
