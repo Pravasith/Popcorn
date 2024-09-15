@@ -1,8 +1,10 @@
-#include "Popcorn/ImGui/ImGuiLayer.h"
+#include <glad/glad.h>
+
 #include "Application.h"
 #include "Event.h"
 #include "GLFW_Funcs.h"
 #include "Global_Macros.h"
+#include "Popcorn/ImGui/ImGuiLayer.h"
 
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -54,16 +56,20 @@ void ImGuiLayer::OnAttach() {
 
   io.ConfigFlags |=
       ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-  io.ConfigFlags |=
-      ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
-                                         //
-  // Setup Dear ImGui style
-  ImGui::StyleColorsDark();
-  // ImGui::StyleColorsLight();
+                                          //
+  // io.ConfigFlags |=
+  //     ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
   //
+  // Setup Dear ImGui style
+  // ImGui::StyleColorsDark();
+  ImGui::StyleColorsLight();
+
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
   // Setup Platform/Renderer backends
   ImGui_ImplGlfw_InitForOpenGL(
       static_cast<GLFW_Types::GLFW_OSWindow_T *>(m_os_window), true);
+
 #ifdef __EMSCRIPTEN__
   ImGui_ImplGlfw_InstallEmscriptenCanvasResizeCallback("#canvas");
 #endif
@@ -87,10 +93,22 @@ void ImGuiLayer::OnUpdate() {
   ImGui::ShowDemoWindow(&show_demo_window);
 
   ImGui::Render();
+
+  static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+  int display_w, display_h;
+  glfwGetFramebufferSize(
+      static_cast<GLFW_Types::GLFW_OSWindow_T *>(m_os_window), &display_w,
+      &display_h);
+  glViewport(0, 0, display_w, display_h);
+  glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w,
+               clear_color.z * clear_color.w, clear_color.w);
+  glClear(GL_COLOR_BUFFER_BIT);
+
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void ImGuiLayer::OnEvent(Event &e) {
+  // TODO: ADD EVENTS
   std::cout << e.GetEventTypeName() << '\n';
 }
 ENGINE_NAMESPACE_END

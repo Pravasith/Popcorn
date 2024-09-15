@@ -23,7 +23,6 @@ static void glfw_error_callback(int error, const char *description) {
 
 static auto GLFW_GetProcAddress = glfwGetProcAddress;
 
-
 static void GLFW_Init() {
   int success = glfwInit();
   if (!success) {
@@ -41,7 +40,6 @@ static void GLFW_Init() {
 #endif
 }
 
-
 static void GLFW_CreateWindow(GLFWwindow **glfwWindow, std::string &title,
                               uint16_t w, uint16_t h) {
   *glfwWindow = glfwCreateWindow((int)w, (int)h, title.c_str(), NULL, NULL);
@@ -52,6 +50,7 @@ static void GLFW_CreateWindow(GLFWwindow **glfwWindow, std::string &title,
   }
 
   glfwMakeContextCurrent(*glfwWindow);
+  glfwSwapInterval(1); // Enable vsync
 }
 
 static void GLFW_SetWindowCallbacks(
