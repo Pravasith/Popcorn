@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Global_Macros.h"
 
 ENGINE_NAMESPACE_BEGIN
@@ -8,6 +7,7 @@ class Renderer {
 public:
   static void Create();
   static void Destroy();
+  Renderer &Get() const;
 
 private:
   Renderer();
