@@ -153,8 +153,11 @@ target_include_directories(
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events)
 
 target_include_directories(
-  Graphics PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-                  ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Graphics)
+  Graphics
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Graphics
+         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/OpenGL
+         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan)
 
 target_include_directories(
   PopcornEngine
