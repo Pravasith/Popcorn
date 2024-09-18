@@ -10,7 +10,7 @@ add_library(
   ${CORE_IMPL_DIR}/LayerStack.cpp ${IMGUI_IMPL_DIR}/ImGuiLayer.cpp)
 
 add_library(Window ${CORE_IMPL_DIR}/Window.cpp
-                   ${PLATFORM_IMPL_DIR}/Window_Win64_Linux.cpp)
+                   ${PLATFORM_IMPL_DIR}/Agnostic/Window_Agnostic.cpp)
 
 add_library(Events ${EVENTS_IMPL_DIR}/Publisher.cpp)
 add_library(Graphics ${GRAPHICS_IMPL_DIR}/Renderer.cpp)

@@ -143,7 +143,8 @@ target_include_directories(
   Window
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core
-         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform)
+         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform
+         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Agnostic)
 
 target_include_directories(
   Events
@@ -178,7 +179,6 @@ if(PC_DEBUG)
   target_compile_definitions(Window PUBLIC "PC_DEBUG")
   target_compile_definitions(Graphics PUBLIC "PC_DEBUG")
   target_compile_definitions(Events PUBLIC "PC_DEBUG")
-
 endif()
 # -----------------------------------------------------------------------
 # DEBUG FLAG --- END

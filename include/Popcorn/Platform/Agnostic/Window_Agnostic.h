@@ -6,7 +6,7 @@
 #include <cstdint>
 
 ENGINE_NAMESPACE_BEGIN
-class WindowWin64Linux : public Window {
+class WindowAgnostic : public Window {
 public:
   [[nodiscard]] static Window *Init(const Props &props);
   static void Terminate();
@@ -18,13 +18,13 @@ public:
   void OnUpdate();
 
 private:
-  WindowWin64Linux(const Props &props);
-  ~WindowWin64Linux() override;
+  WindowAgnostic(const Props &props);
+  ~WindowAgnostic() override;
 
 private:
   std::string m_title;
 
   static GLFW_Types::GLFW_OSWindow_T *s_os_window;
-  static WindowWin64Linux *s_instance;
+  static WindowAgnostic *s_instance;
 };
 ENGINE_NAMESPACE_END

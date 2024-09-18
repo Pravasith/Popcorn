@@ -1,6 +1,6 @@
 #include "Window.h"
 /* #ifdef IS_WINDOWS_OR_LINUX */
-#include "Window_Win64_Linux.h"
+#include "Window_Agnostic.h"
 /* #else */
 /* write_log("Error Importing Platform!"); */
 /* #endif */
@@ -25,7 +25,7 @@ Window *Window::Create(const Props &props) {
   /* ---- END NOTE ---- */
 
   /* #ifdef IS_WINDOWS_OR_LINUX */
-  s_platform_window_instance = WindowWin64Linux::Init(props);
+  s_platform_window_instance = WindowAgnostic::Init(props);
   /* #else */
   /* write_log("Error Creating Window - Wrong platform!"); */
   /* #endif */
@@ -37,7 +37,7 @@ Window *Window::Create(const Props &props) {
 //   PC_PRINT_DEBUG("WINDOW SUBSCRIPTION ADDED", 1, "WINDOW");
 //
 //   /* #ifdef IS_WINDOWS_OR_LINUX */
-//   (static_cast<WindowWin64Linux
+//   (static_cast<WindowAgnostic
 //   *>(s_platform_window_instance))->Subscribe(s);
 //   /* #else */
 //   /* write_log("Error Creating Window - Wrong platform!"); */
@@ -46,7 +46,7 @@ Window *Window::Create(const Props &props) {
 
 void Window::Destroy() {
   /* #ifdef IS_WINDOWS_OR_LINUX */
-  WindowWin64Linux::Terminate();
+  WindowAgnostic::Terminate();
   s_platform_window_instance = nullptr;
 
   /* #else */
@@ -56,7 +56,7 @@ void Window::Destroy() {
 
 void Window::OnUpdate() {
   /* #ifdef IS_WINDOWS_OR_LINUX */
-  (static_cast<WindowWin64Linux *>(s_platform_window_instance))->OnUpdate();
+  (static_cast<WindowAgnostic *>(s_platform_window_instance))->OnUpdate();
   /* #else */
   /* write_log("Error Creating Window - Wrong platform!"); */
   /* #endif */
