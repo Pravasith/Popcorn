@@ -1,25 +1,29 @@
 #include "Publisher.h"
 #include "Global_Macros.h"
+#include "Popcorn/Core/Base.h"
+#include "Subscriber.h"
 #include <algorithm>
-#include <iostream>
+#include <vector>
 
 ENGINE_NAMESPACE_BEGIN
+
+std::vector<const Subscriber *> Publisher::s_subscribers;
+
 void Publisher::Subscribe(const Subscriber *subscriber) {
-  m_subscribers.push_back(subscriber);
-  std::cout << "      --- m_subscribers in Publisher: " << ", Size = "
-            << m_subscribers.size() << '\n';
+  s_subscribers.push_back(subscriber);
+  PC_PRINT_DEBUG(s_subscribers.size(), 2, "SUBSCRIBERS")
 };
 
-void Publisher::Unsubscribe(const Subscriber *subscriber) {
-  auto iter = std::find(m_subscribers.begin(), m_subscribers.end(), subscriber);
+void Publisher::UnSubscribe(const Subscriber *subscriber) {
+  auto iter = std::find(s_subscribers.begin(), s_subscribers.end(), subscriber);
 
-  if (iter != m_subscribers.end()) {
-    m_subscribers.erase(iter);
+  if (iter != s_subscribers.end()) {
+    s_subscribers.erase(iter);
   };
 };
 
 void Publisher::PublishEvent(Event &e) {
-  for (const Subscriber *s : m_subscribers) {
+  for (const Subscriber *s : s_subscribers) {
     s->OnEvent(e);
 
     if (e.IsHandled()) {
@@ -28,15 +32,8 @@ void Publisher::PublishEvent(Event &e) {
   }
 };
 
-/* Publisher::Publisher() { */
-/*   std::cout << "      --- m_subscribers in Publisher: " << ", Size = " */
-/*             << m_subscribers.size() << '\n'; */
-/* } */
-
 Publisher::~Publisher() {
-  m_subscribers.clear();
-
-  std::cout << "      --- m_subscribers in Publisher: " << ", Size = "
-            << m_subscribers.size() << '\n';
+  s_subscribers.clear();
+  PC_PRINT_DEBUG(s_subscribers.size(), 2, "SUBSCRIBERS")
 }
 ENGINE_NAMESPACE_END

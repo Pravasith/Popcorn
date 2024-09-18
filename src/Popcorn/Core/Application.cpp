@@ -2,6 +2,7 @@
 #include "Event.h"
 #include "ImGuiLayer.h"
 #include "LayerStack.h"
+#include "Popcorn/Graphics/Renderer.h"
 #include "Utilities.h"
 #include "Window.h"
 #include "WindowEvent.h"
@@ -15,48 +16,61 @@ Window *Application::s_window = nullptr;
 LayerStack *Application::s_layer_stack = nullptr;
 ImGuiLayer *Application::s_imgui_layer = nullptr;
 bool Application::s_is_game_loop_running = false;
+Renderer *Application::s_renderer = nullptr;
 
 Application::Application() {
-  PC_PRINT_DEBUG("ENGINE STARTED", 0, "APP");
+  PC_PRINT_DEBUG("APPLICATION STARTED", 0, "APP");
 
   /* Window::Create(Window::Props("Ramen")); */
   /* Window::Destroy(); */
 };
 
 Application::~Application() {
+  // FREE MEMORY
 
-  // DELETE LAYER STACK
+  // LAYERS DELETED IN THE LAYERSTACK DESTRUCTOR
   delete s_layer_stack;
 
-  // DESTROY WINDOW
-  Window::Destroy();
+  // UNSUBSCRIBE
+  Window::UnSubscribe(s_instance);
 
-  PC_PRINT_DEBUG("ENGINE STOPPED", 0, "APP");
+  // DELETE SINGLETON INSTANCES
+  Window::Destroy();
+  Renderer::Destroy();
+
+  PC_PRINT_DEBUG("APPLICATION STOPPED", 0, "APP");
 };
 
 Application &Application::Get() { return *s_instance; }
 Window &Application::GetAppWindow() const { return *s_window; }
 
 void Application::Start() {
-  PC_PRINT_DEBUG("APPLICATION STARTED", 0, "APP");
-
   if (!s_instance) {
+    // DONT MOVE THIS BLOCK
+    // DONT MOVE THIS BLOCK
     s_instance = new Application();
+    // DONT MOVE THIS BLOCK
     s_window = Window::Create(Window::Props("Popcorn Engine", 500, 500));
-
-    Window::AddSubscriber(s_instance);
-
+    Window::Subscribe(s_instance);
+    // DONT MOVE THIS BLOCK
+    Renderer::Create();
+    // DONT MOVE THIS BLOCK
+    Application::InitLayers();
     s_layer_stack = new LayerStack();
-
+    // DONT MOVE THIS BLOCK
     s_imgui_layer = new ImGuiLayer();
     s_imgui_layer->OnAttach();
-
+    // DONT MOVE THIS BLOCK
     s_layer_stack->PushLayer(s_imgui_layer);
+    // DONT MOVE THIS BLOCK
+    // DONT MOVE THIS BLOCK
   } else {
     write_log(
         "Attempt to create Application class, when instance already exists");
   }
 }
+
+void Application::InitLayers() {};
 
 void Application::Run() {
   assert(!s_is_game_loop_running && "GAME LOOP ALREADY RUNNING!");

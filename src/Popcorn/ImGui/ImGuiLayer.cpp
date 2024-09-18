@@ -15,6 +15,7 @@ ENGINE_NAMESPACE_BEGIN
 ImGuiLayer::ImGuiLayer() {
   PC_PRINT_DEBUG("IMGUI LAYER OBJ CREATED", 2, "IMGUI_LAYER");
 }
+
 ImGuiLayer::~ImGuiLayer() {
   PC_PRINT_DEBUG("IMGUI LAYER OBJ DESTROYED", 2, "IMGUI_LAYER");
 }
@@ -51,10 +52,10 @@ void ImGuiLayer::OnAttach() {
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
-  ImGuiIO &io = ImGui::GetIO();
-  (void)io;
+  m_imgui_io = ImGui::GetIO();
+  (void)m_imgui_io;
 
-  io.ConfigFlags |=
+  m_imgui_io.ConfigFlags |=
       ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
                                           //
   // io.ConfigFlags |=
@@ -64,7 +65,8 @@ void ImGuiLayer::OnAttach() {
   // ImGui::StyleColorsDark();
   ImGui::StyleColorsLight();
 
-  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  m_imgui_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  m_imgui_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
   // Setup Platform/Renderer backends
   ImGui_ImplGlfw_InitForOpenGL(
@@ -93,6 +95,13 @@ void ImGuiLayer::OnUpdate() {
   ImGui::ShowDemoWindow(&show_demo_window);
 
   ImGui::Render();
+
+  if (m_imgui_io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+    GLFWwindow *backup_current_context = glfwGetCurrentContext();
+    ImGui::UpdatePlatformWindows();
+    ImGui::RenderPlatformWindowsDefault();
+    glfwMakeContextCurrent(backup_current_context);
+  }
 
   static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
   int display_w, display_h;

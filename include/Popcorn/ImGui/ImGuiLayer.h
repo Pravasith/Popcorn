@@ -3,6 +3,7 @@
 #include "Event.h"
 #include "Global_Macros.h"
 #include "Layer.h"
+#include "imgui.h"
 
 ENGINE_NAMESPACE_BEGIN
 class ImGuiLayer : public Layer {
@@ -17,6 +18,7 @@ public:
 
 private:
   void *m_os_window;
+  ImGuiIO m_imgui_io;
 };
 
 ENGINE_NAMESPACE_END

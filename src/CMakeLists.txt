@@ -2,6 +2,7 @@ set(CORE_IMPL_DIR Popcorn/Core)
 set(IMGUI_IMPL_DIR Popcorn/ImGui)
 set(EVENTS_IMPL_DIR Popcorn/Events)
 set(PLATFORM_IMPL_DIR Popcorn/Platform)
+set(GRAPHICS_IMPL_DIR Popcorn/Graphics)
 
 add_library(
   PopcornEngine
@@ -12,3 +13,4 @@ add_library(Window ${CORE_IMPL_DIR}/Window.cpp
                    ${PLATFORM_IMPL_DIR}/Window_Win64_Linux.cpp)
 
 add_library(Events ${EVENTS_IMPL_DIR}/Publisher.cpp)
+add_library(Graphics ${GRAPHICS_IMPL_DIR}/Renderer.cpp)

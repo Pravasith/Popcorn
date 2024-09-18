@@ -5,6 +5,7 @@
 #include "LayerStack.h"
 #include "Popcorn/Events/Event.h"
 #include "Popcorn/Events/Subscriber.h"
+#include "Popcorn/Graphics/Renderer.h"
 #include "Window.h"
 #include "WindowEvent.h"
 
@@ -15,6 +16,7 @@ public:
   static Application &Get();
   static void Run();
   static void Stop();
+  static void InitLayers();
 
   void OnEvent(Event &) const override;
   bool OnWindowResize(WindowResizeEvent &) const;
@@ -37,5 +39,6 @@ private:
   static LayerStack *s_layer_stack;
   static ImGuiLayer *s_imgui_layer;
   static Window *s_window;
+  static Renderer *s_renderer;
 };
 ENGINE_NAMESPACE_END

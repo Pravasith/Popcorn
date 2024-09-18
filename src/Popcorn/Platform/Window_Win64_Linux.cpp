@@ -26,7 +26,7 @@ Window *WindowWin64Linux::Init(const Props &props) {
 }
 
 WindowWin64Linux::WindowWin64Linux(const Props &props) : m_title(props.Title) {
-  PC_PRINT_DEBUG("WIN64 CLASS " << m_title << "CREATED", 3, "WIN64");
+  PC_PRINT_DEBUG("PLATFORM WINDOW " << m_title << " CREATED", 2, "WIN64-LINUX");
 
   GLFW_Init();
   PC_PRINT_DEBUG("GLFW INIT", 4, "WIN64");
@@ -104,6 +104,9 @@ WindowWin64Linux::~WindowWin64Linux() {
   PC_PRINT_DEBUG("WIN64 CLASS "
                  "DESTROYED",
                  3, "WIN64");
+
+  PC_PRINT_DEBUG("PLATFORM WINDOW " << m_title << " DESTROYED", 2,
+                 "WIN64-LINUX");
 };
 
 void WindowWin64Linux::Terminate() {

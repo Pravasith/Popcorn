@@ -23,11 +23,11 @@ public:
 
     Props(const std::string &title = "Popcorn Engine", uint16_t w = 1600,
           uint16_t h = 900)
-        : Title(title), W(w), H(h){};
+        : Title(title), W(w), H(h) {};
   };
 
   static Window *Create(const Props &props = Props());
-  static void AddSubscriber(const Subscriber *);
+  // static void AddSubscriber(const Subscriber *);
   static void OnUpdate();
   static void Destroy();
 

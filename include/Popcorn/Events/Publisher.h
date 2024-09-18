@@ -9,11 +9,11 @@ ENGINE_NAMESPACE_BEGIN
 class Publisher {
 public:
   virtual ~Publisher() = 0;
-  void PublishEvent(Event &e);
-  void Subscribe(const Subscriber *s);
-  void Unsubscribe(const Subscriber *s);
+  static void PublishEvent(Event &e);
+  static void Subscribe(const Subscriber *s);
+  static void UnSubscribe(const Subscriber *s);
 
 private:
-  std::vector<const Subscriber *> m_subscribers;
+  static std::vector<const Subscriber *> s_subscribers;
 };
 ENGINE_NAMESPACE_END
