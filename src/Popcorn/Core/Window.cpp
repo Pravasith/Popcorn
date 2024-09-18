@@ -16,6 +16,8 @@ Window *Window::Create(const Props &props) {
     return static_cast<Window *>(s_platform_window_instance);
   };
 
+  PC_PRINT_DEBUG("MAIN WINDOW CREATED", 1, "WINDOW");
+
   /* ---- NOTE ---- */
   /* Multiple window creation not supported at the moment */
   /* So multiple calls to Window::Create will result in  */
@@ -28,25 +30,25 @@ Window *Window::Create(const Props &props) {
   /* write_log("Error Creating Window - Wrong platform!"); */
   /* #endif */
 
-  PC_PRINT_DEBUG("MAIN WINDOW CREATED", 2, "WINDOW");
-
   return static_cast<Window *>(s_platform_window_instance);
 };
 
-void Window::AddSubscriber(const Subscriber *s) {
-  PC_PRINT_DEBUG("WINDOW SUBSCRIPTION ADDED", 2, "WINDOW");
-
-  /* #ifdef IS_WINDOWS_OR_LINUX */
-  (static_cast<WindowWin64Linux *>(s_platform_window_instance))->Subscribe(s);
-  /* #else */
-  /* write_log("Error Creating Window - Wrong platform!"); */
-  /* #endif */
-}
+// void Window::AddSubscriber(const Subscriber *s) {
+//   PC_PRINT_DEBUG("WINDOW SUBSCRIPTION ADDED", 1, "WINDOW");
+//
+//   /* #ifdef IS_WINDOWS_OR_LINUX */
+//   (static_cast<WindowWin64Linux
+//   *>(s_platform_window_instance))->Subscribe(s);
+//   /* #else */
+//   /* write_log("Error Creating Window - Wrong platform!"); */
+//   /* #endif */
+// }
 
 void Window::Destroy() {
   /* #ifdef IS_WINDOWS_OR_LINUX */
-  s_platform_window_instance = nullptr;
   WindowWin64Linux::Terminate();
+  s_platform_window_instance = nullptr;
+
   /* #else */
   /* write_log("Error Destroying Window - Wrong platform!"); */
   /* #endif */
@@ -60,8 +62,8 @@ void Window::OnUpdate() {
   /* #endif */
 };
 
-Window::Window(){
-    /* std::cout << "LALALA Window Constructor called" << std::endl; */
+Window::Window() {
+  /* std::cout << "LALALA Window Constructor called" << std::endl; */
 };
-Window::~Window() { PC_PRINT_DEBUG("MAIN WINDOW DESTROYED", 2, "WINDOW"); };
+Window::~Window() { PC_PRINT_DEBUG("MAIN WINDOW DESTROYED", 1, "WINDOW"); };
 ENGINE_NAMESPACE_END

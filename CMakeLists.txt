@@ -152,6 +152,10 @@ target_include_directories(
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events)
 
 target_include_directories(
+  Graphics PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+                  ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Graphics)
+
+target_include_directories(
   PopcornEngine
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events
@@ -172,6 +176,9 @@ option(PC_DEBUG "Use debug mode for compiling" ON)
 
 if(PC_DEBUG)
   target_compile_definitions(Window PUBLIC "PC_DEBUG")
+  target_compile_definitions(Graphics PUBLIC "PC_DEBUG")
+  target_compile_definitions(Events PUBLIC "PC_DEBUG")
+
 endif()
 # -----------------------------------------------------------------------
 # DEBUG FLAG --- END
@@ -189,7 +196,7 @@ target_link_libraries(Window PUBLIC Events)
 target_link_libraries(PopcornEngine PRIVATE glad)
 
 target_link_libraries(PopcornEngine PUBLIC ImGui)
-target_link_libraries(PopcornEngine PRIVATE Window)
+target_link_libraries(PopcornEngine PRIVATE Window Graphics)
 
 # FINAL PROJECT LINKING
 target_link_libraries(${PROJECT} PRIVATE PopcornEngine)

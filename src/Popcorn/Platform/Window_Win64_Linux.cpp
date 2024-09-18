@@ -26,10 +26,10 @@ Window *WindowWin64Linux::Init(const Props &props) {
 }
 
 WindowWin64Linux::WindowWin64Linux(const Props &props) : m_title(props.Title) {
-  PC_PRINT_DEBUG("WIN64 CLASS " << m_title << "CREATED", 3, "WIN64");
+  PC_PRINT_DEBUG("PLATFORM WINDOW CREATED", 2, "WIN64-LINUX");
 
   GLFW_Init();
-  PC_PRINT_DEBUG("GLFW INIT", 4, "WIN64");
+  PC_PRINT_DEBUG("GLFW INIT", 2, "WIN64-LINUX");
 
   // CREATE GLFW WINDOW AND MAKE CONTEXT CURRENT
   GLFW_CreateWindow(&s_os_window, m_title, props.W, props.H);
@@ -100,10 +100,8 @@ void WindowWin64Linux::OnUpdate() {
 WindowWin64Linux::~WindowWin64Linux() {
   GLFW_Terminate();
 
-  PC_PRINT_DEBUG("GLFW KILLED", 4, "WIN64");
-  PC_PRINT_DEBUG("WIN64 CLASS "
-                 "DESTROYED",
-                 3, "WIN64");
+  PC_PRINT_DEBUG("GLFW KILL", 2, "WIN64-LINUX");
+  PC_PRINT_DEBUG("PLATFORM WINDOW DESTROYED", 2, "WIN64-LINUX");
 };
 
 void WindowWin64Linux::Terminate() {

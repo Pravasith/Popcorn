@@ -21,10 +21,10 @@ static void pc_print(const std::string &msg, unsigned int lvl,
   ss << ">> ";
 
   for (int i = 0; i < lvl; ++i) {
-    ss << "  ";
+    ss << " ";
   }
 
-  ss << "---- " << tag << ": " << msg << '\n';
+  ss << "|-- " << tag << ": " << msg << '\n';
   std::cout << ss.str();
 };
 
@@ -33,7 +33,7 @@ static void pc_print(const std::string &msg, unsigned int lvl,
     std::ostringstream oss;                                                    \
     oss << msg;                                                                \
     pc_print(oss.str(), lvl, tag);                                             \
-  } while (0)
+  } while (0);
 #else
 #define PC_PRINT_DEBUG(msg, lvl, tag)
 #endif
