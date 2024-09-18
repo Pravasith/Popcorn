@@ -31,7 +31,14 @@ check_create_folder() {
 
 # -----------------------------------------------------------------------
 # INSTALL THESE EXTERNAL DEPENDENCIES
+#
+# FOR GLFW:
 # sudo apt install libwayland-dev libxkbcommon-dev xorg-dev
+#
+# FOR VULKAN:
+# sudo apt install vulkan-tools
+# sudo apt install libvulkan-dev
+# sudo apt install vulkan-validationlayers-dev spirv-tools
 # -----------------------------------------------------------------------
 
 #

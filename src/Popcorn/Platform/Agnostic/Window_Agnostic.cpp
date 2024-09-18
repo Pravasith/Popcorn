@@ -7,25 +7,25 @@
 #include "MouseEvent.h"
 #include "Utilities.h"
 #include "WindowEvent.h"
-#include "Window_Win64_Linux.h"
+#include "Window_Agnostic.h"
 #include <cstdint>
 #include <string>
 
 ENGINE_NAMESPACE_BEGIN
 using namespace GLFW_Funcs;
 
-GLFW_Types::GLFW_OSWindow_T *WindowWin64Linux::s_os_window = nullptr;
-WindowWin64Linux *WindowWin64Linux::s_instance = nullptr;
+GLFW_Types::GLFW_OSWindow_T *WindowAgnostic::s_os_window = nullptr;
+WindowAgnostic *WindowAgnostic::s_instance = nullptr;
 
-Window *WindowWin64Linux::Init(const Props &props) {
+Window *WindowAgnostic::Init(const Props &props) {
   if (!s_instance) {
-    s_instance = new WindowWin64Linux(props);
+    s_instance = new WindowAgnostic(props);
   }
 
   return s_instance;
 }
 
-WindowWin64Linux::WindowWin64Linux(const Props &props) : m_title(props.Title) {
+WindowAgnostic::WindowAgnostic(const Props &props) : m_title(props.Title) {
   PC_PRINT_DEBUG("PLATFORM WINDOW CREATED", 2, "WIN64-LINUX");
 
   GLFW_Init();
@@ -89,24 +89,24 @@ WindowWin64Linux::WindowWin64Linux(const Props &props) : m_title(props.Title) {
   }
 }
 
-void WindowWin64Linux::OnUpdate() {
+void WindowAgnostic::OnUpdate() {
 
-  // glViewport(0, 0, WindowWin64Linux::GetWidth(),
-  // WindowWin64Linux::GetHeight());
+  // glViewport(0, 0, WindowAgnostic::GetWidth(),
+  // WindowAgnostic::GetHeight());
 
   GLFW_UpdateWindow(s_os_window);
 }
 
-WindowWin64Linux::~WindowWin64Linux() {
+WindowAgnostic::~WindowAgnostic() {
   GLFW_Terminate();
 
   PC_PRINT_DEBUG("GLFW KILL", 2, "WIN64-LINUX");
   PC_PRINT_DEBUG("PLATFORM WINDOW DESTROYED", 2, "WIN64-LINUX");
 };
 
-void WindowWin64Linux::Terminate() {
+void WindowAgnostic::Terminate() {
   if (!s_os_window || !s_instance) {
-    write_log("Error: WindowWin64Linux Terminate -- s_os_window or s_instance "
+    write_log("Error: WindowAgnostic Terminate -- s_os_window or s_instance "
               "of class not found.");
   }
 
@@ -119,11 +119,11 @@ void WindowWin64Linux::Terminate() {
   }
 }
 
-uint16_t WindowWin64Linux::GetWidth() const { return 1; }
+uint16_t WindowAgnostic::GetWidth() const { return 1; }
 
-uint16_t WindowWin64Linux::GetHeight() const { return 1; }
+uint16_t WindowAgnostic::GetHeight() const { return 1; }
 
-void *WindowWin64Linux::GetOSWindow() const {
+void *WindowAgnostic::GetOSWindow() const {
   if (s_os_window)
     return s_os_window;
 
