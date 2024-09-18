@@ -7,17 +7,8 @@ ENGINE_NAMESPACE_BEGIN
 // SINGLETON
 Renderer *Renderer::s_instance = nullptr;
 
-Renderer::Renderer() {
-  PC_PRINT_DEBUG("RENDERER INSTANCE CREATED", 2, "GRAPHICS")
-
-#ifdef PC_DEBUG
-  std::cout << "PC_DEBUG\n";
-#endif
-};
-
-Renderer::~Renderer() {
-  PC_PRINT_DEBUG("RENDERER INSTANCE DELETED", 2, "GRAPHICS")
-};
+Renderer::Renderer() { PC_PRINT_DEBUG("RENDERER CREATED", 1, "GRAPHICS") };
+Renderer::~Renderer() { PC_PRINT_DEBUG("RENDERER DESTROYED", 1, "GRAPHICS") };
 
 void Renderer::Create() {
 

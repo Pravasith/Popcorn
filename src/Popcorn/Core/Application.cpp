@@ -26,17 +26,15 @@ Application::Application() {
 };
 
 Application::~Application() {
-  // FREE MEMORY
 
-  // LAYERS DELETED IN THE LAYERSTACK DESTRUCTOR
+  // DEALLOC MEMBERS
   delete s_layer_stack;
 
-  // UNSUBSCRIBE
-  Window::UnSubscribe(s_instance);
-
-  // DELETE SINGLETON INSTANCES
-  Window::Destroy();
+  // LAYERS ARE DELETED IN THE LAYERSTACK DESTRUCTOR
   Renderer::Destroy();
+
+  Window::UnSubscribe(s_instance);
+  Window::Destroy();
 
   PC_PRINT_DEBUG("APPLICATION STOPPED", 0, "APP");
 };

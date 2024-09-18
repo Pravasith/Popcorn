@@ -177,6 +177,7 @@ option(PC_DEBUG "Use debug mode for compiling" ON)
 if(PC_DEBUG)
   target_compile_definitions(Window PUBLIC "PC_DEBUG")
   target_compile_definitions(Graphics PUBLIC "PC_DEBUG")
+  target_compile_definitions(Events PUBLIC "PC_DEBUG")
 
 endif()
 # -----------------------------------------------------------------------

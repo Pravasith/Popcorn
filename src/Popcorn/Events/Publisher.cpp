@@ -11,7 +11,7 @@ std::vector<const Subscriber *> Publisher::s_subscribers;
 
 void Publisher::Subscribe(const Subscriber *subscriber) {
   s_subscribers.push_back(subscriber);
-  PC_PRINT_DEBUG(s_subscribers.size(), 2, "SUBSCRIBERS")
+  PC_PRINT_DEBUG(s_subscribers.size() << " SUBSCRIBED", 8, "PUBLISHERS")
 };
 
 void Publisher::UnSubscribe(const Subscriber *subscriber) {
@@ -20,6 +20,8 @@ void Publisher::UnSubscribe(const Subscriber *subscriber) {
   if (iter != s_subscribers.end()) {
     s_subscribers.erase(iter);
   };
+
+  PC_PRINT_DEBUG(s_subscribers.size() << " UNSUBSCRIBED", 8, "PUBLISHERS")
 };
 
 void Publisher::PublishEvent(Event &e) {
@@ -34,6 +36,7 @@ void Publisher::PublishEvent(Event &e) {
 
 Publisher::~Publisher() {
   s_subscribers.clear();
-  PC_PRINT_DEBUG(s_subscribers.size(), 2, "SUBSCRIBERS")
+  // PC_PRINT_DEBUG(s_subscribers.size() << " PUBLISHER DESTROYED", 8,
+  //                "PUBLISHERS")
 }
 ENGINE_NAMESPACE_END
