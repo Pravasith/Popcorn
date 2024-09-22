@@ -13,4 +13,8 @@ add_library(Window ${CORE_IMPL_DIR}/Window.cpp
                    ${PLATFORM_IMPL_DIR}/Agnostic/Window_Agnostic.cpp)
 
 add_library(Events ${EVENTS_IMPL_DIR}/Publisher.cpp)
-add_library(Graphics ${GRAPHICS_IMPL_DIR}/Renderer.cpp)
+add_library(
+  Graphics
+  ${GRAPHICS_IMPL_DIR}/Renderer.cpp
+  ${PLATFORM_IMPL_DIR}/OpenGL/Renderer_OpenGL.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/Renderer_Vulkan.cpp)

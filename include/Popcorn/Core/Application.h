@@ -12,24 +12,26 @@
 ENGINE_NAMESPACE_BEGIN
 class Application : public Subscriber {
 public:
+  // SINGLETON
   static void Start();
   static Application &Get();
-  static void Run();
   static void Stop();
+
   static void InitLayers();
 
-  void OnEvent(Event &) const override;
-  bool OnWindowResize(WindowResizeEvent &) const;
-  bool OnWindowClose(WindowCloseEvent &) const;
+  static void Run();
 
   Window &GetAppWindow() const;
-
   LayerStack &GetLayerStack() const { return *s_layer_stack; };
-  bool IsGameLoopRunning() const { return s_is_game_loop_running; };
+  static bool IsGameLoopRunning() { return s_is_game_loop_running; };
 
 private:
   Application();
   ~Application();
+
+  void OnEvent(Event &) const override;
+  bool OnWindowResize(WindowResizeEvent &) const;
+  bool OnWindowClose(WindowCloseEvent &) const;
 
 private:
   static bool s_is_window_minimized;

@@ -6,6 +6,11 @@
 },
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux/third-party",
+  "command": "/usr/bin/cc  -I/home/prav/personal/opengl-experiments/third-party/platform-agnostic/glad/include  -o CMakeFiles/glad.dir/platform-agnostic/glad/src/glad.c.o -c /home/prav/personal/opengl-experiments/third-party/platform-agnostic/glad/src/glad.c",
+  "file": "/home/prav/personal/opengl-experiments/third-party/platform-agnostic/glad/src/glad.c"
+},
+{
+  "directory": "/home/prav/personal/opengl-experiments/build/linux/third-party",
   "command": "/usr/bin/c++  -I/home/prav/personal/opengl-experiments/third-party/platform-agnostic -I/home/prav/personal/opengl-experiments/third-party/platform-agnostic/imgui -std=c++17 -o CMakeFiles/ImGui.dir/platform-agnostic/imgui/imgui.cpp.o -c /home/prav/personal/opengl-experiments/third-party/platform-agnostic/imgui/imgui.cpp",
   "file": "/home/prav/personal/opengl-experiments/third-party/platform-agnostic/imgui/imgui.cpp"
 },
@@ -40,19 +45,9 @@
   "file": "/home/prav/personal/opengl-experiments/third-party/platform-agnostic/imgui/backends/imgui_impl_glfw.cpp"
 },
 {
-  "directory": "/home/prav/personal/opengl-experiments/build/linux/third-party",
-  "command": "/usr/bin/cc  -I/home/prav/personal/opengl-experiments/third-party/platform-agnostic/glad/include  -o CMakeFiles/glad.dir/platform-agnostic/glad/src/glad.c.o -c /home/prav/personal/opengl-experiments/third-party/platform-agnostic/glad/src/glad.c",
-  "file": "/home/prav/personal/opengl-experiments/third-party/platform-agnostic/glad/src/glad.c"
-},
-{
   "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
   "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Input -I/home/prav/personal/opengl-experiments/include/Popcorn/Events -std=c++17 -o CMakeFiles/Events.dir/Popcorn/Events/Publisher.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Events/Publisher.cpp",
   "file": "/home/prav/personal/opengl-experiments/src/Popcorn/Events/Publisher.cpp"
-},
-{
-  "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Graphics -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/OpenGL -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/Vulkan -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Graphics/Renderer.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Graphics/Renderer.cpp",
-  "file": "/home/prav/personal/opengl-experiments/src/Popcorn/Graphics/Renderer.cpp"
 },
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
@@ -63,6 +58,21 @@
   "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
   "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Core -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/Agnostic -I/home/prav/personal/opengl-experiments/third-party/platform-agnostic/glad/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Input -I/home/prav/personal/opengl-experiments/include/Popcorn/Events -std=c++17 -o CMakeFiles/Window.dir/Popcorn/Platform/Agnostic/Window_Agnostic.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Platform/Agnostic/Window_Agnostic.cpp",
   "file": "/home/prav/personal/opengl-experiments/src/Popcorn/Platform/Agnostic/Window_Agnostic.cpp"
+},
+{
+  "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Graphics -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/OpenGL -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/Vulkan -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Graphics/Renderer.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Graphics/Renderer.cpp",
+  "file": "/home/prav/personal/opengl-experiments/src/Popcorn/Graphics/Renderer.cpp"
+},
+{
+  "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Graphics -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/OpenGL -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/Vulkan -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/OpenGL/Renderer_OpenGL.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Platform/OpenGL/Renderer_OpenGL.cpp",
+  "file": "/home/prav/personal/opengl-experiments/src/Popcorn/Platform/OpenGL/Renderer_OpenGL.cpp"
+},
+{
+  "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Graphics -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/OpenGL -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/Vulkan -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/Renderer_Vulkan.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Platform/Vulkan/Renderer_Vulkan.cpp",
+  "file": "/home/prav/personal/opengl-experiments/src/Popcorn/Platform/Vulkan/Renderer_Vulkan.cpp"
 },
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux/src",

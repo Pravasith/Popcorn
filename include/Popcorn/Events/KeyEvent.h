@@ -29,7 +29,7 @@ private:
 class KeyPressedEvent : public KeyEvent {
 public:
   KeyPressedEvent(const KeyCode keyCode, bool isRepeat = false)
-      : KeyEvent(keyCode), m_is_repeat(isRepeat){};
+      : KeyEvent(keyCode), m_is_repeat(isRepeat) {};
 
   bool IsRepeat() const { return m_is_repeat; }
 
@@ -49,7 +49,7 @@ private:
 class KeyReleasedEvent : public KeyEvent {
 public:
   KeyReleasedEvent(const KeyCode keyCode, bool isRepeat = false)
-      : KeyEvent(keyCode), m_is_repeat(isRepeat){};
+      : KeyEvent(keyCode), m_is_repeat(isRepeat) {};
 
   bool IsRepeat() const { return m_is_repeat; }
 

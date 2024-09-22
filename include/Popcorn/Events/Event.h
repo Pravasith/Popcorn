@@ -2,6 +2,7 @@
 
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
+#include "TimeEvent.h"
 #include <string>
 #include <sys/types.h>
 
@@ -25,6 +26,9 @@ enum class EventType {
   MouseButtonReleased,
   MouseMoved,
   MouseScrolled,
+
+  // Time Events
+  TimeCPUClockUnit // One second passed
 };
 
 enum class EventCategory {
@@ -33,7 +37,7 @@ enum class EventCategory {
   WindowEvent = bit_shift_left(2),
   KeyboardEvent = bit_shift_left(3),
   MouseEvent = bit_shift_left(4),
-  /* ControllerEvent = bit_shift_left(5), */
+  TimeEvent = bit_shift_left(5)
 };
 
 // HASH DEFINE START ----------------------------------------------------------

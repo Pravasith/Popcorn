@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "Assert.h"
 #include "Event.h"
 #include "ImGuiLayer.h"
 #include "LayerStack.h"
@@ -71,8 +72,7 @@ void Application::Start() {
 void Application::InitLayers() {};
 
 void Application::Run() {
-  assert(!s_is_game_loop_running && "GAME LOOP ALREADY RUNNING!");
-
+  PC_ASSERT(!s_is_game_loop_running, "GAME LOOP ALREADY RUNNING!");
   s_is_game_loop_running = true;
 
   while (s_is_game_loop_running) {

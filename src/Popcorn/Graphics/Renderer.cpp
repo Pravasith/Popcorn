@@ -4,6 +4,7 @@
 #include "Popcorn/Core/Base.h"
 #include "Renderer_OpenGL.h"
 #include "Renderer_Vulkan.h"
+#include <string>
 
 ENGINE_NAMESPACE_BEGIN
 // SINGLETON
@@ -11,9 +12,15 @@ Renderer *Renderer::s_instance = nullptr;
 
 Renderer::Renderer() {
   PC_PRINT_DEBUG("RENDERER CREATED", 1, "RENDERER");
+  // TODO: CHANGE TO FANCY DISPATCHER STUFF
+  m_type = RendererType::Vulkan;
 
-  RendererOpenGL();
-  RendererVulkan();
+  // TODO: CHANGE TO FANCY DISPATCHER STUFF
+  if (static_cast<int>(m_type) & static_cast<int>(RendererType::OpenGL)) {
+    RendererOpenGL();
+  } else {
+    RendererVulkan();
+  };
 };
 Renderer::~Renderer() { PC_PRINT_DEBUG("RENDERER DESTROYED", 1, "RENDERER") };
 
