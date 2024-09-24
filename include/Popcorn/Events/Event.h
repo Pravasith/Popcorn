@@ -2,7 +2,6 @@
 
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
-#include "TimeEvent.h"
 #include <string>
 #include <sys/types.h>
 
@@ -28,7 +27,7 @@ enum class EventType {
   MouseScrolled,
 
   // Time Events
-  TimeCPUClockUnit // One second passed
+  CPUClockTick,
 };
 
 enum class EventCategory {
@@ -37,7 +36,7 @@ enum class EventCategory {
   WindowEvent = bit_shift_left(2),
   KeyboardEvent = bit_shift_left(3),
   MouseEvent = bit_shift_left(4),
-  TimeEvent = bit_shift_left(5)
+  ClockEvent = bit_shift_left(5)
 };
 
 // HASH DEFINE START ----------------------------------------------------------
@@ -73,9 +72,11 @@ public:
   // DEBUG ONLY
   [[nodiscard]] virtual const char *GetEventTypeName() const = 0;
   // DEBUG ONLY
-  [[nodiscard]] virtual std::string PrintDebugData() const {
-    return "From base class -- virtual method \"PrintDebugData\" not defined "
-           "in derived class\n";
+  virtual void PrintDebugData() const {
+    PC_PRINT_DEBUG(
+        "From base class -- virtual method \"PrintDebugData\" not defined "
+        "in derived class\n",
+        1, "EVENT BASE")
   };
 
 private:

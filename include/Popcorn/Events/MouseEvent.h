@@ -1,8 +1,8 @@
 
 #pragma once
-#include "Base.h"
 #include "Event.h"
 #include "Global_Macros.h"
+#include "Popcorn/Core/Base.h"
 
 ENGINE_NAMESPACE_BEGIN
 
@@ -23,7 +23,7 @@ public:
   EVENT_CATEGORY_OVERRIDE_METHODS(MouseEvent);
   EVENT_TYPE_OVERRIDE_METHODS(MouseMoved);
 
-  std::string PrintDebugData() const override {
+  void PrintDebugData() const override {
     PC_PRINT_DEBUG("X: " << GetCoords().x << ", Y: " << GetCoords().y << '\n',
                    2, "TIME");
   };

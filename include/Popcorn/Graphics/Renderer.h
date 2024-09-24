@@ -19,6 +19,8 @@ public:
   static void Destroy();
   Renderer &Get() const;
 
+  void virtual OnEvent(Event &) const override;
+
 private:
   Renderer();
   virtual ~Renderer();

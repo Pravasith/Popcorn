@@ -24,6 +24,8 @@ Renderer::Renderer() {
 };
 Renderer::~Renderer() { PC_PRINT_DEBUG("RENDERER DESTROYED", 1, "RENDERER") };
 
+void Renderer::OnEvent(Event &e) const {};
+
 void Renderer::Create() {
   if (s_instance) {
     return;

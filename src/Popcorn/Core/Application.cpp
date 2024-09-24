@@ -1,9 +1,10 @@
 #include "Application.h"
-#include "Assert.h"
+#include "Base.h"
 #include "Event.h"
 #include "ImGuiLayer.h"
 #include "LayerStack.h"
 #include "Popcorn/Graphics/Renderer.h"
+#include "TimeEvent.h"
 #include "Utilities.h"
 #include "Window.h"
 #include "WindowEvent.h"
@@ -12,12 +13,15 @@
 #include <string>
 
 ENGINE_NAMESPACE_BEGIN
+// HANDLES
 Application *Application::s_instance = nullptr;
 Window *Application::s_window = nullptr;
 LayerStack *Application::s_layer_stack = nullptr;
 ImGuiLayer *Application::s_imgui_layer = nullptr;
-bool Application::s_is_game_loop_running = false;
 Renderer *Application::s_renderer = nullptr;
+Time *Application::s_time = nullptr;
+
+// REG MEMBERS
 
 Application::Application() {
   PC_PRINT_DEBUG("APPLICATION STARTED", 0, "APP");
@@ -29,12 +33,12 @@ Application::Application() {
 Application::~Application() {
 
   // DEALLOC MEMBERS
+  delete s_time;
   delete s_layer_stack;
 
   // LAYERS ARE DELETED IN THE LAYERSTACK DESTRUCTOR
   Renderer::Destroy();
 
-  Window::UnSubscribe(s_instance);
   Window::Destroy();
 
   PC_PRINT_DEBUG("APPLICATION STOPPED", 0, "APP");
@@ -58,6 +62,7 @@ void Application::Start() {
     s_layer_stack = new LayerStack();
     // DONT MOVE THIS BLOCK
     s_imgui_layer = new ImGuiLayer();
+    std::cout << s_imgui_layer << '\n';
     s_imgui_layer->OnAttach();
     // DONT MOVE THIS BLOCK
     s_layer_stack->PushLayer(s_imgui_layer);
@@ -72,28 +77,46 @@ void Application::Start() {
 void Application::InitLayers() {};
 
 void Application::Run() {
-  PC_ASSERT(!s_is_game_loop_running, "GAME LOOP ALREADY RUNNING!");
-  s_is_game_loop_running = true;
-
-  while (s_is_game_loop_running) {
-    Window::OnUpdate();
-    s_layer_stack->UpdateLayerStack();
-  }
+  // PC_ASSERT(!s_is_game_loop_running, "GAME LOOP ALREADY RUNNING!");
+  // s_is_game_loop_running = true;
+  //
+  // while (s_is_game_loop_running) {
+  //   Window::OnUpdate();
+  //   s_layer_stack->UpdateLayerStack();
+  // }
+  s_time->Start();
 };
 
-void Application::Stop() {
+bool Application::IsGameLoopRunning() { return s_time->IsTimeRunning(); };
 
-  // DESTROY WINDOW
+void Application::Stop() {
   if (s_instance) {
+    // UNSUBSCRIBE TO WINDOW
+    Window::UnSubscribe(s_instance);
+
+    s_time->Stop();
+
+    // DESTROY APPLICATION
     delete s_instance;
     s_instance = nullptr;
   }
 }
 
-bool Application::OnWindowResize(WindowResizeEvent &e) const { return true; };
+bool Application::OnWindowResize(WindowResizeEvent &e) const {
+  e.PrintDebugData();
+  return true;
+};
 
 bool Application::OnWindowClose(WindowCloseEvent &e) const {
-  s_is_game_loop_running = false;
+  e.PrintDebugData();
+  return true;
+};
+
+bool Application::OnCPUClockTick(TimeEvent &e) const {
+  e.PrintDebugData();
+  Window::OnUpdate();
+
+  s_layer_stack->UpdateLayerStack();
   return true;
 };
 
@@ -106,6 +129,8 @@ void Application::OnEvent(Event &e) const {
   dispatch.Dispatch<WindowCloseEvent>(
       PC_BIND_EVENT_FUNC(WindowCloseEvent, OnWindowClose));
 
+  dispatch.Dispatch<TimeEvent>(PC_BIND_EVENT_FUNC(TimeEvent, OnCPUClockTick));
+
   // auto layerStack = Application::GetLayerStack();
   // layerStack.IterateBackwards([&](Event &e) {
   //   // auto x = e.PrintDebugData();
@@ -113,11 +138,11 @@ void Application::OnEvent(Event &e) const {
   // });
 
   if (e.BelongsToCategory(EventCategory::MouseEvent)) {
-    std::cout << e.PrintDebugData();
+    e.PrintDebugData();
   };
 
   if (e.BelongsToCategory(EventCategory::KeyboardEvent)) {
-    std::cout << e.PrintDebugData();
+    e.PrintDebugData();
   };
 };
 

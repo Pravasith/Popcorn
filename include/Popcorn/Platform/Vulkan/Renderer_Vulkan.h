@@ -11,7 +11,7 @@ public:
 private:
   void InitVulkan();
   void CleanUp();
-  virtual void OnUpdate();
+  // virtual void OnUpdate();
 };
 
 ENGINE_NAMESPACE_END

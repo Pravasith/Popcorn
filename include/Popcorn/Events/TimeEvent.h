@@ -5,7 +5,6 @@
 #include "Popcorn/Core/Base.h"
 
 ENGINE_NAMESPACE_BEGIN
-template <typename T> //
 class TimeEvent : public Event {
 public:
   TimeEvent()
@@ -17,8 +16,13 @@ public:
   [[nodiscard]] float GetDeltaMS() const { return m_delta; };
   [[nodiscard]] float GetElapsedMS() const { return m_elapsed; };
 
-  std::string PrintDebugData() const override {
-    PC_PRINT_DEBUG(GetDeltaMS(), 1, "TIME");
+  EVENT_CATEGORY_OVERRIDE_METHODS(ClockEvent);
+  EVENT_TYPE_OVERRIDE_METHODS(CPUClockTick);
+
+  void PrintDebugData() const override {
+    PC_PRINT_DEBUG("DELTA: " << GetDeltaMS() << "\nNOW: " << GetNowMS()
+                             << "\nELAPSED: " << GetElapsedMS() << '\n',
+                   1, "TIME");
   };
 
 private:

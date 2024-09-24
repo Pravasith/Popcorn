@@ -16,6 +16,8 @@ ImGuiLayer::ImGuiLayer() { PC_PRINT_DEBUG("CREATED", 1, "IMGUI-LAYER"); }
 ImGuiLayer::~ImGuiLayer() { PC_PRINT_DEBUG("DESTROYED", 1, "IMGUI-LAYER"); }
 
 void ImGuiLayer::OnAttach() {
+
+  std::cout << "s_instance";
   Application &app = Application::Get();
   m_os_window = app.GetAppWindow().GetOSWindow();
 
