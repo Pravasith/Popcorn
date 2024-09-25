@@ -113,11 +113,11 @@ void Application::OnEvent(Event &e) const {
   // });
 
   if (e.BelongsToCategory(EventCategory::MouseEvent)) {
-    std::cout << e.PrintDebugData();
+    e.PrintDebugData();
   };
 
   if (e.BelongsToCategory(EventCategory::KeyboardEvent)) {
-    std::cout << e.PrintDebugData();
+    e.PrintDebugData();
   };
 };
 

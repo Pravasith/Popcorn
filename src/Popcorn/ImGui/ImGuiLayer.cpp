@@ -45,10 +45,10 @@ void ImGuiLayer::OnAttach() {
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
-  m_imgui_io = ImGui::GetIO();
-  (void)m_imgui_io;
+  auto &imgui_io = ImGui::GetIO();
+  (void)imgui_io;
 
-  m_imgui_io.ConfigFlags |=
+  imgui_io.ConfigFlags |=
       ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
                                           //
   // io.ConfigFlags |=
@@ -58,8 +58,7 @@ void ImGuiLayer::OnAttach() {
   // ImGui::StyleColorsDark();
   ImGui::StyleColorsLight();
 
-  m_imgui_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-  m_imgui_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+  imgui_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
   // Setup Platform/Renderer backends
   ImGui_ImplGlfw_InitForOpenGL(
@@ -88,13 +87,6 @@ void ImGuiLayer::OnUpdate() {
   ImGui::ShowDemoWindow(&show_demo_window);
 
   ImGui::Render();
-
-  if (m_imgui_io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-    GLFWwindow *backup_current_context = glfwGetCurrentContext();
-    ImGui::UpdatePlatformWindows();
-    ImGui::RenderPlatformWindowsDefault();
-    glfwMakeContextCurrent(backup_current_context);
-  }
 
   static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
   int display_w, display_h;

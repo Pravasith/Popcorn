@@ -17,7 +17,7 @@ public:
   [[nodiscard]] float GetDeltaMS() const { return m_delta; };
   [[nodiscard]] float GetElapsedMS() const { return m_elapsed; };
 
-  std::string PrintDebugData() const override {
+  void PrintDebugData() const override {
     PC_PRINT_DEBUG(GetDeltaMS(), 1, "TIME");
   };
 

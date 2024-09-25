@@ -72,9 +72,11 @@ public:
   // DEBUG ONLY
   [[nodiscard]] virtual const char *GetEventTypeName() const = 0;
   // DEBUG ONLY
-  [[nodiscard]] virtual std::string PrintDebugData() const {
-    return "From base class -- virtual method \"PrintDebugData\" not defined "
-           "in derived class\n";
+  virtual void PrintDebugData() const {
+    PC_PRINT_DEBUG(
+        "From base class -- virtual method \"PrintDebugData\" not defined "
+        "in derived class\n",
+        1, "EVENT");
   };
 
 private:
