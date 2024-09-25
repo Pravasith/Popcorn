@@ -18,5 +18,7 @@ RendererVulkan::~RendererVulkan() {
 };
 
 void RendererVulkan::InitVulkan() {};
+void RendererVulkan::OnUpdate() {};
+void RendererVulkan::CleanUp() {};
 
 ENGINE_NAMESPACE_END

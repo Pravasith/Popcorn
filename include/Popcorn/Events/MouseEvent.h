@@ -1,6 +1,5 @@
 
 #pragma once
-#include "Base.h"
 #include "Event.h"
 #include "Global_Macros.h"
 
@@ -24,8 +23,10 @@ public:
   EVENT_TYPE_OVERRIDE_METHODS(MouseMoved);
 
   std::string PrintDebugData() const override {
-    PC_PRINT_DEBUG("X: " << GetCoords().x << ", Y: " << GetCoords().y << '\n',
-                   2, "TIME");
+    std::stringstream ss;
+
+    ss << "X: " << GetCoords().x << ", Y: " << GetCoords().y << '\n';
+    return ss.str();
   };
 
 private:

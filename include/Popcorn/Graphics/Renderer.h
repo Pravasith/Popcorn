@@ -18,6 +18,7 @@ public:
   static void Create();
   static void Destroy();
   Renderer &Get() const;
+  void OnEvent(Event &) const override {};
 
 private:
   Renderer();
