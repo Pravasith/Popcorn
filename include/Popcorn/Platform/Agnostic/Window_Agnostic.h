@@ -15,7 +15,7 @@ public:
   uint16_t GetHeight() const override;
   [[nodiscard]] void *GetOSWindow() const override;
 
-  void OnUpdate();
+  virtual void OnUpdate();
 
 private:
   WindowAgnostic(const Props &props);

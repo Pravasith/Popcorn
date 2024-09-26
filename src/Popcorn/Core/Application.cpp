@@ -3,11 +3,12 @@
 #include "ImGuiLayer.h"
 #include "LayerStack.h"
 #include "Popcorn/Graphics/Renderer.h"
+#include "Time.h"
+#include "TimeEvent.h"
 #include "Utilities.h"
 #include "Window.h"
 #include "WindowEvent.h"
 #include <cassert>
-#include <iostream>
 #include <string>
 
 ENGINE_NAMESPACE_BEGIN
@@ -15,8 +16,8 @@ Application *Application::s_instance = nullptr;
 Window *Application::s_window = nullptr;
 LayerStack *Application::s_layer_stack = nullptr;
 ImGuiLayer *Application::s_imgui_layer = nullptr;
-bool Application::s_is_game_loop_running = false;
 Renderer *Application::s_renderer = nullptr;
+Time *Application::s_time = nullptr;
 
 Application::Application() {
   PC_PRINT_DEBUG("APPLICATION STARTED", 0, "APP");
@@ -60,6 +61,8 @@ void Application::Start() {
     s_imgui_layer->OnAttach();
     // DONT MOVE THIS BLOCK
     s_layer_stack->PushLayer(s_imgui_layer);
+
+    s_time = Time::Get();
     // DONT MOVE THIS BLOCK
     // DONT MOVE THIS BLOCK
   } else {
@@ -70,16 +73,9 @@ void Application::Start() {
 
 void Application::InitLayers() {};
 
-void Application::Run() {
-  assert(!s_is_game_loop_running && "GAME LOOP ALREADY RUNNING!");
+void Application::Run() { s_time->Start(); };
 
-  s_is_game_loop_running = true;
-
-  while (s_is_game_loop_running) {
-    Window::OnUpdate();
-    s_layer_stack->UpdateLayerStack();
-  }
-};
+bool Application::IsGameLoopRunning() { return s_time->IsGameLoopRunning(); };
 
 void Application::Stop() {
 
@@ -93,7 +89,14 @@ void Application::Stop() {
 bool Application::OnWindowResize(WindowResizeEvent &e) const { return true; };
 
 bool Application::OnWindowClose(WindowCloseEvent &e) const {
-  s_is_game_loop_running = false;
+  s_time->Stop();
+  return true;
+};
+
+bool Application::OnCPUClockTick(TimeEvent &e) const {
+  Window::OnUpdate();
+  s_layer_stack->UpdateLayerStack();
+
   return true;
 };
 
@@ -106,6 +109,8 @@ void Application::OnEvent(Event &e) const {
   dispatch.Dispatch<WindowCloseEvent>(
       PC_BIND_EVENT_FUNC(WindowCloseEvent, OnWindowClose));
 
+  dispatch.Dispatch<TimeEvent>(PC_BIND_EVENT_FUNC(TimeEvent, OnCPUClockTick));
+
   // auto layerStack = Application::GetLayerStack();
   // layerStack.IterateBackwards([&](Event &e) {
   //   // auto x = e.PrintDebugData();
@@ -113,11 +118,11 @@ void Application::OnEvent(Event &e) const {
   // });
 
   if (e.BelongsToCategory(EventCategory::MouseEvent)) {
-    std::cout << e.PrintDebugData();
+    e.PrintDebugData();
   };
 
   if (e.BelongsToCategory(EventCategory::KeyboardEvent)) {
-    std::cout << e.PrintDebugData();
+    e.PrintDebugData();
   };
 };
 

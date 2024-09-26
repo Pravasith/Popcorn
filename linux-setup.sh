@@ -39,6 +39,8 @@ check_create_folder() {
 # sudo apt install vulkan-tools
 # sudo apt install libvulkan-dev
 # sudo apt install vulkan-validationlayers-dev spirv-tools
+#
+# SHADER COMPILERS:
 # -----------------------------------------------------------------------
 
 #

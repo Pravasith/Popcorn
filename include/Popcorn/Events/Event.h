@@ -25,6 +25,9 @@ enum class EventType {
   MouseButtonReleased,
   MouseMoved,
   MouseScrolled,
+
+  // Time Events
+  TimeCPUClockUnit // One second passed
 };
 
 enum class EventCategory {
@@ -33,7 +36,7 @@ enum class EventCategory {
   WindowEvent = bit_shift_left(2),
   KeyboardEvent = bit_shift_left(3),
   MouseEvent = bit_shift_left(4),
-  /* ControllerEvent = bit_shift_left(5), */
+  TimeEvent = bit_shift_left(5)
 };
 
 // HASH DEFINE START ----------------------------------------------------------
@@ -69,9 +72,11 @@ public:
   // DEBUG ONLY
   [[nodiscard]] virtual const char *GetEventTypeName() const = 0;
   // DEBUG ONLY
-  [[nodiscard]] virtual std::string PrintDebugData() const {
-    return "From base class -- virtual method \"PrintDebugData\" not defined "
-           "in derived class\n";
+  virtual void PrintDebugData() const {
+    PC_PRINT_DEBUG(
+        "From base class -- virtual method \"PrintDebugData\" not defined "
+        "in derived class\n",
+        1, "EVENT");
   };
 
 private:

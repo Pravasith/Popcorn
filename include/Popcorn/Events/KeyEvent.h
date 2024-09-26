@@ -4,6 +4,7 @@
 
 #include "Global_Macros.h"
 #include "KeyCodes.h"
+#include "Popcorn/Core/Base.h"
 
 ENGINE_NAMESPACE_BEGIN
 using namespace Key;
@@ -29,17 +30,14 @@ private:
 class KeyPressedEvent : public KeyEvent {
 public:
   KeyPressedEvent(const KeyCode keyCode, bool isRepeat = false)
-      : KeyEvent(keyCode), m_is_repeat(isRepeat){};
+      : KeyEvent(keyCode), m_is_repeat(isRepeat) {};
 
   bool IsRepeat() const { return m_is_repeat; }
 
   EVENT_TYPE_OVERRIDE_METHODS(KeyPressed);
 
-  [[nodiscard]] std::string PrintDebugData() const override {
-    std::stringstream ss;
-
-    ss << "Key Pressed: " << GetKeyCode() << '\n';
-    return ss.str();
+  void PrintDebugData() const override {
+    PC_PRINT_DEBUG("Key Pressed: " << GetKeyCode(), 1, "KEY_EVENT");
   };
 
 private:
@@ -49,17 +47,14 @@ private:
 class KeyReleasedEvent : public KeyEvent {
 public:
   KeyReleasedEvent(const KeyCode keyCode, bool isRepeat = false)
-      : KeyEvent(keyCode), m_is_repeat(isRepeat){};
+      : KeyEvent(keyCode), m_is_repeat(isRepeat) {};
 
   bool IsRepeat() const { return m_is_repeat; }
 
   EVENT_TYPE_OVERRIDE_METHODS(KeyReleased);
 
-  [[nodiscard]] std::string PrintDebugData() const override {
-    std::stringstream ss;
-
-    ss << "Key Released: " << GetKeyCode() << '\n';
-    return ss.str();
+  void PrintDebugData() const override {
+    PC_PRINT_DEBUG("Key Released: " << GetKeyCode(), 1, "KEY_EVENT");
   };
 
 private:
