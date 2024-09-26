@@ -1,32 +1,42 @@
 #pragma once
 
-#include "Application.h"
-#include "Assert.h"
+#include "Base.h"
 #include "Global_Macros.h"
 #include "Publisher.h"
-#include "TimeEvent.h"
 
 ENGINE_NAMESPACE_BEGIN
+
 class Time : public Publisher {
 public:
+  Time(const Time &) = delete;
+  Time operator()(const Time &) = delete;
+
+  Time(const Time &&) = delete;
+  Time operator()(const Time &&) = delete;
+
+  [[nodiscard]] bool IsGameLoopRunning();
+
+  static Time *Get();
+
+  void Start();
+  void Stop();
+
+private:
   Time()
       : m_now(0.0f),
         // Assumption: First frame took 16.66 ms
-        m_delta(16.66f), m_elapsed(0.0f) {};
-  ~Time() = default;
-
-  void Start() {
-    PC_ASSERT(!Application::IsGameLoopRunning(), "GAME LOOP ALREADY RUNNING!");
-
-    while (Application::IsGameLoopRunning()) {
-      // this->PublishEvent(TimeEvent<typename T>);
-    }
-  };
-
-private:
+        m_delta(16.66f), m_elapsed(0.0f), m_is_game_loop_running(true) {
+          PC_PRINT_DEBUG("CREATED", 1, "TIME")
+        };
+  ~Time() { PC_PRINT_DEBUG("DESTROYED", 1, "TIME") };
   float m_now;
   float m_delta;
   float m_elapsed;
+
+  bool m_is_game_loop_running;
+  static Time *s_instance;
+
+  void RunLoop();
 };
 
 ENGINE_NAMESPACE_END
