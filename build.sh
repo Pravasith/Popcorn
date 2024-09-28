@@ -15,7 +15,18 @@ if [ "$platform" = "l" ]; then
 
     cd "$src_dir"/build/linux
 
-    rm -rf *
+    clean_build_prompt=$(echo "$clean_build_prompt" | tr '[:upper:]' '[:lower:]')
+    read -p "Clean build? Y / N " clean_build_prompt
+
+    if [ "$clean_build_prompt" = 'y' ]; then
+        echo "Performing a clean build..."
+        rm -rf *
+    elif [ "$clean_build_prompt" = 'n' ]; then
+        echo "Performing a non-clean build..."
+    else
+        echo "Invalid input. Y / N"
+    fi
+
     cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ../../
     cp compile_commands.json "$src_dir"/compile_commands.json
     make
@@ -29,7 +40,18 @@ elif [ "$platform" = "w" ]; then
 
     cd "$src_dir"/build/windows
 
-    rm -rf *
+    clean_build_prompt=$(echo "$clean_build_prompt" | tr '[:upper:]' '[:lower:]')
+    read -p "Clean build? Y / N " clean_build_prompt
+
+    if [ "$clean_build_prompt" = 'y' ]; then
+        echo "Performing a clean build..."
+        rm -rf *
+    elif [ "$clean_build_prompt" = 'n' ]; then
+        echo "Performing a non-clean build..."
+    else
+        echo "Invalid input. Y / N"
+    fi
+
     cmake -DCMAKE_TOOLCHAIN_FILE=../../tc-windows.cmake ../../
     make
     echo $PWD

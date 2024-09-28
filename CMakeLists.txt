@@ -138,6 +138,9 @@ target_include_directories(
   ImGui PUBLIC ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}
                ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/imgui)
 
+target_precompile_headers(
+  glad PUBLIC ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glad/include/glad/glad.h)
+
 # TODO: Refactor these
 target_include_directories(
   Window
