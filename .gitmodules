@@ -4,3 +4,6 @@
 [submodule "submodules/imgui"]
 	path = submodules/imgui
 	url = git@github.com:ocornut/imgui.git
+[submodule "submodules/vulkan-loader"]
+	path = submodules/vulkan-loader
+	url = https://github.com/KhronosGroup/Vulkan-Loader
