@@ -36,9 +36,8 @@ check_create_folder() {
 # sudo apt install libwayland-dev libxkbcommon-dev xorg-dev
 #
 # FOR VULKAN:
-# sudo apt install vulkan-tools
-# sudo apt install libvulkan-dev
-# sudo apt install vulkan-validationlayers-dev spirv-tools
+# sudo apt-get install git build-essential libx11-xcb-dev \
+#     libxkbcommon-dev libwayland-dev libxrandr-dev
 #
 # SHADER COMPILERS:
 # -----------------------------------------------------------------------
@@ -204,6 +203,55 @@ echo "Installing ImGui complete"
 # -----------------------------------------------------------------------
 
 #
+
+# -----------------------------------------------------------------------
+# SUBMODULE INSTALL - VULKAN-LOADER --- BEGIN
+# -----------------------------------------------------------------------
+
+echo "Installing Vulkan-Loader..."
+
+vulkan_loader_submodule_dir="$submodules_dir/vulkan-loader"
+
+echo "Building VULKAN-LOADER..."
+vulkan_loader_submodule_build_dir="$vulkan_loader_submodule_dir/build"
+check_create_folder "$vulkan_loader_submodule_build_dir"
+
+# CREATE VULKAN-LOADER VENDOR DIR
+vulkan_loader_vendor_dir="$vendor_platform_agnostic_dir/vulkan-loader"
+check_create_folder "$vulkan_loader_vendor_dir"
+
+cmake -DCMAKE_INSTALL_PREFIX="$vulkan_loader_vendor_dir" \
+    -D UPDATE_DEPS=ON \
+    -S "$vulkan_loader_submodule_dir" -B "$vulkan_loader_submodule_build_dir"
+
+cd "$vulkan_loader_submodule_build_dir"
+make install
+cd "$curr_dir"
+
+echo "Building VULKAN-LOADER complete"
+echo "Installing Vulkan-Loader complete"
+
+echo "Installing Vulkan-Headers ..."
+vulkan_headers_submodule_dir="$submodules_dir/vulkan-headers"
+
+# CREATE VULKAN-HEADERS SUBMODULES BUILD DIR
+
+vulkan_headers_submodule_build_dir="$vulkan_headers_submodule_dir/build"
+check_create_folder "$vulkan_headers_submodule_build_dir"
+
+# CREATE VULKAN-HEADERS VENDOR DIR
+vulkan_headers_vendor_dir="$vendor_platform_agnostic_dir/vulkan-headers"
+check_create_folder "$vulkan_headers_vendor_dir"
+
+cmake -S "$vulkan_headers_submodule_dir" -B "$vulkan_headers_submodule_build_dir"
+cmake --install "$vulkan_headers_submodule_build_dir" --prefix "$vulkan_headers_vendor_dir"
+
+echo "Installing Vulkan-Headers complete"
+
+
+# -----------------------------------------------------------------------
+# SUBMODULE INSTALL - VULKAN-LOADER --- END
+# -----------------------------------------------------------------------
 
 #
 echo "Installing vendor/third-party submodules complete"
