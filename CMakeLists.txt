@@ -83,8 +83,24 @@ add_executable(${PROJECT} ${SOURCE_FILES})
 
 add_subdirectory("third-party")
 
+# VENDOR BINARIES DIRS
+set(PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR
+    ${CMAKE_SOURCE_DIR}/third-party/platform-agnostic)
+set(LINUX_VENDOR_BINARIES_DIR ${CMAKE_SOURCE_DIR}/third-party/linux)
+set(WINDOWS_VENDOR_BINARIES_DIR ${CMAKE_SOURCE_DIR}/third-party/windows)
+
+if(BUILD_FOR_LINUX)
+  # VENDOR BINARIES PATHS
+  set(CMAKE_PREFIX_PATH ${LINUX_VENDOR_BINARIES_DIR}/glfw
+                        ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-loader)
+else()
+  set(CMAKE_PREFIX_PATH ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-loader)
+endif()
+
+# FIND VENDOR BINARIES
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
+find_package(VulkanLoader REQUIRED)
 # -----------------------------------------------------------------------
 # ADD THIRD PARTY LIBS --- END
 # -----------------------------------------------------------------------
@@ -119,18 +135,6 @@ add_subdirectory("src")
 
 include_directories(# POPCORN INTERNAL INCLUDES
                     include)
-
-# INCLUDE LINUX VENDOR DIRS
-if(BUILD_FOR_LINUX)
-  # THIRD-PARTY INCLUDES LINUX --- FOR OTHER PLATFORMS USE TOOLCHAIN FILES
-  set(LINUX_BINARIES_DIR ${CMAKE_SOURCE_DIR}/third-party/linux)
-
-  # target_include_directories(some-lib PUBLIC ${LINUX_BINARIES_DIR}/some-lib)
-endif()
-
-# INCLUDE PLATFORM AGNOSTIC VENDOR DIRS
-set(PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR
-    ${CMAKE_SOURCE_DIR}/third-party/platform-agnostic)
 
 target_include_directories(
   glad PUBLIC ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glad/include)
