@@ -231,6 +231,24 @@ cd "$curr_dir"
 echo "Building VULKAN-LOADER complete"
 echo "Installing Vulkan-Loader complete"
 
+echo "Installing Vulkan-Headers ..."
+vulkan_headers_submodule_dir="$submodules_dir/vulkan-headers"
+
+# CREATE VULKAN-HEADERS SUBMODULES BUILD DIR
+
+vulkan_headers_submodule_build_dir="$vulkan_headers_submodule_dir/build"
+check_create_folder "$vulkan_headers_submodule_build_dir"
+
+# CREATE VULKAN-HEADERS VENDOR DIR
+vulkan_headers_vendor_dir="$vendor_platform_agnostic_dir/vulkan-headers"
+check_create_folder "$vulkan_headers_vendor_dir"
+
+cmake -S "$vulkan_headers_submodule_dir" -B "$vulkan_headers_submodule_build_dir"
+cmake --install "$vulkan_headers_submodule_build_dir" --prefix "$vulkan_headers_vendor_dir"
+
+echo "Installing Vulkan-Headers complete"
+
+
 # -----------------------------------------------------------------------
 # SUBMODULE INSTALL - VULKAN-LOADER --- END
 # -----------------------------------------------------------------------
