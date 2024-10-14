@@ -96,7 +96,6 @@ if(BUILD_FOR_LINUX)
       ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-loader
       ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers)
 else()
-  message("WINDOWS")
   set(CMAKE_PREFIX_PATH ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-loader
                         ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers)
 endif()
