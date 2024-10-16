@@ -205,7 +205,7 @@ echo "Installing ImGui complete"
 #
 
 # -----------------------------------------------------------------------
-# SUBMODULE INSTALL - VULKAN-LOADER --- BEGIN
+# SUBMODULE INSTALL - VULKAN-LOADER & VULKAN-HEADERS --- BEGIN
 # -----------------------------------------------------------------------
 
 echo "Installing Vulkan-Loader..."
@@ -246,14 +246,50 @@ check_create_folder "$vulkan_headers_vendor_dir"
 cmake -S "$vulkan_headers_submodule_dir" -B "$vulkan_headers_submodule_build_dir"
 cmake --install "$vulkan_headers_submodule_build_dir" --prefix "$vulkan_headers_vendor_dir"
 
+cd "$curr_dir"
+
 echo "Installing Vulkan-Headers complete"
 
 
 # -----------------------------------------------------------------------
-# SUBMODULE INSTALL - VULKAN-LOADER --- END
+# SUBMODULE INSTALL - VULKAN-LOADER & VULKAN-HEADERS --- END
 # -----------------------------------------------------------------------
 
 #
+
+# -----------------------------------------------------------------------
+# SUBMODULE INSTALL - GLM --- BEGIN
+# -----------------------------------------------------------------------
+
+echo "Installing GLM..."
+
+glm_submodule_dir="$submodules_dir/glm"
+
+glm_submodule_build_dir="$glm_submodule_dir/build"
+check_create_folder "$glm_submodule_build_dir"
+
+# CREATE GLM VENDOR DIR
+glm_vendor_dir="$vendor_platform_agnostic_dir/glm"
+check_create_folder "$glm_vendor_dir"
+
+cmake \
+    -DGLM_BUILD_TESTS=OFF \
+    -DBUILD_SHARED_LIBS=OFF \
+    -S "$glm_submodule_dir" -B "$glm_submodule_build_dir"
+
+cmake --build "$glm_submodule_build_dir" --target all
+cmake --install "$glm_submodule_build_dir" --prefix "$glm_vendor_dir"
+
+cd "$curr_dir"
+
+echo "Installing GLM complete"
+
+# -----------------------------------------------------------------------
+# SUBMODULE INSTALL - GLM --- END
+# -----------------------------------------------------------------------
+
+#
+
 echo "Installing vendor/third-party submodules complete"
 # -----------------------------------------------------------------------
 # INSTALL SUBMODULES --- END
