@@ -1,6 +1,6 @@
 #include "Window.h"
 /* #ifdef IS_WINDOWS_OR_LINUX */
-#include "Window_Agnostic.h"
+#include "WindowAgnostic.h"
 /* #else */
 /* write_log("Error Importing Platform!"); */
 /* #endif */

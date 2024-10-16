@@ -6,7 +6,10 @@
 	url = git@github.com:ocornut/imgui.git
 [submodule "submodules/vulkan-loader"]
 	path = submodules/vulkan-loader
-	url = https://github.com/KhronosGroup/Vulkan-Loader.git
+	url = git@github.com:KhronosGroup/Vulkan-Loader.git
 [submodule "submodules/vulkan-headers"]
 	path = submodules/vulkan-headers
-	url = https://github.com/KhronosGroup/Vulkan-Headers.git
+	url = git@github.com:KhronosGroup/Vulkan-Headers.git
+[submodule "submodules/glm"]
+	path = submodules/glm
+	url = git@github.com:g-truc/glm.git

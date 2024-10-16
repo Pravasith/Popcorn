@@ -2,8 +2,8 @@
 #include "Global_Macros.h"
 #include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
-#include "Renderer_OpenGL.h"
-#include "Renderer_Vulkan.h"
+#include "RendererOpenGL.h"
+#include "RendererVulkan.h"
 #include <string>
 
 ENGINE_NAMESPACE_BEGIN
