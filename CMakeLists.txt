@@ -94,10 +94,13 @@ if(BUILD_FOR_LINUX)
   set(CMAKE_PREFIX_PATH
       ${LINUX_VENDOR_BINARIES_DIR}/glfw
       ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-loader
-      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers)
+      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers
+      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glm)
 else()
-  set(CMAKE_PREFIX_PATH ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-loader
-                        ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers)
+  set(CMAKE_PREFIX_PATH
+      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-loader
+      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers
+      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glm)
 endif()
 
 # FIND VENDOR BINARIES
@@ -105,6 +108,7 @@ find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(VulkanLoader REQUIRED)
 find_package(VulkanHeaders REQUIRED CONFIG)
+find_package(glm CONFIG REQUIRED)
 # -----------------------------------------------------------------------
 # ADD THIRD PARTY LIBS --- END
 # -----------------------------------------------------------------------
