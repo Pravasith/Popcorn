@@ -1,16 +1,5 @@
 #include "Application.h"
-#include "Event.h"
-#include "ImGuiLayer.h"
-#include "LayerStack.h"
-#include "Renderer.h"
-#include "Time.h"
-#include "TimeEvent.h"
 #include "Utilities.h"
-#include "Window.h"
-#include "WindowEvent.h"
-
-#include <cassert>
-#include <string>
 
 ENGINE_NAMESPACE_BEGIN
 Application *Application::s_instance = nullptr;
@@ -67,7 +56,7 @@ void Application::Start() {
     // DONT MOVE THIS BLOCK
     // DONT MOVE THIS BLOCK
   } else {
-    write_log(
+    pc_write_log(
         "Attempt to create Application class, when instance already exists");
   }
 }

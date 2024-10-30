@@ -85,7 +85,7 @@ WindowAgnostic::WindowAgnostic(const Props &props) : m_title(props.Title) {
   );
 
   if (!s_os_window) {
-    write_log("No OS Window yet!");
+    pc_write_log("No OS Window yet!");
   }
 }
 
@@ -106,8 +106,8 @@ WindowAgnostic::~WindowAgnostic() {
 
 void WindowAgnostic::Terminate() {
   if (!s_os_window || !s_instance) {
-    write_log("Error: WindowAgnostic Terminate -- s_os_window or s_instance "
-              "of class not found.");
+    pc_write_log("Error: WindowAgnostic Terminate -- s_os_window or s_instance "
+                 "of class not found.");
   }
 
   else {

@@ -9,14 +9,12 @@ ENGINE_NAMESPACE_BEGIN
 
 RendererVulkan::RendererVulkan() {
   PC_PRINT_DEBUG("VULKAN CREATED", 2, "RENDERER");
-
-  // auto os_window* =
-
-  // Application::Get();
   InitVulkan();
 };
 
 RendererVulkan::~RendererVulkan() {
+  // Application
+
   CleanUp();
   PC_PRINT_DEBUG("VULKAN DESTROYED", 2, "RENDERER");
 };
