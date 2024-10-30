@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Events/Subscriber.h"

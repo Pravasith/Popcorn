@@ -1,5 +1,6 @@
 #include "RendererVulkan.h"
 #include "Global_Macros.h"
+// #include "Popcorn/Core/Application.h"
 #include "Popcorn/Core/Base.h"
 #include <vulkan/vulkan.h>
 
@@ -9,6 +10,9 @@ ENGINE_NAMESPACE_BEGIN
 RendererVulkan::RendererVulkan() {
   PC_PRINT_DEBUG("VULKAN CREATED", 2, "RENDERER");
 
+  // auto os_window* =
+
+  // Application::Get();
   InitVulkan();
 };
 

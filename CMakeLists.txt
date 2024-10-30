@@ -178,6 +178,7 @@ target_include_directories(
   PopcornEngine
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events
+         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Graphics
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/ImGui
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core)
 
@@ -216,7 +217,8 @@ target_link_libraries(PopcornEngine PRIVATE glad)
 target_link_libraries(ImGui PUBLIC glfw)
 
 target_link_libraries(PopcornEngine PUBLIC ImGui)
-target_link_libraries(PopcornEngine PRIVATE Window Graphics)
+target_link_libraries(PopcornEngine PRIVATE Graphics)
+target_link_libraries(PopcornEngine PRIVATE Window)
 
 # FINAL PROJECT LINKING
 target_link_libraries(${PROJECT} PRIVATE PopcornEngine)
