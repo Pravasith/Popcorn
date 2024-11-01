@@ -1,10 +1,10 @@
 #pragma once
 
+#include "DebugUIOverlay.h"
 #include "Event.h"
 #include "Global_Macros.h"
-#include "ImGuiLayer.h"
 #include "LayerStack.h"
-#include "Renderer.h"
+#include "Popcorn/Graphics/Renderer.h"
 #include "Subscriber.h"
 #include "Time.h"
 #include "TimeEvent.h"
@@ -40,7 +40,7 @@ private:
 private:
   static Application *s_instance;
   static LayerStack *s_layer_stack;
-  static ImGuiLayer *s_imgui_layer;
+  static DebugUIOverlay *s_debug_ui_overlay;
   static Window *s_window;
   static Renderer *s_renderer;
   static Time *s_time;

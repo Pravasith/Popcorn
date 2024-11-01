@@ -6,6 +6,8 @@
 #include "RendererVulkan.h"
 #include <string>
 
+// #include "Application.h"
+
 ENGINE_NAMESPACE_BEGIN
 // SINGLETON
 Renderer *Renderer::s_instance = nullptr;
@@ -23,6 +25,10 @@ Renderer::Renderer() {
   };
 };
 Renderer::~Renderer() { PC_PRINT_DEBUG("RENDERER DESTROYED", 1, "RENDERER") };
+
+// Window &Renderer::GetWindow() const {
+//   // return Application::Get().GetAppWindow();
+// };
 
 void Renderer::Create() {
   if (s_instance) {

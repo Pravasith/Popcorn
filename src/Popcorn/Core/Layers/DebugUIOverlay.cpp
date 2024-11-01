@@ -1,10 +1,10 @@
 #include <glad/glad.h>
 
 #include "Application.h"
+#include "DebugUIOverlay.h"
 #include "Event.h"
 #include "GLFW_Funcs.h"
 #include "Global_Macros.h"
-#include "Popcorn/ImGui/ImGuiLayer.h"
 
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -12,10 +12,14 @@
 #include <iostream>
 
 ENGINE_NAMESPACE_BEGIN
-ImGuiLayer::ImGuiLayer() { PC_PRINT_DEBUG("CREATED", 1, "IMGUI-LAYER"); }
-ImGuiLayer::~ImGuiLayer() { PC_PRINT_DEBUG("DESTROYED", 1, "IMGUI-LAYER"); }
+DebugUIOverlay::DebugUIOverlay() {
+  PC_PRINT_DEBUG("CREATED", 1, "IMGUI-LAYER");
+}
+DebugUIOverlay::~DebugUIOverlay() {
+  PC_PRINT_DEBUG("DESTROYED", 1, "IMGUI-LAYER");
+}
 
-void ImGuiLayer::OnAttach() {
+void DebugUIOverlay::OnAttach() {
   Application &app = Application::Get();
   m_os_window = app.GetAppWindow().GetOSWindow();
 
@@ -74,9 +78,9 @@ void ImGuiLayer::OnAttach() {
   static bool show_another_window = false;
 }
 
-void ImGuiLayer::OnDetach() {}
+void DebugUIOverlay::OnDetach() {}
 
-void ImGuiLayer::OnUpdate() {
+void DebugUIOverlay::OnUpdate() {
   // std::cout << "IMGUI UPDATE\n";
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
@@ -101,7 +105,7 @@ void ImGuiLayer::OnUpdate() {
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void ImGuiLayer::OnEvent(Event &e) {
+void DebugUIOverlay::OnEvent(Event &e) {
   // TODO: ADD EVENTS
   std::cout << e.GetEventTypeName() << '\n';
 }

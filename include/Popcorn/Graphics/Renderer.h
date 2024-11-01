@@ -2,6 +2,7 @@
 
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
+#include "Popcorn/Core/Window.h"
 #include "Popcorn/Events/Subscriber.h"
 
 ENGINE_NAMESPACE_BEGIN
@@ -20,6 +21,7 @@ public:
   static void Destroy();
   Renderer &Get() const;
   void OnEvent(Event &) const override {};
+  // Window &GetWindow() const {};
 
 private:
   Renderer();

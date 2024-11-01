@@ -5,7 +5,7 @@ ENGINE_NAMESPACE_BEGIN
 Application *Application::s_instance = nullptr;
 Window *Application::s_window = nullptr;
 LayerStack *Application::s_layer_stack = nullptr;
-ImGuiLayer *Application::s_imgui_layer = nullptr;
+DebugUIOverlay *Application::s_debug_ui_overlay = nullptr;
 Renderer *Application::s_renderer = nullptr;
 Time *Application::s_time = nullptr;
 
@@ -36,25 +36,19 @@ Window &Application::GetAppWindow() const { return *s_window; }
 void Application::Start() {
   if (!s_instance) {
     // DONT MOVE THIS BLOCK
-    // DONT MOVE THIS BLOCK
     s_instance = new Application();
-    // DONT MOVE THIS BLOCK
     s_window = Window::Create(Window::Props("Popcorn Engine", 500, 500));
     Window::Subscribe(s_instance);
-    // DONT MOVE THIS BLOCK
-    Renderer::Create();
-    // DONT MOVE THIS BLOCK
+
     Application::InitLayers();
     s_layer_stack = new LayerStack();
-    // DONT MOVE THIS BLOCK
-    s_imgui_layer = new ImGuiLayer();
-    s_imgui_layer->OnAttach();
-    // DONT MOVE THIS BLOCK
-    s_layer_stack->PushLayer(s_imgui_layer);
+    s_debug_ui_overlay = new DebugUIOverlay();
+    s_debug_ui_overlay->OnAttach();
+    s_layer_stack->PushLayer(s_debug_ui_overlay);
+
+    Renderer::Create();
 
     s_time = Time::Get();
-    // DONT MOVE THIS BLOCK
-    // DONT MOVE THIS BLOCK
   } else {
     pc_write_log(
         "Attempt to create Application class, when instance already exists");

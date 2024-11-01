@@ -1,6 +1,5 @@
 #include "RendererVulkan.h"
 #include "Global_Macros.h"
-// #include "Popcorn/Core/Application.h"
 #include "Popcorn/Core/Base.h"
 #include <vulkan/vulkan.h>
 
@@ -13,9 +12,7 @@ RendererVulkan::RendererVulkan() {
 };
 
 RendererVulkan::~RendererVulkan() {
-  // Application
-
-  CleanUp();
+  // APPLICATION
   PC_PRINT_DEBUG("VULKAN DESTROYED", 2, "RENDERER");
 };
 

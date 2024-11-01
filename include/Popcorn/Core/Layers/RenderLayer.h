@@ -5,10 +5,10 @@
 #include "Layer.h"
 
 ENGINE_NAMESPACE_BEGIN
-class ImGuiLayer : public Layer {
+class RenderLayer : public Layer {
 public:
-  ImGuiLayer();
-  ~ImGuiLayer();
+  RenderLayer();
+  ~RenderLayer();
 
   void OnAttach() override;
   void OnDetach() override;
