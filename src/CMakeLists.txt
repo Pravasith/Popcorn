@@ -1,5 +1,6 @@
 # CORE LIBS
 set(CORE_IMPL_DIR Popcorn/Core)
+set(LAYERS_IMPL_DIR Popcorn/Layers)
 
 add_library(
   PopcornEngine
@@ -7,9 +8,9 @@ add_library(
   # CORE IMPL FILES
   ${CORE_IMPL_DIR}/Application.cpp
   # CORE LAYERS
-  ${CORE_IMPL_DIR}/Layers/Layer.cpp
-  ${CORE_IMPL_DIR}/Layers/LayerStack.cpp
-  ${CORE_IMPL_DIR}/Layers/DebugUIOverlay.cpp
+  ${CORE_IMPL_DIR}/Layer.cpp
+  ${CORE_IMPL_DIR}/LayerStack.cpp
+  ${LAYERS_IMPL_DIR}/DebugUIOverlay.cpp
   # TIME
   ${CORE_IMPL_DIR}/Time.cpp)
 

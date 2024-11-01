@@ -178,7 +178,7 @@ target_include_directories(
   PopcornEngine
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core
-         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core/Layers
+         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Layers
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events)
 
 # -----------------------------------------------------------------------
