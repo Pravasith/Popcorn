@@ -1,20 +1,21 @@
 #pragma once
 
+#include "DebugUIOverlay.h"
+#include "Event.h"
 #include "Global_Macros.h"
-#include "ImGuiLayer.h"
 #include "LayerStack.h"
-#include "Popcorn/Events/Event.h"
-#include "Popcorn/Events/Subscriber.h"
 #include "Popcorn/Graphics/Renderer.h"
+#include "Subscriber.h"
 #include "Time.h"
 #include "TimeEvent.h"
 #include "Window.h"
 #include "WindowEvent.h"
 
 ENGINE_NAMESPACE_BEGIN
+
+// SINGLETON
 class Application : public Subscriber {
 public:
-  // SINGLETON
   static void Start();
   static Application &Get();
   static void Stop();
@@ -39,7 +40,7 @@ private:
 private:
   static Application *s_instance;
   static LayerStack *s_layer_stack;
-  static ImGuiLayer *s_imgui_layer;
+  static DebugUIOverlay *s_debug_ui_overlay;
   static Window *s_window;
   static Renderer *s_renderer;
   static Time *s_time;

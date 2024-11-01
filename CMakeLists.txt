@@ -94,10 +94,13 @@ if(BUILD_FOR_LINUX)
   set(CMAKE_PREFIX_PATH
       ${LINUX_VENDOR_BINARIES_DIR}/glfw
       ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-loader
-      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers)
+      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers
+      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glm)
 else()
-  set(CMAKE_PREFIX_PATH ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-loader
-                        ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers)
+  set(CMAKE_PREFIX_PATH
+      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-loader
+      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers
+      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glm)
 endif()
 
 # FIND VENDOR BINARIES
@@ -105,6 +108,7 @@ find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(VulkanLoader REQUIRED)
 find_package(VulkanHeaders REQUIRED CONFIG)
+find_package(glm CONFIG REQUIRED)
 # -----------------------------------------------------------------------
 # ADD THIRD PARTY LIBS --- END
 # -----------------------------------------------------------------------
@@ -173,9 +177,9 @@ target_include_directories(
 target_include_directories(
   PopcornEngine
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events
-         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/ImGui
-         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core)
+         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core
+         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Layers
+         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events)
 
 # -----------------------------------------------------------------------
 # SET IMPLEMENTATION AND INCLUDE DIRS --- END
@@ -212,7 +216,8 @@ target_link_libraries(PopcornEngine PRIVATE glad)
 target_link_libraries(ImGui PUBLIC glfw)
 
 target_link_libraries(PopcornEngine PUBLIC ImGui)
-target_link_libraries(PopcornEngine PRIVATE Window Graphics)
+target_link_libraries(PopcornEngine PRIVATE Graphics)
+target_link_libraries(PopcornEngine PRIVATE Window)
 
 # FINAL PROJECT LINKING
 target_link_libraries(${PROJECT} PRIVATE PopcornEngine)

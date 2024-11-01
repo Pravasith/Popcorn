@@ -17,7 +17,7 @@ typedef GLFWwindow GLFW_OSWindow_T;
 
 namespace GLFW_Funcs {
 static void glfw_error_callback(int error, const char *description) {
-  write_log(description);
+  pc_write_log(description);
   throw("GLFW error, see common_logs file");
 }
 
@@ -26,7 +26,7 @@ static auto GLFW_GetProcAddress = glfwGetProcAddress;
 static void GLFW_Init() {
   int success = glfwInit();
   if (!success) {
-    write_log("GLFW Error: Couldn't initiate GLFW");
+    pc_write_log("GLFW Error: Couldn't initiate GLFW");
   };
 
   glfwSetErrorCallback(glfw_error_callback);
@@ -45,7 +45,7 @@ static void GLFW_CreateWindow(GLFWwindow **glfwWindow, std::string &title,
   *glfwWindow = glfwCreateWindow((int)w, (int)h, title.c_str(), NULL, NULL);
 
   if (!glfwWindow) {
-    write_log("Failed to create GLFW Window");
+    pc_write_log("Failed to create GLFW Window");
     glfwTerminate();
   }
 
