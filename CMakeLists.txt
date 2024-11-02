@@ -216,8 +216,7 @@ target_link_libraries(PopcornEngine PRIVATE glad)
 target_link_libraries(ImGui PUBLIC glfw)
 
 target_link_libraries(PopcornEngine PUBLIC ImGui)
-target_link_libraries(PopcornEngine PRIVATE Graphics)
-target_link_libraries(PopcornEngine PRIVATE Window)
+target_link_libraries(PopcornEngine PRIVATE Graphics Window)
 
 # FINAL PROJECT LINKING
 target_link_libraries(${PROJECT} PRIVATE PopcornEngine)

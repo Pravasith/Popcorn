@@ -24,11 +24,8 @@ Renderer::Renderer() {
     RendererVulkan();
   };
 };
-Renderer::~Renderer() { PC_PRINT_DEBUG("RENDERER DESTROYED", 1, "RENDERER") };
 
-// Window &Renderer::GetWindow() const {
-//   // return Application::Get().GetAppWindow();
-// };
+Renderer::~Renderer() { PC_PRINT_DEBUG("RENDERER DESTROYED", 1, "RENDERER") };
 
 void Renderer::Create() {
   if (s_instance) {
@@ -37,6 +34,8 @@ void Renderer::Create() {
 
   s_instance = new Renderer();
 };
+
+void Renderer::SetOSWindow(const void *osWindow) { s_os_window = osWindow; };
 
 Renderer &Renderer::Get() const {
   PC_ASSERT(!s_instance, "NO RENDERER INSTANCE");

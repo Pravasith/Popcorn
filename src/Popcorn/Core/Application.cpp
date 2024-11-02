@@ -1,13 +1,15 @@
 #include "Application.h"
+#include "RenderLayer.h"
 #include "Utilities.h"
 
 ENGINE_NAMESPACE_BEGIN
 Application *Application::s_instance = nullptr;
-Window *Application::s_window = nullptr;
 LayerStack *Application::s_layer_stack = nullptr;
-DebugUIOverlay *Application::s_debug_ui_overlay = nullptr;
-Renderer *Application::s_renderer = nullptr;
+Window *Application::s_window = nullptr;
 Time *Application::s_time = nullptr;
+
+DebugUIOverlay *Application::s_debug_ui_overlay = nullptr;
+RenderLayer *Application::s_render_layer = nullptr;
 
 Application::Application() {
   PC_PRINT_DEBUG("APPLICATION STARTED", 0, "APP");
@@ -22,7 +24,6 @@ Application::~Application() {
   delete s_layer_stack;
 
   // LAYERS ARE DELETED IN THE LAYERSTACK DESTRUCTOR
-  Renderer::Destroy();
 
   Window::UnSubscribe(s_instance);
   Window::Destroy();
@@ -42,11 +43,17 @@ void Application::Start() {
 
     Application::InitLayers();
     s_layer_stack = new LayerStack();
-    s_debug_ui_overlay = new DebugUIOverlay();
-    s_debug_ui_overlay->OnAttach();
-    s_layer_stack->PushLayer(s_debug_ui_overlay);
 
-    Renderer::Create();
+    // OVERLAYS
+    s_debug_ui_overlay = new DebugUIOverlay();
+    s_layer_stack->PushOverlay(s_debug_ui_overlay);
+
+    // LAYERS
+    s_render_layer = new RenderLayer();
+    s_layer_stack->PushLayer(s_render_layer);
+
+    s_debug_ui_overlay->OnAttach();
+    s_render_layer->OnAttach();
 
     s_time = Time::Get();
   } else {

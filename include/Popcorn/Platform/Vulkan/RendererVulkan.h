@@ -1,10 +1,11 @@
 #pragma once
 
 #include "Global_Macros.h"
+#include "Renderer.h"
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
-class RendererVulkan {
+class RendererVulkan : public Renderer {
 public:
   RendererVulkan();
   ~RendererVulkan();
@@ -12,7 +13,7 @@ public:
 private:
   void InitVulkan();
   void CleanUp();
-  virtual void OnUpdate();
+  virtual void OnUpdate() const override;
 
 private:
   VkInstance m_vk_instance;
