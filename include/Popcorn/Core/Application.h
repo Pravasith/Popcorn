@@ -28,6 +28,14 @@ public:
   LayerStack &GetLayerStack() const { return *s_layer_stack; };
   static bool IsGameLoopRunning();
 
+  // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
+  Application(const Application &) = delete;
+  Application &operator=(const Application &) = delete;
+
+  // DELETE THE MOVE CONSTRUCTOR AND MOVE ASSIGNMENT OPERATOR
+  Application(Application &&) = delete;
+  Application &operator=(Application &&) = delete;
+
 private:
   Application();
   ~Application();

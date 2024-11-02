@@ -8,6 +8,7 @@ ENGINE_NAMESPACE_BEGIN
 
 RendererVulkan::RendererVulkan() {
   PC_PRINT_DEBUG("VULKAN CREATED", 2, "RENDERER");
+
   InitVulkan();
 };
 
@@ -16,8 +17,11 @@ RendererVulkan::~RendererVulkan() {
   PC_PRINT_DEBUG("VULKAN DESTROYED", 2, "RENDERER");
 };
 
-void RendererVulkan::InitVulkan() {};
-void RendererVulkan::OnUpdate() {};
+void RendererVulkan::InitVulkan() {
+  PC_PRINT_DEBUG(s_os_window, 2, "RENDERER VULKAN")
+};
+
+void RendererVulkan::OnUpdate() const {};
 void RendererVulkan::CleanUp() {};
 
 ENGINE_NAMESPACE_END

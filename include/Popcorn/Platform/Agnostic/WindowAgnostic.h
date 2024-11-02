@@ -17,6 +17,14 @@ public:
 
   virtual void OnUpdate();
 
+  // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
+  WindowAgnostic(const WindowAgnostic &) = delete;
+  WindowAgnostic &operator=(const WindowAgnostic &) = delete;
+
+  // DELETE THE MOVE CONSTRUCTOR AND MOVE ASSIGNMENT OPERATOR
+  WindowAgnostic(WindowAgnostic &&) = delete;
+  WindowAgnostic &operator=(WindowAgnostic &&) = delete;
+
 private:
   WindowAgnostic(const Props &props);
   ~WindowAgnostic() override;

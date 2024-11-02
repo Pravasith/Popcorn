@@ -21,12 +21,14 @@ public:
 
   static void SetOSWindow(const void *);
 
+  static void Run();
+
   Renderer &Get() const;
 
   void OnEvent(Event &) const override {};
   virtual void OnUpdate() const {};
 
-private:
+protected:
   Renderer();
   virtual ~Renderer();
 

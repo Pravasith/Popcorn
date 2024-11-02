@@ -15,6 +15,14 @@ class Window : public Publisher {
   /* a same window pointer */
   /* ---- END NOTE ---- */
 
+  // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
+  Window(const Window &) = delete;
+  Window &operator=(const Window &) = delete;
+
+  // DELETE THE MOVE CONSTRUCTOR AND MOVE ASSIGNMENT OPERATOR
+  Window(Window &&) = delete;
+  Window &operator=(Window &&) = delete;
+
 public:
   struct Props {
     std::string Title;
