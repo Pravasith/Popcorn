@@ -1,4 +1,5 @@
 
+#include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
 #include "Base.h"
@@ -126,6 +127,7 @@ void WindowAgnostic::OnUpdate() {
 }
 
 WindowAgnostic::~WindowAgnostic() {
+  glfwDestroyWindow(s_os_window);
   glfwTerminate();
 
   PC_PRINT_DEBUG("GLFW KILL", 2, "WIN64-LINUX");

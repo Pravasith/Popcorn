@@ -14,6 +14,8 @@ private:
   void InitVulkan();
   void CleanUp();
 
+  void CreateInstance();
+
   virtual void OnUpdate() const override;
 
 private:
