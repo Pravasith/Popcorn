@@ -16,6 +16,7 @@ RendererVulkan::RendererVulkan() {
 
 RendererVulkan::~RendererVulkan() {
   PC_PRINT_DEBUG("VULKAN DESTROYED", 2, "RENDERER");
+  CleanUp();
 };
 
 void RendererVulkan::InitVulkan() {
@@ -55,6 +56,7 @@ void RendererVulkan::CreateInstance() {
 };
 
 void RendererVulkan::OnUpdate() const {};
-void RendererVulkan::CleanUp() {};
+
+void RendererVulkan::CleanUp() { vkDestroyInstance(m_vk_instance, nullptr); };
 
 ENGINE_NAMESPACE_END
