@@ -1,8 +1,8 @@
 #pragma once
 
-#include "GLFW_Funcs.h"
 #include "Global_Macros.h"
 #include "Window.h"
+#include <GLFW/glfw3.h>
 #include <cstdint>
 
 ENGINE_NAMESPACE_BEGIN
@@ -32,7 +32,7 @@ private:
 private:
   std::string m_title;
 
-  static GLFW_Types::GLFW_OSWindow_T *s_os_window;
+  static GLFWwindow *s_os_window;
   static WindowAgnostic *s_instance;
 };
 ENGINE_NAMESPACE_END

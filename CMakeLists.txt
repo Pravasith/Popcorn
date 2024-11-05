@@ -207,7 +207,7 @@ endif()
 # -----------------------------------------------------------------------
 # LINKING LIBS --- START
 # -----------------------------------------------------------------------
-target_link_libraries(Graphics PRIVATE Vulkan::Headers)
+target_link_libraries(Graphics PRIVATE Vulkan::Headers glfw)
 target_link_libraries(Window PRIVATE glad glfw)
 target_link_libraries(Window PUBLIC Events)
 

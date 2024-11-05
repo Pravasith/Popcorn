@@ -85,19 +85,19 @@
 },
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Graphics -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/OpenGL -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/opengl-experiments/third-party/platform-agnostic/vulkan-headers/include -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Graphics/Renderer.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Graphics/Renderer.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Graphics -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/OpenGL -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/opengl-experiments/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/opengl-experiments/third-party/linux/glfw/include -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Graphics/Renderer.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Graphics/Renderer.cpp",
   "file": "/home/prav/personal/opengl-experiments/src/Popcorn/Graphics/Renderer.cpp",
   "output": "src/CMakeFiles/Graphics.dir/Popcorn/Graphics/Renderer.cpp.o"
 },
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Graphics -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/OpenGL -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/opengl-experiments/third-party/platform-agnostic/vulkan-headers/include -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/OpenGL/RendererOpenGL.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Platform/OpenGL/RendererOpenGL.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Graphics -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/OpenGL -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/opengl-experiments/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/opengl-experiments/third-party/linux/glfw/include -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/OpenGL/RendererOpenGL.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Platform/OpenGL/RendererOpenGL.cpp",
   "file": "/home/prav/personal/opengl-experiments/src/Popcorn/Platform/OpenGL/RendererOpenGL.cpp",
   "output": "src/CMakeFiles/Graphics.dir/Popcorn/Platform/OpenGL/RendererOpenGL.cpp.o"
 },
 {
   "directory": "/home/prav/personal/opengl-experiments/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Graphics -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/OpenGL -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/opengl-experiments/third-party/platform-agnostic/vulkan-headers/include -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/RendererVulkan.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Platform/Vulkan/RendererVulkan.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/opengl-experiments/include -I/home/prav/personal/opengl-experiments/include/Popcorn/Graphics -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/OpenGL -I/home/prav/personal/opengl-experiments/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/opengl-experiments/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/opengl-experiments/third-party/linux/glfw/include -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/RendererVulkan.cpp.o -c /home/prav/personal/opengl-experiments/src/Popcorn/Platform/Vulkan/RendererVulkan.cpp",
   "file": "/home/prav/personal/opengl-experiments/src/Popcorn/Platform/Vulkan/RendererVulkan.cpp",
   "output": "src/CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/RendererVulkan.cpp.o"
 },

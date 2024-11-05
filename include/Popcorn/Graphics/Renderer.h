@@ -28,6 +28,12 @@ public:
   void OnEvent(Event &) const override {};
   virtual void OnUpdate() const {};
 
+  Renderer(const Renderer &) = delete;
+  Renderer &operator=(const Renderer &) = delete;
+
+  Renderer(Renderer &&) = delete;
+  Renderer &operator=(const Renderer &&) = delete;
+
 protected:
   Renderer();
   virtual ~Renderer();

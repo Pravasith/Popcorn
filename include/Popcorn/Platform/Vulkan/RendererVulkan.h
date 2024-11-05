@@ -13,6 +13,7 @@ public:
 private:
   void InitVulkan();
   void CleanUp();
+
   virtual void OnUpdate() const override;
 
 private:

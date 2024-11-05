@@ -2,7 +2,7 @@
 #include "Global_Macros.h"
 #include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
-#include "RendererOpenGL.h"
+// #include "RendererOpenGL.h"
 #include "RendererVulkan.h"
 #include <string>
 
@@ -18,13 +18,6 @@ Renderer::Renderer() {
 
   // TODO: CHANGE TO FANCY DISPATCHER STUFF
   m_type = RendererType::Vulkan;
-
-  // TODO: CHANGE TO FANCY DISPATCHER STUFF
-  // if (static_cast<int>(m_type) & static_cast<int>(RendererType::OpenGL)) {
-  //   RendererOpenGL();
-  // } else {
-  //   RendererVulkan();
-  // };
 };
 
 Renderer::~Renderer() { PC_PRINT_DEBUG("RENDERER DESTROYED", 1, "RENDERER") };
@@ -36,6 +29,12 @@ void Renderer::Create() {
 
   s_instance = new Renderer();
 
+  // TODO: CHANGE TO FANCY DISPATCHER STUFF
+  // if (static_cast<int>(m_type) & static_cast<int>(RendererType::OpenGL)) {
+  //   RendererOpenGL();
+  // } else {
+  //   RendererVulkan();
+  // };
   RendererVulkan();
 };
 
