@@ -15,8 +15,8 @@ RendererVulkan::RendererVulkan() {
 };
 
 RendererVulkan::~RendererVulkan() {
-  PC_PRINT_DEBUG("VULKAN DESTROYED", 2, "RENDERER");
   CleanUp();
+  PC_PRINT_DEBUG("VULKAN DESTROYED", 2, "RENDERER");
 };
 
 void RendererVulkan::InitVulkan() {
