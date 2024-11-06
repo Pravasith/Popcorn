@@ -12,9 +12,10 @@ void RenderLayer::OnAttach() {
   Application &app = Application::Get();
   auto osWindow = app.GetAppWindow().GetOSWindow();
 
-  Renderer::SetOSWindow(osWindow);
   Renderer::Create();
-  Renderer::Run();
+  Renderer::SetOSWindow(osWindow);
+  auto &rendInst = Renderer::Get();
+  rendInst.Run();
 }
 
 void RenderLayer::OnDetach() { Renderer::Destroy(); }

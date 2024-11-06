@@ -2,7 +2,8 @@
 
 #include "Global_Macros.h"
 #include "Renderer.h"
-#include <vulkan/vulkan_core.h>
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
 
 ENGINE_NAMESPACE_BEGIN
 class RendererVulkan : public Renderer {
@@ -15,11 +16,13 @@ private:
   void CleanUp();
 
   void CreateInstance();
+  bool CheckValidationLayerSupport();
 
   virtual void OnUpdate() const override;
 
 private:
-  VkInstance m_vk_instance;
+  VkInstance m_vkInstance;
+  bool m_enableValidationLayers;
 };
 
 ENGINE_NAMESPACE_END

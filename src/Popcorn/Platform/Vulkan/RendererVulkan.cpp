@@ -1,5 +1,5 @@
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+#include <cstdint>
+#include <vector>
 
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
@@ -10,8 +10,10 @@ ENGINE_NAMESPACE_BEGIN
 
 RendererVulkan::RendererVulkan() {
   PC_PRINT_DEBUG("VULKAN CREATED", 2, "RENDERER");
+  RendererVulkan::m_enableValidationLayers = false;
 
   InitVulkan();
+  CheckValidationLayerSupport();
 };
 
 RendererVulkan::~RendererVulkan() {
@@ -20,7 +22,7 @@ RendererVulkan::~RendererVulkan() {
 };
 
 void RendererVulkan::InitVulkan() {
-  PC_PRINT_DEBUG(s_os_window, 2, "RENDERER VULKAN")
+  PC_PRINT_DEBUG(s_osWindow, 2, "RENDERER VULKAN")
   CreateInstance();
 };
 
@@ -48,15 +50,36 @@ void RendererVulkan::CreateInstance() {
   createInfo.enabledLayerCount = 0;
 
   // CREATE INSTANCE
-  VkResult result = vkCreateInstance(&createInfo, nullptr, &m_vk_instance);
+  VkResult result = vkCreateInstance(&createInfo, nullptr, &m_vkInstance);
 
   if (result != VK_SUCCESS) {
     throw std::runtime_error("FAILED TO CREATE VK INSTANCE!");
   }
 };
 
+bool RendererVulkan::CheckValidationLayerSupport() {
+  const std::vector<const char *> validationLayers{
+      "VK_LAYER_KHRONOS_validation"};
+
+#ifdef NDEBUG
+  m_enableValidationLayers = false;
+  PC_PRINT_DEBUG("NDEBUG", 0, "RV")
+#else
+  m_enableValidationLayers = true;
+  PC_PRINT_DEBUG("DEBUG", 0, "RV")
+#endif
+
+  uint32_t layerCount;
+  vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+  std::vector<VkLayerProperties> availableLayers(layerCount);
+  vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+  return false;
+};
+
 void RendererVulkan::OnUpdate() const {};
 
-void RendererVulkan::CleanUp() { vkDestroyInstance(m_vk_instance, nullptr); };
+void RendererVulkan::CleanUp() { vkDestroyInstance(m_vkInstance, nullptr); };
 
 ENGINE_NAMESPACE_END

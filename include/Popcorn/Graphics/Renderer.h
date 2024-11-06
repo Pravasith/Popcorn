@@ -3,8 +3,10 @@
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Events/Subscriber.h"
+#include <variant>
 
 ENGINE_NAMESPACE_BEGIN
+
 enum class RendererType {
   None = 0,
   OpenGL = bit_shift_left(1),
@@ -12,6 +14,11 @@ enum class RendererType {
   // DirectX = bit_shift_left(3),
   // Metal = bit_shift_left(4)
 };
+
+// FORWARD DECLARATIONS OF DERIVED CLASSES TO AVOID
+// CIRCULAR DEP PROBLEM
+class RendererOpenGL;
+class RendererVulkan;
 
 // SINGLETON
 class Renderer : public Subscriber {
@@ -21,9 +28,9 @@ public:
 
   static void SetOSWindow(const void *);
 
-  static void Run();
+  void Run();
 
-  Renderer &Get() const;
+  static Renderer &Get();
 
   void OnEvent(Event &) const override {};
   virtual void OnUpdate() const {};
@@ -39,9 +46,10 @@ protected:
   virtual ~Renderer();
 
   static Renderer *s_instance;
+  static RendererType s_type;
+  static const void *s_osWindow;
 
-  RendererType m_type;
-  static const void *s_os_window;
+  static std::variant<RendererVulkan *, RendererOpenGL *> s_renderer;
 };
 
 ENGINE_NAMESPACE_END
