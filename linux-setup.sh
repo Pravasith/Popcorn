@@ -205,63 +205,8 @@ echo "Installing ImGui complete"
 #
 
 # -----------------------------------------------------------------------
-# SUBMODULE INSTALL - VULKAN-LOADER & VULKAN-HEADERS --- BEGIN
+# SUBMODULE INSTALL - VULKAN-HEADERS --- BEGIN
 # -----------------------------------------------------------------------
-
-echo "Installing Vulkan-Loader..."
-
-vulkan_loader_sm_dir="$submodules_dir/vulkan-loader"
-
-# LINUX
-# -----------------------------------------------------------------------
-echo "Building VULKAN-LOADER for Linux..."
-vulkan_loader_sm_lnx_build_dir="$vulkan_loader_sm_dir/build-linux"
-check_create_folder "$vulkan_loader_sm_lnx_build_dir"
-
-# CREATE VULKAN-LOADER VENDOR DIR
-vulkan_loader_vendor_lnx_dir="$vendor_linux_dir/vulkan-loader"
-check_create_folder "$vulkan_loader_vendor_lnx_dir"
-
-cmake \
-    -DCMAKE_INSTALL_PREFIX="$vulkan_loader_vendor_lnx_dir" \
-    -D UPDATE_DEPS=ON \
-    -DCMAKE_BUILD_TYPE=Release \
-    -S "$vulkan_loader_sm_dir" \
-    -B "$vulkan_loader_sm_lnx_build_dir"
-
-cd "$vulkan_loader_sm_lnx_build_dir"
-make install
-cd "$curr_dir"
-
-echo "Building VULKAN-LOADER for Linux complete"
-
-# WINDOWS
-# -----------------------------------------------------------------------
-echo "Building VULKAN-LOADER for Windows..."
-vulkan_loader_sm_win_build_dir="$vulkan_loader_sm_dir/build-win"
-check_create_folder "$vulkan_loader_sm_win_build_dir"
-
-# CREATE VULKAN-LOADER VENDOR DIR
-vulkan_loader_vendor_win_dir="$vendor_windows_dir/vulkan-loader"
-check_create_folder "$vulkan_loader_vendor_win_dir"
-
-win_toolchain_file="$submodules_dir/tc-vendor-win.cmake"
-
-cmake \
-    -DCMAKE_TOOLCHAIN_FILE="$win_toolchain_file" \
-    -DCMAKE_INSTALL_PREFIX="$vulkan_loader_vendor_win_dir" \
-    -D UPDATE_DEPS=ON \
-    -DCMAKE_BUILD_TYPE=Release \
-    -S "$vulkan_loader_sm_dir" \
-    -B "$vulkan_loader_sm_win_build_dir"
-
-cd "$vulkan_loader_sm_win_build_dir"
-make install
-cd "$curr_dir"
-
-echo "Building VULKAN-LOADER for Windows complete"
-
-echo "Installing Vulkan-Loader complete"
 
 echo "Installing Vulkan-Headers ..."
 vulkan_headers_sm_dir="$submodules_dir/vulkan-headers"
@@ -282,9 +227,75 @@ cd "$curr_dir"
 
 echo "Installing Vulkan-Headers complete"
 
+# -----------------------------------------------------------------------
+# SUBMODULE INSTALL - VULKAN-HEADERS --- END
+# -----------------------------------------------------------------------
+
+#
 
 # -----------------------------------------------------------------------
-# SUBMODULE INSTALL - VULKAN-LOADER & VULKAN-HEADERS --- END
+# SUBMODULE INSTALL - VULKAN-LOADER  --- BEGIN
+# -----------------------------------------------------------------------
+
+echo "Installing Vulkan-Loader..."
+
+vulkan_loader_sm_dir="$submodules_dir/vulkan-loader"
+
+# LINUX
+# -----------------------------------------------------------------------
+echo "Building VULKAN-LOADER for Linux..."
+vulkan_loader_sm_lnx_build_dir="$vulkan_loader_sm_dir/build-linux"
+check_create_folder "$vulkan_loader_sm_lnx_build_dir"
+
+# CREATE VULKAN-LOADER VENDOR DIR
+vulkan_loader_vendor_lnx_dir="$vendor_linux_dir/vulkan-loader"
+check_create_folder "$vulkan_loader_vendor_lnx_dir"
+
+cmake \
+    -D CMAKE_INSTALL_PREFIX="$vulkan_loader_vendor_lnx_dir" \
+    -D UPDATE_DEPS=ON \
+    -D CMAKE_BUILD_TYPE=Release \
+    -S "$vulkan_loader_sm_dir" \
+    -B "$vulkan_loader_sm_lnx_build_dir"
+    # -D VULKAN_HEADERS_INSTALL_DIR="$vulkan_headers_vendor_dir" \
+
+cd "$vulkan_loader_sm_lnx_build_dir"
+make install
+cd "$curr_dir"
+
+echo "Building VULKAN-LOADER for Linux complete"
+
+# WINDOWS
+# -----------------------------------------------------------------------
+echo "Building VULKAN-LOADER for Windows..."
+vulkan_loader_sm_win_build_dir="$vulkan_loader_sm_dir/build-win"
+check_create_folder "$vulkan_loader_sm_win_build_dir"
+
+# CREATE VULKAN-LOADER VENDOR DIR
+vulkan_loader_vendor_win_dir="$vendor_windows_dir/vulkan-loader"
+check_create_folder "$vulkan_loader_vendor_win_dir"
+
+win_toolchain_file="$submodules_dir/tc-vendor-win.cmake"
+
+cmake \
+    -D CMAKE_TOOLCHAIN_FILE="$win_toolchain_file" \
+    -D UPDATE_DEPS=ON \
+    -D CMAKE_INSTALL_PREFIX="$vulkan_loader_vendor_win_dir" \
+    -D CMAKE_BUILD_TYPE=Release \
+    -S "$vulkan_loader_sm_dir" \
+    -B "$vulkan_loader_sm_win_build_dir"
+    # -D VULKAN_HEADERS_INSTALL_DIR="$vulkan_headers_vendor_dir" \
+
+cd "$vulkan_loader_sm_win_build_dir"
+make install
+cd "$curr_dir"
+
+echo "Building VULKAN-LOADER for Windows complete"
+
+echo "Installing Vulkan-Loader complete"
+
+# -----------------------------------------------------------------------
+# SUBMODULE INSTALL - VULKAN-LOADER  --- END
 # -----------------------------------------------------------------------
 
 #
@@ -305,8 +316,8 @@ glm_vendor_dir="$vendor_platform_agnostic_dir/glm"
 check_create_folder "$glm_vendor_dir"
 
 cmake \
-    -DGLM_BUILD_TESTS=OFF \
-    -DBUILD_SHARED_LIBS=OFF \
+    -D GLM_BUILD_TESTS=OFF \
+    -D BUILD_SHARED_LIBS=OFF \
     -S "$glm_sm_dir" -B "$glm_sm_build_dir"
 
 cmake --build "$glm_sm_build_dir" --target all

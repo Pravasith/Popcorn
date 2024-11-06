@@ -106,7 +106,6 @@ endif()
 # FIND VENDOR BINARIES
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
-find_package(Vulkan REQUIRED)
 find_package(VulkanLoader REQUIRED)
 find_package(VulkanHeaders REQUIRED CONFIG)
 find_package(glm CONFIG REQUIRED)
@@ -208,7 +207,7 @@ endif()
 # -----------------------------------------------------------------------
 # LINKING LIBS --- START
 # -----------------------------------------------------------------------
-target_link_libraries(Graphics PRIVATE Vulkan::Headers Vulkan::Vulkan glfw)
+target_link_libraries(Graphics PRIVATE Vulkan::Headers Vulkan::Loader glfw)
 target_link_libraries(Window PRIVATE glad glfw)
 target_link_libraries(Window PUBLIC Events)
 
