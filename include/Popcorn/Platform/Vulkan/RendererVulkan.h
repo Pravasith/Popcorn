@@ -2,6 +2,7 @@
 
 #include "Global_Macros.h"
 #include "Renderer.h"
+#include <vector>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -23,6 +24,7 @@ private:
 private:
   VkInstance m_vkInstance;
   bool m_enableValidationLayers;
+  std::vector<const char *> m_validationLayers;
 };
 
 ENGINE_NAMESPACE_END

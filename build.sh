@@ -61,6 +61,7 @@ elif [ "$platform" = "w" ]; then
 
     cmake \
         -D CMAKE_TOOLCHAIN_FILE=../../tc-windows.cmake \
+        -D CMAKE_BUILD_TYPE=Release \
         ../../
         # ADD BELOW FLAG FOR RELEASE BUILDS
         # -D CMAKE_BUILD_TYPE=Release \

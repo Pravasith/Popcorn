@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <cstring>
 #include <vector>
 
 #include "Global_Macros.h"
@@ -49,6 +50,21 @@ void RendererVulkan::CreateInstance() {
   createInfo.ppEnabledExtensionNames = glfwExtensions;
   createInfo.enabledLayerCount = 0;
 
+  // CHECK FOR VALIDATION LAYER SUPPORT
+  m_validationLayers = {"VK_LAYER_KHRONOS_validation"};
+
+#ifdef NDEBUG
+  m_enableValidationLayers = false;
+  PC_PRINT_DEBUG("NDEBUG", 0, "VK_R")
+#else
+  m_enableValidationLayers = true;
+  PC_PRINT_DEBUG("DEBUG", 0, "VK_R")
+#endif
+
+  if (m_enableValidationLayers && !CheckValidationLayerSupport()) {
+    throw std::runtime_error("validation layers requested, but not available!");
+  }
+
   // CREATE INSTANCE
   VkResult result = vkCreateInstance(&createInfo, nullptr, &m_vkInstance);
 
@@ -58,16 +74,6 @@ void RendererVulkan::CreateInstance() {
 };
 
 bool RendererVulkan::CheckValidationLayerSupport() {
-  const std::vector<const char *> validationLayers{
-      "VK_LAYER_KHRONOS_validation"};
-
-#ifdef NDEBUG
-  m_enableValidationLayers = false;
-  PC_PRINT_DEBUG("NDEBUG", 0, "RV")
-#else
-  m_enableValidationLayers = true;
-  PC_PRINT_DEBUG("DEBUG", 0, "RV")
-#endif
 
   uint32_t layerCount;
   vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -75,7 +81,22 @@ bool RendererVulkan::CheckValidationLayerSupport() {
   std::vector<VkLayerProperties> availableLayers(layerCount);
   vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
-  return false;
+  for (const char *layerName : m_validationLayers) {
+    bool layerFound = false;
+
+    for (const auto &layerProperties : availableLayers) {
+      if (strcmp(layerName, layerProperties.layerName) == 0) {
+        layerFound = true;
+        break;
+      }
+    }
+
+    if (!layerFound) {
+      return false;
+    }
+  }
+
+  return true;
 };
 
 void RendererVulkan::OnUpdate() const {};
