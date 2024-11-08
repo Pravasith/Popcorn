@@ -6,10 +6,7 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#ifdef NDEBUG
-#else
 #include "VkValidationLayers.h"
-#endif
 
 ENGINE_NAMESPACE_BEGIN
 class RendererVulkan : public Renderer {
@@ -36,7 +33,6 @@ private:
 #else
   static constexpr bool s_enableValidationLayers = true;
 #endif
-
   // CLASS MEMBERS
   VkValidationLayers m_VkValLyrs;
 };

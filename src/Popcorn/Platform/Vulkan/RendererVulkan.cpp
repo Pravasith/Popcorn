@@ -9,10 +9,8 @@
 // HELLO TRIANGLE!
 ENGINE_NAMESPACE_BEGIN
 
-RendererVulkan::RendererVulkan() {
+RendererVulkan::RendererVulkan() : m_VkValLyrs() {
   PC_PRINT_DEBUG("VULKAN CREATED", 2, "RENDERER");
-
-  m_VkValLyrs = VkValidationLayers();
   InitVulkan();
 };
 
