@@ -18,6 +18,7 @@ private:
 
   void CreateInstance();
   bool CheckValidationLayerSupport();
+  std::vector<const char *> GetRequiredExtensions();
 
   virtual void OnUpdate() const override;
 

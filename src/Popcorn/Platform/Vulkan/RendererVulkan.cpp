@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <cstring>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
@@ -62,8 +63,20 @@ void RendererVulkan::CreateInstance() {
 #endif
 
   if (m_enableValidationLayers && !CheckValidationLayerSupport()) {
-    throw std::runtime_error("validation layers requested, but not available!");
+    throw std::runtime_error("VALIDATION LAYERS REQUESTED, BUT NOT AVAILABLE!");
   }
+
+  if (m_enableValidationLayers) {
+    createInfo.enabledLayerCount =
+        static_cast<uint32_t>(m_validationLayers.size());
+    createInfo.ppEnabledLayerNames = m_validationLayers.data();
+  } else {
+    createInfo.enabledLayerCount = 0;
+  }
+
+  auto extensions = GetRequiredExtensions();
+  createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+  createInfo.ppEnabledExtensionNames = extensions.data();
 
   // CREATE INSTANCE
   VkResult result = vkCreateInstance(&createInfo, nullptr, &m_vkInstance);
@@ -74,7 +87,6 @@ void RendererVulkan::CreateInstance() {
 };
 
 bool RendererVulkan::CheckValidationLayerSupport() {
-
   uint32_t layerCount;
   vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
@@ -97,6 +109,21 @@ bool RendererVulkan::CheckValidationLayerSupport() {
   }
 
   return true;
+};
+
+std::vector<const char *> RendererVulkan::GetRequiredExtensions() {
+  uint32_t glfwExtensionCount = 0;
+  const char **glfwExtensions;
+  glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+  std::vector<const char *> extensions(glfwExtensions,
+                                       glfwExtensions + glfwExtensionCount);
+
+  if (m_enableValidationLayers) {
+    extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+  };
+
+  return extensions;
 };
 
 void RendererVulkan::OnUpdate() const {};
