@@ -1,7 +1,7 @@
-# CORE LIBS
 set(CORE_IMPL_DIR Popcorn/Core)
 set(LAYERS_IMPL_DIR Popcorn/Layers)
 
+# POPCORN LIB
 add_library(
   PopcornEngine
   #
@@ -11,19 +11,25 @@ add_library(
   ${CORE_IMPL_DIR}/Layer.cpp
   ${CORE_IMPL_DIR}/LayerStack.cpp
   ${LAYERS_IMPL_DIR}/DebugUIOverlay.cpp
+  ${LAYERS_IMPL_DIR}/RenderLayer.cpp
   # TIME
   ${CORE_IMPL_DIR}/Time.cpp)
 
 # -----------------------------------------------------------------------
-# SEPARATE LIBS
+#
+
 set(EVENTS_IMPL_DIR Popcorn/Events)
 set(PLATFORM_IMPL_DIR Popcorn/Platform)
 set(GRAPHICS_IMPL_DIR Popcorn/Graphics)
 
+# WINDOW LIB
 add_library(Window ${CORE_IMPL_DIR}/Window.cpp
                    ${PLATFORM_IMPL_DIR}/Agnostic/WindowAgnostic.cpp)
 
+# EVENTS LIB
 add_library(Events ${EVENTS_IMPL_DIR}/Publisher.cpp)
+
+# GRAPHICS LIB
 add_library(
   Graphics
   ${GRAPHICS_IMPL_DIR}/Renderer.cpp

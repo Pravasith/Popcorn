@@ -1,10 +1,13 @@
 #pragma once
 
 #include "Global_Macros.h"
-#include <vulkan/vulkan_core.h>
+#include "Renderer.h"
+#include <vector>
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
 
 ENGINE_NAMESPACE_BEGIN
-class RendererVulkan {
+class RendererVulkan : public Renderer {
 public:
   RendererVulkan();
   ~RendererVulkan();
@@ -12,10 +15,17 @@ public:
 private:
   void InitVulkan();
   void CleanUp();
-  virtual void OnUpdate();
+
+  void CreateInstance();
+  bool CheckValidationLayerSupport();
+  std::vector<const char *> GetRequiredExtensions();
+
+  virtual void OnUpdate() const override;
 
 private:
-  VkInstance m_vk_instance;
+  VkInstance m_vkInstance;
+  bool m_enableValidationLayers;
+  std::vector<const char *> m_validationLayers;
 };
 
 ENGINE_NAMESPACE_END

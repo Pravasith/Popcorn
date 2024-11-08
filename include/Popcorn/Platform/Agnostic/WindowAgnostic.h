@@ -1,8 +1,8 @@
 #pragma once
 
-#include "GLFW_Funcs.h"
 #include "Global_Macros.h"
 #include "Window.h"
+#include <GLFW/glfw3.h>
 #include <cstdint>
 
 ENGINE_NAMESPACE_BEGIN
@@ -17,6 +17,14 @@ public:
 
   virtual void OnUpdate();
 
+  // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
+  WindowAgnostic(const WindowAgnostic &) = delete;
+  WindowAgnostic &operator=(const WindowAgnostic &) = delete;
+
+  // DELETE THE MOVE CONSTRUCTOR AND MOVE ASSIGNMENT OPERATOR
+  WindowAgnostic(WindowAgnostic &&) = delete;
+  WindowAgnostic &operator=(WindowAgnostic &&) = delete;
+
 private:
   WindowAgnostic(const Props &props);
   ~WindowAgnostic() override;
@@ -24,7 +32,7 @@ private:
 private:
   std::string m_title;
 
-  static GLFW_Types::GLFW_OSWindow_T *s_os_window;
+  static GLFWwindow *s_os_window;
   static WindowAgnostic *s_instance;
 };
 ENGINE_NAMESPACE_END

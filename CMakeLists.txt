@@ -92,15 +92,15 @@ set(WINDOWS_VENDOR_BINARIES_DIR ${CMAKE_SOURCE_DIR}/third-party/windows)
 if(BUILD_FOR_LINUX)
   # VENDOR BINARIES PATHS
   set(CMAKE_PREFIX_PATH
+      # LINUX SPECIFIC
       ${LINUX_VENDOR_BINARIES_DIR}/glfw
-      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-loader
+      ${LINUX_VENDOR_BINARIES_DIR}/vulkan-loader
+      # PLATFORM AGNOSTIC
       ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers
       ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glm)
 else()
-  set(CMAKE_PREFIX_PATH
-      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-loader
-      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers
-      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glm)
+  set(CMAKE_PREFIX_PATH ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers
+                        ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glm)
 endif()
 
 # FIND VENDOR BINARIES
@@ -207,7 +207,7 @@ endif()
 # -----------------------------------------------------------------------
 # LINKING LIBS --- START
 # -----------------------------------------------------------------------
-target_link_libraries(Graphics PRIVATE Vulkan::Headers)
+target_link_libraries(Graphics PRIVATE Vulkan::Headers Vulkan::Loader glfw)
 target_link_libraries(Window PRIVATE glad glfw)
 target_link_libraries(Window PUBLIC Events)
 
@@ -216,8 +216,7 @@ target_link_libraries(PopcornEngine PRIVATE glad)
 target_link_libraries(ImGui PUBLIC glfw)
 
 target_link_libraries(PopcornEngine PUBLIC ImGui)
-target_link_libraries(PopcornEngine PRIVATE Graphics)
-target_link_libraries(PopcornEngine PRIVATE Window)
+target_link_libraries(PopcornEngine PRIVATE Graphics Window)
 
 # FINAL PROJECT LINKING
 target_link_libraries(${PROJECT} PRIVATE PopcornEngine)

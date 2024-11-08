@@ -4,7 +4,7 @@
 #include "Event.h"
 #include "Global_Macros.h"
 #include "LayerStack.h"
-#include "Popcorn/Graphics/Renderer.h"
+#include "RenderLayer.h"
 #include "Subscriber.h"
 #include "Time.h"
 #include "TimeEvent.h"
@@ -28,6 +28,14 @@ public:
   LayerStack &GetLayerStack() const { return *s_layer_stack; };
   static bool IsGameLoopRunning();
 
+  // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
+  Application(const Application &) = delete;
+  Application &operator=(const Application &) = delete;
+
+  // DELETE THE MOVE CONSTRUCTOR AND MOVE ASSIGNMENT OPERATOR
+  Application(Application &&) = delete;
+  Application &operator=(Application &&) = delete;
+
 private:
   Application();
   ~Application();
@@ -40,9 +48,10 @@ private:
 private:
   static Application *s_instance;
   static LayerStack *s_layer_stack;
-  static DebugUIOverlay *s_debug_ui_overlay;
   static Window *s_window;
-  static Renderer *s_renderer;
   static Time *s_time;
+
+  static DebugUIOverlay *s_debug_ui_overlay;
+  static RenderLayer *s_render_layer;
 };
 ENGINE_NAMESPACE_END

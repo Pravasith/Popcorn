@@ -1,7 +1,8 @@
 
+#include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
-#include "GLFW_Funcs.h"
+#include "Base.h"
 #include "Global_Macros.h"
 #include "KeyEvent.h"
 #include "MouseEvent.h"
@@ -12,9 +13,8 @@
 #include <string>
 
 ENGINE_NAMESPACE_BEGIN
-using namespace GLFW_Funcs;
 
-GLFW_Types::GLFW_OSWindow_T *WindowAgnostic::s_os_window = nullptr;
+GLFWwindow *WindowAgnostic::s_os_window = nullptr;
 WindowAgnostic *WindowAgnostic::s_instance = nullptr;
 
 Window *WindowAgnostic::Init(const Props &props) {
@@ -28,61 +28,89 @@ Window *WindowAgnostic::Init(const Props &props) {
 WindowAgnostic::WindowAgnostic(const Props &props) : m_title(props.Title) {
   PC_PRINT_DEBUG("PLATFORM WINDOW CREATED", 2, "WIN64-LINUX");
 
-  GLFW_Init();
+  // GLFW INIT
+  // ---------------------------------------------------
+  int success = glfwInit();
+  if (!success) {
+    pc_write_log("GLFW Error: Couldn't initiate GLFW");
+  };
+
+  glfwSetErrorCallback([](int error, const char *desc) {
+    pc_write_log(desc);
+    throw("GLFW error, see common_logs file");
+  });
+
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
   PC_PRINT_DEBUG("GLFW INIT", 2, "WIN64-LINUX");
 
   // CREATE GLFW WINDOW AND MAKE CONTEXT CURRENT
-  GLFW_CreateWindow(&s_os_window, m_title, props.W, props.H);
+  // ---------------------------------------------------
+  s_os_window = glfwCreateWindow(props.W, props.H, m_title.c_str(), NULL, NULL);
 
-  int status = gladLoadGLLoader(GLADloadproc(GLFW_Funcs::GLFW_GetProcAddress));
+  if (!s_os_window) {
+    pc_write_log("Failed to create GLFW Window");
+    glfwTerminate();
+  }
 
-  GLFW_SetWindowCallbacks(
-      s_os_window,
+  glfwMakeContextCurrent(s_os_window);
+  glfwSwapInterval(1); // Enable vsync
 
-      /* Window Close Callback */
-      [](GLFW_Types::GLFW_OSWindow_T *os_window) {
-        WindowCloseEvent winCloseEvt;
-        s_instance->PublishEvent(winCloseEvt);
-      },
+  int status = gladLoadGLLoader(GLADloadproc(glfwGetProcAddress));
 
-      /* Mouse Position Callback */
-      [](GLFW_Types::GLFW_OSWindow_T *os_window, double x, double y) {
-        MouseMovedEvent mMoveEvt((float)x, (float)y);
-        s_instance->PublishEvent(mMoveEvt);
-      },
+  // GLFW SET WINDOW CALLBACKS
+  // ---------------------------------------------------
 
-      /* Key Callback */
-      [](GLFW_Types::GLFW_OSWindow_T *os_window, int key, int scan_code,
-         int action, int mods) {
-        // GLFW ACTIONS
-        // 0 = KEY_PRESS, 1 = KEY_RELEASE, 2 = KEY_REPEAT
+  /* Window Close Callback */
+  glfwSetWindowCloseCallback(s_os_window, [](GLFWwindow *os_window) {
+    WindowCloseEvent winCloseEvt;
+    s_instance->PublishEvent(winCloseEvt);
+  });
 
-        switch (action) {
-        case GLFW_PRESS: {
-          KeyPressedEvent event(key, 0);
-          s_instance->PublishEvent(event);
-          break;
-        }
-        case GLFW_RELEASE: {
-          KeyReleasedEvent event(key);
-          s_instance->PublishEvent(event);
-          break;
-        }
-        case GLFW_REPEAT: {
-          KeyPressedEvent event(key, true);
-          s_instance->PublishEvent(event);
-          break;
-        }
-        }
-      },
+  /* Mouse Position Callback */
+  glfwSetCursorPosCallback(s_os_window,
+                           [](GLFWwindow *os_window, double x, double y) {
+                             MouseMovedEvent mMoveEvt((float)x, (float)y);
+                             s_instance->PublishEvent(mMoveEvt);
+                           });
 
-      /* Window Resize Callback */
-      [](GLFW_Types::GLFW_OSWindow_T *os_window, int width, int height) {
-        WindowResizeEvent event(width, height);
-        s_instance->PublishEvent(event);
-      }
+  /* Key Callback */
+  glfwSetKeyCallback(s_os_window, [](GLFWwindow *os_window, int key,
+                                     int scan_code, int action, int mods) {
+    // GLFW ACTIONS
+    // 0 = KEY_PRESS, 1 = KEY_RELEASE, 2 = KEY_REPEAT
 
-  );
+    switch (action) {
+    case GLFW_PRESS: {
+      KeyPressedEvent event(key, 0);
+      s_instance->PublishEvent(event);
+      break;
+    }
+    case GLFW_RELEASE: {
+      KeyReleasedEvent event(key);
+      s_instance->PublishEvent(event);
+      break;
+    }
+    case GLFW_REPEAT: {
+      KeyPressedEvent event(key, true);
+      s_instance->PublishEvent(event);
+      break;
+    }
+    }
+  });
+
+  /* Window Resize Callback */
+  glfwSetWindowSizeCallback(s_os_window,
+                            [](GLFWwindow *os_window, int width, int height) {
+                              WindowResizeEvent event(width, height);
+                              s_instance->PublishEvent(event);
+                            });
 
   if (!s_os_window) {
     pc_write_log("No OS Window yet!");
@@ -94,11 +122,13 @@ void WindowAgnostic::OnUpdate() {
   // glViewport(0, 0, WindowAgnostic::GetWidth(),
   // WindowAgnostic::GetHeight());
 
-  GLFW_UpdateWindow(s_os_window);
+  glfwSwapBuffers(s_os_window);
+  glfwPollEvents();
 }
 
 WindowAgnostic::~WindowAgnostic() {
-  GLFW_Terminate();
+  glfwDestroyWindow(s_os_window);
+  glfwTerminate();
 
   PC_PRINT_DEBUG("GLFW KILL", 2, "WIN64-LINUX");
   PC_PRINT_DEBUG("PLATFORM WINDOW DESTROYED", 2, "WIN64-LINUX");

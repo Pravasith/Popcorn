@@ -1,9 +1,9 @@
+#include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
 #include "Application.h"
 #include "DebugUIOverlay.h"
 #include "Event.h"
-#include "GLFW_Funcs.h"
 #include "Global_Macros.h"
 
 #include <backends/imgui_impl_glfw.h>
@@ -65,8 +65,7 @@ void DebugUIOverlay::OnAttach() {
   imgui_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
   // Setup Platform/Renderer backends
-  ImGui_ImplGlfw_InitForOpenGL(
-      static_cast<GLFW_Types::GLFW_OSWindow_T *>(m_os_window), true);
+  ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow *>(m_os_window), true);
 
 #ifdef __EMSCRIPTEN__
   ImGui_ImplGlfw_InstallEmscriptenCanvasResizeCallback("#canvas");
@@ -94,9 +93,8 @@ void DebugUIOverlay::OnUpdate() {
 
   static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
   int display_w, display_h;
-  glfwGetFramebufferSize(
-      static_cast<GLFW_Types::GLFW_OSWindow_T *>(m_os_window), &display_w,
-      &display_h);
+  glfwGetFramebufferSize(static_cast<GLFWwindow *>(m_os_window), &display_w,
+                         &display_h);
   glViewport(0, 0, display_w, display_h);
   glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w,
                clear_color.z * clear_color.w, clear_color.w);

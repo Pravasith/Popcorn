@@ -106,26 +106,26 @@ echo "Installing vendor/third-party submodules..."
 # SUBMODULE INSTALL - GLFW --- START
 # -----------------------------------------------------------------------
 echo "Building GLFW..."
-glfw_submodule_dir="$submodules_dir/glfw"
+glfw_sm_dir="$submodules_dir/glfw"
 
-glfw_submodule_build_dir="$glfw_submodule_dir/build"
-check_create_folder "$glfw_submodule_build_dir"
+glfw_sm_build_dir="$glfw_sm_dir/build"
+check_create_folder "$glfw_sm_build_dir"
 
 # LINUX
 # -----------------------------------------------------------------------
 echo "Building GLFW for Linux..."
 # CREATE GLFW SUBMODULE BUILD DIR FOR LINUX
-glfw_submodule_build_linux_dir="$glfw_submodule_build_dir/linux"
-check_create_folder "$glfw_submodule_build_linux_dir"
+glfw_sm_build_linux_dir="$glfw_sm_build_dir/linux"
+check_create_folder "$glfw_sm_build_linux_dir"
 
 # CREATE GLFW VENDOR DIR FOR LINUX
 glfw_vendor_linux_dir="$vendor_linux_dir/glfw"
 check_create_folder "$glfw_vendor_linux_dir"
 
 cmake -DCMAKE_INSTALL_PREFIX="$glfw_vendor_linux_dir" \
-    -S "$glfw_submodule_dir" -B "$glfw_submodule_build_linux_dir"
+    -S "$glfw_sm_dir" -B "$glfw_sm_build_linux_dir"
 
-cd "$glfw_submodule_build_linux_dir"
+cd "$glfw_sm_build_linux_dir"
 make install
 cd "$curr_dir"
 
@@ -135,18 +135,18 @@ echo "Building GLFW for Linux complete"
 # -----------------------------------------------------------------------
 echo "Building GLFW for Windows..."
 # CREATE GLFW SUBMODULE BUILD DIR FOR WINDOWS
-glfw_submodule_build_windows_dir="$glfw_submodule_build_dir/windows"
-check_create_folder "$glfw_submodule_build_windows_dir"
+glfw_sm_build_windows_dir="$glfw_sm_build_dir/windows"
+check_create_folder "$glfw_sm_build_windows_dir"
 
 # CREATE GLFW VENDOR DIR FOR WINDOWS
 glfw_vendor_windows_dir="$vendor_windows_dir/glfw"
 check_create_folder "$glfw_vendor_windows_dir"
 
 cmake -DCMAKE_INSTALL_PREFIX="$glfw_vendor_windows_dir" \
-    -S "$glfw_submodule_dir" -B "$glfw_submodule_build_windows_dir" \
+    -S "$glfw_sm_dir" -B "$glfw_sm_build_windows_dir" \
     -D CMAKE_TOOLCHAIN_FILE=CMake/x86_64-w64-mingw32.cmake
 
-cd "$glfw_submodule_build_windows_dir"
+cd "$glfw_sm_build_windows_dir"
 make install
 cd "$curr_dir"
 
@@ -163,12 +163,12 @@ echo "Building GLFW complete"
 # SUBMODULE INSTALL - GLAD --- START
 # -----------------------------------------------------------------------
 echo "Installing GLAD..."
-glad_submodule_dir="$submodules_dir/glad"
+glad_sm_dir="$submodules_dir/glad"
 
 # COPY GLAD FILES FROM SUBMODULES TO VENDOR
 #
 # -----------------------------------------------------------------------
-cp -r "$glad_submodule_dir" "$vendor_platform_agnostic_dir"
+cp -r "$glad_sm_dir" "$vendor_platform_agnostic_dir"
 
 echo "Installing GLAD complete"
 # -----------------------------------------------------------------------
@@ -182,8 +182,8 @@ echo "Installing GLAD complete"
 # -----------------------------------------------------------------------
 
 echo "Installing ImGui..."
-imgui_submodule_dir="$submodules_dir/imgui"
-imgui_submodule_backends_dir="$imgui_submodule_dir/backends"
+imgui_sm_dir="$submodules_dir/imgui"
+imgui_sm_backends_dir="$imgui_sm_dir/backends"
 
 imgui_vendor_platform_agnostic_dir="$vendor_platform_agnostic_dir/imgui"
 check_create_folder "$imgui_vendor_platform_agnostic_dir"
@@ -192,7 +192,7 @@ check_create_folder "$imgui_vendor_platform_agnostic_dir"
 #
 # LINUX & WINDOWS
 # -----------------------------------------------------------------------
-cp -a "$imgui_submodule_dir/."  \
+cp -a "$imgui_sm_dir/."  \
       "$imgui_vendor_platform_agnostic_dir"
 
 
@@ -205,54 +205,97 @@ echo "Installing ImGui complete"
 #
 
 # -----------------------------------------------------------------------
-# SUBMODULE INSTALL - VULKAN-LOADER & VULKAN-HEADERS --- BEGIN
+# SUBMODULE INSTALL - VULKAN-HEADERS --- BEGIN
 # -----------------------------------------------------------------------
 
-echo "Installing Vulkan-Loader..."
-
-vulkan_loader_submodule_dir="$submodules_dir/vulkan-loader"
-
-echo "Building VULKAN-LOADER..."
-vulkan_loader_submodule_build_dir="$vulkan_loader_submodule_dir/build"
-check_create_folder "$vulkan_loader_submodule_build_dir"
-
-# CREATE VULKAN-LOADER VENDOR DIR
-vulkan_loader_vendor_dir="$vendor_platform_agnostic_dir/vulkan-loader"
-check_create_folder "$vulkan_loader_vendor_dir"
-
-cmake -DCMAKE_INSTALL_PREFIX="$vulkan_loader_vendor_dir" \
-    -D UPDATE_DEPS=ON \
-    -S "$vulkan_loader_submodule_dir" -B "$vulkan_loader_submodule_build_dir"
-
-cd "$vulkan_loader_submodule_build_dir"
-make install
-cd "$curr_dir"
-
-echo "Building VULKAN-LOADER complete"
-echo "Installing Vulkan-Loader complete"
-
 echo "Installing Vulkan-Headers ..."
-vulkan_headers_submodule_dir="$submodules_dir/vulkan-headers"
+vulkan_headers_sm_dir="$submodules_dir/vulkan-headers"
 
 # CREATE VULKAN-HEADERS SUBMODULES BUILD DIR
 
-vulkan_headers_submodule_build_dir="$vulkan_headers_submodule_dir/build"
-check_create_folder "$vulkan_headers_submodule_build_dir"
+vulkan_headers_sm_build_dir="$vulkan_headers_sm_dir/build"
+check_create_folder "$vulkan_headers_sm_build_dir"
 
 # CREATE VULKAN-HEADERS VENDOR DIR
 vulkan_headers_vendor_dir="$vendor_platform_agnostic_dir/vulkan-headers"
 check_create_folder "$vulkan_headers_vendor_dir"
 
-cmake -S "$vulkan_headers_submodule_dir" -B "$vulkan_headers_submodule_build_dir"
-cmake --install "$vulkan_headers_submodule_build_dir" --prefix "$vulkan_headers_vendor_dir"
+cmake -S "$vulkan_headers_sm_dir" -B "$vulkan_headers_sm_build_dir"
+cmake --install "$vulkan_headers_sm_build_dir" --prefix "$vulkan_headers_vendor_dir"
 
 cd "$curr_dir"
 
 echo "Installing Vulkan-Headers complete"
 
+# -----------------------------------------------------------------------
+# SUBMODULE INSTALL - VULKAN-HEADERS --- END
+# -----------------------------------------------------------------------
+
+#
 
 # -----------------------------------------------------------------------
-# SUBMODULE INSTALL - VULKAN-LOADER & VULKAN-HEADERS --- END
+# SUBMODULE INSTALL - VULKAN-LOADER  --- BEGIN
+# -----------------------------------------------------------------------
+
+echo "Installing Vulkan-Loader..."
+
+vulkan_loader_sm_dir="$submodules_dir/vulkan-loader"
+
+# LINUX
+# -----------------------------------------------------------------------
+echo "Building VULKAN-LOADER for Linux..."
+vulkan_loader_sm_lnx_build_dir="$vulkan_loader_sm_dir/build-linux"
+check_create_folder "$vulkan_loader_sm_lnx_build_dir"
+
+# CREATE VULKAN-LOADER VENDOR DIR
+vulkan_loader_vendor_lnx_dir="$vendor_linux_dir/vulkan-loader"
+check_create_folder "$vulkan_loader_vendor_lnx_dir"
+
+cmake \
+    -D CMAKE_INSTALL_PREFIX="$vulkan_loader_vendor_lnx_dir" \
+    -D UPDATE_DEPS=ON \
+    -D CMAKE_BUILD_TYPE=Release \
+    -S "$vulkan_loader_sm_dir" \
+    -B "$vulkan_loader_sm_lnx_build_dir"
+    # -D VULKAN_HEADERS_INSTALL_DIR="$vulkan_headers_vendor_dir" \
+
+cd "$vulkan_loader_sm_lnx_build_dir"
+make install
+cd "$curr_dir"
+
+echo "Building VULKAN-LOADER for Linux complete"
+
+# WINDOWS
+# -----------------------------------------------------------------------
+echo "Building VULKAN-LOADER for Windows..."
+vulkan_loader_sm_win_build_dir="$vulkan_loader_sm_dir/build-win"
+check_create_folder "$vulkan_loader_sm_win_build_dir"
+
+# CREATE VULKAN-LOADER VENDOR DIR
+vulkan_loader_vendor_win_dir="$vendor_windows_dir/vulkan-loader"
+check_create_folder "$vulkan_loader_vendor_win_dir"
+
+win_toolchain_file="$submodules_dir/tc-vendor-win.cmake"
+
+cmake \
+    -D CMAKE_TOOLCHAIN_FILE="$win_toolchain_file" \
+    -D UPDATE_DEPS=ON \
+    -D CMAKE_INSTALL_PREFIX="$vulkan_loader_vendor_win_dir" \
+    -D CMAKE_BUILD_TYPE=Release \
+    -S "$vulkan_loader_sm_dir" \
+    -B "$vulkan_loader_sm_win_build_dir"
+    # -D VULKAN_HEADERS_INSTALL_DIR="$vulkan_headers_vendor_dir" \
+
+cd "$vulkan_loader_sm_win_build_dir"
+make install
+cd "$curr_dir"
+
+echo "Building VULKAN-LOADER for Windows complete"
+
+echo "Installing Vulkan-Loader complete"
+
+# -----------------------------------------------------------------------
+# SUBMODULE INSTALL - VULKAN-LOADER  --- END
 # -----------------------------------------------------------------------
 
 #
@@ -263,22 +306,22 @@ echo "Installing Vulkan-Headers complete"
 
 echo "Installing GLM..."
 
-glm_submodule_dir="$submodules_dir/glm"
+glm_sm_dir="$submodules_dir/glm"
 
-glm_submodule_build_dir="$glm_submodule_dir/build"
-check_create_folder "$glm_submodule_build_dir"
+glm_sm_build_dir="$glm_sm_dir/build"
+check_create_folder "$glm_sm_build_dir"
 
 # CREATE GLM VENDOR DIR
 glm_vendor_dir="$vendor_platform_agnostic_dir/glm"
 check_create_folder "$glm_vendor_dir"
 
 cmake \
-    -DGLM_BUILD_TESTS=OFF \
-    -DBUILD_SHARED_LIBS=OFF \
-    -S "$glm_submodule_dir" -B "$glm_submodule_build_dir"
+    -D GLM_BUILD_TESTS=OFF \
+    -D BUILD_SHARED_LIBS=OFF \
+    -S "$glm_sm_dir" -B "$glm_sm_build_dir"
 
-cmake --build "$glm_submodule_build_dir" --target all
-cmake --install "$glm_submodule_build_dir" --prefix "$glm_vendor_dir"
+cmake --build "$glm_sm_build_dir" --target all
+cmake --install "$glm_sm_build_dir" --prefix "$glm_vendor_dir"
 
 cd "$curr_dir"
 
