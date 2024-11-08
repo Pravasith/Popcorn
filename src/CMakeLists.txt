@@ -34,4 +34,5 @@ add_library(
   Graphics
   ${GRAPHICS_IMPL_DIR}/Renderer.cpp
   ${PLATFORM_IMPL_DIR}/OpenGL/RendererOpenGL.cpp
-  ${PLATFORM_IMPL_DIR}/Vulkan/RendererVulkan.cpp)
+  ${PLATFORM_IMPL_DIR}/Vulkan/RendererVulkan.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/VkValidationLayers.cpp)
