@@ -19,7 +19,6 @@ private:
   void CleanUp();
 
   void CreateInstance();
-  // bool CheckValidationLayerSupport();
   std::vector<const char *> GetRequiredExtensions();
 
   virtual void OnUpdate() const override;
@@ -27,7 +26,6 @@ private:
 private:
   // MEMBERS
   VkInstance m_vkInstance;
-  // std::vector<const char *> m_validationLayers;
 #ifdef NDEBUG
   static constexpr bool s_enableValidationLayers = false;
 #else

@@ -1,5 +1,6 @@
 #include "VkValidationLayers.h"
 #include "Global_Macros.h"
+#include <iostream>
 
 ENGINE_NAMESPACE_BEGIN
 
@@ -29,4 +30,13 @@ bool VkValidationLayers::CheckVkVLSupport() {
 
   return true;
 };
+
+VKAPI_ATTR VkBool32 VKAPI_CALL VkValidationLayers::DebugCallback(
+    VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+    VkDebugUtilsMessageTypeFlagsEXT messageType,
+    const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+    void *pUserData) {
+  std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+  return VK_FALSE;
+}
 ENGINE_NAMESPACE_END

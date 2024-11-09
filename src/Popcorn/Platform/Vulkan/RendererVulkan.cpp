@@ -22,7 +22,6 @@ RendererVulkan::~RendererVulkan() {
 void RendererVulkan::InitVulkan() {
   PC_PRINT_DEBUG(s_osWindow, 2, "RENDERER VULKAN")
   CreateInstance();
-  // CheckValidationLayerSupport();
 };
 
 void RendererVulkan::CreateInstance() {
