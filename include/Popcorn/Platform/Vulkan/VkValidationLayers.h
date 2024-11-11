@@ -43,7 +43,8 @@ use of Vulkan */
 
 private:
   // MEMBERS
-  std::vector<const char *> m_validationLayers;
+  const std::vector<const char *> m_validationLayers = {
+      "VK_LAYER_KHRONOS_validation"};
   // CLASS MEMBERS
   VkDebugUtilsMessengerEXT m_DebugMessenger;
 };

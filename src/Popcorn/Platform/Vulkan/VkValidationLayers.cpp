@@ -4,6 +4,7 @@
 #include <iostream>
 
 ENGINE_NAMESPACE_BEGIN
+VkValidationLayers::VkValidationLayers() {};
 
 VkResult CreateDebugUtilsMessengerEXT(
     VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
@@ -18,12 +19,9 @@ VkResult CreateDebugUtilsMessengerEXT(
   }
 }
 
-VkValidationLayers::VkValidationLayers()
-    : m_validationLayers{"VK_LAYER_KHRONOS_validation"} {};
-
 bool VkValidationLayers::CheckVkVLSupport() {
-  PC_PRINT(m_validationLayers[0], TagType::Print, "VK-VALIDATION-LAYERS")
   uint32_t layerCount;
+  vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
   std::vector<VkLayerProperties> availableLayers(layerCount);
   vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
