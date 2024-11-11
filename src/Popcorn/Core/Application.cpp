@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "Base.h"
 #include "RenderLayer.h"
 #include "Utilities.h"
 
@@ -12,7 +13,7 @@ DebugUIOverlay *Application::s_debug_ui_overlay = nullptr;
 RenderLayer *Application::s_render_layer = nullptr;
 
 Application::Application() {
-  PC_PRINT_DEBUG("APPLICATION STARTED", 0, "APP");
+  PC_PRINT("APPLICATION STARTED", TagType::Constr, "APP");
 
   /* Window::Create(Window::Props("Ramen")); */
   /* Window::Destroy(); */
@@ -28,7 +29,7 @@ Application::~Application() {
   Window::UnSubscribe(s_instance);
   Window::Destroy();
 
-  PC_PRINT_DEBUG("APPLICATION STOPPED", 0, "APP");
+  PC_PRINT("APPLICATION STOPPED", TagType::Destr, "APP");
 };
 
 Application &Application::Get() { return *s_instance; }

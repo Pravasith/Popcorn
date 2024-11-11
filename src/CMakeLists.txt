@@ -7,6 +7,7 @@ add_library(
   #
   # CORE IMPL FILES
   ${CORE_IMPL_DIR}/Application.cpp
+  ${CORE_IMPL_DIR}/Externs.cpp
   # CORE LAYERS
   ${CORE_IMPL_DIR}/Layer.cpp
   ${CORE_IMPL_DIR}/LayerStack.cpp

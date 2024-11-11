@@ -17,13 +17,13 @@ std::variant<RendererVulkan *, RendererOpenGL *> Renderer::s_renderer{
     static_cast<RendererVulkan *>(nullptr)};
 
 Renderer::Renderer() {
-  PC_PRINT_DEBUG("RENDERER CREATED", 1, "RENDERER");
+  PC_PRINT("CREATED", TagType::Constr, "RENDERER");
 
   // TODO: CHANGE TO FANCY DISPATCHER STUFF
   s_type = RendererType::Vulkan;
 };
 
-Renderer::~Renderer() { PC_PRINT_DEBUG("RENDERER DESTROYED", 1, "RENDERER") };
+Renderer::~Renderer() { PC_PRINT("DESTROYED", TagType::Destr, "RENDERER") };
 
 void Renderer::Create() {
   if (s_instance) {
@@ -34,7 +34,6 @@ void Renderer::Create() {
 };
 
 void Renderer::Run() {
-  PC_PRINT_DEBUG(s_osWindow, 2, "RENDERER")
 
   // TODO: CHANGE TO FANCY DISPATCHER STUFF
   if (static_cast<int>(s_type) & static_cast<int>(RendererType::OpenGL)) {

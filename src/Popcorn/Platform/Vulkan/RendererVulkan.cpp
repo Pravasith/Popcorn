@@ -10,18 +10,20 @@
 ENGINE_NAMESPACE_BEGIN
 
 RendererVulkan::RendererVulkan() : m_VkValLyrs() {
-  PC_PRINT_DEBUG("VULKAN CREATED", 2, "RENDERER");
+  PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
   InitVulkan();
 };
 
 RendererVulkan::~RendererVulkan() {
   CleanUp();
-  PC_PRINT_DEBUG("VULKAN DESTROYED", 2, "RENDERER");
+  PC_PRINT("DESTROYED", TagType::Destr, "RENDERER-VULKAN");
 };
 
 void RendererVulkan::InitVulkan() {
-  PC_PRINT_DEBUG(s_osWindow, 2, "RENDERER VULKAN")
   CreateInstance();
+
+  if constexpr (s_enableValidationLayers)
+    m_VkValLyrs.SetupDbgMsngr();
 };
 
 void RendererVulkan::CreateInstance() {

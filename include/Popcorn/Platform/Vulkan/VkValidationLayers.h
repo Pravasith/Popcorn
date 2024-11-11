@@ -9,10 +9,15 @@
 ENGINE_NAMESPACE_BEGIN
 class VkValidationLayers {
 public:
-  bool CheckVkVLSupport();
-  std::vector<const char *> GetValidationLayers() const {
+  VkValidationLayers();
+  ~VkValidationLayers() = default;
+
+  inline std::vector<const char *> GetValidationLayers() const {
     return m_validationLayers;
   };
+
+  bool CheckVkVLSupport();
+
   static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
       /**
        * VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT: Diagnostic message
@@ -34,7 +39,12 @@ use of Vulkan */
       const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
       void *pUserData);
 
+  void SetupDbgMsngr();
+
 private:
+  // MEMBERS
   std::vector<const char *> m_validationLayers;
+  // CLASS MEMBERS
+  VkDebugUtilsMessengerEXT m_DebugMessenger;
 };
 ENGINE_NAMESPACE_END

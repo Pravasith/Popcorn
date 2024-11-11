@@ -19,8 +19,8 @@ private:
   void CleanUp();
 
   void CreateInstance();
-  std::vector<const char *> GetRequiredExtensions();
 
+  std::vector<const char *> GetRequiredExtensions();
   virtual void OnUpdate() const override;
 
 private:

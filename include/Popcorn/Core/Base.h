@@ -2,40 +2,66 @@
 
 #include "Global_Macros.h"
 #include <cstddef>
+
+#ifdef PC_DEBUG
 #include <iostream>
 #include <sstream>
 #include <string>
+#endif
+
 #include <sys/types.h>
 
 ENGINE_NAMESPACE_BEGIN
-constexpr std::size_t bit_shift_left(std::size_t n) { return 1 << n; }
+constexpr std::size_t shift_l(std::size_t n) { return 1 << n; }
 
+enum TagType { Constr, Destr, Print };
+
+// TODO: SWAP
 #ifdef PC_DEBUG
-static void pc_print(const std::string &msg, unsigned int lvl,
-                     const std::string &tag) {
+
+extern int PC_print_lvl;
+
+static void PC_Print(const std::string &msg, const TagType tag,
+                     const std::string &className) {
+
+  if (tag == TagType::Constr) {
+    PC_print_lvl++;
+  } else if (tag == TagType::Destr)
+    PC_print_lvl--;
+
+  if (PC_print_lvl < 0) {
+    std::cout << "MISSING CONSTRUCTOR MESSAGE" << '\n';
+    return;
+  };
+
   std::stringstream ss;
 
-  if (lvl > 20)
-    lvl = 20;
+  auto lvl = PC_print_lvl < 10 ? " " + std::to_string(PC_print_lvl)
+                               : std::to_string(PC_print_lvl);
 
-  ss << ">> ";
+  ss << lvl << " ";
 
-  for (int i = 0; i < lvl; ++i) {
-    ss << " ";
+  for (int i = 0; i < PC_print_lvl; ++i) {
+    ss << "| ";
   }
 
-  ss << "|-- " << tag << ": " << msg << '\n';
+  ss << "| " << className << ": " << msg << '\n';
   std::cout << ss.str();
+
+  if (PC_print_lvl < 0) {
+    std::cout << "MISSING DESTRUCTOR MESSAGE" << '\n';
+    return;
+  };
 };
 
-#define PC_PRINT_DEBUG(msg, lvl, tag)                                          \
+#define PC_PRINT(msg, tag, className)                                          \
   do {                                                                         \
     std::ostringstream oss;                                                    \
     oss << msg;                                                                \
-    pc_print(oss.str(), lvl, tag);                                             \
+    PC_Print(oss.str(), tag, className);                                       \
   } while (0);
 #else
-#define PC_PRINT_DEBUG(msg, lvl, tag)
+#define PC_PRINT(x, y, z)
 #endif
 
 // VARIANT 1: (std::bind -- slow)

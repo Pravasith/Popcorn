@@ -26,9 +26,10 @@ private:
       : m_now(0.0f),
         // Assumption: First frame took 16.66 ms
         m_delta(16.66f), m_elapsed(0.0f), m_is_game_loop_running(true) {
-          PC_PRINT_DEBUG("CREATED", 1, "TIME")
+          PC_PRINT("CREATED", TagType::Constr, "TIME")
         };
-  ~Time() { PC_PRINT_DEBUG("DESTROYED", 1, "TIME") };
+  ~Time() { PC_PRINT("DESTROYED", TagType::Destr, "TIME") };
+
   float m_now;
   float m_delta;
   float m_elapsed;

@@ -21,7 +21,7 @@ public:
   EVENT_TYPE_OVERRIDE_METHODS(KeyReleased);
 
   void PrintDebugData() const override {
-    PC_PRINT_DEBUG(GetDeltaMS(), 1, "TIME");
+    PC_PRINT(GetDeltaMS(), TagType::Print, "TIME-EVENT");
   };
 
 private:

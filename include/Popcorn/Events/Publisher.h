@@ -8,6 +8,7 @@
 ENGINE_NAMESPACE_BEGIN
 class Publisher {
 public:
+  Publisher();
   virtual ~Publisher() = 0;
   static void PublishEvent(Event &e);
   static void Subscribe(const Subscriber *s);
