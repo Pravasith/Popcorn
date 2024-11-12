@@ -65,10 +65,10 @@ void VkValidationLayers::SetupDbgMsngr() {
   createInfo.pfnUserCallback = DebugCallback;
   createInfo.pUserData = nullptr; // Optional
 
-  if (PC_CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr,
-                                      &debugMessenger) != VK_SUCCESS) {
-    throw std::runtime_error("failed to set up debug messenger!");
-  }
+  // if (PC_CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr,
+  //                                     &debugMessenger) != VK_SUCCESS) {
+  //   throw std::runtime_error("failed to set up debug messenger!");
+  // }
 };
 
 // STATIC FUNCTIONS -----------------------------------------------------------
