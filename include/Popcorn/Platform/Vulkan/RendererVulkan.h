@@ -31,6 +31,7 @@ private:
 #else
   static constexpr bool s_enableValidationLayers = true;
 #endif
+
   // CLASS MEMBERS
   VkValidationLayers m_VkValLyrs;
 };

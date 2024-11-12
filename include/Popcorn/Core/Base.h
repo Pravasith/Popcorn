@@ -24,18 +24,12 @@ extern int PC_print_lvl;
 static void PC_Print(const std::string &msg, const TagType tag,
                      const std::string &className) {
 
-  if (tag == TagType::Constr) {
-    PC_print_lvl++;
-  } else if (tag == TagType::Destr)
-    PC_print_lvl--;
-
   if (PC_print_lvl < 0) {
     std::cout << "MISSING CONSTRUCTOR MESSAGE" << '\n';
     return;
   };
 
   std::stringstream ss;
-
   auto lvl = PC_print_lvl < 10 ? " " + std::to_string(PC_print_lvl)
                                : std::to_string(PC_print_lvl);
 
@@ -48,10 +42,10 @@ static void PC_Print(const std::string &msg, const TagType tag,
   ss << "| " << className << ": " << msg << '\n';
   std::cout << ss.str();
 
-  if (PC_print_lvl < 0) {
-    std::cout << "MISSING DESTRUCTOR MESSAGE" << '\n';
-    return;
-  };
+  if (tag == TagType::Constr) {
+    PC_print_lvl++;
+  } else if (tag == TagType::Destr)
+    PC_print_lvl--;
 };
 
 #define PC_PRINT(msg, tag, className)                                          \

@@ -4,9 +4,7 @@
 #include <iostream>
 
 ENGINE_NAMESPACE_BEGIN
-VkValidationLayers::VkValidationLayers() {};
-
-VkResult CreateDebugUtilsMessengerEXT(
+VkResult PC_CreateDebugUtilsMessengerEXT(
     VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
     const VkAllocationCallbacks *pAllocator,
     VkDebugUtilsMessengerEXT *pDebugMessenger) {
@@ -19,14 +17,20 @@ VkResult CreateDebugUtilsMessengerEXT(
   }
 }
 
+VkValidationLayers::VkValidationLayers() {
+  PC_PRINT("CREATED", TagType::Constr, "VK-VALIDATION-LAYERS")
+};
+
+VkValidationLayers::~VkValidationLayers() {
+  PC_PRINT("DESTROYED", TagType::Destr, "VK-VALIDATION-LAYERS")
+};
+
 bool VkValidationLayers::CheckVkVLSupport() {
   uint32_t layerCount;
   vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
   std::vector<VkLayerProperties> availableLayers(layerCount);
   vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
-
-  PC_PRINT(availableLayers.size(), TagType::Print, "VK-VAL")
 
   for (const char *layerName : m_validationLayers) {
     bool layerFound = false;
@@ -60,6 +64,11 @@ void VkValidationLayers::SetupDbgMsngr() {
 
   createInfo.pfnUserCallback = DebugCallback;
   createInfo.pUserData = nullptr; // Optional
+
+  if (PC_CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr,
+                                      &debugMessenger) != VK_SUCCESS) {
+    throw std::runtime_error("failed to set up debug messenger!");
+  }
 };
 
 // STATIC FUNCTIONS -----------------------------------------------------------

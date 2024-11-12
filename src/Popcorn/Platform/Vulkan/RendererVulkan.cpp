@@ -11,6 +11,8 @@ ENGINE_NAMESPACE_BEGIN
 
 RendererVulkan::RendererVulkan() : m_VkValLyrs() {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
+  m_VkValLyrs.SetVkInst(m_vkInstance);
+
   InitVulkan();
 };
 
