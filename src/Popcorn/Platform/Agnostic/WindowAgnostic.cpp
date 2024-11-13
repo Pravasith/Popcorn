@@ -26,7 +26,7 @@ Window *WindowAgnostic::Init(const Props &props) {
 }
 
 WindowAgnostic::WindowAgnostic(const Props &props) : m_title(props.Title) {
-  PC_PRINT_DEBUG("PLATFORM WINDOW CREATED", 2, "WIN64-LINUX");
+  PC_PRINT("PLATFORM WINDOW CREATED", TagType::Constr, "WIN64-LINUX");
 
   // GLFW INIT
   // ---------------------------------------------------
@@ -47,8 +47,7 @@ WindowAgnostic::WindowAgnostic(const Props &props) : m_title(props.Title) {
 #ifdef __APPLE__
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-
-  PC_PRINT_DEBUG("GLFW INIT", 2, "WIN64-LINUX");
+  PC_PRINT("INITED", TagType::Constr, "GLFW");
 
   // CREATE GLFW WINDOW AND MAKE CONTEXT CURRENT
   // ---------------------------------------------------
@@ -130,8 +129,8 @@ WindowAgnostic::~WindowAgnostic() {
   glfwDestroyWindow(s_os_window);
   glfwTerminate();
 
-  PC_PRINT_DEBUG("GLFW KILL", 2, "WIN64-LINUX");
-  PC_PRINT_DEBUG("PLATFORM WINDOW DESTROYED", 2, "WIN64-LINUX");
+  PC_PRINT("TERMINATED", TagType::Destr, "GLFW");
+  PC_PRINT("PLATFORM WINDOW DESTROYED", TagType::Destr, "WIN64-LINUX");
 };
 
 void WindowAgnostic::Terminate() {

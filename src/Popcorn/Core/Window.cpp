@@ -1,5 +1,6 @@
 #include "Window.h"
 /* #ifdef IS_WINDOWS_OR_LINUX */
+#include "Base.h"
 #include "WindowAgnostic.h"
 /* #else */
 /* write_log("Error Importing Platform!"); */
@@ -16,7 +17,7 @@ Window *Window::Create(const Props &props) {
     return static_cast<Window *>(s_platform_window_instance);
   };
 
-  PC_PRINT_DEBUG("MAIN WINDOW CREATED", 1, "WINDOW");
+  PC_PRINT("CREATED", TagType::Constr, "WINDOW");
 
   /* ---- NOTE ---- */
   /* Multiple window creation not supported at the moment */
@@ -34,7 +35,6 @@ Window *Window::Create(const Props &props) {
 };
 
 // void Window::AddSubscriber(const Subscriber *s) {
-//   PC_PRINT_DEBUG("WINDOW SUBSCRIPTION ADDED", 1, "WINDOW");
 //
 //   /* #ifdef IS_WINDOWS_OR_LINUX */
 //   (static_cast<WindowAgnostic
@@ -65,5 +65,5 @@ void Window::OnUpdate() {
 Window::Window() {
   /* std::cout << "LALALA Window Constructor called" << std::endl; */
 };
-Window::~Window() { PC_PRINT_DEBUG("MAIN WINDOW DESTROYED", 1, "WINDOW"); };
+Window::~Window() { PC_PRINT("DESTROYED", TagType::Destr, "WINDOW"); };
 ENGINE_NAMESPACE_END

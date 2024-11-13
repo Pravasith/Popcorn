@@ -24,8 +24,8 @@ public:
   EVENT_TYPE_OVERRIDE_METHODS(MouseMoved);
 
   void PrintDebugData() const override {
-    PC_PRINT_DEBUG("X: " << GetCoords().x << ", Y: " << GetCoords().y, 1,
-                   "MOUSE_EVENT");
+    PC_PRINT("X: " << GetCoords().x << ", Y: " << GetCoords().y, TagType::Print,
+             "MOUSE_EVENT");
   };
 
 private:

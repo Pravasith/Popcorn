@@ -9,16 +9,16 @@ ENGINE_NAMESPACE_BEGIN
 
 enum class RendererType {
   None = 0,
-  OpenGL = bit_shift_left(1),
-  Vulkan = bit_shift_left(2),
-  // DirectX = bit_shift_left(3),
-  // Metal = bit_shift_left(4)
+  OpenGL = shift_l(1),
+  Vulkan = shift_l(2),
+  // DirectX = shift_l(3),
+  // Metal = shift_l(4)
 };
 
 // FORWARD DECLARATIONS OF DERIVED CLASSES TO AVOID
 // CIRCULAR DEP PROBLEM
 class RendererOpenGL;
-class RendererVulkan;
+class RendererVk;
 
 // SINGLETON
 class Renderer : public Subscriber {
@@ -49,7 +49,7 @@ protected:
   static RendererType s_type;
   static const void *s_osWindow;
 
-  static std::variant<RendererVulkan *, RendererOpenGL *> s_renderer;
+  static std::variant<RendererVk *, RendererOpenGL *> s_renderer;
 };
 
 ENGINE_NAMESPACE_END

@@ -5,8 +5,13 @@
 #include "Renderer.h"
 
 ENGINE_NAMESPACE_BEGIN
-RenderLayer::RenderLayer() { PC_PRINT_DEBUG("CREATED", 1, "RENDER-LAYER"); }
-RenderLayer::~RenderLayer() { PC_PRINT_DEBUG("DESTROYED", 1, "RENDER-LAYER"); }
+RenderLayer::RenderLayer() {
+  PC_PRINT("CREATED", TagType::Constr, "RENDER-LAYER");
+}
+
+RenderLayer::~RenderLayer() {
+  PC_PRINT("DESTROYED", TagType::Destr, "RENDER-LAYER");
+}
 
 void RenderLayer::OnAttach() {
   Application &app = Application::Get();

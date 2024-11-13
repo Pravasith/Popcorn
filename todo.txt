@@ -1,0 +1,8 @@
+TODO:
+----------
+ :: Mem check resolution
+    Valgrind memory check
+
+ :: Precompiled headers
+    Add precompiled headers to the project and
+    in cmake

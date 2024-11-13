@@ -14,7 +14,7 @@ public:
   EVENT_TYPE_OVERRIDE_METHODS(WindowClose)
 
   void PrintDebugData() const override {
-    PC_PRINT_DEBUG("Window Closed", 1, "WINDOW_EVENT");
+    PC_PRINT("Window Closed", TagType::Print, "WINDOW-EVENT");
   };
 };
 
@@ -27,10 +27,9 @@ public:
   EVENT_TYPE_OVERRIDE_METHODS(WindowResize)
 
   void PrintDebugData() const override {
-    PC_PRINT_DEBUG("Window Resize Event: " << " -- W: " << GetWindowSize().width
-                                           << " -- H: "
-                                           << GetWindowSize().height,
-                   1, "WINDOW_EVENT");
+    PC_PRINT("Window Resize" << " W: " << GetWindowSize().width
+                             << " H: " << GetWindowSize().height,
+             TagType::Print, "WINDOW-EVENT");
   };
 
   struct WindowSize {

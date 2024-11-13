@@ -37,7 +37,7 @@ public:
   EVENT_TYPE_OVERRIDE_METHODS(KeyPressed);
 
   void PrintDebugData() const override {
-    PC_PRINT_DEBUG("Key Pressed: " << GetKeyCode(), 1, "KEY_EVENT");
+    PC_PRINT("Key Pressed: " << GetKeyCode(), TagType::Print, "KEY-EVENT");
   };
 
 private:
@@ -54,7 +54,7 @@ public:
   EVENT_TYPE_OVERRIDE_METHODS(KeyReleased);
 
   void PrintDebugData() const override {
-    PC_PRINT_DEBUG("Key Released: " << GetKeyCode(), 1, "KEY_EVENT");
+    PC_PRINT("Key Released: " << GetKeyCode(), TagType::Print, "KEY-EVENT");
   };
 
 private:

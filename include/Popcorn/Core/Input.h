@@ -24,10 +24,10 @@ private:
   virtual bool IsKeyPressedImpl(Key::KeyCode kc) = 0;
 
 private:
-  Input() { PC_PRINT_DEBUG("INPUT CLASS CONSTRUCTOR", 1, "INPUT.H"); };
+  Input() { PC_PRINT("CREATED", TagType::Constr, "INPUT"); };
   ~Input() {
-    delete s_instance;
-    PC_PRINT_DEBUG("INPUT CLASS DESTRUCTOR", 1, "INPUT.H");
+    // delete s_instance;
+    PC_PRINT("DESTROYED", TagType::Destr, "INPUT");
   };
 
   static Input *s_instance;

@@ -32,11 +32,11 @@ enum class EventType {
 
 enum class EventCategory {
   None = 0,
-  ApplicationEvent = bit_shift_left(1),
-  WindowEvent = bit_shift_left(2),
-  KeyboardEvent = bit_shift_left(3),
-  MouseEvent = bit_shift_left(4),
-  TimeEvent = bit_shift_left(5)
+  ApplicationEvent = shift_l(1),
+  WindowEvent = shift_l(2),
+  KeyboardEvent = shift_l(3),
+  MouseEvent = shift_l(4),
+  TimeEvent = shift_l(5)
 };
 
 // HASH DEFINE START ----------------------------------------------------------
@@ -73,10 +73,9 @@ public:
   [[nodiscard]] virtual const char *GetEventTypeName() const = 0;
   // DEBUG ONLY
   virtual void PrintDebugData() const {
-    PC_PRINT_DEBUG(
-        "From base class -- virtual method \"PrintDebugData\" not defined "
-        "in derived class\n",
-        1, "EVENT");
+    PC_PRINT("From base class -- virtual method \"PrintDebugData\" not defined "
+             "in derived class\n",
+             TagType::Print, "EVENT");
   };
 
 private:

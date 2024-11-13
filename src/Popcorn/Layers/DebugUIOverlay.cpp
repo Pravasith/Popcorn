@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 
 #include "Application.h"
+#include "Base.h"
 #include "DebugUIOverlay.h"
 #include "Event.h"
 #include "Global_Macros.h"
@@ -13,10 +14,10 @@
 
 ENGINE_NAMESPACE_BEGIN
 DebugUIOverlay::DebugUIOverlay() {
-  PC_PRINT_DEBUG("CREATED", 1, "IMGUI-LAYER");
+  PC_PRINT("CREATED", TagType::Constr, "IMGUI-LAYER");
 }
 DebugUIOverlay::~DebugUIOverlay() {
-  PC_PRINT_DEBUG("DESTROYED", 1, "IMGUI-LAYER");
+  PC_PRINT("DESTROYED", TagType::Destr, "IMGUI-LAYER");
 }
 
 void DebugUIOverlay::OnAttach() {
