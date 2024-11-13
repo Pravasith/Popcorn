@@ -9,9 +9,8 @@
 // HELLO TRIANGLE!
 ENGINE_NAMESPACE_BEGIN
 
-RendererVulkan::RendererVulkan() : m_VkValLyrs() {
+RendererVulkan::RendererVulkan() : m_VkValLyrs(m_vkInstance) {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
-  m_VkValLyrs.SetVkInst(m_vkInstance);
 
   InitVulkan();
 };
@@ -23,7 +22,6 @@ RendererVulkan::~RendererVulkan() {
 
 void RendererVulkan::InitVulkan() {
   CreateInstance();
-
   if constexpr (s_enableValidationLayers)
     m_VkValLyrs.SetupDbgMsngr();
 };
@@ -47,6 +45,10 @@ void RendererVulkan::CreateInstance() {
 
   glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
+  auto extensions = GetRequiredExtensions();
+  createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+  createInfo.ppEnabledExtensionNames = extensions.data();
+
   createInfo.enabledExtensionCount = glfwExtensionCount;
   createInfo.ppEnabledExtensionNames = glfwExtensions;
   createInfo.enabledLayerCount = 0;
@@ -56,24 +58,20 @@ void RendererVulkan::CreateInstance() {
     if (!m_VkValLyrs.CheckVkVLSupport()) {
       throw std::runtime_error(
           "VALIDATION LAYERS REQUESTED, BUT NOT AVAILABLE!");
-
-      // UPDATE CREATE INFO
-      createInfo.enabledLayerCount =
-          static_cast<uint32_t>(m_VkValLyrs.GetValidationLayers().size());
-      createInfo.ppEnabledLayerNames = m_VkValLyrs.GetValidationLayers().data();
     }
+
+    // UPDATE CREATE INFO
+    createInfo.enabledLayerCount =
+        static_cast<uint32_t>(m_VkValLyrs.GetValidationLayers().size());
+    createInfo.ppEnabledLayerNames = m_VkValLyrs.GetValidationLayers().data();
   } else {
     createInfo.enabledLayerCount = 0;
   }
 
-  auto extensions = GetRequiredExtensions();
-  createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-  createInfo.ppEnabledExtensionNames = extensions.data();
-
   // CREATE INSTANCE
   VkResult result = vkCreateInstance(&createInfo, nullptr, &m_vkInstance);
 
-  if (result != VK_SUCCESS) {
+  if (vkCreateInstance(&createInfo, nullptr, &m_vkInstance) != VK_SUCCESS) {
     throw std::runtime_error("FAILED TO CREATE VK INSTANCE!");
   }
 };

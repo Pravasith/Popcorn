@@ -17,9 +17,10 @@ VkResult PC_CreateDebugUtilsMessengerEXT(
   }
 }
 
-VkValidationLayers::VkValidationLayers() {
-  PC_PRINT("CREATED", TagType::Constr, "VK-VALIDATION-LAYERS")
-};
+VkValidationLayers::VkValidationLayers(VkInstance &vkInst)
+    : m_vkInst(vkInst) {
+        PC_PRINT("CREATED", TagType::Constr, "VK-VALIDATION-LAYERS")
+      };
 
 VkValidationLayers::~VkValidationLayers() {
   PC_PRINT("DESTROYED", TagType::Destr, "VK-VALIDATION-LAYERS")

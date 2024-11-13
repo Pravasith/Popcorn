@@ -15,15 +15,11 @@ public:
   friend class RendererVulkan;
 
 private:
-  VkValidationLayers();
+  VkValidationLayers(VkInstance &);
   ~VkValidationLayers();
 
-  inline std::vector<const char *> GetValidationLayers() const {
+  inline const std::vector<const char *> &GetValidationLayers() const {
     return m_validationLayers;
-  };
-
-  inline void SetVkInst(const VkInstance &vkInstance) const {
-    m_vkInst = vkInstance;
   };
 
   bool CheckVkVLSupport();
