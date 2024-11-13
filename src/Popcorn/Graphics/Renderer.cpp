@@ -6,15 +6,13 @@
 #include "RendererVk.h"
 #include <string>
 
-// #include "Application.h"
-
 ENGINE_NAMESPACE_BEGIN
 // SINGLETON
 Renderer *Renderer::s_instance = nullptr;
 RendererType Renderer::s_type = RendererType::OpenGL;
 const void *Renderer::s_osWindow = nullptr;
-std::variant<RendererVulkan *, RendererOpenGL *> Renderer::s_renderer{
-    static_cast<RendererVulkan *>(nullptr)};
+std::variant<RendererVk *, RendererOpenGL *> Renderer::s_renderer{
+    static_cast<RendererVk *>(nullptr)};
 
 Renderer::Renderer() {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER");
@@ -39,7 +37,7 @@ void Renderer::Run() {
   if (static_cast<int>(s_type) & static_cast<int>(RendererType::OpenGL)) {
     s_renderer = new RendererOpenGL();
   } else {
-    s_renderer = new RendererVulkan();
+    s_renderer = new RendererVk();
   };
 };
 
@@ -51,15 +49,15 @@ Renderer &Renderer::Get() {
 };
 
 void Renderer::Destroy() {
-  if (auto vulkanRenderer =
-          std::get_if<RendererVulkan *>(&Renderer::s_renderer)) {
+  if (auto vulkanRenderer = std::get_if<RendererVk *>(&Renderer::s_renderer)) {
     delete *vulkanRenderer;
   } else if (auto openGLRenderer =
                  std::get_if<RendererOpenGL *>(&Renderer::s_renderer)) {
     delete *openGLRenderer;
   };
 
-  Renderer::s_renderer = static_cast<RendererVulkan *>(nullptr);
+  Renderer::s_renderer = static_cast<RendererVk *>(nullptr);
+
   delete s_instance;
   s_instance = nullptr;
 };

@@ -9,18 +9,18 @@
 // HELLO TRIANGLE!
 ENGINE_NAMESPACE_BEGIN
 
-RendererVulkan::RendererVulkan() : m_VkValLyrs(m_vkInstance) {
+RendererVk::RendererVk() : m_VkValLyrs(m_vkInstance) {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
 
   InitVulkan();
 };
 
-RendererVulkan::~RendererVulkan() {
+RendererVk::~RendererVk() {
   CleanUp();
   PC_PRINT("DESTROYED", TagType::Destr, "RENDERER-VULKAN");
 };
 
-void RendererVulkan::InitVulkan() {
+void RendererVk::InitVulkan() {
   CreateInstance();
 
   if constexpr (s_enableValidationLayers)
@@ -29,7 +29,7 @@ void RendererVulkan::InitVulkan() {
   // PickPhysDevice();
 };
 
-void RendererVulkan::CreateInstance() {
+void RendererVk::CreateInstance() {
   VkApplicationInfo appInfo{};
 
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -79,7 +79,7 @@ void RendererVulkan::CreateInstance() {
   }
 };
 
-std::vector<const char *> RendererVulkan::GetRequiredExtensions() {
+std::vector<const char *> RendererVk::GetRequiredExtensions() {
   uint32_t glfwExtensionCount = 0;
   const char **glfwExtensions;
   glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
@@ -94,9 +94,9 @@ std::vector<const char *> RendererVulkan::GetRequiredExtensions() {
   return extensions;
 };
 
-void RendererVulkan::OnUpdate() const {};
+void RendererVk::OnUpdate() const {};
 
-void RendererVulkan::CleanUp() {
+void RendererVk::CleanUp() {
   m_VkValLyrs.CleanUp();
 
   vkDestroyInstance(m_vkInstance, nullptr);

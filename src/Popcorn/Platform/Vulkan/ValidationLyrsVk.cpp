@@ -27,16 +27,16 @@ void PC_DestroyDebugUtilsMessengerEXT(VkInstance instance,
   }
 }
 
-VkValidationLayers::VkValidationLayers(VkInstance &vkInst)
+ValidationLyrsVk::ValidationLyrsVk(VkInstance &vkInst)
     : m_vkInst(vkInst) {
         PC_PRINT("CREATED", TagType::Constr, "VK-VALIDATION-LAYERS")
       };
 
-VkValidationLayers::~VkValidationLayers() {
+ValidationLyrsVk::~ValidationLyrsVk() {
   PC_PRINT("DESTROYED", TagType::Destr, "VK-VALIDATION-LAYERS")
 };
 
-void VkValidationLayers::PopulateDbgMsngrCreateInfo(
+void ValidationLyrsVk::PopulateDbgMsngrCreateInfo(
     VkDebugUtilsMessengerCreateInfoEXT &createInfo) {
   createInfo = {};
   createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -49,7 +49,7 @@ void VkValidationLayers::PopulateDbgMsngrCreateInfo(
   createInfo.pfnUserCallback = DebugCallback;
 }
 
-bool VkValidationLayers::CheckVkVLSupport() {
+bool ValidationLyrsVk::CheckVkVLSupport() {
   uint32_t layerCount;
   vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
@@ -74,7 +74,7 @@ bool VkValidationLayers::CheckVkVLSupport() {
   return true;
 };
 
-void VkValidationLayers::SetupDbgMsngr() {
+void ValidationLyrsVk::SetupDbgMsngr() {
   VkDebugUtilsMessengerCreateInfoEXT createInfo{};
   PopulateDbgMsngrCreateInfo(createInfo);
 
@@ -84,14 +84,14 @@ void VkValidationLayers::SetupDbgMsngr() {
   }
 };
 
-void VkValidationLayers::CleanUp() {
+void ValidationLyrsVk::CleanUp() {
   PC_DestroyDebugUtilsMessengerEXT(m_vkInst, m_DebugMessenger, nullptr);
   m_DebugMessenger = VK_NULL_HANDLE;
 };
 
 // STATIC FUNCTIONS -----------------------------------------------------------
 //
-VKAPI_ATTR VkBool32 VKAPI_CALL VkValidationLayers::DebugCallback(
+VKAPI_ATTR VkBool32 VKAPI_CALL ValidationLyrsVk::DebugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT messageType,
     const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,

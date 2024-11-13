@@ -7,16 +7,16 @@
 #include <cstring>
 #include <vector>
 
-class RendererVulkan;
+class RendererVk;
 
 ENGINE_NAMESPACE_BEGIN
-class VkValidationLayers {
+class ValidationLyrsVk {
 public:
-  friend class RendererVulkan;
+  friend class RendererVk;
 
 private:
-  VkValidationLayers(VkInstance &);
-  ~VkValidationLayers();
+  ValidationLyrsVk(VkInstance &);
+  ~ValidationLyrsVk();
 
   inline const std::vector<const char *> &GetValidationLayers() const {
     return m_validationLayers;

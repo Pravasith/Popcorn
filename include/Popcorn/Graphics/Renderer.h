@@ -18,7 +18,7 @@ enum class RendererType {
 // FORWARD DECLARATIONS OF DERIVED CLASSES TO AVOID
 // CIRCULAR DEP PROBLEM
 class RendererOpenGL;
-class RendererVulkan;
+class RendererVk;
 
 // SINGLETON
 class Renderer : public Subscriber {
@@ -49,7 +49,7 @@ protected:
   static RendererType s_type;
   static const void *s_osWindow;
 
-  static std::variant<RendererVulkan *, RendererOpenGL *> s_renderer;
+  static std::variant<RendererVk *, RendererOpenGL *> s_renderer;
 };
 
 ENGINE_NAMESPACE_END

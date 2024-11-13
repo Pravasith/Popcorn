@@ -9,10 +9,10 @@
 #include "ValidationLyrsVk.h"
 
 ENGINE_NAMESPACE_BEGIN
-class RendererVulkan : public Renderer {
+class RendererVk : public Renderer {
 public:
-  RendererVulkan();
-  ~RendererVulkan();
+  RendererVk();
+  ~RendererVk();
 
 private:
   void InitVulkan();
@@ -33,7 +33,7 @@ private:
 #endif
 
   // CLASS MEMBERS
-  VkValidationLayers m_VkValLyrs;
+  ValidationLyrsVk m_VkValLyrs;
 };
 
 ENGINE_NAMESPACE_END
