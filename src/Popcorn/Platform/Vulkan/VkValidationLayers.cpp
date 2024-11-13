@@ -17,6 +17,16 @@ VkResult PC_CreateDebugUtilsMessengerEXT(
   }
 }
 
+void PC_DestroyDebugUtilsMessengerEXT(VkInstance instance,
+                                      VkDebugUtilsMessengerEXT debugMessenger,
+                                      const VkAllocationCallbacks *pAllocator) {
+  auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
+      instance, "vkDestroyDebugUtilsMessengerEXT");
+  if (func != nullptr) {
+    func(instance, debugMessenger, pAllocator);
+  }
+}
+
 VkValidationLayers::VkValidationLayers(VkInstance &vkInst)
     : m_vkInst(vkInst) {
         PC_PRINT("CREATED", TagType::Constr, "VK-VALIDATION-LAYERS")
@@ -25,6 +35,23 @@ VkValidationLayers::VkValidationLayers(VkInstance &vkInst)
 VkValidationLayers::~VkValidationLayers() {
   PC_PRINT("DESTROYED", TagType::Destr, "VK-VALIDATION-LAYERS")
 };
+
+void VkValidationLayers::CleanUp() {
+  PC_DestroyDebugUtilsMessengerEXT(m_vkInst, m_DebugMessenger, nullptr);
+};
+
+void VkValidationLayers::PopulateDbgMsngrCreateInfo(
+    VkDebugUtilsMessengerCreateInfoEXT &createInfo) {
+  createInfo = {};
+  createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+  createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+                               VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                               VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+  createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                           VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+                           VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+  createInfo.pfnUserCallback = DebugCallback;
+}
 
 bool VkValidationLayers::CheckVkVLSupport() {
   uint32_t layerCount;
@@ -53,23 +80,12 @@ bool VkValidationLayers::CheckVkVLSupport() {
 
 void VkValidationLayers::SetupDbgMsngr() {
   VkDebugUtilsMessengerCreateInfoEXT createInfo{};
-  createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+  PopulateDbgMsngrCreateInfo(createInfo);
 
-  createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-                               VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-                               VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-
-  createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-                           VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-                           VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-
-  createInfo.pfnUserCallback = DebugCallback;
-  createInfo.pUserData = nullptr; // Optional
-
-  // if (PC_CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr,
-  //                                     &debugMessenger) != VK_SUCCESS) {
-  //   throw std::runtime_error("failed to set up debug messenger!");
-  // }
+  if (PC_CreateDebugUtilsMessengerEXT(m_vkInst, &createInfo, nullptr,
+                                      &m_DebugMessenger) != VK_SUCCESS) {
+    throw std::runtime_error("failed to set up debug messenger!");
+  }
 };
 
 // STATIC FUNCTIONS -----------------------------------------------------------

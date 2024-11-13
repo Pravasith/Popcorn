@@ -23,6 +23,9 @@ private:
   };
 
   bool CheckVkVLSupport();
+  void CleanUp();
+  void
+  PopulateDbgMsngrCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
       /**

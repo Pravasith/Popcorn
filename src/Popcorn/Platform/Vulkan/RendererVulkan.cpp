@@ -49,9 +49,9 @@ void RendererVulkan::CreateInstance() {
   createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
   createInfo.ppEnabledExtensionNames = extensions.data();
 
-  createInfo.enabledExtensionCount = glfwExtensionCount;
-  createInfo.ppEnabledExtensionNames = glfwExtensions;
   createInfo.enabledLayerCount = 0;
+
+  VkDebugUtilsMessengerCreateInfoEXT dbgCreateInfo{};
 
   // CHECK FOR VALIDATION LAYER SUPPORT
   if constexpr (s_enableValidationLayers) {
@@ -64,8 +64,12 @@ void RendererVulkan::CreateInstance() {
     createInfo.enabledLayerCount =
         static_cast<uint32_t>(m_VkValLyrs.GetValidationLayers().size());
     createInfo.ppEnabledLayerNames = m_VkValLyrs.GetValidationLayers().data();
+
+    m_VkValLyrs.PopulateDbgMsngrCreateInfo(dbgCreateInfo);
+    createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&dbgCreateInfo;
   } else {
     createInfo.enabledLayerCount = 0;
+    createInfo.pNext = nullptr;
   }
 
   // CREATE INSTANCE
@@ -93,6 +97,9 @@ std::vector<const char *> RendererVulkan::GetRequiredExtensions() {
 
 void RendererVulkan::OnUpdate() const {};
 
-void RendererVulkan::CleanUp() { vkDestroyInstance(m_vkInstance, nullptr); };
+void RendererVulkan::CleanUp() {
+  m_VkValLyrs.CleanUp();
+  vkDestroyInstance(m_vkInstance, nullptr);
+};
 
 ENGINE_NAMESPACE_END
