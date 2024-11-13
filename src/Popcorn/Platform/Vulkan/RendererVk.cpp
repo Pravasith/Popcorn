@@ -4,7 +4,7 @@
 
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
-#include "RendererVulkan.h"
+#include "RendererVk.h"
 
 // HELLO TRIANGLE!
 ENGINE_NAMESPACE_BEGIN
@@ -25,6 +25,8 @@ void RendererVulkan::InitVulkan() {
 
   if constexpr (s_enableValidationLayers)
     m_VkValLyrs.SetupDbgMsngr();
+
+  // PickPhysDevice();
 };
 
 void RendererVulkan::CreateInstance() {
@@ -41,10 +43,6 @@ void RendererVulkan::CreateInstance() {
   VkInstanceCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
   createInfo.pApplicationInfo = &appInfo;
-
-  // uint32_t glfwExtensionCount = 0;
-  // const char **glfwExtensions;
-  // glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
   auto extensions = GetRequiredExtensions();
   createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());

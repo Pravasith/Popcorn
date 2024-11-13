@@ -6,6 +6,6 @@
 #define KEY_NAMESPACE_BEGIN namespace Key {
 #define KEY_NAMESPACE_END }
 
-// #Compile only
+// COMPILE ONLY
 #define ENUM_TO_STRING(enum_name, option_name)                                 \
   const char *Get##enum_name##Name() const override { return #option_name; }
