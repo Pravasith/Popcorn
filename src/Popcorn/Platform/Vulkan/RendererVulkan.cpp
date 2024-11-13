@@ -22,12 +22,14 @@ RendererVulkan::~RendererVulkan() {
 
 void RendererVulkan::InitVulkan() {
   CreateInstance();
+
   if constexpr (s_enableValidationLayers)
     m_VkValLyrs.SetupDbgMsngr();
 };
 
 void RendererVulkan::CreateInstance() {
   VkApplicationInfo appInfo{};
+
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appInfo.pApplicationName = "HELLO TRIANGLE";
   appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -40,10 +42,9 @@ void RendererVulkan::CreateInstance() {
   createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
   createInfo.pApplicationInfo = &appInfo;
 
-  uint32_t glfwExtensionCount = 0;
-  const char **glfwExtensions;
-
-  glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+  // uint32_t glfwExtensionCount = 0;
+  // const char **glfwExtensions;
+  // glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
   auto extensions = GetRequiredExtensions();
   createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
@@ -99,7 +100,9 @@ void RendererVulkan::OnUpdate() const {};
 
 void RendererVulkan::CleanUp() {
   m_VkValLyrs.CleanUp();
+
   vkDestroyInstance(m_vkInstance, nullptr);
+  m_vkInstance = VK_NULL_HANDLE;
 };
 
 ENGINE_NAMESPACE_END

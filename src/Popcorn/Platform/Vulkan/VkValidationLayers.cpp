@@ -36,10 +36,6 @@ VkValidationLayers::~VkValidationLayers() {
   PC_PRINT("DESTROYED", TagType::Destr, "VK-VALIDATION-LAYERS")
 };
 
-void VkValidationLayers::CleanUp() {
-  PC_DestroyDebugUtilsMessengerEXT(m_vkInst, m_DebugMessenger, nullptr);
-};
-
 void VkValidationLayers::PopulateDbgMsngrCreateInfo(
     VkDebugUtilsMessengerCreateInfoEXT &createInfo) {
   createInfo = {};
@@ -88,6 +84,11 @@ void VkValidationLayers::SetupDbgMsngr() {
   }
 };
 
+void VkValidationLayers::CleanUp() {
+  PC_DestroyDebugUtilsMessengerEXT(m_vkInst, m_DebugMessenger, nullptr);
+  m_DebugMessenger = VK_NULL_HANDLE;
+};
+
 // STATIC FUNCTIONS -----------------------------------------------------------
 //
 VKAPI_ATTR VkBool32 VKAPI_CALL VkValidationLayers::DebugCallback(
@@ -95,7 +96,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL VkValidationLayers::DebugCallback(
     VkDebugUtilsMessageTypeFlagsEXT messageType,
     const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
     void *pUserData) {
-  std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+  std::cerr << "VALIDATION LAYER: " << pCallbackData->pMessage << std::endl;
   return VK_FALSE;
 }
 ENGINE_NAMESPACE_END
