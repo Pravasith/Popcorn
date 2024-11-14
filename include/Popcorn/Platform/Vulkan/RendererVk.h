@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Global_Macros.h"
+#include "PhysDeviceVk.h"
 #include "Renderer.h"
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
@@ -32,8 +33,8 @@ private:
   static constexpr bool s_enableValidationLayers = true;
 #endif
 
-  // CLASS MEMBERS
-  ValidationLyrsVk m_VkValLyrs;
+  ValidationLyrsVk m_ValLyrsVk;
+  PhysDeviceVk m_PhysDevVk;
 };
 
 ENGINE_NAMESPACE_END

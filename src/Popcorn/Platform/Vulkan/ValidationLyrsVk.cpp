@@ -27,7 +27,7 @@ void PC_DestroyDebugUtilsMessengerEXT(VkInstance instance,
   }
 }
 
-ValidationLyrsVk::ValidationLyrsVk(VkInstance &vkInst)
+ValidationLyrsVk::ValidationLyrsVk(const VkInstance &vkInst)
     : m_vkInst(vkInst) {
         PC_PRINT("CREATED", TagType::Constr, "VK-VALIDATION-LAYERS")
       };
@@ -79,14 +79,14 @@ void ValidationLyrsVk::SetupDbgMsngr() {
   PopulateDbgMsngrCreateInfo(createInfo);
 
   if (PC_CreateDebugUtilsMessengerEXT(m_vkInst, &createInfo, nullptr,
-                                      &m_DebugMessenger) != VK_SUCCESS) {
+                                      &m_debugMessenger) != VK_SUCCESS) {
     throw std::runtime_error("failed to set up debug messenger!");
   }
 };
 
 void ValidationLyrsVk::CleanUp() {
-  PC_DestroyDebugUtilsMessengerEXT(m_vkInst, m_DebugMessenger, nullptr);
-  m_DebugMessenger = VK_NULL_HANDLE;
+  PC_DestroyDebugUtilsMessengerEXT(m_vkInst, m_debugMessenger, nullptr);
+  m_debugMessenger = VK_NULL_HANDLE;
 };
 
 // STATIC FUNCTIONS -----------------------------------------------------------
