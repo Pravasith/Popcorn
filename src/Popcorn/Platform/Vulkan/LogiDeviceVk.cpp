@@ -39,6 +39,9 @@ void LogiDeviceVk::CreateLogicalDevice(
       VK_SUCCESS) {
     throw std::runtime_error("failed to create logical device!");
   }
+
+  vkGetDeviceQueue(m_device, qFamIndices.graphicsFamily.value(), 0,
+                   &m_gfxQueue);
 };
 
 void LogiDeviceVk::CleanUp() { vkDestroyDevice(m_device, nullptr); }

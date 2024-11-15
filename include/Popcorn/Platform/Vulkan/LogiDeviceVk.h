@@ -20,6 +20,8 @@ private:
   };
   ~LogiDeviceVk() { PC_PRINT("DESTROYED", TagType::Destr, "LOGICAL-DEVICE"); };
 
+  [[nodiscard]] inline const VkQueue &GetDeviceQueue() { return m_gfxQueue; };
+
   void CleanUp();
 
   void CreateLogicalDevice(const PhysDeviceVk::QueueFamilyIndices &qFamIndices,
@@ -28,6 +30,7 @@ private:
   const VkInstance &m_vkInst;
 
   VkDevice m_device;
+  VkQueue m_gfxQueue;
 };
 
 ENGINE_NAMESPACE_END
