@@ -27,10 +27,15 @@ private:
   };
   ~PhysDeviceVk() { PC_PRINT("DESTROYED", TagType::Destr, "VK-PHYS-DEVICE"); };
 
+  [[nodiscard]] inline const VkPhysicalDevice &GetPhysDevice() const {
+    return m_physDevice;
+  };
+
   [[nodiscard]] bool IsDeviceSuitable(const VkPhysicalDevice &);
+
   void FindQueueFamilies(const VkPhysicalDevice &);
 
-  QueueFamilyIndices const &GetQueueFamilyIndices();
+  const QueueFamilyIndices &GetQueueFamilyIndices();
 
   void PickPhysDevice();
 

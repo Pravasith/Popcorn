@@ -32,7 +32,9 @@ void RendererVk::InitVulkan() {
     m_ValLyrsVk.SetupDbgMsngr();
 
   m_PhysDevVk.PickPhysDevice();
-  m_LogiDevVk.CreateLogicalDevice(m_qFamIndices);
+  m_LogiDevVk.CreateLogicalDevice(m_qFamIndices,
+                                  m_ValLyrsVk.GetValidationLayers(),
+                                  m_PhysDevVk.GetPhysDevice());
 };
 
 void RendererVk::CreateInstance() {
@@ -104,6 +106,7 @@ std::vector<const char *> RendererVk::GetRequiredExtensions() {
 void RendererVk::OnUpdate() const {};
 
 void RendererVk::CleanUp() {
+  m_LogiDevVk.CleanUp();
   m_ValLyrsVk.CleanUp();
 
   vkDestroyInstance(m_vkInstance, nullptr);

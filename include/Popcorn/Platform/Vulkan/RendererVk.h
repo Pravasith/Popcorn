@@ -18,6 +18,10 @@ public:
 
   using QueueFamilyIndicesVk = PhysDeviceVk::QueueFamilyIndices;
 
+  constexpr inline static bool IsValLyrsEnabled() {
+    return s_enableValidationLayers;
+  };
+
 private:
   void InitVulkan();
   void CleanUp();
