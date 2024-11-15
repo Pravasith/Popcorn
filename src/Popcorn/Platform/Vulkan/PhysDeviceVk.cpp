@@ -27,18 +27,19 @@ void PhysDeviceVk::PickPhysDevice() {
   }
 };
 
-bool PhysDeviceVk::IsDeviceSuitable(const VkPhysicalDevice &device) const {
+bool PhysDeviceVk::IsDeviceSuitable(const VkPhysicalDevice &device) {
   /** FOR CUSTOM IMPLEMENTATION CHECK VULKAN TUTORIAL
    * https://vulkan-tutorial.com/Drawing_a_triangle/Setup/Physical_devices_and_queue_families
    */
-  QueueFamilyIndices indices = FindQueueFamilies(device);
-
-  return indices.isComplete();
+  FindQueueFamilies(device);
+  return m_qFamIndices.isComplete();
 };
 
-PhysDeviceVk::QueueFamilyIndices
-PhysDeviceVk::FindQueueFamilies(VkPhysicalDevice device) const {
-  QueueFamilyIndices indices;
+PhysDeviceVk::QueueFamilyIndices const &PhysDeviceVk::GetQueueFamilyIndices() {
+  return m_qFamIndices;
+};
+
+void PhysDeviceVk::FindQueueFamilies(const VkPhysicalDevice &device) {
   // LOGIC TO FIND QUEUE FAMILY INDICES TO POPULATE STRUCT WITH
 
   uint32_t queueFamilyCount = 0;
@@ -51,17 +52,15 @@ PhysDeviceVk::FindQueueFamilies(VkPhysicalDevice device) const {
   int i = 0;
   for (const auto &queueFamily : queueFamilies) {
     if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-      indices.graphicsFamily = i;
+      m_qFamIndices.graphicsFamily = i;
     }
 
-    if (indices.isComplete()) {
+    if (m_qFamIndices.isComplete()) {
       break;
     }
 
     i++;
   }
-
-  return indices;
 }
 
 ENGINE_NAMESPACE_END

@@ -115,6 +115,12 @@
 },
 {
   "directory": "/home/prav/personal/Popcorn/build/linux/src",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/LogiDeviceVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/LogiDeviceVk.cpp",
+  "file": "/home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/LogiDeviceVk.cpp",
+  "output": "src/CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/LogiDeviceVk.cpp.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/src",
   "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Core -I/home/prav/personal/Popcorn/include/Popcorn/Layers -I/home/prav/personal/Popcorn/include/Popcorn/Events -I/home/prav/personal/Popcorn/third-party/platform-agnostic/glad/include -I/home/prav/personal/Popcorn/third-party/platform-agnostic -I/home/prav/personal/Popcorn/third-party/platform-agnostic/imgui -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -I/home/prav/personal/Popcorn/include/Popcorn/Platform -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Agnostic -I/home/prav/personal/Popcorn/include/Popcorn/Input -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -std=c++17 -Winvalid-pch -x c++-header -include /home/prav/personal/Popcorn/build/linux/src/CMakeFiles/PopcornEngine.dir/cmake_pch.hxx -o CMakeFiles/PopcornEngine.dir/cmake_pch.hxx.gch -c /home/prav/personal/Popcorn/build/linux/src/CMakeFiles/PopcornEngine.dir/cmake_pch.hxx.cxx",
   "file": "/home/prav/personal/Popcorn/build/linux/src/CMakeFiles/PopcornEngine.dir/cmake_pch.hxx.cxx",
   "output": "src/CMakeFiles/PopcornEngine.dir/cmake_pch.hxx.gch"

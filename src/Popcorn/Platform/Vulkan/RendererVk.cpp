@@ -10,7 +10,10 @@
 ENGINE_NAMESPACE_BEGIN
 
 RendererVk::RendererVk()
-    : m_ValLyrsVk(m_vkInstance), m_PhysDevVk(m_vkInstance) {
+    : m_ValLyrsVk(m_vkInstance), m_PhysDevVk(m_vkInstance),
+      m_LogiDevVk(m_vkInstance),
+      m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()) {
+
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
 
   InitVulkan();
@@ -22,12 +25,14 @@ RendererVk::~RendererVk() {
 };
 
 void RendererVk::InitVulkan() {
+  // CREATE INSTANCE
   CreateInstance();
 
   if constexpr (s_enableValidationLayers)
     m_ValLyrsVk.SetupDbgMsngr();
 
   m_PhysDevVk.PickPhysDevice();
+  m_LogiDevVk.CreateLogicalDevice(m_qFamIndices);
 };
 
 void RendererVk::CreateInstance() {

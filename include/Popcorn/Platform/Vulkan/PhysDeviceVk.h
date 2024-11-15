@@ -12,11 +12,12 @@ class RendererVk;
 // PHYSICAL DEVICE
 class PhysDeviceVk {
   friend class RendererVk;
+  friend class LogiDeviceVk;
 
-private:
+public:
   struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
-    bool isComplete() { return graphicsFamily.has_value(); }
+    bool isComplete() const { return graphicsFamily.has_value(); }
   };
 
 private:
@@ -26,14 +27,18 @@ private:
   };
   ~PhysDeviceVk() { PC_PRINT("DESTROYED", TagType::Destr, "VK-PHYS-DEVICE"); };
 
-  [[nodiscard]] bool IsDeviceSuitable(const VkPhysicalDevice &) const;
-  QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device) const;
+  [[nodiscard]] bool IsDeviceSuitable(const VkPhysicalDevice &);
+  void FindQueueFamilies(const VkPhysicalDevice &);
+
+  QueueFamilyIndices const &GetQueueFamilyIndices();
 
   void PickPhysDevice();
 
 private:
   const VkInstance &m_vkInst;
   VkPhysicalDevice m_physDevice;
+
+  QueueFamilyIndices m_qFamIndices;
 };
 
 ENGINE_NAMESPACE_END

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Global_Macros.h"
+#include "LogiDeviceVk.h"
 #include "PhysDeviceVk.h"
 #include "Renderer.h"
 #include <vector>
@@ -15,6 +16,8 @@ public:
   RendererVk();
   ~RendererVk();
 
+  using QueueFamilyIndicesVk = PhysDeviceVk::QueueFamilyIndices;
+
 private:
   void InitVulkan();
   void CleanUp();
@@ -25,7 +28,6 @@ private:
   virtual void OnUpdate() const override;
 
 private:
-  // MEMBERS
   VkInstance m_vkInstance;
 #ifdef NDEBUG
   static constexpr bool s_enableValidationLayers = false;
@@ -35,6 +37,9 @@ private:
 
   ValidationLyrsVk m_ValLyrsVk;
   PhysDeviceVk m_PhysDevVk;
+  LogiDeviceVk m_LogiDevVk;
+
+  const QueueFamilyIndicesVk &m_qFamIndices;
 };
 
 ENGINE_NAMESPACE_END
