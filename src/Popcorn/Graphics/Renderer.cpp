@@ -10,7 +10,7 @@ ENGINE_NAMESPACE_BEGIN
 // SINGLETON
 Renderer *Renderer::s_instance = nullptr;
 RendererType Renderer::s_type = RendererType::OpenGL;
-const void *Renderer::s_osWindow = nullptr;
+void *Renderer::s_osWindow = nullptr;
 std::variant<RendererVk *, RendererOpenGL *> Renderer::s_renderer{
     static_cast<RendererVk *>(nullptr)};
 
@@ -40,7 +40,7 @@ void Renderer::Run() {
   };
 };
 
-void Renderer::SetOSWindow(const void *osWindow) { s_osWindow = osWindow; };
+void Renderer::SetOSWindow(void *osWindow) { s_osWindow = osWindow; };
 
 Renderer &Renderer::Get() {
   PC_ASSERT(s_instance, "NO RENDERER INSTANCE");

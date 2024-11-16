@@ -2,7 +2,6 @@
 
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
-#include <stdexcept>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -20,12 +19,9 @@ class WinSurfaceVk {
     PC_PRINT("DESTROYED", TagType::Destr, "VK-WIN-SURFACE-VK");
   };
 
-  void CreateSurface() {
-    if (glfwCreateWindowSurface(m_vkInst, m_osWindow, nullptr, &m_surface) !=
-        VK_SUCCESS) {
-      throw std::runtime_error("FAILED TO CREATE WINDOW SURFACE!");
-    }
-  }
+  void CreateSurface();
+
+  void CleanUp();
 
   const VkInstance &m_vkInst;
 

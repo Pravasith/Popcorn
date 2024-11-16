@@ -40,4 +40,5 @@ add_library(
   ${PLATFORM_IMPL_DIR}/Vulkan/RendererVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/ValidationLyrsVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/PhysDeviceVk.cpp
-  ${PLATFORM_IMPL_DIR}/Vulkan/LogiDeviceVk.cpp)
+  ${PLATFORM_IMPL_DIR}/Vulkan/LogiDeviceVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/WinSurface.cpp)
