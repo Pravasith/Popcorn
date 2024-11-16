@@ -24,9 +24,8 @@ Renderer::Renderer() {
 Renderer::~Renderer() { PC_PRINT("DESTROYED", TagType::Destr, "RENDERER") };
 
 void Renderer::Create() {
-  if (s_instance) {
+  if (s_instance)
     return;
-  }
 
   s_instance = new Renderer();
 };

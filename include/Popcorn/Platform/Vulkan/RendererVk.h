@@ -4,6 +4,7 @@
 #include "LogiDeviceVk.h"
 #include "PhysDeviceVk.h"
 #include "Renderer.h"
+#include "WinSurfaceVk.h"
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -42,6 +43,7 @@ private:
   ValidationLyrsVk m_ValLyrsVk;
   PhysDeviceVk m_PhysDevVk;
   LogiDeviceVk m_LogiDevVk;
+  WinSurfaceVk m_WinSrfcVk;
 
   const QueueFamilyIndicesVk &m_qFamIndices;
 };

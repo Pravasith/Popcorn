@@ -12,7 +12,8 @@ ENGINE_NAMESPACE_BEGIN
 RendererVk::RendererVk()
     : m_ValLyrsVk(m_vkInstance), m_PhysDevVk(m_vkInstance),
       m_LogiDevVk(m_vkInstance),
-      m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()) {
+      m_WinSrfcVk(m_vkInstance, const static_cast<GLFWwindow *>(s_osWindow)),
+          m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()) {
 
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
 
