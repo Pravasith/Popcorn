@@ -2,6 +2,7 @@
 
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
+#include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -19,10 +20,15 @@ class WinSurfaceVk {
     PC_PRINT("DESTROYED", TagType::Destr, "VK-WIN-SURFACE-VK");
   };
 
+  [[nodiscard]] inline const VkSurfaceKHR &GetSurface() const {
+    return m_surface;
+  };
+
   void CreateSurface();
 
   void CleanUp();
 
+private:
   const VkInstance &m_vkInst;
 
   GLFWwindow *m_osWindow;

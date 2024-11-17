@@ -2,6 +2,7 @@
 #include "Global_Macros.h"
 #include "PhysDeviceVk.h"
 #include "RendererVk.h"
+#include <set>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -42,6 +43,27 @@ void LogiDeviceVk::CreateLogicalDevice(
 
   vkGetDeviceQueue(m_device, qFamIndices.graphicsFamily.value(), 0,
                    &m_gfxQueue);
+
+  std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+  std::set<uint32_t> uniqueQueueFamilies = {qFamIndices.graphicsFamily.value(),
+                                            qFamIndices.presentFamily.value()};
+
+  queuePriority = 1.0f;
+  for (uint32_t queueFamily : uniqueQueueFamilies) {
+    VkDeviceQueueCreateInfo queueCreateInfo{};
+    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queueCreateInfo.queueFamilyIndex = queueFamily;
+    queueCreateInfo.queueCount = 1;
+    queueCreateInfo.pQueuePriorities = &queuePriority;
+    queueCreateInfos.push_back(queueCreateInfo);
+  }
+
+  createInfo.queueCreateInfoCount =
+      static_cast<uint32_t>(queueCreateInfos.size());
+  createInfo.pQueueCreateInfos = queueCreateInfos.data();
+
+  vkGetDeviceQueue(m_device, qFamIndices.presentFamily.value(), 0,
+                   &m_presQueue);
 };
 
 void LogiDeviceVk::CleanUp() { vkDestroyDevice(m_device, nullptr); }

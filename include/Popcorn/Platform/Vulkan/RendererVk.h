@@ -33,6 +33,10 @@ private:
   virtual void OnUpdate() const override;
 
 private:
+  [[nodiscard]] inline const VkSurfaceKHR &GetSurface() const {
+    return m_WinSrfcVk.GetSurface();
+  };
+
   VkInstance m_vkInstance;
 #ifdef NDEBUG
   static constexpr bool s_enableValidationLayers = false;

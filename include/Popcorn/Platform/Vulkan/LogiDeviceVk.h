@@ -30,7 +30,9 @@ private:
   const VkInstance &m_vkInst;
 
   VkDevice m_device;
+
   VkQueue m_gfxQueue;
+  VkQueue m_presQueue;
 };
 
 ENGINE_NAMESPACE_END

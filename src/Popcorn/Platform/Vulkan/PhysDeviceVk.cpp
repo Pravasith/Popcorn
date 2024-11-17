@@ -1,6 +1,7 @@
 #include "PhysDeviceVk.h"
 #include "Global_Macros.h"
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 
@@ -53,6 +54,13 @@ void PhysDeviceVk::FindQueueFamilies(const VkPhysicalDevice &device) {
   for (const auto &queueFamily : queueFamilies) {
     if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
       m_qFamIndices.graphicsFamily = i;
+    }
+
+    VkBool32 presentSupport = false;
+    vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_surface, &presentSupport);
+
+    if (presentSupport) {
+      m_qFamIndices.presentFamily = i;
     }
 
     if (m_qFamIndices.isComplete()) {

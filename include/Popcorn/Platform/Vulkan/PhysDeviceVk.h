@@ -3,6 +3,7 @@
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
 #include <optional>
+#include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -17,12 +18,16 @@ class PhysDeviceVk {
 public:
   struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
-    bool isComplete() const { return graphicsFamily.has_value(); }
+    std::optional<uint32_t> presentFamily;
+
+    bool isComplete() const {
+      return graphicsFamily.has_value() && presentFamily.has_value();
+    }
   };
 
 private:
-  PhysDeviceVk(const VkInstance &vkInst)
-      : m_vkInst(vkInst), m_physDevice(VK_NULL_HANDLE) {
+  PhysDeviceVk(const VkInstance &vkInst, const VkSurfaceKHR &surface)
+      : m_vkInst(vkInst), m_physDevice(VK_NULL_HANDLE), m_surface(surface) {
     PC_PRINT("CREATED", TagType::Constr, "VK-PHYS-DEVICE");
   };
   ~PhysDeviceVk() { PC_PRINT("DESTROYED", TagType::Destr, "VK-PHYS-DEVICE"); };
@@ -33,16 +38,16 @@ private:
 
   [[nodiscard]] bool IsDeviceSuitable(const VkPhysicalDevice &);
 
-  void FindQueueFamilies(const VkPhysicalDevice &);
-
   const QueueFamilyIndices &GetQueueFamilyIndices();
 
+  void FindQueueFamilies(const VkPhysicalDevice &);
   void PickPhysDevice();
 
 private:
   const VkInstance &m_vkInst;
-  VkPhysicalDevice m_physDevice;
+  const VkSurfaceKHR &m_surface;
 
+  VkPhysicalDevice m_physDevice;
   QueueFamilyIndices m_qFamIndices;
 };
 
