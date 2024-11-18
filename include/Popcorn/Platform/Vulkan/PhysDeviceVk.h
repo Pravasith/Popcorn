@@ -3,6 +3,7 @@
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
 #include <optional>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -38,6 +39,9 @@ private:
 
   [[nodiscard]] bool IsDeviceSuitable(const VkPhysicalDevice &);
 
+  [[nodiscard]] const bool
+  CheckDevExtSupport(const VkPhysicalDevice &device) const;
+
   const QueueFamilyIndices &GetQueueFamilyIndices();
 
   void FindQueueFamilies(const VkPhysicalDevice &);
@@ -46,6 +50,9 @@ private:
 private:
   const VkInstance &m_vkInst;
   const VkSurfaceKHR &m_surface;
+
+  const std::vector<const char *> m_deviceExts = {
+      VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
   VkPhysicalDevice m_physDevice;
   QueueFamilyIndices m_qFamIndices;

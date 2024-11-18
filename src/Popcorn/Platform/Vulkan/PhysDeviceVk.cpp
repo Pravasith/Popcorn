@@ -33,7 +33,14 @@ bool PhysDeviceVk::IsDeviceSuitable(const VkPhysicalDevice &device) {
    * https://vulkan-tutorial.com/Drawing_a_triangle/Setup/Physical_devices_and_queue_families
    */
   FindQueueFamilies(device);
-  return m_qFamIndices.isComplete();
+  bool areExtsSupported = CheckDevExtSupport();
+
+  return m_qFamIndices.isComplete() && areExtsSupported;
+};
+
+const bool
+PhysDeviceVk::CheckDevExtSupport(const VkPhysicalDevice &device) const {
+  return true;
 };
 
 PhysDeviceVk::QueueFamilyIndices const &PhysDeviceVk::GetQueueFamilyIndices() {

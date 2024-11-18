@@ -10,6 +10,7 @@ void LogiDeviceVk::CreateLogicalDevice(
     const RendererVk::QueueFamilyIndicesVk &qFamIndices,
     const std::vector<const char *> &valLyrsVk,
     const VkPhysicalDevice &physDevVk) {
+
   VkDeviceQueueCreateInfo queueCreateInfo{};
   queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
   queueCreateInfo.queueFamilyIndex = qFamIndices.graphicsFamily.value();
