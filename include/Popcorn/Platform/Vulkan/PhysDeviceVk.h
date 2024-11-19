@@ -2,6 +2,7 @@
 
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
+#include "SwapChainVk.h"
 #include <optional>
 #include <vector>
 #include <vulkan/vulkan_core.h>
@@ -33,11 +34,16 @@ private:
   };
   ~PhysDeviceVk() { PC_PRINT("DESTROYED", TagType::Destr, "VK-PHYS-DEVICE"); };
 
+  [[nodiscard]] inline const std::vector<const char *> &GetDeviceExts() {
+    return m_deviceExts;
+  };
+
   [[nodiscard]] inline const VkPhysicalDevice &GetPhysDevice() const {
     return m_physDevice;
   };
 
-  [[nodiscard]] bool IsDeviceSuitable(const VkPhysicalDevice &);
+  [[nodiscard]] bool IsDeviceSuitable(const VkPhysicalDevice &,
+                                      const SwapChainVk &);
 
   [[nodiscard]] const bool
   CheckDevExtSupport(const VkPhysicalDevice &device) const;

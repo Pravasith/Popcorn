@@ -35,10 +35,17 @@ add_library(Events ${EVENTS_IMPL_DIR}/Publisher.cpp)
 # GRAPHICS LIB
 add_library(
   Graphics
+  #
+  # MAIN CLASS
   ${GRAPHICS_IMPL_DIR}/Renderer.cpp
+  #
+  # OPENGL CLASSES
   ${PLATFORM_IMPL_DIR}/OpenGL/RendererOpenGL.cpp
+  #
+  # VULKAN CLASSES
   ${PLATFORM_IMPL_DIR}/Vulkan/RendererVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/ValidationLyrsVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/PhysDeviceVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/LogiDeviceVk.cpp
-  ${PLATFORM_IMPL_DIR}/Vulkan/WinSurface.cpp)
+  ${PLATFORM_IMPL_DIR}/Vulkan/WinSurfaceVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/SwapChainVk.cpp)

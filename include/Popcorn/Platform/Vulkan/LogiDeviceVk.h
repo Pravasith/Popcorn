@@ -26,7 +26,8 @@ private:
 
   void CreateLogicalDevice(const PhysDeviceVk::QueueFamilyIndices &qFamIndices,
                            const std::vector<const char *> &valLyrsVk,
-                           const VkPhysicalDevice &physDevVk);
+                           const VkPhysicalDevice &physDevVk,
+                           const std::vector<const char *> &devExts);
   const VkInstance &m_vkInst;
 
   VkDevice m_device;

@@ -1,5 +1,9 @@
 #include "PhysDeviceVk.h"
 #include "Global_Macros.h"
+#include "Popcorn/Core/Base.h"
+#include "SwapChainVk.h"
+#include <set>
+#include <string>
 #include <vector>
 #include <vulkan/vulkan_core.h>
 
@@ -28,19 +32,47 @@ void PhysDeviceVk::PickPhysDevice() {
   }
 };
 
-bool PhysDeviceVk::IsDeviceSuitable(const VkPhysicalDevice &device) {
+bool PhysDeviceVk::IsDeviceSuitable(const VkPhysicalDevice &device,
+                                    const SwapChainVk &swapChainVk) {
   /** FOR CUSTOM IMPLEMENTATION CHECK VULKAN TUTORIAL
    * https://vulkan-tutorial.com/Drawing_a_triangle/Setup/Physical_devices_and_queue_families
    */
   FindQueueFamilies(device);
-  bool areExtsSupported = CheckDevExtSupport();
+  bool extsSupported = CheckDevExtSupport(device);
 
-  return m_qFamIndices.isComplete() && areExtsSupported;
+  bool swapChainAdequate = false;
+  if (extsSupported) {
+    SwapChainVk::SwapChainSupportDetails swapChainSupport =
+        swapChainVk.QuerySwapChainSupport();
+
+    swapChainAdequate = !swapChainSupport.formats.empty() &&
+                        !swapChainSupport.presentModes.empty();
+  }
+
+  return m_qFamIndices.isComplete() && extsSupported && swapChainAdequate;
 };
 
+// CHECK SWAP CHAIN SUPPORT
 const bool
 PhysDeviceVk::CheckDevExtSupport(const VkPhysicalDevice &device) const {
-  return true;
+  uint32_t extensionCount;
+  vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount,
+
+                                       nullptr);
+
+  std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+  vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount,
+                                       availableExtensions.data());
+
+  std::set<std::string> requiredExtensions(m_deviceExts.begin(),
+                                           m_deviceExts.end());
+
+  for (const auto &extension : availableExtensions) {
+    PC_PRINT(extension.extensionName, TagType::Print, "CHECK")
+    requiredExtensions.erase(extension.extensionName);
+  }
+
+  return requiredExtensions.empty();
 };
 
 PhysDeviceVk::QueueFamilyIndices const &PhysDeviceVk::GetQueueFamilyIndices() {

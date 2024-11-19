@@ -9,7 +9,8 @@ ENGINE_NAMESPACE_BEGIN
 void LogiDeviceVk::CreateLogicalDevice(
     const RendererVk::QueueFamilyIndicesVk &qFamIndices,
     const std::vector<const char *> &valLyrsVk,
-    const VkPhysicalDevice &physDevVk) {
+    const VkPhysicalDevice &physDevVk,
+    const std::vector<const char *> &devExts) {
 
   VkDeviceQueueCreateInfo queueCreateInfo{};
   queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -28,7 +29,8 @@ void LogiDeviceVk::CreateLogicalDevice(
   createInfo.queueCreateInfoCount = 1;
   createInfo.pEnabledFeatures = &deviceFeatures;
 
-  createInfo.enabledExtensionCount = 0;
+  createInfo.enabledExtensionCount = static_cast<uint32_t>(devExts.size());
+  createInfo.ppEnabledExtensionNames = devExts.data();
 
   if constexpr (RendererVk::IsValLyrsEnabled()) {
     createInfo.enabledLayerCount = static_cast<uint32_t>(valLyrsVk.size());

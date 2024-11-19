@@ -4,6 +4,7 @@
 #include "LogiDeviceVk.h"
 #include "PhysDeviceVk.h"
 #include "Renderer.h"
+#include "SwapChainVk.h"
 #include "WinSurfaceVk.h"
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
@@ -18,6 +19,7 @@ public:
   ~RendererVk();
 
   using QueueFamilyIndicesVk = PhysDeviceVk::QueueFamilyIndices;
+  using SwapChainSupportDetailsVk = SwapChainVk::SwapChainSupportDetails;
 
   constexpr inline static bool IsValLyrsEnabled() {
     return s_enableValidationLayers;

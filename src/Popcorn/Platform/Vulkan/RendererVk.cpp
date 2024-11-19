@@ -10,10 +10,9 @@
 ENGINE_NAMESPACE_BEGIN
 
 RendererVk::RendererVk()
-    : m_ValLyrsVk(m_vkInstance), 
+    : m_ValLyrsVk(m_vkInstance),
       m_WinSrfcVk(m_vkInstance, static_cast<GLFWwindow *>(s_osWindow)),
-    m_PhysDevVk(m_vkInstance, GetSurface()),
-      m_LogiDevVk(m_vkInstance),
+      m_PhysDevVk(m_vkInstance, GetSurface()), m_LogiDevVk(m_vkInstance),
       m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()) {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
   InitVulkan();
@@ -33,10 +32,9 @@ void RendererVk::InitVulkan() {
 
   m_WinSrfcVk.CreateSurface();
   m_PhysDevVk.PickPhysDevice();
-  m_LogiDevVk.CreateLogicalDevice(m_qFamIndices,
-                                  m_ValLyrsVk.GetValidationLayers(),
-                                  m_PhysDevVk.GetPhysDevice());
-
+  m_LogiDevVk.CreateLogicalDevice(
+      m_qFamIndices, m_ValLyrsVk.GetValidationLayers(),
+      m_PhysDevVk.GetPhysDevice(), m_PhysDevVk.GetDeviceExts());
 };
 
 void RendererVk::CreateInstance() {
