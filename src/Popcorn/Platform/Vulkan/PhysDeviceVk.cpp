@@ -9,7 +9,7 @@
 
 ENGINE_NAMESPACE_BEGIN
 
-void PhysDeviceVk::PickPhysDevice() {
+void PhysDeviceVk::PickPhysDevice(const SwapChainVk &swpChnVk) {
   uint32_t deviceCount = 0;
   vkEnumeratePhysicalDevices(m_vkInst, &deviceCount, nullptr);
 
@@ -21,7 +21,7 @@ void PhysDeviceVk::PickPhysDevice() {
   vkEnumeratePhysicalDevices(m_vkInst, &deviceCount, devices.data());
 
   for (const auto &device : devices) {
-    if (IsDeviceSuitable(device)) {
+    if (IsDeviceSuitable(device, swpChnVk)) {
       m_physDevice = device;
       break;
     }
@@ -43,11 +43,14 @@ bool PhysDeviceVk::IsDeviceSuitable(const VkPhysicalDevice &device,
   bool swapChainAdequate = false;
   if (extsSupported) {
     SwapChainVk::SwapChainSupportDetails swapChainSupport =
-        swapChainVk.QuerySwapChainSupport();
+        swapChainVk.QuerySwapChainSupport(device, m_surface);
 
     swapChainAdequate = !swapChainSupport.formats.empty() &&
                         !swapChainSupport.presentModes.empty();
   }
+
+  PC_PRINT("" << (swapChainAdequate ? "True" : "False"), TagType::Print,
+           "SWAPCHAIN ADEQUATE")
 
   return m_qFamIndices.isComplete() && extsSupported && swapChainAdequate;
 };
@@ -68,7 +71,7 @@ PhysDeviceVk::CheckDevExtSupport(const VkPhysicalDevice &device) const {
                                            m_deviceExts.end());
 
   for (const auto &extension : availableExtensions) {
-    PC_PRINT(extension.extensionName, TagType::Print, "CHECK")
+    // PC_PRINT(extension.extensionName, TagType::Print, "CHECK")
     requiredExtensions.erase(extension.extensionName);
   }
 

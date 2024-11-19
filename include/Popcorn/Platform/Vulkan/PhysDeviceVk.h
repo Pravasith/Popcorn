@@ -51,7 +51,7 @@ private:
   const QueueFamilyIndices &GetQueueFamilyIndices();
 
   void FindQueueFamilies(const VkPhysicalDevice &);
-  void PickPhysDevice();
+  void PickPhysDevice(const SwapChainVk &);
 
 private:
   const VkInstance &m_vkInst;

@@ -121,9 +121,15 @@
 },
 {
   "directory": "/home/prav/personal/Popcorn/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/WinSurface.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/WinSurface.cpp",
-  "file": "/home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/WinSurface.cpp",
-  "output": "src/CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/WinSurface.cpp.o"
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/WinSurfaceVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/WinSurfaceVk.cpp",
+  "file": "/home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/WinSurfaceVk.cpp",
+  "output": "src/CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/WinSurfaceVk.cpp.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/src",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/SwapChainVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/SwapChainVk.cpp",
+  "file": "/home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/SwapChainVk.cpp",
+  "output": "src/CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/SwapChainVk.cpp.o"
 },
 {
   "directory": "/home/prav/personal/Popcorn/build/linux/src",

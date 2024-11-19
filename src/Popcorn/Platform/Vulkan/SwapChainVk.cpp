@@ -3,28 +3,28 @@
 
 ENGINE_NAMESPACE_BEGIN
 SwapChainVk::SwapChainSupportDetails
-SwapChainVk::QuerySwapChainSupport() const {
-  SwapChainSupportDetails details;
+SwapChainVk::QuerySwapChainSupport(const VkPhysicalDevice &physDev,
+                                   const VkSurfaceKHR &surface) const {
 
-  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physDev, m_surface,
+  SwapChainSupportDetails details;
+  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physDev, surface,
                                             &details.capabilities);
 
   uint32_t formatCount;
-  vkGetPhysicalDeviceSurfaceFormatsKHR(m_physDev, m_surface, &formatCount,
-                                       nullptr);
+  vkGetPhysicalDeviceSurfaceFormatsKHR(physDev, surface, &formatCount, nullptr);
   if (formatCount != 0) {
     details.formats.resize(formatCount);
-    vkGetPhysicalDeviceSurfaceFormatsKHR(m_physDev, m_surface, &formatCount,
+    vkGetPhysicalDeviceSurfaceFormatsKHR(physDev, surface, &formatCount,
                                          details.formats.data());
   }
 
   uint32_t presentModeCount;
-  vkGetPhysicalDeviceSurfacePresentModesKHR(m_physDev, m_surface,
-                                            &presentModeCount, nullptr);
+  vkGetPhysicalDeviceSurfacePresentModesKHR(physDev, surface, &presentModeCount,
+                                            nullptr);
   if (presentModeCount != 0) {
     details.presentModes.resize(presentModeCount);
     vkGetPhysicalDeviceSurfacePresentModesKHR(
-        m_physDev, m_surface, &presentModeCount, details.presentModes.data());
+        physDev, surface, &presentModeCount, details.presentModes.data());
   }
 
   return details;

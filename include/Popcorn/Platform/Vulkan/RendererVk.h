@@ -39,6 +39,10 @@ private:
     return m_WinSrfcVk.GetSurface();
   };
 
+  [[nodiscard]] inline const VkPhysicalDevice &GetPhysDevice() const {
+    return m_PhysDevVk.GetPhysDevice();
+  };
+
   VkInstance m_vkInstance;
 #ifdef NDEBUG
   static constexpr bool s_enableValidationLayers = false;
@@ -50,6 +54,7 @@ private:
   PhysDeviceVk m_PhysDevVk;
   LogiDeviceVk m_LogiDevVk;
   WinSurfaceVk m_WinSrfcVk;
+  SwapChainVk m_SwpChnVk;
 
   const QueueFamilyIndicesVk &m_qFamIndices;
 };
