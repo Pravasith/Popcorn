@@ -40,9 +40,10 @@ WindowAgnostic::WindowAgnostic(const Props &props) : m_title(props.Title) {
     throw("GLFW error, see common_logs file");
   });
 
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  // glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  // glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
 #ifdef __APPLE__
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -58,10 +59,10 @@ WindowAgnostic::WindowAgnostic(const Props &props) : m_title(props.Title) {
     glfwTerminate();
   }
 
-  glfwMakeContextCurrent(s_os_window);
-  glfwSwapInterval(1); // Enable vsync
+  // glfwMakeContextCurrent(s_os_window);
+  // glfwSwapInterval(1); // Enable vsync
 
-  int status = gladLoadGLLoader(GLADloadproc(glfwGetProcAddress));
+  // int status = gladLoadGLLoader(GLADloadproc(glfwGetProcAddress));
 
   // GLFW SET WINDOW CALLBACKS
   // ---------------------------------------------------
@@ -121,7 +122,7 @@ void WindowAgnostic::OnUpdate() {
   // glViewport(0, 0, WindowAgnostic::GetWidth(),
   // WindowAgnostic::GetHeight());
 
-  glfwSwapBuffers(s_os_window);
+  // glfwSwapBuffers(s_os_window);
   glfwPollEvents();
 }
 

@@ -1,7 +1,12 @@
 #pragma once
 
+#include "Common.h"
 #include "Global_Macros.h"
+#include "LogiDeviceVk.h"
+#include "PhysDeviceVk.h"
 #include "Renderer.h"
+#include "SwapChainVk.h"
+#include "WinSurfaceVk.h"
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -14,6 +19,10 @@ public:
   RendererVk();
   ~RendererVk();
 
+  constexpr inline static bool IsValLyrsEnabled() {
+    return s_enableValidationLayers;
+  };
+
 private:
   void InitVulkan();
   void CleanUp();
@@ -24,7 +33,14 @@ private:
   virtual void OnUpdate() const override;
 
 private:
-  // MEMBERS
+  [[nodiscard]] inline const VkSurfaceKHR &GetSurface() const {
+    return m_WinSrfcVk.GetSurface();
+  };
+
+  [[nodiscard]] inline const VkPhysicalDevice &GetPhysDevice() const {
+    return m_PhysDevVk.GetPhysDevice();
+  };
+
   VkInstance m_vkInstance;
 #ifdef NDEBUG
   static constexpr bool s_enableValidationLayers = false;
@@ -32,8 +48,13 @@ private:
   static constexpr bool s_enableValidationLayers = true;
 #endif
 
-  // CLASS MEMBERS
-  ValidationLyrsVk m_VkValLyrs;
+  ValidationLyrsVk m_ValLyrsVk;
+  PhysDeviceVk m_PhysDevVk;
+  LogiDeviceVk m_LogiDevVk;
+  WinSurfaceVk m_WinSrfcVk;
+  SwapChainVk m_SwpChnVk;
+
+  const QueueFamilyIndices &m_qFamIndices;
 };
 
 ENGINE_NAMESPACE_END

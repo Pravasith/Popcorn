@@ -26,7 +26,7 @@ public:
   static void Create();
   static void Destroy();
 
-  static void SetOSWindow(const void *);
+  static void SetOSWindow(void *);
 
   void Run();
 
@@ -47,7 +47,7 @@ protected:
 
   static Renderer *s_instance;
   static RendererType s_type;
-  static const void *s_osWindow;
+  static void *s_osWindow;
 
   static std::variant<RendererVk *, RendererOpenGL *> s_renderer;
 };

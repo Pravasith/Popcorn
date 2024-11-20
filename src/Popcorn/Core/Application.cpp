@@ -46,14 +46,13 @@ void Application::Start() {
     s_layer_stack = new LayerStack();
 
     // OVERLAYS
-    s_debug_ui_overlay = new DebugUIOverlay();
-    s_layer_stack->PushOverlay(s_debug_ui_overlay);
+    // s_debug_ui_overlay = new DebugUIOverlay();
+    // s_layer_stack->PushOverlay(s_debug_ui_overlay);
+    // s_debug_ui_overlay->OnAttach();
 
     // LAYERS
     s_render_layer = new RenderLayer();
     s_layer_stack->PushLayer(s_render_layer);
-
-    s_debug_ui_overlay->OnAttach();
     s_render_layer->OnAttach();
 
     s_time = Time::Get();

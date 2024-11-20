@@ -9,9 +9,13 @@
 // HELLO TRIANGLE!
 ENGINE_NAMESPACE_BEGIN
 
-RendererVk::RendererVk() : m_VkValLyrs(m_vkInstance) {
+RendererVk::RendererVk()
+    : m_ValLyrsVk(m_vkInstance),
+      m_WinSrfcVk(m_vkInstance, static_cast<GLFWwindow *>(s_osWindow)),
+      m_PhysDevVk(m_vkInstance, GetSurface()), m_LogiDevVk(m_vkInstance),
+      m_SwpChnVk(GetPhysDevice(), GetSurface()),
+      m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()) {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
-
   InitVulkan();
 };
 
@@ -24,9 +28,17 @@ void RendererVk::InitVulkan() {
   CreateInstance();
 
   if constexpr (s_enableValidationLayers)
-    m_VkValLyrs.SetupDbgMsngr();
+    m_ValLyrsVk.SetupDbgMsngr();
 
-  // PickPhysDevice();
+  m_WinSrfcVk.CreateSurface();
+  m_PhysDevVk.PickPhysDevice(m_SwpChnVk);
+  m_LogiDevVk.CreateLogicalDevice(
+      m_PhysDevVk.GetQueueFamilyIndices(), m_ValLyrsVk.GetValidationLayers(),
+      m_PhysDevVk.GetPhysDevice(), m_PhysDevVk.GetDeviceExts());
+  m_SwpChnVk.CreateSwapChain(
+      m_PhysDevVk.GetPhysDevice(), m_WinSrfcVk.GetSurface(),
+      static_cast<GLFWwindow *>(s_osWindow),
+      m_PhysDevVk.GetQueueFamilyIndices(), m_LogiDevVk.GetLogiDevice());
 };
 
 void RendererVk::CreateInstance() {
@@ -50,21 +62,22 @@ void RendererVk::CreateInstance() {
 
   createInfo.enabledLayerCount = 0;
 
-  VkDebugUtilsMessengerCreateInfoEXT dbgCreateInfo{};
-
   // CHECK FOR VALIDATION LAYER SUPPORT
   if constexpr (s_enableValidationLayers) {
-    if (!m_VkValLyrs.CheckVkVLSupport()) {
+
+    if (!m_ValLyrsVk.CheckVkVLSupport()) {
       throw std::runtime_error(
           "VALIDATION LAYERS REQUESTED, BUT NOT AVAILABLE!");
     }
 
+    VkDebugUtilsMessengerCreateInfoEXT dbgCreateInfo{};
+
     // UPDATE CREATE INFO
     createInfo.enabledLayerCount =
-        static_cast<uint32_t>(m_VkValLyrs.GetValidationLayers().size());
-    createInfo.ppEnabledLayerNames = m_VkValLyrs.GetValidationLayers().data();
+        static_cast<uint32_t>(m_ValLyrsVk.GetValidationLayers().size());
+    createInfo.ppEnabledLayerNames = m_ValLyrsVk.GetValidationLayers().data();
 
-    m_VkValLyrs.PopulateDbgMsngrCreateInfo(dbgCreateInfo);
+    m_ValLyrsVk.PopulateDbgMsngrCreateInfo(dbgCreateInfo);
     createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&dbgCreateInfo;
   } else {
     createInfo.enabledLayerCount = 0;
@@ -97,7 +110,10 @@ std::vector<const char *> RendererVk::GetRequiredExtensions() {
 void RendererVk::OnUpdate() const {};
 
 void RendererVk::CleanUp() {
-  m_VkValLyrs.CleanUp();
+  m_SwpChnVk.CleanUp(m_LogiDevVk.GetLogiDevice());
+  m_WinSrfcVk.CleanUp();
+  m_LogiDevVk.CleanUp();
+  m_ValLyrsVk.CleanUp();
 
   vkDestroyInstance(m_vkInstance, nullptr);
   m_vkInstance = VK_NULL_HANDLE;
