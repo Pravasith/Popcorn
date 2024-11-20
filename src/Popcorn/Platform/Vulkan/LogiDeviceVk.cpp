@@ -3,11 +3,10 @@
 #include "PhysDeviceVk.h"
 #include "RendererVk.h"
 #include <set>
-#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 void LogiDeviceVk::CreateLogicalDevice(
-    const RendererVk::QueueFamilyIndicesVk &qFamIndices,
+    const QueueFamilyIndices &qFamIndices,
     const std::vector<const char *> &valLyrsVk,
     const VkPhysicalDevice &physDevVk,
     const std::vector<const char *> &devExts) {

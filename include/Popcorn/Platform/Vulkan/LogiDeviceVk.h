@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PhysDeviceVk.h"
+#include "Common.h"
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
 #include "Global_Macros.h"
@@ -20,11 +20,12 @@ private:
   };
   ~LogiDeviceVk() { PC_PRINT("DESTROYED", TagType::Destr, "LOGICAL-DEVICE"); };
 
+  [[nodiscard]] inline const VkDevice &GetLogiDevice() { return m_device; };
   [[nodiscard]] inline const VkQueue &GetDeviceQueue() { return m_gfxQueue; };
 
   void CleanUp();
 
-  void CreateLogicalDevice(const PhysDeviceVk::QueueFamilyIndices &qFamIndices,
+  void CreateLogicalDevice(const QueueFamilyIndices &qFamIndices,
                            const std::vector<const char *> &valLyrsVk,
                            const VkPhysicalDevice &physDevVk,
                            const std::vector<const char *> &devExts);

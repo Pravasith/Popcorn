@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Common.h"
 #include "Global_Macros.h"
 #include "LogiDeviceVk.h"
 #include "PhysDeviceVk.h"
@@ -17,9 +18,6 @@ class RendererVk : public Renderer {
 public:
   RendererVk();
   ~RendererVk();
-
-  using QueueFamilyIndicesVk = PhysDeviceVk::QueueFamilyIndices;
-  using SwapChainSupportDetailsVk = SwapChainVk::SwapChainSupportDetails;
 
   constexpr inline static bool IsValLyrsEnabled() {
     return s_enableValidationLayers;
@@ -56,7 +54,7 @@ private:
   WinSurfaceVk m_WinSrfcVk;
   SwapChainVk m_SwpChnVk;
 
-  const QueueFamilyIndicesVk &m_qFamIndices;
+  const QueueFamilyIndices &m_qFamIndices;
 };
 
 ENGINE_NAMESPACE_END

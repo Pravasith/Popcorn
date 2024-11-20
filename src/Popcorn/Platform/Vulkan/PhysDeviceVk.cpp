@@ -5,7 +5,6 @@
 #include <set>
 #include <string>
 #include <vector>
-#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 
@@ -42,7 +41,7 @@ bool PhysDeviceVk::IsDeviceSuitable(const VkPhysicalDevice &device,
 
   bool swapChainAdequate = false;
   if (extsSupported) {
-    SwapChainVk::SwapChainSupportDetails swapChainSupport =
+    SwapChainSupportDetails swapChainSupport =
         swapChainVk.QuerySwapChainSupport(device, m_surface);
 
     swapChainAdequate = !swapChainSupport.formats.empty() &&
@@ -78,7 +77,7 @@ PhysDeviceVk::CheckDevExtSupport(const VkPhysicalDevice &device) const {
   return requiredExtensions.empty();
 };
 
-PhysDeviceVk::QueueFamilyIndices const &PhysDeviceVk::GetQueueFamilyIndices() {
+QueueFamilyIndices const &PhysDeviceVk::GetQueueFamilyIndices() {
   return m_qFamIndices;
 };
 

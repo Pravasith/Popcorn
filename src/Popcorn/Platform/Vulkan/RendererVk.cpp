@@ -25,7 +25,6 @@ RendererVk::~RendererVk() {
 };
 
 void RendererVk::InitVulkan() {
-  // CREATE INSTANCE
   CreateInstance();
 
   if constexpr (s_enableValidationLayers)
@@ -34,8 +33,12 @@ void RendererVk::InitVulkan() {
   m_WinSrfcVk.CreateSurface();
   m_PhysDevVk.PickPhysDevice(m_SwpChnVk);
   m_LogiDevVk.CreateLogicalDevice(
-      m_qFamIndices, m_ValLyrsVk.GetValidationLayers(),
+      m_PhysDevVk.GetQueueFamilyIndices(), m_ValLyrsVk.GetValidationLayers(),
       m_PhysDevVk.GetPhysDevice(), m_PhysDevVk.GetDeviceExts());
+  m_SwpChnVk.CreateSwapChain(
+      m_PhysDevVk.GetPhysDevice(), m_WinSrfcVk.GetSurface(),
+      static_cast<GLFWwindow *>(s_osWindow),
+      m_PhysDevVk.GetQueueFamilyIndices(), m_LogiDevVk.GetLogiDevice());
 };
 
 void RendererVk::CreateInstance() {
@@ -107,6 +110,7 @@ std::vector<const char *> RendererVk::GetRequiredExtensions() {
 void RendererVk::OnUpdate() const {};
 
 void RendererVk::CleanUp() {
+  m_SwpChnVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_WinSrfcVk.CleanUp();
   m_LogiDevVk.CleanUp();
   m_ValLyrsVk.CleanUp();

@@ -1,11 +1,10 @@
 #pragma once
 
+#include "Common.h"
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
 #include "SwapChainVk.h"
-#include <optional>
 #include <vector>
-#include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -18,15 +17,6 @@ class PhysDeviceVk {
   friend class LogiDeviceVk;
 
 public:
-  struct QueueFamilyIndices {
-    std::optional<uint32_t> graphicsFamily;
-    std::optional<uint32_t> presentFamily;
-
-    bool isComplete() const {
-      return graphicsFamily.has_value() && presentFamily.has_value();
-    }
-  };
-
 private:
   PhysDeviceVk(const VkInstance &vkInst, const VkSurfaceKHR &surface)
       : m_vkInst(vkInst), m_physDevice(VK_NULL_HANDLE), m_surface(surface) {
