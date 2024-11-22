@@ -39,6 +39,7 @@ void RendererVk::InitVulkan() {
       m_PhysDevVk.GetPhysDevice(), m_WinSrfcVk.GetSurface(),
       static_cast<GLFWwindow *>(s_osWindow),
       m_PhysDevVk.GetQueueFamilyIndices(), m_LogiDevVk.GetLogiDevice());
+  m_SwpChnVk.CreateImgViews(m_LogiDevVk.GetLogiDevice());
 };
 
 void RendererVk::CreateInstance() {

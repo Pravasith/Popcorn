@@ -4,6 +4,7 @@
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
 #include <vector>
+#include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -32,9 +33,15 @@ private:
   VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities,
                               GLFWwindow *osWindow);
 
+  void CreateImgViews(const VkDevice &logiDevice);
   void CleanUp(const VkDevice &logiDevice);
 
 private:
   VkSwapchainKHR m_swapChain;
+  std::vector<VkImage> m_swapChainImgs;
+  VkFormat m_swapChainImgFormat;
+  VkExtent2D m_swapChainExtent;
+  std::vector<VkImageView> m_swapChainImgViews;
 };
+
 ENGINE_NAMESPACE_END

@@ -8,7 +8,6 @@
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
-
 struct SwapChainSupportDetails {
   VkSurfaceCapabilitiesKHR capabilities;
   std::vector<VkSurfaceFormatKHR> formats;
