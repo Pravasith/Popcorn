@@ -1,13 +1,22 @@
 #pragma once
 
 #include "Global_Macros.h"
+#include "ShaderVk.h"
 
 ENGINE_NAMESPACE_BEGIN
 class GfxPipelineVk {
-private:
   friend class RendererVk;
 
+private:
+  GfxPipelineVk() { PC_PRINT("CREATED", TagType::Constr, "GFX-PIPELINE-VK"); };
+  ~GfxPipelineVk() {
+    PC_PRINT("DESTROYED", TagType::Destr, "GFX-PIPELINE-VK");
+  };
+
   void CreateGfxPipeline();
+
+private:
+  ShaderVk m_ShdrVk;
 };
 
 ENGINE_NAMESPACE_END

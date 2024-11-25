@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CommonVk.h"
+#include "GfxPipelineVk.h"
 #include "Global_Macros.h"
 #include "LogiDeviceVk.h"
 #include "PhysDeviceVk.h"
@@ -53,6 +54,7 @@ private:
   LogiDeviceVk m_LogiDevVk;
   WinSurfaceVk m_WinSrfcVk;
   SwapChainVk m_SwpChnVk;
+  GfxPipelineVk m_GfxPlineVk;
 
   const QueueFamilyIndices &m_qFamIndices;
 };

@@ -6,7 +6,6 @@
 #include "Popcorn/Core/Base.h"
 #include "RendererVk.h"
 
-// HELLO TRIANGLE!
 ENGINE_NAMESPACE_BEGIN
 
 RendererVk::RendererVk()
@@ -14,7 +13,7 @@ RendererVk::RendererVk()
       m_WinSrfcVk(m_vkInstance, static_cast<GLFWwindow *>(s_osWindow)),
       m_PhysDevVk(m_vkInstance, GetSurface()), m_LogiDevVk(m_vkInstance),
       m_SwpChnVk(GetPhysDevice(), GetSurface()),
-      m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()) {
+      m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()), m_GfxPlineVk() {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
   InitVulkan();
 };
@@ -40,6 +39,7 @@ void RendererVk::InitVulkan() {
       static_cast<GLFWwindow *>(s_osWindow),
       m_PhysDevVk.GetQueueFamilyIndices(), m_LogiDevVk.GetLogiDevice());
   m_SwpChnVk.CreateImgViews(m_LogiDevVk.GetLogiDevice());
+  m_GfxPlineVk.CreateGfxPipeline();
 };
 
 void RendererVk::CreateInstance() {
