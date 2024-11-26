@@ -2,6 +2,9 @@
 
 #include "Global_Macros.h"
 #include "ShaderVk.h"
+#include <vector>
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
 
 ENGINE_NAMESPACE_BEGIN
 class GfxPipelineVk {
@@ -13,7 +16,9 @@ private:
     PC_PRINT("DESTROYED", TagType::Destr, "GFX-PIPELINE-VK");
   };
 
-  void CreateGfxPipeline();
+  void CreateGfxPipeline(const VkDevice &);
+  VkShaderModule CreateShaderModule(const std::vector<char> &,
+                                    const VkDevice &);
 
 private:
   ShaderVk m_ShdrVk;

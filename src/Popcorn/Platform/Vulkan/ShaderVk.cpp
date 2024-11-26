@@ -10,7 +10,6 @@ ENGINE_NAMESPACE_BEGIN
 std::vector<char> ShaderVk::LoadFile(const std::string &fname) {
   // FLAGS MEANING: OPEN THE FILE AND SEEK TO THE END (ate FLAG) AND READ IT AS
   // A BINARY (binary FLAG)
-
   std::ifstream file(fname, std::ios::ate | std::ios::binary);
 
   if (!file.is_open()) {
@@ -29,7 +28,7 @@ std::vector<char> ShaderVk::LoadFile(const std::string &fname) {
 
   file.close();
 
-  PC_PRINT(fname << " SIZE" << fsize << " bytes", TagType::Print, "SHADER-VK")
+  PC_PRINT(fname << " SIZE: " << fsize << " BYTES", TagType::Print, "SHADER-VK")
 
   return bfr;
 };
