@@ -16,12 +16,14 @@ private:
     PC_PRINT("DESTROYED", TagType::Destr, "GFX-PIPELINE-VK");
   };
 
-  void CreateGfxPipeline(const VkDevice &);
+  void CreateGfxPipeline(const VkDevice &, const VkExtent2D &);
   VkShaderModule CreateShaderModule(const std::vector<char> &,
                                     const VkDevice &);
+  void CleanUp(const VkDevice &);
 
 private:
   ShaderVk m_ShdrVk;
+  VkPipelineLayout m_pplnLytVk;
 };
 
 ENGINE_NAMESPACE_END

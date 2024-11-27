@@ -39,7 +39,8 @@ void RendererVk::InitVulkan() {
       static_cast<GLFWwindow *>(s_osWindow),
       m_PhysDevVk.GetQueueFamilyIndices(), m_LogiDevVk.GetLogiDevice());
   m_SwpChnVk.CreateImgViews(m_LogiDevVk.GetLogiDevice());
-  m_GfxPlineVk.CreateGfxPipeline(m_LogiDevVk.GetLogiDevice());
+  m_GfxPlineVk.CreateGfxPipeline(m_LogiDevVk.GetLogiDevice(),
+                                 m_SwpChnVk.GetSwapChainExtent());
 };
 
 void RendererVk::CreateInstance() {
@@ -111,6 +112,7 @@ std::vector<const char *> RendererVk::GetRequiredExtensions() {
 void RendererVk::OnUpdate() const {};
 
 void RendererVk::CleanUp() {
+  m_GfxPlineVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_SwpChnVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_WinSrfcVk.CleanUp();
   m_LogiDevVk.CleanUp();
