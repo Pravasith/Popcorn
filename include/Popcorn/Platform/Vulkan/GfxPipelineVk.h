@@ -19,6 +19,7 @@ private:
   void CreateGfxPipeline(const VkDevice &, const VkExtent2D &);
   VkShaderModule CreateShaderModule(const std::vector<char> &,
                                     const VkDevice &);
+  void CreateRndrPass(const VkFormat &);
   void CleanUp(const VkDevice &);
 
 private:

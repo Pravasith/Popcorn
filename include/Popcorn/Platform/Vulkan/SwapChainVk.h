@@ -25,6 +25,14 @@ public:
     return m_swapChainExtent;
   };
 
+  [[nodiscard]] inline const VkFormat &GetImgFormat() const {
+    if (m_swapChainImgFormat == VK_FORMAT_UNDEFINED) {
+      std::runtime_error("SWAPCHAIN IMG FORMAT UNDEFINED");
+    };
+
+    return m_swapChainImgFormat;
+  };
+
 private:
   SwapChainVk(const VkPhysicalDevice &physDev, const VkSurfaceKHR &surface) {
     PC_PRINT("CREATED", TagType::Constr, "SWAP-CHAIN-VK");

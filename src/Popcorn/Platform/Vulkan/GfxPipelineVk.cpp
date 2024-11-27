@@ -149,6 +149,30 @@ void GfxPipelineVk::CleanUp(const VkDevice &dev) {
   vkDestroyPipelineLayout(dev, m_pplnLytVk, nullptr);
 };
 
+void CreateRndrPass(const VkFormat &swpChnImgFrmt) {
+  VkAttachmentDescription clrAtmt{};
+  clrAtmt.format = swpChnImgFrmt;
+  clrAtmt.samples = VK_SAMPLE_COUNT_1_BIT;
+  clrAtmt.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+  clrAtmt.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+  clrAtmt.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+  clrAtmt.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+  clrAtmt.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  clrAtmt.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+  // SUBPASSES & ATTACHMENT REFERENCES
+  VkAttachmentReference clrAttmtRef{};
+  clrAttmtRef.attachment = 0;
+  clrAttmtRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+  VkSubpassDescription sbpass{};
+  sbpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+  sbpass.colorAttachmentCount = 1;
+  sbpass.pColorAttachments = &clrAttmtRef;
+
+  // RENDER PASS CREATION
+};
+
 VkShaderModule GfxPipelineVk::CreateShaderModule(const std::vector<char> &code,
                                                  const VkDevice &device) {
   VkShaderModuleCreateInfo createInfo{};
