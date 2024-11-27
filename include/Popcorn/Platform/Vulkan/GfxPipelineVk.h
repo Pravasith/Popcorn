@@ -19,12 +19,14 @@ private:
   void CreateGfxPipeline(const VkDevice &, const VkExtent2D &);
   VkShaderModule CreateShaderModule(const std::vector<char> &,
                                     const VkDevice &);
-  void CreateRndrPass(const VkFormat &);
+  void CreateRndrPass(const VkFormat &, const VkDevice &);
   void CleanUp(const VkDevice &);
 
 private:
   ShaderVk m_ShdrVk;
+  VkRenderPass m_rndrPass;
   VkPipelineLayout m_pplnLytVk;
+  VkPipeline m_gfxPpline;
 };
 
 ENGINE_NAMESPACE_END

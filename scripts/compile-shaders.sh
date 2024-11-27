@@ -25,6 +25,9 @@ else
         echo "CREATING SHADER BIN DIRS";
         mkdir "$sh_build_dir_lnx"
         mkdir "$sh_build_dir_win"
+
+        cp "$sh_dest_dir"/* "$sh_build_dir_lnx"
+        cp "$sh_dest_dir"/* "$sh_build_dir_win"
     else
         cp "$sh_dest_dir"/* "$sh_build_dir_lnx"
         cp "$sh_dest_dir"/* "$sh_build_dir_win"

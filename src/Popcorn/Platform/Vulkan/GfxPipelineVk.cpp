@@ -1,5 +1,6 @@
 #include "GfxPipelineVk.h"
 #include "Global_Macros.h"
+#include "Popcorn/Core/Base.h"
 #include "Sources.h"
 #include <stdexcept>
 #include <vector>
@@ -17,7 +18,7 @@ void GfxPipelineVk::CreateGfxPipeline(const VkDevice &dev,
 
   // CREATE PIPELINE STAGE
   // VERTEX
-  VkPipelineShaderStageCreateInfo vertShdrStageInfo;
+  VkPipelineShaderStageCreateInfo vertShdrStageInfo{};
   vertShdrStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   vertShdrStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
   vertShdrStageInfo.module = vertShdrMod;
@@ -25,7 +26,7 @@ void GfxPipelineVk::CreateGfxPipeline(const VkDevice &dev,
 
   // CREATE PIPELINE STAGE
   // FRAGMENT
-  VkPipelineShaderStageCreateInfo fragShdrStageInfo;
+  VkPipelineShaderStageCreateInfo fragShdrStageInfo{};
   fragShdrStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   fragShdrStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
   fragShdrStageInfo.module = fragShdrMod;
@@ -33,14 +34,6 @@ void GfxPipelineVk::CreateGfxPipeline(const VkDevice &dev,
 
   VkPipelineShaderStageCreateInfo shaderStages[] = {vertShdrStageInfo,
                                                     fragShdrStageInfo};
-
-  // DYNAMIC STATES CONFIG OF THE PIPELINE
-  std::vector<VkDynamicState> dynStatesVec = {VK_DYNAMIC_STATE_VIEWPORT,
-                                              VK_DYNAMIC_STATE_SCISSOR};
-  VkPipelineDynamicStateCreateInfo dynState{};
-  dynState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-  dynState.dynamicStateCount = static_cast<uint32_t>(dynStatesVec.size());
-  dynState.pDynamicStates = dynStatesVec.data();
 
   // VERTEX BUFFER DATA
   VkPipelineVertexInputStateCreateInfo vertInptInfo{};
@@ -71,24 +64,32 @@ void GfxPipelineVk::CreateGfxPipeline(const VkDevice &dev,
   scssr.offset = {0, 0};
   scssr.extent = swpChnExt;
 
+  // DYNAMIC STATES CONFIG OF THE PIPELINE
+  std::vector<VkDynamicState> dynStatesVec = {VK_DYNAMIC_STATE_VIEWPORT,
+                                              VK_DYNAMIC_STATE_SCISSOR};
+  VkPipelineDynamicStateCreateInfo dynState{};
+  dynState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+  dynState.dynamicStateCount = static_cast<uint32_t>(dynStatesVec.size());
+  dynState.pDynamicStates = dynStatesVec.data();
+
   VkPipelineViewportStateCreateInfo viewportState{};
   viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
   viewportState.viewportCount = 1;
   viewportState.scissorCount = 1;
 
   // RASTERIZER
-  VkPipelineRasterizationStateCreateInfo rstr{};
-  rstr.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-  rstr.depthClampEnable = VK_FALSE;
-  rstr.rasterizerDiscardEnable = VK_FALSE;
-  rstr.polygonMode = VK_POLYGON_MODE_FILL;
-  rstr.lineWidth = 1.0f;
-  rstr.cullMode = VK_CULL_MODE_BACK_BIT;
-  rstr.frontFace = VK_FRONT_FACE_CLOCKWISE;
-  rstr.depthBiasEnable = VK_FALSE;
-  rstr.depthBiasConstantFactor = 0.0f;
-  rstr.depthBiasClamp = 0.0f;
-  rstr.depthBiasSlopeFactor = 0.0f;
+  VkPipelineRasterizationStateCreateInfo rstrzr{};
+  rstrzr.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+  rstrzr.depthClampEnable = VK_FALSE;
+  rstrzr.rasterizerDiscardEnable = VK_FALSE;
+  rstrzr.polygonMode = VK_POLYGON_MODE_FILL;
+  rstrzr.lineWidth = 1.0f;
+  rstrzr.cullMode = VK_CULL_MODE_BACK_BIT;
+  rstrzr.frontFace = VK_FRONT_FACE_CLOCKWISE;
+  rstrzr.depthBiasEnable = VK_FALSE;
+  rstrzr.depthBiasConstantFactor = 0.0f;
+  rstrzr.depthBiasClamp = 0.0f;
+  rstrzr.depthBiasSlopeFactor = 0.0f;
 
   // MULTISAMPLING
   VkPipelineMultisampleStateCreateInfo msmpling{};
@@ -107,8 +108,6 @@ void GfxPipelineVk::CreateGfxPipeline(const VkDevice &dev,
   clrBldAtchmt.colorWriteMask =
       VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
       VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-
-  clrBldAtchmt.blendEnable = VK_FALSE;
   clrBldAtchmt.blendEnable = VK_FALSE;
   clrBldAtchmt.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;  // Optional
   clrBldAtchmt.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
@@ -141,15 +140,36 @@ void GfxPipelineVk::CreateGfxPipeline(const VkDevice &dev,
     std::runtime_error("FAILED TO CREATE PIPELINE LAYOUT!");
   };
 
+  // CREATE GRAPHICS PIPELINE
+  VkGraphicsPipelineCreateInfo gfxPlInfo{};
+  gfxPlInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+  gfxPlInfo.stageCount = 2;
+  gfxPlInfo.pStages = shaderStages;
+  gfxPlInfo.pVertexInputState = &vertInptInfo;
+  gfxPlInfo.pInputAssemblyState = &inptAsmInfo;
+  gfxPlInfo.pViewportState = &viewportState;
+  gfxPlInfo.pRasterizationState = &rstrzr;
+  gfxPlInfo.pMultisampleState = &msmpling;
+  gfxPlInfo.pDepthStencilState = nullptr;
+  gfxPlInfo.pColorBlendState = &clrBlding;
+  gfxPlInfo.pDynamicState = &dynState;
+  gfxPlInfo.layout = m_pplnLytVk;
+  gfxPlInfo.renderPass = m_rndrPass;
+  gfxPlInfo.subpass = 0; // INDEX OF THE SUBPASS
+  gfxPlInfo.basePipelineHandle = VK_NULL_HANDLE;
+  gfxPlInfo.basePipelineIndex = -1;
+
+  if (vkCreateGraphicsPipelines(dev, VK_NULL_HANDLE, 1, &gfxPlInfo, nullptr,
+                                &m_gfxPpline) != VK_SUCCESS) {
+    std::runtime_error("ERROR: FAILED TO CREATE GFX PIPELINE!");
+  };
+
   vkDestroyShaderModule(dev, vertShdrMod, nullptr);
   vkDestroyShaderModule(dev, fragShdrMod, nullptr);
 };
 
-void GfxPipelineVk::CleanUp(const VkDevice &dev) {
-  vkDestroyPipelineLayout(dev, m_pplnLytVk, nullptr);
-};
-
-void CreateRndrPass(const VkFormat &swpChnImgFrmt) {
+void GfxPipelineVk::CreateRndrPass(const VkFormat &swpChnImgFrmt,
+                                   const VkDevice &dev) {
   VkAttachmentDescription clrAtmt{};
   clrAtmt.format = swpChnImgFrmt;
   clrAtmt.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -165,12 +185,23 @@ void CreateRndrPass(const VkFormat &swpChnImgFrmt) {
   clrAttmtRef.attachment = 0;
   clrAttmtRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-  VkSubpassDescription sbpass{};
-  sbpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-  sbpass.colorAttachmentCount = 1;
-  sbpass.pColorAttachments = &clrAttmtRef;
+  VkSubpassDescription sbPass{};
+  sbPass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+  sbPass.colorAttachmentCount = 1;
+  sbPass.pColorAttachments = &clrAttmtRef;
 
   // RENDER PASS CREATION
+  VkRenderPassCreateInfo rndrPassInfo{};
+  rndrPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+  rndrPassInfo.attachmentCount = 1;
+  rndrPassInfo.pAttachments = &clrAtmt;
+  rndrPassInfo.subpassCount = 1;
+  rndrPassInfo.pSubpasses = &sbPass;
+
+  if (vkCreateRenderPass(dev, &rndrPassInfo, nullptr, &m_rndrPass) !=
+      VK_SUCCESS) {
+    std::runtime_error("ERROR: RENDER PASS COULDN'T BE CREATED!");
+  };
 };
 
 VkShaderModule GfxPipelineVk::CreateShaderModule(const std::vector<char> &code,
@@ -187,6 +218,12 @@ VkShaderModule GfxPipelineVk::CreateShaderModule(const std::vector<char> &code,
   };
 
   return shdrModl;
+};
+
+void GfxPipelineVk::CleanUp(const VkDevice &dev) {
+  vkDestroyPipeline(dev, m_gfxPpline, nullptr);
+  vkDestroyPipelineLayout(dev, m_pplnLytVk, nullptr);
+  vkDestroyRenderPass(dev, m_rndrPass, nullptr);
 };
 
 ENGINE_NAMESPACE_END
