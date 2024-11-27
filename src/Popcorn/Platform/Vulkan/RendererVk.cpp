@@ -13,7 +13,8 @@ RendererVk::RendererVk()
       m_WinSrfcVk(m_vkInstance, static_cast<GLFWwindow *>(s_osWindow)),
       m_PhysDevVk(m_vkInstance, GetSurface()), m_LogiDevVk(m_vkInstance),
       m_SwpChnVk(GetPhysDevice(), GetSurface()),
-      m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()), m_GfxPlineVk() {
+      m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()), m_GfxPlineVk(),
+      m_FrmBfrsVk() {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
   InitVulkan();
 };
@@ -43,6 +44,9 @@ void RendererVk::InitVulkan() {
                               m_LogiDevVk.GetLogiDevice());
   m_GfxPlineVk.CreateGfxPipeline(m_LogiDevVk.GetLogiDevice(),
                                  m_SwpChnVk.GetSwapChainExtent());
+  m_FrmBfrsVk.CreateFrameBfrs(
+      m_LogiDevVk.GetLogiDevice(), m_SwpChnVk.GetImgViews(),
+      m_GfxPlineVk.GetRndrPass(), m_SwpChnVk.GetSwapChainExtent());
 };
 
 void RendererVk::CreateInstance() {
@@ -114,6 +118,7 @@ std::vector<const char *> RendererVk::GetRequiredExtensions() {
 void RendererVk::OnUpdate() const {};
 
 void RendererVk::CleanUp() {
+  m_FrmBfrsVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_GfxPlineVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_SwpChnVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_WinSrfcVk.CleanUp();

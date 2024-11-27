@@ -2,6 +2,7 @@
 
 #include "Global_Macros.h"
 #include "ShaderVk.h"
+#include <stdexcept>
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -9,6 +10,15 @@
 ENGINE_NAMESPACE_BEGIN
 class GfxPipelineVk {
   friend class RendererVk;
+
+private:
+  [[nodiscard]] inline const VkRenderPass &GetRndrPass() const {
+    if (m_rndrPass == VK_NULL_HANDLE) {
+      std::runtime_error("ERROR: RENDER PASS IS NULL");
+    };
+
+    return m_rndrPass;
+  };
 
 private:
   GfxPipelineVk() { PC_PRINT("CREATED", TagType::Constr, "GFX-PIPELINE-VK"); };

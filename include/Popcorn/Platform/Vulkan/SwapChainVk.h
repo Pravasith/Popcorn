@@ -19,7 +19,8 @@ public:
 
   [[nodiscard]] inline const VkExtent2D &GetSwapChainExtent() const {
     if (m_swapChainExtent.width == 0 && m_swapChainExtent.height == 0) {
-      std::runtime_error("SWAP CHAIN EXT IS UNINITIALIZED - SwapChainVk.h");
+      throw std::runtime_error(
+          "SWAP CHAIN EXT IS UNINITIALIZED - SwapChainVk.h");
     }
 
     return m_swapChainExtent;
@@ -27,10 +28,18 @@ public:
 
   [[nodiscard]] inline const VkFormat &GetImgFormat() const {
     if (m_swapChainImgFormat == VK_FORMAT_UNDEFINED) {
-      std::runtime_error("SWAPCHAIN IMG FORMAT UNDEFINED");
+      throw std::runtime_error("SWAPCHAIN IMG FORMAT UNDEFINED");
     };
 
     return m_swapChainImgFormat;
+  };
+
+  [[nodiscard]] inline const std::vector<VkImageView> &GetImgViews() const {
+    if (m_swapChainImgViews.size() == 0) {
+      throw std::runtime_error("SWAPCHAIN IMG VIEWS NOT INITIALIZED");
+    };
+
+    return m_swapChainImgViews;
   };
 
 private:

@@ -1,10 +1,8 @@
 #include "GfxPipelineVk.h"
 #include "Global_Macros.h"
-#include "Popcorn/Core/Base.h"
 #include "Sources.h"
 #include <stdexcept>
 #include <vector>
-#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 
