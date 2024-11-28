@@ -2,7 +2,6 @@
 
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
-#include "Popcorn/Events/Subscriber.h"
 #include <variant>
 
 ENGINE_NAMESPACE_BEGIN
@@ -21,18 +20,17 @@ class RendererOpenGL;
 class RendererVk;
 
 // SINGLETON
-class Renderer : public Subscriber {
+class Renderer {
 public:
-  static void Create();
+  static const Renderer *Create();
   static void Destroy();
 
   static void SetOSWindow(void *);
 
-  void Run();
+  void Init() const;
 
   static Renderer &Get();
 
-  void OnEvent(Event &) const override {};
   virtual void OnUpdate() const {};
 
   Renderer(const Renderer &) = delete;

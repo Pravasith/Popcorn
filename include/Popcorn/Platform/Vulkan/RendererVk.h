@@ -31,9 +31,9 @@ private:
   void CleanUp();
 
   void CreateInstance();
+  void OnUpdate() const override;
 
   std::vector<const char *> GetRequiredExtensions();
-  virtual void OnUpdate() const override;
 
 private:
   [[nodiscard]] inline const VkSurfaceKHR &GetSurface() const {

@@ -23,15 +23,16 @@ Renderer::Renderer() {
 
 Renderer::~Renderer() { PC_PRINT("DESTROYED", TagType::Destr, "RENDERER") };
 
-void Renderer::Create() {
-  if (s_instance)
-    return;
+const Renderer *Renderer::Create() {
+  if (!s_instance) {
+    // PC_ASSERT(s_instance, "NO RENDERER INSTANCE");
+    s_instance = new Renderer();
+  }
 
-  s_instance = new Renderer();
+  return s_instance;
 };
 
-void Renderer::Run() {
-
+void Renderer::Init() const {
   // TODO: CHANGE TO FANCY DISPATCHER STUFF
   if (static_cast<int>(s_type) & static_cast<int>(RendererType::OpenGL)) {
     s_renderer = new RendererOpenGL();

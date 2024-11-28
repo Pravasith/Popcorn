@@ -7,6 +7,7 @@
 ENGINE_NAMESPACE_BEGIN
 RenderLayer::RenderLayer() {
   PC_PRINT("CREATED", TagType::Constr, "RENDER-LAYER");
+  m_Renderer = Renderer::Create();
 }
 
 RenderLayer::~RenderLayer() {
@@ -17,17 +18,13 @@ void RenderLayer::OnAttach() {
   Application &app = Application::Get();
   auto osWindow = app.GetAppWindow().GetOSWindow();
 
-  Renderer::Create();
   Renderer::SetOSWindow(osWindow);
-  auto &rendInst = Renderer::Get();
-  rendInst.Run();
+  m_Renderer->Init();
 }
 
 void RenderLayer::OnDetach() { Renderer::Destroy(); }
 
-void RenderLayer::OnUpdate() {
-  // Renderer::OnUpdate();
-}
+void RenderLayer::OnUpdate() { m_Renderer->OnUpdate(); }
 
 void RenderLayer::OnEvent(Event &e) {
   // TODO: ADD EVENTS

@@ -2,12 +2,12 @@
 #include <iostream>
 
 int main(int argc, char **argv) {
-
   Popcorn::Application::Start();
   Popcorn::Application::Run();
   Popcorn::Application::Stop();
 
-  if (__cplusplus == 199711L)
+  std::cout << "\n";
+  if (__cplusplus == 199712L)
     std::cout << "C++98/03\n";
   else if (__cplusplus == 201103L)
     std::cout << "C++11\n";

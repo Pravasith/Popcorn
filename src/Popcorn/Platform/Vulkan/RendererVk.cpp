@@ -20,8 +20,8 @@ RendererVk::RendererVk()
 };
 
 RendererVk::~RendererVk() {
-  CleanUp();
   PC_PRINT("DESTROYED", TagType::Destr, "RENDERER-VULKAN");
+  CleanUp();
 };
 
 void RendererVk::InitVulkan() {
@@ -118,7 +118,9 @@ std::vector<const char *> RendererVk::GetRequiredExtensions() {
   return extensions;
 };
 
-void RendererVk::OnUpdate() const {};
+void RendererVk::OnUpdate() const {
+  // PC_PRINT("FROM REN-VK", TagType::Print, "RENVK")
+};
 
 void RendererVk::CleanUp() {
   m_CmdPoolVk.CleanUp(m_LogiDevVk.GetLogiDevice());
