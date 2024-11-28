@@ -17,7 +17,7 @@
 #include "ValidationLyrsVk.h"
 
 ENGINE_NAMESPACE_BEGIN
-class RendererVk : public Renderer {
+class RendererVk : public Renderer<RendererType::Vulkan> {
 public:
   RendererVk();
   ~RendererVk();

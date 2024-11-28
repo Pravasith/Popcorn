@@ -5,9 +5,11 @@
 #include "Renderer.h"
 
 ENGINE_NAMESPACE_BEGIN
+template <RendererType T> const Renderer<T> *RenderLayer::s_Renderer = nullptr;
+
 RenderLayer::RenderLayer() {
   PC_PRINT("CREATED", TagType::Constr, "RENDER-LAYER");
-  m_Renderer = Renderer::Create();
+  s_Renderer<RendererType::Vulkan> = Renderer<RendererType::Vulkan>::Create();
 }
 
 RenderLayer::~RenderLayer() {
@@ -18,13 +20,15 @@ void RenderLayer::OnAttach() {
   Application &app = Application::Get();
   auto osWindow = app.GetAppWindow().GetOSWindow();
 
-  Renderer::SetOSWindow(osWindow);
-  m_Renderer->Init();
+  Renderer<RendererType::Vulkan>::SetOSWindow(osWindow);
+  s_Renderer<RendererType::Vulkan>->Init();
 }
 
-void RenderLayer::OnDetach() { Renderer::Destroy(); }
+void RenderLayer::OnDetach() { Renderer<RendererType::Vulkan>::Destroy(); }
 
-void RenderLayer::OnUpdate() { m_Renderer->OnUpdate(); }
+void RenderLayer::OnUpdate() {
+  // s_Renderer<RendererType::Vulkan>->OnUpdate();
+}
 
 void RenderLayer::OnEvent(Event &e) {
   // TODO: ADD EVENTS
