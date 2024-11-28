@@ -28,9 +28,9 @@ public:
 
   void Init() const;
 
-  static Renderer &Get();
+  static const auto GetRenderer();
 
-  virtual void OnUpdate() const {};
+  virtual void OnUpdate() const;
 
   Renderer(const Renderer &) = delete;
   Renderer &operator=(const Renderer &) = delete;

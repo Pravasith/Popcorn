@@ -1,5 +1,7 @@
 TODO:
 ----------
+ :: Refactor THE HORRIBLE Renderer
+
  :: Mem check resolution
     Valgrind memory check
 

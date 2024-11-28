@@ -119,7 +119,7 @@ std::vector<const char *> RendererVk::GetRequiredExtensions() {
 };
 
 void RendererVk::OnUpdate() const {
-  // PC_PRINT("FROM REN-VK", TagType::Print, "RENVK")
+
 };
 
 void RendererVk::CleanUp() {

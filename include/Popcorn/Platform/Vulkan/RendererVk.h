@@ -26,12 +26,13 @@ public:
     return s_enableValidationLayers;
   };
 
+  void OnUpdate() const override;
+
 private:
   void InitVulkan();
   void CleanUp();
 
   void CreateInstance();
-  void OnUpdate() const override;
 
   std::vector<const char *> GetRequiredExtensions();
 

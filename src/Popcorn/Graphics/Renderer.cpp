@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include "Global_Macros.h"
+#include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
 #include "RendererOpenGL.h"
 #include "RendererVk.h"
@@ -43,10 +44,24 @@ template <RendererType T> void Renderer<T>::SetOSWindow(void *osWindow) {
   s_osWindow = osWindow;
 };
 
-template <RendererType T> Renderer<T> &Renderer<T>::Get() {
+template <RendererType T> const auto Renderer<T>::GetRenderer() {
   // PC_ASSERT(s_renderer, "NO RENDERER INSTANCE");
-  return *s_instance;
+  if constexpr (T == RendererType::Vulkan) {
+    return std::get<RendererVk *>(s_renderer);
+  } else if constexpr (T == RendererType::OpenGL) {
+    return std::get<RendererOpenGL *>(s_renderer);
+  } else {
+    PC_STATIC_ASSERT(true, "UNSUPPORTED RENDERERTYPE");
+  }
 };
+
+template <RendererType T> void Renderer<T>::OnUpdate() const {
+  if constexpr (T == RendererType::Vulkan) {
+    std::get<RendererVk *>(s_renderer)->OnUpdate();
+  } else {
+    // std::get<RendererOpenGL *>(s_renderer)->OnUpdate();
+  }
+}
 
 template <RendererType T> void Renderer<T>::Destroy() {
   if (auto vulkanRenderer = std::get_if<RendererVk *>(&Renderer::s_renderer)) {

@@ -27,7 +27,8 @@ void RenderLayer::OnAttach() {
 void RenderLayer::OnDetach() { Renderer<RendererType::Vulkan>::Destroy(); }
 
 void RenderLayer::OnUpdate() {
-  // s_Renderer<RendererType::Vulkan>->OnUpdate();
+  s_Renderer<RendererType::Vulkan>->OnUpdate();
+  // s_Renderer<RendererType::Vulkan>->GetRenderer();
 }
 
 void RenderLayer::OnEvent(Event &e) {
