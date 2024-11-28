@@ -20,6 +20,14 @@ private:
     return m_rndrPass;
   };
 
+  [[nodiscard]] inline const VkPipeline &GetGfxPipeline() const {
+    if (m_gfxPpline == VK_NULL_HANDLE) {
+      std::runtime_error("ERROR: GFX PIPELINE IS NULL");
+    };
+
+    return m_gfxPpline;
+  };
+
 private:
   GfxPipelineVk() { PC_PRINT("CREATED", TagType::Constr, "GFX-PIPELINE-VK"); };
   ~GfxPipelineVk() {

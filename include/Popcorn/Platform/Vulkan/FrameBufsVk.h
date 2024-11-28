@@ -2,7 +2,9 @@
 
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
+#include <stdexcept>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -12,6 +14,14 @@ class FrameBufsVk {
 
   FrameBufsVk() { PC_PRINT("CREATED", TagType::Constr, "FRAME-BUFS-VK") };
   ~FrameBufsVk() { PC_PRINT("DESTROYED", TagType::Destr, "FRAME-BUFS-VK") };
+
+  [[nodiscard]] inline const std::vector<VkFramebuffer> &GetSwpChnFrameBfrs() {
+    if (m_swpChnFrameBufs.size() == 0) {
+      throw std::runtime_error("ERROR: SWAP CHAIN FRAME BUFFERS VEC IS EMPTY!");
+    };
+
+    return m_swpChnFrameBufs;
+  };
 
   void CreateFrameBfrs(const VkDevice &, const std::vector<VkImageView> &,
                        const VkRenderPass &, const VkExtent2D &);

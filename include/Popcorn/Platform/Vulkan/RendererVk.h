@@ -1,5 +1,6 @@
 #pragma once
 
+#include "CmdPoolVk.h"
 #include "CommonVk.h"
 #include "FrameBufsVk.h"
 #include "GfxPipelineVk.h"
@@ -57,6 +58,7 @@ private:
   SwapChainVk m_SwpChnVk;
   GfxPipelineVk m_GfxPlineVk;
   FrameBufsVk m_FrmBfrsVk;
+  CmdPoolVk m_CmdPoolVk;
 
   const QueueFamilyIndices &m_qFamIndices;
 };
