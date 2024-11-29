@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Common.h"
+#include "CommonVk.h"
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
 #include "Global_Macros.h"
@@ -20,8 +20,17 @@ private:
   };
   ~LogiDeviceVk() { PC_PRINT("DESTROYED", TagType::Destr, "LOGICAL-DEVICE"); };
 
-  [[nodiscard]] inline const VkDevice &GetLogiDevice() { return m_device; };
-  [[nodiscard]] inline const VkQueue &GetDeviceQueue() { return m_gfxQueue; };
+  [[nodiscard]] inline const VkDevice &GetLogiDevice() const {
+    return m_device;
+  };
+
+  [[nodiscard]] inline const VkQueue &GetDeviceQueue() const {
+    return m_gfxQueue;
+  };
+
+  [[nodiscard]] inline const VkQueue &GetPresentQueue() const {
+    return m_presQueue;
+  };
 
   void CleanUp();
 

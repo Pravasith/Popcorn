@@ -1,5 +1,9 @@
 TODO:
 ----------
+ :: Check OnUpdate Method of RendererVk
+
+ :: Refactor THE HORRIBLE Renderer
+
  :: Mem check resolution
     Valgrind memory check
 

@@ -1,5 +1,6 @@
 #include "SwapChainVk.h"
 #include "Global_Macros.h"
+#include "Popcorn/Core/Base.h"
 #include <algorithm>
 #include <limits>
 #include <vulkan/vulkan_core.h>
@@ -134,9 +135,52 @@ void SwapChainVk::CreateSwapChain(const VkPhysicalDevice &physDev,
       VK_SUCCESS) {
     throw std::runtime_error("FAILED TO CREATE SWAP CHAIN!");
   }
+
+  // RETRIEVE HANDLES OF THE SWAPCHAIN IMAGES
+  vkGetSwapchainImagesKHR(logiDevice, m_swapChain, &imageCount, nullptr);
+  m_swapChainImgs.resize(imageCount);
+  vkGetSwapchainImagesKHR(logiDevice, m_swapChain, &imageCount,
+                          m_swapChainImgs.data());
+
+  m_swapChainImgFormat = surfaceFormat.format;
+  m_swapChainExtent = extent;
 }
 
+void SwapChainVk::CreateImgViews(const VkDevice &logiDevice) {
+  m_swapChainImgViews.resize(m_swapChainImgs.size());
+
+  PC_PRINT(m_swapChainImgViews.size(), TagType::Print, "SC IMAGE VIEWS SIZE")
+
+  for (size_t i = 0; i < m_swapChainImgs.size(); i++) {
+    VkImageViewCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    createInfo.image = m_swapChainImgs[i];
+
+    createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    createInfo.format = m_swapChainImgFormat;
+
+    createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+    createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    createInfo.subresourceRange.baseMipLevel = 0;
+    createInfo.subresourceRange.levelCount = 1;
+    createInfo.subresourceRange.baseArrayLayer = 0;
+    createInfo.subresourceRange.layerCount = 1;
+
+    if (vkCreateImageView(logiDevice, &createInfo, nullptr,
+                          &m_swapChainImgViews[i]) != VK_SUCCESS) {
+      throw std::runtime_error("FAILED TO CREATE IMAGE VIEWS!");
+    }
+  }
+};
+
 void SwapChainVk::CleanUp(const VkDevice &logiDevice) {
+  for (auto imageView : m_swapChainImgViews) {
+    vkDestroyImageView(logiDevice, imageView, nullptr);
+  }
   vkDestroySwapchainKHR(logiDevice, m_swapChain, nullptr);
 }
 

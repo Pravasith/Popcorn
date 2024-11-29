@@ -1,9 +1,13 @@
 #pragma once
 
-#include "Common.h"
+#include "CmdPoolVk.h"
+#include "CommonVk.h"
+#include "FrameBufsVk.h"
+#include "GfxPipelineVk.h"
 #include "Global_Macros.h"
 #include "LogiDeviceVk.h"
 #include "PhysDeviceVk.h"
+#include "PresentVk.h"
 #include "Renderer.h"
 #include "SwapChainVk.h"
 #include "WinSurfaceVk.h"
@@ -14,7 +18,7 @@
 #include "ValidationLyrsVk.h"
 
 ENGINE_NAMESPACE_BEGIN
-class RendererVk : public Renderer {
+class RendererVk : public Renderer<RendererType::Vulkan> {
 public:
   RendererVk();
   ~RendererVk();
@@ -23,6 +27,8 @@ public:
     return s_enableValidationLayers;
   };
 
+  void OnUpdate() override;
+
 private:
   void InitVulkan();
   void CleanUp();
@@ -30,7 +36,6 @@ private:
   void CreateInstance();
 
   std::vector<const char *> GetRequiredExtensions();
-  virtual void OnUpdate() const override;
 
 private:
   [[nodiscard]] inline const VkSurfaceKHR &GetSurface() const {
@@ -53,6 +58,10 @@ private:
   LogiDeviceVk m_LogiDevVk;
   WinSurfaceVk m_WinSrfcVk;
   SwapChainVk m_SwpChnVk;
+  GfxPipelineVk m_GfxPlineVk;
+  FrameBufsVk m_FrmBfrsVk;
+  CmdPoolVk m_CmdPoolVk;
+  PresentVk m_PresentVk;
 
   const QueueFamilyIndices &m_qFamIndices;
 };

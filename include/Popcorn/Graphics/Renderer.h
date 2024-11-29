@@ -2,17 +2,15 @@
 
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
-#include "Popcorn/Events/Subscriber.h"
 #include <variant>
 
 ENGINE_NAMESPACE_BEGIN
 
 enum class RendererType {
-  None = 0,
-  OpenGL = shift_l(1),
-  Vulkan = shift_l(2),
-  // DirectX = shift_l(3),
-  // Metal = shift_l(4)
+  OpenGL = shift_l(0),
+  Vulkan = shift_l(1),
+  // DirectX = shift_l(2),
+  // Metal = shift_l(3)
 };
 
 // FORWARD DECLARATIONS OF DERIVED CLASSES TO AVOID
@@ -21,19 +19,18 @@ class RendererOpenGL;
 class RendererVk;
 
 // SINGLETON
-class Renderer : public Subscriber {
+template <RendererType T> class Renderer {
 public:
-  static void Create();
+  static Renderer *Create();
   static void Destroy();
 
   static void SetOSWindow(void *);
 
-  void Run();
+  void Init() const;
 
-  static Renderer &Get();
+  static const auto GetRenderer();
 
-  void OnEvent(Event &) const override {};
-  virtual void OnUpdate() const {};
+  virtual void OnUpdate();
 
   Renderer(const Renderer &) = delete;
   Renderer &operator=(const Renderer &) = delete;
@@ -41,15 +38,16 @@ public:
   Renderer(Renderer &&) = delete;
   Renderer &operator=(const Renderer &&) = delete;
 
-protected:
   Renderer();
   virtual ~Renderer();
 
+private:
+  constexpr static RendererType s_type = T;
   static Renderer *s_instance;
-  static RendererType s_type;
-  static void *s_osWindow;
-
   static std::variant<RendererVk *, RendererOpenGL *> s_renderer;
+
+protected:
+  static void *s_osWindow;
 };
 
 ENGINE_NAMESPACE_END

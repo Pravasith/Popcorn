@@ -46,7 +46,7 @@ check_create_folder() {
 
 echo "--- Starting environment setup for Linux based systems..."
 # DIR -- PROJECT PARENT SRC DIR
-curr_dir=${PWD}
+curr_dir="${PWD}"
 
 # DIR -- RAW GITHUB CLONED SUBMODULES
 submodules_dir="$curr_dir/submodules"

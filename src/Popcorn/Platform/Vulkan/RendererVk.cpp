@@ -2,11 +2,11 @@
 #include <cstring>
 #include <vector>
 
+#include "CmdPoolVk.h"
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
 #include "RendererVk.h"
 
-// HELLO TRIANGLE!
 ENGINE_NAMESPACE_BEGIN
 
 RendererVk::RendererVk()
@@ -14,14 +14,15 @@ RendererVk::RendererVk()
       m_WinSrfcVk(m_vkInstance, static_cast<GLFWwindow *>(s_osWindow)),
       m_PhysDevVk(m_vkInstance, GetSurface()), m_LogiDevVk(m_vkInstance),
       m_SwpChnVk(GetPhysDevice(), GetSurface()),
-      m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()) {
+      m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()), m_GfxPlineVk(),
+      m_FrmBfrsVk(), m_CmdPoolVk(), m_PresentVk() {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
   InitVulkan();
 };
 
 RendererVk::~RendererVk() {
-  CleanUp();
   PC_PRINT("DESTROYED", TagType::Destr, "RENDERER-VULKAN");
+  CleanUp();
 };
 
 void RendererVk::InitVulkan() {
@@ -39,6 +40,18 @@ void RendererVk::InitVulkan() {
       m_PhysDevVk.GetPhysDevice(), m_WinSrfcVk.GetSurface(),
       static_cast<GLFWwindow *>(s_osWindow),
       m_PhysDevVk.GetQueueFamilyIndices(), m_LogiDevVk.GetLogiDevice());
+  m_SwpChnVk.CreateImgViews(m_LogiDevVk.GetLogiDevice());
+  m_GfxPlineVk.CreateRndrPass(m_SwpChnVk.GetImgFormat(),
+                              m_LogiDevVk.GetLogiDevice());
+  m_GfxPlineVk.CreateGfxPipeline(m_LogiDevVk.GetLogiDevice(),
+                                 m_SwpChnVk.GetSwapChainExtent());
+  m_FrmBfrsVk.CreateFrameBfrs(
+      m_LogiDevVk.GetLogiDevice(), m_SwpChnVk.GetImgViews(),
+      m_GfxPlineVk.GetRndrPass(), m_SwpChnVk.GetSwapChainExtent());
+  m_CmdPoolVk.CreateCmdPool(m_PhysDevVk.GetQueueFamilyIndices(),
+                            m_LogiDevVk.GetLogiDevice());
+  m_CmdPoolVk.CreateCmdBfr(m_LogiDevVk.GetLogiDevice());
+  m_PresentVk.CreateSyncObjs(m_LogiDevVk.GetLogiDevice());
 };
 
 void RendererVk::CreateInstance() {
@@ -107,9 +120,26 @@ std::vector<const char *> RendererVk::GetRequiredExtensions() {
   return extensions;
 };
 
-void RendererVk::OnUpdate() const {};
+void RendererVk::OnUpdate() {
+  // TODO: OPTIMIZE THIS
+  constexpr CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPtr =
+      &CmdPoolVk::RecordCmdBfr;
+
+  m_PresentVk.DrawFrame(
+      m_LogiDevVk.GetLogiDevice(), m_CmdPoolVk, m_SwpChnVk.GetSwapChain(),
+      m_CmdPoolVk.GetCmdBfr(), m_GfxPlineVk.GetRndrPass(),
+      m_FrmBfrsVk.GetSwpChnFrameBfrs(), m_SwpChnVk.GetSwapChainExtent(),
+      m_GfxPlineVk.GetGfxPipeline(), m_LogiDevVk.GetDeviceQueue(),
+      m_LogiDevVk.GetPresentQueue(), recordCmdBfrPtr);
+
+  vkDeviceWaitIdle(m_LogiDevVk.GetLogiDevice());
+};
 
 void RendererVk::CleanUp() {
+  m_PresentVk.CleanUp(m_LogiDevVk.GetLogiDevice());
+  m_CmdPoolVk.CleanUp(m_LogiDevVk.GetLogiDevice());
+  m_FrmBfrsVk.CleanUp(m_LogiDevVk.GetLogiDevice());
+  m_GfxPlineVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_SwpChnVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_WinSrfcVk.CleanUp();
   m_LogiDevVk.CleanUp();

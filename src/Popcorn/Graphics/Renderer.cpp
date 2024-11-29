@@ -8,46 +8,62 @@
 
 ENGINE_NAMESPACE_BEGIN
 // SINGLETON
-Renderer *Renderer::s_instance = nullptr;
-RendererType Renderer::s_type = RendererType::OpenGL;
-void *Renderer::s_osWindow = nullptr;
-std::variant<RendererVk *, RendererOpenGL *> Renderer::s_renderer{
+template <RendererType T> Renderer<T> *Renderer<T>::s_instance = nullptr;
+template <RendererType T> void *Renderer<T>::s_osWindow = nullptr;
+template <RendererType T>
+std::variant<RendererVk *, RendererOpenGL *> Renderer<T>::s_renderer{
     static_cast<RendererVk *>(nullptr)};
 
-Renderer::Renderer() {
+template <RendererType T> Renderer<T>::Renderer() {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER");
-
-  // TODO: CHANGE TO FANCY DISPATCHER STUFF
-  s_type = RendererType::Vulkan;
 };
 
-Renderer::~Renderer() { PC_PRINT("DESTROYED", TagType::Destr, "RENDERER") };
+template <RendererType T>
+Renderer<T>::~Renderer(){PC_PRINT("DESTROYED", TagType::Destr, "RENDERER")};
 
-void Renderer::Create() {
-  if (s_instance)
-    return;
+template <RendererType T> Renderer<T> *Renderer<T>::Create() {
+  if (!s_instance) {
+    // PC_ASSERT(s_instance, "NO RENDERER INSTANCE");
+    s_instance = new Renderer();
+  }
 
-  s_instance = new Renderer();
+  return s_instance;
 };
 
-void Renderer::Run() {
-
+template <RendererType T> void Renderer<T>::Init() const {
   // TODO: CHANGE TO FANCY DISPATCHER STUFF
-  if (static_cast<int>(s_type) & static_cast<int>(RendererType::OpenGL)) {
+  if constexpr (static_cast<int>(s_type) &
+                static_cast<int>(RendererType::OpenGL)) {
     s_renderer = new RendererOpenGL();
   } else {
     s_renderer = new RendererVk();
   };
 };
 
-void Renderer::SetOSWindow(void *osWindow) { s_osWindow = osWindow; };
-
-Renderer &Renderer::Get() {
-  PC_ASSERT(s_instance, "NO RENDERER INSTANCE");
-  return *s_instance;
+template <RendererType T> void Renderer<T>::SetOSWindow(void *osWindow) {
+  s_osWindow = osWindow;
 };
 
-void Renderer::Destroy() {
+template <RendererType T> const auto Renderer<T>::GetRenderer() {
+  // PC_ASSERT(s_renderer, "NO RENDERER INSTANCE");
+  if constexpr (T == RendererType::Vulkan) {
+    return std::get<RendererVk *>(s_renderer);
+  } else if constexpr (T == RendererType::OpenGL) {
+    return std::get<RendererOpenGL *>(s_renderer);
+  } else {
+    PC_STATIC_ASSERT(true, "UNSUPPORTED RENDERERTYPE");
+  }
+};
+
+template <RendererType T> void Renderer<T>::OnUpdate() {
+  if constexpr (T == RendererType::Vulkan) {
+    std::get<RendererVk *>(s_renderer)->OnUpdate();
+  } else {
+    // std::get<RendererOpenGL *>(s_renderer)->OnUpdate();
+  }
+}
+
+template <RendererType T> void Renderer<T>::Destroy() {
   if (auto vulkanRenderer = std::get_if<RendererVk *>(&Renderer::s_renderer)) {
     delete *vulkanRenderer;
   } else if (auto openGLRenderer =
@@ -60,5 +76,9 @@ void Renderer::Destroy() {
   delete s_instance;
   s_instance = nullptr;
 };
+
+// Explicit template instantiation
+template class Renderer<RendererType::OpenGL>;
+template class Renderer<RendererType::Vulkan>;
 
 ENGINE_NAMESPACE_END
