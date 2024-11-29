@@ -7,6 +7,7 @@
 #include "Global_Macros.h"
 #include "LogiDeviceVk.h"
 #include "PhysDeviceVk.h"
+#include "PresentVk.h"
 #include "Renderer.h"
 #include "SwapChainVk.h"
 #include "WinSurfaceVk.h"
@@ -26,7 +27,7 @@ public:
     return s_enableValidationLayers;
   };
 
-  void OnUpdate() const override;
+  void OnUpdate() override;
 
 private:
   void InitVulkan();
@@ -60,6 +61,7 @@ private:
   GfxPipelineVk m_GfxPlineVk;
   FrameBufsVk m_FrmBfrsVk;
   CmdPoolVk m_CmdPoolVk;
+  PresentVk m_PresentVk;
 
   const QueueFamilyIndices &m_qFamIndices;
 };

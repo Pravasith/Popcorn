@@ -30,7 +30,7 @@ public:
 
   static const auto GetRenderer();
 
-  virtual void OnUpdate() const;
+  virtual void OnUpdate();
 
   Renderer(const Renderer &) = delete;
   Renderer &operator=(const Renderer &) = delete;

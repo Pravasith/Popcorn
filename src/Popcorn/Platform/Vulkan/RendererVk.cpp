@@ -2,6 +2,7 @@
 #include <cstring>
 #include <vector>
 
+#include "CmdPoolVk.h"
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
 #include "RendererVk.h"
@@ -14,7 +15,7 @@ RendererVk::RendererVk()
       m_PhysDevVk(m_vkInstance, GetSurface()), m_LogiDevVk(m_vkInstance),
       m_SwpChnVk(GetPhysDevice(), GetSurface()),
       m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()), m_GfxPlineVk(),
-      m_FrmBfrsVk(), m_CmdPoolVk() {
+      m_FrmBfrsVk(), m_CmdPoolVk(), m_PresentVk() {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
   InitVulkan();
 };
@@ -50,6 +51,7 @@ void RendererVk::InitVulkan() {
   m_CmdPoolVk.CreateCmdPool(m_PhysDevVk.GetQueueFamilyIndices(),
                             m_LogiDevVk.GetLogiDevice());
   m_CmdPoolVk.CreateCmdBfr(m_LogiDevVk.GetLogiDevice());
+  m_PresentVk.CreateSyncObjs(m_LogiDevVk.GetLogiDevice());
 };
 
 void RendererVk::CreateInstance() {
@@ -118,8 +120,16 @@ std::vector<const char *> RendererVk::GetRequiredExtensions() {
   return extensions;
 };
 
-void RendererVk::OnUpdate() const {
+void RendererVk::OnUpdate() {
+  // TODO: OPTIMIZE THIS
+  constexpr CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPtr =
+      &CmdPoolVk::RecordCmdBfr;
 
+  m_PresentVk.DrawFrame(
+      m_LogiDevVk.GetLogiDevice(), m_CmdPoolVk, m_SwpChnVk.GetSwapChain(),
+      m_CmdPoolVk.GetCmdBfr(), m_GfxPlineVk.GetRndrPass(),
+      m_FrmBfrsVk.GetSwpChnFrameBfrs(), m_SwpChnVk.GetSwapChainExtent(),
+      m_GfxPlineVk.GetGfxPipeline(), recordCmdBfrPtr);
 };
 
 void RendererVk::CleanUp() {

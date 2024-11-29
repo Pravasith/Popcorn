@@ -42,6 +42,14 @@ public:
     return m_swapChainImgViews;
   };
 
+  [[nodiscard]] inline const VkSwapchainKHR &GetSwapChain() const {
+    if (m_swapChain == nullptr) {
+      throw std::runtime_error("SWAPCHAIN SWAPCHAIN NOT PRESENT");
+    };
+
+    return m_swapChain;
+  };
+
 private:
   SwapChainVk(const VkPhysicalDevice &physDev, const VkSurfaceKHR &surface) {
     PC_PRINT("CREATED", TagType::Constr, "SWAP-CHAIN-VK");
