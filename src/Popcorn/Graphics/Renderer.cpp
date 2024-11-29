@@ -21,7 +21,7 @@ template <RendererType T> Renderer<T>::Renderer() {
 template <RendererType T>
 Renderer<T>::~Renderer(){PC_PRINT("DESTROYED", TagType::Destr, "RENDERER")};
 
-template <RendererType T> const Renderer<T> *Renderer<T>::Create() {
+template <RendererType T> Renderer<T> *Renderer<T>::Create() {
   if (!s_instance) {
     // PC_ASSERT(s_instance, "NO RENDERER INSTANCE");
     s_instance = new Renderer();
@@ -55,7 +55,7 @@ template <RendererType T> const auto Renderer<T>::GetRenderer() {
   }
 };
 
-template <RendererType T> void Renderer<T>::OnUpdate() const {
+template <RendererType T> void Renderer<T>::OnUpdate() {
   if constexpr (T == RendererType::Vulkan) {
     std::get<RendererVk *>(s_renderer)->OnUpdate();
   } else {

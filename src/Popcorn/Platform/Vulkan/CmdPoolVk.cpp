@@ -35,7 +35,7 @@ void CmdPoolVk::RecordCmdBfr(VkCommandBuffer cmdBfr, uint32_t imgIdx,
                              const VkRenderPass &rndrPass,
                              const std::vector<VkFramebuffer> &swpChnFrameBfrs,
                              const VkExtent2D &swpChnExt,
-                             const VkPipeline &gfxPipeline) {
+                             const VkPipeline &gfxPipeline) const {
 
   VkCommandBufferBeginInfo beginInfo{};
   beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;

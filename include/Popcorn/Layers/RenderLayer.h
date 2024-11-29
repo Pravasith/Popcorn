@@ -17,7 +17,7 @@ public:
   void OnEvent(Event &e) override;
 
 private:
-  template <RendererType T> static const Renderer<T> *s_Renderer;
+  template <RendererType T> static Renderer<T> *s_Renderer;
 };
 
 ENGINE_NAMESPACE_END

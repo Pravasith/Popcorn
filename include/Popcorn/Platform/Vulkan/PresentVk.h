@@ -13,12 +13,12 @@ class PresentVk {
   PresentVk() { PC_PRINT("CREATED", TagType::Constr, "PRESENT-VK") };
   ~PresentVk() { PC_PRINT("DESTROYED", TagType::Destr, "PRESENT-VK") };
 
-  void DrawFrame(const VkDevice &dev, CmdPoolVk &CmdPoolVk,
+  void DrawFrame(const VkDevice &dev, const CmdPoolVk &CmdPoolVk,
                  const VkSwapchainKHR &swpChn, VkCommandBuffer &cmdBfr,
                  const VkRenderPass &rndrPass,
                  const std::vector<VkFramebuffer> &swpChnFrameBfrs,
                  const VkExtent2D &swpChnExt, const VkPipeline &gfxPipeline,
-                 const CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPtr);
+                 const CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPtr) const;
   void CreateSyncObjs(const VkDevice &);
   void CleanUp(const VkDevice &);
 

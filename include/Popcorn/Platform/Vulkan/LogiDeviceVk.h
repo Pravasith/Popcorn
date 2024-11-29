@@ -20,8 +20,12 @@ private:
   };
   ~LogiDeviceVk() { PC_PRINT("DESTROYED", TagType::Destr, "LOGICAL-DEVICE"); };
 
-  [[nodiscard]] inline const VkDevice &GetLogiDevice() { return m_device; };
-  [[nodiscard]] inline const VkQueue &GetDeviceQueue() { return m_gfxQueue; };
+  [[nodiscard]] inline const VkDevice &GetLogiDevice() const {
+    return m_device;
+  };
+  [[nodiscard]] inline const VkQueue &GetDeviceQueue() const {
+    return m_gfxQueue;
+  };
 
   void CleanUp();
 

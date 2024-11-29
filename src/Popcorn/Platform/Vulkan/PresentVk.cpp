@@ -24,13 +24,13 @@ void PresentVk::CreateSyncObjs(const VkDevice &dev) {
   };
 };
 
-void PresentVk::DrawFrame(const VkDevice &dev, CmdPoolVk &CmdPool,
-                          const VkSwapchainKHR &swpChn, VkCommandBuffer &cmdBfr,
-                          const VkRenderPass &rndrPass,
-                          const std::vector<VkFramebuffer> &swpChnFrameBfrs,
-                          const VkExtent2D &swpChnExt,
-                          const VkPipeline &gfxPipeline,
-                          const CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPtr) {
+void PresentVk::DrawFrame(
+    const VkDevice &dev, const CmdPoolVk &CmdPoolVk,
+    const VkSwapchainKHR &swpChn, VkCommandBuffer &cmdBfr,
+    const VkRenderPass &rndrPass,
+    const std::vector<VkFramebuffer> &swpChnFrameBfrs,
+    const VkExtent2D &swpChnExt, const VkPipeline &gfxPipeline,
+    const CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPtr) const {
 
   // ACQUIRE IMAGE FROM THE SWAP CHAIN
   // USING SEPHAMORES AND FENCES
@@ -43,8 +43,21 @@ void PresentVk::DrawFrame(const VkDevice &dev, CmdPoolVk &CmdPool,
 
   // RECORD COMMAND BUFFER
   vkResetCommandBuffer(cmdBfr, 0);
-  (CmdPool.*recordCmdBfrPtr)(cmdBfr, imgIdx, rndrPass, swpChnFrameBfrs,
-                             swpChnExt, gfxPipeline);
+  // RECOND COMMAND BUFFER POINTER FUNC CALL
+  (CmdPoolVk.*recordCmdBfrPtr)(cmdBfr, imgIdx, rndrPass, swpChnFrameBfrs,
+                               swpChnExt, gfxPipeline);
+
+  // SUBMIT THE COMMAND BUFFER
+  VkSubmitInfo submitInfo{};
+  submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+  VkSemaphore waitSmphs[] = {m_imgAvailableSmph};
+  VkPipelineStageFlags waitStages[] = {
+      VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+
+  submitInfo.waitSemaphoreCount = 1;
+  submitInfo.pWaitSemaphores = waitSmphs;
+  submitInfo.pWaitDstStageMask = waitStages;
 };
 
 void PresentVk::CleanUp(const VkDevice &dev) {

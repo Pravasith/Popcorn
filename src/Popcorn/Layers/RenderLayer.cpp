@@ -5,7 +5,7 @@
 #include "Renderer.h"
 
 ENGINE_NAMESPACE_BEGIN
-template <RendererType T> const Renderer<T> *RenderLayer::s_Renderer = nullptr;
+template <RendererType T> Renderer<T> *RenderLayer::s_Renderer = nullptr;
 
 RenderLayer::RenderLayer() {
   PC_PRINT("CREATED", TagType::Constr, "RENDER-LAYER");

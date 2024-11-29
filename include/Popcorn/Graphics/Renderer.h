@@ -21,7 +21,7 @@ class RendererVk;
 // SINGLETON
 template <RendererType T> class Renderer {
 public:
-  static const Renderer *Create();
+  static Renderer *Create();
   static void Destroy();
 
   static void SetOSWindow(void *);

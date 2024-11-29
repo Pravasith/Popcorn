@@ -17,7 +17,7 @@ public:
   using RecordCmdBfrPtr =
       void (CmdPoolVk::*)(VkCommandBuffer, uint32_t, const VkRenderPass &,
                           const std::vector<VkFramebuffer> &,
-                          const VkExtent2D &, const VkPipeline &);
+                          const VkExtent2D &, const VkPipeline &) const;
 
 private:
   CmdPoolVk() { PC_PRINT("CREATED", TagType::Constr, "COMMAND-POOL-VK") };
@@ -35,7 +35,7 @@ private:
   void CreateCmdBfr(const VkDevice &);
   void RecordCmdBfr(VkCommandBuffer, uint32_t imgIdx, const VkRenderPass &,
                     const std::vector<VkFramebuffer> &, const VkExtent2D &,
-                    const VkPipeline &);
+                    const VkPipeline &) const;
   void CleanUp(const VkDevice &dev);
 
 private:

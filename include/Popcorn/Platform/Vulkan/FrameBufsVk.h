@@ -15,7 +15,8 @@ class FrameBufsVk {
   FrameBufsVk() { PC_PRINT("CREATED", TagType::Constr, "FRAME-BUFS-VK") };
   ~FrameBufsVk() { PC_PRINT("DESTROYED", TagType::Destr, "FRAME-BUFS-VK") };
 
-  [[nodiscard]] inline const std::vector<VkFramebuffer> &GetSwpChnFrameBfrs() {
+  [[nodiscard]] inline const std::vector<VkFramebuffer> &
+  GetSwpChnFrameBfrs() const {
     if (m_swpChnFrameBufs.size() == 0) {
       throw std::runtime_error("ERROR: SWAP CHAIN FRAME BUFFERS VEC IS EMPTY!");
     };
