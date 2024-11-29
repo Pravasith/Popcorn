@@ -23,8 +23,13 @@ private:
   [[nodiscard]] inline const VkDevice &GetLogiDevice() const {
     return m_device;
   };
+
   [[nodiscard]] inline const VkQueue &GetDeviceQueue() const {
     return m_gfxQueue;
+  };
+
+  [[nodiscard]] inline const VkQueue &GetPresentQueue() const {
+    return m_presQueue;
   };
 
   void CleanUp();

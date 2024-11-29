@@ -18,6 +18,7 @@ class PresentVk {
                  const VkRenderPass &rndrPass,
                  const std::vector<VkFramebuffer> &swpChnFrameBfrs,
                  const VkExtent2D &swpChnExt, const VkPipeline &gfxPipeline,
+                 const VkQueue &gfxQueue, const VkQueue &presentQueue,
                  const CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPtr) const;
   void CreateSyncObjs(const VkDevice &);
   void CleanUp(const VkDevice &);

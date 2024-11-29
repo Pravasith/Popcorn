@@ -30,6 +30,7 @@ void PresentVk::DrawFrame(
     const VkRenderPass &rndrPass,
     const std::vector<VkFramebuffer> &swpChnFrameBfrs,
     const VkExtent2D &swpChnExt, const VkPipeline &gfxPipeline,
+    const VkQueue &gfxQueue, const VkQueue &presentQueue,
     const CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPtr) const {
 
   // ACQUIRE IMAGE FROM THE SWAP CHAIN
@@ -51,13 +52,42 @@ void PresentVk::DrawFrame(
   VkSubmitInfo submitInfo{};
   submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-  VkSemaphore waitSmphs[] = {m_imgAvailableSmph};
   VkPipelineStageFlags waitStages[] = {
       VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+  VkSemaphore waitSmphs[] = {m_imgAvailableSmph};
 
   submitInfo.waitSemaphoreCount = 1;
+
+  // WAIT FOR THE IMAGE AVAILABLE SMPH BEFORE YOU SUBMIT THE CMDBFR
   submitInfo.pWaitSemaphores = waitSmphs;
   submitInfo.pWaitDstStageMask = waitStages;
+  submitInfo.commandBufferCount = 1;
+  submitInfo.pCommandBuffers = &cmdBfr;
+
+  // SIGNAL THE RENDER-FINISHED SMPH WHEN THE RENDER IS FINISHED (CMDBFR EXEC IS
+  // DONE), SO THE IMAGE-AVAILABLE SMPH(ABOVE LINES) STOPS WAITING AND THE NEXT
+  // CMDBFR STARTS EXECUTING
+  VkSemaphore signalSmphs[] = {m_renderFinishedSmph};
+  submitInfo.signalSemaphoreCount = 1;
+  submitInfo.pSignalSemaphores = signalSmphs;
+
+  if (vkQueueSubmit(gfxQueue, 1, &submitInfo, m_inFlightFence) != VK_SUCCESS) {
+    throw std::runtime_error("FAILED TO SUBMIT DRAW COMMAND BUFFER!");
+  };
+
+  // PRESENTATION BITCHHHH
+  VkPresentInfoKHR prsntInfo{};
+  prsntInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+  prsntInfo.waitSemaphoreCount = 1;
+  prsntInfo.pWaitSemaphores = signalSmphs;
+
+  VkSwapchainKHR swpChns[] = {swpChn};
+  prsntInfo.swapchainCount = 1;
+  prsntInfo.pSwapchains = swpChns;
+  prsntInfo.pImageIndices = &imgIdx;
+  prsntInfo.pResults = nullptr; // OPTIONAL
+
+  vkQueuePresentKHR(presentQueue, &prsntInfo);
 };
 
 void PresentVk::CleanUp(const VkDevice &dev) {

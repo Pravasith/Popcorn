@@ -188,6 +188,14 @@ void GfxPipelineVk::CreateRndrPass(const VkFormat &swpChnImgFrmt,
   sbPass.colorAttachmentCount = 1;
   sbPass.pColorAttachments = &clrAttmtRef;
 
+  VkSubpassDependency subpassDep{};
+  subpassDep.srcSubpass = VK_SUBPASS_EXTERNAL;
+  subpassDep.dstSubpass = 0;
+  subpassDep.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  subpassDep.srcAccessMask = 0;
+  subpassDep.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  subpassDep.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
   // RENDER PASS CREATION
   VkRenderPassCreateInfo rndrPassInfo{};
   rndrPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
@@ -195,6 +203,8 @@ void GfxPipelineVk::CreateRndrPass(const VkFormat &swpChnImgFrmt,
   rndrPassInfo.pAttachments = &clrAtmt;
   rndrPassInfo.subpassCount = 1;
   rndrPassInfo.pSubpasses = &sbPass;
+  rndrPassInfo.dependencyCount = 1;
+  rndrPassInfo.pDependencies = &subpassDep;
 
   if (vkCreateRenderPass(dev, &rndrPassInfo, nullptr, &m_rndrPass) !=
       VK_SUCCESS) {
