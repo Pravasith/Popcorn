@@ -18,14 +18,16 @@ void CmdPoolVk::CreateCmdPool(const QueueFamilyIndices &qFamIndices,
   };
 };
 
-void CmdPoolVk::CreateCmdBfr(const VkDevice &dev) {
+void CmdPoolVk::CreateCmdBfrs(const VkDevice &dev) {
   VkCommandBufferAllocateInfo cmdBfrAllocInfo{};
   cmdBfrAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
   cmdBfrAllocInfo.commandPool = m_cmdPool;
   cmdBfrAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-  cmdBfrAllocInfo.commandBufferCount = 1;
 
-  if (vkAllocateCommandBuffers(dev, &cmdBfrAllocInfo, &m_cmdBfr) !=
+  m_cmdBfrs.resize(MAX_FRAMES_IN_FLIGHT);
+  cmdBfrAllocInfo.commandBufferCount = static_cast<uint32_t>(m_cmdBfrs.size());
+
+  if (vkAllocateCommandBuffers(dev, &cmdBfrAllocInfo, m_cmdBfrs.data()) !=
       VK_SUCCESS) {
     throw std::runtime_error("FAILED TO ALLOCATE COMMAND BUFFERS!");
   }

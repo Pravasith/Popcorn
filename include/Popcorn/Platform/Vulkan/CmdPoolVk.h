@@ -23,16 +23,16 @@ private:
   CmdPoolVk() { PC_PRINT("CREATED", TagType::Constr, "COMMAND-POOL-VK") };
   ~CmdPoolVk() { PC_PRINT("DESTROYED", TagType::Destr, "COMMAND-POOL-VK") };
 
-  [[nodiscard]] inline VkCommandBuffer &GetCmdBfr() {
-    if (m_cmdBfr == NULL) {
-      throw std::runtime_error("ERROR: COMMAND BFR IS NULL!");
+  [[nodiscard]] inline std::vector<VkCommandBuffer> &GetCmdBfrs() {
+    if (m_cmdBfrs.size() == 0) {
+      throw std::runtime_error("ERROR: COMMAND BFRS EMPTY!");
     };
 
-    return m_cmdBfr;
+    return m_cmdBfrs;
   };
 
   void CreateCmdPool(const QueueFamilyIndices &, const VkDevice &);
-  void CreateCmdBfr(const VkDevice &);
+  void CreateCmdBfrs(const VkDevice &);
   void RecordCmdBfr(VkCommandBuffer, uint32_t imgIdx, const VkRenderPass &,
                     const std::vector<VkFramebuffer> &, const VkExtent2D &,
                     const VkPipeline &) const;
@@ -40,7 +40,7 @@ private:
 
 private:
   VkCommandPool m_cmdPool;
-  VkCommandBuffer m_cmdBfr;
+  std::vector<VkCommandBuffer> m_cmdBfrs;
 };
 
 ENGINE_NAMESPACE_END

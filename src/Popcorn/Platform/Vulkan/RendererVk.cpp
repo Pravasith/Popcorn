@@ -28,8 +28,9 @@ RendererVk::~RendererVk() {
 void RendererVk::InitVulkan() {
   CreateInstance();
 
-  if constexpr (s_enableValidationLayers)
+  if constexpr (s_enableValidationLayers) {
     m_ValLyrsVk.SetupDbgMsngr();
+  };
 
   m_WinSrfcVk.CreateSurface();
   m_PhysDevVk.PickPhysDevice(m_SwpChnVk);
@@ -50,7 +51,7 @@ void RendererVk::InitVulkan() {
       m_GfxPlineVk.GetRndrPass(), m_SwpChnVk.GetSwapChainExtent());
   m_CmdPoolVk.CreateCmdPool(m_PhysDevVk.GetQueueFamilyIndices(),
                             m_LogiDevVk.GetLogiDevice());
-  m_CmdPoolVk.CreateCmdBfr(m_LogiDevVk.GetLogiDevice());
+  m_CmdPoolVk.CreateCmdBfrs(m_LogiDevVk.GetLogiDevice());
   m_PresentVk.CreateSyncObjs(m_LogiDevVk.GetLogiDevice());
 };
 
@@ -127,7 +128,7 @@ void RendererVk::OnUpdate() {
 
   m_PresentVk.DrawFrame(
       m_LogiDevVk.GetLogiDevice(), m_CmdPoolVk, m_SwpChnVk.GetSwapChain(),
-      m_CmdPoolVk.GetCmdBfr(), m_GfxPlineVk.GetRndrPass(),
+      m_CmdPoolVk.GetCmdBfrs(), m_GfxPlineVk.GetRndrPass(),
       m_FrmBfrsVk.GetSwpChnFrameBfrs(), m_SwpChnVk.GetSwapChainExtent(),
       m_GfxPlineVk.GetGfxPipeline(), m_LogiDevVk.GetDeviceQueue(),
       m_LogiDevVk.GetPresentQueue(), recordCmdBfrPtr);
