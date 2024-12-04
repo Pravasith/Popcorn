@@ -42,6 +42,14 @@ public:
     return m_swapChainImgViews;
   };
 
+  [[nodiscard]] inline const std::vector<VkFramebuffer> &GetFrameBfrs() const {
+    if (m_frameBfrs.size() == 0) {
+      throw std::runtime_error("ERROR: SWAP CHAIN FRAME BUFFERS VEC IS EMPTY!");
+    };
+
+    return m_frameBfrs;
+  };
+
   [[nodiscard]] inline const VkSwapchainKHR &GetSwapChain() const {
     if (m_swapChain == nullptr) {
       throw std::runtime_error("SWAPCHAIN SWAPCHAIN NOT PRESENT");
@@ -60,6 +68,8 @@ private:
                        GLFWwindow *, const QueueFamilyIndices &,
                        const VkDevice &);
   void CreateImgViews(const VkDevice &logiDevice);
+  void CreateFrameBfrs(const VkDevice &, const std::vector<VkImageView> &,
+                       const VkRenderPass &, const VkExtent2D &);
 
   VkSurfaceFormatKHR ChooseSwapSurfaceFormat(
       const std::vector<VkSurfaceFormatKHR> &availableFormats);
@@ -76,6 +86,7 @@ private:
   VkFormat m_swapChainImgFormat;
   VkExtent2D m_swapChainExtent{0, 0};
   std::vector<VkImageView> m_swapChainImgViews;
+  std::vector<VkFramebuffer> m_frameBfrs;
 };
 
 ENGINE_NAMESPACE_END

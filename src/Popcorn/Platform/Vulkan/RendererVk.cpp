@@ -15,7 +15,7 @@ RendererVk::RendererVk()
       m_PhysDevVk(m_vkInstance, GetSurface()), m_LogiDevVk(m_vkInstance),
       m_SwpChnVk(GetPhysDevice(), GetSurface()),
       m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()), m_GfxPlineVk(),
-      m_FrmBfrsVk(), m_CmdPoolVk(), m_PresentVk() {
+      m_CmdPoolVk(), m_PresentVk() {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
   InitVulkan();
 };
@@ -53,7 +53,7 @@ void RendererVk::InitVulkan() {
                                  m_SwpChnVk.GetSwapChainExtent());
 
   // FRAME BUFFERS
-  m_FrmBfrsVk.CreateFrameBfrs(
+  m_SwpChnVk.CreateFrameBfrs(
       m_LogiDevVk.GetLogiDevice(), m_SwpChnVk.GetImgViews(),
       m_GfxPlineVk.GetRndrPass(), m_SwpChnVk.GetSwapChainExtent());
 
@@ -140,7 +140,7 @@ void RendererVk::OnUpdate() {
   m_PresentVk.DrawFrame(
       m_LogiDevVk.GetLogiDevice(), m_CmdPoolVk, m_SwpChnVk.GetSwapChain(),
       m_CmdPoolVk.GetCmdBfrs(), m_GfxPlineVk.GetRndrPass(),
-      m_FrmBfrsVk.GetSwpChnFrameBfrs(), m_SwpChnVk.GetSwapChainExtent(),
+      m_SwpChnVk.GetFrameBfrs(), m_SwpChnVk.GetSwapChainExtent(),
       m_GfxPlineVk.GetGfxPipeline(), m_LogiDevVk.GetDeviceQueue(),
       m_LogiDevVk.GetPresentQueue(), recordCmdBfrPtr);
 };
@@ -150,9 +150,8 @@ void RendererVk::CleanUp() {
 
   m_PresentVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_CmdPoolVk.CleanUp(m_LogiDevVk.GetLogiDevice());
-  m_FrmBfrsVk.CleanUp(m_LogiDevVk.GetLogiDevice());
-  m_GfxPlineVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_SwpChnVk.CleanUp(m_LogiDevVk.GetLogiDevice());
+  m_GfxPlineVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_WinSrfcVk.CleanUp();
   m_LogiDevVk.CleanUp();
   m_ValLyrsVk.CleanUp();

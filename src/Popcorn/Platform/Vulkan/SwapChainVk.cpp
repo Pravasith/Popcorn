@@ -146,6 +146,30 @@ void SwapChainVk::CreateSwapChain(const VkPhysicalDevice &physDev,
   m_swapChainExtent = extent;
 }
 
+void SwapChainVk::CreateFrameBfrs(
+    const VkDevice &dev, const std::vector<VkImageView> &swpChnImgViews,
+    const VkRenderPass &rndrPass, const VkExtent2D &swpChnExt) {
+  m_frameBfrs.resize(swpChnImgViews.size());
+
+  for (size_t i = 0; i < swpChnImgViews.size(); ++i) {
+    VkImageView attachments[] = {swpChnImgViews[i]};
+
+    VkFramebufferCreateInfo frmbfrInfo{};
+    frmbfrInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    frmbfrInfo.renderPass = rndrPass;
+    frmbfrInfo.attachmentCount = 1;
+    frmbfrInfo.pAttachments = attachments;
+    frmbfrInfo.width = swpChnExt.width;
+    frmbfrInfo.height = swpChnExt.height;
+    frmbfrInfo.layers = 1;
+
+    if (vkCreateFramebuffer(dev, &frmbfrInfo, nullptr, &m_frameBfrs[i]) !=
+        VK_SUCCESS) {
+      throw std::runtime_error("ERROR: FAILED TO CREATE FRAMEBUFFER!");
+    };
+  };
+};
+
 void SwapChainVk::CreateImgViews(const VkDevice &logiDevice) {
   m_swapChainImgViews.resize(m_swapChainImgs.size());
 
@@ -178,6 +202,9 @@ void SwapChainVk::CreateImgViews(const VkDevice &logiDevice) {
 };
 
 void SwapChainVk::CleanUp(const VkDevice &logiDevice) {
+  for (size_t i = 0; i < m_frameBfrs.size(); ++i) {
+    vkDestroyFramebuffer(logiDevice, m_frameBfrs[i], nullptr);
+  };
   for (auto imageView : m_swapChainImgViews) {
     vkDestroyImageView(logiDevice, imageView, nullptr);
   }
