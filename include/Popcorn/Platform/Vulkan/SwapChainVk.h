@@ -59,6 +59,7 @@ private:
   void CreateSwapChain(const VkPhysicalDevice &, const VkSurfaceKHR &,
                        GLFWwindow *, const QueueFamilyIndices &,
                        const VkDevice &);
+  void CreateImgViews(const VkDevice &logiDevice);
 
   VkSurfaceFormatKHR ChooseSwapSurfaceFormat(
       const std::vector<VkSurfaceFormatKHR> &availableFormats);
@@ -67,7 +68,6 @@ private:
   VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities,
                               GLFWwindow *osWindow);
 
-  void CreateImgViews(const VkDevice &logiDevice);
   void CleanUp(const VkDevice &logiDevice);
 
 private:

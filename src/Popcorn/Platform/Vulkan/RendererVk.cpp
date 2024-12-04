@@ -32,26 +32,37 @@ void RendererVk::InitVulkan() {
     m_ValLyrsVk.SetupDbgMsngr();
   };
 
+  // SURFACE, PHYS DEVICE, LOGICAL DEVICE CREATION
   m_WinSrfcVk.CreateSurface();
   m_PhysDevVk.PickPhysDevice(m_SwpChnVk);
   m_LogiDevVk.CreateLogicalDevice(
       m_PhysDevVk.GetQueueFamilyIndices(), m_ValLyrsVk.GetValidationLayers(),
       m_PhysDevVk.GetPhysDevice(), m_PhysDevVk.GetDeviceExts());
+
+  // SWAP CHAIN RELATED
   m_SwpChnVk.CreateSwapChain(
       m_PhysDevVk.GetPhysDevice(), m_WinSrfcVk.GetSurface(),
       static_cast<GLFWwindow *>(s_osWindow),
       m_PhysDevVk.GetQueueFamilyIndices(), m_LogiDevVk.GetLogiDevice());
   m_SwpChnVk.CreateImgViews(m_LogiDevVk.GetLogiDevice());
+
+  // CREATE GFX PIPELINE
   m_GfxPlineVk.CreateRndrPass(m_SwpChnVk.GetImgFormat(),
                               m_LogiDevVk.GetLogiDevice());
   m_GfxPlineVk.CreateGfxPipeline(m_LogiDevVk.GetLogiDevice(),
                                  m_SwpChnVk.GetSwapChainExtent());
+
+  // FRAME BUFFERS
   m_FrmBfrsVk.CreateFrameBfrs(
       m_LogiDevVk.GetLogiDevice(), m_SwpChnVk.GetImgViews(),
       m_GfxPlineVk.GetRndrPass(), m_SwpChnVk.GetSwapChainExtent());
+
+  // CMD BFRS
   m_CmdPoolVk.CreateCmdPool(m_PhysDevVk.GetQueueFamilyIndices(),
                             m_LogiDevVk.GetLogiDevice());
   m_CmdPoolVk.CreateCmdBfrs(m_LogiDevVk.GetLogiDevice());
+
+  // PRESENTATION SYNC OBJS FOR DRAW FRAME
   m_PresentVk.CreateSyncObjs(m_LogiDevVk.GetLogiDevice());
 };
 
