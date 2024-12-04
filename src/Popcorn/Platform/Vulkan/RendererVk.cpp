@@ -132,11 +132,11 @@ void RendererVk::OnUpdate() {
       m_FrmBfrsVk.GetSwpChnFrameBfrs(), m_SwpChnVk.GetSwapChainExtent(),
       m_GfxPlineVk.GetGfxPipeline(), m_LogiDevVk.GetDeviceQueue(),
       m_LogiDevVk.GetPresentQueue(), recordCmdBfrPtr);
-
-  vkDeviceWaitIdle(m_LogiDevVk.GetLogiDevice());
 };
 
 void RendererVk::CleanUp() {
+  vkDeviceWaitIdle(m_LogiDevVk.GetLogiDevice());
+
   m_PresentVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_CmdPoolVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_FrmBfrsVk.CleanUp(m_LogiDevVk.GetLogiDevice());

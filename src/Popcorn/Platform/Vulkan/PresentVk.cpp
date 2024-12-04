@@ -43,20 +43,24 @@ void PresentVk::DrawFrame(
     const VkExtent2D &swpChnExt, const VkPipeline &gfxPipeline,
     const VkQueue &gfxQueue, const VkQueue &presentQueue,
     const CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPtr) const {
-
   // ACQUIRE IMAGE FROM THE SWAP CHAIN
   // USING SEPHAMORES AND FENCES
+  // SYNC CODE - WAIT UNTIL m_inFlightFences[s_currFrame] IS SIGNALLED - (IT'S
+  // SIGNALLED WHEN THE CMD BFR HAS BEEN SUBMITTED TO THE SWAPCHAIN)
   vkWaitForFences(dev, 1, &m_inFlightFences[s_currFrame], VK_TRUE, UINT64_MAX);
   vkResetFences(dev, 1, &m_inFlightFences[s_currFrame]);
 
+  // CPU ISSUES ACQ. IMG CALL TO GPU, m_imgAvlSmphs IS SIGNALLED WHEN THE IMG IS
+  // READY. THE NEXT GPU INSTRUCTION IS BLOCKED UNTIL THE m_imgAvlSmphs IS
+  // SIGNALLED
   uint32_t imgIdx;
   vkAcquireNextImageKHR(dev, swpChn, UINT64_MAX,
                         m_imgAvailableSmphs[s_currFrame], VK_NULL_HANDLE,
                         &imgIdx);
 
-  // RECORD COMMAND BUFFER
   vkResetCommandBuffer(cmdBfrs[s_currFrame], 0);
-  // RECOND COMMAND BUFFER POINTER FUNC CALL
+  // RECORD COMMAND BUFFER POINTER FUNC CALL
+  //
   (CmdPoolVk.*recordCmdBfrPtr)(cmdBfrs[s_currFrame], imgIdx, rndrPass,
                                swpChnFrameBfrs, swpChnExt, gfxPipeline);
 
@@ -67,19 +71,14 @@ void PresentVk::DrawFrame(
   VkPipelineStageFlags waitStages[] = {
       VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 
-  VkSemaphore waitSmphs[] = {m_imgAvailableSmphs[s_currFrame]};
-
-  submitInfo.waitSemaphoreCount = 1;
-
   // WAIT FOR THE IMAGE AVAILABLE SMPH BEFORE YOU SUBMIT THE CMDBFR
+  VkSemaphore waitSmphs[] = {m_imgAvailableSmphs[s_currFrame]};
+  submitInfo.waitSemaphoreCount = 1;
   submitInfo.pWaitSemaphores = waitSmphs;
   submitInfo.pWaitDstStageMask = waitStages;
   submitInfo.commandBufferCount = 1;
   submitInfo.pCommandBuffers = &cmdBfrs[s_currFrame];
 
-  // SIGNAL THE RENDER-FINISHED SMPH WHEN THE RENDER IS FINISHED (CMDBFR EXEC IS
-  // DONE), SO THE IMAGE-AVAILABLE SMPH(ABOVE LINES) STOPS WAITING AND THE NEXT
-  // CMDBFR STARTS EXECUTING
   VkSemaphore signalSmphs[] = {m_renderFinishedSmphs[s_currFrame]};
   submitInfo.signalSemaphoreCount = 1;
   submitInfo.pSignalSemaphores = signalSmphs;
@@ -89,7 +88,7 @@ void PresentVk::DrawFrame(
     throw std::runtime_error("FAILED TO SUBMIT DRAW COMMAND BUFFER!");
   };
 
-  // PRESENTATION BITCHHHH
+  // PRESENTATION
   VkPresentInfoKHR prsntInfo{};
   prsntInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
   prsntInfo.waitSemaphoreCount = 1;
