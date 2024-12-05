@@ -2,6 +2,7 @@
 
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
+#include "Popcorn/Core/Window.h"
 #include <variant>
 
 ENGINE_NAMESPACE_BEGIN
@@ -21,12 +22,8 @@ class RendererVk;
 // SINGLETON
 template <RendererType T> class Renderer {
 public:
-  static Renderer *Create();
+  static Renderer *Create(const Window &appWin);
   static void Destroy();
-
-  static void SetOSWindow(void *);
-
-  void Init() const;
 
   static const auto GetRenderer();
 
@@ -38,7 +35,7 @@ public:
   Renderer(Renderer &&) = delete;
   Renderer &operator=(const Renderer &&) = delete;
 
-  Renderer();
+  Renderer(const Window &);
   virtual ~Renderer();
 
 private:
@@ -46,8 +43,10 @@ private:
   static Renderer *s_instance;
   static std::variant<RendererVk *, RendererOpenGL *> s_renderer;
 
+  void Init() const;
+
 protected:
-  static void *s_osWindow;
+  const Window &m_AppWin;
 };
 
 ENGINE_NAMESPACE_END

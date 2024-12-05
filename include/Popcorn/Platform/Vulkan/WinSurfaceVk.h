@@ -10,8 +10,7 @@ ENGINE_NAMESPACE_BEGIN
 class WinSurfaceVk {
   friend class RendererVk;
 
-  WinSurfaceVk(const VkInstance &vkInst, GLFWwindow *osWindow)
-      : m_vkInst(vkInst), m_osWindow(osWindow) {
+  WinSurfaceVk(const VkInstance &vkInst) : m_vkInst(vkInst) {
     PC_PRINT("CREATED", TagType::Constr, "VK-WIN-SURFACE-VK");
   };
 
@@ -21,6 +20,10 @@ class WinSurfaceVk {
 
   [[nodiscard]] inline const VkSurfaceKHR &GetSurface() const {
     return m_surface;
+  };
+
+  void SetOSWindow(void *osWindow) {
+    m_osWindow = static_cast<GLFWwindow *>(osWindow);
   };
 
   void CreateSurface();

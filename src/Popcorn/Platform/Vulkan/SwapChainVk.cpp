@@ -57,6 +57,21 @@ VkPresentModeKHR SwapChainVk::ChooseSwapPresentMode(
   return VK_PRESENT_MODE_FIFO_KHR;
 }
 
+void SwapChainVk::RecreateSwapChain(const VkDevice &logiDevice,
+                                    const VkPhysicalDevice &physDev,
+                                    const VkSurfaceKHR &srfc,
+                                    GLFWwindow *osWindow,
+                                    const QueueFamilyIndices &qFamIndices,
+                                    const VkRenderPass &rndrPass) {
+  vkDeviceWaitIdle(logiDevice);
+
+  CleanUp(logiDevice);
+
+  CreateSwapChain(physDev, srfc, osWindow, qFamIndices, logiDevice);
+  CreateImgViews(logiDevice);
+  CreateFrameBfrs(logiDevice, rndrPass);
+};
+
 VkExtent2D
 SwapChainVk::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities,
                               GLFWwindow *osWindow) {
@@ -146,21 +161,20 @@ void SwapChainVk::CreateSwapChain(const VkPhysicalDevice &physDev,
   m_swapChainExtent = extent;
 }
 
-void SwapChainVk::CreateFrameBfrs(
-    const VkDevice &dev, const std::vector<VkImageView> &swpChnImgViews,
-    const VkRenderPass &rndrPass, const VkExtent2D &swpChnExt) {
-  m_frameBfrs.resize(swpChnImgViews.size());
+void SwapChainVk::CreateFrameBfrs(const VkDevice &dev,
+                                  const VkRenderPass &rndrPass) {
+  m_frameBfrs.resize(m_swapChainImgViews.size());
 
-  for (size_t i = 0; i < swpChnImgViews.size(); ++i) {
-    VkImageView attachments[] = {swpChnImgViews[i]};
+  for (size_t i = 0; i < m_swapChainImgViews.size(); ++i) {
+    VkImageView attachments[] = {m_swapChainImgViews[i]};
 
     VkFramebufferCreateInfo frmbfrInfo{};
     frmbfrInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
     frmbfrInfo.renderPass = rndrPass;
     frmbfrInfo.attachmentCount = 1;
     frmbfrInfo.pAttachments = attachments;
-    frmbfrInfo.width = swpChnExt.width;
-    frmbfrInfo.height = swpChnExt.height;
+    frmbfrInfo.width = m_swapChainExtent.width;
+    frmbfrInfo.height = m_swapChainExtent.height;
     frmbfrInfo.layers = 1;
 
     if (vkCreateFramebuffer(dev, &frmbfrInfo, nullptr, &m_frameBfrs[i]) !=

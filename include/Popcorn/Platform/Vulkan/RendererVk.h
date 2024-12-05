@@ -19,7 +19,7 @@
 ENGINE_NAMESPACE_BEGIN
 class RendererVk : public Renderer<RendererType::Vulkan> {
 public:
-  RendererVk();
+  RendererVk(const Window &appWin);
   ~RendererVk();
 
   constexpr inline static bool IsValLyrsEnabled() {
@@ -53,9 +53,9 @@ private:
 #endif
 
   ValidationLyrsVk m_ValLyrsVk;
+  WinSurfaceVk m_WinSrfcVk;
   PhysDeviceVk m_PhysDevVk;
   LogiDeviceVk m_LogiDevVk;
-  WinSurfaceVk m_WinSrfcVk;
   SwapChainVk m_SwpChnVk;
   GfxPipelineVk m_GfxPlineVk;
   CmdPoolVk m_CmdPoolVk;

@@ -68,8 +68,12 @@ private:
                        GLFWwindow *, const QueueFamilyIndices &,
                        const VkDevice &);
   void CreateImgViews(const VkDevice &logiDevice);
-  void CreateFrameBfrs(const VkDevice &, const std::vector<VkImageView> &,
-                       const VkRenderPass &, const VkExtent2D &);
+  void CreateFrameBfrs(const VkDevice &dev, const VkRenderPass &rndrPass);
+  void RecreateSwapChain(const VkDevice &logiDevice,
+                         const VkPhysicalDevice &physDev,
+                         const VkSurfaceKHR &srfc, GLFWwindow *osWindow,
+                         const QueueFamilyIndices &qFamIndices,
+                         const VkRenderPass &rndrPass);
 
   VkSurfaceFormatKHR ChooseSwapSurfaceFormat(
       const std::vector<VkSurfaceFormatKHR> &availableFormats);

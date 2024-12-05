@@ -5,17 +5,17 @@
 #include "CmdPoolVk.h"
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
+#include "Renderer.h"
 #include "RendererVk.h"
 
 ENGINE_NAMESPACE_BEGIN
 
-RendererVk::RendererVk()
-    : m_ValLyrsVk(m_vkInstance),
-      m_WinSrfcVk(m_vkInstance, static_cast<GLFWwindow *>(s_osWindow)),
-      m_PhysDevVk(m_vkInstance, GetSurface()), m_LogiDevVk(m_vkInstance),
-      m_SwpChnVk(GetPhysDevice(), GetSurface()),
-      m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()), m_GfxPlineVk(),
-      m_CmdPoolVk(), m_PresentVk() {
+RendererVk::RendererVk(const Window &appWin)
+    : Renderer<RendererType::Vulkan>(appWin), m_ValLyrsVk(m_vkInstance),
+      m_WinSrfcVk(m_vkInstance), m_PhysDevVk(m_vkInstance, GetSurface()),
+      m_LogiDevVk(m_vkInstance), m_SwpChnVk(GetPhysDevice(), GetSurface()),
+      m_GfxPlineVk(), m_CmdPoolVk(), m_PresentVk(),
+      m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()) {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
   InitVulkan();
 };
@@ -33,6 +33,7 @@ void RendererVk::InitVulkan() {
   };
 
   // SURFACE, PHYS DEVICE, LOGICAL DEVICE CREATION
+  m_WinSrfcVk.SetOSWindow(static_cast<GLFWwindow *>(m_AppWin.GetOSWindow()));
   m_WinSrfcVk.CreateSurface();
   m_PhysDevVk.PickPhysDevice(m_SwpChnVk);
   m_LogiDevVk.CreateLogicalDevice(
@@ -42,7 +43,7 @@ void RendererVk::InitVulkan() {
   // SWAP CHAIN RELATED
   m_SwpChnVk.CreateSwapChain(
       m_PhysDevVk.GetPhysDevice(), m_WinSrfcVk.GetSurface(),
-      static_cast<GLFWwindow *>(s_osWindow),
+      static_cast<GLFWwindow *>(m_AppWin.GetOSWindow()),
       m_PhysDevVk.GetQueueFamilyIndices(), m_LogiDevVk.GetLogiDevice());
   m_SwpChnVk.CreateImgViews(m_LogiDevVk.GetLogiDevice());
 
@@ -53,9 +54,8 @@ void RendererVk::InitVulkan() {
                                  m_SwpChnVk.GetSwapChainExtent());
 
   // FRAME BUFFERS
-  m_SwpChnVk.CreateFrameBfrs(
-      m_LogiDevVk.GetLogiDevice(), m_SwpChnVk.GetImgViews(),
-      m_GfxPlineVk.GetRndrPass(), m_SwpChnVk.GetSwapChainExtent());
+  m_SwpChnVk.CreateFrameBfrs(m_LogiDevVk.GetLogiDevice(),
+                             m_GfxPlineVk.GetRndrPass());
 
   // CMD BFRS
   m_CmdPoolVk.CreateCmdPool(m_PhysDevVk.GetQueueFamilyIndices(),
@@ -148,9 +148,9 @@ void RendererVk::OnUpdate() {
 void RendererVk::CleanUp() {
   vkDeviceWaitIdle(m_LogiDevVk.GetLogiDevice());
 
+  m_SwpChnVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_PresentVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_CmdPoolVk.CleanUp(m_LogiDevVk.GetLogiDevice());
-  m_SwpChnVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_GfxPlineVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_WinSrfcVk.CleanUp();
   m_LogiDevVk.CleanUp();
