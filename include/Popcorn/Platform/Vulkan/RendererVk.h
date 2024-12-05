@@ -9,12 +9,11 @@
 #include "PresentVk.h"
 #include "Renderer.h"
 #include "SwapChainVk.h"
+#include "ValidationLyrsVk.h"
 #include "WinSurfaceVk.h"
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-
-#include "ValidationLyrsVk.h"
 
 ENGINE_NAMESPACE_BEGIN
 class RendererVk : public Renderer<RendererType::Vulkan> {

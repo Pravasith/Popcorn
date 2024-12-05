@@ -17,10 +17,10 @@ RenderLayer::~RenderLayer() {
 
 void RenderLayer::OnAttach() {
   Application &app = Application::Get();
-  auto &osWindow = app.GetAppWindow();
+  auto &appWin= app.GetAppWindow();
 
   s_Renderer<RendererType::Vulkan> =
-      Renderer<RendererType::Vulkan>::Create(osWindow);
+      Renderer<RendererType::Vulkan>::Create(appWin);
 }
 
 void RenderLayer::OnDetach() { Renderer<RendererType::Vulkan>::Destroy(); }

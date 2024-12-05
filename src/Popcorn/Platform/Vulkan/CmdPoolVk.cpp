@@ -2,7 +2,6 @@
 #include "CommonVk.h"
 #include "Global_Macros.h"
 #include <cstdint>
-#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 void CmdPoolVk::CreateCmdPool(const QueueFamilyIndices &qFamIndices,

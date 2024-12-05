@@ -2,10 +2,8 @@
 #include <cstring>
 #include <vector>
 
-#include "CmdPoolVk.h"
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
-#include "Renderer.h"
 #include "RendererVk.h"
 
 ENGINE_NAMESPACE_BEGIN
@@ -33,8 +31,7 @@ void RendererVk::InitVulkan() {
   };
 
   // SURFACE, PHYS DEVICE, LOGICAL DEVICE CREATION
-  m_WinSrfcVk.SetOSWindow(static_cast<GLFWwindow *>(m_AppWin.GetOSWindow()));
-  m_WinSrfcVk.CreateSurface();
+  m_WinSrfcVk.CreateSurface(m_AppWin.GetOSWindow());
   m_PhysDevVk.PickPhysDevice(m_SwpChnVk);
   m_LogiDevVk.CreateLogicalDevice(
       m_PhysDevVk.GetQueueFamilyIndices(), m_ValLyrsVk.GetValidationLayers(),

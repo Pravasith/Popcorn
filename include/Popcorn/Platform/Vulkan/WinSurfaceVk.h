@@ -22,18 +22,11 @@ class WinSurfaceVk {
     return m_surface;
   };
 
-  void SetOSWindow(void *osWindow) {
-    m_osWindow = static_cast<GLFWwindow *>(osWindow);
-  };
-
-  void CreateSurface();
-
+  void CreateSurface(void *osWindow);
   void CleanUp();
 
 private:
   const VkInstance &m_vkInst;
-
-  GLFWwindow *m_osWindow;
   VkSurfaceKHR m_surface;
 };
 

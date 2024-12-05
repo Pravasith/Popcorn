@@ -4,6 +4,7 @@
 #include "Popcorn/Events/Publisher.h"
 #include <cstdint>
 #include <string>
+#include <utility>
 
 ENGINE_NAMESPACE_BEGIN
 // ABSTRACT CLASS -- HAS NO INVARIANT OR ANY DATA
@@ -14,14 +15,6 @@ class Window : public Publisher {
   /* So multiple calls to Window::Create will result in  */
   /* a same window pointer */
   /* ---- END NOTE ---- */
-
-  // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
-  Window(const Window &) = delete;
-  Window &operator=(const Window &) = delete;
-
-  // DELETE THE MOVE CONSTRUCTOR AND MOVE ASSIGNMENT OPERATOR
-  Window(Window &&) = delete;
-  Window &operator=(Window &&) = delete;
 
 public:
   struct Props {
@@ -39,14 +32,24 @@ public:
   static void OnUpdate();
   static void Destroy();
 
-  virtual uint16_t GetWidth() const = 0;
-  virtual uint16_t GetHeight() const = 0;
-  virtual void *GetOSWindow() const = 0;
+  // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
+  Window(const Window &) = delete;
+  Window &operator=(const Window &) = delete;
+
+  // DELETE THE MOVE CONSTRUCTOR AND MOVE ASSIGNMENT OPERATOR
+  Window(Window &&) = delete;
+  Window &operator=(Window &&) = delete;
+
+  [[nodiscard("\n\nDON'T FORGET TO USE THE FRAMEBUFFER-"
+              "SIZE HOE!!!")]] const virtual std::pair<uint32_t, uint32_t>
+  GetFramebufferSize() const = 0;
+  [[nodiscard]] virtual uint16_t GetWidth() const = 0;
+  [[nodiscard]] virtual uint16_t GetHeight() const = 0;
+  [[nodiscard]] virtual void *GetOSWindow() const = 0;
 
 protected:
   Window();
   virtual ~Window();
-  /* = default; */
 
 private:
   static void *s_platform_window_instance;

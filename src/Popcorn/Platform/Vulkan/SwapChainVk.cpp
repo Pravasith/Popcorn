@@ -3,7 +3,6 @@
 #include "Popcorn/Core/Base.h"
 #include <algorithm>
 #include <limits>
-#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 SwapChainSupportDetails
