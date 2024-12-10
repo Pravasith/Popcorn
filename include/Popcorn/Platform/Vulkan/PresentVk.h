@@ -21,18 +21,35 @@ class PresentVk {
                  const std::vector<VkFramebuffer> &swpChnFrameBfrs,
                  const VkExtent2D &swpChnExt, const VkPipeline &gfxPipeline,
                  const VkQueue &gfxQueue, const VkQueue &presentQueue,
-                 const CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPtr) const;
+                 // const CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPtr
+                 CmdPoolVk::RecordCmdBfrFtr) const;
+
   void CreateSyncObjs(const VkDevice &);
   void CleanUp(const VkDevice &);
 
 private:
+  static uint32_t s_currFrame;
+
   // WE HAVE 2 FRAMES IN FLIGHT SO EVERY FRAME HAS IT'S OWN SET OF SMPHS &
   // FENCES, HENCE THE VECTORS
   std::vector<VkSemaphore> m_imgAvailableSmphs;
   std::vector<VkSemaphore> m_renderFinishedSmphs;
   std::vector<VkFence> m_inFlightFences;
 
-  static uint32_t s_currFrame;
+  // REFERENCES
+  // const CmdPoolVk &m_CmdPoolVk;
+  // const VkDevice &m_logiDevice;
+  // const VkSwapchainKHR &m_swpChn;
+  // const VkRenderPass &rndrPass;
+  // const std::vector<VkFramebuffer> &swpChnFrameBfrs;
+  // const VkExtent2D &swpChnExt;
+  // const VkPipeline &gfxPipeline;
+  // const VkQueue &gfxQueue;
+  // const VkQueue &presentQueue;
+  //
+  // DON'T NEED THESE
+  // std::vector<VkCommandBuffer> &cmdBfrs;
+  // const CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPt;
 };
 
 ENGINE_NAMESPACE_END

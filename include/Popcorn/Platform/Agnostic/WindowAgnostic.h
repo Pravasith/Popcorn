@@ -44,7 +44,7 @@ private:
 private:
   std::string m_title;
 
-  static GLFWwindow *s_os_window;
+  static GLFWwindow *s_osWindow;
   static WindowAgnostic *s_instance;
 };
 ENGINE_NAMESPACE_END

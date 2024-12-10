@@ -19,15 +19,16 @@ class Window : public Publisher {
 public:
   struct Props {
     std::string Title;
-    uint16_t W;
-    uint16_t H;
+    uint32_t W;
+    uint32_t H;
 
-    Props(const std::string &title = "Popcorn Engine", uint16_t w = 1600,
-          uint16_t h = 900)
+    Props(const std::string &title = "Popcorn Engine", uint32_t w = 1600,
+          uint32_t h = 900)
         : Title(title), W(w), H(h) {};
   };
 
   static Window *Create(const Props &props = Props());
+
   // static void AddSubscriber(const Subscriber *);
   static void OnUpdate();
   static void Destroy();
@@ -52,6 +53,6 @@ protected:
   virtual ~Window();
 
 private:
-  static void *s_platform_window_instance;
+  static void *s_osWindow;
 };
 ENGINE_NAMESPACE_END

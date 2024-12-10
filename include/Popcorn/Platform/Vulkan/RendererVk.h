@@ -58,9 +58,9 @@ private:
   SwapChainVk m_SwpChnVk;
   GfxPipelineVk m_GfxPlineVk;
   CmdPoolVk m_CmdPoolVk;
-  PresentVk m_PresentVk;
-
   const QueueFamilyIndices &m_qFamIndices;
+
+  PresentVk m_PresentVk;
 };
 
 ENGINE_NAMESPACE_END

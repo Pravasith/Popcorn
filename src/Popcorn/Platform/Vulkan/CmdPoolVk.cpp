@@ -32,11 +32,16 @@ void CmdPoolVk::CreateCmdBfrs(const VkDevice &dev) {
   }
 };
 
-void CmdPoolVk::RecordCmdBfr(VkCommandBuffer cmdBfr, uint32_t imgIdx,
-                             const VkRenderPass &rndrPass,
-                             const std::vector<VkFramebuffer> &swpChnFrameBfrs,
-                             const VkExtent2D &swpChnExt,
-                             const VkPipeline &gfxPipeline) const {
+void CmdPoolVk::RecordCmdBfrFtr::operator()(VkCommandBuffer cmdBfr,
+                                            uint32_t imgIdx) {
+#ifdef PC_DEBUG
+  if (!m_rndrPass ||
+      m_frameBfrs.size() == 0
+      // || !m_swpChnExt
+      || !m_pipeline) {
+    throw std::runtime_error("RecordCmdBfr FUNCTOR NULL MEMBERS");
+  };
+#endif
 
   VkCommandBufferBeginInfo beginInfo{};
   beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -50,10 +55,10 @@ void CmdPoolVk::RecordCmdBfr(VkCommandBuffer cmdBfr, uint32_t imgIdx,
   // STARTING A RENDER PASS
   VkRenderPassBeginInfo rndrPassBeginInfo{};
   rndrPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-  rndrPassBeginInfo.renderPass = rndrPass;
-  rndrPassBeginInfo.framebuffer = swpChnFrameBfrs[imgIdx];
+  rndrPassBeginInfo.renderPass = m_rndrPass;
+  rndrPassBeginInfo.framebuffer = m_frameBfrs[imgIdx];
   rndrPassBeginInfo.renderArea.offset = {0, 0};
-  rndrPassBeginInfo.renderArea.extent = swpChnExt;
+  rndrPassBeginInfo.renderArea.extent = m_swpChnExt;
 
   VkClearValue clearClr = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
   rndrPassBeginInfo.clearValueCount = 1;
@@ -62,13 +67,13 @@ void CmdPoolVk::RecordCmdBfr(VkCommandBuffer cmdBfr, uint32_t imgIdx,
   vkCmdBeginRenderPass(cmdBfr, &rndrPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
   // BIND GRAPHICS PIPELINE
-  vkCmdBindPipeline(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS, gfxPipeline);
+  vkCmdBindPipeline(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
 
   VkViewport vwprt{};
   vwprt.x = 0.0f;
   vwprt.y = 0.0f;
-  vwprt.width = static_cast<float>(swpChnExt.width);
-  vwprt.height = static_cast<float>(swpChnExt.height);
+  vwprt.width = static_cast<float>(m_swpChnExt.width);
+  vwprt.height = static_cast<float>(m_swpChnExt.height);
   vwprt.minDepth = 0.0f;
   vwprt.maxDepth = 1.0f;
 
@@ -76,7 +81,7 @@ void CmdPoolVk::RecordCmdBfr(VkCommandBuffer cmdBfr, uint32_t imgIdx,
 
   VkRect2D scssr{};
   scssr.offset = {0, 0};
-  scssr.extent = swpChnExt;
+  scssr.extent = m_swpChnExt;
   vkCmdSetScissor(cmdBfr, 0, 1, &scssr);
 
   vkCmdDraw(cmdBfr, 3, 1, 0, 0);
@@ -86,7 +91,7 @@ void CmdPoolVk::RecordCmdBfr(VkCommandBuffer cmdBfr, uint32_t imgIdx,
   if (vkEndCommandBuffer(cmdBfr) != VK_SUCCESS) {
     throw std::runtime_error("FAILED TO RECORD COMMAND BUFFER!");
   };
-};
+}
 
 void CmdPoolVk::CleanUp(const VkDevice &dev) {
   vkDestroyCommandPool(dev, m_cmdPool, nullptr);

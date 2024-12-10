@@ -63,23 +63,27 @@ private:
   }
   ~SwapChainVk() { PC_PRINT("DESTROYED", TagType::Destr, "SWAP-CHAIN-VK"); }
 
-  void CreateSwapChain(const VkPhysicalDevice &, const VkSurfaceKHR &,
-                       GLFWwindow *, const QueueFamilyIndices &,
-                       const VkDevice &);
+  void CreateSwapChain(const VkPhysicalDevice &physDev,
+                       const VkSurfaceKHR &surface,
+                       const QueueFamilyIndices &qFamIndices,
+                       const VkDevice &logiDevice, const uint32_t frmBfrWidth,
+                       const uint32_t frmBfrHeight);
   void CreateImgViews(const VkDevice &logiDevice);
   void CreateFrameBfrs(const VkDevice &dev, const VkRenderPass &rndrPass);
   void RecreateSwapChain(const VkDevice &logiDevice,
                          const VkPhysicalDevice &physDev,
                          const VkSurfaceKHR &srfc, GLFWwindow *osWindow,
                          const QueueFamilyIndices &qFamIndices,
-                         const VkRenderPass &rndrPass);
+                         const VkRenderPass &rndrPass,
+                         const uint32_t frmBfrWidth,
+                         const uint32_t frmBfrHeight);
 
   VkSurfaceFormatKHR ChooseSwapSurfaceFormat(
       const std::vector<VkSurfaceFormatKHR> &availableFormats);
   VkPresentModeKHR ChooseSwapPresentMode(
       const std::vector<VkPresentModeKHR> &availablePresentModes);
   VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities,
-                              GLFWwindow *osWindow);
+                              uint32_t frameBfrW, uint32_t frameBfrH);
 
   void CleanUp(const VkDevice &logiDevice);
 

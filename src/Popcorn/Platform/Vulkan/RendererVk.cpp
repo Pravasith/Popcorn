@@ -1,10 +1,9 @@
+#include "RendererVk.h"
+#include "Global_Macros.h"
+#include "Popcorn/Core/Base.h"
 #include <cstdint>
 #include <cstring>
 #include <vector>
-
-#include "Global_Macros.h"
-#include "Popcorn/Core/Base.h"
-#include "RendererVk.h"
 
 ENGINE_NAMESPACE_BEGIN
 
@@ -12,10 +11,11 @@ RendererVk::RendererVk(const Window &appWin)
     : Renderer<RendererType::Vulkan>(appWin), m_ValLyrsVk(m_vkInstance),
       m_WinSrfcVk(m_vkInstance), m_PhysDevVk(m_vkInstance, GetSurface()),
       m_LogiDevVk(m_vkInstance), m_SwpChnVk(GetPhysDevice(), GetSurface()),
-      m_GfxPlineVk(), m_CmdPoolVk(), m_PresentVk(),
+      m_GfxPlineVk(), m_CmdPoolVk(),
       m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()) {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
   InitVulkan();
+  m_PresentVk = PresentVk{};
 };
 
 RendererVk::~RendererVk() {
@@ -40,8 +40,10 @@ void RendererVk::InitVulkan() {
   // SWAP CHAIN RELATED
   m_SwpChnVk.CreateSwapChain(
       m_PhysDevVk.GetPhysDevice(), m_WinSrfcVk.GetSurface(),
-      static_cast<GLFWwindow *>(m_AppWin.GetOSWindow()),
-      m_PhysDevVk.GetQueueFamilyIndices(), m_LogiDevVk.GetLogiDevice());
+      m_PhysDevVk.GetQueueFamilyIndices(), m_LogiDevVk.GetLogiDevice(),
+      m_AppWin.GetFramebufferSize().first, // FRAME BFR WIDTH
+      m_AppWin.GetFramebufferSize().second // FRAME BFR HEIGHT
+  );
   m_SwpChnVk.CreateImgViews(m_LogiDevVk.GetLogiDevice());
 
   // CREATE GFX PIPELINE
@@ -131,15 +133,20 @@ std::vector<const char *> RendererVk::GetRequiredExtensions() {
 
 void RendererVk::OnUpdate() {
   // TODO: OPTIMIZE THIS
-  constexpr CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPtr =
-      &CmdPoolVk::RecordCmdBfr;
+  // constexpr CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPtr =
+  //     &CmdPoolVk::RecordCmdBfr;
 
   m_PresentVk.DrawFrame(
       m_LogiDevVk.GetLogiDevice(), m_CmdPoolVk, m_SwpChnVk.GetSwapChain(),
       m_CmdPoolVk.GetCmdBfrs(), m_GfxPlineVk.GetRndrPass(),
       m_SwpChnVk.GetFrameBfrs(), m_SwpChnVk.GetSwapChainExtent(),
       m_GfxPlineVk.GetGfxPipeline(), m_LogiDevVk.GetDeviceQueue(),
-      m_LogiDevVk.GetPresentQueue(), recordCmdBfrPtr);
+      m_LogiDevVk.GetPresentQueue(),
+      CmdPoolVk::RecordCmdBfrFtr{
+          m_GfxPlineVk.GetRndrPass(), m_SwpChnVk.GetFrameBfrs(),
+          m_SwpChnVk.GetSwapChainExtent(), m_GfxPlineVk.GetGfxPipeline()}
+      // recordCmdBfrPtr
+  );
 };
 
 void RendererVk::CleanUp() {

@@ -6,7 +6,6 @@
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
-#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 uint32_t PresentVk::s_currFrame = 0;
@@ -35,14 +34,18 @@ void PresentVk::CreateSyncObjs(const VkDevice &dev) {
   };
 };
 
-void PresentVk::DrawFrame(
-    const VkDevice &dev, const CmdPoolVk &CmdPoolVk,
-    const VkSwapchainKHR &swpChn, std::vector<VkCommandBuffer> &cmdBfrs,
-    const VkRenderPass &rndrPass,
-    const std::vector<VkFramebuffer> &swpChnFrameBfrs,
-    const VkExtent2D &swpChnExt, const VkPipeline &gfxPipeline,
-    const VkQueue &gfxQueue, const VkQueue &presentQueue,
-    const CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPtr) const {
+void PresentVk::DrawFrame(const VkDevice &dev, const CmdPoolVk &cmdPoolVk,
+                          const VkSwapchainKHR &swpChn,
+                          std::vector<VkCommandBuffer> &cmdBfrs,
+                          const VkRenderPass &rndrPass,
+                          const std::vector<VkFramebuffer> &swpChnFrameBfrs,
+                          const VkExtent2D &swpChnExt,
+                          const VkPipeline &gfxPipeline,
+                          const VkQueue &gfxQueue, const VkQueue &presentQueue,
+                          // const CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPtr
+                          CmdPoolVk::RecordCmdBfrFtr recordCmdBfr
+
+) const {
   // ACQUIRE IMAGE FROM THE SWAP CHAIN
   // USING SEPHAMORES AND FENCES
   // SYNC CODE - WAIT UNTIL m_inFlightFences[s_currFrame] IS SIGNALLED - (IT'S
@@ -54,15 +57,24 @@ void PresentVk::DrawFrame(
   // READY. THE NEXT GPU INSTRUCTION IS BLOCKED UNTIL THE m_imgAvlSmphs IS
   // SIGNALLED
   uint32_t imgIdx;
-  vkAcquireNextImageKHR(dev, swpChn, UINT64_MAX,
-                        m_imgAvailableSmphs[s_currFrame], VK_NULL_HANDLE,
-                        &imgIdx);
+  VkResult res = vkAcquireNextImageKHR(dev, swpChn, UINT64_MAX,
+                                       m_imgAvailableSmphs[s_currFrame],
+                                       VK_NULL_HANDLE, &imgIdx);
+  if (res == VK_ERROR_OUT_OF_DATE_KHR) {
+    // RECREATE SWAPCHAIN
+    return;
+  } else if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR) {
+    throw std::runtime_error("FAILED TO ACQUIRE SWAPCHAIN IMAGE!");
+  };
 
   vkResetCommandBuffer(cmdBfrs[s_currFrame], 0);
   // RECORD COMMAND BUFFER POINTER FUNC CALL
-  //
-  (CmdPoolVk.*recordCmdBfrPtr)(cmdBfrs[s_currFrame], imgIdx, rndrPass,
-                               swpChnFrameBfrs, swpChnExt, gfxPipeline);
+  // (cmdPoolVk.*recordCmdBfrPtr)(cmdBfrs[s_currFrame], imgIdx, rndrPass,
+  //                              swpChnFrameBfrs, swpChnExt, gfxPipeline);
+  // cmdPoolVk.RecordCmdBfr(cmdBfrs[s_currFrame], imgIdx, rndrPass,
+  //                        swpChnFrameBfrs, swpChnExt, gfxPipeline);
+
+  recordCmdBfr(cmdBfrs[s_currFrame], imgIdx);
 
   // SUBMIT THE COMMAND BUFFER
   VkSubmitInfo submitInfo{};
@@ -100,7 +112,14 @@ void PresentVk::DrawFrame(
   prsntInfo.pImageIndices = &imgIdx;
   prsntInfo.pResults = nullptr; // OPTIONAL
 
-  vkQueuePresentKHR(presentQueue, &prsntInfo);
+  res = vkQueuePresentKHR(presentQueue, &prsntInfo);
+
+  if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR) {
+    // RECREATE SWAPCHAIN
+
+  } else if (res != VK_SUCCESS) {
+    throw std::runtime_error("FAILED TO PRESENT SWAPCHAIN IMAGE!");
+  };
 
   s_currFrame = (s_currFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 };

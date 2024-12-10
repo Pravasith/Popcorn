@@ -1,11 +1,11 @@
 #pragma once
+
 #include "CommonVk.h"
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
-#include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -14,10 +14,22 @@ class CmdPoolVk {
   friend class RendererVk;
 
 public:
-  using RecordCmdBfrPtr =
-      void (CmdPoolVk::*)(VkCommandBuffer, uint32_t, const VkRenderPass &,
-                          const std::vector<VkFramebuffer> &,
-                          const VkExtent2D &, const VkPipeline &) const;
+  // TODO: CHANGE NAME
+  // FUNCTOR TO RECORD CMD BFRS
+  struct RecordCmdBfrFtr {
+    RecordCmdBfrFtr(const VkRenderPass &rpass,
+                    const std::vector<VkFramebuffer> &fbfrs,
+                    const VkExtent2D &ext, const VkPipeline &pl)
+        : m_rndrPass(rpass), m_frameBfrs(fbfrs), m_swpChnExt(ext),
+          m_pipeline(pl) {};
+
+    void operator()(VkCommandBuffer cmdBfr, uint32_t imgIdx);
+
+    const VkRenderPass &m_rndrPass;
+    const std::vector<VkFramebuffer> &m_frameBfrs;
+    const VkExtent2D &m_swpChnExt;
+    const VkPipeline &m_pipeline;
+  };
 
 private:
   CmdPoolVk() { PC_PRINT("CREATED", TagType::Constr, "COMMAND-POOL-VK") };
@@ -33,9 +45,6 @@ private:
 
   void CreateCmdPool(const QueueFamilyIndices &, const VkDevice &);
   void CreateCmdBfrs(const VkDevice &);
-  void RecordCmdBfr(VkCommandBuffer, uint32_t imgIdx, const VkRenderPass &,
-                    const std::vector<VkFramebuffer> &, const VkExtent2D &,
-                    const VkPipeline &) const;
   void CleanUp(const VkDevice &dev);
 
 private:

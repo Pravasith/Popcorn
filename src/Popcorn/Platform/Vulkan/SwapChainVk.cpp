@@ -2,6 +2,7 @@
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
 #include <algorithm>
+#include <cstdint>
 #include <limits>
 
 ENGINE_NAMESPACE_BEGIN
@@ -56,33 +57,30 @@ VkPresentModeKHR SwapChainVk::ChooseSwapPresentMode(
   return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-void SwapChainVk::RecreateSwapChain(const VkDevice &logiDevice,
-                                    const VkPhysicalDevice &physDev,
-                                    const VkSurfaceKHR &srfc,
-                                    GLFWwindow *osWindow,
-                                    const QueueFamilyIndices &qFamIndices,
-                                    const VkRenderPass &rndrPass) {
+void SwapChainVk::RecreateSwapChain(
+    const VkDevice &logiDevice, const VkPhysicalDevice &physDev,
+    const VkSurfaceKHR &srfc, GLFWwindow *osWindow,
+    const QueueFamilyIndices &qFamIndices, const VkRenderPass &rndrPass,
+    const uint32_t frmBfrWidth, const uint32_t frmBfrHeight) {
   vkDeviceWaitIdle(logiDevice);
 
   CleanUp(logiDevice);
 
-  CreateSwapChain(physDev, srfc, osWindow, qFamIndices, logiDevice);
+  CreateSwapChain(physDev, srfc, qFamIndices, logiDevice, frmBfrWidth,
+                  frmBfrHeight);
   CreateImgViews(logiDevice);
   CreateFrameBfrs(logiDevice, rndrPass);
 };
 
 VkExtent2D
 SwapChainVk::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities,
-                              GLFWwindow *osWindow) {
+                              uint32_t frameBfrW, uint32_t frameBfrH) {
   if (capabilities.currentExtent.width !=
       std::numeric_limits<uint32_t>::max()) {
     return capabilities.currentExtent;
   } else {
-    int width, height;
-    glfwGetFramebufferSize(osWindow, &width, &height);
 
-    VkExtent2D actualExtent{static_cast<uint32_t>(width),
-                            static_cast<uint32_t>(height)};
+    VkExtent2D actualExtent{frameBfrW, frameBfrH};
 
     actualExtent.width =
         std::clamp(actualExtent.width, capabilities.minImageExtent.width,
@@ -97,9 +95,10 @@ SwapChainVk::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities,
 
 void SwapChainVk::CreateSwapChain(const VkPhysicalDevice &physDev,
                                   const VkSurfaceKHR &surface,
-                                  GLFWwindow *osWindow,
                                   const QueueFamilyIndices &qFamIndices,
-                                  const VkDevice &logiDevice) {
+                                  const VkDevice &logiDevice,
+                                  const uint32_t frmBfrWidth,
+                                  const uint32_t frmBfrHeight) {
   SwapChainSupportDetails swapChainSupport =
       QuerySwapChainSupport(physDev, surface);
 
@@ -107,7 +106,8 @@ void SwapChainVk::CreateSwapChain(const VkPhysicalDevice &physDev,
       ChooseSwapSurfaceFormat(swapChainSupport.formats);
   VkPresentModeKHR presentMode =
       ChooseSwapPresentMode(swapChainSupport.presentModes);
-  VkExtent2D extent = ChooseSwapExtent(swapChainSupport.capabilities, osWindow);
+  VkExtent2D extent = ChooseSwapExtent(swapChainSupport.capabilities,
+                                       frmBfrWidth, frmBfrHeight);
 
   uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
 
