@@ -51,6 +51,5 @@ add_library(
   ${PLATFORM_IMPL_DIR}/Vulkan/SwapChainVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/GfxPipelineVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/ShaderVk.cpp
-  ${PLATFORM_IMPL_DIR}/Vulkan/FrameBufsVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/CmdPoolVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/PresentVk.cpp)

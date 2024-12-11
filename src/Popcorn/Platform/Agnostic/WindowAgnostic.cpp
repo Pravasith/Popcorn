@@ -14,7 +14,7 @@
 
 ENGINE_NAMESPACE_BEGIN
 
-GLFWwindow *WindowAgnostic::s_os_window = nullptr;
+GLFWwindow *WindowAgnostic::s_osWindow = nullptr;
 WindowAgnostic *WindowAgnostic::s_instance = nullptr;
 
 Window *WindowAgnostic::Init(const Props &props) {
@@ -52,14 +52,14 @@ WindowAgnostic::WindowAgnostic(const Props &props) : m_title(props.Title) {
 
   // CREATE GLFW WINDOW AND MAKE CONTEXT CURRENT
   // ---------------------------------------------------
-  s_os_window = glfwCreateWindow(props.W, props.H, m_title.c_str(), NULL, NULL);
+  s_osWindow = glfwCreateWindow(props.W, props.H, m_title.c_str(), NULL, NULL);
 
-  if (!s_os_window) {
+  if (!s_osWindow) {
     pc_write_log("Failed to create GLFW Window");
     glfwTerminate();
   }
 
-  // glfwMakeContextCurrent(s_os_window);
+  // glfwMakeContextCurrent(s_osWindow);
   // glfwSwapInterval(1); // Enable vsync
 
   // int status = gladLoadGLLoader(GLADloadproc(glfwGetProcAddress));
@@ -68,21 +68,21 @@ WindowAgnostic::WindowAgnostic(const Props &props) : m_title(props.Title) {
   // ---------------------------------------------------
 
   /* Window Close Callback */
-  glfwSetWindowCloseCallback(s_os_window, [](GLFWwindow *os_window) {
+  glfwSetWindowCloseCallback(s_osWindow, [](GLFWwindow *os_window) {
     WindowCloseEvent winCloseEvt;
     s_instance->PublishEvent(winCloseEvt);
   });
 
   /* Mouse Position Callback */
-  glfwSetCursorPosCallback(s_os_window,
+  glfwSetCursorPosCallback(s_osWindow,
                            [](GLFWwindow *os_window, double x, double y) {
                              MouseMovedEvent mMoveEvt((float)x, (float)y);
                              s_instance->PublishEvent(mMoveEvt);
                            });
 
   /* Key Callback */
-  glfwSetKeyCallback(s_os_window, [](GLFWwindow *os_window, int key,
-                                     int scan_code, int action, int mods) {
+  glfwSetKeyCallback(s_osWindow, [](GLFWwindow *os_window, int key,
+                                    int scan_code, int action, int mods) {
     // GLFW ACTIONS
     // 0 = KEY_PRESS, 1 = KEY_RELEASE, 2 = KEY_REPEAT
 
@@ -106,13 +106,13 @@ WindowAgnostic::WindowAgnostic(const Props &props) : m_title(props.Title) {
   });
 
   /* Window Resize Callback */
-  glfwSetWindowSizeCallback(s_os_window,
+  glfwSetWindowSizeCallback(s_osWindow,
                             [](GLFWwindow *os_window, int width, int height) {
                               WindowResizeEvent event(width, height);
                               s_instance->PublishEvent(event);
                             });
 
-  if (!s_os_window) {
+  if (!s_osWindow) {
     pc_write_log("No OS Window yet!");
   }
 }
@@ -122,12 +122,12 @@ void WindowAgnostic::OnUpdate() {
   // glViewport(0, 0, WindowAgnostic::GetWidth(),
   // WindowAgnostic::GetHeight());
 
-  // glfwSwapBuffers(s_os_window);
+  // glfwSwapBuffers(s_osWindow);
   glfwPollEvents();
 }
 
 WindowAgnostic::~WindowAgnostic() {
-  glfwDestroyWindow(s_os_window);
+  glfwDestroyWindow(s_osWindow);
   glfwTerminate();
 
   PC_PRINT("TERMINATED", TagType::Destr, "GLFW");
@@ -135,14 +135,14 @@ WindowAgnostic::~WindowAgnostic() {
 };
 
 void WindowAgnostic::Terminate() {
-  if (!s_os_window || !s_instance) {
-    pc_write_log("Error: WindowAgnostic Terminate -- s_os_window or s_instance "
+  if (!s_osWindow || !s_instance) {
+    pc_write_log("Error: WindowAgnostic Terminate -- s_osWindow or s_instance "
                  "of class not found.");
   }
 
   else {
     // No need to delete bc GLFW_Terminate() handles deletion
-    s_os_window = nullptr;
+    s_osWindow = nullptr;
 
     delete s_instance;
     s_instance = nullptr;
@@ -154,8 +154,8 @@ uint16_t WindowAgnostic::GetWidth() const { return 1; }
 uint16_t WindowAgnostic::GetHeight() const { return 1; }
 
 void *WindowAgnostic::GetOSWindow() const {
-  if (s_os_window)
-    return s_os_window;
+  if (s_osWindow)
+    return s_osWindow;
 
   return nullptr;
 }

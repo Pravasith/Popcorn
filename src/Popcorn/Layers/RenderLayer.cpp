@@ -9,7 +9,6 @@ template <RendererType T> Renderer<T> *RenderLayer::s_Renderer = nullptr;
 
 RenderLayer::RenderLayer() {
   PC_PRINT("CREATED", TagType::Constr, "RENDER-LAYER");
-  s_Renderer<RendererType::Vulkan> = Renderer<RendererType::Vulkan>::Create();
 }
 
 RenderLayer::~RenderLayer() {
@@ -18,10 +17,10 @@ RenderLayer::~RenderLayer() {
 
 void RenderLayer::OnAttach() {
   Application &app = Application::Get();
-  auto osWindow = app.GetAppWindow().GetOSWindow();
+  auto &appWin= app.GetAppWindow();
 
-  Renderer<RendererType::Vulkan>::SetOSWindow(osWindow);
-  s_Renderer<RendererType::Vulkan>->Init();
+  s_Renderer<RendererType::Vulkan> =
+      Renderer<RendererType::Vulkan>::Create(appWin);
 }
 
 void RenderLayer::OnDetach() { Renderer<RendererType::Vulkan>::Destroy(); }

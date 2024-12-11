@@ -4,9 +4,11 @@ TODO:
 
  :: Refactor THE HORRIBLE Renderer
 
- :: Mem check resolution
-    Valgrind memory check
-
  :: Precompiled headers
     Add precompiled headers to the project and
     in cmake
+
+DONE:
+----------
+ :: Mem check resolution
+    Valgrind memory check

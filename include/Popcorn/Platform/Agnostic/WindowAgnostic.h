@@ -17,6 +17,18 @@ public:
 
   virtual void OnUpdate();
 
+  const std::pair<uint32_t, uint32_t> GetFramebufferSize() const override {
+    if (GetOSWindow() == nullptr) {
+      throw std::runtime_error("OS WINDOW IS NULL");
+    };
+
+    int width, height;
+    glfwGetFramebufferSize(static_cast<GLFWwindow *>(GetOSWindow()), &width,
+                           &height);
+
+    return std::make_pair(width, height);
+  };
+
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
   WindowAgnostic(const WindowAgnostic &) = delete;
   WindowAgnostic &operator=(const WindowAgnostic &) = delete;
@@ -32,7 +44,7 @@ private:
 private:
   std::string m_title;
 
-  static GLFWwindow *s_os_window;
+  static GLFWwindow *s_osWindow;
   static WindowAgnostic *s_instance;
 };
 ENGINE_NAMESPACE_END

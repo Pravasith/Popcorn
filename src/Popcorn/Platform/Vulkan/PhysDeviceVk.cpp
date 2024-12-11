@@ -48,8 +48,8 @@ bool PhysDeviceVk::IsDeviceSuitable(const VkPhysicalDevice &device,
                         !swapChainSupport.presentModes.empty();
   }
 
-  PC_PRINT("" << (swapChainAdequate ? "True" : "False"), TagType::Print,
-           "SWAPCHAIN ADEQUATE")
+  // PC_PRINT("" << (swapChainAdequate ? "True" : "False"), TagType::Print,
+  //          "SWAPCHAIN ADEQUATE")
 
   return m_qFamIndices.isComplete() && extsSupported && swapChainAdequate;
 };

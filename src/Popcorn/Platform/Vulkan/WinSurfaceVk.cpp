@@ -2,9 +2,9 @@
 #include "Global_Macros.h"
 
 ENGINE_NAMESPACE_BEGIN
-void WinSurfaceVk::CreateSurface() {
-  if (glfwCreateWindowSurface(m_vkInst, m_osWindow, nullptr, &m_surface) !=
-      VK_SUCCESS) {
+void WinSurfaceVk::CreateSurface(void *osWindow) {
+  if (glfwCreateWindowSurface(m_vkInst, static_cast<GLFWwindow *>(osWindow),
+                              nullptr, &m_surface) != VK_SUCCESS) {
     throw std::runtime_error("FAILED TO CREATE WINDOW SURFACE!");
   }
 }

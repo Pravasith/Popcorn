@@ -2,25 +2,25 @@
 
 #include "CmdPoolVk.h"
 #include "CommonVk.h"
-#include "FrameBufsVk.h"
 #include "GfxPipelineVk.h"
 #include "Global_Macros.h"
 #include "LogiDeviceVk.h"
 #include "PhysDeviceVk.h"
+#include "Popcorn/Core/Base.h"
 #include "PresentVk.h"
 #include "Renderer.h"
 #include "SwapChainVk.h"
+#include "ValidationLyrsVk.h"
 #include "WinSurfaceVk.h"
+#include <stdexcept>
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#include "ValidationLyrsVk.h"
-
 ENGINE_NAMESPACE_BEGIN
 class RendererVk : public Renderer<RendererType::Vulkan> {
 public:
-  RendererVk();
+  RendererVk(const Window &appWin);
   ~RendererVk();
 
   constexpr inline static bool IsValLyrsEnabled() {
@@ -39,10 +39,16 @@ private:
 
 private:
   [[nodiscard]] inline const VkSurfaceKHR &GetSurface() const {
+    if (!m_WinSrfcVk.GetSurface()) {
+      PC_WARN("SURFACE NOT AVAILABLE");
+    };
     return m_WinSrfcVk.GetSurface();
   };
 
   [[nodiscard]] inline const VkPhysicalDevice &GetPhysDevice() const {
+    if (!m_PhysDevVk.GetPhysDevice()) {
+      PC_WARN("PHYS DEV NOT AVAILABLE");
+    };
     return m_PhysDevVk.GetPhysDevice();
   };
 
@@ -54,16 +60,15 @@ private:
 #endif
 
   ValidationLyrsVk m_ValLyrsVk;
+  WinSurfaceVk m_WinSrfcVk;
   PhysDeviceVk m_PhysDevVk;
   LogiDeviceVk m_LogiDevVk;
-  WinSurfaceVk m_WinSrfcVk;
   SwapChainVk m_SwpChnVk;
   GfxPipelineVk m_GfxPlineVk;
-  FrameBufsVk m_FrmBfrsVk;
   CmdPoolVk m_CmdPoolVk;
-  PresentVk m_PresentVk;
-
   const QueueFamilyIndices &m_qFamIndices;
+
+  PresentVk m_PresentVk;
 };
 
 ENGINE_NAMESPACE_END

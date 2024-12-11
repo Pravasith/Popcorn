@@ -30,9 +30,8 @@ if [ "$platform" = "l" ]; then
 
     cmake \
         -D CMAKE_EXPORT_COMPILE_COMMANDS=ON \
+        -D CMAKE_BUILD_TYPE=Debug \
         ../../
-        # ADD BELOW FLAG FOR RELEASE BUILDS
-        # -D CMAKE_BUILD_TYPE=Release \
 
     cp compile_commands.json "$src_dir"/compile_commands.json
 

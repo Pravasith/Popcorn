@@ -9,22 +9,24 @@
 ENGINE_NAMESPACE_BEGIN
 // SINGLETON
 template <RendererType T> Renderer<T> *Renderer<T>::s_instance = nullptr;
-template <RendererType T> void *Renderer<T>::s_osWindow = nullptr;
 template <RendererType T>
 std::variant<RendererVk *, RendererOpenGL *> Renderer<T>::s_renderer{
     static_cast<RendererVk *>(nullptr)};
 
-template <RendererType T> Renderer<T>::Renderer() {
+template <RendererType T>
+Renderer<T>::Renderer(const Window &appWin) : m_AppWin(appWin) {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER");
 };
 
 template <RendererType T>
 Renderer<T>::~Renderer(){PC_PRINT("DESTROYED", TagType::Destr, "RENDERER")};
 
-template <RendererType T> Renderer<T> *Renderer<T>::Create() {
+template <RendererType T>
+Renderer<T> *Renderer<T>::Create(const Window &appWin) {
   if (!s_instance) {
     // PC_ASSERT(s_instance, "NO RENDERER INSTANCE");
-    s_instance = new Renderer();
+    s_instance = new Renderer(appWin);
+    s_instance->Init();
   }
 
   return s_instance;
@@ -36,12 +38,8 @@ template <RendererType T> void Renderer<T>::Init() const {
                 static_cast<int>(RendererType::OpenGL)) {
     s_renderer = new RendererOpenGL();
   } else {
-    s_renderer = new RendererVk();
+    s_renderer = new RendererVk(m_AppWin);
   };
-};
-
-template <RendererType T> void Renderer<T>::SetOSWindow(void *osWindow) {
-  s_osWindow = osWindow;
 };
 
 template <RendererType T> const auto Renderer<T>::GetRenderer() {

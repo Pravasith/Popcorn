@@ -10,11 +10,11 @@
 
 ENGINE_NAMESPACE_BEGIN
 
-void *Window::s_platform_window_instance = nullptr;
+void *Window::s_osWindow = nullptr;
 
 Window *Window::Create(const Props &props) {
-  if (s_platform_window_instance) {
-    return static_cast<Window *>(s_platform_window_instance);
+  if (s_osWindow) {
+    return static_cast<Window *>(s_osWindow);
   };
 
   PC_PRINT("CREATED", TagType::Constr, "WINDOW");
@@ -26,19 +26,19 @@ Window *Window::Create(const Props &props) {
   /* ---- END NOTE ---- */
 
   /* #ifdef IS_WINDOWS_OR_LINUX */
-  s_platform_window_instance = WindowAgnostic::Init(props);
+  s_osWindow = WindowAgnostic::Init(props);
   /* #else */
   /* write_log("Error Creating Window - Wrong platform!"); */
   /* #endif */
 
-  return static_cast<Window *>(s_platform_window_instance);
+  return static_cast<Window *>(s_osWindow);
 };
 
 // void Window::AddSubscriber(const Subscriber *s) {
 //
 //   /* #ifdef IS_WINDOWS_OR_LINUX */
 //   (static_cast<WindowAgnostic
-//   *>(s_platform_window_instance))->Subscribe(s);
+//   *>(s_osWindow))->Subscribe(s);
 //   /* #else */
 //   /* write_log("Error Creating Window - Wrong platform!"); */
 //   /* #endif */
@@ -47,7 +47,7 @@ Window *Window::Create(const Props &props) {
 void Window::Destroy() {
   /* #ifdef IS_WINDOWS_OR_LINUX */
   WindowAgnostic::Terminate();
-  s_platform_window_instance = nullptr;
+  s_osWindow = nullptr;
 
   /* #else */
   /* write_log("Error Destroying Window - Wrong platform!"); */
@@ -56,14 +56,12 @@ void Window::Destroy() {
 
 void Window::OnUpdate() {
   /* #ifdef IS_WINDOWS_OR_LINUX */
-  (static_cast<WindowAgnostic *>(s_platform_window_instance))->OnUpdate();
+  (static_cast<WindowAgnostic *>(s_osWindow))->OnUpdate();
   /* #else */
   /* write_log("Error Creating Window - Wrong platform!"); */
   /* #endif */
 };
 
-Window::Window() {
-  /* std::cout << "LALALA Window Constructor called" << std::endl; */
-};
+Window::Window() { PC_PRINT("CREATED", TagType::Constr, "WINDOW"); };
 Window::~Window() { PC_PRINT("DESTROYED", TagType::Destr, "WINDOW"); };
 ENGINE_NAMESPACE_END
