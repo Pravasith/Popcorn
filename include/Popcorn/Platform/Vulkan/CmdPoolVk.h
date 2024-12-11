@@ -23,8 +23,9 @@ public:
         : m_rndrPass(rpass), m_frameBfrs(fbfrs), m_swpChnExt(ext),
           m_pipeline(pl) {};
 
-    void operator()(VkCommandBuffer cmdBfr, uint32_t imgIdx);
+    void operator()(VkCommandBuffer &cmdBfr, uint32_t imgIdx);
 
+  private:
     const VkRenderPass &m_rndrPass;
     const std::vector<VkFramebuffer> &m_frameBfrs;
     const VkExtent2D &m_swpChnExt;

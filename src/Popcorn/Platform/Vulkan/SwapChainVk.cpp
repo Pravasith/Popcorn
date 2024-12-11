@@ -57,19 +57,24 @@ VkPresentModeKHR SwapChainVk::ChooseSwapPresentMode(
   return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-void SwapChainVk::RecreateSwapChain(
-    const VkDevice &logiDevice, const VkPhysicalDevice &physDev,
-    const VkSurfaceKHR &srfc, GLFWwindow *osWindow,
-    const QueueFamilyIndices &qFamIndices, const VkRenderPass &rndrPass,
-    const uint32_t frmBfrWidth, const uint32_t frmBfrHeight) {
-  vkDeviceWaitIdle(logiDevice);
+void SwapChainVk::RecreateSwapChain(const uint32_t frmBfrWidth,
+                                    const uint32_t frmBfrHeight) {
+  vkDeviceWaitIdle(m_logiDevice);
+  CleanUp();
 
-  CleanUp(logiDevice);
+  CreateSwapChain(frmBfrWidth, frmBfrHeight);
+  CreateImgViews();
+  CreateFrameBfrs();
+};
 
-  CreateSwapChain(physDev, srfc, qFamIndices, logiDevice, frmBfrWidth,
-                  frmBfrHeight);
-  CreateImgViews(logiDevice);
-  CreateFrameBfrs(logiDevice, rndrPass);
+void SwapChainVk::RecreateSwapChainFtr::operator()(const uint32_t width,
+                                                   const uint32_t height) {
+  vkDeviceWaitIdle(m_logiDev);
+  m_instance.CleanUp();
+
+  m_instance.CreateSwapChain(width, height);
+  m_instance.CreateImgViews();
+  m_instance.CreateFrameBfrs();
 };
 
 VkExtent2D
@@ -93,14 +98,10 @@ SwapChainVk::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities,
   }
 };
 
-void SwapChainVk::CreateSwapChain(const VkPhysicalDevice &physDev,
-                                  const VkSurfaceKHR &surface,
-                                  const QueueFamilyIndices &qFamIndices,
-                                  const VkDevice &logiDevice,
-                                  const uint32_t frmBfrWidth,
+void SwapChainVk::CreateSwapChain(const uint32_t frmBfrWidth,
                                   const uint32_t frmBfrHeight) {
   SwapChainSupportDetails swapChainSupport =
-      QuerySwapChainSupport(physDev, surface);
+      QuerySwapChainSupport(m_physDev, m_srfc);
 
   VkSurfaceFormatKHR surfaceFormat =
       ChooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -118,7 +119,7 @@ void SwapChainVk::CreateSwapChain(const VkPhysicalDevice &physDev,
 
   VkSwapchainCreateInfoKHR createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-  createInfo.surface = surface;
+  createInfo.surface = m_srfc;
   createInfo.minImageCount = imageCount;
   createInfo.imageFormat = surfaceFormat.format;
   createInfo.imageColorSpace = surfaceFormat.colorSpace;
@@ -126,10 +127,10 @@ void SwapChainVk::CreateSwapChain(const VkPhysicalDevice &physDev,
   createInfo.imageArrayLayers = 1;
   createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-  uint32_t queueFamilyIndices[] = {qFamIndices.graphicsFamily.value(),
-                                   qFamIndices.presentFamily.value()};
+  uint32_t queueFamilyIndices[] = {m_qFamIndices.graphicsFamily.value(),
+                                   m_qFamIndices.presentFamily.value()};
 
-  if (qFamIndices.graphicsFamily != qFamIndices.presentFamily) {
+  if (m_qFamIndices.graphicsFamily != m_qFamIndices.presentFamily) {
     createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
     createInfo.queueFamilyIndexCount = 2;
     createInfo.pQueueFamilyIndices = queueFamilyIndices;
@@ -145,23 +146,22 @@ void SwapChainVk::CreateSwapChain(const VkPhysicalDevice &physDev,
   createInfo.clipped = VK_TRUE;
   createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-  if (vkCreateSwapchainKHR(logiDevice, &createInfo, nullptr, &m_swapChain) !=
+  if (vkCreateSwapchainKHR(m_logiDevice, &createInfo, nullptr, &m_swapChain) !=
       VK_SUCCESS) {
     throw std::runtime_error("FAILED TO CREATE SWAP CHAIN!");
   }
 
   // RETRIEVE HANDLES OF THE SWAPCHAIN IMAGES
-  vkGetSwapchainImagesKHR(logiDevice, m_swapChain, &imageCount, nullptr);
+  vkGetSwapchainImagesKHR(m_logiDevice, m_swapChain, &imageCount, nullptr);
   m_swapChainImgs.resize(imageCount);
-  vkGetSwapchainImagesKHR(logiDevice, m_swapChain, &imageCount,
+  vkGetSwapchainImagesKHR(m_logiDevice, m_swapChain, &imageCount,
                           m_swapChainImgs.data());
 
   m_swapChainImgFormat = surfaceFormat.format;
   m_swapChainExtent = extent;
 }
 
-void SwapChainVk::CreateFrameBfrs(const VkDevice &dev,
-                                  const VkRenderPass &rndrPass) {
+void SwapChainVk::CreateFrameBfrs() {
   m_frameBfrs.resize(m_swapChainImgViews.size());
 
   for (size_t i = 0; i < m_swapChainImgViews.size(); ++i) {
@@ -169,21 +169,21 @@ void SwapChainVk::CreateFrameBfrs(const VkDevice &dev,
 
     VkFramebufferCreateInfo frmbfrInfo{};
     frmbfrInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    frmbfrInfo.renderPass = rndrPass;
+    frmbfrInfo.renderPass = m_rndrPass;
     frmbfrInfo.attachmentCount = 1;
     frmbfrInfo.pAttachments = attachments;
     frmbfrInfo.width = m_swapChainExtent.width;
     frmbfrInfo.height = m_swapChainExtent.height;
     frmbfrInfo.layers = 1;
 
-    if (vkCreateFramebuffer(dev, &frmbfrInfo, nullptr, &m_frameBfrs[i]) !=
-        VK_SUCCESS) {
+    if (vkCreateFramebuffer(m_logiDevice, &frmbfrInfo, nullptr,
+                            &m_frameBfrs[i]) != VK_SUCCESS) {
       throw std::runtime_error("ERROR: FAILED TO CREATE FRAMEBUFFER!");
     };
   };
 };
 
-void SwapChainVk::CreateImgViews(const VkDevice &logiDevice) {
+void SwapChainVk::CreateImgViews() {
   m_swapChainImgViews.resize(m_swapChainImgs.size());
 
   PC_PRINT(m_swapChainImgViews.size(), TagType::Print, "SC IMAGE VIEWS SIZE")
@@ -207,21 +207,21 @@ void SwapChainVk::CreateImgViews(const VkDevice &logiDevice) {
     createInfo.subresourceRange.baseArrayLayer = 0;
     createInfo.subresourceRange.layerCount = 1;
 
-    if (vkCreateImageView(logiDevice, &createInfo, nullptr,
+    if (vkCreateImageView(m_logiDevice, &createInfo, nullptr,
                           &m_swapChainImgViews[i]) != VK_SUCCESS) {
       throw std::runtime_error("FAILED TO CREATE IMAGE VIEWS!");
     }
   }
 };
 
-void SwapChainVk::CleanUp(const VkDevice &logiDevice) {
+void SwapChainVk::CleanUp() const {
   for (size_t i = 0; i < m_frameBfrs.size(); ++i) {
-    vkDestroyFramebuffer(logiDevice, m_frameBfrs[i], nullptr);
+    vkDestroyFramebuffer(m_logiDevice, m_frameBfrs[i], nullptr);
   };
   for (auto imageView : m_swapChainImgViews) {
-    vkDestroyImageView(logiDevice, imageView, nullptr);
+    vkDestroyImageView(m_logiDevice, imageView, nullptr);
   }
-  vkDestroySwapchainKHR(logiDevice, m_swapChain, nullptr);
+  vkDestroySwapchainKHR(m_logiDevice, m_swapChain, nullptr);
 }
 
 ENGINE_NAMESPACE_END

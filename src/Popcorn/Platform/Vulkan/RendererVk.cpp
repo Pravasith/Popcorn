@@ -10,9 +10,11 @@ ENGINE_NAMESPACE_BEGIN
 RendererVk::RendererVk(const Window &appWin)
     : Renderer<RendererType::Vulkan>(appWin), m_ValLyrsVk(m_vkInstance),
       m_WinSrfcVk(m_vkInstance), m_PhysDevVk(m_vkInstance, GetSurface()),
-      m_LogiDevVk(m_vkInstance), m_SwpChnVk(GetPhysDevice(), GetSurface()),
-      m_GfxPlineVk(), m_CmdPoolVk(),
-      m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()),
+      m_LogiDevVk(m_vkInstance), m_GfxPlineVk(),
+      m_SwpChnVk(m_LogiDevVk.GetLogiDevice(), m_PhysDevVk.GetPhysDevice(),
+                 m_WinSrfcVk.GetSurface(), m_PhysDevVk.GetQueueFamilyIndices(),
+                 m_GfxPlineVk.GetRndrPass()),
+      m_CmdPoolVk(), m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()),
       m_PresentVk{
           m_LogiDevVk.GetLogiDevice(),
           m_SwpChnVk.GetSwapChain(),
@@ -44,12 +46,10 @@ void RendererVk::InitVulkan() {
 
   // SWAP CHAIN RELATED
   m_SwpChnVk.CreateSwapChain(
-      m_PhysDevVk.GetPhysDevice(), m_WinSrfcVk.GetSurface(),
-      m_PhysDevVk.GetQueueFamilyIndices(), m_LogiDevVk.GetLogiDevice(),
       m_AppWin.GetFramebufferSize().first, // FRAME BFR WIDTH
       m_AppWin.GetFramebufferSize().second // FRAME BFR HEIGHT
   );
-  m_SwpChnVk.CreateImgViews(m_LogiDevVk.GetLogiDevice());
+  m_SwpChnVk.CreateImgViews();
 
   // CREATE GFX PIPELINE
   m_GfxPlineVk.CreateRndrPass(m_SwpChnVk.GetImgFormat(),
@@ -58,8 +58,7 @@ void RendererVk::InitVulkan() {
                                  m_SwpChnVk.GetSwapChainExtent());
 
   // FRAME BUFFERS
-  m_SwpChnVk.CreateFrameBfrs(m_LogiDevVk.GetLogiDevice(),
-                             m_GfxPlineVk.GetRndrPass());
+  m_SwpChnVk.CreateFrameBfrs();
 
   // CMD BFRS
   m_CmdPoolVk.CreateCmdPool(m_PhysDevVk.GetQueueFamilyIndices(),
@@ -141,13 +140,15 @@ void RendererVk::OnUpdate() {
       m_CmdPoolVk.GetCmdBfrs(),
       CmdPoolVk::RecordCmdBfrFtr{
           m_GfxPlineVk.GetRndrPass(), m_SwpChnVk.GetFrameBfrs(),
-          m_SwpChnVk.GetSwapChainExtent(), m_GfxPlineVk.GetGfxPipeline()});
+          m_SwpChnVk.GetSwapChainExtent(), m_GfxPlineVk.GetGfxPipeline()},
+      SwapChainVk::RecreateSwapChainFtr{m_SwpChnVk,
+                                        m_LogiDevVk.GetLogiDevice()});
 };
 
 void RendererVk::CleanUp() {
   vkDeviceWaitIdle(m_LogiDevVk.GetLogiDevice());
 
-  m_SwpChnVk.CleanUp(m_LogiDevVk.GetLogiDevice());
+  m_SwpChnVk.CleanUp();
   m_PresentVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_CmdPoolVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_GfxPlineVk.CleanUp(m_LogiDevVk.GetLogiDevice());

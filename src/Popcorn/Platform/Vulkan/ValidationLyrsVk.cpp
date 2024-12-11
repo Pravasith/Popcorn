@@ -1,7 +1,6 @@
 #include "ValidationLyrsVk.h"
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
-#include <iostream>
 
 ENGINE_NAMESPACE_BEGIN
 VkResult PC_CreateDebugUtilsMessengerEXT(
@@ -96,9 +95,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL ValidationLyrsVk::DebugCallback(
     VkDebugUtilsMessageTypeFlagsEXT messageType,
     const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
     void *pUserData) {
-
-  std::cerr << "VALIDATION LAYER: " << pCallbackData->pMessage << std::endl;
-  PC_ERROR(pCallbackData->pMessage, "VALIDATION LAYER: ");
+  PC_ERROR(pCallbackData->pMessage, "VALIDATION LAYER");
   return VK_FALSE;
 }
 ENGINE_NAMESPACE_END

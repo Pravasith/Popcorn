@@ -12,7 +12,6 @@
 #include "SwapChainVk.h"
 #include "ValidationLyrsVk.h"
 #include "WinSurfaceVk.h"
-#include <stdexcept>
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -63,8 +62,8 @@ private:
   WinSurfaceVk m_WinSrfcVk;
   PhysDeviceVk m_PhysDevVk;
   LogiDeviceVk m_LogiDevVk;
-  SwapChainVk m_SwpChnVk;
   GfxPipelineVk m_GfxPlineVk;
+  SwapChainVk m_SwpChnVk;
   CmdPoolVk m_CmdPoolVk;
   const QueueFamilyIndices &m_qFamIndices;
 

@@ -3,6 +3,7 @@
 #include "CmdPoolVk.h"
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
+#include "SwapChainVk.h"
 #include <cstdint>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -21,7 +22,8 @@ class PresentVk {
   ~PresentVk() { PC_PRINT("DESTROYED", TagType::Destr, "PRESENT-VK") };
 
   void DrawFrame(std::vector<VkCommandBuffer> &cmdBfrs,
-                 CmdPoolVk::RecordCmdBfrFtr) const;
+                 CmdPoolVk::RecordCmdBfrFtr recordCmdBfr,
+                 SwapChainVk::RecreateSwapChainFtr recreateSwapChain) const;
 
   void CreateSyncObjs(const VkDevice &);
   void CleanUp(const VkDevice &);

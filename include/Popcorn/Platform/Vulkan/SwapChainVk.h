@@ -3,6 +3,7 @@
 #include "CommonVk.h"
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
+#include <cstdint>
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -55,25 +56,29 @@ public:
     return m_swapChain;
   };
 
+  struct RecreateSwapChainFtr {
+    RecreateSwapChainFtr(SwapChainVk &sc, const VkDevice &logiDev)
+        : m_instance(sc), m_logiDev(logiDev) {};
+
+    void operator()(const uint32_t width, const uint32_t height);
+    SwapChainVk &m_instance;
+    const VkDevice &m_logiDev;
+  };
+
 private:
-  SwapChainVk(const VkPhysicalDevice &physDev, const VkSurfaceKHR &surface) {
+  SwapChainVk(const VkDevice &logiDevice, const VkPhysicalDevice &physDev,
+              const VkSurfaceKHR &srfc, const QueueFamilyIndices &qFamIndices,
+              const VkRenderPass &rndrPass)
+      : m_logiDevice(logiDevice), m_physDev(physDev), m_srfc(srfc),
+        m_qFamIndices(qFamIndices), m_rndrPass(rndrPass) {
     PC_PRINT("CREATED", TagType::Constr, "SWAP-CHAIN-VK");
   }
   ~SwapChainVk() { PC_PRINT("DESTROYED", TagType::Destr, "SWAP-CHAIN-VK"); }
 
-  void CreateSwapChain(const VkPhysicalDevice &physDev,
-                       const VkSurfaceKHR &surface,
-                       const QueueFamilyIndices &qFamIndices,
-                       const VkDevice &logiDevice, const uint32_t frmBfrWidth,
-                       const uint32_t frmBfrHeight);
-  void CreateImgViews(const VkDevice &logiDevice);
-  void CreateFrameBfrs(const VkDevice &dev, const VkRenderPass &rndrPass);
-  void RecreateSwapChain(const VkDevice &logiDevice,
-                         const VkPhysicalDevice &physDev,
-                         const VkSurfaceKHR &srfc, GLFWwindow *osWindow,
-                         const QueueFamilyIndices &qFamIndices,
-                         const VkRenderPass &rndrPass,
-                         const uint32_t frmBfrWidth,
+  void CreateSwapChain(const uint32_t frmBfrWidth, const uint32_t frmBfrHeight);
+  void CreateImgViews();
+  void CreateFrameBfrs();
+  void RecreateSwapChain(const uint32_t frmBfrWidth,
                          const uint32_t frmBfrHeight);
 
   VkSurfaceFormatKHR ChooseSwapSurfaceFormat(
@@ -83,7 +88,7 @@ private:
   VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities,
                               uint32_t frameBfrW, uint32_t frameBfrH);
 
-  void CleanUp(const VkDevice &logiDevice);
+  void CleanUp() const;
 
 private:
   VkSwapchainKHR m_swapChain;
@@ -92,6 +97,13 @@ private:
   VkExtent2D m_swapChainExtent{0, 0};
   std::vector<VkImageView> m_swapChainImgViews;
   std::vector<VkFramebuffer> m_frameBfrs;
+
+  // REFS
+  const VkDevice &m_logiDevice;
+  const VkPhysicalDevice &m_physDev;
+  const VkSurfaceKHR &m_srfc;
+  const QueueFamilyIndices &m_qFamIndices;
+  const VkRenderPass &m_rndrPass;
 };
 
 ENGINE_NAMESPACE_END

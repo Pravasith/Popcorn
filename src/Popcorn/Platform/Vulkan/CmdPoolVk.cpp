@@ -32,7 +32,7 @@ void CmdPoolVk::CreateCmdBfrs(const VkDevice &dev) {
   }
 };
 
-void CmdPoolVk::RecordCmdBfrFtr::operator()(VkCommandBuffer cmdBfr,
+void CmdPoolVk::RecordCmdBfrFtr::operator()(VkCommandBuffer &cmdBfr,
                                             uint32_t imgIdx) {
 #ifdef PC_DEBUG
   if (!m_rndrPass ||

@@ -1,5 +1,4 @@
 #include "PresentVk.h"
-#include "CmdPoolVk.h"
 #include "CommonVk.h"
 #include "Global_Macros.h"
 #include <cstddef>
@@ -34,8 +33,10 @@ void PresentVk::CreateSyncObjs(const VkDevice &dev) {
   };
 };
 
-void PresentVk::DrawFrame(std::vector<VkCommandBuffer> &cmdBfrs,
-                          CmdPoolVk::RecordCmdBfrFtr recordCmdBfr) const {
+void PresentVk::DrawFrame(
+    std::vector<VkCommandBuffer> &cmdBfrs,
+    CmdPoolVk::RecordCmdBfrFtr recordCmdBfr,
+    SwapChainVk::RecreateSwapChainFtr recreateSwapChain) const {
   // ACQUIRE IMAGE FROM THE SWAP CHAIN
   // USING SEPHAMORES AND FENCES
   // SYNC CODE - WAIT UNTIL m_inFlightFences[s_currFrame] IS SIGNALLED - (IT'S
@@ -51,6 +52,7 @@ void PresentVk::DrawFrame(std::vector<VkCommandBuffer> &cmdBfrs,
   VkResult res = vkAcquireNextImageKHR(m_logiDevice, m_swpChn, UINT64_MAX,
                                        m_imgAvailableSmphs[s_currFrame],
                                        VK_NULL_HANDLE, &imgIdx);
+
   if (res == VK_ERROR_OUT_OF_DATE_KHR) {
     // RECREATE SWAPCHAIN
     return;
@@ -101,7 +103,7 @@ void PresentVk::DrawFrame(std::vector<VkCommandBuffer> &cmdBfrs,
 
   if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR) {
     // RECREATE SWAPCHAIN
-
+    recreateSwapChain(100, 100);
   } else if (res != VK_SUCCESS) {
     throw std::runtime_error("FAILED TO PRESENT SWAPCHAIN IMAGE!");
   };
