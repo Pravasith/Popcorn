@@ -6,11 +6,13 @@
 #include "Global_Macros.h"
 #include "LogiDeviceVk.h"
 #include "PhysDeviceVk.h"
+#include "Popcorn/Core/Base.h"
 #include "PresentVk.h"
 #include "Renderer.h"
 #include "SwapChainVk.h"
 #include "ValidationLyrsVk.h"
 #include "WinSurfaceVk.h"
+#include <stdexcept>
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -37,10 +39,16 @@ private:
 
 private:
   [[nodiscard]] inline const VkSurfaceKHR &GetSurface() const {
+    if (!m_WinSrfcVk.GetSurface()) {
+      PC_WARN("SURFACE NOT AVAILABLE");
+    };
     return m_WinSrfcVk.GetSurface();
   };
 
   [[nodiscard]] inline const VkPhysicalDevice &GetPhysDevice() const {
+    if (!m_PhysDevVk.GetPhysDevice()) {
+      PC_WARN("PHYS DEV NOT AVAILABLE");
+    };
     return m_PhysDevVk.GetPhysDevice();
   };
 

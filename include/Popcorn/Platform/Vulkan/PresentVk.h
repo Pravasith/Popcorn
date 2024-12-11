@@ -11,17 +11,16 @@ ENGINE_NAMESPACE_BEGIN
 class PresentVk {
   friend class RendererVk;
 
-  PresentVk() { PC_PRINT("CREATED", TagType::Constr, "PRESENT-VK") };
+  PresentVk(const VkDevice &logiDevice, const VkSwapchainKHR &swpChn,
+            const VkQueue &gfxQueue, const VkQueue &presentQueue)
+      : m_logiDevice(logiDevice), m_swpChn(swpChn), m_gfxQueue(gfxQueue),
+        m_presentQueue(presentQueue) {
+          PC_PRINT("CREATED", TagType::Constr, "PRESENT-VK")
+        };
+
   ~PresentVk() { PC_PRINT("DESTROYED", TagType::Destr, "PRESENT-VK") };
 
-  void DrawFrame(const VkDevice &dev, const CmdPoolVk &CmdPoolVk,
-                 const VkSwapchainKHR &swpChn,
-                 std::vector<VkCommandBuffer> &cmdBfrs,
-                 const VkRenderPass &rndrPass,
-                 const std::vector<VkFramebuffer> &swpChnFrameBfrs,
-                 const VkExtent2D &swpChnExt, const VkPipeline &gfxPipeline,
-                 const VkQueue &gfxQueue, const VkQueue &presentQueue,
-                 // const CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPtr
+  void DrawFrame(std::vector<VkCommandBuffer> &cmdBfrs,
                  CmdPoolVk::RecordCmdBfrFtr) const;
 
   void CreateSyncObjs(const VkDevice &);
@@ -37,19 +36,10 @@ private:
   std::vector<VkFence> m_inFlightFences;
 
   // REFERENCES
-  // const CmdPoolVk &m_CmdPoolVk;
-  // const VkDevice &m_logiDevice;
-  // const VkSwapchainKHR &m_swpChn;
-  // const VkRenderPass &rndrPass;
-  // const std::vector<VkFramebuffer> &swpChnFrameBfrs;
-  // const VkExtent2D &swpChnExt;
-  // const VkPipeline &gfxPipeline;
-  // const VkQueue &gfxQueue;
-  // const VkQueue &presentQueue;
-  //
-  // DON'T NEED THESE
-  // std::vector<VkCommandBuffer> &cmdBfrs;
-  // const CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPt;
+  const VkDevice &m_logiDevice;
+  const VkSwapchainKHR &m_swpChn;
+  const VkQueue &m_gfxQueue;
+  const VkQueue &m_presentQueue;
 };
 
 ENGINE_NAMESPACE_END

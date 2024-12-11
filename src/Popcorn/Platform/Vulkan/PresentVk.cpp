@@ -34,30 +34,21 @@ void PresentVk::CreateSyncObjs(const VkDevice &dev) {
   };
 };
 
-void PresentVk::DrawFrame(const VkDevice &dev, const CmdPoolVk &cmdPoolVk,
-                          const VkSwapchainKHR &swpChn,
-                          std::vector<VkCommandBuffer> &cmdBfrs,
-                          const VkRenderPass &rndrPass,
-                          const std::vector<VkFramebuffer> &swpChnFrameBfrs,
-                          const VkExtent2D &swpChnExt,
-                          const VkPipeline &gfxPipeline,
-                          const VkQueue &gfxQueue, const VkQueue &presentQueue,
-                          // const CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPtr
-                          CmdPoolVk::RecordCmdBfrFtr recordCmdBfr
-
-) const {
+void PresentVk::DrawFrame(std::vector<VkCommandBuffer> &cmdBfrs,
+                          CmdPoolVk::RecordCmdBfrFtr recordCmdBfr) const {
   // ACQUIRE IMAGE FROM THE SWAP CHAIN
   // USING SEPHAMORES AND FENCES
   // SYNC CODE - WAIT UNTIL m_inFlightFences[s_currFrame] IS SIGNALLED - (IT'S
   // SIGNALLED WHEN THE CMD BFR HAS BEEN SUBMITTED TO THE SWAPCHAIN)
-  vkWaitForFences(dev, 1, &m_inFlightFences[s_currFrame], VK_TRUE, UINT64_MAX);
-  vkResetFences(dev, 1, &m_inFlightFences[s_currFrame]);
+  vkWaitForFences(m_logiDevice, 1, &m_inFlightFences[s_currFrame], VK_TRUE,
+                  UINT64_MAX);
+  vkResetFences(m_logiDevice, 1, &m_inFlightFences[s_currFrame]);
 
   // CPU ISSUES ACQ. IMG CALL TO GPU, m_imgAvlSmphs IS SIGNALLED WHEN THE IMG IS
   // READY. THE NEXT GPU INSTRUCTION IS BLOCKED UNTIL THE m_imgAvlSmphs IS
   // SIGNALLED
   uint32_t imgIdx;
-  VkResult res = vkAcquireNextImageKHR(dev, swpChn, UINT64_MAX,
+  VkResult res = vkAcquireNextImageKHR(m_logiDevice, m_swpChn, UINT64_MAX,
                                        m_imgAvailableSmphs[s_currFrame],
                                        VK_NULL_HANDLE, &imgIdx);
   if (res == VK_ERROR_OUT_OF_DATE_KHR) {
@@ -68,12 +59,6 @@ void PresentVk::DrawFrame(const VkDevice &dev, const CmdPoolVk &cmdPoolVk,
   };
 
   vkResetCommandBuffer(cmdBfrs[s_currFrame], 0);
-  // RECORD COMMAND BUFFER POINTER FUNC CALL
-  // (cmdPoolVk.*recordCmdBfrPtr)(cmdBfrs[s_currFrame], imgIdx, rndrPass,
-  //                              swpChnFrameBfrs, swpChnExt, gfxPipeline);
-  // cmdPoolVk.RecordCmdBfr(cmdBfrs[s_currFrame], imgIdx, rndrPass,
-  //                        swpChnFrameBfrs, swpChnExt, gfxPipeline);
-
   recordCmdBfr(cmdBfrs[s_currFrame], imgIdx);
 
   // SUBMIT THE COMMAND BUFFER
@@ -95,8 +80,8 @@ void PresentVk::DrawFrame(const VkDevice &dev, const CmdPoolVk &cmdPoolVk,
   submitInfo.signalSemaphoreCount = 1;
   submitInfo.pSignalSemaphores = signalSmphs;
 
-  if (vkQueueSubmit(gfxQueue, 1, &submitInfo, m_inFlightFences[s_currFrame]) !=
-      VK_SUCCESS) {
+  if (vkQueueSubmit(m_gfxQueue, 1, &submitInfo,
+                    m_inFlightFences[s_currFrame]) != VK_SUCCESS) {
     throw std::runtime_error("FAILED TO SUBMIT DRAW COMMAND BUFFER!");
   };
 
@@ -106,13 +91,13 @@ void PresentVk::DrawFrame(const VkDevice &dev, const CmdPoolVk &cmdPoolVk,
   prsntInfo.waitSemaphoreCount = 1;
   prsntInfo.pWaitSemaphores = signalSmphs;
 
-  VkSwapchainKHR swpChns[] = {swpChn};
+  VkSwapchainKHR swpChns[] = {m_swpChn};
   prsntInfo.swapchainCount = 1;
   prsntInfo.pSwapchains = swpChns;
   prsntInfo.pImageIndices = &imgIdx;
   prsntInfo.pResults = nullptr; // OPTIONAL
 
-  res = vkQueuePresentKHR(presentQueue, &prsntInfo);
+  res = vkQueuePresentKHR(m_presentQueue, &prsntInfo);
 
   if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR) {
     // RECREATE SWAPCHAIN

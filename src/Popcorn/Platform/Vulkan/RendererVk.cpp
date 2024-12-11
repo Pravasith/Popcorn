@@ -12,10 +12,15 @@ RendererVk::RendererVk(const Window &appWin)
       m_WinSrfcVk(m_vkInstance), m_PhysDevVk(m_vkInstance, GetSurface()),
       m_LogiDevVk(m_vkInstance), m_SwpChnVk(GetPhysDevice(), GetSurface()),
       m_GfxPlineVk(), m_CmdPoolVk(),
-      m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()) {
+      m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()),
+      m_PresentVk{
+          m_LogiDevVk.GetLogiDevice(),
+          m_SwpChnVk.GetSwapChain(),
+          m_LogiDevVk.GetDeviceQueue(),
+          m_LogiDevVk.GetPresentQueue(),
+      } {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
   InitVulkan();
-  m_PresentVk = PresentVk{};
 };
 
 RendererVk::~RendererVk() {
@@ -132,21 +137,11 @@ std::vector<const char *> RendererVk::GetRequiredExtensions() {
 };
 
 void RendererVk::OnUpdate() {
-  // TODO: OPTIMIZE THIS
-  // constexpr CmdPoolVk::RecordCmdBfrPtr recordCmdBfrPtr =
-  //     &CmdPoolVk::RecordCmdBfr;
-
   m_PresentVk.DrawFrame(
-      m_LogiDevVk.GetLogiDevice(), m_CmdPoolVk, m_SwpChnVk.GetSwapChain(),
-      m_CmdPoolVk.GetCmdBfrs(), m_GfxPlineVk.GetRndrPass(),
-      m_SwpChnVk.GetFrameBfrs(), m_SwpChnVk.GetSwapChainExtent(),
-      m_GfxPlineVk.GetGfxPipeline(), m_LogiDevVk.GetDeviceQueue(),
-      m_LogiDevVk.GetPresentQueue(),
+      m_CmdPoolVk.GetCmdBfrs(),
       CmdPoolVk::RecordCmdBfrFtr{
           m_GfxPlineVk.GetRndrPass(), m_SwpChnVk.GetFrameBfrs(),
-          m_SwpChnVk.GetSwapChainExtent(), m_GfxPlineVk.GetGfxPipeline()}
-      // recordCmdBfrPtr
-  );
+          m_SwpChnVk.GetSwapChainExtent(), m_GfxPlineVk.GetGfxPipeline()});
 };
 
 void RendererVk::CleanUp() {

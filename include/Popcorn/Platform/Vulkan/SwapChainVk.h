@@ -3,7 +3,6 @@
 #include "CommonVk.h"
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
-#include <stdexcept>
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -18,8 +17,7 @@ public:
 
   [[nodiscard]] inline const VkExtent2D &GetSwapChainExtent() const {
     if (m_swapChainExtent.width == 0 && m_swapChainExtent.height == 0) {
-      throw std::runtime_error(
-          "SWAP CHAIN EXT IS UNINITIALIZED - SwapChainVk.h");
+      PC_WARN("SWAP CHAIN EXT IS UNINITIALIZED - SwapChainVk.h");
     }
 
     return m_swapChainExtent;
@@ -27,7 +25,7 @@ public:
 
   [[nodiscard]] inline const VkFormat &GetImgFormat() const {
     if (m_swapChainImgFormat == VK_FORMAT_UNDEFINED) {
-      throw std::runtime_error("SWAPCHAIN IMG FORMAT UNDEFINED");
+      PC_WARN("SWAPCHAIN IMG FORMAT UNDEFINED");
     };
 
     return m_swapChainImgFormat;
@@ -35,7 +33,7 @@ public:
 
   [[nodiscard]] inline const std::vector<VkImageView> &GetImgViews() const {
     if (m_swapChainImgViews.size() == 0) {
-      throw std::runtime_error("SWAPCHAIN IMG VIEWS NOT INITIALIZED");
+      PC_WARN("SWAPCHAIN IMG VIEWS NOT INITIALIZED");
     };
 
     return m_swapChainImgViews;
@@ -43,7 +41,7 @@ public:
 
   [[nodiscard]] inline const std::vector<VkFramebuffer> &GetFrameBfrs() const {
     if (m_frameBfrs.size() == 0) {
-      throw std::runtime_error("ERROR: SWAP CHAIN FRAME BUFFERS VEC IS EMPTY!");
+      PC_WARN("ERROR: SWAP CHAIN FRAME BUFFERS VEC IS EMPTY!");
     };
 
     return m_frameBfrs;
@@ -51,7 +49,7 @@ public:
 
   [[nodiscard]] inline const VkSwapchainKHR &GetSwapChain() const {
     if (m_swapChain == nullptr) {
-      throw std::runtime_error("SWAPCHAIN SWAPCHAIN NOT PRESENT");
+      PC_WARN("SWAPCHAIN NOT PRESENT");
     };
 
     return m_swapChain;

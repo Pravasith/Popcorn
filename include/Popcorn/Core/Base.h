@@ -16,11 +16,8 @@ constexpr std::size_t shift_l(std::size_t n) { return 1 << n; }
 
 enum TagType { Constr, Destr, Print };
 
-// TODO: SWAP
 #ifdef PC_DEBUG
-
 extern int PC_print_lvl;
-
 static void PC_Print(const std::string &msg, const TagType tag,
                      const std::string &className) {
 
@@ -54,8 +51,22 @@ static void PC_Print(const std::string &msg, const TagType tag,
     oss << msg;                                                                \
     PC_Print(oss.str(), tag, className);                                       \
   } while (0);
+#define PC_WARN(msg)                                                           \
+  do {                                                                         \
+    std::ostringstream oss;                                                    \
+    oss << "WARNING !! " << msg;                                               \
+    PC_Print(oss.str(), TagType::Print, "");                                   \
+  } while (0);
+#define PC_ERROR(msg, errType)                                                 \
+  do {                                                                         \
+    std::ostringstream oss;                                                    \
+    oss << "ERROR !! " << msg;                                                 \
+    PC_Print(oss.str(), TagType::Print, errType);                              \
+  } while (0);
 #else
 #define PC_PRINT(x, y, z)
+#define PC_WARN(msg)
+#define PC_ERROR(msg, errType)
 #endif
 
 // VARIANT 1: (std::bind -- slow)
