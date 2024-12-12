@@ -61,7 +61,6 @@ void SwapChainVk::RecreateSwapChain(const uint32_t frmBfrWidth,
                                     const uint32_t frmBfrHeight) {
   vkDeviceWaitIdle(m_logiDevice);
   CleanUp();
-
   CreateSwapChain(frmBfrWidth, frmBfrHeight);
   CreateImgViews();
   CreateFrameBfrs();

@@ -11,13 +11,12 @@ public:
   [[nodiscard]] static Window *Init(const Props &props);
   static void Terminate();
 
-  uint16_t GetWidth() const override;
-  uint16_t GetHeight() const override;
   [[nodiscard]] void *GetOSWindow() const override;
 
   virtual void OnUpdate();
 
-  const std::pair<uint32_t, uint32_t> GetFramebufferSize() const override {
+  [[nodiscard]] const std::pair<uint32_t, uint32_t>
+  GetFramebufferSize() const override {
     if (GetOSWindow() == nullptr) {
       throw std::runtime_error("OS WINDOW IS NULL");
     };

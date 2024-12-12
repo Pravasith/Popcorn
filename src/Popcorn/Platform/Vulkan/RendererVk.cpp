@@ -1,6 +1,7 @@
 #include "RendererVk.h"
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
+#include "Popcorn/Events/Event.h"
 #include <cstdint>
 #include <cstring>
 #include <vector>
@@ -15,12 +16,9 @@ RendererVk::RendererVk(const Window &appWin)
                  m_WinSrfcVk.GetSurface(), m_PhysDevVk.GetQueueFamilyIndices(),
                  m_GfxPlineVk.GetRndrPass()),
       m_CmdPoolVk(), m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()),
-      m_PresentVk{
-          m_LogiDevVk.GetLogiDevice(),
-          m_SwpChnVk.GetSwapChain(),
-          m_LogiDevVk.GetDeviceQueue(),
-          m_LogiDevVk.GetPresentQueue(),
-      } {
+      m_PresentVk{m_LogiDevVk.GetLogiDevice(), m_SwpChnVk.GetSwapChain(),
+                  m_LogiDevVk.GetDeviceQueue(), m_LogiDevVk.GetPresentQueue(),
+                  m_AppWin.GetFramebufferSize()} {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
   InitVulkan();
 };
@@ -135,12 +133,16 @@ std::vector<const char *> RendererVk::GetRequiredExtensions() {
   return extensions;
 };
 
+void RendererVk::OnEvent(Event &e) { e.PrintDebugData(); };
+
 void RendererVk::OnUpdate() {
   m_PresentVk.DrawFrame(
       m_CmdPoolVk.GetCmdBfrs(),
+      // TODO: USE A LAMBDA
       CmdPoolVk::RecordCmdBfrFtr{
           m_GfxPlineVk.GetRndrPass(), m_SwpChnVk.GetFrameBfrs(),
           m_SwpChnVk.GetSwapChainExtent(), m_GfxPlineVk.GetGfxPipeline()},
+      // TODO: USE A LAMBDA
       SwapChainVk::RecreateSwapChainFtr{m_SwpChnVk,
                                         m_LogiDevVk.GetLogiDevice()});
 };

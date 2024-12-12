@@ -13,12 +13,12 @@ class PresentVk {
   friend class RendererVk;
 
   PresentVk(const VkDevice &logiDevice, const VkSwapchainKHR &swpChn,
-            const VkQueue &gfxQueue, const VkQueue &presentQueue)
+            const VkQueue &gfxQueue, const VkQueue &presentQueue,
+            std::pair<const uint32_t &, const uint32_t &> frmBfrSize)
       : m_logiDevice(logiDevice), m_swpChn(swpChn), m_gfxQueue(gfxQueue),
-        m_presentQueue(presentQueue) {
+        m_presentQueue(presentQueue), m_frmBfrSize(frmBfrSize) {
           PC_PRINT("CREATED", TagType::Constr, "PRESENT-VK")
         };
-
   ~PresentVk() { PC_PRINT("DESTROYED", TagType::Destr, "PRESENT-VK") };
 
   void DrawFrame(std::vector<VkCommandBuffer> &cmdBfrs,
@@ -36,6 +36,10 @@ private:
   std::vector<VkSemaphore> m_imgAvailableSmphs;
   std::vector<VkSemaphore> m_renderFinishedSmphs;
   std::vector<VkFence> m_inFlightFences;
+
+  static bool s_frmBfrResized;
+
+  std::pair<const uint32_t &, const uint32_t &> m_frmBfrSize;
 
   // REFERENCES
   const VkDevice &m_logiDevice;

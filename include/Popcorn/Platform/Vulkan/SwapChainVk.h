@@ -56,11 +56,13 @@ public:
     return m_swapChain;
   };
 
+  // RECREATE SWAPCHAIN FUNCTOR
   struct RecreateSwapChainFtr {
     RecreateSwapChainFtr(SwapChainVk &sc, const VkDevice &logiDev)
         : m_instance(sc), m_logiDev(logiDev) {};
-
     void operator()(const uint32_t width, const uint32_t height);
+
+  private:
     SwapChainVk &m_instance;
     const VkDevice &m_logiDev;
   };

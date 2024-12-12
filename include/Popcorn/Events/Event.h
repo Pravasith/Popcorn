@@ -14,6 +14,7 @@ enum class EventType {
   // Window Events
   WindowClose,
   WindowResize,
+  FrameBfrResize,
 
   // Keyboard Events
   KeyPressed,
@@ -41,11 +42,11 @@ enum class EventCategory {
 
 // HASH DEFINE START ----------------------------------------------------------
 #define EVENT_TYPE_OVERRIDE_METHODS(name)                                      \
-  [[nodiscard]] static const EventType GetStaticEventType() {                  \
+  [[nodiscard]] static const EventType GetValueType() {                        \
     return EventType::name;                                                    \
   };                                                                           \
   [[nodiscard]] virtual const EventType GetEventType() const override {        \
-    return GetStaticEventType();                                               \
+    return GetValueType();                                                     \
   };                                                                           \
   [[nodiscard]] ENUM_TO_STRING(EventType, name);
 
@@ -73,8 +74,8 @@ public:
   [[nodiscard]] virtual const char *GetEventTypeName() const = 0;
   // DEBUG ONLY
   virtual void PrintDebugData() const {
-    PC_PRINT("From base class -- virtual method \"PrintDebugData\" not defined "
-             "in derived class\n",
+    PC_PRINT("FROM BASE CLASS -- VIRTUAL METHOD \"PrintDebugData\" NOT DEFINED "
+             "IN DERIVED CLASS\n",
              TagType::Print, "EVENT");
   };
 
@@ -87,7 +88,7 @@ public:
   EventDispatcher(Event &e) : m_event(e) {}
 
   template <typename T, typename F> bool Dispatch(const F &eventCb) {
-    if (T::GetStaticEventType() == m_event.GetEventType()) {
+    if (T::GetValueType() == m_event.GetEventType()) {
       m_event.SetIsHandled(
           // m_event.IsHandled() |
           eventCb(static_cast<T &>(m_event)));

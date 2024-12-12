@@ -29,6 +29,7 @@ public:
     }
   };
 
+  // TODO: REFACTOR WHEN DEALING WITH TIME
   void UpdateLayerStack() {
     for (Layer *l : m_layer_stack) {
       l->OnUpdate();

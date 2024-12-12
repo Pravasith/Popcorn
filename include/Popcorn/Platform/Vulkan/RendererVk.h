@@ -7,6 +7,7 @@
 #include "LogiDeviceVk.h"
 #include "PhysDeviceVk.h"
 #include "Popcorn/Core/Base.h"
+#include "Popcorn/Events/Event.h"
 #include "PresentVk.h"
 #include "Renderer.h"
 #include "SwapChainVk.h"
@@ -27,6 +28,7 @@ public:
   };
 
   void OnUpdate() override;
+  void OnEvent(Event &e) override;
 
 private:
   void InitVulkan();
