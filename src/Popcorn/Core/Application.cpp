@@ -77,15 +77,30 @@ void Application::Stop() {
   }
 }
 
-bool Application::OnWindowResize(WindowResizeEvent &e) const { return true; };
+bool Application::OnWindowResize(WindowResizeEvent &e) const {
+  // s_layerStack->IterateBackwards([&](auto it) {
+  //   PC_PRINT(&it, TagType::Print, "ONRESIZE")
+  //
+  //   if (e.IsHandled()) {
+  //     return;
+  //   }
+  //
+  //   (*it)->OnEvent(e);
+  // });
+
+  return true;
+};
+
 bool Application::OnFrameBfrResize(FrameBfrResizeEvent &e) const {
   s_layerStack->IterateBackwards([&](auto it) {
     if (e.IsHandled()) {
       return;
     }
 
+    PC_PRINT("XX", TagType::Print, "APP")
     (*it)->OnEvent(e);
   });
+
   return true;
 };
 

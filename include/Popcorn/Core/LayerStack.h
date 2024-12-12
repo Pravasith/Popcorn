@@ -19,13 +19,14 @@ public:
   void PopOverlay(Layer *);
 
   template <typename F> void IterateBackwards(const F &cb) {
-    for (auto it = m_layer_stack.end(); it < m_layer_stack.begin(); --it) {
-      cb(it);
+    // for (auto it = m_layer_stack.end() - 1; it >= m_layer_stack.begin();
+    // --it) {
+    //   PC_PRINT(&it, TagType::Print, "LAYERSTACK")
+    //   cb(it);
+    // }
 
-      // (*it)->OnEvent(e);
-      // if (e.IsHandled()) {
-      //   break;
-      // }
+    for (auto it = m_layer_stack.rbegin(); it != m_layer_stack.rend(); ++it) {
+      cb(it);
     }
   };
 
