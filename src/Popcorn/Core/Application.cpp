@@ -97,7 +97,6 @@ bool Application::OnFrameBfrResize(FrameBfrResizeEvent &e) const {
       return;
     }
 
-    PC_PRINT("XX", TagType::Print, "APP")
     (*it)->OnEvent(e);
   });
 

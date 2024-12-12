@@ -62,7 +62,6 @@ template <RendererType T> void Renderer<T>::OnUpdate() {
 }
 
 template <RendererType T> void Renderer<T>::OnEvent(Event &e) {
-  PC_PRINT("YY", TagType::Print, "REN")
   if constexpr (T == RendererType::Vulkan) {
     std::get<RendererVk *>(s_renderer)->OnEvent(e);
   } else {

@@ -21,6 +21,8 @@ class PresentVk {
         };
   ~PresentVk() { PC_PRINT("DESTROYED", TagType::Destr, "PRESENT-VK") };
 
+  inline void SetFrmBfrResized(bool resized) { s_frmBfrResized = resized; };
+
   void DrawFrame(std::vector<VkCommandBuffer> &cmdBfrs,
                  CmdPoolVk::RecordCmdBfrFtr recordCmdBfr,
                  SwapChainVk::RecreateSwapChainFtr recreateSwapChain) const;

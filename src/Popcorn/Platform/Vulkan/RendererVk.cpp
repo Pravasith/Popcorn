@@ -133,7 +133,12 @@ std::vector<const char *> RendererVk::GetRequiredExtensions() {
   return extensions;
 };
 
-void RendererVk::OnEvent(Event &e) { e.PrintDebugData(); };
+void RendererVk::OnEvent(Event &e) {
+  if (e.BelongsToCategory(EventCategory::WindowEvent) &&
+      e.GetEventType() == EventType::FrameBfrResize) {
+    m_PresentVk.SetFrmBfrResized(true);
+  }
+};
 
 void RendererVk::OnUpdate() {
   m_PresentVk.DrawFrame(
