@@ -44,8 +44,6 @@ public:
   [[nodiscard("\n\nDON'T FORGET TO USE THE FRAMEBUFFER-"
               "SIZE HOE!!!")]] const virtual std::pair<uint32_t, uint32_t>
   GetFramebufferSize() const = 0;
-  // [[nodiscard]] virtual uint16_t GetWidth() const = 0;
-  // [[nodiscard]] virtual uint16_t GetHeight() const = 0;
   [[nodiscard]] virtual void *GetOSWindow() const = 0;
 
 protected:

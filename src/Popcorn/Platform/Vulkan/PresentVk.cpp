@@ -8,7 +8,7 @@
 
 ENGINE_NAMESPACE_BEGIN
 uint32_t PresentVk::s_currFrame = 0;
-bool PresentVk::s_frmBfrResized = false;
+bool PresentVk::s_frameBfrResized = false;
 
 void PresentVk::CreateSyncObjs(const VkDevice &dev) {
   VkSemaphoreCreateInfo smphInfo{};
@@ -56,7 +56,7 @@ void PresentVk::DrawFrame(
 
   if (res == VK_ERROR_OUT_OF_DATE_KHR) {
     // RECREATE SWAPCHAIN
-    recreateSwapChain(m_frmBfrSize.first, m_frmBfrSize.second);
+    recreateSwapChain();
     return;
   } else if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR) {
     throw std::runtime_error("FAILED TO ACQUIRE SWAPCHAIN IMAGE!");
@@ -107,10 +107,10 @@ void PresentVk::DrawFrame(
   res = vkQueuePresentKHR(m_presentQueue, &prsntInfo);
 
   if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR ||
-      s_frmBfrResized) {
+      s_frameBfrResized) {
     // RECREATE SWAPCHAIN
-    s_frmBfrResized = false;
-    recreateSwapChain(m_frmBfrSize.first, m_frmBfrSize.second);
+    s_frameBfrResized = false;
+    recreateSwapChain();
   } else if (res != VK_SUCCESS) {
     throw std::runtime_error("FAILED TO PRESENT SWAPCHAIN IMAGE!");
   };

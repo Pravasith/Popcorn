@@ -16,12 +16,15 @@ class PresentVk {
             const VkQueue &gfxQueue, const VkQueue &presentQueue,
             std::pair<const uint32_t &, const uint32_t &> frmBfrSize)
       : m_logiDevice(logiDevice), m_swpChn(swpChn), m_gfxQueue(gfxQueue),
-        m_presentQueue(presentQueue), m_frmBfrSize(frmBfrSize) {
+        m_presentQueue(presentQueue) {
           PC_PRINT("CREATED", TagType::Constr, "PRESENT-VK")
         };
   ~PresentVk() { PC_PRINT("DESTROYED", TagType::Destr, "PRESENT-VK") };
 
-  inline void SetFrmBfrResized(bool resized) { s_frmBfrResized = resized; };
+  // inline void SetFrameBfrSize (std::pair(const uint32_t))
+  inline void SetFrameBfrResized(bool isResized) {
+    s_frameBfrResized = isResized;
+  };
 
   void DrawFrame(std::vector<VkCommandBuffer> &cmdBfrs,
                  CmdPoolVk::RecordCmdBfrFtr recordCmdBfr,
@@ -39,9 +42,7 @@ private:
   std::vector<VkSemaphore> m_renderFinishedSmphs;
   std::vector<VkFence> m_inFlightFences;
 
-  static bool s_frmBfrResized;
-
-  std::pair<const uint32_t &, const uint32_t &> m_frmBfrSize;
+  static bool s_frameBfrResized;
 
   // REFERENCES
   const VkDevice &m_logiDevice;

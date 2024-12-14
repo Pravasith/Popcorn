@@ -3,6 +3,7 @@
 #include "CommonVk.h"
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
+#include "Popcorn/Core/Window.h"
 #include <cstdint>
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
@@ -58,13 +59,15 @@ public:
 
   // RECREATE SWAPCHAIN FUNCTOR
   struct RecreateSwapChainFtr {
-    RecreateSwapChainFtr(SwapChainVk &sc, const VkDevice &logiDev)
-        : m_instance(sc), m_logiDev(logiDev) {};
-    void operator()(const uint32_t width, const uint32_t height);
+    RecreateSwapChainFtr(SwapChainVk &sc, const VkDevice &logiDev,
+                         const Window &AppWin)
+        : m_instance(sc), m_logiDev(logiDev), m_AppWin(AppWin) {};
+    void operator()() const;
 
   private:
     SwapChainVk &m_instance;
     const VkDevice &m_logiDev;
+    const Window &m_AppWin;
   };
 
 private:
@@ -80,8 +83,6 @@ private:
   void CreateSwapChain(const uint32_t frmBfrWidth, const uint32_t frmBfrHeight);
   void CreateImgViews();
   void CreateFrameBfrs();
-  void RecreateSwapChain(const uint32_t frmBfrWidth,
-                         const uint32_t frmBfrHeight);
 
   VkSurfaceFormatKHR ChooseSwapSurfaceFormat(
       const std::vector<VkSurfaceFormatKHR> &availableFormats);

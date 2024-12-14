@@ -135,11 +135,11 @@ void Application::OnEvent(Event &e) const {
   // });
 
   if (e.BelongsToCategory(EventCategory::MouseEvent)) {
-    e.PrintDebugData();
+    // e.PrintDebugData();
   };
 
   if (e.BelongsToCategory(EventCategory::KeyboardEvent)) {
-    e.PrintDebugData();
+    // e.PrintDebugData();
   };
 };
 

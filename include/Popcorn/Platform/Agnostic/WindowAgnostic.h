@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Base.h"
 #include "Global_Macros.h"
 #include "Window.h"
 #include <GLFW/glfw3.h>
@@ -24,7 +25,6 @@ public:
     int width, height;
     glfwGetFramebufferSize(static_cast<GLFWwindow *>(GetOSWindow()), &width,
                            &height);
-
     return std::make_pair(width, height);
   };
 

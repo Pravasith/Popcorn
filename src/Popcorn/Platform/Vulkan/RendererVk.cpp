@@ -136,7 +136,7 @@ std::vector<const char *> RendererVk::GetRequiredExtensions() {
 void RendererVk::OnEvent(Event &e) {
   if (e.BelongsToCategory(EventCategory::WindowEvent) &&
       e.GetEventType() == EventType::FrameBfrResize) {
-    m_PresentVk.SetFrmBfrResized(true);
+    m_PresentVk.SetFrameBfrResized(true);
   }
 };
 
@@ -148,8 +148,8 @@ void RendererVk::OnUpdate() {
           m_GfxPlineVk.GetRndrPass(), m_SwpChnVk.GetFrameBfrs(),
           m_SwpChnVk.GetSwapChainExtent(), m_GfxPlineVk.GetGfxPipeline()},
       // TODO: USE A LAMBDA
-      SwapChainVk::RecreateSwapChainFtr{m_SwpChnVk,
-                                        m_LogiDevVk.GetLogiDevice()});
+      SwapChainVk::RecreateSwapChainFtr{m_SwpChnVk, m_LogiDevVk.GetLogiDevice(),
+                                        m_AppWin});
 };
 
 void RendererVk::CleanUp() {

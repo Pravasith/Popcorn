@@ -1,6 +1,7 @@
 #include "SwapChainVk.h"
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
+#include <GLFW/glfw3.h>
 #include <algorithm>
 #include <cstdint>
 #include <limits>
@@ -57,21 +58,22 @@ VkPresentModeKHR SwapChainVk::ChooseSwapPresentMode(
   return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-void SwapChainVk::RecreateSwapChain(const uint32_t frmBfrWidth,
-                                    const uint32_t frmBfrHeight) {
-  vkDeviceWaitIdle(m_logiDevice);
-  CleanUp();
-  CreateSwapChain(frmBfrWidth, frmBfrHeight);
-  CreateImgViews();
-  CreateFrameBfrs();
-};
+void SwapChainVk::RecreateSwapChainFtr::operator()() const {
+  int w = m_AppWin.GetFramebufferSize().first,
+      h = m_AppWin.GetFramebufferSize().second;
 
-void SwapChainVk::RecreateSwapChainFtr::operator()(const uint32_t width,
-                                                   const uint32_t height) {
+  while (w == 0 || h == 0) {
+    w = m_AppWin.GetFramebufferSize().first;
+    h = m_AppWin.GetFramebufferSize().second;
+
+    // BLOCKS THE MAIN THREAD
+    glfwWaitEvents();
+  };
+
   vkDeviceWaitIdle(m_logiDev);
-  m_instance.CleanUp();
 
-  m_instance.CreateSwapChain(width, height);
+  m_instance.CleanUp();
+  m_instance.CreateSwapChain(w, h);
   m_instance.CreateImgViews();
   m_instance.CreateFrameBfrs();
 };
@@ -184,8 +186,6 @@ void SwapChainVk::CreateFrameBfrs() {
 
 void SwapChainVk::CreateImgViews() {
   m_swapChainImgViews.resize(m_swapChainImgs.size());
-
-  PC_PRINT(m_swapChainImgViews.size(), TagType::Print, "SC IMAGE VIEWS SIZE")
 
   for (size_t i = 0; i < m_swapChainImgs.size(); i++) {
     VkImageViewCreateInfo createInfo{};
