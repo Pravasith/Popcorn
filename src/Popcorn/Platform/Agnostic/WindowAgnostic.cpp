@@ -28,7 +28,7 @@ WindowAgnostic::WindowAgnostic(const Props &props) : m_title(props.Title) {
   PC_PRINT("CREATED", TagType::Constr, "WINDOW-AGNOSTIC");
 
   // GLFW INIT
-  // ---------------------------------------------------
+  // -------------------------------------------------------------------
   int success = glfwInit();
   if (!success) {
     pc_write_log("GLFW Error: Couldn't initiate GLFW");
