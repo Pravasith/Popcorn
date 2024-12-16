@@ -1,14 +1,13 @@
-third-party/
+Engine/third-party/
 
-build/linux/
-build/windows/
+Engine/build/
+# Engine/build/linux/
+# Engine/build/windows/
 
-ext-repos/glfw
-win64/
-.cache/
+Engine/.cache/
 
 # Logs
-common_logs.txt
+Engine/common_logs.txt
 
 # Prerequisites
 *.d
