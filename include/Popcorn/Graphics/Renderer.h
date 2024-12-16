@@ -28,6 +28,7 @@ public:
   static const auto GetRenderer();
 
   virtual void OnUpdate();
+  virtual void OnEvent(Event &);
 
   Renderer(const Renderer &) = delete;
   Renderer &operator=(const Renderer &) = delete;

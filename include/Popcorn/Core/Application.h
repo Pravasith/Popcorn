@@ -25,7 +25,7 @@ public:
   static void Run();
 
   Window &GetAppWindow() const;
-  LayerStack &GetLayerStack() const { return *s_layer_stack; };
+  LayerStack &GetLayerStack() const { return *s_layerStack; };
   static bool IsGameLoopRunning();
 
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
@@ -42,16 +42,17 @@ private:
 
   void OnEvent(Event &) const override;
   bool OnWindowResize(WindowResizeEvent &) const;
+  bool OnFrameBfrResize(FrameBfrResizeEvent &) const;
   bool OnWindowClose(WindowCloseEvent &) const;
   bool OnCPUClockTick(TimeEvent &) const;
 
 private:
   static Application *s_instance;
-  static LayerStack *s_layer_stack;
+  static LayerStack *s_layerStack;
   static Window *s_window;
   static Time *s_time;
 
-  static DebugUIOverlay *s_debug_ui_overlay;
-  static RenderLayer *s_render_layer;
+  static DebugUIOverlay *s_debugUIOverlay;
+  static RenderLayer *s_renderLayer;
 };
 ENGINE_NAMESPACE_END

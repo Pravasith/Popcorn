@@ -17,21 +17,17 @@ RenderLayer::~RenderLayer() {
 
 void RenderLayer::OnAttach() {
   Application &app = Application::Get();
-  auto &appWin= app.GetAppWindow();
+  auto &appWin = app.GetAppWindow();
 
   s_Renderer<RendererType::Vulkan> =
       Renderer<RendererType::Vulkan>::Create(appWin);
 }
 
-void RenderLayer::OnDetach() { Renderer<RendererType::Vulkan>::Destroy(); }
-
-void RenderLayer::OnUpdate() {
-  s_Renderer<RendererType::Vulkan>->OnUpdate();
-  // s_Renderer<RendererType::Vulkan>->GetRenderer();
-}
+void RenderLayer::OnUpdate() { s_Renderer<RendererType::Vulkan>->OnUpdate(); }
 
 void RenderLayer::OnEvent(Event &e) {
-  // TODO: ADD EVENTS
-  std::cout << e.GetEventTypeName() << '\n';
+  s_Renderer<RendererType::Vulkan>->OnEvent(e);
 }
+
+void RenderLayer::OnDetach() { Renderer<RendererType::Vulkan>::Destroy(); }
 ENGINE_NAMESPACE_END

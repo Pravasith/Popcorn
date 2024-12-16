@@ -1,12 +1,16 @@
 TODO:
 ----------
- :: Check OnUpdate Method of RendererVk
+::  Test minimization logic -
+    https://vulkan-tutorial.com/Drawing_a_triangle/Swap_chain_recreation
 
- :: Refactor THE HORRIBLE Renderer
+::  Check Events class for perf issues
 
- :: Precompiled headers
-    Add precompiled headers to the project and
-    in cmake
+::  Check OnUpdate Method of RendererVk
+
+::  Refactor the Renderer
+
+::  Precompiled headers
+    Add precompiled headers to the project and in cmake
 
 DONE:
 ----------

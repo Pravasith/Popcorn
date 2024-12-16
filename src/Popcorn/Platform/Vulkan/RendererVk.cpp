@@ -1,6 +1,7 @@
 #include "RendererVk.h"
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
+#include "Popcorn/Events/Event.h"
 #include <cstdint>
 #include <cstring>
 #include <vector>
@@ -10,15 +11,14 @@ ENGINE_NAMESPACE_BEGIN
 RendererVk::RendererVk(const Window &appWin)
     : Renderer<RendererType::Vulkan>(appWin), m_ValLyrsVk(m_vkInstance),
       m_WinSrfcVk(m_vkInstance), m_PhysDevVk(m_vkInstance, GetSurface()),
-      m_LogiDevVk(m_vkInstance), m_SwpChnVk(GetPhysDevice(), GetSurface()),
-      m_GfxPlineVk(), m_CmdPoolVk(),
-      m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()),
-      m_PresentVk{
-          m_LogiDevVk.GetLogiDevice(),
-          m_SwpChnVk.GetSwapChain(),
-          m_LogiDevVk.GetDeviceQueue(),
-          m_LogiDevVk.GetPresentQueue(),
-      } {
+      m_LogiDevVk(m_vkInstance), m_GfxPlineVk(),
+      m_SwpChnVk(m_LogiDevVk.GetLogiDevice(), m_PhysDevVk.GetPhysDevice(),
+                 m_WinSrfcVk.GetSurface(), m_PhysDevVk.GetQueueFamilyIndices(),
+                 m_GfxPlineVk.GetRndrPass()),
+      m_CmdPoolVk(), m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()),
+      m_PresentVk{m_LogiDevVk.GetLogiDevice(), m_SwpChnVk.GetSwapChain(),
+                  m_LogiDevVk.GetDeviceQueue(), m_LogiDevVk.GetPresentQueue(),
+                  m_AppWin.GetFramebufferSize()} {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
   InitVulkan();
 };
@@ -44,12 +44,10 @@ void RendererVk::InitVulkan() {
 
   // SWAP CHAIN RELATED
   m_SwpChnVk.CreateSwapChain(
-      m_PhysDevVk.GetPhysDevice(), m_WinSrfcVk.GetSurface(),
-      m_PhysDevVk.GetQueueFamilyIndices(), m_LogiDevVk.GetLogiDevice(),
       m_AppWin.GetFramebufferSize().first, // FRAME BFR WIDTH
       m_AppWin.GetFramebufferSize().second // FRAME BFR HEIGHT
   );
-  m_SwpChnVk.CreateImgViews(m_LogiDevVk.GetLogiDevice());
+  m_SwpChnVk.CreateImgViews();
 
   // CREATE GFX PIPELINE
   m_GfxPlineVk.CreateRndrPass(m_SwpChnVk.GetImgFormat(),
@@ -58,8 +56,7 @@ void RendererVk::InitVulkan() {
                                  m_SwpChnVk.GetSwapChainExtent());
 
   // FRAME BUFFERS
-  m_SwpChnVk.CreateFrameBfrs(m_LogiDevVk.GetLogiDevice(),
-                             m_GfxPlineVk.GetRndrPass());
+  m_SwpChnVk.CreateFrameBfrs();
 
   // CMD BFRS
   m_CmdPoolVk.CreateCmdPool(m_PhysDevVk.GetQueueFamilyIndices(),
@@ -136,18 +133,29 @@ std::vector<const char *> RendererVk::GetRequiredExtensions() {
   return extensions;
 };
 
+void RendererVk::OnEvent(Event &e) {
+  if (e.BelongsToCategory(EventCategory::WindowEvent) &&
+      e.GetEventType() == EventType::FrameBfrResize) {
+    m_PresentVk.SetFrameBfrResized(true);
+  }
+};
+
 void RendererVk::OnUpdate() {
   m_PresentVk.DrawFrame(
       m_CmdPoolVk.GetCmdBfrs(),
+      // TODO: USE A LAMBDA
       CmdPoolVk::RecordCmdBfrFtr{
           m_GfxPlineVk.GetRndrPass(), m_SwpChnVk.GetFrameBfrs(),
-          m_SwpChnVk.GetSwapChainExtent(), m_GfxPlineVk.GetGfxPipeline()});
+          m_SwpChnVk.GetSwapChainExtent(), m_GfxPlineVk.GetGfxPipeline()},
+      // TODO: USE A LAMBDA
+      SwapChainVk::RecreateSwapChainFtr{m_SwpChnVk, m_LogiDevVk.GetLogiDevice(),
+                                        m_AppWin});
 };
 
 void RendererVk::CleanUp() {
   vkDeviceWaitIdle(m_LogiDevVk.GetLogiDevice());
 
-  m_SwpChnVk.CleanUp(m_LogiDevVk.GetLogiDevice());
+  m_SwpChnVk.CleanUp();
   m_PresentVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_CmdPoolVk.CleanUp(m_LogiDevVk.GetLogiDevice());
   m_GfxPlineVk.CleanUp(m_LogiDevVk.GetLogiDevice());

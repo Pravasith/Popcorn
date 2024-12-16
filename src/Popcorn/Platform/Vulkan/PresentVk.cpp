@@ -1,5 +1,4 @@
 #include "PresentVk.h"
-#include "CmdPoolVk.h"
 #include "CommonVk.h"
 #include "Global_Macros.h"
 #include <cstddef>
@@ -9,6 +8,7 @@
 
 ENGINE_NAMESPACE_BEGIN
 uint32_t PresentVk::s_currFrame = 0;
+bool PresentVk::s_frameBfrResized = false;
 
 void PresentVk::CreateSyncObjs(const VkDevice &dev) {
   VkSemaphoreCreateInfo smphInfo{};
@@ -34,15 +34,17 @@ void PresentVk::CreateSyncObjs(const VkDevice &dev) {
   };
 };
 
-void PresentVk::DrawFrame(std::vector<VkCommandBuffer> &cmdBfrs,
-                          CmdPoolVk::RecordCmdBfrFtr recordCmdBfr) const {
+void PresentVk::DrawFrame(
+    std::vector<VkCommandBuffer> &cmdBfrs,
+    CmdPoolVk::RecordCmdBfrFtr recordCmdBfr,
+    SwapChainVk::RecreateSwapChainFtr recreateSwapChain) const {
+
   // ACQUIRE IMAGE FROM THE SWAP CHAIN
   // USING SEPHAMORES AND FENCES
   // SYNC CODE - WAIT UNTIL m_inFlightFences[s_currFrame] IS SIGNALLED - (IT'S
   // SIGNALLED WHEN THE CMD BFR HAS BEEN SUBMITTED TO THE SWAPCHAIN)
   vkWaitForFences(m_logiDevice, 1, &m_inFlightFences[s_currFrame], VK_TRUE,
                   UINT64_MAX);
-  vkResetFences(m_logiDevice, 1, &m_inFlightFences[s_currFrame]);
 
   // CPU ISSUES ACQ. IMG CALL TO GPU, m_imgAvlSmphs IS SIGNALLED WHEN THE IMG IS
   // READY. THE NEXT GPU INSTRUCTION IS BLOCKED UNTIL THE m_imgAvlSmphs IS
@@ -51,12 +53,17 @@ void PresentVk::DrawFrame(std::vector<VkCommandBuffer> &cmdBfrs,
   VkResult res = vkAcquireNextImageKHR(m_logiDevice, m_swpChn, UINT64_MAX,
                                        m_imgAvailableSmphs[s_currFrame],
                                        VK_NULL_HANDLE, &imgIdx);
+
   if (res == VK_ERROR_OUT_OF_DATE_KHR) {
     // RECREATE SWAPCHAIN
+    recreateSwapChain();
     return;
   } else if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR) {
     throw std::runtime_error("FAILED TO ACQUIRE SWAPCHAIN IMAGE!");
   };
+
+  // RESET FENCE BEFORE SUBMITTING WORK
+  vkResetFences(m_logiDevice, 1, &m_inFlightFences[s_currFrame]);
 
   vkResetCommandBuffer(cmdBfrs[s_currFrame], 0);
   recordCmdBfr(cmdBfrs[s_currFrame], imgIdx);
@@ -99,9 +106,11 @@ void PresentVk::DrawFrame(std::vector<VkCommandBuffer> &cmdBfrs,
 
   res = vkQueuePresentKHR(m_presentQueue, &prsntInfo);
 
-  if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR) {
+  if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR ||
+      s_frameBfrResized) {
     // RECREATE SWAPCHAIN
-
+    s_frameBfrResized = false;
+    recreateSwapChain();
   } else if (res != VK_SUCCESS) {
     throw std::runtime_error("FAILED TO PRESENT SWAPCHAIN IMAGE!");
   };

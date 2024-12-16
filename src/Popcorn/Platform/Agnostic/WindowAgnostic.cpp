@@ -9,7 +9,6 @@
 #include "Utilities.h"
 #include "WindowAgnostic.h"
 #include "WindowEvent.h"
-#include <cstdint>
 #include <string>
 
 ENGINE_NAMESPACE_BEGIN
@@ -26,10 +25,10 @@ Window *WindowAgnostic::Init(const Props &props) {
 }
 
 WindowAgnostic::WindowAgnostic(const Props &props) : m_title(props.Title) {
-  PC_PRINT("PLATFORM WINDOW CREATED", TagType::Constr, "WIN64-LINUX");
+  PC_PRINT("CREATED", TagType::Constr, "WINDOW-AGNOSTIC");
 
   // GLFW INIT
-  // ---------------------------------------------------
+  // -------------------------------------------------------------------
   int success = glfwInit();
   if (!success) {
     pc_write_log("GLFW Error: Couldn't initiate GLFW");
@@ -67,20 +66,20 @@ WindowAgnostic::WindowAgnostic(const Props &props) : m_title(props.Title) {
   // GLFW SET WINDOW CALLBACKS
   // ---------------------------------------------------
 
-  /* Window Close Callback */
+  /* WINDOW CLOSE CALLBACK */
   glfwSetWindowCloseCallback(s_osWindow, [](GLFWwindow *os_window) {
     WindowCloseEvent winCloseEvt;
     s_instance->PublishEvent(winCloseEvt);
   });
 
-  /* Mouse Position Callback */
+  /* MOUSE POSITION CALLBACK */
   glfwSetCursorPosCallback(s_osWindow,
                            [](GLFWwindow *os_window, double x, double y) {
                              MouseMovedEvent mMoveEvt((float)x, (float)y);
                              s_instance->PublishEvent(mMoveEvt);
                            });
 
-  /* Key Callback */
+  /* KEY CALLBACK */
   glfwSetKeyCallback(s_osWindow, [](GLFWwindow *os_window, int key,
                                     int scan_code, int action, int mods) {
     // GLFW ACTIONS
@@ -105,12 +104,19 @@ WindowAgnostic::WindowAgnostic(const Props &props) : m_title(props.Title) {
     }
   });
 
-  /* Window Resize Callback */
+  /* WINDOW RESIZE CALLBACK */
   glfwSetWindowSizeCallback(s_osWindow,
                             [](GLFWwindow *os_window, int width, int height) {
                               WindowResizeEvent event(width, height);
                               s_instance->PublishEvent(event);
                             });
+
+  /* FRAME BFR RESIZE CALLBACK */
+  glfwSetFramebufferSizeCallback(
+      s_osWindow, [](GLFWwindow *os_window, int width, int height) {
+        FrameBfrResizeEvent event(width, height);
+        s_instance->PublishEvent(event);
+      });
 
   if (!s_osWindow) {
     pc_write_log("No OS Window yet!");
@@ -118,7 +124,6 @@ WindowAgnostic::WindowAgnostic(const Props &props) : m_title(props.Title) {
 }
 
 void WindowAgnostic::OnUpdate() {
-
   // glViewport(0, 0, WindowAgnostic::GetWidth(),
   // WindowAgnostic::GetHeight());
 
@@ -131,7 +136,7 @@ WindowAgnostic::~WindowAgnostic() {
   glfwTerminate();
 
   PC_PRINT("TERMINATED", TagType::Destr, "GLFW");
-  PC_PRINT("PLATFORM WINDOW DESTROYED", TagType::Destr, "WIN64-LINUX");
+  PC_PRINT("DESTROYED", TagType::Destr, "WINDOW-AGNOSTIC");
 };
 
 void WindowAgnostic::Terminate() {
@@ -141,17 +146,13 @@ void WindowAgnostic::Terminate() {
   }
 
   else {
-    // No need to delete bc GLFW_Terminate() handles deletion
+    // NO NEED TO DELETE s_osWindow BC glfwTerminate() HANDLES DELETION
     s_osWindow = nullptr;
 
     delete s_instance;
     s_instance = nullptr;
   }
 }
-
-uint16_t WindowAgnostic::GetWidth() const { return 1; }
-
-uint16_t WindowAgnostic::GetHeight() const { return 1; }
 
 void *WindowAgnostic::GetOSWindow() const {
   if (s_osWindow)

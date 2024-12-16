@@ -20,7 +20,7 @@ public:
 
 class WindowResizeEvent : public Event {
 public:
-  WindowResizeEvent(const uint16_t w, const uint16_t h)
+  WindowResizeEvent(const uint32_t w, const uint32_t h)
       : m_window_size({w, h}) {};
 
   EVENT_CATEGORY_OVERRIDE_METHODS(WindowEvent)
@@ -33,8 +33,8 @@ public:
   };
 
   struct WindowSize {
-    uint16_t width = 0;
-    uint16_t height = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
   };
 
   WindowSize GetWindowSize() const { return m_window_size; };
@@ -42,4 +42,31 @@ public:
 private:
   WindowSize m_window_size;
 };
+
+class FrameBfrResizeEvent : public Event {
+private:
+  struct FrameBfrSize {
+    uint32_t width = 0;
+    uint32_t height = 0;
+  };
+
+public:
+  FrameBfrResizeEvent(const uint32_t w, const uint32_t h)
+      : m_window_size({w, h}) {};
+
+  EVENT_CATEGORY_OVERRIDE_METHODS(WindowEvent)
+  EVENT_TYPE_OVERRIDE_METHODS(FrameBfrResize)
+
+  void PrintDebugData() const override {
+    PC_PRINT("FRAMEBFR RESIZE" << " W: " << GetFrameBfrSize().width
+                               << " H: " << GetFrameBfrSize().height,
+             TagType::Print, "WINDOW-EVENT");
+  };
+
+  FrameBfrSize GetFrameBfrSize() const { return m_window_size; };
+
+private:
+  FrameBfrSize m_window_size;
+};
+
 ENGINE_NAMESPACE_END

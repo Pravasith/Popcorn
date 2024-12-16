@@ -85,75 +85,81 @@
 },
 {
   "directory": "/home/prav/personal/Popcorn/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Graphics/Renderer.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Graphics/Renderer.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/glm/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Graphics/Renderer.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Graphics/Renderer.cpp",
   "file": "/home/prav/personal/Popcorn/src/Popcorn/Graphics/Renderer.cpp",
   "output": "src/CMakeFiles/Graphics.dir/Popcorn/Graphics/Renderer.cpp.o"
 },
 {
   "directory": "/home/prav/personal/Popcorn/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/OpenGL/RendererOpenGL.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/OpenGL/RendererOpenGL.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/glm/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/OpenGL/RendererOpenGL.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/OpenGL/RendererOpenGL.cpp",
   "file": "/home/prav/personal/Popcorn/src/Popcorn/Platform/OpenGL/RendererOpenGL.cpp",
   "output": "src/CMakeFiles/Graphics.dir/Popcorn/Platform/OpenGL/RendererOpenGL.cpp.o"
 },
 {
   "directory": "/home/prav/personal/Popcorn/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/RendererVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/RendererVk.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/glm/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/RendererVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/RendererVk.cpp",
   "file": "/home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/RendererVk.cpp",
   "output": "src/CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/RendererVk.cpp.o"
 },
 {
   "directory": "/home/prav/personal/Popcorn/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/ValidationLyrsVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/ValidationLyrsVk.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/glm/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/ValidationLyrsVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/ValidationLyrsVk.cpp",
   "file": "/home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/ValidationLyrsVk.cpp",
   "output": "src/CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/ValidationLyrsVk.cpp.o"
 },
 {
   "directory": "/home/prav/personal/Popcorn/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/PhysDeviceVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/PhysDeviceVk.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/glm/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/PhysDeviceVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/PhysDeviceVk.cpp",
   "file": "/home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/PhysDeviceVk.cpp",
   "output": "src/CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/PhysDeviceVk.cpp.o"
 },
 {
   "directory": "/home/prav/personal/Popcorn/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/LogiDeviceVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/LogiDeviceVk.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/glm/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/LogiDeviceVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/LogiDeviceVk.cpp",
   "file": "/home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/LogiDeviceVk.cpp",
   "output": "src/CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/LogiDeviceVk.cpp.o"
 },
 {
   "directory": "/home/prav/personal/Popcorn/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/WinSurfaceVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/WinSurfaceVk.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/glm/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/WinSurfaceVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/WinSurfaceVk.cpp",
   "file": "/home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/WinSurfaceVk.cpp",
   "output": "src/CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/WinSurfaceVk.cpp.o"
 },
 {
   "directory": "/home/prav/personal/Popcorn/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/SwapChainVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/SwapChainVk.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/glm/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/SwapChainVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/SwapChainVk.cpp",
   "file": "/home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/SwapChainVk.cpp",
   "output": "src/CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/SwapChainVk.cpp.o"
 },
 {
   "directory": "/home/prav/personal/Popcorn/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/GfxPipelineVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/GfxPipelineVk.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/glm/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/GfxPipelineVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/GfxPipelineVk.cpp",
   "file": "/home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/GfxPipelineVk.cpp",
   "output": "src/CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/GfxPipelineVk.cpp.o"
 },
 {
   "directory": "/home/prav/personal/Popcorn/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/ShaderVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/ShaderVk.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/glm/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/ShaderVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/ShaderVk.cpp",
   "file": "/home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/ShaderVk.cpp",
   "output": "src/CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/ShaderVk.cpp.o"
 },
 {
   "directory": "/home/prav/personal/Popcorn/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/CmdPoolVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/CmdPoolVk.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/glm/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/CmdPoolVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/CmdPoolVk.cpp",
   "file": "/home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/CmdPoolVk.cpp",
   "output": "src/CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/CmdPoolVk.cpp.o"
 },
 {
   "directory": "/home/prav/personal/Popcorn/build/linux/src",
-  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/PresentVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/PresentVk.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/glm/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/PresentVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/PresentVk.cpp",
   "file": "/home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/PresentVk.cpp",
   "output": "src/CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/PresentVk.cpp.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/src",
+  "command": "/usr/bin/c++ -DPC_DEBUG -I/home/prav/personal/Popcorn/include -I/home/prav/personal/Popcorn/include/Popcorn/Graphics -I/home/prav/personal/Popcorn/include/Popcorn/Platform/OpenGL -I/home/prav/personal/Popcorn/include/Popcorn/Platform/Vulkan -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/vulkan-headers/include -isystem /home/prav/personal/Popcorn/third-party/linux/glfw/include -isystem /home/prav/personal/Popcorn/third-party/platform-agnostic/glm/include -g -std=c++17 -o CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/VertexBufferVk.cpp.o -c /home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/VertexBufferVk.cpp",
+  "file": "/home/prav/personal/Popcorn/src/Popcorn/Platform/Vulkan/VertexBufferVk.cpp",
+  "output": "src/CMakeFiles/Graphics.dir/Popcorn/Platform/Vulkan/VertexBufferVk.cpp.o"
 },
 {
   "directory": "/home/prav/personal/Popcorn/build/linux/src",

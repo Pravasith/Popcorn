@@ -14,8 +14,8 @@ class CmdPoolVk {
   friend class RendererVk;
 
 public:
-  // TODO: CHANGE NAME
   // FUNCTOR TO RECORD CMD BFRS
+  // TODO: USE A LAMBDA
   struct RecordCmdBfrFtr {
     RecordCmdBfrFtr(const VkRenderPass &rpass,
                     const std::vector<VkFramebuffer> &fbfrs,
@@ -23,8 +23,9 @@ public:
         : m_rndrPass(rpass), m_frameBfrs(fbfrs), m_swpChnExt(ext),
           m_pipeline(pl) {};
 
-    void operator()(VkCommandBuffer cmdBfr, uint32_t imgIdx);
+    void operator()(VkCommandBuffer &cmdBfr, uint32_t imgIdx);
 
+  private:
     const VkRenderPass &m_rndrPass;
     const std::vector<VkFramebuffer> &m_frameBfrs;
     const VkExtent2D &m_swpChnExt;

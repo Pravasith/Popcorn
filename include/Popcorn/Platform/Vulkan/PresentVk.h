@@ -3,6 +3,7 @@
 #include "CmdPoolVk.h"
 #include "Global_Macros.h"
 #include "Popcorn/Core/Base.h"
+#include "SwapChainVk.h"
 #include <cstdint>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -12,16 +13,22 @@ class PresentVk {
   friend class RendererVk;
 
   PresentVk(const VkDevice &logiDevice, const VkSwapchainKHR &swpChn,
-            const VkQueue &gfxQueue, const VkQueue &presentQueue)
+            const VkQueue &gfxQueue, const VkQueue &presentQueue,
+            std::pair<const uint32_t &, const uint32_t &> frmBfrSize)
       : m_logiDevice(logiDevice), m_swpChn(swpChn), m_gfxQueue(gfxQueue),
         m_presentQueue(presentQueue) {
           PC_PRINT("CREATED", TagType::Constr, "PRESENT-VK")
         };
-
   ~PresentVk() { PC_PRINT("DESTROYED", TagType::Destr, "PRESENT-VK") };
 
+  // inline void SetFrameBfrSize (std::pair(const uint32_t))
+  inline void SetFrameBfrResized(bool isResized) {
+    s_frameBfrResized = isResized;
+  };
+
   void DrawFrame(std::vector<VkCommandBuffer> &cmdBfrs,
-                 CmdPoolVk::RecordCmdBfrFtr) const;
+                 CmdPoolVk::RecordCmdBfrFtr recordCmdBfr,
+                 SwapChainVk::RecreateSwapChainFtr recreateSwapChain) const;
 
   void CreateSyncObjs(const VkDevice &);
   void CleanUp(const VkDevice &);
@@ -34,6 +41,8 @@ private:
   std::vector<VkSemaphore> m_imgAvailableSmphs;
   std::vector<VkSemaphore> m_renderFinishedSmphs;
   std::vector<VkFence> m_inFlightFences;
+
+  static bool s_frameBfrResized;
 
   // REFERENCES
   const VkDevice &m_logiDevice;

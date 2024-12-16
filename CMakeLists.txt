@@ -150,6 +150,7 @@ target_include_directories(
   ImGui PUBLIC ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}
                ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/imgui)
 
+# PRECOMPILE
 target_precompile_headers(
   glad PUBLIC ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glad/include/glad/glad.h)
 
@@ -190,8 +191,8 @@ target_include_directories(
 # -----------------------------------------------------------------------
 # DEBUG FLAG --- START
 # -----------------------------------------------------------------------
-option(PC_DEBUG "Use debug mode for compiling" ON)
-# option(PC_DEBUG "Use debug mode for compiling" OFF)
+option(PC_DEBUG "USE DEBUG MODE FOR COMPILING" ON)
+# option(PC_DEBUG "USE DEBUG MODE FOR COMPILING" OFF)
 
 if(PC_DEBUG)
   target_compile_definitions(Window PUBLIC "PC_DEBUG")
@@ -207,7 +208,8 @@ endif()
 # -----------------------------------------------------------------------
 # LINKING LIBS --- START
 # -----------------------------------------------------------------------
-target_link_libraries(Graphics PRIVATE Vulkan::Headers Vulkan::Loader glfw)
+target_link_libraries(Graphics PRIVATE Vulkan::Headers Vulkan::Loader glfw
+                                       glm::glm)
 target_link_libraries(Window PRIVATE glad glfw)
 target_link_libraries(Window PUBLIC Events)
 

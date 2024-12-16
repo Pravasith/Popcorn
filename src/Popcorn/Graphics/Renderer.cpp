@@ -49,7 +49,7 @@ template <RendererType T> const auto Renderer<T>::GetRenderer() {
   } else if constexpr (T == RendererType::OpenGL) {
     return std::get<RendererOpenGL *>(s_renderer);
   } else {
-    PC_STATIC_ASSERT(true, "UNSUPPORTED RENDERERTYPE");
+    PC_STATIC_ASSERT(true, "UNSUPPORTED RENDERER TYPE");
   }
 };
 
@@ -58,6 +58,14 @@ template <RendererType T> void Renderer<T>::OnUpdate() {
     std::get<RendererVk *>(s_renderer)->OnUpdate();
   } else {
     // std::get<RendererOpenGL *>(s_renderer)->OnUpdate();
+  }
+}
+
+template <RendererType T> void Renderer<T>::OnEvent(Event &e) {
+  if constexpr (T == RendererType::Vulkan) {
+    std::get<RendererVk *>(s_renderer)->OnEvent(e);
+  } else {
+    // std::get<RendererOpenGL *>(s_renderer)->OnEvent();
   }
 }
 
