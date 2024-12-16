@@ -3,7 +3,7 @@ set(LAYERS_IMPL_DIR Popcorn/Layers)
 
 # POPCORN LIB
 add_library(
-  PopcornEngine
+  Popcorn
   #
   # CORE IMPL FILES
   ${CORE_IMPL_DIR}/Application.cpp

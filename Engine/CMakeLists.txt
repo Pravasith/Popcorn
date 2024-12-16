@@ -1,12 +1,10 @@
-#
+cmake_minimum_required(VERSION 3.22)
 
 # -----------------------------------------------------------------------
 # BASIC SETTINGS --- START
 # -----------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.22)
 
-set(PROJECT Game)
-
+set(PROJECT Popcorn)
 project(${PROJECT} VERSION 1.0.0)
 message("Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
 
@@ -66,8 +64,7 @@ endif()
 # -----------------------------------------------------------------------
 # SET EXECUTABLE --- START
 # -----------------------------------------------------------------------
-set(SOURCE_FILES main.cpp)
-add_executable(${PROJECT} ${SOURCE_FILES})
+# set(SOURCE_FILES main.cpp) add_executable(${PROJECT} ${SOURCE_FILES})
 # -----------------------------------------------------------------------
 # SET EXECUTABLE --- END
 # -----------------------------------------------------------------------
@@ -138,7 +135,6 @@ set(GLFW_BUILD_EXAMPLES
 # -----------------------------------------------------------------------
 # SET IMPLEMENTATION AND INCLUDE DIRS --- START
 # -----------------------------------------------------------------------
-# Main implementation dir
 add_subdirectory("src")
 
 include_directories(# POPCORN INTERNAL INCLUDES
@@ -176,7 +172,7 @@ target_include_directories(
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan)
 
 target_include_directories(
-  PopcornEngine
+  Popcorn
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core
          ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Layers
@@ -214,14 +210,13 @@ target_link_libraries(Window PRIVATE glad glfw)
 target_link_libraries(Window PUBLIC Events)
 
 # FOR IMGUI_LAYER
-target_link_libraries(PopcornEngine PRIVATE glad)
+target_link_libraries(Popcorn PRIVATE glad)
 target_link_libraries(ImGui PUBLIC glfw)
 
-target_link_libraries(PopcornEngine PUBLIC ImGui)
-target_link_libraries(PopcornEngine PRIVATE Graphics Window)
+target_link_libraries(Popcorn PUBLIC ImGui)
+target_link_libraries(Popcorn PRIVATE Graphics Window)
 
-# FINAL PROJECT LINKING
-target_link_libraries(${PROJECT} PRIVATE PopcornEngine)
+# FINAL PROJECT LINKING target_link_libraries(${PROJECT} PRIVATE Popcorn)
 # -----------------------------------------------------------------------
 # LINKING LIBS --- END
 # -----------------------------------------------------------------------
