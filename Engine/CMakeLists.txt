@@ -66,24 +66,18 @@ endif()
 add_subdirectory("third-party")
 
 # VENDOR BINARIES DIRS
-set(PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR
+set(PLATFORM_AGNOSTIC_VENDOR_DIR
     ${CMAKE_SOURCE_DIR}/third-party/platform-agnostic)
-set(LINUX_VENDOR_BINARIES_DIR ${CMAKE_SOURCE_DIR}/third-party/linux)
-set(WINDOWS_VENDOR_BINARIES_DIR ${CMAKE_SOURCE_DIR}/third-party/windows)
+set(LINUX_VENDOR_DIR ${CMAKE_SOURCE_DIR}/third-party/linux)
+set(WINDOWS_VENDOR_DIR ${CMAKE_SOURCE_DIR}/third-party/windows)
 
+# Set CMAKE_PREFIX_PATH for find_package
 if(BUILD_FOR_LINUX)
-  # VENDOR BINARIES PATHS
-  set(CMAKE_PREFIX_PATH
-      # LINUX SPECIFIC
-      ${LINUX_VENDOR_BINARIES_DIR}/glfw
-      ${LINUX_VENDOR_BINARIES_DIR}/vulkan-loader
-      # PLATFORM AGNOSTIC
-      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers
-      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glm)
-else()
-  set(CMAKE_PREFIX_PATH ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers
-                        ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glm)
+  list(APPEND CMAKE_PREFIX_PATH ${LINUX_VENDOR_DIR}/glfw
+       ${LINUX_VENDOR_DIR}/vulkan-loader)
 endif()
+list(APPEND CMAKE_PREFIX_PATH ${PLATFORM_AGNOSTIC_VENDOR_DIR}/vulkan-headers
+     ${PLATFORM_AGNOSTIC_VENDOR_DIR}/glm)
 
 # FIND VENDOR BINARIES
 find_package(OpenGL REQUIRED)
@@ -124,40 +118,59 @@ set(GLFW_BUILD_EXAMPLES
 # -----------------------------------------------------------------------
 add_subdirectory("src")
 
-# include_directories(include)
+include_directories(include)
 
-# target_include_directories( glad PUBLIC
-# ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glad/include)
+target_include_directories(
+  glad
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic/glad/include>
+    $<INSTALL_INTERFACE:include>)
 
-# target_include_directories( ImGui PUBLIC
-# ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}
-# ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/imgui)
+target_include_directories(
+  ImGui
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic>
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic/imgui>
+    $<INSTALL_INTERFACE:include>)
 
 # PRECOMPILE
 target_precompile_headers(
-  glad PUBLIC ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glad/include/glad/glad.h)
+  glad PUBLIC ${PLATFORM_AGNOSTIC_VENDOR_DIR}/glad/include/glad/glad.h)
 
-# TODO: Refactor these
+target_include_directories(
+  Window
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Agnostic>
+    $<INSTALL_INTERFACE:include>)
 
-# target_include_directories( Window PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core
-# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform
-# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Agnostic)
+target_include_directories(
+  Events
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Input>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events>
+         $<INSTALL_INTERFACE:include>)
 
-# target_include_directories( Events PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Input
-# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events)
+# target_include_directories( Graphics PUBLIC include include/Popcorn/Graphics
+# include/Popcorn/Platform/OpenGL include/Popcorn/Platform/Vulkan)
+target_include_directories(
+  Graphics
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Graphics>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/OpenGL>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan>
+    $<INSTALL_INTERFACE:include>)
 
-# target_include_directories( Graphics PUBLIC
-# ${CMAKE_CURRENT_SOURCE_DIR}/include
-# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Graphics
-# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/OpenGL
-# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan)
-
-# target_include_directories( Popcorn PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core
-# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Layers
-# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events)
+target_include_directories(
+  Popcorn
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Layers>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events>
+         $<INSTALL_INTERFACE:include>)
 
 # -----------------------------------------------------------------------
 # SET IMPLEMENTATION AND INCLUDE DIRS --- END
@@ -208,7 +221,7 @@ install(
   RUNTIME DESTINATION bin)
 
 # Export the include directories
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include)
 
 # Export the Popcorn library configuration
 install(

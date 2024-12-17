@@ -1,7 +1,7 @@
 **/third-party/
 
 **/build/
-**/install/
+**/dist/
 
 **/.cache/
 
