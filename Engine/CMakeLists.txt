@@ -63,7 +63,6 @@ endif()
 # -----------------------------------------------------------------------
 # ADD THIRD PARTY LIBS --- START
 # -----------------------------------------------------------------------
-
 add_subdirectory("third-party")
 
 # VENDOR BINARIES DIRS
@@ -127,12 +126,12 @@ add_subdirectory("src")
 
 # include_directories(include)
 
-target_include_directories(
-  glad PUBLIC ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glad/include)
+# target_include_directories( glad PUBLIC
+# ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glad/include)
 
-target_include_directories(
-  ImGui PUBLIC ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}
-               ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/imgui)
+# target_include_directories( ImGui PUBLIC
+# ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}
+# ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/imgui)
 
 # PRECOMPILE
 target_precompile_headers(
@@ -140,32 +139,25 @@ target_precompile_headers(
 
 # TODO: Refactor these
 
-target_include_directories(
-  Window
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core
-         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform
-         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Agnostic)
+# target_include_directories( Window PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core
+# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform
+# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Agnostic)
 
-target_include_directories(
-  Events
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Input
-         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events)
+# target_include_directories( Events PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Input
+# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events)
 
-target_include_directories(
-  Graphics
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Graphics
-         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/OpenGL
-         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan)
+# target_include_directories( Graphics PUBLIC
+# ${CMAKE_CURRENT_SOURCE_DIR}/include
+# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Graphics
+# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/OpenGL
+# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan)
 
-target_include_directories(
-  Popcorn
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core
-         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Layers
-         ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events)
+# target_include_directories( Popcorn PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core
+# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Layers
+# ${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events)
 
 # -----------------------------------------------------------------------
 # SET IMPLEMENTATION AND INCLUDE DIRS --- END
@@ -202,16 +194,14 @@ target_link_libraries(Popcorn PRIVATE glad)
 target_link_libraries(Popcorn PUBLIC ImGui)
 
 target_link_libraries(Popcorn PRIVATE Graphics Window)
-
-# FINAL PROJECT LINKING target_link_libraries(${PROJECT} PRIVATE Popcorn)
 # -----------------------------------------------------------------------
 # LINKING LIBS --- END
 # -----------------------------------------------------------------------
 
 # target_compile_features(${PROJECT} PUBLIC cxx_std_17)
+
 install(
-  TARGETS Popcorn
-  # Window Graphics ImGui glad Events
+  TARGETS Popcorn Window Graphics ImGui glad Events
   EXPORT PopcornTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

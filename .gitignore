@@ -1,10 +1,9 @@
-Engine/third-party/
+**/third-party/
 
-Engine/build/
-# Engine/build/linux/
-# Engine/build/windows/
+**/build/
+**/install/
 
-Engine/.cache/
+**/.cache/
 
 # Logs
 Engine/common_logs.txt

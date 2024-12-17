@@ -51,6 +51,44 @@ endif()
 
 #
 
+set(PC_HOME "${CMAKE_SOURCE_DIR}/../../Engine")
+set(CMAKE_PREFIX_PATH "${PC_HOME}/dist/linux")
+
+# -----------------------------------------------------------------------
+# ADD THIRD PARTY LIBS --- START
+# -----------------------------------------------------------------------
+# VENDOR BINARIES DIRS
+set(PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR
+    ${PC_HOME}/third-party/platform-agnostic)
+set(LINUX_VENDOR_BINARIES_DIR ${PC_HOME}/third-party/linux)
+set(WINDOWS_VENDOR_BINARIES_DIR ${PC_HOME}/third-party/windows)
+
+if(BUILD_FOR_LINUX)
+  # VENDOR BINARIES PATHS
+  set(CMAKE_PREFIX_PATH
+      # LINUX SPECIFIC
+      ${LINUX_VENDOR_BINARIES_DIR}/glfw
+      ${LINUX_VENDOR_BINARIES_DIR}/vulkan-loader
+      # PLATFORM AGNOSTIC
+      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers
+      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glm)
+else()
+  set(CMAKE_PREFIX_PATH ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers
+                        ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glm)
+endif()
+
+# FIND VENDOR BINARIES
+find_package(OpenGL REQUIRED)
+find_package(glfw3 REQUIRED)
+find_package(VulkanLoader REQUIRED)
+find_package(VulkanHeaders REQUIRED CONFIG)
+find_package(glm CONFIG REQUIRED)
+# -----------------------------------------------------------------------
+# ADD THIRD PARTY LIBS --- END
+# -----------------------------------------------------------------------
+
+find_package(Popcorn REQUIRED)
+
 # -----------------------------------------------------------------------
 # SET EXECUTABLE --- START
 # -----------------------------------------------------------------------
@@ -60,28 +98,19 @@ add_executable(${PROJECT} ${SOURCE_FILES})
 # SET EXECUTABLE --- END
 # -----------------------------------------------------------------------
 
-#
+target_link_libraries(${PROJECT} PUBLIC Popcorn::Popcorn)
 
-set(PC_HOME "${CMAKE_SOURCE_DIR}/../../Engine")
-set(PC_INCLUDES "${PC_HOME}/include")
-message("${PC_INCLUDES}")
+install(
+  TARGETS Popcorn Triangle
+  EXPORT TriangleTargets
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
 
-set(PC_BIN_LINUX "${PC_HOME}/build/linux")
-set(PC_BIN_WIN "${PC_HOME}/build/windows")
+# EXPORT THE INCLUDE DIRECTORIES
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
 
-#
+# # EXPORT THE GAME LIBRARY CONFIGURATION
 
-target_include_directories(
-  ${PROJECT}
-  PUBLIC ${PC_INCLUDES}
-         ${PC_INCLUDES}/Popcorn
-         ${PC_INCLUDES}/Popcorn/Core
-         ${PC_INCLUDES}/Popcorn/Layers
-         ${PC_INCLUDES}/Popcorn/Events
-         ${PC_INCLUDES}/Popcorn/Graphics
-         ${PC_INCLUDES}/Popcorn/Input
-         ${PC_INCLUDES}/Popcorn/Platform)
-
-# target_link_libraries( ${PROJECT} PUBLIC "${PC_BIN_LINUX}/src/libPopcorn.a"
-# "${PC_BIN_LINUX}/src/libEvents.a" "${PC_BIN_LINUX}/src/libGraphics.a"
-# "${PC_BIN_LINUX}/src/libWindow.a")
+# install( EXPORT PopcornTargets FILE PopcornConfig.cmake NAMESPACE Popcorn::
+# DESTINATION lib/cmake/Popcorn)

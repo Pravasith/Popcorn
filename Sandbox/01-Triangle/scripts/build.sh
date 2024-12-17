@@ -7,6 +7,7 @@ read -p "Are you compiling for Linux or Windows? (Enter 'L' for Linux or 'W' for
 platform=$(echo "$platform" | tr '[:upper:]' '[:lower:]')
 src_dir="$PWD"
 
+
 # Check the user input and print a message accordingly
 if [ "$platform" = "l" ]; then
     echo "You are compiling for Linux."
