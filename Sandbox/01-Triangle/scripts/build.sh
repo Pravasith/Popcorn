@@ -43,8 +43,8 @@ if [ "$platform" = "l" ]; then
         -B .
 
     cp compile_commands.json "$src_dir"/compile_commands.json
-
-    cmake --build . --target install
+    # cmake --build . --target install
+    make
 
     echo $PWD
     cd $src_dir

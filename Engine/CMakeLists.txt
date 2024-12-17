@@ -144,17 +144,20 @@ target_include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Agnostic>
-    $<INSTALL_INTERFACE:include>)
+    $<INSTALL_INTERFACE:include>
+    $<INSTALL_INTERFACE:include/Popcorn/Core>
+    $<INSTALL_INTERFACE:include/Popcorn/Platform>
+    $<INSTALL_INTERFACE:include/Popcorn/Platform/Agnostic>)
 
 target_include_directories(
   Events
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Input>
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events>
-         $<INSTALL_INTERFACE:include>)
+         $<INSTALL_INTERFACE:include>
+         $<INSTALL_INTERFACE:include/Popcorn/Input>
+         $<INSTALL_INTERFACE:include/Popcorn/Events>)
 
-# target_include_directories( Graphics PUBLIC include include/Popcorn/Graphics
-# include/Popcorn/Platform/OpenGL include/Popcorn/Platform/Vulkan)
 target_include_directories(
   Graphics
   PUBLIC
@@ -162,7 +165,10 @@ target_include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Graphics>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/OpenGL>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan>
-    $<INSTALL_INTERFACE:include>)
+    $<INSTALL_INTERFACE:include>
+    $<INSTALL_INTERFACE:include/Popcorn/Graphics>
+    $<INSTALL_INTERFACE:include/Popcorn/Platform/OpenGL>
+    $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan>)
 
 target_include_directories(
   Popcorn
@@ -170,7 +176,10 @@ target_include_directories(
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core>
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Layers>
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events>
-         $<INSTALL_INTERFACE:include>)
+         $<INSTALL_INTERFACE:include>
+         $<INSTALL_INTERFACE:include/Popcorn/Core>
+         $<INSTALL_INTERFACE:include/Popcorn/Layers>
+         $<INSTALL_INTERFACE:include/Popcorn/Events>)
 
 # -----------------------------------------------------------------------
 # SET IMPLEMENTATION AND INCLUDE DIRS --- END

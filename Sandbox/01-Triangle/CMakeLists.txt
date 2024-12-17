@@ -53,29 +53,23 @@ endif()
 
 set(PC_HOME "${CMAKE_SOURCE_DIR}/../../Engine")
 set(CMAKE_PREFIX_PATH "${PC_HOME}/dist/linux")
+# list(APPEND CMAKE_PREFIX_PATH "${PC_HOME}/dist/linux")
 
 # -----------------------------------------------------------------------
 # ADD THIRD PARTY LIBS --- START
 # -----------------------------------------------------------------------
 # VENDOR BINARIES DIRS
-set(PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR
-    ${PC_HOME}/third-party/platform-agnostic)
-set(LINUX_VENDOR_BINARIES_DIR ${PC_HOME}/third-party/linux)
-set(WINDOWS_VENDOR_BINARIES_DIR ${PC_HOME}/third-party/windows)
+set(PLATFORM_AGNOSTIC_VENDOR_DIR ${PC_HOME}/third-party/platform-agnostic)
+set(LINUX_VENDOR_DIR ${PC_HOME}/third-party/linux)
+set(WINDOWS_VENDOR_DIR ${PC_HOME}/third-party/windows)
 
+# Set CMAKE_PREFIX_PATH for find_package
 if(BUILD_FOR_LINUX)
-  # VENDOR BINARIES PATHS
-  set(CMAKE_PREFIX_PATH
-      # LINUX SPECIFIC
-      ${LINUX_VENDOR_BINARIES_DIR}/glfw
-      ${LINUX_VENDOR_BINARIES_DIR}/vulkan-loader
-      # PLATFORM AGNOSTIC
-      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers
-      ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glm)
-else()
-  set(CMAKE_PREFIX_PATH ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers
-                        ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glm)
+  list(APPEND CMAKE_PREFIX_PATH ${LINUX_VENDOR_DIR}/glfw
+       ${LINUX_VENDOR_DIR}/vulkan-loader)
 endif()
+list(APPEND CMAKE_PREFIX_PATH ${PLATFORM_AGNOSTIC_VENDOR_DIR}/vulkan-headers
+     ${PLATFORM_AGNOSTIC_VENDOR_DIR}/glm)
 
 # FIND VENDOR BINARIES
 find_package(OpenGL REQUIRED)
@@ -100,17 +94,8 @@ add_executable(${PROJECT} ${SOURCE_FILES})
 
 target_link_libraries(${PROJECT} PUBLIC Popcorn::Popcorn)
 
-install(
-  TARGETS Popcorn Triangle
-  EXPORT TriangleTargets
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
+# install( TARGETS Triangle EXPORT TriangleTargets ARCHIVE DESTINATION lib
+# LIBRARY DESTINATION lib RUNTIME DESTINATION bin)
 
-# EXPORT THE INCLUDE DIRECTORIES
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
-
-# # EXPORT THE GAME LIBRARY CONFIGURATION
-
-# install( EXPORT PopcornTargets FILE PopcornConfig.cmake NAMESPACE Popcorn::
-# DESTINATION lib/cmake/Popcorn)
+# EXPORT THE INCLUDE DIRECTORIES install(DIRECTORY
+# ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
