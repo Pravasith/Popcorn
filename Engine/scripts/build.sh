@@ -29,13 +29,16 @@ if [ "$platform" = "l" ]; then
     fi
 
     cmake \
+        -D CMAKE_INSTALL_PREFIX="$src_dir/build/linux" \
         -D CMAKE_EXPORT_COMPILE_COMMANDS=ON \
         -D CMAKE_BUILD_TYPE=Debug \
-        ../../
+        -S ../../ \
+        -B .
 
     cp compile_commands.json "$src_dir"/compile_commands.json
 
-    make
+    cmake --build . --target install
+    # make
 
     echo $PWD
     cd $src_dir

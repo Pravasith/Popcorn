@@ -8,7 +8,7 @@ set(PROJECT Popcorn)
 project(${PROJECT} VERSION 1.0.0)
 message("Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
 
-# Specify the C++ standard
+# SPECIFY THE C++ STANDARD
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -45,15 +45,12 @@ endif()
 # -----------------------------------------------------------------------
 # STATIC BUILD SETTINGS (OPTIONAL) --- START
 # -----------------------------------------------------------------------
-option(STATIC_BUILD "Build a static binary." ${BUILD_FOR_WIN})
+option(STATIC_BUILD "BUILD A STATIC BINARY" ${BUILD_FOR_WIN})
 
 if(STATIC_BUILD)
   set(CMAKE_EXE_LINKER_FLAGS "-static")
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" CONFIG)
   set(BUILD_SHARED_LIBS OFF)
-
-  # set(WINDOWS_BINARIES_DIR ${CMAKE_SOURCE_DIR}/win64) set(GLAD_INCLUDE_DIR
-  # ${WINDOWS_BINARIES_DIR}/glad/include)
 endif()
 # -----------------------------------------------------------------------
 # STATIC BUILD SETTINGS (OPTIONAL) --- END
@@ -61,22 +58,11 @@ endif()
 
 #
 
-# -----------------------------------------------------------------------
-# SET EXECUTABLE --- START
-# -----------------------------------------------------------------------
-# set(SOURCE_FILES main.cpp) add_executable(${PROJECT} ${SOURCE_FILES})
-# -----------------------------------------------------------------------
-# SET EXECUTABLE --- END
-# -----------------------------------------------------------------------
-
 #
 
 # -----------------------------------------------------------------------
 # ADD THIRD PARTY LIBS --- START
 # -----------------------------------------------------------------------
-# if(BUILD_FOR_LINUX) add_subdirectory("third-party/linux") endif()
-#
-# if(BUILD_FOR_WIN) add_subdirectory("third-party/windows") endif()
 
 add_subdirectory("third-party")
 
@@ -132,16 +118,18 @@ set(GLFW_BUILD_EXAMPLES
 
 #
 
+#
+
 # -----------------------------------------------------------------------
 # SET IMPLEMENTATION AND INCLUDE DIRS --- START
 # -----------------------------------------------------------------------
 add_subdirectory("src")
 
-include_directories(# POPCORN INTERNAL INCLUDES
-                    include)
+# include_directories(include)
 
 target_include_directories(
   glad PUBLIC ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glad/include)
+
 target_include_directories(
   ImGui PUBLIC ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}
                ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/imgui)
@@ -151,6 +139,7 @@ target_precompile_headers(
   glad PUBLIC ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glad/include/glad/glad.h)
 
 # TODO: Refactor these
+
 target_include_directories(
   Window
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -208,12 +197,10 @@ target_link_libraries(Graphics PRIVATE Vulkan::Headers Vulkan::Loader glfw
                                        glm::glm)
 target_link_libraries(Window PRIVATE glad glfw)
 target_link_libraries(Window PUBLIC Events)
-
-# FOR IMGUI_LAYER
-target_link_libraries(Popcorn PRIVATE glad)
 target_link_libraries(ImGui PUBLIC glfw)
-
+target_link_libraries(Popcorn PRIVATE glad)
 target_link_libraries(Popcorn PUBLIC ImGui)
+
 target_link_libraries(Popcorn PRIVATE Graphics Window)
 
 # FINAL PROJECT LINKING target_link_libraries(${PROJECT} PRIVATE Popcorn)
@@ -222,3 +209,20 @@ target_link_libraries(Popcorn PRIVATE Graphics Window)
 # -----------------------------------------------------------------------
 
 # target_compile_features(${PROJECT} PUBLIC cxx_std_17)
+install(
+  TARGETS Popcorn
+  # Window Graphics ImGui glad Events
+  EXPORT PopcornTargets
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
+
+# Export the include directories
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
+
+# Export the Popcorn library configuration
+install(
+  EXPORT PopcornTargets
+  FILE PopcornConfig.cmake
+  NAMESPACE Popcorn::
+  DESTINATION lib/cmake/Popcorn)

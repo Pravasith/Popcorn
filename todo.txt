@@ -1,5 +1,7 @@
 TODO:
 ----------
+::  Make Readme for the project & install it on a VM
+
 ::  Test minimization logic -
     https://vulkan-tutorial.com/Drawing_a_triangle/Swap_chain_recreation
 

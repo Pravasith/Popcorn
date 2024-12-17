@@ -1,3 +1,5 @@
 #pragma once
 
-#include "Application.h"
+#include "Popcorn/Core/Application.h"
+#include "Popcorn/Layers/DebugUIOverlay.h"
+#include "Popcorn/Layers/RenderLayer.h"
