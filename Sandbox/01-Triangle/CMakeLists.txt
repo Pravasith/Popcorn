@@ -56,8 +56,4 @@ add_executable(${PROJECT} ${SOURCE_FILES})
 
 target_link_libraries(${PROJECT} PUBLIC Popcorn::Popcorn)
 
-# install( TARGETS Triangle EXPORT TriangleTargets ARCHIVE DESTINATION lib
-# LIBRARY DESTINATION lib RUNTIME DESTINATION bin)
-
-# EXPORT THE INCLUDE DIRECTORIES install(DIRECTORY
-# ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)

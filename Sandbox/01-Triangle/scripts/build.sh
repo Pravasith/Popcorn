@@ -43,8 +43,8 @@ if [ "$platform" = "l" ]; then
         -B .
 
     cp compile_commands.json "$src_dir"/compile_commands.json
-    # cmake --build . --target install
-    make
+    cmake --build . --target install
+    # make
 
     echo $PWD
     cd $src_dir
@@ -84,8 +84,8 @@ elif [ "$platform" = "w" ]; then
         # ADD BELOW FLAG FOR RELEASE BUILDS
         # -D CMAKE_BUILD_TYPE=Release \
 
-    # cmake --build . --target install
-    make
+    cmake --build . --target install
+    # make
 
     echo $PWD
     cd $src_dir
