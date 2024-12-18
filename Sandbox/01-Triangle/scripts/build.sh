@@ -12,7 +12,7 @@ src_dir="$PWD"
 if [ "$platform" = "l" ]; then
     echo "You are compiling for Linux."
 
-    build_dir="$src_dir"/build/linux
+    build_dir="$src_dir/build/linux"
     install_dir="$src_dir/dist/linux"
 
     mkdir -p "$build_dir"
@@ -84,7 +84,8 @@ elif [ "$platform" = "w" ]; then
         # ADD BELOW FLAG FOR RELEASE BUILDS
         # -D CMAKE_BUILD_TYPE=Release \
 
-    cmake --build . --target install
+    # cmake --build . --target install
+    make
 
     echo $PWD
     cd $src_dir

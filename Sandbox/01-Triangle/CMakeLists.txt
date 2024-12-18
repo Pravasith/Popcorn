@@ -19,16 +19,9 @@ set(PC_HOME "${CMAKE_SOURCE_DIR}/../../Engine")
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set(BUILD_FOR_LINUX TRUE)
   set(CMAKE_PREFIX_PATH "${PC_HOME}/dist/linux")
-endif()
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  set(BUILD_FOR_WIN TRUE)
-  set(CMAKE_PREFIX_PATH "${PC_HOME}/dist/windows")
-  # Include the toolchain file for cross-compilation
-  # include(${CMAKE_TOOLCHAIN_FILE})
-endif()
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  # IN TOOLCHAIN FILE
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(BUILD_FOR_MACOS TRUE)
   # Include the toolchain file for cross-compilation
   # include(${CMAKE_TOOLCHAIN_FILE})
@@ -57,14 +50,8 @@ endif()
 
 find_package(Popcorn REQUIRED)
 
-# -----------------------------------------------------------------------
-# SET EXECUTABLE --- START
-# -----------------------------------------------------------------------
 set(SOURCE_FILES main.cpp)
 add_executable(${PROJECT} ${SOURCE_FILES})
-# -----------------------------------------------------------------------
-# SET EXECUTABLE --- END
-# -----------------------------------------------------------------------
 
 target_link_libraries(${PROJECT} PUBLIC Popcorn::Popcorn)
 
