@@ -1,5 +1,6 @@
 TODO:
 ----------
+::  Check GLFW installation for linux & windows
 ::  Architecture for Sandbox - scripts
     - script to build & install engine in sandbox
     - make main.cpp work

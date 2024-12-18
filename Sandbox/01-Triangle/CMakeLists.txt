@@ -14,12 +14,16 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # -----------------------------------------------------------------------
 # OS FLAGS --- START
 # -----------------------------------------------------------------------
+set(PC_HOME "${CMAKE_SOURCE_DIR}/../../Engine")
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set(BUILD_FOR_LINUX TRUE)
+  set(CMAKE_PREFIX_PATH "${PC_HOME}/dist/linux")
 endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set(BUILD_FOR_WIN TRUE)
+  set(CMAKE_PREFIX_PATH "${PC_HOME}/dist/windows")
   # Include the toolchain file for cross-compilation
   # include(${CMAKE_TOOLCHAIN_FILE})
 endif()
@@ -50,36 +54,6 @@ endif()
 # -----------------------------------------------------------------------
 
 #
-
-set(PC_HOME "${CMAKE_SOURCE_DIR}/../../Engine")
-set(CMAKE_PREFIX_PATH "${PC_HOME}/dist/linux")
-# list(APPEND CMAKE_PREFIX_PATH "${PC_HOME}/dist/linux")
-
-# -----------------------------------------------------------------------
-# ADD THIRD PARTY LIBS --- START
-# -----------------------------------------------------------------------
-# VENDOR BINARIES DIRS
-set(PLATFORM_AGNOSTIC_VENDOR_DIR ${PC_HOME}/third-party/platform-agnostic)
-set(LINUX_VENDOR_DIR ${PC_HOME}/third-party/linux)
-set(WINDOWS_VENDOR_DIR ${PC_HOME}/third-party/windows)
-
-# Set CMAKE_PREFIX_PATH for find_package
-if(BUILD_FOR_LINUX)
-  list(APPEND CMAKE_PREFIX_PATH ${LINUX_VENDOR_DIR}/glfw
-       ${LINUX_VENDOR_DIR}/vulkan-loader)
-endif()
-list(APPEND CMAKE_PREFIX_PATH ${PLATFORM_AGNOSTIC_VENDOR_DIR}/vulkan-headers
-     ${PLATFORM_AGNOSTIC_VENDOR_DIR}/glm)
-
-# FIND VENDOR BINARIES
-find_package(OpenGL REQUIRED)
-find_package(glfw3 REQUIRED)
-find_package(VulkanLoader REQUIRED)
-find_package(VulkanHeaders REQUIRED CONFIG)
-find_package(glm CONFIG REQUIRED)
-# -----------------------------------------------------------------------
-# ADD THIRD PARTY LIBS --- END
-# -----------------------------------------------------------------------
 
 find_package(Popcorn REQUIRED)
 

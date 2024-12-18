@@ -12,6 +12,16 @@ message("Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+set(GLFW_BUILD_DOCS
+    OFF
+    CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS
+    OFF
+    CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES
+    OFF
+    CACHE BOOL "" FORCE)
 # -----------------------------------------------------------------------
 # BASIC SETTINGS --- END
 # -----------------------------------------------------------------------
@@ -42,11 +52,12 @@ endif()
 
 #
 
+#
+
 # -----------------------------------------------------------------------
 # STATIC BUILD SETTINGS (OPTIONAL) --- START
 # -----------------------------------------------------------------------
 option(STATIC_BUILD "BUILD A STATIC BINARY" ${BUILD_FOR_WIN})
-
 if(STATIC_BUILD)
   set(CMAKE_EXE_LINKER_FLAGS "-static")
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" CONFIG)
@@ -60,10 +71,12 @@ endif()
 
 #
 
+add_subdirectory("third-party")
+add_subdirectory("src")
+
 # -----------------------------------------------------------------------
 # ADD THIRD PARTY LIBS --- START
 # -----------------------------------------------------------------------
-add_subdirectory("third-party")
 
 # VENDOR BINARIES DIRS
 set(PLATFORM_AGNOSTIC_VENDOR_DIR
@@ -75,6 +88,7 @@ set(WINDOWS_VENDOR_DIR ${CMAKE_SOURCE_DIR}/third-party/windows)
 if(BUILD_FOR_LINUX)
   list(APPEND CMAKE_PREFIX_PATH ${LINUX_VENDOR_DIR}/glfw
        ${LINUX_VENDOR_DIR}/vulkan-loader)
+
 endif()
 list(APPEND CMAKE_PREFIX_PATH ${PLATFORM_AGNOSTIC_VENDOR_DIR}/vulkan-headers
      ${PLATFORM_AGNOSTIC_VENDOR_DIR}/glm)
@@ -91,24 +105,6 @@ find_package(glm CONFIG REQUIRED)
 
 #
 
-# -----------------------------------------------------------------------
-# GLFW SETTINGS --- START
-# -----------------------------------------------------------------------
-set(GLFW_BUILD_DOCS
-    OFF
-    CACHE BOOL "" FORCE)
-
-set(GLFW_BUILD_TESTS
-    OFF
-    CACHE BOOL "" FORCE)
-
-set(GLFW_BUILD_EXAMPLES
-    OFF
-    CACHE BOOL "" FORCE)
-# -----------------------------------------------------------------------
-# GLFW SETTINGS --- END
-# -----------------------------------------------------------------------
-
 #
 
 #
@@ -116,7 +112,6 @@ set(GLFW_BUILD_EXAMPLES
 # -----------------------------------------------------------------------
 # SET IMPLEMENTATION AND INCLUDE DIRS --- START
 # -----------------------------------------------------------------------
-add_subdirectory("src")
 
 include_directories(include)
 
@@ -210,17 +205,55 @@ endif()
 target_link_libraries(Graphics PRIVATE Vulkan::Headers Vulkan::Loader glfw
                                        glm::glm)
 target_link_libraries(Window PRIVATE glad glfw)
-target_link_libraries(Window PUBLIC Events)
-target_link_libraries(ImGui PUBLIC glfw)
-target_link_libraries(Popcorn PRIVATE glad)
-target_link_libraries(Popcorn PUBLIC ImGui)
+target_link_libraries(Window PRIVATE Events)
+target_link_libraries(ImGui PRIVATE glfw)
+target_link_libraries(Popcorn PRIVATE glad glfw)
+# target_link_libraries(Popcorn PUBLIC ImGui)
 
-target_link_libraries(Popcorn PRIVATE Graphics Window)
+target_link_libraries(Popcorn PRIVATE Graphics Window ImGui)
 # -----------------------------------------------------------------------
 # LINKING LIBS --- END
 # -----------------------------------------------------------------------
 
-# target_compile_features(${PROJECT} PUBLIC cxx_std_17)
+target_compile_features(${PROJECT} PUBLIC cxx_std_17)
+
+# -----------------------------------------------------------------------
+# INSTALL CONFIG --- START
+# -----------------------------------------------------------------------
+# Export Vulkan, GLFW, and GLM as part of Popcorn
+
+# target_link_libraries(Popcorn PUBLIC Vulkan::Headers Vulkan::Loader glfw
+# glm::glm)
+
+include(CMakePackageConfigHelpers)
+
+# Generate the Config file
+configure_package_config_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/PopcornConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/PopcornConfig.cmake
+  INSTALL_DESTINATION lib/cmake/Popcorn)
+
+# Generate the Version file
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/PopcornConfigVersion.cmake
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion)
+
+# Install Config and Version Files
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PopcornConfig.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/PopcornConfigVersion.cmake
+        DESTINATION lib/cmake/Popcorn)
+
+# Export static libs
+install(DIRECTORY include/ DESTINATION include)
+
+if(BUILD_FOR_LINUX)
+  install(DIRECTORY third-party/linux/ third-party/platform-agnostic/
+          DESTINATION third-party)
+elseif(BUILD_FOR_WIN)
+  install(DIRECTORY third-party/windows/ third-party/platform-agnostic/
+          DESTINATION third-party)
+endif()
 
 install(
   TARGETS Popcorn Window Graphics ImGui glad Events
@@ -229,12 +262,13 @@ install(
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
 
-# Export the include directories
-install(DIRECTORY include/ DESTINATION include)
-
 # Export the Popcorn library configuration
 install(
   EXPORT PopcornTargets
-  FILE PopcornConfig.cmake
+  FILE PopcornTargets.cmake
   NAMESPACE Popcorn::
   DESTINATION lib/cmake/Popcorn)
+
+# -----------------------------------------------------------------------
+# INSTALL CONFIG --- END
+# -----------------------------------------------------------------------
