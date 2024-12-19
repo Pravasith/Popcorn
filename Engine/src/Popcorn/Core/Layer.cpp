@@ -1,6 +1,5 @@
 
 #include "Layer.h"
-#include "Event.h"
 #include "Global_Macros.h"
 
 ENGINE_NAMESPACE_BEGIN

@@ -1,7 +1,7 @@
 #include "Application.h"
 #include "Base.h"
 #include "RenderLayer.h"
-#include "Utilities.h"
+#include <stdexcept>
 
 ENGINE_NAMESPACE_BEGIN
 Application *Application::s_instance = nullptr;
@@ -35,11 +35,12 @@ Application::~Application() {
 Application &Application::Get() { return *s_instance; }
 Window &Application::GetAppWindow() const { return *s_window; }
 
-void Application::Start() {
+void Application::Start(Window *appWin) {
   if (!s_instance) {
     // DONT MOVE THIS BLOCK
     s_instance = new Application();
-    s_window = Window::Create(Window::Props("Popcorn Engine", 500, 500));
+    s_window = appWin;
+    // Window::Create(Window::Props("Popcorn Engine", 500, 500));
     Window::Subscribe(s_instance);
 
     Application::InitLayers();
@@ -57,8 +58,8 @@ void Application::Start() {
 
     s_time = Time::Get();
   } else {
-    pc_write_log(
-        "Attempt to create Application class, when instance already exists");
+    std::runtime_error(
+        "ATTEMPT TO CREATE APPLICATION CLASS, WHEN INSTANCE ALREADY EXISTS");
   }
 }
 
@@ -69,7 +70,6 @@ void Application::Run() { s_time->Start(); };
 bool Application::IsGameLoopRunning() { return s_time->IsGameLoopRunning(); };
 
 void Application::Stop() {
-
   // DESTROY WINDOW
   if (s_instance) {
     delete s_instance;

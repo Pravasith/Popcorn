@@ -80,14 +80,14 @@ target_include_directories(
   glad
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic/glad/include>
-    $<INSTALL_INTERFACE:include>)
+  PRIVATE $<INSTALL_INTERFACE:include>)
 
 target_include_directories(
   ImGui
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic>
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic/imgui>
-    $<INSTALL_INTERFACE:include>)
+  PRIVATE $<INSTALL_INTERFACE:include>)
 
 # PRECOMPILE
 target_precompile_headers(
@@ -100,19 +100,19 @@ target_include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Agnostic>
-    $<INSTALL_INTERFACE:include>
-    $<INSTALL_INTERFACE:include/Popcorn/Core>
-    $<INSTALL_INTERFACE:include/Popcorn/Platform>
-    $<INSTALL_INTERFACE:include/Popcorn/Platform/Agnostic>)
+  INTERFACE $<INSTALL_INTERFACE:include>
+            $<INSTALL_INTERFACE:include/Popcorn/Core>
+            $<INSTALL_INTERFACE:include/Popcorn/Platform>
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Agnostic>)
 
 target_include_directories(
   Events
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Input>
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events>
-         $<INSTALL_INTERFACE:include>
-         $<INSTALL_INTERFACE:include/Popcorn/Input>
-         $<INSTALL_INTERFACE:include/Popcorn/Events>)
+  INTERFACE $<INSTALL_INTERFACE:include>
+            $<INSTALL_INTERFACE:include/Popcorn/Input>
+            $<INSTALL_INTERFACE:include/Popcorn/Events>)
 
 target_include_directories(
   Graphics
@@ -121,21 +121,19 @@ target_include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Graphics>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/OpenGL>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan>
-    $<INSTALL_INTERFACE:include>
-    $<INSTALL_INTERFACE:include/Popcorn/Graphics>
-    $<INSTALL_INTERFACE:include/Popcorn/Platform/OpenGL>
-    $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan>)
+  INTERFACE $<INSTALL_INTERFACE:include>
+            $<INSTALL_INTERFACE:include/Popcorn/Graphics>
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/OpenGL>
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan>)
 
 target_include_directories(
   Popcorn
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core>
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Layers>
-         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events>
-         $<INSTALL_INTERFACE:include>
-         $<INSTALL_INTERFACE:include/Popcorn/Core>
-         $<INSTALL_INTERFACE:include/Popcorn/Layers>
-         $<INSTALL_INTERFACE:include/Popcorn/Events>)
+  INTERFACE $<INSTALL_INTERFACE:include>
+            $<INSTALL_INTERFACE:include/Popcorn/Core>
+            $<INSTALL_INTERFACE:include/Popcorn/Layers>)
 
 # DEBUG FLAGS
 option(PC_DEBUG "USE DEBUG MODE FOR COMPILING" ON)
@@ -154,8 +152,6 @@ target_link_libraries(Window PRIVATE glad glfw)
 target_link_libraries(Window PRIVATE Events)
 target_link_libraries(ImGui PRIVATE glfw)
 target_link_libraries(Popcorn PRIVATE glad glfw)
-# target_link_libraries(Popcorn PUBLIC ImGui)
-
 target_link_libraries(Popcorn PRIVATE Graphics Window ImGui)
 
 target_compile_features(${PROJECT} PUBLIC cxx_std_17)

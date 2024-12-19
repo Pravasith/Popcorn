@@ -4,7 +4,6 @@
 #include "Application.h"
 #include "Base.h"
 #include "DebugUIOverlay.h"
-#include "Event.h"
 #include "Global_Macros.h"
 
 #include <backends/imgui_impl_glfw.h>

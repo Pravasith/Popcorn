@@ -1,22 +1,22 @@
 #pragma once
 
-#include "DebugUIOverlay.h"
-#include "Event.h"
 #include "Global_Macros.h"
 #include "LayerStack.h"
-#include "RenderLayer.h"
-#include "Subscriber.h"
+#include "Popcorn/Events/Event.h"
+#include "Popcorn/Events/Subscriber.h"
+#include "Popcorn/Events/TimeEvent.h"
+#include "Popcorn/Events/WindowEvent.h"
+#include "Popcorn/Layers/DebugUIOverlay.h"
+#include "Popcorn/Layers/RenderLayer.h"
 #include "Time.h"
-#include "TimeEvent.h"
 #include "Window.h"
-#include "WindowEvent.h"
 
 ENGINE_NAMESPACE_BEGIN
 
 // SINGLETON
 class Application : public Subscriber {
 public:
-  static void Start();
+  static void Start(Window *);
   static Application &Get();
   static void Stop();
 

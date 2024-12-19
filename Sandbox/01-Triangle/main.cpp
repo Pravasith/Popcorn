@@ -1,26 +1,19 @@
 #include <Popcorn.h>
-#include <iostream>
+#include <Popcorn/Graphics/Renderer.h>
 
 int main(int argc, char **argv) {
-  Popcorn::Application::Start();
+
+  // CREATE A POPCORN WINDOW
+  auto windowProps = Popcorn::Window::Props("Triangle App", 500, 500);
+  auto AppWin = Popcorn::Window::Create(windowProps);
+
+  auto x = Popcorn::LayerStack();
+  auto y = Popcorn::Renderer<Popcorn::RendererType::Vulkan>::Create(*AppWin);
+
+  // START THE APPLICATION WITH WINDOW
+  Popcorn::Application::Start(AppWin);
   Popcorn::Application::Run();
   Popcorn::Application::Stop();
-
-  std::cout << "\n";
-  if (__cplusplus == 199712L)
-    std::cout << "C++98/03\n";
-  else if (__cplusplus == 201103L)
-    std::cout << "C++11\n";
-  else if (__cplusplus == 201402L)
-    std::cout << "C++14\n";
-  else if (__cplusplus == 201703L)
-    std::cout << "C++17\n";
-  else if (__cplusplus == 202002L)
-    std::cout << "C++20\n";
-  else if (__cplusplus == 202302L)
-    std::cout << "C++23\n";
-  else
-    std::cout << "Unknown C++ version\n";
 
   return 0;
 }
