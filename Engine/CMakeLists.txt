@@ -1,14 +1,9 @@
 cmake_minimum_required(VERSION 3.22)
 
-# -----------------------------------------------------------------------
-# BASIC SETTINGS --- START
-# -----------------------------------------------------------------------
-
 set(PROJECT Popcorn)
 project(${PROJECT} VERSION 1.0.0)
 message("Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
 
-# SPECIFY THE C++ STANDARD
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -22,40 +17,22 @@ set(GLFW_BUILD_TESTS
 set(GLFW_BUILD_EXAMPLES
     OFF
     CACHE BOOL "" FORCE)
-# -----------------------------------------------------------------------
-# BASIC SETTINGS --- END
-# -----------------------------------------------------------------------
-
-#
 
 # -----------------------------------------------------------------------
-# OS FLAGS --- START
+# OS FLAGS
 # -----------------------------------------------------------------------
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set(BUILD_FOR_LINUX TRUE)
-endif()
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set(BUILD_FOR_WIN TRUE)
-  # Include the toolchain file for cross-compilation
   # include(${CMAKE_TOOLCHAIN_FILE})
-endif()
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(BUILD_FOR_MACOS TRUE)
-  # Include the toolchain file for cross-compilation
   # include(${CMAKE_TOOLCHAIN_FILE})
 endif()
-# -----------------------------------------------------------------------
-# OS FLAGS --- END
-# -----------------------------------------------------------------------
-
-#
-
-#
 
 # -----------------------------------------------------------------------
-# STATIC BUILD SETTINGS (OPTIONAL) --- START
+# STATIC BUILD SETTINGS
 # -----------------------------------------------------------------------
 option(STATIC_BUILD "BUILD A STATIC BINARY" ${BUILD_FOR_WIN})
 if(STATIC_BUILD)
@@ -63,22 +40,13 @@ if(STATIC_BUILD)
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" CONFIG)
   set(BUILD_SHARED_LIBS OFF)
 endif()
-# -----------------------------------------------------------------------
-# STATIC BUILD SETTINGS (OPTIONAL) --- END
-# -----------------------------------------------------------------------
-
-#
-
-#
 
 add_subdirectory("third-party")
 add_subdirectory("src")
 
 # -----------------------------------------------------------------------
-# ADD THIRD PARTY LIBS --- START
+# ADD THIRD-PARTY/VENDOR LIBS
 # -----------------------------------------------------------------------
-
-# VENDOR BINARIES DIRS
 set(PLATFORM_AGNOSTIC_VENDOR_DIR
     ${CMAKE_SOURCE_DIR}/third-party/platform-agnostic)
 set(LINUX_VENDOR_DIR ${CMAKE_SOURCE_DIR}/third-party/linux)
@@ -88,14 +56,12 @@ set(WINDOWS_VENDOR_DIR ${CMAKE_SOURCE_DIR}/third-party/windows)
 if(BUILD_FOR_LINUX)
   list(APPEND CMAKE_PREFIX_PATH ${LINUX_VENDOR_DIR}/glfw
        ${LINUX_VENDOR_DIR}/vulkan-loader)
+elseif(BUILD_FOR_WIN)
+  # Add from toolchain file
 endif()
 
-list(
-  APPEND
-  CMAKE_PREFIX_PATH
-  #
-  ${PLATFORM_AGNOSTIC_VENDOR_DIR}/vulkan-headers
-  ${PLATFORM_AGNOSTIC_VENDOR_DIR}/glm)
+list(APPEND CMAKE_PREFIX_PATH ${PLATFORM_AGNOSTIC_VENDOR_DIR}/vulkan-headers
+     ${PLATFORM_AGNOSTIC_VENDOR_DIR}/glm)
 
 # FIND VENDOR BINARIES
 find_package(OpenGL REQUIRED)
@@ -103,20 +69,11 @@ find_package(glfw3 REQUIRED)
 find_package(VulkanLoader REQUIRED)
 find_package(VulkanHeaders REQUIRED CONFIG)
 find_package(glm CONFIG REQUIRED)
-# -----------------------------------------------------------------------
-# ADD THIRD PARTY LIBS --- END
-# -----------------------------------------------------------------------
-
-#
-
-#
-
-#
 
 # -----------------------------------------------------------------------
-# SET IMPLEMENTATION AND INCLUDE DIRS --- START
+# TARGETS
 # -----------------------------------------------------------------------
-
+# COMMON INCLUDE DIRS
 include_directories(include)
 
 target_include_directories(
@@ -180,15 +137,7 @@ target_include_directories(
          $<INSTALL_INTERFACE:include/Popcorn/Layers>
          $<INSTALL_INTERFACE:include/Popcorn/Events>)
 
-# -----------------------------------------------------------------------
-# SET IMPLEMENTATION AND INCLUDE DIRS --- END
-# -----------------------------------------------------------------------
-
-#
-
-# -----------------------------------------------------------------------
-# DEBUG FLAG --- START
-# -----------------------------------------------------------------------
+# DEBUG FLAGS
 option(PC_DEBUG "USE DEBUG MODE FOR COMPILING" ON)
 # option(PC_DEBUG "USE DEBUG MODE FOR COMPILING" OFF)
 
@@ -196,16 +145,9 @@ if(PC_DEBUG)
   target_compile_definitions(Window PUBLIC "PC_DEBUG")
   target_compile_definitions(Graphics PUBLIC "PC_DEBUG")
   target_compile_definitions(Events PUBLIC "PC_DEBUG")
+  target_compile_definitions(Popcorn PUBLIC "PC_DEBUG")
 endif()
-# -----------------------------------------------------------------------
-# DEBUG FLAG --- END
-# -----------------------------------------------------------------------
 
-#
-
-# -----------------------------------------------------------------------
-# LINKING LIBS --- START
-# -----------------------------------------------------------------------
 target_link_libraries(Graphics PRIVATE Vulkan::Headers Vulkan::Loader glfw
                                        glm::glm)
 target_link_libraries(Window PRIVATE glad glfw)
@@ -215,20 +157,12 @@ target_link_libraries(Popcorn PRIVATE glad glfw)
 # target_link_libraries(Popcorn PUBLIC ImGui)
 
 target_link_libraries(Popcorn PRIVATE Graphics Window ImGui)
-# -----------------------------------------------------------------------
-# LINKING LIBS --- END
-# -----------------------------------------------------------------------
 
 target_compile_features(${PROJECT} PUBLIC cxx_std_17)
 
 # -----------------------------------------------------------------------
 # INSTALL CONFIG --- START
 # -----------------------------------------------------------------------
-# Export Vulkan, GLFW, and GLM as part of Popcorn
-
-# target_link_libraries(Popcorn PUBLIC Vulkan::Headers Vulkan::Loader glfw
-# glm::glm)
-
 include(CMakePackageConfigHelpers)
 
 # Generate the Config file
@@ -249,8 +183,6 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PopcornConfig.cmake
         DESTINATION lib/cmake/Popcorn)
 
 # Export static libs
-install(DIRECTORY include/ DESTINATION include)
-
 if(BUILD_FOR_LINUX)
   install(DIRECTORY third-party/linux/ third-party/platform-agnostic/
           DESTINATION third-party)
@@ -258,6 +190,9 @@ elseif(BUILD_FOR_WIN)
   install(DIRECTORY third-party/windows/ third-party/platform-agnostic/
           DESTINATION third-party)
 endif()
+
+# Popcorn headers
+install(DIRECTORY include/ DESTINATION include)
 
 install(
   TARGETS Popcorn Window Graphics ImGui glad Events
@@ -272,7 +207,3 @@ install(
   FILE PopcornTargets.cmake
   NAMESPACE Popcorn::
   DESTINATION lib/cmake/Popcorn)
-
-# -----------------------------------------------------------------------
-# INSTALL CONFIG --- END
-# -----------------------------------------------------------------------
