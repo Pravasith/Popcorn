@@ -2,34 +2,6 @@
 #
 
 # -----------------------------------------------------------------------
-# UTIL FUNCS --- START
-# -----------------------------------------------------------------------
-check_create_folder() {
-    local folder="$1"
-
-    # Check if the folder exists
-    if [ ! -d "$folder" ]; then
-        # If the folder doesn't exist, create it
-        if [ $# -eq 1 ]; then
-            mkdir "$folder"
-            echo "Folder '$folder' created."
-        else
-            if [ "$2" -eq 1 ]; then
-                sudo mkdir "$folder"
-                echo "Folder '$folder' created."
-            fi
-        fi
-    else
-        echo "Folder '$folder' already exists. Skipped creating."
-    fi
-}
-# -----------------------------------------------------------------------
-# UTIL FUNCS --- END
-# -----------------------------------------------------------------------
-
-#
-
-# -----------------------------------------------------------------------
 # INSTALL THESE EXTERNAL DEPENDENCIES
 #
 # FOR GLFW:
@@ -39,10 +11,11 @@ check_create_folder() {
 # sudo apt-get install git build-essential libx11-xcb-dev \
 #     libxkbcommon-dev libwayland-dev libxrandr-dev
 #
-# SHADER COMPILERS:
-# -----------------------------------------------------------------------
-
+# ALSO INSTALL Vulkan-SDK
 #
+# SHADER COMPILERS:
+# glslc -- included in Vulkan-SDK
+# -----------------------------------------------------------------------
 
 echo "--- Starting environment setup for Linux based systems..."
 # DIR -- PROJECT PARENT SRC DIR
@@ -50,34 +23,33 @@ curr_dir="${PWD}"
 
 # DIR -- RAW GITHUB CLONED SUBMODULES
 submodules_dir="$curr_dir/submodules"
-# NOTE: THIS DIR ALREADY EXISTS
-# check_create_folder "$submodules_dir"
+mkdir -p "$submodules_dir"
 
 # DIR -- BASE -- 3RD PARTY INCL. & IMPL. FILES
 vendor_dir="$curr_dir/third-party"
-check_create_folder "$vendor_dir"
+mkdir -p "$vendor_dir"
 
 # DIR -- PLATFORM SPECIFIC -- INCL. FILES
 include_platform_dir="$curr_dir/include/Popcorn/Platform"
-check_create_folder "$include_platform_dir"
+mkdir -p "$include_platform_dir"
 
 # DIR -- PLATFORM SPECIFIC -- IMPL. FILES
 src_platform_dir="$curr_dir/src/Popcorn/Platform"
-check_create_folder "$src_platform_dir"
+mkdir -p "$src_platform_dir"
 
 # DIR -- PLATFORM SPECIFIC 3RD PARTY INCL & SRC FILES
 vendor_windows_dir="$vendor_dir/windows"
-check_create_folder "$vendor_windows_dir"
+mkdir -p "$vendor_windows_dir"
 
 vendor_linux_dir="$vendor_dir/linux"
-check_create_folder "$vendor_linux_dir"
+mkdir -p "$vendor_linux_dir"
 
 vendor_mac_os_dir="$vendor_dir/mac-os"
-check_create_folder "$vendor_mac_os_dir"
+mkdir -p "$vendor_mac_os_dir"
 
 # DIR -- PLAFORM AGNOSTIC 3RD PARTY INCL & SRC FILES
 vendor_platform_agnostic_dir="$vendor_dir/platform-agnostic"
-check_create_folder "$vendor_platform_agnostic_dir"
+mkdir -p "$vendor_platform_agnostic_dir"
 
 #
 
@@ -109,18 +81,18 @@ echo "Building GLFW..."
 glfw_sm_dir="$submodules_dir/glfw"
 
 glfw_sm_build_dir="$glfw_sm_dir/build"
-check_create_folder "$glfw_sm_build_dir"
+mkdir -p "$glfw_sm_build_dir"
 
 # LINUX
 # -----------------------------------------------------------------------
 echo "Building GLFW for Linux..."
 # CREATE GLFW SUBMODULE BUILD DIR FOR LINUX
 glfw_sm_build_linux_dir="$glfw_sm_build_dir/linux"
-check_create_folder "$glfw_sm_build_linux_dir"
+mkdir -p "$glfw_sm_build_linux_dir"
 
 # CREATE GLFW VENDOR DIR FOR LINUX
 glfw_vendor_linux_dir="$vendor_linux_dir/glfw"
-check_create_folder "$glfw_vendor_linux_dir"
+mkdir -p "$glfw_vendor_linux_dir"
 
 cmake -DCMAKE_INSTALL_PREFIX="$glfw_vendor_linux_dir" \
     -S "$glfw_sm_dir" -B "$glfw_sm_build_linux_dir"
@@ -136,11 +108,11 @@ echo "Building GLFW for Linux complete"
 echo "Building GLFW for Windows..."
 # CREATE GLFW SUBMODULE BUILD DIR FOR WINDOWS
 glfw_sm_build_windows_dir="$glfw_sm_build_dir/windows"
-check_create_folder "$glfw_sm_build_windows_dir"
+mkdir -p "$glfw_sm_build_windows_dir"
 
 # CREATE GLFW VENDOR DIR FOR WINDOWS
 glfw_vendor_windows_dir="$vendor_windows_dir/glfw"
-check_create_folder "$glfw_vendor_windows_dir"
+mkdir -p "$glfw_vendor_windows_dir"
 
 cmake -DCMAKE_INSTALL_PREFIX="$glfw_vendor_windows_dir" \
     -S "$glfw_sm_dir" -B "$glfw_sm_build_windows_dir" \
@@ -186,7 +158,7 @@ imgui_sm_dir="$submodules_dir/imgui"
 imgui_sm_backends_dir="$imgui_sm_dir/backends"
 
 imgui_vendor_platform_agnostic_dir="$vendor_platform_agnostic_dir/imgui"
-check_create_folder "$imgui_vendor_platform_agnostic_dir"
+mkdir -p "$imgui_vendor_platform_agnostic_dir"
 
 # COPY IMGUI FILES FROM SUBMODULES TO VENDOR
 #
@@ -214,11 +186,11 @@ vulkan_headers_sm_dir="$submodules_dir/vulkan-headers"
 # CREATE VULKAN-HEADERS SUBMODULES BUILD DIR
 
 vulkan_headers_sm_build_dir="$vulkan_headers_sm_dir/build"
-check_create_folder "$vulkan_headers_sm_build_dir"
+mkdir -p "$vulkan_headers_sm_build_dir"
 
 # CREATE VULKAN-HEADERS VENDOR DIR
 vulkan_headers_vendor_dir="$vendor_platform_agnostic_dir/vulkan-headers"
-check_create_folder "$vulkan_headers_vendor_dir"
+mkdir -p "$vulkan_headers_vendor_dir"
 
 cmake -S "$vulkan_headers_sm_dir" -B "$vulkan_headers_sm_build_dir"
 cmake --install "$vulkan_headers_sm_build_dir" --prefix "$vulkan_headers_vendor_dir"
@@ -245,11 +217,11 @@ vulkan_loader_sm_dir="$submodules_dir/vulkan-loader"
 # -----------------------------------------------------------------------
 echo "Building VULKAN-LOADER for Linux..."
 vulkan_loader_sm_lnx_build_dir="$vulkan_loader_sm_dir/build-linux"
-check_create_folder "$vulkan_loader_sm_lnx_build_dir"
+mkdir -p "$vulkan_loader_sm_lnx_build_dir"
 
 # CREATE VULKAN-LOADER VENDOR DIR
 vulkan_loader_vendor_lnx_dir="$vendor_linux_dir/vulkan-loader"
-check_create_folder "$vulkan_loader_vendor_lnx_dir"
+mkdir -p "$vulkan_loader_vendor_lnx_dir"
 
 cmake \
     -D CMAKE_INSTALL_PREFIX="$vulkan_loader_vendor_lnx_dir" \
@@ -269,11 +241,11 @@ echo "Building VULKAN-LOADER for Linux complete"
 # -----------------------------------------------------------------------
 echo "Building VULKAN-LOADER for Windows..."
 vulkan_loader_sm_win_build_dir="$vulkan_loader_sm_dir/build-win"
-check_create_folder "$vulkan_loader_sm_win_build_dir"
+mkdir -p "$vulkan_loader_sm_win_build_dir"
 
 # CREATE VULKAN-LOADER VENDOR DIR
 vulkan_loader_vendor_win_dir="$vendor_windows_dir/vulkan-loader"
-check_create_folder "$vulkan_loader_vendor_win_dir"
+mkdir -p "$vulkan_loader_vendor_win_dir"
 
 win_toolchain_file="$submodules_dir/tc-vendor-win.cmake"
 
@@ -309,11 +281,11 @@ echo "Installing GLM..."
 glm_sm_dir="$submodules_dir/glm"
 
 glm_sm_build_dir="$glm_sm_dir/build"
-check_create_folder "$glm_sm_build_dir"
+mkdir -p "$glm_sm_build_dir"
 
 # CREATE GLM VENDOR DIR
 glm_vendor_dir="$vendor_platform_agnostic_dir/glm"
-check_create_folder "$glm_vendor_dir"
+mkdir -p "$glm_vendor_dir"
 
 cmake \
     -D GLM_BUILD_TESTS=OFF \
