@@ -1,7 +1,7 @@
 
 #include "Popcorn/Core/Time.h"
 #include "Assert.h"
-#include "Global_Macros.h"
+#include "GlobalMacros.h"
 #include "Popcorn/Events/TimeEvent.h"
 
 ENGINE_NAMESPACE_BEGIN

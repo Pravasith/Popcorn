@@ -4,7 +4,7 @@
 #include "Application.h"
 #include "Base.h"
 #include "DebugUIOverlay.h"
-#include "Global_Macros.h"
+#include "GlobalMacros.h"
 
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>

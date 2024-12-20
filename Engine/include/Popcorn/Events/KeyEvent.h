@@ -2,7 +2,7 @@
 #pragma once
 #include "Event.h"
 
-#include "Global_Macros.h"
+#include "GlobalMacros.h"
 #include "KeyCodes.h"
 #include "Popcorn/Core/Base.h"
 

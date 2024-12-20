@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Buffer.h"
-#include "Global_Macros.h"
+#include "GlobalMacros.h"
 
 ENGINE_NAMESPACE_BEGIN
 class VertexBufferVk : public VertexBuffer {

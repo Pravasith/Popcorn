@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Global_Macros.h"
+#include "GlobalMacros.h"
 #include "Popcorn/Events/Event.h"
 
 ENGINE_NAMESPACE_BEGIN

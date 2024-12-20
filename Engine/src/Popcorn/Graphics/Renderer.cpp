@@ -1,5 +1,5 @@
 #include "Renderer.h"
-#include "Global_Macros.h"
+#include "GlobalMacros.h"
 #include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
 #include "RendererOpenGL.h"

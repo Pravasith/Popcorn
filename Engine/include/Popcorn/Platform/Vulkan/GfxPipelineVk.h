@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Global_Macros.h"
+#include "GlobalMacros.h"
 #include "ShaderVk.h"
 #include <stdexcept>
 #include <vector>

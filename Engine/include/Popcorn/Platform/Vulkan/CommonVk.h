@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Global_Macros.h"
+#include "GlobalMacros.h"
 #include <cstdint>
 #include <optional>
 #define GLFW_INCLUDE_VULKAN

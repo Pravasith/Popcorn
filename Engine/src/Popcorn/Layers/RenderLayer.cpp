@@ -1,7 +1,7 @@
 #include "RenderLayer.h"
 #include "Application.h"
 #include "Base.h"
-#include "Global_Macros.h"
+#include "GlobalMacros.h"
 #include "Renderer.h"
 
 ENGINE_NAMESPACE_BEGIN

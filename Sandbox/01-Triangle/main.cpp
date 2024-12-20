@@ -1,5 +1,6 @@
 #include <Popcorn.h>
 #include <Popcorn/Graphics/Renderer.h>
+#include <Popcorn/Layers/DebugUIOverlay.h>
 
 int main(int argc, char **argv) {
 
@@ -9,6 +10,7 @@ int main(int argc, char **argv) {
 
   auto x = Popcorn::LayerStack();
   auto y = Popcorn::Renderer<Popcorn::RendererType::Vulkan>::Create(*AppWin);
+  auto z = Popcorn::DebugUIOverlay();
 
   // START THE APPLICATION WITH WINDOW
   Popcorn::Application::Start(AppWin);

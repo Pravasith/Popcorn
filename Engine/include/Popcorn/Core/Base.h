@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Global_Macros.h"
+#include "GlobalMacros.h"
 #include <cstddef>
 
 #ifdef PC_DEBUG

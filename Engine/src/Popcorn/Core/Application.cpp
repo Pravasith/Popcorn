@@ -1,5 +1,6 @@
 #include "Application.h"
 #include "Base.h"
+// #include "DebugUIOverlay.h"
 #include "RenderLayer.h"
 #include <stdexcept>
 
@@ -8,9 +9,6 @@ Application *Application::s_instance = nullptr;
 LayerStack *Application::s_layerStack = nullptr;
 Window *Application::s_window = nullptr;
 Time *Application::s_time = nullptr;
-
-DebugUIOverlay *Application::s_debugUIOverlay = nullptr;
-RenderLayer *Application::s_renderLayer = nullptr;
 
 Application::Application() {
   PC_PRINT("APPLICATION STARTED", TagType::Constr, "APP");
@@ -52,7 +50,7 @@ void Application::Start(Window *appWin) {
     // s_debugUIOverlay->OnAttach();
 
     // LAYERS
-    s_renderLayer = new RenderLayer();
+    static auto s_renderLayer = new RenderLayer();
     s_layerStack->PushLayer(s_renderLayer);
     s_renderLayer->OnAttach();
 

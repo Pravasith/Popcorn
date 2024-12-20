@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Base.h"
-#include "Global_Macros.h"
+#include "GlobalMacros.h"
 #include "KeyCodes.h"
 
 ENGINE_NAMESPACE_BEGIN

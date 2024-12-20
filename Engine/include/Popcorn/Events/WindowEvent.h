@@ -1,7 +1,7 @@
 #pragma once
 #include "Base.h"
 #include "Event.h"
-#include "Global_Macros.h"
+#include "GlobalMacros.h"
 #include <cstdint>
 
 ENGINE_NAMESPACE_BEGIN

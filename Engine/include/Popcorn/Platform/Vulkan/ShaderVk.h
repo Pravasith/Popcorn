@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "Global_Macros.h"
+#include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include "Shader.h"
 

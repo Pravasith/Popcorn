@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 
 #include "Base.h"
-#include "Global_Macros.h"
+#include "GlobalMacros.h"
 #include "KeyEvent.h"
 #include "MouseEvent.h"
 #include "Utilities.h"

@@ -1,5 +1,5 @@
 #include "RendererOpenGL.h"
-#include "Global_Macros.h"
+#include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 
 ENGINE_NAMESPACE_BEGIN

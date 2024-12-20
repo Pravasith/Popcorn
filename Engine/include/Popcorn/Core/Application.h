@@ -1,13 +1,11 @@
 #pragma once
 
-#include "Global_Macros.h"
+#include "GlobalMacros.h"
 #include "LayerStack.h"
 #include "Popcorn/Events/Event.h"
 #include "Popcorn/Events/Subscriber.h"
 #include "Popcorn/Events/TimeEvent.h"
 #include "Popcorn/Events/WindowEvent.h"
-#include "Popcorn/Layers/DebugUIOverlay.h"
-#include "Popcorn/Layers/RenderLayer.h"
 #include "Time.h"
 #include "Window.h"
 
@@ -15,6 +13,7 @@ ENGINE_NAMESPACE_BEGIN
 
 // SINGLETON
 class Application : public Subscriber {
+
 public:
   static void Start(Window *);
   static Application &Get();
@@ -51,8 +50,5 @@ private:
   static LayerStack *s_layerStack;
   static Window *s_window;
   static Time *s_time;
-
-  static DebugUIOverlay *s_debugUIOverlay;
-  static RenderLayer *s_renderLayer;
 };
 ENGINE_NAMESPACE_END

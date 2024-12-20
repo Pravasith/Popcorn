@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Global_Macros.h"
+#include "GlobalMacros.h"
 ENGINE_NAMESPACE_BEGIN
 class RendererOpenGL {
 public:

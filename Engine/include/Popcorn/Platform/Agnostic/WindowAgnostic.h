@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Base.h"
-#include "Global_Macros.h"
+#include "GlobalMacros.h"
 #include "Window.h"
 #include <GLFW/glfw3.h>
 #include <cstdint>

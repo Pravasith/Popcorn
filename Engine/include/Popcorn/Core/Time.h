@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Base.h"
-#include "Global_Macros.h"
+#include "GlobalMacros.h"
 #include "Popcorn/Events/Publisher.h"
 
 ENGINE_NAMESPACE_BEGIN

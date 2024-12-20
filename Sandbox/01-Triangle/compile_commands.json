@@ -1,7 +1,7 @@
 [
 {
   "directory": "/home/prav/personal/Popcorn/Sandbox/01-Triangle/build/linux",
-  "command": "/usr/bin/c++ -DPC_DEBUG -isystem /home/prav/personal/Popcorn/Engine/dist/linux/include -isystem /home/prav/personal/Popcorn/Engine/dist/linux/include/Popcorn/Core -isystem /home/prav/personal/Popcorn/Engine/dist/linux/include/Popcorn/Layers -g -std=c++17 -o CMakeFiles/Triangle.dir/main.cpp.o -c /home/prav/personal/Popcorn/Sandbox/01-Triangle/main.cpp",
+  "command": "/usr/bin/c++ -DPC_DEBUG -isystem /home/prav/personal/Popcorn/Engine/dist/linux/include -isystem /home/prav/personal/Popcorn/Engine/dist/linux/include/Popcorn/Core -g -std=c++17 -o CMakeFiles/Triangle.dir/main.cpp.o -c /home/prav/personal/Popcorn/Sandbox/01-Triangle/main.cpp",
   "file": "/home/prav/personal/Popcorn/Sandbox/01-Triangle/main.cpp",
   "output": "CMakeFiles/Triangle.dir/main.cpp.o"
 }
