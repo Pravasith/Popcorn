@@ -133,14 +133,12 @@ std::vector<const char *> RendererVk::GetRequiredExtensions() {
   return extensions;
 };
 
-void RendererVk::OnEvent(Event &e) {
-  if (e.BelongsToCategory(EventCategory::WindowEvent) &&
-      e.GetEventType() == EventType::FrameBfrResize) {
-    m_PresentVk.SetFrameBfrResized(true);
-  }
+bool RendererVk::OnFrameBfrResize(FrameBfrResizeEvent &e) {
+  m_PresentVk.SetFrameBfrResized(true);
+  return true;
 };
 
-void RendererVk::OnUpdate() {
+void RendererVk::DrawFrame() {
   m_PresentVk.DrawFrame(
       m_CmdPoolVk.GetCmdBfrs(),
       // TODO: USE A LAMBDA

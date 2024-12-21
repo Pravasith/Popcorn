@@ -7,7 +7,6 @@
 #include "LogiDeviceVk.h"
 #include "PhysDeviceVk.h"
 #include "Popcorn/Core/Base.h"
-#include "Popcorn/Events/Event.h"
 #include "PresentVk.h"
 #include "Renderer.h"
 #include "SwapChainVk.h"
@@ -27,8 +26,8 @@ public:
     return s_enableValidationLayers;
   };
 
-  void OnUpdate() override;
-  void OnEvent(Event &e) override;
+  virtual void DrawFrame() override;
+  virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) override;
 
 private:
   void InitVulkan();

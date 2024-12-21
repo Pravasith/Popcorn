@@ -1,7 +1,8 @@
 #include "Application.h"
 #include "Base.h"
+#include "Renderer.h"
 // #include "DebugUIOverlay.h"
-#include "RenderLayer.h"
+// #include "RenderLayer.h"
 #include <stdexcept>
 
 ENGINE_NAMESPACE_BEGIN
@@ -9,21 +10,20 @@ Application *Application::s_instance = nullptr;
 LayerStack *Application::s_layerStack = nullptr;
 Window *Application::s_window = nullptr;
 Time *Application::s_time = nullptr;
+template <RendererType T> Renderer<T> *Application::s_Renderer = nullptr;
 
 Application::Application() {
   PC_PRINT("APPLICATION STARTED", TagType::Constr, "APP");
-
-  /* Window::Create(Window::Props("Ramen")); */
-  /* Window::Destroy(); */
 };
 
 Application::~Application() {
 
   // DEALLOC MEMBERS
+  // LAYERS ARE DELETED INTERNALLY IN THE LAYERSTACK DESTRUCTOR
   delete s_layerStack;
 
-  // LAYERS ARE DELETED IN THE LAYERSTACK DESTRUCTOR
-
+  Renderer<RendererType::Vulkan>::Destroy();
+  s_Renderer<RendererType::Vulkan> = nullptr;
   Window::UnSubscribe(s_instance);
   Window::Destroy();
 
@@ -33,25 +33,31 @@ Application::~Application() {
 Application &Application::Get() { return *s_instance; }
 Window &Application::GetAppWindow() const { return *s_window; }
 
-void Application::Start(Window *appWin) {
+void Application::Init() {
   if (!s_instance) {
     // DONT MOVE THIS BLOCK
-    s_window = appWin;
+    auto windowProps = Popcorn::Window::Props("Triangle App", 500, 500);
+    auto AppWin = Popcorn::Window::Create(windowProps);
+
+    s_window = AppWin;
     s_instance = new Application();
+
     Window::Subscribe(s_instance);
 
-    Application::InitLayers();
     s_layerStack = new LayerStack();
 
-    // OVERLAYS
+    // OVERLAYS - EXAMPLE
     // s_debugUIOverlay = new DebugUIOverlay();
     // s_layerStack->PushOverlay(s_debugUIOverlay);
     // s_debugUIOverlay->OnAttach();
 
-    // LAYERS
-    static auto s_renderLayer = new RenderLayer();
-    s_layerStack->PushLayer(s_renderLayer);
-    s_renderLayer->OnAttach();
+    // LAYERS - EXAMPLE
+    // auto s_renderLayer = new RenderLayer();
+    // s_layerStack->PushLayer(s_renderLayer);
+    // s_renderLayer->OnAttach();
+
+    s_Renderer<RendererType::Vulkan> =
+        Renderer<RendererType::Vulkan>::Create(*AppWin);
 
     s_time = Time::Get();
   } else {
@@ -60,11 +66,14 @@ void Application::Start(Window *appWin) {
   }
 }
 
-void Application::InitLayers() {};
-
-void Application::Run() { s_time->Start(); };
+void Application::StartGameLoop() { s_time->Start(); };
 
 bool Application::IsGameLoopRunning() { return s_time->IsGameLoopRunning(); };
+
+void Application::AddLayer(Layer *layer) {
+  s_layerStack->PushLayer(layer);
+  layer->OnAttach();
+};
 
 void Application::Stop() {
   // DESTROY WINDOW
@@ -88,18 +97,6 @@ bool Application::OnWindowResize(WindowResizeEvent &e) const {
   return true;
 };
 
-bool Application::OnFrameBfrResize(FrameBfrResizeEvent &e) const {
-  s_layerStack->IterateBackwards([&](auto it) {
-    if (e.IsHandled()) {
-      return;
-    }
-
-    (*it)->OnEvent(e);
-  });
-
-  return true;
-};
-
 bool Application::OnWindowClose(WindowCloseEvent &e) const {
   s_time->Stop();
   return true;
@@ -107,7 +104,9 @@ bool Application::OnWindowClose(WindowCloseEvent &e) const {
 
 bool Application::OnCPUClockTick(TimeEvent &e) const {
   Window::OnUpdate();
+  // RENDER LAYER UPDATES HERE
   s_layerStack->UpdateLayerStack();
+  s_Renderer<RendererType::Vulkan>->DrawFrame();
   return true;
 };
 
@@ -117,8 +116,8 @@ void Application::OnEvent(Event &e) const {
   dispatcher.Dispatch<WindowResizeEvent>(
       PC_BIND_EVENT_FUNC(WindowResizeEvent, OnWindowResize));
 
-  dispatcher.Dispatch<FrameBfrResizeEvent>(
-      PC_BIND_EVENT_FUNC(FrameBfrResizeEvent, OnFrameBfrResize));
+  dispatcher.Dispatch<FrameBfrResizeEvent>(PC_BIND_EVENT_FUNC(
+      FrameBfrResizeEvent, s_Renderer<RendererType::Vulkan>->OnFrameBfrResize));
 
   dispatcher.Dispatch<WindowCloseEvent>(
       PC_BIND_EVENT_FUNC(WindowCloseEvent, OnWindowClose));

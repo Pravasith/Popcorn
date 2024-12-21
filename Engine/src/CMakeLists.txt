@@ -13,7 +13,6 @@ add_library(
   ${CORE_IMPL_DIR}/Layer.cpp
   ${CORE_IMPL_DIR}/LayerStack.cpp
   ${LAYERS_IMPL_DIR}/DebugUIOverlay.cpp
-  ${LAYERS_IMPL_DIR}/RenderLayer.cpp
   #
   # TIME
   ${CORE_IMPL_DIR}/Time.cpp)

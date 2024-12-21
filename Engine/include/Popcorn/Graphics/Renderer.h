@@ -3,6 +3,7 @@
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Window.h"
+#include "Popcorn/Events/WindowEvent.h"
 #include <variant>
 
 ENGINE_NAMESPACE_BEGIN
@@ -27,8 +28,9 @@ public:
 
   static const auto GetRenderer();
 
-  virtual void OnUpdate();
-  virtual void OnEvent(Event &);
+  // PASS IN SCENE & CAMERA ETC.
+  virtual void DrawFrame();
+  virtual bool OnFrameBfrResize(FrameBfrResizeEvent &);
 
   Renderer(const Renderer &) = delete;
   Renderer &operator=(const Renderer &) = delete;

@@ -2,6 +2,7 @@
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
+#include "Popcorn/Events/WindowEvent.h"
 #include "RendererOpenGL.h"
 #include "RendererVk.h"
 #include <string>
@@ -53,20 +54,23 @@ template <RendererType T> const auto Renderer<T>::GetRenderer() {
   }
 };
 
-template <RendererType T> void Renderer<T>::OnUpdate() {
+template <RendererType T> void Renderer<T>::DrawFrame() {
   if constexpr (T == RendererType::Vulkan) {
-    std::get<RendererVk *>(s_renderer)->OnUpdate();
+    std::get<RendererVk *>(s_renderer)->DrawFrame();
   } else {
     // std::get<RendererOpenGL *>(s_renderer)->OnUpdate();
   }
 }
 
-template <RendererType T> void Renderer<T>::OnEvent(Event &e) {
+template <RendererType T>
+bool Renderer<T>::OnFrameBfrResize(FrameBfrResizeEvent &e) {
   if constexpr (T == RendererType::Vulkan) {
-    std::get<RendererVk *>(s_renderer)->OnEvent(e);
+    return std::get<RendererVk *>(s_renderer)->OnFrameBfrResize(e);
   } else {
     // std::get<RendererOpenGL *>(s_renderer)->OnEvent();
   }
+
+  return true;
 }
 
 template <RendererType T> void Renderer<T>::Destroy() {

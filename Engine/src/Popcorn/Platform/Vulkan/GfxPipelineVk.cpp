@@ -8,6 +8,7 @@ ENGINE_NAMESPACE_BEGIN
 
 void GfxPipelineVk::CreateGfxPipeline(const VkDevice &dev,
                                       const VkExtent2D &swpChnExt) {
+
   auto vertShdr = m_ShdrVk.LoadFile(PC_src_map[VkTriVert]);
   auto fragShdr = m_ShdrVk.LoadFile(PC_src_map[VkTriFrag]);
 

@@ -6,6 +6,7 @@
 #include "Popcorn/Events/Subscriber.h"
 #include "Popcorn/Events/TimeEvent.h"
 #include "Popcorn/Events/WindowEvent.h"
+#include "Popcorn/Graphics/Renderer.h"
 #include "Time.h"
 #include "Window.h"
 
@@ -15,13 +16,12 @@ ENGINE_NAMESPACE_BEGIN
 class Application : public Subscriber {
 
 public:
-  static void Start(Window *);
+  static void Init();
   static Application &Get();
   static void Stop();
 
-  static void InitLayers();
-
-  static void Run();
+  static void StartGameLoop();
+  static void AddLayer(Layer *);
 
   Window &GetAppWindow() const;
   LayerStack &GetLayerStack() const { return *s_layerStack; };
@@ -41,7 +41,6 @@ private:
 
   void OnEvent(Event &) const override;
   bool OnWindowResize(WindowResizeEvent &) const;
-  bool OnFrameBfrResize(FrameBfrResizeEvent &) const;
   bool OnWindowClose(WindowCloseEvent &) const;
   bool OnCPUClockTick(TimeEvent &) const;
 
@@ -50,5 +49,6 @@ private:
   static LayerStack *s_layerStack;
   static Window *s_window;
   static Time *s_time;
+  template <RendererType T> static Renderer<T> *s_Renderer;
 };
 ENGINE_NAMESPACE_END
