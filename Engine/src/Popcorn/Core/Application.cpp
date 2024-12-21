@@ -36,9 +36,8 @@ Window &Application::GetAppWindow() const { return *s_window; }
 void Application::Start(Window *appWin) {
   if (!s_instance) {
     // DONT MOVE THIS BLOCK
-    s_instance = new Application();
     s_window = appWin;
-    // Window::Create(Window::Props("Popcorn Engine", 500, 500));
+    s_instance = new Application();
     Window::Subscribe(s_instance);
 
     Application::InitLayers();
