@@ -1,8 +1,6 @@
 #include "Application.h"
 #include "Base.h"
 #include "Renderer.h"
-// #include "DebugUIOverlay.h"
-// #include "RenderLayer.h"
 #include <stdexcept>
 
 ENGINE_NAMESPACE_BEGIN
@@ -18,12 +16,12 @@ Application::Application() {
 
 Application::~Application() {
 
-  // DEALLOC MEMBERS
   // LAYERS ARE DELETED INTERNALLY IN THE LAYERSTACK DESTRUCTOR
   delete s_layerStack;
 
   Renderer<RendererType::Vulkan>::Destroy();
   s_Renderer<RendererType::Vulkan> = nullptr;
+
   Window::UnSubscribe(s_instance);
   Window::Destroy();
 

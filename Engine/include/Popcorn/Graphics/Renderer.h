@@ -22,11 +22,15 @@ class RendererVk;
 
 // SINGLETON
 template <RendererType T> class Renderer {
+
 public:
   static Renderer *Create(const Window &appWin);
   static void Destroy();
 
   static const auto GetRenderer();
+  [[nodiscard]] constexpr static bool IsRendererType(RendererType type) {
+    return static_cast<int>(type) & static_cast<int>(s_type);
+  };
 
   // PASS IN SCENE & CAMERA ETC.
   virtual void DrawFrame();

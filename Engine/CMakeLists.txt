@@ -146,13 +146,17 @@ if(PC_DEBUG)
   target_compile_definitions(Popcorn PUBLIC "PC_DEBUG")
 endif()
 
-target_link_libraries(Graphics PRIVATE Vulkan::Headers Vulkan::Loader glfw
-                                       glm::glm)
+target_link_libraries(Graphics PRIVATE Vulkan::Headers Vulkan::Loader glfw)
+target_link_libraries(Graphics PUBLIC glm::glm)
+
 target_link_libraries(Window PRIVATE glad glfw)
 target_link_libraries(Window PRIVATE Events)
 target_link_libraries(ImGui PRIVATE glfw)
 target_link_libraries(Popcorn PRIVATE glad glfw)
 target_link_libraries(Popcorn PRIVATE Graphics Window ImGui)
+
+# INTERFACE LIBS
+target_link_libraries(Popcorn INTERFACE glm::glm)
 
 target_compile_features(${PROJECT} PUBLIC cxx_std_17)
 
