@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GlobalMacros.h"
-#include "Popcorn/Core/Base.h"
 #include <glm/glm.hpp>
 #include <initializer_list>
 #include <iostream>
@@ -67,10 +66,10 @@ private:
   }
 };
 
-Buffer<ElementType::Float2, ElementType::Float3> bfr = {
-    {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
+// Buffer<ElementType::Float2, ElementType::Float3> bfr = {
+//     {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+//     {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+//     {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
 
 }; // namespace Gfx
 

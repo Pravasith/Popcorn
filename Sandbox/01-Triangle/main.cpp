@@ -18,10 +18,10 @@ public:
   //                                    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
   //                                    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
 
-  const std::vector<Buffer<Float2, Float3>> vertices = {
-      {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-      {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-      {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
+  // const std::vector<Buffer<Float2, Float3>> vertices = {
+  //     {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+  //     {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+  //     {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
 
   GameLayer() { PC_PRINT("CREATED", TagType::Constr, "GAME-LAYER") };
   ~GameLayer() { PC_PRINT("DESTROYED", TagType::Destr, "GAME-LAYER") };
