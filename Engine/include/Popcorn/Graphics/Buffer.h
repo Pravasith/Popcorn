@@ -1,11 +1,8 @@
 #pragma once
 
 #include "GlobalMacros.h"
-#include <glm/glm.hpp>
-#include <initializer_list>
-#include <iostream>
-#include <tuple>
-#include <vector>
+#include "Renderer.h"
+#include <cstdint>
 
 ENGINE_NAMESPACE_BEGIN
 namespace Gfx {
@@ -26,50 +23,33 @@ enum class ElementType {
   Bool
 };
 
-// Map ElementType to its corresponding type
-template <ElementType E> struct ConvertToType;
-
-template <> struct ConvertToType<ElementType::Float2> {
-  using type = glm::vec2;
-};
-
-template <> struct ConvertToType<ElementType::Float3> {
-  using type = glm::vec3;
-};
-
-// Helper alias
-template <ElementType E>
-using ConvertToType_t = typename ConvertToType<E>::type;
-
 // Buffer class
-template <ElementType... Args> class Buffer {
+template <RendererType Rt, ElementType... Args> class Buffer {
 public:
-  using ElementTuple = std::tuple<ConvertToType_t<Args>...>;
+  // IMPLEMENT CONSTRUCTOR IN CPP FILE
+  Buffer() = default;
+  virtual ~Buffer() = default;
 
-  Buffer(std::initializer_list<ElementTuple> elements) : m_elements(elements) {}
+  [[nodiscard]] virtual const uint32_t GetSize() const;
 
-  void Print() const {
-    for (const auto &element : m_elements) {
-      PrintElement(element);
-    }
-  }
+  // void Print() const {
+  //   for (const auto &element : m_elements) {
+  //     PrintElement(element);
+  //   }
+  // }
 
 private:
-  std::vector<ElementTuple> m_elements;
+  // std::vector<ElementTuple> m_elements;
 
   // Helper to print tuple contents
-  template <typename... Ts>
-  void PrintElement(const std::tuple<Ts...> &element) const {
-    std::apply([](const auto &...args) { ((std::cout << args << " "), ...); },
-               element);
-    std::cout << '\n';
-  }
+  // template <typename... Ts>
+  // void PrintElement(const std::tuple<Ts...> &element) const {
+  //   std::apply([](const auto &...args) { ((std::cout << args << " "), ...);
+  //   },
+  //              element);
+  //   std::cout << '\n';
+  // }
 };
-
-// Buffer<ElementType::Float2, ElementType::Float3> bfr = {
-//     {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-//     {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-//     {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
 
 }; // namespace Gfx
 

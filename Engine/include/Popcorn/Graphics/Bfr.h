@@ -22,38 +22,10 @@ enum class ElementType {
   Bool
 };
 
-template <ElementType E> struct ElementMap {};
-
-template <> struct ElementMap<ElementType::None> {
-  // SFINAE
-};
-
-// DEFINE THIS IN INHERITED CLASS
-template <> struct ElementMap<ElementType::Float2> {
-  // DEFINE CUSTOM TYPE: USING GLM FOR VULKAN, MAYBE SOMETHING ELSE FOR OPENGL,
-  // DIRECTX ...ETC
-  using type = glm::vec3;
-};
-
-// template <> struct ElementMap<ElementType::Float3> {
-//   // DEFINE CUSTOM TYPE: USING GLM FOR VULKAN, MAYBE SOMETHING ELSE FOR
-//   OPENGL,
-//   // DIRECTX ...ETC
-//   using type = glm::vec3;
-// };
-
-template <ElementType E> using ConvertToType_t = ElementMap<E>::type;
-
 template <ElementType... Args> class Buffer {
 public:
-  using ElementTupleType = std::tuple<ConvertToType_t<Args>...>;
-
-  Buffer(std::initializer_list<ElementTupleType> elements)
-      : m_elements(elements) {};
-  ~Buffer() {};
-
-private:
-  std::vector<ElementTupleType> m_elements;
+  Buffer() = default;
+  virtual ~Buffer() = default;
 };
 
 // Buffer<ElementType::Float2, ElementType::Float3> bfr = {
