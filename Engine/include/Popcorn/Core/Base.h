@@ -2,6 +2,7 @@
 
 #include "GlobalMacros.h"
 #include <cstddef>
+#include <cstdint>
 
 #ifdef PC_DEBUG
 #include <iostream>
@@ -15,6 +16,8 @@ ENGINE_NAMESPACE_BEGIN
 constexpr std::size_t shift_l(std::size_t n) { return 1 << n; }
 
 enum TagType { Constr, Destr, Print };
+
+using byte_t = uint8_t;
 
 #ifdef PC_DEBUG
 extern int PC_print_lvl;

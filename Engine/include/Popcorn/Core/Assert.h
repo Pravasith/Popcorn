@@ -1,4 +1,5 @@
 #pragma once
+
 #include "GlobalMacros.h"
 #include <cassert>
 
