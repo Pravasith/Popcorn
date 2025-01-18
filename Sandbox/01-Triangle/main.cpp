@@ -1,4 +1,8 @@
 #include <Popcorn.h>
+#include <Popcorn/Core/Buffer.h>
+#include <cstddef>
+#include <glm/glm.hpp>
+#include <iostream>
 
 using namespace Popcorn;
 
@@ -18,7 +22,31 @@ public:
   //                                    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
   //                                    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
 
-  GameLayer() { PC_PRINT("CREATED", TagType::Constr, "GAME-LAYER") };
+  // VertexBuffer<Vertex> vertices{{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+  //                               {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+  //                               {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
+
+  GameLayer() {
+    PC_PRINT("CREATED", TagType::Constr, "GAME-LAYER")
+
+    struct Vertex {
+      glm::vec2 pos;
+      glm::vec3 color;
+      std::string Print() {
+        std::stringstream ss;
+        ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g
+           << ", " << color.b;
+
+        return ss.str();
+      };
+    };
+
+    Buffer<Vertex> bfr{{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+                       {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+                       {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
+
+    Popcorn::Buffer<Vertex>::Print(bfr);
+  };
   ~GameLayer() { PC_PRINT("DESTROYED", TagType::Destr, "GAME-LAYER") };
 
   virtual void OnAttach() override {};

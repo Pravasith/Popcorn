@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include "GlobalMacros.h"
@@ -5,25 +6,9 @@
 #include <cassert>
 #include <cstdint>
 #include <cstring>
+#include <initializer_list>
 
 ENGINE_NAMESPACE_BEGIN
-namespace Gfx {
-
-// Enum for ElementType
-enum class ElementType {
-  None = 0,
-  Float,
-  Float2,
-  Float3,
-  Float4,
-  Mat3,
-  Mat4,
-  Int,
-  Int2,
-  Int3,
-  Int4,
-  Bool
-};
 
 template <typename T, uint64_t Count> struct SizeOf {
   static constexpr uint64_t value = sizeof(T) * Count;
@@ -36,6 +21,16 @@ public:
   Buffer() {
     AllocBytes(SizeOf<T, Count>::value);
     m_count = Count;
+  };
+
+  Buffer(std::initializer_list<T> list) {
+    // constexpr uint64_t size = SizeOf<T, list.size()>::value;
+
+    const uint64_t size = sizeof(T) * list.size();
+    AllocBytes(size);
+    memcpy(m_data, list.begin(), size);
+    m_count = list.size();
+    m_size = size;
   };
   Buffer(uint64_t count) : m_count(count) { AllocBytes(count * sizeof(T)); };
   Buffer(T *data, uint64_t count = 0) : m_data(data), m_count(count) {};
@@ -67,6 +62,21 @@ public:
   [[nodiscard]] inline const uint64_t GetCount() const { return m_count; };
   [[nodiscard]] inline const uint64_t GetSize() const { return m_size; };
 
+  T *begin() { return static_cast<T *>(m_data); };
+  const T *begin() const { return static_cast<T *>(m_data); };
+  T *end() { return static_cast<T *>(m_data) + m_count; };
+  const T *end() const { return static_cast<T *>(m_data) + m_count; };
+
+#ifdef PC_DEBUG
+  inline static void Print(Buffer &buffer) {
+    for (auto elem : buffer) {
+      PC_PRINT(elem.Print(), TagType::Print, "BUFFER")
+    }
+  };
+#else
+  inline static void Print(Buffer &buffer) {};
+#endif
+
 private:
   void AllocBytes(uint64_t size) {
     FreeBytes();
@@ -89,12 +99,5 @@ private:
   uint64_t m_count = 0;
   uint64_t m_size = 0;
 };
-
-class VertexBuffer {
-  VertexBuffer();
-  ~VertexBuffer();
-};
-
-}; // namespace Gfx
 
 ENGINE_NAMESPACE_END

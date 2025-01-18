@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Buffer.h"
 #include "GlobalMacros.h"
 #include <glm/glm.hpp>
 
