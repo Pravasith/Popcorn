@@ -1,6 +1,5 @@
 #include <Popcorn.h>
 #include <Popcorn/Core/Buffer.h>
-#include <cstddef>
 #include <glm/glm.hpp>
 #include <iostream>
 

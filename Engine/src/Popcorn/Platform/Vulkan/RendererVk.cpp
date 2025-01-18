@@ -9,9 +9,9 @@
 ENGINE_NAMESPACE_BEGIN
 
 RendererVk::RendererVk(const Window &appWin)
-    : Renderer<RendererType::Vulkan>(appWin), m_ValLyrsVk(m_vkInstance),
-      m_WinSrfcVk(m_vkInstance), m_PhysDevVk(m_vkInstance, GetSurface()),
-      m_LogiDevVk(m_vkInstance), m_GfxPlineVk(),
+    : Renderer(appWin), m_ValLyrsVk(m_vkInstance), m_WinSrfcVk(m_vkInstance),
+      m_PhysDevVk(m_vkInstance, GetSurface()), m_LogiDevVk(m_vkInstance),
+      m_GfxPlineVk(),
       m_SwpChnVk(m_LogiDevVk.GetLogiDevice(), m_PhysDevVk.GetPhysDevice(),
                  m_WinSrfcVk.GetSurface(), m_PhysDevVk.GetQueueFamilyIndices(),
                  m_GfxPlineVk.GetRndrPass()),

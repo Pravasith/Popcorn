@@ -15,20 +15,20 @@ enum class RendererType {
   // Metal = shift_l(3)
 };
 
-// FORWARD DECLARATIONS OF DERIVED CLASSES TO AVOID
-// CIRCULAR DEP PROBLEM
 class RendererOpenGL;
 class RendererVk;
 
 // SINGLETON
-template <RendererType T> class Renderer {
+class Renderer {
 
 public:
-  static Renderer *Create(const Window &appWin);
+  template <RendererType T> static Renderer *Create(const Window &);
   static void Destroy();
 
-  static const auto GetRenderer();
-  [[nodiscard]] constexpr static bool IsRendererType(RendererType type) {
+  // template <RendererType T>
+  static Renderer *GetRenderer();
+
+  [[nodiscard]] const static bool IsRendererType(RendererType type) {
     return static_cast<int>(type) & static_cast<int>(s_type);
   };
 
@@ -46,7 +46,7 @@ public:
   virtual ~Renderer();
 
 private:
-  constexpr static RendererType s_type = T;
+  static RendererType s_type;
   static Renderer *s_instance;
   static std::variant<RendererVk *, RendererOpenGL *> s_renderer;
 
@@ -54,6 +54,17 @@ private:
 
 protected:
   const Window &m_AppWin;
+};
+
+template <RendererType T> Renderer *Renderer::Create(const Window &appWin) {
+  if (!s_instance) {
+    // PC_ASSERT(s_instance, "NO RENDERER INSTANCE");
+    s_type = T;
+    s_instance = new Renderer(appWin);
+    s_instance->Init();
+  }
+
+  return s_instance;
 };
 
 ENGINE_NAMESPACE_END

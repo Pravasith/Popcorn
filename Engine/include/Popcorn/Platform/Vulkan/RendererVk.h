@@ -17,7 +17,7 @@
 #include <GLFW/glfw3.h>
 
 ENGINE_NAMESPACE_BEGIN
-class RendererVk : public Renderer<RendererType::Vulkan> {
+class RendererVk : public Renderer {
 public:
   RendererVk(const Window &appWin);
   ~RendererVk();

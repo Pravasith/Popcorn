@@ -8,7 +8,7 @@ Application *Application::s_instance = nullptr;
 LayerStack *Application::s_layerStack = nullptr;
 Window *Application::s_window = nullptr;
 Time *Application::s_time = nullptr;
-template <RendererType T> Renderer<T> *Application::s_Renderer = nullptr;
+Renderer *Application::s_Renderer = nullptr;
 
 Application::Application() {
   PC_PRINT("APPLICATION STARTED", TagType::Constr, "APP");
@@ -19,8 +19,8 @@ Application::~Application() {
   // LAYERS ARE DELETED INTERNALLY IN THE LAYERSTACK DESTRUCTOR
   delete s_layerStack;
 
-  Renderer<RendererType::Vulkan>::Destroy();
-  s_Renderer<RendererType::Vulkan> = nullptr;
+  Renderer::Destroy();
+  s_Renderer = nullptr;
 
   Window::UnSubscribe(s_instance);
   Window::Destroy();
@@ -54,8 +54,7 @@ void Application::Init() {
     // s_layerStack->PushLayer(s_renderLayer);
     // s_renderLayer->OnAttach();
 
-    s_Renderer<RendererType::Vulkan> =
-        Renderer<RendererType::Vulkan>::Create(*AppWin);
+    s_Renderer = Renderer::Create<RendererType::Vulkan>(*AppWin);
 
     s_time = Time::Get();
   } else {
@@ -104,7 +103,7 @@ bool Application::OnCPUClockTick(TimeEvent &e) const {
   Window::OnUpdate();
   // RENDER LAYER UPDATES HERE
   s_layerStack->UpdateLayerStack();
-  s_Renderer<RendererType::Vulkan>->DrawFrame();
+  s_Renderer->DrawFrame();
   return true;
 };
 
@@ -114,8 +113,8 @@ void Application::OnEvent(Event &e) const {
   dispatcher.Dispatch<WindowResizeEvent>(
       PC_BIND_EVENT_FUNC(WindowResizeEvent, OnWindowResize));
 
-  dispatcher.Dispatch<FrameBfrResizeEvent>(PC_BIND_EVENT_FUNC(
-      FrameBfrResizeEvent, s_Renderer<RendererType::Vulkan>->OnFrameBfrResize));
+  dispatcher.Dispatch<FrameBfrResizeEvent>(
+      PC_BIND_EVENT_FUNC(FrameBfrResizeEvent, s_Renderer->OnFrameBfrResize));
 
   dispatcher.Dispatch<WindowCloseEvent>(
       PC_BIND_EVENT_FUNC(WindowCloseEvent, OnWindowClose));

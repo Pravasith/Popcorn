@@ -4,9 +4,10 @@
 
 ENGINE_NAMESPACE_BEGIN
 
-RendererOpenGL::RendererOpenGL() {
-  PC_PRINT("CREATED", TagType::Constr, "RENDERER-OPENGL")
-};
+RendererOpenGL::RendererOpenGL(const Window &appWin)
+    : Renderer(appWin) {
+        PC_PRINT("CREATED", TagType::Constr, "RENDERER-OPENGL")
+      };
 
 RendererOpenGL::~RendererOpenGL() {
   PC_PRINT("DESTROYED", TagType::Destr, "RENDERER-OPENGL")

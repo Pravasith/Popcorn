@@ -29,9 +29,7 @@ enum class ElementType {
 
 template <typename T> class VertexBuffer {
   VertexBuffer(std::initializer_list<T>);
-  // { PC_PRINT("CREATED", TagType::Constr, "VERTEX-BUFFER") };
-  virtual ~VertexBuffer() = default;
-  // PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER") };
+  virtual ~VertexBuffer();
 
   virtual void SetData();
 

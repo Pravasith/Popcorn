@@ -49,6 +49,6 @@ private:
   static LayerStack *s_layerStack;
   static Window *s_window;
   static Time *s_time;
-  template <RendererType T> static Renderer<T> *s_Renderer;
+  static Renderer *s_Renderer;
 };
 ENGINE_NAMESPACE_END
