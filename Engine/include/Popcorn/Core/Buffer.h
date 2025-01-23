@@ -14,47 +14,54 @@ template <typename T, uint64_t Count> struct SizeOf {
   static constexpr uint64_t value = sizeof(T) * Count;
 };
 
-template <typename T, uint64_t Count = 0> class Buffer {
+class Buffer {
 public:
-  using type = T;
+  Buffer() = default;
 
-  Buffer() {
-    AllocBytes(SizeOf<T, Count>::value);
-    m_count = Count;
-  };
-
-  Buffer(std::initializer_list<T> list) {
-    // constexpr uint64_t size = SizeOf<T, list.size()>::value;
+  template <typename T> void SetData(std::initializer_list<T> list) {
+    PC_PRINT("CREATED(INIT-LIST)", TagType::Constr, "BUFFER")
 
     const uint64_t size = sizeof(T) * list.size();
+    FreeBytes();
     AllocBytes(size);
-    memcpy(m_data, list.begin(), size);
+    // THESE LINES HERE DON'T WORK AS EXPECTED. THE m_count IS ZERO??
     m_count = list.size();
     m_size = size;
+    memcpy(m_data, list.begin(), size);
+    // m_count = list.size();
+    // m_size = size;
   };
-  Buffer(uint64_t count) : m_count(count) { AllocBytes(count * sizeof(T)); };
-  Buffer(T *data, uint64_t count = 0) : m_data(data), m_count(count) {};
 
-  Buffer(const Buffer &other) {
-    size_t size = sizeof(T) * other.m_count;
+  template <typename T, uint64_t Count = 0>
+  Buffer() : m_count(Count), m_size((sizeof(T) * m_count)) {
+    PC_PRINT("CREATED", TagType::Constr, "BUFFER")
+    AllocBytes(SizeOf<T, Count>::value);
+  };
+
+  template <typename T> Buffer(uint64_t count) : m_count(count) {
+    PC_PRINT("THIS_CREATED", TagType::Constr, "BUFFER")
+    AllocBytes(count * sizeof(T));
+  };
+  template <typename T>
+  Buffer(T *data, uint64_t count = 0)
+      : m_data(data),
+        m_count(count){PC_PRINT("CREATED", TagType::Constr, "BUFFER")};
+
+  Buffer(const Buffer &other, const uint64_t size) {
     AllocBytes(size);
     memcpy(m_data, other.m_data, size);
   };
 
   Buffer &operator=(const Buffer &other) {
+    PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print, "BUFFER")
     if (this == &other)
       return *this;
 
-    size_t size = sizeof(T) * other.m_count;
+    size_t size = other.m_size;
     AllocBytes(size);
     memcpy(m_data, other.m_data, size);
 
     return *this;
-  };
-
-  Buffer(const Buffer &other, uint64_t size) {
-    AllocBytes(size);
-    memcpy(m_data, other.m_data, size);
   };
 
   ~Buffer() { FreeBytes(); };
@@ -62,20 +69,32 @@ public:
   [[nodiscard]] inline const uint64_t GetCount() const { return m_count; };
   [[nodiscard]] inline const uint64_t GetSize() const { return m_size; };
 
-  T *begin() { return static_cast<T *>(m_data); };
-  const T *begin() const { return static_cast<T *>(m_data); };
-  T *end() { return static_cast<T *>(m_data) + m_count; };
-  const T *end() const { return static_cast<T *>(m_data) + m_count; };
+  template <typename T> T *begin() { return static_cast<T *>(m_data); };
+  template <typename T> const T *begin() const {
+    return static_cast<T *>(m_data);
+  };
+  template <typename T> T *end() { return static_cast<T *>(m_data) + m_count; };
+  template <typename T> const T *end() const {
+    return static_cast<T *>(m_data) + m_count;
+  };
 
 #ifdef PC_DEBUG
-  inline static void Print(Buffer &buffer) {
-    for (auto elem : buffer) {
-      PC_PRINT(elem.Print(), TagType::Print, "BUFFER")
+  template <typename T> inline static void Print(Buffer &buffer) {
+    for (T *it = buffer.begin<T>(); it != buffer.end<T>(); ++it) {
+      PC_PRINT(
+          // BELOW STATEMENT
+          ((T &)(*it)).Print(),
+          // IS EQUIVALENT TO:
+          // elem.Print(),
+          // WHERE: T &elem = *it;
+          TagType::Print, "BUFFER")
     }
   };
 #else
-  inline static void Print(Buffer &buffer) {};
+  static void Print(Buffer &buffer) {};
 #endif
+
+  template <typename T> T *AsType() { return (T *)m_data; };
 
 private:
   void AllocBytes(uint64_t size) {

@@ -1,5 +1,5 @@
 #include <Popcorn.h>
-#include <Popcorn/Core/Buffer.h>
+#include <Popcorn/Graphics/VertexBuffer.h>
 #include <glm/glm.hpp>
 #include <iostream>
 
@@ -40,11 +40,11 @@ public:
       };
     };
 
-    Buffer<Vertex> bfr{{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-                       {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-                       {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
-
-    Popcorn::Buffer<Vertex>::Print(bfr);
+    Gfx::VertexBuffer bfr;
+    bfr.Fill<Vertex>({{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+                      {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+                      {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}});
+    bfr.PrintBuffer<Vertex>();
   };
   ~GameLayer() { PC_PRINT("DESTROYED", TagType::Destr, "GAME-LAYER") };
 

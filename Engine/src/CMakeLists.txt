@@ -37,6 +37,7 @@ add_library(
   #
   # MAIN CLASS
   ${GRAPHICS_IMPL_DIR}/Renderer.cpp
+  ${GRAPHICS_IMPL_DIR}/VertexBuffer.cpp
   #
   # OPENGL CLASSES
   ${PLATFORM_IMPL_DIR}/OpenGL/RendererOpenGL.cpp

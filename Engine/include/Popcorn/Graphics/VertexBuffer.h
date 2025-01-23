@@ -2,14 +2,14 @@
 
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include "Popcorn/Core/Buffer.h"
+#include "Renderer.h"
 #include <cassert>
 #include <cstring>
 #include <initializer_list>
 
 ENGINE_NAMESPACE_BEGIN
-namespace Gfx {
-
-template <typename T> class Buffer;
+GFX_NAMESPACE_BEGIN
 
 // Enum for ElementType
 enum class ElementType {
@@ -27,16 +27,21 @@ enum class ElementType {
   Bool
 };
 
-template <typename T> class VertexBuffer {
-  VertexBuffer(std::initializer_list<T>);
+class VertexBuffer {
+public:
+  VertexBuffer() { PC_PRINT("CREATED", TagType::Constr, "VERTEX-BUFFER") };
+  template <typename T> void Fill(std::initializer_list<T> list) {
+    m_buffer.SetData(list);
+  };
   virtual ~VertexBuffer();
 
-  virtual void SetData();
+  void Init() const;
+
+  template <typename T> void PrintBuffer() { Buffer::Print<T>(m_buffer); };
 
 protected:
-  Buffer<T> m_buffer;
+  Buffer m_buffer;
 };
 
-}; // namespace Gfx
-
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
