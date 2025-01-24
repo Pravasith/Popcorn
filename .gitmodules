@@ -1,15 +1,15 @@
 [submodule "submodules/glfw"]
-	path = submodules/glfw
+	path = Engine/submodules/glfw
 	url = git@github.com:glfw/glfw.git
 [submodule "submodules/imgui"]
-	path = submodules/imgui
+	path = Engine/submodules/imgui
 	url = git@github.com:ocornut/imgui.git
 [submodule "submodules/vulkan-loader"]
-	path = submodules/vulkan-loader
+	path = Engine/submodules/vulkan-loader
 	url = git@github.com:KhronosGroup/Vulkan-Loader.git
 [submodule "submodules/vulkan-headers"]
-	path = submodules/vulkan-headers
+	path = Engine/submodules/vulkan-headers
 	url = git@github.com:KhronosGroup/Vulkan-Headers.git
 [submodule "submodules/glm"]
-	path = submodules/glm
+	path = Engine/submodules/glm
 	url = git@github.com:g-truc/glm.git

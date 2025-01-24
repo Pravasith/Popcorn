@@ -1,0 +1,28 @@
+@PACKAGE_INIT@
+# THIS IS A CUSTOM CMAKE CONFIG FILE TO FIND LIBRARIES THAT ARE NOT BUILT BY
+# THIS PROJECT
+
+set(PC_HOME "${CMAKE_SOURCE_DIR}/../../Engine")
+include("${CMAKE_CURRENT_LIST_DIR}/PopcornTargets.cmake")
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  set(BUILD_FOR_LINUX TRUE)
+  list(
+    APPEND
+    CMAKE_PREFIX_PATH
+    "${PC_HOME}/dist/linux/third-party/glfw"
+    "${PC_HOME}/dist/linux/third-party/vulkan-loader"
+    "${PC_HOME}/dist/linux/third-party/vulkan-headers"
+    "${PC_HOME}/dist/linux/third-party/glm")
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  set(BUILD_FOR_WIN TRUE)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(BUILD_FOR_MACOS TRUE)
+endif()
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(VulkanHeaders REQUIRED)
+find_dependency(VulkanLoader REQUIRED)
+find_dependency(glfw3 REQUIRED)
+find_dependency(glm REQUIRED)

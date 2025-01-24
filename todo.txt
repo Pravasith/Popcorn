@@ -1,5 +1,14 @@
 TODO:
 ----------
+::  Check GLFW installation for linux & windows
+::  Architecture for Sandbox - scripts
+    - script to build & install engine in sandbox
+    - make main.cpp work
+    - script to create a new Game project
+
+::  Build for windows
+::  Make Readme for the project
+
 ::  Test minimization logic -
     https://vulkan-tutorial.com/Drawing_a_triangle/Swap_chain_recreation
 
