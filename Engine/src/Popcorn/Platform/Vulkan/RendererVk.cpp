@@ -1,11 +1,14 @@
 #include "RendererVk.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include "VertexBuffer.h"
 #include <cstdint>
 #include <cstring>
+#include <glm/glm.hpp>
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
+GFX_NAMESPACE_BEGIN
 
 RendererVk::RendererVk(const Window &appWin)
     : Renderer(appWin), m_ValLyrsVk(m_vkInstance), m_WinSrfcVk(m_vkInstance),
@@ -52,6 +55,29 @@ void RendererVk::InitVulkan() {
   m_GfxPlineVk.CreateRenderPass(m_SwpChnVk.GetImgFormat(),
                                 m_LogiDevVk.GetLogiDevice());
   // TODO: SET VERTEX BUFFER HERE
+  struct Vertex {
+    glm::vec2 pos;
+    glm::vec3 color;
+    std::string Print() {
+      std::stringstream ss;
+      ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g << ", "
+         << color.b;
+
+      return ss.str();
+    };
+  };
+
+  Gfx::VertexBuffer bfr;
+  bfr.Fill<Vertex>({
+      //
+      {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
+      {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+      {{0.0f, 0.5f}, {1.0f, 0.0f, 0.0f}},
+      //
+  });
+
+  bfr.PrintBuffer<Vertex>();
+
   m_GfxPlineVk.CreateGfxPipeline(m_LogiDevVk.GetLogiDevice(),
                                  m_SwpChnVk.GetSwapChainExtent());
 
@@ -165,4 +191,5 @@ void RendererVk::CleanUp() {
   m_vkInstance = VK_NULL_HANDLE;
 };
 
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

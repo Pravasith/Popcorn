@@ -5,6 +5,7 @@
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
+GFX_NAMESPACE_BEGIN
 
 // Gfx::VertexBufferVk::GetAttrDescs<T>();
 
@@ -237,4 +238,5 @@ void GfxPipelineVk::CleanUp(const VkDevice &dev) {
   vkDestroyRenderPass(dev, m_renderPass, nullptr);
 };
 
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

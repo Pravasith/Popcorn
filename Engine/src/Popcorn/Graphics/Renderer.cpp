@@ -8,6 +8,7 @@
 #include <string>
 
 ENGINE_NAMESPACE_BEGIN
+GFX_NAMESPACE_BEGIN
 // SINGLETON
 Renderer *Renderer::s_instance = nullptr;
 RendererType Renderer::s_type = RendererType::Vulkan;
@@ -76,5 +77,5 @@ void Renderer::Destroy() {
 // Explicit template instantiation
 // template class Renderer<RendererType::OpenGL>;
 // template class Renderer<RendererType::Vulkan>;
-
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Assert.h"
+#include "Base.h"
 #include "GlobalMacros.h"
 #include "LayerStack.h"
 #include "Popcorn/Events/Event.h"
@@ -12,6 +13,7 @@
 #include "Window.h"
 
 ENGINE_NAMESPACE_BEGIN
+using namespace Gfx;
 
 // SINGLETON
 class Application : public Subscriber {
@@ -31,7 +33,7 @@ public:
   inline void SetRenderer(Renderer &renderer)
   //
   {
-    PC_ASSERT(s_Renderer, "A renderer already exists!");
+    PC_ASSERT(!s_Renderer, "A renderer already exists!");
     s_Renderer = &renderer;
   };
 

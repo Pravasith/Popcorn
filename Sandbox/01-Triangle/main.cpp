@@ -16,27 +16,27 @@ public:
   ~GameLayer() { PC_PRINT("DESTROYED", TagType::Destr, "GAME-LAYER") };
 
   virtual void OnAttach() override {
-    struct Vertex {
-      glm::vec2 pos;
-      glm::vec3 color;
-      std::string Print() {
-        std::stringstream ss;
-        ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g
-           << ", " << color.b;
+    // struct Vertex {
+    //   glm::vec2 pos;
+    //   glm::vec3 color;
+    //   std::string Print() {
+    //     std::stringstream ss;
+    //     ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g
+    //        << ", " << color.b;
+    //
+    //     return ss.str();
+    //   };
+    // };
 
-        return ss.str();
-      };
-    };
-
-    Gfx::VertexBuffer bfr;
-    bfr.Fill<Vertex>({
-        //
-        {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
-        {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-        {{0.0f, 0.5f}, {1.0f, 0.0f, 0.0f}},
-        //
-    });
-    bfr.PrintBuffer<Vertex>();
+    // Gfx::VertexBuffer bfr;
+    // bfr.Fill<Vertex>({
+    //     //
+    //     {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
+    //     {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+    //     {{0.0f, 0.5f}, {1.0f, 0.0f, 0.0f}},
+    //     //
+    // });
+    // bfr.PrintBuffer<Vertex>();
   };
   virtual void OnDetach() override {};
   virtual void OnUpdate() override { Renderer::Get().DrawFrame(); };

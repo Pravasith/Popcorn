@@ -53,7 +53,7 @@ void Application::Start() {
     // s_layerStack->PushLayer(s_renderLayer);
     // s_renderLayer->OnAttach();
 
-    s_Renderer = Renderer::Create<RendererType::Vulkan>(*AppWin);
+    // s_Renderer = Renderer::Create<RendererType::Vulkan>(*AppWin);
     s_time = Time::Get();
   } else {
     PC_WARN(
@@ -101,7 +101,7 @@ bool Application::OnCPUClockTick(TimeEvent &e) const {
   Window::OnUpdate();
   // RENDER LAYER UPDATES HERE
   s_layerStack->UpdateLayerStack();
-  s_Renderer->DrawFrame();
+  // s_Renderer->DrawFrame();
   return true;
 };
 
@@ -111,8 +111,10 @@ void Application::OnEvent(Event &e) const {
   dispatcher.Dispatch<WindowResizeEvent>(
       PC_BIND_EVENT_FUNC(WindowResizeEvent, OnWindowResize));
 
-  dispatcher.Dispatch<FrameBfrResizeEvent>(
-      PC_BIND_EVENT_FUNC(FrameBfrResizeEvent, s_Renderer->OnFrameBfrResize));
+  if (s_Renderer) {
+    dispatcher.Dispatch<FrameBfrResizeEvent>(
+        PC_BIND_EVENT_FUNC(FrameBfrResizeEvent, s_Renderer->OnFrameBfrResize));
+  }
 
   dispatcher.Dispatch<WindowCloseEvent>(
       PC_BIND_EVENT_FUNC(WindowCloseEvent, OnWindowClose));

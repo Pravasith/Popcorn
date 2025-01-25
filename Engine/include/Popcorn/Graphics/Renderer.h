@@ -7,6 +7,7 @@
 #include <variant>
 
 ENGINE_NAMESPACE_BEGIN
+GFX_NAMESPACE_BEGIN
 
 enum class RendererType {
   OpenGL = shift_l(0),
@@ -66,4 +67,5 @@ template <RendererType T> Renderer *Renderer::Create(const Window &appWin) {
   return s_instance;
 };
 
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

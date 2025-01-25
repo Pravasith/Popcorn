@@ -8,7 +8,7 @@
 #include <GLFW/glfw3.h>
 
 ENGINE_NAMESPACE_BEGIN
-
+GFX_NAMESPACE_BEGIN
 class RendererVk;
 
 class LogiDeviceVk {
@@ -54,5 +54,5 @@ private:
   VkQueue m_gfxQueue;
   VkQueue m_presQueue;
 };
-
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

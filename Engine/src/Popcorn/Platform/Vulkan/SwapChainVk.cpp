@@ -6,6 +6,8 @@
 #include <limits>
 
 ENGINE_NAMESPACE_BEGIN
+GFX_NAMESPACE_BEGIN
+
 SwapChainSupportDetails
 SwapChainVk::QuerySwapChainSupport(const VkPhysicalDevice &physDev,
                                    const VkSurfaceKHR &surface) const {
@@ -222,4 +224,5 @@ void SwapChainVk::CleanUp() const {
   vkDestroySwapchainKHR(m_logiDevice, m_swapChain, nullptr);
 }
 
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

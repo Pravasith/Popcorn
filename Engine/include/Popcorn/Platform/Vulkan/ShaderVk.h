@@ -6,6 +6,7 @@
 #include "Shader.h"
 
 ENGINE_NAMESPACE_BEGIN
+GFX_NAMESPACE_BEGIN
 class ShaderVk : public Shader {
 public:
   ShaderVk() { PC_PRINT("CREATED", TagType::Constr, "SHADER-VK"); }
@@ -14,5 +15,5 @@ public:
   [[nodiscard]] virtual std::vector<char>
   LoadFile(const std::string &) override;
 };
-
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

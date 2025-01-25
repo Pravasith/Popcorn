@@ -4,6 +4,7 @@
 #include <cstdint>
 
 ENGINE_NAMESPACE_BEGIN
+GFX_NAMESPACE_BEGIN
 void CmdPoolVk::CreateCmdPool(const QueueFamilyIndices &qFamIndices,
                               const VkDevice &dev) {
   VkCommandPoolCreateInfo cmdPoolInfo{};
@@ -96,4 +97,5 @@ void CmdPoolVk::RecordCmdBfrFtr::operator()(VkCommandBuffer &cmdBfr,
 void CmdPoolVk::CleanUp(const VkDevice &dev) {
   vkDestroyCommandPool(dev, m_cmdPool, nullptr);
 };
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

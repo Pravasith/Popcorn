@@ -5,6 +5,8 @@
 #include <set>
 
 ENGINE_NAMESPACE_BEGIN
+GFX_NAMESPACE_BEGIN
+
 void LogiDeviceVk::CreateLogicalDevice(
     const QueueFamilyIndices &qFamIndices,
     const std::vector<const char *> &valLyrsVk,
@@ -70,4 +72,5 @@ void LogiDeviceVk::CreateLogicalDevice(
 
 void LogiDeviceVk::CleanUp() { vkDestroyDevice(m_device, nullptr); }
 
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

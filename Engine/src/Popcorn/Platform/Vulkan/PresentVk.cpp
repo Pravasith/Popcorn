@@ -7,6 +7,8 @@
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
+GFX_NAMESPACE_BEGIN
+
 uint32_t PresentVk::s_currFrame = 0;
 bool PresentVk::s_frameBfrResized = false;
 
@@ -126,4 +128,5 @@ void PresentVk::CleanUp(const VkDevice &dev) {
   }
 };
 
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
