@@ -20,7 +20,7 @@ DebugUIOverlay::~DebugUIOverlay() {
 }
 
 void DebugUIOverlay::OnAttach() {
-  Application &app = Application::Get();
+  const Application &app = Application::Get();
   m_os_window = app.GetAppWindow().GetOSWindow();
 
   // Decide GL+GLSL versions

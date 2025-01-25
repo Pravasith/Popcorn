@@ -1,7 +1,6 @@
 #include "Application.h"
 #include "Base.h"
 #include "Renderer.h"
-#include <stdexcept>
 
 ENGINE_NAMESPACE_BEGIN
 Application *Application::s_instance = nullptr;
@@ -31,7 +30,7 @@ Application::~Application() {
 Application &Application::Get() { return *s_instance; }
 Window &Application::GetAppWindow() const { return *s_window; }
 
-void Application::Init() {
+void Application::Start() {
   if (!s_instance) {
     // DONT MOVE THIS BLOCK
     auto windowProps = Popcorn::Window::Props("Triangle App", 500, 500);
@@ -55,10 +54,9 @@ void Application::Init() {
     // s_renderLayer->OnAttach();
 
     s_Renderer = Renderer::Create<RendererType::Vulkan>(*AppWin);
-
     s_time = Time::Get();
   } else {
-    std::runtime_error(
+    PC_WARN(
         "ATTEMPT TO CREATE APPLICATION CLASS, WHEN INSTANCE ALREADY EXISTS");
   }
 }

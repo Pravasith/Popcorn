@@ -29,6 +29,11 @@ static void PC_Print(const std::string &msg, const TagType tag,
     return;
   };
 
+  if (tag == TagType::Constr) {
+    PC_print_lvl++;
+  } else if (tag == TagType::Destr)
+    PC_print_lvl--;
+
   std::stringstream ss;
   auto lvl = PC_print_lvl < 10 ? " " + std::to_string(PC_print_lvl)
                                : std::to_string(PC_print_lvl);
@@ -41,11 +46,6 @@ static void PC_Print(const std::string &msg, const TagType tag,
 
   ss << "| " << className << ": " << msg << '\n';
   std::cout << ss.str();
-
-  if (tag == TagType::Constr) {
-    PC_print_lvl++;
-  } else if (tag == TagType::Destr)
-    PC_print_lvl--;
 };
 
 #define PC_PRINT(msg, tag, className)                                          \

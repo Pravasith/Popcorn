@@ -1,10 +1,9 @@
 #pragma once
 
 #include "GlobalMacros.h"
+#include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
-#include "Renderer.h"
-#include <cassert>
 #include <cstring>
 #include <initializer_list>
 
@@ -30,16 +29,41 @@ enum class ElementType {
 class VertexBuffer {
 public:
   VertexBuffer() { PC_PRINT("CREATED", TagType::Constr, "VERTEX-BUFFER") };
-  template <typename T> void Fill(std::initializer_list<T> list) {
-    m_buffer.SetData(list);
-  };
-  virtual ~VertexBuffer();
+  virtual ~VertexBuffer() {
+    delete m_vertexBfr;
+    m_vertexBfr = nullptr;
 
-  void Init() const;
+    PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER")
+  };
+
+  template <typename T> void Fill(std::initializer_list<T> list) noexcept {
+    m_buffer.SetData(list);
+    m_vertexBfr = Init();
+  };
+
+  [[nodiscard]] inline const uint64_t GetSize() const {
+    return m_buffer.GetSize();
+  };
+
+  [[nodiscard]] inline const uint64_t GetCount() const {
+    return m_buffer.GetCount();
+  };
+
+  // [[nodiscard]] inline const unsigned int GetVertexSize() const {
+  //   PC_ASSERT(m_buffer.GetCount() == 0, "Buffer count is zero!");
+  //   return m_buffer.GetSize() / m_buffer.GetCount();
+  // };
+
+  virtual void Bind() {};
+  virtual void UnBind() {};
 
   template <typename T> void PrintBuffer() { Buffer::Print<T>(m_buffer); };
 
+private:
+  VertexBuffer *Init() const;
+
 protected:
+  VertexBuffer *m_vertexBfr = nullptr;
   Buffer m_buffer;
 };
 

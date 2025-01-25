@@ -1,7 +1,6 @@
 #include "RendererVk.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
-#include "Popcorn/Events/Event.h"
 #include <cstdint>
 #include <cstring>
 #include <vector>
@@ -14,7 +13,7 @@ RendererVk::RendererVk(const Window &appWin)
       m_GfxPlineVk(),
       m_SwpChnVk(m_LogiDevVk.GetLogiDevice(), m_PhysDevVk.GetPhysDevice(),
                  m_WinSrfcVk.GetSurface(), m_PhysDevVk.GetQueueFamilyIndices(),
-                 m_GfxPlineVk.GetRndrPass()),
+                 m_GfxPlineVk.GetRenderPass()),
       m_CmdPoolVk(), m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()),
       m_PresentVk{m_LogiDevVk.GetLogiDevice(), m_SwpChnVk.GetSwapChain(),
                   m_LogiDevVk.GetDeviceQueue(), m_LogiDevVk.GetPresentQueue(),
@@ -50,8 +49,8 @@ void RendererVk::InitVulkan() {
   m_SwpChnVk.CreateImgViews();
 
   // CREATE GFX PIPELINE
-  m_GfxPlineVk.CreateRndrPass(m_SwpChnVk.GetImgFormat(),
-                              m_LogiDevVk.GetLogiDevice());
+  m_GfxPlineVk.CreateRenderPass(m_SwpChnVk.GetImgFormat(),
+                                m_LogiDevVk.GetLogiDevice());
   m_GfxPlineVk.CreateGfxPipeline(m_LogiDevVk.GetLogiDevice(),
                                  m_SwpChnVk.GetSwapChainExtent());
 
@@ -143,7 +142,7 @@ void RendererVk::DrawFrame() {
       m_CmdPoolVk.GetCmdBfrs(),
       // TODO: USE A LAMBDA
       CmdPoolVk::RecordCmdBfrFtr{
-          m_GfxPlineVk.GetRndrPass(), m_SwpChnVk.GetFrameBfrs(),
+          m_GfxPlineVk.GetRenderPass(), m_SwpChnVk.GetFrameBfrs(),
           m_SwpChnVk.GetSwapChainExtent(), m_GfxPlineVk.GetGfxPipeline()},
       // TODO: USE A LAMBDA
       SwapChainVk::RecreateSwapChainFtr{m_SwpChnVk, m_LogiDevVk.GetLogiDevice(),

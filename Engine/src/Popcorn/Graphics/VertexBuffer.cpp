@@ -6,24 +6,18 @@
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
-void VertexBuffer::Init() const {
-  PC_PRINT("CREATED", TagType::Constr, "VERTEX-BUFFER")
+VertexBuffer *VertexBuffer::Init() const {
   switch (Renderer::GetAPI()) {
   case RendererType::Vulkan: {
-    PC_PRINT("VULKAN RENDERER", TagType::Print, "VERTEX-BUFFER")
-    VertexBufferVk x;
-    break;
+    return new VertexBufferVk();
   }
   case RendererType::OpenGL:
-    PC_PRINT("OPENGL RENDERER", TagType::Print, "VERTEX-BUFFER")
-    break;
+    // return new VertexBufferOpenGL();
+    return nullptr;
   default:
     PC_ERROR("WRONG RENDERER API", "RENDERER-API")
-    break;
+    return nullptr;
   };
-};
-VertexBuffer::~VertexBuffer() {
-  PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER")
 };
 
 GFX_NAMESPACE_END
