@@ -26,6 +26,7 @@ public:
   static void Destroy();
 
   // template <RendererType T>
+  static Renderer &Get() { return *GetRenderer(); };
   static Renderer *GetRenderer();
 
   [[nodiscard]] const static RendererType GetAPI() { return s_type; };

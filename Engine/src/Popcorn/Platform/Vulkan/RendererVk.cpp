@@ -51,6 +51,7 @@ void RendererVk::InitVulkan() {
   // CREATE GFX PIPELINE
   m_GfxPlineVk.CreateRenderPass(m_SwpChnVk.GetImgFormat(),
                                 m_LogiDevVk.GetLogiDevice());
+  // TODO: SET VERTEX BUFFER HERE
   m_GfxPlineVk.CreateGfxPipeline(m_LogiDevVk.GetLogiDevice(),
                                  m_SwpChnVk.GetSwapChainExtent());
 

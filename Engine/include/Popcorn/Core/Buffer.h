@@ -54,6 +54,9 @@ public:
     // m_size = size;
   };
 
+  // TODO: IMPLEMENT FLUSH
+  void Flush() {};
+
   template <typename T, uint64_t Count = 0>
   Buffer() : m_count(Count), m_size((sizeof(T) * m_count)) {
     PC_PRINT("CREATED", TagType::Constr, "BUFFER")
@@ -76,6 +79,7 @@ public:
 
   Buffer &operator=(const Buffer &other) {
     PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print, "BUFFER")
+
     if (this == &other)
       return *this;
 

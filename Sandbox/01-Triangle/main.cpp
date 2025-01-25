@@ -1,5 +1,6 @@
 #include <Application.h>
 #include <Popcorn.h>
+#include <Popcorn/Graphics/Renderer.h>
 #include <Popcorn/Graphics/VertexBuffer.h>
 #include <glm/glm.hpp>
 #include <iostream>
@@ -38,7 +39,7 @@ public:
     bfr.PrintBuffer<Vertex>();
   };
   virtual void OnDetach() override {};
-  virtual void OnUpdate() override {};
+  virtual void OnUpdate() override { Renderer::Get().DrawFrame(); };
   virtual void OnEvent(Event &e) override {};
 };
 
@@ -48,7 +49,6 @@ int main(int argc, char **argv) {
   auto &app = Application::Get();
 
   // CREATE AND SET RENDERER
-  // THIS IS AN LVALUE
   auto &renderer =
       *(Renderer::Create<RendererType::Vulkan>(app.GetAppWindow()));
   app.SetRenderer(renderer);
