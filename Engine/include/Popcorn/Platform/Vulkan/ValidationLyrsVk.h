@@ -7,7 +7,7 @@
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
-
+GFX_NAMESPACE_BEGIN
 class RendererVk;
 
 class ValidationLyrsVk {
@@ -44,4 +44,5 @@ private:
   VkDebugUtilsMessengerEXT m_debugMessenger;
   const VkInstance &m_vkInst;
 };
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

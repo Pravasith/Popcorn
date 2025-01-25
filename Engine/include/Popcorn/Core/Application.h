@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Assert.h"
+#include "Base.h"
 #include "GlobalMacros.h"
 #include "LayerStack.h"
 #include "Popcorn/Events/Event.h"
@@ -11,12 +13,13 @@
 #include "Window.h"
 
 ENGINE_NAMESPACE_BEGIN
+using namespace Gfx;
 
 // SINGLETON
 class Application : public Subscriber {
 
 public:
-  static void Init();
+  static void Start();
   static Application &Get();
   static void Stop();
 
@@ -26,6 +29,13 @@ public:
   Window &GetAppWindow() const;
   LayerStack &GetLayerStack() const { return *s_layerStack; };
   static bool IsGameLoopRunning();
+
+  inline void SetRenderer(Renderer &renderer)
+  //
+  {
+    PC_ASSERT(!s_Renderer, "A renderer already exists!");
+    s_Renderer = &renderer;
+  };
 
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
   Application(const Application &) = delete;

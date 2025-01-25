@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 
 ENGINE_NAMESPACE_BEGIN
+GFX_NAMESPACE_BEGIN
 class RendererVk;
 
 // PHYSICAL DEVICE
@@ -54,4 +55,5 @@ private:
   QueueFamilyIndices m_qFamIndices;
 };
 
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

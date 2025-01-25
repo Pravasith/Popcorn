@@ -7,6 +7,7 @@
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
+GFX_NAMESPACE_BEGIN
 
 void PhysDeviceVk::PickPhysDevice(const SwapChainVk &swpChnVk) {
   uint32_t deviceCount = 0;
@@ -112,4 +113,5 @@ void PhysDeviceVk::FindQueueFamilies(const VkPhysicalDevice &device) {
   }
 }
 
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

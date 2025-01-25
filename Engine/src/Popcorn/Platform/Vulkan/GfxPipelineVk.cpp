@@ -5,12 +5,15 @@
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
+GFX_NAMESPACE_BEGIN
+
+// Gfx::VertexBufferVk::GetAttrDescs<T>();
 
 void GfxPipelineVk::CreateGfxPipeline(const VkDevice &dev,
                                       const VkExtent2D &swpChnExt) {
 
-  auto vertShdr = m_ShdrVk.LoadFile(PC_src_map[VkTriVert]);
-  auto fragShdr = m_ShdrVk.LoadFile(PC_src_map[VkTriFrag]);
+  auto vertShdr = m_ShaderVk.LoadFile(PC_src_map[VkTriVert]);
+  auto fragShdr = m_ShaderVk.LoadFile(PC_src_map[VkTriFrag]);
 
   VkShaderModule vertShdrMod = CreateShaderModule(vertShdr, dev);
   VkShaderModule fragShdrMod = CreateShaderModule(fragShdr, dev);
@@ -35,13 +38,13 @@ void GfxPipelineVk::CreateGfxPipeline(const VkDevice &dev,
                                                     fragShdrStageInfo};
 
   // VERTEX BUFFER DATA
-  VkPipelineVertexInputStateCreateInfo vertInptInfo{};
-  vertInptInfo.sType =
+  VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+  vertexInputInfo.sType =
       VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-  vertInptInfo.vertexBindingDescriptionCount = 0;
-  vertInptInfo.pVertexBindingDescriptions = nullptr;
-  vertInptInfo.vertexAttributeDescriptionCount = 0;
-  vertInptInfo.pVertexAttributeDescriptions = nullptr;
+  vertexInputInfo.vertexBindingDescriptionCount = 0;
+  vertexInputInfo.pVertexBindingDescriptions = nullptr;
+  vertexInputInfo.vertexAttributeDescriptionCount = 0;
+  vertexInputInfo.pVertexAttributeDescriptions = nullptr;
 
   // INPUT ASSEMBLY
   VkPipelineInputAssemblyStateCreateInfo inptAsmInfo{};
@@ -134,7 +137,7 @@ void GfxPipelineVk::CreateGfxPipeline(const VkDevice &dev,
   pplnLytInfo.pushConstantRangeCount = 0;    // Optional
   pplnLytInfo.pPushConstantRanges = nullptr; // Optional
 
-  if (vkCreatePipelineLayout(dev, &pplnLytInfo, nullptr, &m_pplnLytVk) !=
+  if (vkCreatePipelineLayout(dev, &pplnLytInfo, nullptr, &m_pipelineLayout) !=
       VK_SUCCESS) {
     std::runtime_error("FAILED TO CREATE PIPELINE LAYOUT!");
   };
@@ -144,7 +147,7 @@ void GfxPipelineVk::CreateGfxPipeline(const VkDevice &dev,
   gfxPlInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
   gfxPlInfo.stageCount = 2;
   gfxPlInfo.pStages = shaderStages;
-  gfxPlInfo.pVertexInputState = &vertInptInfo;
+  gfxPlInfo.pVertexInputState = &vertexInputInfo;
   gfxPlInfo.pInputAssemblyState = &inptAsmInfo;
   gfxPlInfo.pViewportState = &viewportState;
   gfxPlInfo.pRasterizationState = &rstrzr;
@@ -152,14 +155,14 @@ void GfxPipelineVk::CreateGfxPipeline(const VkDevice &dev,
   gfxPlInfo.pDepthStencilState = nullptr;
   gfxPlInfo.pColorBlendState = &clrBlding;
   gfxPlInfo.pDynamicState = &dynState;
-  gfxPlInfo.layout = m_pplnLytVk;
-  gfxPlInfo.renderPass = m_rndrPass;
+  gfxPlInfo.layout = m_pipelineLayout;
+  gfxPlInfo.renderPass = m_renderPass;
   gfxPlInfo.subpass = 0; // INDEX OF THE SUBPASS
   gfxPlInfo.basePipelineHandle = VK_NULL_HANDLE;
   gfxPlInfo.basePipelineIndex = -1;
 
   if (vkCreateGraphicsPipelines(dev, VK_NULL_HANDLE, 1, &gfxPlInfo, nullptr,
-                                &m_gfxPpline) != VK_SUCCESS) {
+                                &m_gfxPipeline) != VK_SUCCESS) {
     std::runtime_error("ERROR: FAILED TO CREATE GFX PIPELINE!");
   };
 
@@ -167,8 +170,8 @@ void GfxPipelineVk::CreateGfxPipeline(const VkDevice &dev,
   vkDestroyShaderModule(dev, fragShdrMod, nullptr);
 };
 
-void GfxPipelineVk::CreateRndrPass(const VkFormat &swpChnImgFrmt,
-                                   const VkDevice &dev) {
+void GfxPipelineVk::CreateRenderPass(const VkFormat &swpChnImgFrmt,
+                                     const VkDevice &dev) {
   VkAttachmentDescription clrAtmt{};
   clrAtmt.format = swpChnImgFrmt;
   clrAtmt.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -207,7 +210,7 @@ void GfxPipelineVk::CreateRndrPass(const VkFormat &swpChnImgFrmt,
   rndrPassInfo.dependencyCount = 1;
   rndrPassInfo.pDependencies = &subpassDep;
 
-  if (vkCreateRenderPass(dev, &rndrPassInfo, nullptr, &m_rndrPass) !=
+  if (vkCreateRenderPass(dev, &rndrPassInfo, nullptr, &m_renderPass) !=
       VK_SUCCESS) {
     std::runtime_error("ERROR: RENDER PASS COULDN'T BE CREATED!");
   };
@@ -230,9 +233,10 @@ VkShaderModule GfxPipelineVk::CreateShaderModule(const std::vector<char> &code,
 };
 
 void GfxPipelineVk::CleanUp(const VkDevice &dev) {
-  vkDestroyPipeline(dev, m_gfxPpline, nullptr);
-  vkDestroyPipelineLayout(dev, m_pplnLytVk, nullptr);
-  vkDestroyRenderPass(dev, m_rndrPass, nullptr);
+  vkDestroyPipeline(dev, m_gfxPipeline, nullptr);
+  vkDestroyPipelineLayout(dev, m_pipelineLayout, nullptr);
+  vkDestroyRenderPass(dev, m_renderPass, nullptr);
 };
 
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

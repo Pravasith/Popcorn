@@ -15,16 +15,17 @@ template <typename T, uint64_t Count> struct SizeOf {
   static constexpr uint64_t value = sizeof(T) * Count;
 };
 
-// BASE TEMPLATE
+// PRIMARY TEMPLATE
 template <typename T, typename V = void> struct HasPrint : std::false_type {};
 
 // SPECIALIZATION
 template <typename T>
 struct HasPrint<
     T,
-    // FALSE - SUBSTITUTION FAILURE BC ::enable_if<bool>::type
-    // DOESN'T EXIST TRUE - value IS THE SAME TYPE AS THE 2ND PARAM,
-    // WHICH IS NOT DEFINED IN THIS CASE, SO VOID??
+    // IF std::enable_if 1ST PARAM IS -
+    // FALSE - SUBSTITUTION FAILURE BC ::enable_if<bool>::type DOESN'T EXIST.
+    // TRUE - value IS THE SAME TYPE AS THE 2ND PARAM,
+    // WHICH IS NOT DEFINED IN THIS CASE, SO RETURNS void.
     typename std::enable_if<
         //
         std::is_member_function_pointer<decltype(&T::Print)>::value>::type
@@ -33,7 +34,11 @@ struct HasPrint<
 
 class Buffer {
 public:
-  Buffer() = default;
+  Buffer() { PC_PRINT("CREATED(DEFAULT)", TagType::Constr, "BUFFER") };
+  ~Buffer() {
+    FreeBytes();
+    PC_PRINT("DESTROYED", TagType::Destr, "BUFFER")
+  };
 
   template <typename T> void SetData(std::initializer_list<T> list) {
     PC_PRINT("CREATED(INIT-LIST)", TagType::Constr, "BUFFER")
@@ -48,6 +53,9 @@ public:
     // m_count = list.size();
     // m_size = size;
   };
+
+  // TODO: IMPLEMENT FLUSH
+  void Flush() {};
 
   template <typename T, uint64_t Count = 0>
   Buffer() : m_count(Count), m_size((sizeof(T) * m_count)) {
@@ -71,6 +79,7 @@ public:
 
   Buffer &operator=(const Buffer &other) {
     PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print, "BUFFER")
+
     if (this == &other)
       return *this;
 
@@ -80,8 +89,6 @@ public:
 
     return *this;
   };
-
-  ~Buffer() { FreeBytes(); };
 
   [[nodiscard]] inline const uint64_t GetCount() const { return m_count; };
   [[nodiscard]] inline const uint64_t GetSize() const { return m_size; };
@@ -97,18 +104,9 @@ public:
 
 #ifdef PC_DEBUG
   template <typename T> inline static void Print(Buffer &buffer) {
-    for (T *it = buffer.begin<T>(); it != buffer.end<T>(); ++it) {
-      // TODO: CHECK IF METHOD (Print IN THIS CASE) EXISTS -- IMPLEMENT A SFINAE
-      // HELPER
-      // https://www.reddit.com/r/cpp_questions/comments/pbh8zb/sfinae_detect_if_method_exists_cpp17/
-      if constexpr (HasPrint<T>()) {
-        PC_PRINT(
-            // BELOW STATEMENT
-            ((T &)(*it)).Print(),
-            // IS EQUIVALENT TO:
-            // elem.Print(),
-            // WHERE: T &elem = *it;
-            TagType::Print, "BUFFER")
+    if constexpr (HasPrint<T>()) {
+      for (T *it = buffer.begin<T>(); it != buffer.end<T>(); ++it) {
+        PC_PRINT(((T &)(*it)).Print(), TagType::Print, "BUFFER")
       };
     }
   };

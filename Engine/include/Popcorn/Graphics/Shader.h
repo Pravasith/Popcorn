@@ -5,6 +5,7 @@
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
+GFX_NAMESPACE_BEGIN
 class Shader {
 public:
   Shader() { PC_PRINT("CREATED", TagType::Constr, "SHADER"); }
@@ -16,5 +17,5 @@ public:
 class ShaderLib {
   // SOMETHING FOR THE FUTURE
 };
-
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

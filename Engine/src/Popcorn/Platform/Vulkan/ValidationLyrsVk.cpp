@@ -3,6 +3,8 @@
 #include "Popcorn/Core/Base.h"
 
 ENGINE_NAMESPACE_BEGIN
+GFX_NAMESPACE_BEGIN
+
 VkResult PC_CreateDebugUtilsMessengerEXT(
     VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
     const VkAllocationCallbacks *pAllocator,
@@ -98,4 +100,6 @@ VKAPI_ATTR VkBool32 VKAPI_CALL ValidationLyrsVk::DebugCallback(
   PC_ERROR(pCallbackData->pMessage, "VALIDATION LAYER");
   return VK_FALSE;
 }
+
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

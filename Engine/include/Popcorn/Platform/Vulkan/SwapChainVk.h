@@ -10,6 +10,7 @@
 #include <GLFW/glfw3.h>
 
 ENGINE_NAMESPACE_BEGIN
+GFX_NAMESPACE_BEGIN
 class SwapChainVk {
   friend class RendererVk;
 
@@ -108,5 +109,5 @@ private:
   const QueueFamilyIndices &m_qFamIndices;
   const VkRenderPass &m_rndrPass;
 };
-
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

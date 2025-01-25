@@ -1,6 +1,6 @@
 
 #include "Popcorn/Core/Time.h"
-#include "Assert.h"
+#include "Base.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Events/TimeEvent.h"
 
@@ -13,7 +13,7 @@ Time *Time::Get() {
   if (!s_instance) {
     s_instance = new Time();
   } else {
-    PC_ASSERT(s_instance, "Time class instance exists!");
+    PC_WARN("Time class instance exists!");
   };
   return s_instance;
 };

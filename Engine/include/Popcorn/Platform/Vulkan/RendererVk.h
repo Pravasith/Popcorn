@@ -17,6 +17,7 @@
 #include <GLFW/glfw3.h>
 
 ENGINE_NAMESPACE_BEGIN
+GFX_NAMESPACE_BEGIN
 class RendererVk : public Renderer {
 public:
   RendererVk(const Window &appWin);
@@ -70,5 +71,5 @@ private:
 
   PresentVk m_PresentVk;
 };
-
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

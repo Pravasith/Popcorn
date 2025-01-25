@@ -7,6 +7,7 @@
 #include <variant>
 
 ENGINE_NAMESPACE_BEGIN
+GFX_NAMESPACE_BEGIN
 
 enum class RendererType {
   OpenGL = shift_l(0),
@@ -26,6 +27,7 @@ public:
   static void Destroy();
 
   // template <RendererType T>
+  static Renderer &Get() { return *GetRenderer(); };
   static Renderer *GetRenderer();
 
   [[nodiscard]] const static RendererType GetAPI() { return s_type; };
@@ -65,4 +67,5 @@ template <RendererType T> Renderer *Renderer::Create(const Window &appWin) {
   return s_instance;
 };
 
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

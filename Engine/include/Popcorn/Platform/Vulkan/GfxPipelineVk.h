@@ -8,24 +8,25 @@
 #include <GLFW/glfw3.h>
 
 ENGINE_NAMESPACE_BEGIN
+GFX_NAMESPACE_BEGIN
 class GfxPipelineVk {
   friend class RendererVk;
 
 private:
-  [[nodiscard]] inline const VkRenderPass &GetRndrPass() const {
-    if (m_rndrPass == VK_NULL_HANDLE) {
+  [[nodiscard]] inline const VkRenderPass &GetRenderPass() const {
+    if (m_renderPass == VK_NULL_HANDLE) {
       std::runtime_error("ERROR: RENDER PASS IS NULL");
     };
 
-    return m_rndrPass;
+    return m_renderPass;
   };
 
   [[nodiscard]] inline const VkPipeline &GetGfxPipeline() const {
-    if (m_gfxPpline == VK_NULL_HANDLE) {
+    if (m_gfxPipeline == VK_NULL_HANDLE) {
       std::runtime_error("ERROR: GFX PIPELINE IS NULL");
     };
 
-    return m_gfxPpline;
+    return m_gfxPipeline;
   };
 
 private:
@@ -37,14 +38,15 @@ private:
   void CreateGfxPipeline(const VkDevice &, const VkExtent2D &);
   VkShaderModule CreateShaderModule(const std::vector<char> &,
                                     const VkDevice &);
-  void CreateRndrPass(const VkFormat &, const VkDevice &);
+  void CreateRenderPass(const VkFormat &, const VkDevice &);
   void CleanUp(const VkDevice &);
 
 private:
-  ShaderVk m_ShdrVk;
-  VkRenderPass m_rndrPass;
-  VkPipelineLayout m_pplnLytVk;
-  VkPipeline m_gfxPpline;
+  ShaderVk m_ShaderVk;
+  VkRenderPass m_renderPass;
+  VkPipelineLayout m_pipelineLayout;
+  VkPipeline m_gfxPipeline;
 };
 
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

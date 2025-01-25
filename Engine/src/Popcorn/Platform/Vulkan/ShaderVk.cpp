@@ -6,6 +6,7 @@
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
+GFX_NAMESPACE_BEGIN
 
 std::vector<char> ShaderVk::LoadFile(const std::string &fname) {
   // FLAGS MEANING: OPEN THE FILE AND SEEK TO THE END (ate FLAG) AND READ IT AS
@@ -33,4 +34,5 @@ std::vector<char> ShaderVk::LoadFile(const std::string &fname) {
   return bfr;
 };
 
+GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
