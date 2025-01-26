@@ -46,6 +46,8 @@ public:
   virtual ~Renderer();
 
 private:
+  Renderer();
+
   static RendererType s_type;
   static Renderer *s_instance;
   static std::variant<RendererVk *, RendererOpenGL *> s_renderer;

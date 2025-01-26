@@ -5,6 +5,7 @@
 #include "Popcorn/Events/WindowEvent.h"
 #include "RendererOpenGL.h"
 #include "RendererVk.h"
+#include <glm/glm.hpp>
 #include <string>
 
 ENGINE_NAMESPACE_BEGIN
@@ -24,6 +25,43 @@ Renderer::~Renderer() { PC_PRINT("DESTROYED", TagType::Destr, "RENDERER") };
 void Renderer::Init() const {
   if (s_type == RendererType::Vulkan) {
     s_renderer = new RendererVk(m_AppWin);
+
+    // TODO: SET VERTEX BUFFER HERE
+    struct Vertex {
+      glm::vec2 pos;
+      glm::vec3 color;
+      std::string Print() {
+        std::stringstream ss;
+        ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g
+           << ", " << color.b;
+
+        return ss.str();
+      };
+    };
+
+    VertexBuffer bfr{};
+    bfr.Fill<Vertex>({
+        //
+        {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
+        {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+        {{0.0f, 0.5f}, {1.0f, 0.0f, 0.0f}},
+        //
+    });
+
+    // TODO: FIX DOUBLE FREE -- UNCOMMENT BELOW
+    //
+    // std::get<RendererVk *>(s_renderer)
+    //     ->BindVertexBuffer(
+    //         //
+    //         // std::move
+    //         // bfr's DESTRUCTOR CALLED HERE
+    //         (static_cast<VertexBufferVk &>(bfr))
+    //         //
+    //     );
+
+    // bfr.PrintBuffer<Vertex>();
+    // VertexBuffer::GetBindingDescription<Vertex>();
+
   } else if (s_type == RendererType::OpenGL) {
     s_renderer = new RendererOpenGL(m_AppWin);
   } else {

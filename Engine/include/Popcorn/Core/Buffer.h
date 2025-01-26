@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "GlobalMacros.h"
@@ -34,8 +33,13 @@ struct HasPrint<
 
 class Buffer {
 public:
-  Buffer() { PC_PRINT("CREATED(DEFAULT)", TagType::Constr, "BUFFER") };
+  Buffer() {
+    AllocBytes(0);
+    PC_PRINT("CREATED(DEFAULT)", TagType::Constr, "BUFFER")
+  };
   ~Buffer() {
+
+    PC_PRINT("FREE CALLED !!!!!!!!     ", TagType::Destr, "BUFFER")
     FreeBytes();
     PC_PRINT("DESTROYED", TagType::Destr, "BUFFER")
   };
@@ -44,7 +48,6 @@ public:
     PC_PRINT("CREATED(INIT-LIST)", TagType::Constr, "BUFFER")
 
     const uint64_t size = sizeof(T) * list.size();
-    FreeBytes();
     AllocBytes(size);
     // THESE LINES HERE DON'T WORK AS EXPECTED. THE m_count IS ZERO??
     m_count = list.size();
@@ -53,9 +56,6 @@ public:
     // m_count = list.size();
     // m_size = size;
   };
-
-  // TODO: IMPLEMENT FLUSH
-  void Flush() {};
 
   template <typename T, uint64_t Count = 0>
   Buffer() : m_count(Count), m_size((sizeof(T) * m_count)) {
@@ -72,11 +72,16 @@ public:
       : m_data(data),
         m_count(count){PC_PRINT("CREATED", TagType::Constr, "BUFFER")};
 
-  Buffer(const Buffer &other, const uint64_t size) {
+  // COPY CONSTRUCTOR ------------------------------------------------------
+  Buffer(const Buffer &other) {
+    PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Print, "BUFFER")
+    if (this == &other)
+      return;
+
+    size_t size = other.m_size;
     AllocBytes(size);
     memcpy(m_data, other.m_data, size);
   };
-
   Buffer &operator=(const Buffer &other) {
     PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print, "BUFFER")
 
@@ -88,6 +93,25 @@ public:
     memcpy(m_data, other.m_data, size);
 
     return *this;
+  };
+
+  // MOVE CONSTRUCTOR ------------------------------------------------------
+  Buffer(Buffer &&other) {
+    PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Print, "BUFFER")
+    if (this == &other) {
+      return;
+    };
+
+    m_data = other.m_data;
+  };
+  Buffer &&operator=(Buffer &&other) {
+    PC_PRINT("MOVE ASSIGNMENT EVOKED", TagType::Print, "BUFFER")
+    if (this == &other) {
+      return std::move(*this);
+    };
+
+    m_data = other.m_data;
+    return std::move(*this);
   };
 
   [[nodiscard]] inline const uint64_t GetCount() const { return m_count; };
@@ -118,18 +142,24 @@ public:
 
 private:
   void AllocBytes(uint64_t size) {
+    PC_PRINT(m_data, TagType::Print, "BEFORE-ALLOC")
     FreeBytes();
 
-    if (size == 0)
-      return;
+    // if (size == 0)
+    //   return;
 
     m_data = new byte_t[size];
     m_size = size;
+    PC_PRINT(m_data, TagType::Print, "AFTER-ALLOC")
   };
 
   void FreeBytes() {
-    delete[] static_cast<byte_t *>(m_data);
+    PC_PRINT(m_data, TagType::Print, "BEFORE-FREE")
+    if (m_data)
+      delete[] static_cast<byte_t *>(m_data);
     m_data = nullptr;
+    PC_PRINT(m_data, TagType::Print, "AFTER-FREE")
+
     m_size = 0;
     m_count = 0;
   };

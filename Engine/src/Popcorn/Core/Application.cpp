@@ -53,7 +53,6 @@ void Application::Start() {
     // s_layerStack->PushLayer(s_renderLayer);
     // s_renderLayer->OnAttach();
 
-    // s_Renderer = Renderer::Create<RendererType::Vulkan>(*AppWin);
     s_time = Time::Get();
   } else {
     PC_WARN(

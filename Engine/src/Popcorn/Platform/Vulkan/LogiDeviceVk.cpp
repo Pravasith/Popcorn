@@ -33,7 +33,7 @@ void LogiDeviceVk::CreateLogicalDevice(
   createInfo.enabledExtensionCount = static_cast<uint32_t>(devExts.size());
   createInfo.ppEnabledExtensionNames = devExts.data();
 
-  if constexpr (RendererVk::IsValLyrsEnabled()) {
+  if constexpr (RendererVk::AreValLayersEnabled()) {
     createInfo.enabledLayerCount = static_cast<uint32_t>(valLyrsVk.size());
     createInfo.ppEnabledLayerNames = valLyrsVk.data();
   } else {

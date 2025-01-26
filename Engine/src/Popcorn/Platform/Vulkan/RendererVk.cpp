@@ -1,25 +1,26 @@
 #include "RendererVk.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
-#include "VertexBuffer.h"
 #include <cstdint>
 #include <cstring>
-#include <glm/glm.hpp>
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 RendererVk::RendererVk(const Window &appWin)
-    : Renderer(appWin), m_ValLyrsVk(m_vkInstance), m_WinSrfcVk(m_vkInstance),
-      m_PhysDevVk(m_vkInstance, GetSurface()), m_LogiDevVk(m_vkInstance),
-      m_GfxPlineVk(),
-      m_SwpChnVk(m_LogiDevVk.GetLogiDevice(), m_PhysDevVk.GetPhysDevice(),
-                 m_WinSrfcVk.GetSurface(), m_PhysDevVk.GetQueueFamilyIndices(),
-                 m_GfxPlineVk.GetRenderPass()),
-      m_CmdPoolVk(), m_qFamIndices(m_PhysDevVk.GetQueueFamilyIndices()),
-      m_PresentVk{m_LogiDevVk.GetLogiDevice(), m_SwpChnVk.GetSwapChain(),
-                  m_LogiDevVk.GetDeviceQueue(), m_LogiDevVk.GetPresentQueue(),
+    : Renderer(appWin), m_ValLayersVk(m_vkInstance),
+      m_WinSurfaceVk(m_vkInstance), m_PhysDeviceVk(m_vkInstance, GetSurface()),
+      m_LogiDeviceVk(m_vkInstance), m_GfxPipelineVk(),
+      m_SwapChainVk(m_LogiDeviceVk.GetLogiDevice(),
+                    m_PhysDeviceVk.GetPhysDevice(), m_WinSurfaceVk.GetSurface(),
+                    m_PhysDeviceVk.GetQueueFamilyIndices(),
+                    m_GfxPipelineVk.GetRenderPass()),
+      m_CmdPoolVk(),
+      m_queueFamilyIndices(m_PhysDeviceVk.GetQueueFamilyIndices()),
+      m_PresentVk{m_LogiDeviceVk.GetLogiDevice(), m_SwapChainVk.GetSwapChain(),
+                  m_LogiDeviceVk.GetDeviceQueue(),
+                  m_LogiDeviceVk.GetPresentQueue(),
                   m_AppWin.GetFramebufferSize()} {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
   InitVulkan();
@@ -34,63 +35,41 @@ void RendererVk::InitVulkan() {
   CreateInstance();
 
   if constexpr (s_enableValidationLayers) {
-    m_ValLyrsVk.SetupDbgMsngr();
+    m_ValLayersVk.SetupDbgMsngr();
   };
 
   // SURFACE, PHYS DEVICE, LOGICAL DEVICE CREATION
-  m_WinSrfcVk.CreateSurface(m_AppWin.GetOSWindow());
-  m_PhysDevVk.PickPhysDevice(m_SwpChnVk);
-  m_LogiDevVk.CreateLogicalDevice(
-      m_PhysDevVk.GetQueueFamilyIndices(), m_ValLyrsVk.GetValidationLayers(),
-      m_PhysDevVk.GetPhysDevice(), m_PhysDevVk.GetDeviceExts());
+  m_WinSurfaceVk.CreateSurface(m_AppWin.GetOSWindow());
+  m_PhysDeviceVk.PickPhysDevice(m_SwapChainVk);
+  m_LogiDeviceVk.CreateLogicalDevice(m_PhysDeviceVk.GetQueueFamilyIndices(),
+                                     m_ValLayersVk.GetValidationLayers(),
+                                     m_PhysDeviceVk.GetPhysDevice(),
+                                     m_PhysDeviceVk.GetDeviceExts());
 
   // SWAP CHAIN RELATED
-  m_SwpChnVk.CreateSwapChain(
+  m_SwapChainVk.CreateSwapChain(
       m_AppWin.GetFramebufferSize().first, // FRAME BFR WIDTH
       m_AppWin.GetFramebufferSize().second // FRAME BFR HEIGHT
   );
-  m_SwpChnVk.CreateImgViews();
+  m_SwapChainVk.CreateImgViews();
 
   // CREATE GFX PIPELINE
-  m_GfxPlineVk.CreateRenderPass(m_SwpChnVk.GetImgFormat(),
-                                m_LogiDevVk.GetLogiDevice());
-  // TODO: SET VERTEX BUFFER HERE
-  struct Vertex {
-    glm::vec2 pos;
-    glm::vec3 color;
-    std::string Print() {
-      std::stringstream ss;
-      ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g << ", "
-         << color.b;
+  m_GfxPipelineVk.CreateRenderPass(m_SwapChainVk.GetImgFormat(),
+                                   m_LogiDeviceVk.GetLogiDevice());
 
-      return ss.str();
-    };
-  };
-
-  Gfx::VertexBuffer bfr;
-  bfr.Fill<Vertex>({
-      //
-      {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
-      {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-      {{0.0f, 0.5f}, {1.0f, 0.0f, 0.0f}},
-      //
-  });
-
-  bfr.PrintBuffer<Vertex>();
-
-  m_GfxPlineVk.CreateGfxPipeline(m_LogiDevVk.GetLogiDevice(),
-                                 m_SwpChnVk.GetSwapChainExtent());
+  m_GfxPipelineVk.CreateGfxPipeline(m_LogiDeviceVk.GetLogiDevice(),
+                                    m_SwapChainVk.GetSwapChainExtent());
 
   // FRAME BUFFERS
-  m_SwpChnVk.CreateFrameBfrs();
+  m_SwapChainVk.CreateFrameBfrs();
 
   // CMD BFRS
-  m_CmdPoolVk.CreateCmdPool(m_PhysDevVk.GetQueueFamilyIndices(),
-                            m_LogiDevVk.GetLogiDevice());
-  m_CmdPoolVk.CreateCmdBfrs(m_LogiDevVk.GetLogiDevice());
+  m_CmdPoolVk.CreateCmdPool(m_PhysDeviceVk.GetQueueFamilyIndices(),
+                            m_LogiDeviceVk.GetLogiDevice());
+  m_CmdPoolVk.CreateCmdBfrs(m_LogiDeviceVk.GetLogiDevice());
 
   // PRESENTATION SYNC OBJS FOR DRAW FRAME
-  m_PresentVk.CreateSyncObjs(m_LogiDevVk.GetLogiDevice());
+  m_PresentVk.CreateSyncObjs(m_LogiDeviceVk.GetLogiDevice());
 };
 
 void RendererVk::CreateInstance() {
@@ -117,7 +96,7 @@ void RendererVk::CreateInstance() {
   // CHECK FOR VALIDATION LAYER SUPPORT
   if constexpr (s_enableValidationLayers) {
 
-    if (!m_ValLyrsVk.CheckVkVLSupport()) {
+    if (!m_ValLayersVk.CheckVkVLSupport()) {
       throw std::runtime_error(
           "VALIDATION LAYERS REQUESTED, BUT NOT AVAILABLE!");
     }
@@ -126,10 +105,10 @@ void RendererVk::CreateInstance() {
 
     // UPDATE CREATE INFO
     createInfo.enabledLayerCount =
-        static_cast<uint32_t>(m_ValLyrsVk.GetValidationLayers().size());
-    createInfo.ppEnabledLayerNames = m_ValLyrsVk.GetValidationLayers().data();
+        static_cast<uint32_t>(m_ValLayersVk.GetValidationLayers().size());
+    createInfo.ppEnabledLayerNames = m_ValLayersVk.GetValidationLayers().data();
 
-    m_ValLyrsVk.PopulateDbgMsngrCreateInfo(dbgCreateInfo);
+    m_ValLayersVk.PopulateDbgMsngrCreateInfo(dbgCreateInfo);
     createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&dbgCreateInfo;
   } else {
     createInfo.enabledLayerCount = 0;
@@ -169,23 +148,23 @@ void RendererVk::DrawFrame() {
       m_CmdPoolVk.GetCmdBfrs(),
       // TODO: USE A LAMBDA
       CmdPoolVk::RecordCmdBfrFtr{
-          m_GfxPlineVk.GetRenderPass(), m_SwpChnVk.GetFrameBfrs(),
-          m_SwpChnVk.GetSwapChainExtent(), m_GfxPlineVk.GetGfxPipeline()},
+          m_GfxPipelineVk.GetRenderPass(), m_SwapChainVk.GetFrameBfrs(),
+          m_SwapChainVk.GetSwapChainExtent(), m_GfxPipelineVk.GetGfxPipeline()},
       // TODO: USE A LAMBDA
-      SwapChainVk::RecreateSwapChainFtr{m_SwpChnVk, m_LogiDevVk.GetLogiDevice(),
-                                        m_AppWin});
+      SwapChainVk::RecreateSwapChainFtr{
+          m_SwapChainVk, m_LogiDeviceVk.GetLogiDevice(), m_AppWin});
 };
 
 void RendererVk::CleanUp() {
-  vkDeviceWaitIdle(m_LogiDevVk.GetLogiDevice());
+  vkDeviceWaitIdle(m_LogiDeviceVk.GetLogiDevice());
 
-  m_SwpChnVk.CleanUp();
-  m_PresentVk.CleanUp(m_LogiDevVk.GetLogiDevice());
-  m_CmdPoolVk.CleanUp(m_LogiDevVk.GetLogiDevice());
-  m_GfxPlineVk.CleanUp(m_LogiDevVk.GetLogiDevice());
-  m_WinSrfcVk.CleanUp();
-  m_LogiDevVk.CleanUp();
-  m_ValLyrsVk.CleanUp();
+  m_SwapChainVk.CleanUp();
+  m_PresentVk.CleanUp(m_LogiDeviceVk.GetLogiDevice());
+  m_CmdPoolVk.CleanUp(m_LogiDeviceVk.GetLogiDevice());
+  m_GfxPipelineVk.CleanUp(m_LogiDeviceVk.GetLogiDevice());
+  m_WinSurfaceVk.CleanUp();
+  m_LogiDeviceVk.CleanUp();
+  m_ValLayersVk.CleanUp();
 
   vkDestroyInstance(m_vkInstance, nullptr);
   m_vkInstance = VK_NULL_HANDLE;

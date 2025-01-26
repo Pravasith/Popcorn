@@ -28,9 +28,13 @@ enum class ElementType {
 
 class VertexBuffer {
 public:
-  VertexBuffer() { PC_PRINT("CREATED", TagType::Constr, "VERTEX-BUFFER") };
+  VertexBuffer() {
+    // m_vertexBfr ??
+    PC_PRINT("CREATED", TagType::Constr, "VERTEX-BUFFER")
+  };
   virtual ~VertexBuffer() {
-    delete m_vertexBfr;
+    if (m_vertexBfr)
+      delete m_vertexBfr;
     m_vertexBfr = nullptr;
 
     PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER")
