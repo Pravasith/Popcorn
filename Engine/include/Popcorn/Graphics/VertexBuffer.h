@@ -40,6 +40,40 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER")
   };
 
+  // COPY CONSTRUCTOR
+  VertexBuffer(const VertexBuffer &other) {
+    PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Print, "Vertex-Buffer-Vk")
+    m_buffer = other.m_buffer;
+  };
+  VertexBuffer &operator=(const VertexBuffer &other) {
+    PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print, "Vertex-Buffer-Vk")
+
+    if (this == &other)
+      return *this;
+
+    m_buffer = other.m_buffer;
+    return *this;
+  };
+
+  // MOVE CONSTRUCTOR
+  VertexBuffer(VertexBuffer &&other) {
+    PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Print, "Vertex-Buffer-Vk")
+    if (this == &other) {
+      return;
+    };
+    m_buffer = other.m_buffer;
+  };
+  VertexBuffer &&operator=(VertexBuffer &&other) {
+    PC_PRINT("MOVE ASSIGNMENT EVOKED", TagType::Print, "Vertex-Buffer-Vk")
+
+    if (this == &other) {
+      return std::move(*this);
+    };
+
+    m_buffer = std::move(other.m_buffer);
+    return std::move(*this);
+  };
+
   template <typename T> void Fill(std::initializer_list<T> list) noexcept {
     m_buffer.SetData(list);
     m_vertexBfr = Init();

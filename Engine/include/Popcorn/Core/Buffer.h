@@ -38,8 +38,6 @@ public:
     PC_PRINT("CREATED(DEFAULT)", TagType::Constr, "BUFFER")
   };
   ~Buffer() {
-
-    PC_PRINT("FREE CALLED !!!!!!!!     ", TagType::Destr, "BUFFER")
     FreeBytes();
     PC_PRINT("DESTROYED", TagType::Destr, "BUFFER")
   };
@@ -111,6 +109,7 @@ public:
     };
 
     m_data = other.m_data;
+    // delete (decltype(other.m_data) *)other.m_data;
     return std::move(*this);
   };
 
@@ -142,7 +141,6 @@ public:
 
 private:
   void AllocBytes(uint64_t size) {
-    PC_PRINT(m_data, TagType::Print, "BEFORE-ALLOC")
     FreeBytes();
 
     // if (size == 0)
@@ -150,16 +148,12 @@ private:
 
     m_data = new byte_t[size];
     m_size = size;
-    PC_PRINT(m_data, TagType::Print, "AFTER-ALLOC")
   };
 
   void FreeBytes() {
-    PC_PRINT(m_data, TagType::Print, "BEFORE-FREE")
     if (m_data)
       delete[] static_cast<byte_t *>(m_data);
     m_data = nullptr;
-    PC_PRINT(m_data, TagType::Print, "AFTER-FREE")
-
     m_size = 0;
     m_count = 0;
   };

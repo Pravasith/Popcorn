@@ -48,18 +48,16 @@ void Renderer::Init() const {
         //
     });
 
-    // TODO: FIX DOUBLE FREE -- UNCOMMENT BELOW
-    //
-    // std::get<RendererVk *>(s_renderer)
-    //     ->BindVertexBuffer(
-    //         //
-    //         // std::move
-    //         // bfr's DESTRUCTOR CALLED HERE
-    //         (static_cast<VertexBufferVk &>(bfr))
-    //         //
-    //     );
+    std::get<RendererVk *>(s_renderer)
+        ->BindVertexBuffer(
+            //
+            // std::move
+            // bfr's DESTRUCTOR CALLED HERE
+            (static_cast<VertexBufferVk &>(bfr))
+            //
+        );
 
-    // bfr.PrintBuffer<Vertex>();
+    bfr.PrintBuffer<Vertex>();
     // VertexBuffer::GetBindingDescription<Vertex>();
 
   } else if (s_type == RendererType::OpenGL) {

@@ -17,40 +17,6 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER-VK")
   };
 
-  // COPY CONSTRUCTOR
-  VertexBufferVk(const VertexBufferVk &other) {
-    PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Print, "Vertex-Buffer-Vk")
-    m_buffer = other.m_buffer;
-  };
-  VertexBufferVk &operator=(const VertexBufferVk &other) {
-    PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print, "Vertex-Buffer-Vk")
-
-    if (this == &other)
-      return *this;
-
-    m_buffer = other.m_buffer;
-    return *this;
-  };
-
-  // MOVE CONSTRUCTOR
-  VertexBufferVk(VertexBufferVk &&other) {
-    PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Print, "Vertex-Buffer-Vk")
-    if (this == &other) {
-      return;
-    };
-    m_buffer = other.m_buffer;
-  };
-  VertexBufferVk &&operator=(VertexBufferVk &&other) {
-    PC_PRINT("MOVE ASSIGNMENT EVOKED", TagType::Print, "Vertex-Buffer-Vk")
-
-    if (this == &other) {
-      return std::move(*this);
-    };
-
-    m_buffer = std::move(other.m_buffer);
-    return std::move(*this);
-  };
-
   template <typename T>
   static VkVertexInputBindingDescription GetBindingDescription();
   template <typename T>
