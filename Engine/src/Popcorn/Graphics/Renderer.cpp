@@ -5,6 +5,7 @@
 #include "Popcorn/Events/WindowEvent.h"
 #include "RendererOpenGL.h"
 #include "RendererVk.h"
+#include "VertexBuffer.h"
 #include <glm/glm.hpp>
 #include <string>
 
@@ -39,25 +40,25 @@ void Renderer::Init() const {
       };
     };
 
-    VertexBuffer bfr{};
-    bfr.Fill<Vertex>({
-        //
+    // CREATES V-Bfr-Vk*
+    // V-Bfr-Vk has m_vertex
+    VertexBuffer *bfr = VertexBuffer::Create();
+    bfr->Fill<Vertex>({
         {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
         {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
         {{0.0f, 0.5f}, {1.0f, 0.0f, 0.0f}},
-        //
     });
 
     std::get<RendererVk *>(s_renderer)
-        ->BindVertexBuffer(
-            //
-            // std::move
-            // bfr's DESTRUCTOR CALLED HERE
-            (static_cast<VertexBufferVk &>(bfr))
-            //
-        );
+        // bfr's resources are moved to RendererVK's m_vertexBufferVk's;
+        ->BindVertexBuffer(*(static_cast<VertexBufferVk *>(bfr)));
 
-    bfr.PrintBuffer<Vertex>();
+    PC_PRINT(&bfr, TagType::Print, "RENDERER vertexBuffer before delete")
+    bfr->PrintBuffer<Vertex>();
+    delete bfr;
+
+    PC_PRINT(&bfr, TagType::Print, "RENDERER vertexBuffer after delete")
+
     // VertexBuffer::GetBindingDescription<Vertex>();
 
   } else if (s_type == RendererType::OpenGL) {

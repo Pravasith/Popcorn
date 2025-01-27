@@ -4,6 +4,7 @@
 #include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
+#include <cstdint>
 #include <cstring>
 #include <initializer_list>
 
@@ -29,24 +30,26 @@ enum class ElementType {
 class VertexBuffer {
 public:
   VertexBuffer() {
-    // m_vertexBfr ??
-    PC_PRINT("CREATED", TagType::Constr, "VERTEX-BUFFER")
+    // m_vertexBfr = nullptr
+    PC_PRINT("CREATED(DEFAULT)", TagType::Constr, "VERTEX-BUFFER");
   };
   virtual ~VertexBuffer() {
-    if (m_vertexBfr)
-      delete m_vertexBfr;
-    m_vertexBfr = nullptr;
-
     PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER")
+  };
+
+  template <typename T> void Fill(std::initializer_list<T> list) {
+    m_buffer.SetData(list);
   };
 
   // COPY CONSTRUCTOR
   VertexBuffer(const VertexBuffer &other) {
-    PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Print, "Vertex-Buffer-Vk")
+    PC_PRINT("Inherited COPY CONSTRUCTOR EVOKED", TagType::Print,
+             "Vertex-Buffer-Vk")
     m_buffer = other.m_buffer;
   };
-  VertexBuffer &operator=(const VertexBuffer &other) {
-    PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print, "Vertex-Buffer-Vk")
+  virtual VertexBuffer &operator=(const VertexBuffer &other) {
+    PC_PRINT("Inherited COPY ASSIGNMENT EVOKED", TagType::Print,
+             "Vertex-Buffer-Vk")
 
     if (this == &other)
       return *this;
@@ -57,51 +60,38 @@ public:
 
   // MOVE CONSTRUCTOR
   VertexBuffer(VertexBuffer &&other) {
-    PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Print, "Vertex-Buffer-Vk")
+    PC_PRINT("Inherited MOVE CONSTRUCTOR EVOKED", TagType::Print,
+             "Vertex-Buffer-Vk")
     if (this == &other) {
       return;
     };
-    m_buffer = other.m_buffer;
+
+    m_buffer = std::move(other.m_buffer);
   };
-  VertexBuffer &&operator=(VertexBuffer &&other) {
-    PC_PRINT("MOVE ASSIGNMENT EVOKED", TagType::Print, "Vertex-Buffer-Vk")
+  virtual VertexBuffer &operator=(VertexBuffer &&other) {
+    PC_PRINT("Inherited MOVE ASSIGNMENT EVOKED", TagType::Print,
+             "Vertex-Buffer-Vk")
 
     if (this == &other) {
-      return std::move(*this);
+      return *this;
     };
 
     m_buffer = std::move(other.m_buffer);
-    return std::move(*this);
+
+    return *this;
   };
 
-  template <typename T> void Fill(std::initializer_list<T> list) noexcept {
-    m_buffer.SetData(list);
-    m_vertexBfr = Init();
-  };
+  static VertexBuffer *Create();
 
-  [[nodiscard]] inline const uint64_t GetSize() const {
-    return m_buffer.GetSize();
-  };
+  virtual uint64_t GetSize() const = 0;
+  virtual uint64_t GetCount() const = 0;
 
-  [[nodiscard]] inline const uint64_t GetCount() const {
-    return m_buffer.GetCount();
-  };
-
-  // [[nodiscard]] inline const unsigned int GetVertexSize() const {
-  //   PC_ASSERT(m_buffer.GetCount() == 0, "Buffer count is zero!");
-  //   return m_buffer.GetSize() / m_buffer.GetCount();
-  // };
-
-  virtual void Bind() {};
-  virtual void UnBind() {};
+  virtual void Bind() = 0;
+  virtual void UnBind() = 0;
 
   template <typename T> void PrintBuffer() { Buffer::Print<T>(m_buffer); };
 
-private:
-  VertexBuffer *Init() const;
-
 protected:
-  VertexBuffer *m_vertexBfr = nullptr;
   Buffer m_buffer;
 };
 

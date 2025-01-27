@@ -33,17 +33,14 @@ struct HasPrint<
 
 class Buffer {
 public:
-  Buffer() {
-    AllocBytes(0);
-    PC_PRINT("CREATED(DEFAULT)", TagType::Constr, "BUFFER")
-  };
+  Buffer() { PC_PRINT("CREATED(DEFAULT)", TagType::Constr, "BUFFER") };
   ~Buffer() {
     FreeBytes();
     PC_PRINT("DESTROYED", TagType::Destr, "BUFFER")
   };
 
   template <typename T> void SetData(std::initializer_list<T> list) {
-    PC_PRINT("CREATED(INIT-LIST)", TagType::Constr, "BUFFER")
+    PC_PRINT("DATA SET(INIT-LIST)", TagType::Constr, "BUFFER")
 
     const uint64_t size = sizeof(T) * list.size();
     AllocBytes(size);
@@ -62,7 +59,7 @@ public:
   };
 
   template <typename T> Buffer(uint64_t count) : m_count(count) {
-    PC_PRINT("THIS_CREATED", TagType::Constr, "BUFFER")
+    PC_PRINT("CREATED", TagType::Constr, "BUFFER")
     AllocBytes(count * sizeof(T));
   };
   template <typename T>
@@ -101,6 +98,10 @@ public:
     };
 
     m_data = other.m_data;
+
+    other.m_data = nullptr;
+    other.m_size = 0;
+    other.m_count = 0;
   };
   Buffer &&operator=(Buffer &&other) {
     PC_PRINT("MOVE ASSIGNMENT EVOKED", TagType::Print, "BUFFER")
@@ -109,6 +110,10 @@ public:
     };
 
     m_data = other.m_data;
+    other.m_data = nullptr;
+    other.m_size = 0;
+    other.m_count = 0;
+
     // delete (decltype(other.m_data) *)other.m_data;
     return std::move(*this);
   };
@@ -127,6 +132,11 @@ public:
 
 #ifdef PC_DEBUG
   template <typename T> inline static void Print(Buffer &buffer) {
+    if (!buffer.m_data) {
+      PC_PRINT("NO DATA IN BUFFER", TagType::Print, "Buffer.h")
+      return;
+    };
+
     if constexpr (HasPrint<T>()) {
       for (T *it = buffer.begin<T>(); it != buffer.end<T>(); ++it) {
         PC_PRINT(((T &)(*it)).Print(), TagType::Print, "BUFFER")
