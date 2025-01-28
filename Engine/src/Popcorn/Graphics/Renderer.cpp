@@ -6,6 +6,7 @@
 #include "RendererOpenGL.h"
 #include "RendererVk.h"
 #include "VertexBuffer.h"
+#include <cstddef>
 #include <glm/glm.hpp>
 #include <string>
 
@@ -27,7 +28,6 @@ void Renderer::Init() const {
   if (s_type == RendererType::Vulkan) {
     s_renderer = new RendererVk(m_AppWin);
 
-    // TODO: SET VERTEX BUFFER HERE
     struct Vertex {
       glm::vec2 pos;
       glm::vec3 color;
@@ -55,7 +55,13 @@ void Renderer::Init() const {
     for (auto elType : bfr->GetLayout().attrTypesValue) {
       PC_PRINT(static_cast<int>(elType), TagType::Print, "ELEMENT TYPES")
     }
+    for (auto elType : bfr->GetLayout().attrOffsetsValue) {
+      PC_PRINT(static_cast<int>(elType), TagType::Print, "ELEMENT OFFSETS")
+    }
+    PC_PRINT(bfr->GetLayout().attrOffsetsValue.size(), TagType::Print, "OFFSET SIZE")
     PC_PRINT(bfr->GetLayout().strideValue, TagType::Print, "LAYOUT STRIDE")
+    PC_PRINT(bfr->GetLayout().countValue, TagType::Print, "LAYOUT COUNT")
+    PC_PRINT(bfr->GetLayout().GetStaticCount(), TagType::Print, "LAYOUT COUNT CONSTEXPR")
 
     auto *vkRenderer = std::get<RendererVk *>(s_renderer);
     vkRenderer

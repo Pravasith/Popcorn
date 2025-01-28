@@ -16,22 +16,15 @@ GFX_NAMESPACE_BEGIN
 
 class VertexBuffer {
 public:
+  // clang-format off
   enum class AttrTypes {
-    None = 0,
-    Float,
-    Float2,
-    Float3,
-    Float4,
-    Mat3,
-    Mat4,
-    Int,
-    Int2,
-    Int3,
-    Int4,
+    None = 0, 
+    Float, Float2, Float3, Float4, 
+    Mat3, Mat4, 
+    Int, Int2, Int3, Int4,
     Bool
   };
 
-  // clang-format off
   static constexpr uint32_t GetAttrTypeSize(AttrTypes attrType) {
     switch (attrType)
     {
@@ -55,12 +48,22 @@ public:
 
   struct Layout {
     std::vector<AttrTypes> attrTypesValue;
+    std::vector<uint32_t> attrOffsetsValue = {0};
     uint32_t strideValue = 0;
-    // AttrTypes GetAttrType(uint16_t i) { return attrTypesValue[i]; };
+    uint32_t countValue = 0;
 
     template <AttrTypes... E> void Set() {
+      // Attr Types stored in a seq
       (attrTypesValue.push_back(E), ...);
+
+      // Attr Offsets stored in a seq (Inital value 0 already exists in the
+      // array, and we pop the last element offset).
+      (attrOffsetsValue.push_back(GetAttrTypeSize(E)), ...);
+      attrOffsetsValue.pop_back();
+
+      // Stride & count values
       strideValue = (... + GetAttrTypeSize(E));
+      countValue = sizeof...(E);
     };
   };
 
