@@ -31,7 +31,8 @@ VertexBufferVk::GetAttrDescriptions(const VertexBuffer::Layout &layout) {
   for (int i = 0; i < layout.countValue; ++i) {
     attrDescriptions[i].binding = 0;
     attrDescriptions[i].location = i;
-    attrDescriptions[i].format = MapAttrTypeToVulkanType(layout.attrTypesValue[i]);
+    attrDescriptions[i].format =
+        MapAttrTypeToVulkanType(layout.attrTypesValue[i]);
     attrDescriptions[i].offset = layout.attrOffsetsValue[i];
   };
 

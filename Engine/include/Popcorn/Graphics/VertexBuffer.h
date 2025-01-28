@@ -18,9 +18,9 @@ class VertexBuffer {
 public:
   // clang-format off
   enum class AttrTypes {
-    None = 0, 
-    Float, Float2, Float3, Float4, 
-    Mat3, Mat4, 
+    None = 0,
+    Float, Float2, Float3, Float4,
+    Mat3, Mat4,
     Int, Int2, Int3, Int4,
     Bool
   };
@@ -52,6 +52,15 @@ public:
     uint32_t strideValue = 0;
     uint32_t countValue = 0;
 
+    // For move constructors
+    void Reset() {
+      attrTypesValue.clear();
+      attrOffsetsValue.clear();
+      attrOffsetsValue.push_back(0);
+      strideValue = 0;
+      countValue = 0;
+    };
+
     template <AttrTypes... E> void Set() {
       // Attr Types stored in a seq
       (attrTypesValue.push_back(E), ...);
@@ -68,7 +77,11 @@ public:
   };
 
   template <AttrTypes... E> inline void SetLayout() { m_layout.Set<E...>(); };
-  [[nodiscard]] inline const Layout &GetLayout() const { return m_layout; }
+
+  [[nodiscard]] inline const Layout &GetLayout() const {
+    PC_ASSERT(m_layout.countValue != 0, "Layout is empty!");
+    return m_layout;
+  }
 
   VertexBuffer() {
     PC_PRINT("CREATED(DEFAULT)", TagType::Constr, "VERTEX-BUFFER");
@@ -92,6 +105,7 @@ public:
     PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Print,
              "VERTEX-BUFFER(INHERITED)")
     m_buffer = other.m_buffer;
+    m_layout = other.m_layout;
   };
   virtual VertexBuffer &operator=(const VertexBuffer &other) {
     PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print,
@@ -101,6 +115,7 @@ public:
       return *this;
 
     m_buffer = other.m_buffer;
+    m_layout = other.m_layout;
     return *this;
   };
 
@@ -113,6 +128,8 @@ public:
     };
 
     m_buffer = std::move(other.m_buffer);
+    m_layout = other.m_layout;
+    other.m_layout.Reset();
   };
   virtual VertexBuffer &operator=(VertexBuffer &&other) {
     PC_PRINT("MOVE ASSIGNMENT EVOKED", TagType::Print,
@@ -123,6 +140,8 @@ public:
     };
 
     m_buffer = std::move(other.m_buffer);
+    m_layout = other.m_layout;
+    other.m_layout.Reset();
 
     return *this;
   };

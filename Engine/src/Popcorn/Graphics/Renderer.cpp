@@ -6,7 +6,6 @@
 #include "RendererOpenGL.h"
 #include "RendererVk.h"
 #include "VertexBuffer.h"
-#include <cstddef>
 #include <glm/glm.hpp>
 #include <string>
 
@@ -52,24 +51,24 @@ void Renderer::Init() const {
     bfr->SetLayout<VertexBuffer::AttrTypes::Float2,
                    VertexBuffer::AttrTypes::Float3>();
 
-    for (auto elType : bfr->GetLayout().attrTypesValue) {
-      PC_PRINT(static_cast<int>(elType), TagType::Print, "ELEMENT TYPES")
-    }
-    for (auto elType : bfr->GetLayout().attrOffsetsValue) {
-      PC_PRINT(static_cast<int>(elType), TagType::Print, "ELEMENT OFFSETS")
-    }
-    PC_PRINT(bfr->GetLayout().attrOffsetsValue.size(), TagType::Print, "OFFSET SIZE")
-    PC_PRINT(bfr->GetLayout().strideValue, TagType::Print, "LAYOUT STRIDE")
-    PC_PRINT(bfr->GetLayout().countValue, TagType::Print, "LAYOUT COUNT")
-    PC_PRINT(bfr->GetLayout().GetStaticCount(), TagType::Print, "LAYOUT COUNT CONSTEXPR")
+    // for (auto elType : bfr->GetLayout().attrTypesValue) {
+    //   PC_PRINT(static_cast<int>(elType), TagType::Print, "ELEMENT TYPES")
+    // }
+    // for (auto elType : bfr->GetLayout().attrOffsetsValue) {
+    //   PC_PRINT(elType, TagType::Print, "ELEMENT OFFSETS")
+    // }
+    // PC_PRINT(bfr->GetLayout().attrOffsetsValue.size(), TagType::Print,
+    //          "OFFSET SIZE")
+    // PC_PRINT(bfr->GetLayout().strideValue, TagType::Print, "LAYOUT STRIDE")
+    // PC_PRINT(bfr->GetLayout().countValue, TagType::Print, "LAYOUT COUNT")
 
     auto *vkRenderer = std::get<RendererVk *>(s_renderer);
     vkRenderer
         // bfr's resources are moved to RendererVK's m_vertexBufferVk's;
         ->BindVertexBuffer(*(static_cast<VertexBufferVk *>(bfr)));
 
-    VertexBuffer::Destroy(bfr);
     vkRenderer->InitVulkan();
+    VertexBuffer::Destroy(bfr);
     PC_PRINT("PRINT BUFFER::: " << &bfr, TagType::Print, "RENDERER")
     // bfr->PrintBuffer<Vertex>();
 
