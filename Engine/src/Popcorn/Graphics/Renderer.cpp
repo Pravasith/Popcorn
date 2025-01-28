@@ -49,12 +49,13 @@ void Renderer::Init() const {
         {{0.0f, 0.5f}, {1.0f, 0.0f, 0.0f}},
     });
 
-    auto layout = VertexBuffer::Layout();
-    layout.Set<ElementTypes::Float2, ElementTypes::Float3>();
+    bfr->SetLayout<VertexBuffer::AttrTypes::Float2,
+                   VertexBuffer::AttrTypes::Float3>();
 
-    for (auto elType : layout.elementTypes) {
+    for (auto elType : bfr->GetLayout().attrTypesValue) {
       PC_PRINT(static_cast<int>(elType), TagType::Print, "ELEMENT TYPES")
     }
+    PC_PRINT(bfr->GetLayout().strideValue, TagType::Print, "LAYOUT STRIDE")
 
     auto *vkRenderer = std::get<RendererVk *>(s_renderer);
     vkRenderer

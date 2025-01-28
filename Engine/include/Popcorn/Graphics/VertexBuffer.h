@@ -1,47 +1,77 @@
 #pragma once
 
 #include "GlobalMacros.h"
+#include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
 #include <cstdint>
 #include <cstring>
 #include <initializer_list>
-#include <tuple>
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 // Enum for ElementType
-enum class ElementTypes {
-  None = 0,
-  Float,
-  Float2,
-  Float3,
-  Float4,
-  Mat3,
-  Mat4,
-  Int,
-  Int2,
-  Int3,
-  Int4,
-  Bool
-};
 
 class VertexBuffer {
 public:
+  enum class AttrTypes {
+    None = 0,
+    Float,
+    Float2,
+    Float3,
+    Float4,
+    Mat3,
+    Mat4,
+    Int,
+    Int2,
+    Int3,
+    Int4,
+    Bool
+  };
+
+  // clang-format off
+  static constexpr uint32_t GetAttrTypeSize(AttrTypes attrType) {
+    switch (attrType)
+    {
+      case AttrTypes::Float:    return 4;
+      case AttrTypes::Float2:   return 4 * 2;
+      case AttrTypes::Float3:   return 4 * 3;
+      case AttrTypes::Float4:   return 4 * 4;
+      case AttrTypes::Mat3:     return 4 * 3 * 3;
+      case AttrTypes::Mat4:     return 4 * 4 * 4;
+      case AttrTypes::Int:      return 4;
+      case AttrTypes::Int2:     return 4 * 2;
+      case AttrTypes::Int3:     return 4 * 3;
+      case AttrTypes::Int4:     return 4 * 4;
+      case AttrTypes::Bool:     return 1;
+      default:
+        PC_ASSERT(false, "Unknown AttrType");
+        return 0;
+    }
+  };
+  // clang-format on
+
+  struct Layout {
+    std::vector<AttrTypes> attrTypesValue;
+    uint32_t strideValue = 0;
+    // AttrTypes GetAttrType(uint16_t i) { return attrTypesValue[i]; };
+
+    template <AttrTypes... E> void Set() {
+      (attrTypesValue.push_back(E), ...);
+      strideValue = (... + GetAttrTypeSize(E));
+    };
+  };
+
+  template <AttrTypes... E> inline void SetLayout() { m_layout.Set<E...>(); };
+  [[nodiscard]] inline const Layout &GetLayout() const { return m_layout; }
+
   VertexBuffer() {
     PC_PRINT("CREATED(DEFAULT)", TagType::Constr, "VERTEX-BUFFER");
   };
   virtual ~VertexBuffer() {
     PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER")
-  };
-
-  struct Layout {
-    template <ElementTypes... E> void Set() {
-      (elementTypes.push_back(E), ...);
-    };
-    std::vector<ElementTypes> elementTypes;
   };
 
   template <typename T> void Fill(std::initializer_list<T> list) {
@@ -104,6 +134,7 @@ public:
 
 protected:
   Buffer m_buffer;
+  Layout m_layout;
 };
 
 GFX_NAMESPACE_END
