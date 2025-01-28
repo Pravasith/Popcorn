@@ -49,17 +49,22 @@ void Renderer::Init() const {
         {{0.0f, 0.5f}, {1.0f, 0.0f, 0.0f}},
     });
 
-    std::get<RendererVk *>(s_renderer)
+    auto layout = VertexBuffer::Layout();
+    layout.Set<ElementTypes::Float2, ElementTypes::Float3>();
+
+    for (auto elType : layout.elementTypes) {
+      PC_PRINT(static_cast<int>(elType), TagType::Print, "ELEMENT TYPES")
+    }
+
+    auto *vkRenderer = std::get<RendererVk *>(s_renderer);
+    vkRenderer
         // bfr's resources are moved to RendererVK's m_vertexBufferVk's;
         ->BindVertexBuffer(*(static_cast<VertexBufferVk *>(bfr)));
 
-    PC_PRINT(&bfr, TagType::Print, "RENDERER vertexBuffer before delete")
-    bfr->PrintBuffer<Vertex>();
-    delete bfr;
-
-    PC_PRINT(&bfr, TagType::Print, "RENDERER vertexBuffer after delete")
-
-    // VertexBuffer::GetBindingDescription<Vertex>();
+    VertexBuffer::Destroy(bfr);
+    vkRenderer->InitVulkan();
+    PC_PRINT("PRINT BUFFER::: " << &bfr, TagType::Print, "RENDERER")
+    // bfr->PrintBuffer<Vertex>();
 
   } else if (s_type == RendererType::OpenGL) {
     s_renderer = new RendererOpenGL(m_AppWin);

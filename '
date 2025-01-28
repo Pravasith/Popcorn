@@ -37,10 +37,9 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER")
   };
 
-  struct Layout {
-    template <ElementTypes... E> void Set() {
-      (elementTypes.push_back(E), ...);
-    };
+   struct Layout {
+template <ElementTypes... E>
+    void Set() { (elementTypes.push_back(E), ...); };
     std::vector<ElementTypes> elementTypes;
   };
 

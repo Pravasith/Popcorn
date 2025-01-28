@@ -23,7 +23,6 @@ RendererVk::RendererVk(const Window &appWin)
                   m_LogiDeviceVk.GetPresentQueue(),
                   m_AppWin.GetFramebufferSize()} {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
-  InitVulkan();
 };
 
 RendererVk::~RendererVk() {
@@ -57,6 +56,23 @@ void RendererVk::InitVulkan() {
   m_GfxPipelineVk.CreateRenderPass(m_SwapChainVk.GetImgFormat(),
                                    m_LogiDeviceVk.GetLogiDevice());
 
+  PC_PRINT("PRINT BUFFER::: " << &m_vertexBufferVk, TagType::Print,
+           "RENDERER-VK")
+
+  // struct Vertex {
+  //   glm ::vec2 pos;
+  //   glm::vec3 color;
+  //   std::string Print() {
+  //     std::stringstream ss;
+  //     ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g <<
+  //     ", "
+  //        << color.b;
+  //
+  //     return ss.str();
+  //   };
+  // };
+
+  // m_vertexBufferVk.PrintBuffer<Vertex>();
   m_GfxPipelineVk.CreateGfxPipeline(m_LogiDeviceVk.GetLogiDevice(),
                                     m_SwapChainVk.GetSwapChainExtent());
 

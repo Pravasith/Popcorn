@@ -28,8 +28,15 @@ VkVertexInputBindingDescription VertexBufferVk::GetBindingDescription() {
 template <typename T>
 std::array<VkVertexInputAttributeDescription, 2>
 VertexBufferVk::GetAttrDescriptions() {
-
   std::array<VkVertexInputAttributeDescription, 2> attrDescriptions{};
+
+  // for (int i = 0; i < N; ++i) {
+  //   attrDescriptions[i].binding = 0;
+  //   attrDescriptions[i].location = 0;
+  //   attrDescriptions[i].format = VK_FORMAT_R32G32_SFLOAT;
+  //   attrDescriptions[i].offset =
+  //       offsetof(T, pos); // 'pos' should be defined in T
+  // };
 
   // for 'pos'
   attrDescriptions[0].binding = 0;

@@ -98,6 +98,8 @@ public:
     };
 
     m_data = other.m_data;
+    m_size = other.m_size;
+    m_count = other.m_count;
 
     other.m_data = nullptr;
     other.m_size = 0;
@@ -110,6 +112,9 @@ public:
     };
 
     m_data = other.m_data;
+    m_size = other.m_size;
+    m_count = other.m_count;
+
     other.m_data = nullptr;
     other.m_size = 0;
     other.m_count = 0;
@@ -132,12 +137,21 @@ public:
 
 #ifdef PC_DEBUG
   template <typename T> inline static void Print(Buffer &buffer) {
+    PC_PRINT("PRINT EVOKED", TagType::Print, "VERTEX-BUFFER")
     if (!buffer.m_data) {
       PC_PRINT("NO DATA IN BUFFER", TagType::Print, "Buffer.h")
       return;
     };
 
     if constexpr (HasPrint<T>()) {
+      PC_PRINT("BEGIN: " << buffer.begin<T>() << " END: " << buffer.end<T>(),
+               TagType::Print, "Buffer.h")
+
+      if (buffer.begin<T>() == buffer.end<T>()) {
+        PC_PRINT("Buffer iterator begin is same as end!", TagType::Print,
+                 "Buffer.h")
+      };
+
       for (T *it = buffer.begin<T>(); it != buffer.end<T>(); ++it) {
         PC_PRINT(((T &)(*it)).Print(), TagType::Print, "BUFFER")
       };

@@ -34,11 +34,11 @@ public:
 
   inline void BindVertexBuffer(VertexBufferVk &vertexBufferVk) {
     m_vertexBufferVk = std::move(vertexBufferVk);
-    PC_PRINT(&m_vertexBufferVk, TagType::Print, "RENDERER-VK")
   };
 
-private:
   void InitVulkan();
+
+private:
   void CleanUp();
 
   void CreateInstance();
