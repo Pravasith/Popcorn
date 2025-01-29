@@ -129,7 +129,7 @@ public:
 
     m_buffer = std::move(other.m_buffer);
     m_layout = other.m_layout;
-    other.m_layout.Reset();
+    // other.m_layout.Reset();
   };
   virtual VertexBuffer &operator=(VertexBuffer &&other) {
     PC_PRINT("MOVE ASSIGNMENT EVOKED", TagType::Print,
@@ -141,7 +141,7 @@ public:
 
     m_buffer = std::move(other.m_buffer);
     m_layout = other.m_layout;
-    other.m_layout.Reset();
+    // other.m_layout.Reset();
 
     return *this;
   };

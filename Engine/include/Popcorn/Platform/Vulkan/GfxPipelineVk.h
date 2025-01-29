@@ -31,22 +31,9 @@ private:
     return m_gfxPipeline;
   };
 
-  inline void AttachVertexBuffer(const VertexBufferVk &vBfr) {
+  inline void AttachVertexBuffer(VertexBufferVk &vBfr) {
     PC_PRINT("VERTEX BUFFER", TagType::Print, "ELEMENT OFFSETS")
     m_vertexBufferVk = std::move(vBfr);
-
-    auto *bfr = &m_vertexBufferVk;
-
-    for (auto elType : bfr->GetLayout().attrTypesValue) {
-      PC_PRINT(static_cast<int>(elType), TagType::Print, "ELEMENT TYPES")
-    }
-    for (auto elType : bfr->GetLayout().attrOffsetsValue) {
-      PC_PRINT(elType, TagType::Print, "ELEMENT OFFSETS")
-    }
-    PC_PRINT(bfr->GetLayout().attrOffsetsValue.size(), TagType::Print,
-             "OFFSET SIZE")
-    PC_PRINT(bfr->GetLayout().strideValue, TagType::Print, "LAYOUT STRIDE")
-    PC_PRINT(bfr->GetLayout().countValue, TagType::Print, "LAYOUT COUNT")
   };
 
 private:

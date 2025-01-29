@@ -25,7 +25,7 @@ public:
       case AttrTypes::Int2:   return VK_FORMAT_R32G32_SINT;
       case AttrTypes::Int3:   return VK_FORMAT_R32G32B32_SINT;
       case AttrTypes::Int4:   return VK_FORMAT_R32G32B32A32_SINT;
-      case AttrTypes::Bool:   return VK_FORMAT_R8_UINT;  
+      case AttrTypes::Bool:   return VK_FORMAT_R8_UINT;
       default:
         PC_ASSERT(false, "Unknown AttrType");
         return VK_FORMAT_R8_UINT;
@@ -46,8 +46,9 @@ public:
   VertexBufferVk(VertexBufferVk &&other) = default;
   VertexBufferVk &operator=(VertexBufferVk &&other) = default;
 
-  static VkVertexInputBindingDescription GetBindingDescription(const Layout &);
-  static std::vector<VkVertexInputAttributeDescription>
+  [[nodiscard]] static VkVertexInputBindingDescription
+  GetBindingDescription(const Layout &);
+  [[nodiscard]] static std::vector<VkVertexInputAttributeDescription>
   GetAttrDescriptions(const Layout &);
 
 private:

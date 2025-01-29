@@ -26,7 +26,8 @@ VertexBufferVk::GetBindingDescription(const VertexBuffer::Layout &layout) {
 
 std::vector<VkVertexInputAttributeDescription>
 VertexBufferVk::GetAttrDescriptions(const VertexBuffer::Layout &layout) {
-  std::vector<VkVertexInputAttributeDescription> attrDescriptions{};
+  std::vector<VkVertexInputAttributeDescription> attrDescriptions;
+  attrDescriptions.resize(layout.countValue);
 
   for (int i = 0; i < layout.countValue; ++i) {
     attrDescriptions[i].binding = 0;
