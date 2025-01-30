@@ -1,6 +1,7 @@
 #include "RendererVk.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include "VertexBufferVk.h"
 #include <cstdint>
 #include <cstring>
 #include <vector>
@@ -56,22 +57,8 @@ void RendererVk::InitVulkan() {
   m_GfxPipelineVk.CreateRenderPass(m_SwapChainVk.GetImgFormat(),
                                    m_LogiDeviceVk.GetLogiDevice());
 
-  // struct Vertex {
-  //   glm ::vec2 pos;
-  //   glm::vec3 color;
-  //   std::string Print() {
-  //     std::stringstream ss;
-  //     ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g <<
-  //     ", "
-  //        << color.b;
-  //
-  //     return ss.str();
-  //   };
-  // };
-
-  // m_vertexBufferVk.PrintBuffer<Vertex>();
-
   m_GfxPipelineVk.AttachVertexBuffer(m_vertexBufferVk);
+
   m_GfxPipelineVk.CreateGfxPipeline(m_LogiDeviceVk.GetLogiDevice(),
                                     m_SwapChainVk.GetSwapChainExtent());
 
@@ -81,6 +68,11 @@ void RendererVk::InitVulkan() {
   // CMD BFRS
   m_CmdPoolVk.CreateCmdPool(m_PhysDeviceVk.GetQueueFamilyIndices(),
                             m_LogiDeviceVk.GetLogiDevice());
+
+  // CREATE VULKAN VERTEX BUFFER
+  m_vertexBufferVk->CreateVulkanBuffer(m_LogiDeviceVk.GetLogiDevice(),
+                                       m_PhysDeviceVk);
+
   m_CmdPoolVk.CreateCmdBfrs(m_LogiDeviceVk.GetLogiDevice());
 
   // PRESENTATION SYNC OBJS FOR DRAW FRAME
@@ -159,24 +151,33 @@ bool RendererVk::OnFrameBfrResize(FrameBfrResizeEvent &e) {
 };
 
 void RendererVk::DrawFrame() {
+  if (!m_vertexBufferVk) {
+    return;
+  };
+
   m_PresentVk.DrawFrame(
       m_CmdPoolVk.GetCmdBfrs(),
+
       // TODO: USE A LAMBDA
       CmdPoolVk::RecordCmdBfrFtr{
           m_GfxPipelineVk.GetRenderPass(), m_SwapChainVk.GetFrameBfrs(),
-          m_SwapChainVk.GetSwapChainExtent(), m_GfxPipelineVk.GetGfxPipeline()},
+          m_SwapChainVk.GetSwapChainExtent(), m_GfxPipelineVk.GetGfxPipeline(),
+          m_vertexBufferVk},
+
       // TODO: USE A LAMBDA
       SwapChainVk::RecreateSwapChainFtr{
           m_SwapChainVk, m_LogiDeviceVk.GetLogiDevice(), m_AppWin});
 };
 
 void RendererVk::CleanUp() {
-  vkDeviceWaitIdle(m_LogiDeviceVk.GetLogiDevice());
+  auto &device = m_LogiDeviceVk.GetLogiDevice();
 
+  vkDeviceWaitIdle(device);
+  m_vertexBufferVk->DestroyVulkanBuffer(device);
   m_SwapChainVk.CleanUp();
-  m_PresentVk.CleanUp(m_LogiDeviceVk.GetLogiDevice());
-  m_CmdPoolVk.CleanUp(m_LogiDeviceVk.GetLogiDevice());
-  m_GfxPipelineVk.CleanUp(m_LogiDeviceVk.GetLogiDevice());
+  m_PresentVk.CleanUp(device);
+  m_CmdPoolVk.CleanUp(device);
+  m_GfxPipelineVk.CleanUp(device);
   m_WinSurfaceVk.CleanUp();
   m_LogiDeviceVk.CleanUp();
   m_ValLayersVk.CleanUp();

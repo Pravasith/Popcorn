@@ -6,6 +6,7 @@
 #include "RendererOpenGL.h"
 #include "RendererVk.h"
 #include "VertexBuffer.h"
+#include "VertexBufferVk.h"
 #include <glm/glm.hpp>
 #include <string>
 
@@ -17,6 +18,8 @@ RendererType Renderer::s_type = RendererType::Vulkan;
 std::variant<RendererVk *, RendererOpenGL *> Renderer::s_renderer{
     static_cast<RendererVk *>(nullptr)};
 
+VertexBuffer *Renderer::s_vertexBuffer = nullptr;
+
 Renderer::Renderer(const Window &appWin) : m_AppWin(appWin) {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER");
 };
@@ -27,6 +30,9 @@ void Renderer::Init() const {
   if (s_type == RendererType::Vulkan) {
     s_renderer = new RendererVk(m_AppWin);
 
+    // ----------------------------------------------------------
+    // Vertex buffer --------------------------------------------
+    // ----------------------------------------------------------
     struct Vertex {
       glm::vec2 pos;
       glm::vec3 color;
@@ -39,38 +45,24 @@ void Renderer::Init() const {
       };
     };
 
-    // CREATES V-Bfr-Vk*
-    // V-Bfr-Vk has m_vertex
-    VertexBuffer *bfr = VertexBuffer::Create();
-    bfr->Fill<Vertex>({
+    s_vertexBuffer = VertexBuffer::Create();
+    s_vertexBuffer->Fill<Vertex>({
         {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
-        {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+        {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
         {{0.0f, 0.5f}, {1.0f, 0.0f, 0.0f}},
     });
 
-    bfr->SetLayout<VertexBuffer::AttrTypes::Float2,
-                   VertexBuffer::AttrTypes::Float3>();
-
-    // for (auto elType : bfr->GetLayout().attrTypesValue) {
-    //   PC_PRINT(static_cast<int>(elType), TagType::Print, "ELEMENT TYPES")
-    // }
-    // for (auto elType : bfr->GetLayout().attrOffsetsValue) {
-    //   PC_PRINT(elType, TagType::Print, "ELEMENT OFFSETS")
-    // }
-    // PC_PRINT(bfr->GetLayout().attrOffsetsValue.size(), TagType::Print,
-    //          "OFFSET SIZE")
-    // PC_PRINT(bfr->GetLayout().strideValue, TagType::Print, "LAYOUT STRIDE")
-    // PC_PRINT(bfr->GetLayout().countValue, TagType::Print, "LAYOUT COUNT")
+    s_vertexBuffer->SetLayout<VertexBuffer::AttrTypes::Float2,
+                              VertexBuffer::AttrTypes::Float3>();
 
     auto *vkRenderer = std::get<RendererVk *>(s_renderer);
-    vkRenderer
-        // bfr's resources are moved to RendererVK's m_vertexBufferVk's;
-        ->BindVertexBuffer(*(static_cast<VertexBufferVk *>(bfr)));
-
+    vkRenderer->BindVertexBuffer(static_cast<VertexBufferVk *>(s_vertexBuffer));
     vkRenderer->InitVulkan();
-    VertexBuffer::Destroy(bfr);
-    PC_PRINT("PRINT BUFFER::: " << &bfr, TagType::Print, "RENDERER")
-    // bfr->PrintBuffer<Vertex>();
+
+    // s_vertexBuffer->PrintBuffer<Vertex>();
+    // ----------------------------------------------------------
+    // Vertex buffer --------------------------------------------
+    // ----------------------------------------------------------
 
   } else if (s_type == RendererType::OpenGL) {
     s_renderer = new RendererOpenGL(m_AppWin);
@@ -93,6 +85,7 @@ Renderer *Renderer::GetRenderer() {
 
 void Renderer::DrawFrame() {
   if (s_type == RendererType::Vulkan) {
+    // Use GDB
     std::get<RendererVk *>(s_renderer)->DrawFrame();
   } else {
     // std::get<RendererOpenGL *>(s_renderer)->OnUpdate();
@@ -111,6 +104,7 @@ bool Renderer::OnFrameBfrResize(FrameBfrResizeEvent &e) {
 
 void Renderer::Destroy() {
   if (auto vulkanRenderer = std::get_if<RendererVk *>(&Renderer::s_renderer)) {
+    VertexBuffer::Destroy(s_vertexBuffer);
     delete *vulkanRenderer;
   } else if (auto openGLRenderer =
                  std::get_if<RendererOpenGL *>(&Renderer::s_renderer)) {

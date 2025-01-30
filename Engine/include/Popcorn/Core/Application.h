@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Assert.h"
-#include "Base.h"
 #include "GlobalMacros.h"
 #include "LayerStack.h"
 #include "Popcorn/Events/Event.h"

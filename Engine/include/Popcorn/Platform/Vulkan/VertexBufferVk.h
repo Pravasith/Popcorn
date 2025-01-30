@@ -1,9 +1,10 @@
 #pragma once
 
 #include "GlobalMacros.h"
+#include "PhysDeviceVk.h"
 #include "Popcorn/Core/Base.h"
 #include "VertexBuffer.h"
-#include <vulkan/vulkan_core.h>
+#include <cstdint>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -38,6 +39,14 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER-VK")
   };
 
+  void CreateVulkanBuffer(const VkDevice &, const PhysDeviceVk &);
+
+  [[nodiscard]] inline const VkBuffer &GetVulkanVertexBuffer() const {
+    return vertexBuffer;
+  };
+
+  void DestroyVulkanBuffer(const VkDevice &device);
+
   // COPY CONSTRUCTOR
   VertexBufferVk(const VertexBufferVk &other) = default;
   VertexBufferVk &operator=(const VertexBufferVk &other) = default;
@@ -51,11 +60,15 @@ public:
   [[nodiscard]] static std::vector<VkVertexInputAttributeDescription>
   GetAttrDescriptions(const Layout &);
 
-private:
-  virtual uint64_t GetSize() const override { return 0; };
-  virtual uint64_t GetCount() const override { return 0; };
+  virtual uint64_t GetSize() const override { return m_buffer.GetSize(); };
+  virtual uint64_t GetCount() const override { return m_buffer.GetCount(); };
+
   virtual void Bind() override;
   virtual void UnBind() override;
+
+private:
+  VkBuffer vertexBuffer;
+  VkDeviceMemory vertexBufferMemory;
 };
 
 GFX_NAMESPACE_END

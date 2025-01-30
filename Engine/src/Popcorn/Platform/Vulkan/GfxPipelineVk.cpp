@@ -39,25 +39,11 @@ void GfxPipelineVk::CreateGfxPipeline(const VkDevice &dev,
                                                     fragShdrStageInfo};
 
   // FROM VERTEX BUFFER VK
-  auto vertexLayout = m_vertexBufferVk.GetLayout();
+  auto &vertexLayout = m_vertexBufferVk->GetLayout();
+
   auto bindingDescription = VertexBufferVk::GetBindingDescription(vertexLayout);
   auto attributeDescriptions =
       VertexBufferVk::GetAttrDescriptions(vertexLayout);
-
-  PC_PRINT(bindingDescription.binding, TagType::Print, "GfxPipelineVk.cpp")
-  PC_PRINT(bindingDescription.stride, TagType::Print, "GfxPipelineVk.cpp")
-  PC_PRINT(bindingDescription.inputRate, TagType::Print, "GfxPipelineVk.cpp")
-
-  PC_PRINT("------------------------------", TagType::Print,
-           "GfxPipelineVk.cpp")
-  for (auto ad : attributeDescriptions) {
-    PC_PRINT(ad.binding, TagType::Print, "GfxPipelineVk.cpp")
-    PC_PRINT(ad.location, TagType::Print, "GfxPipelineVk.cpp")
-    PC_PRINT(ad.format, TagType::Print, "GfxPipelineVk.cpp")
-    PC_PRINT(ad.offset, TagType::Print, "GfxPipelineVk.cpp")
-    PC_PRINT("------------------------------", TagType::Print,
-             "GfxPipelineVk.cpp")
-  }
 
   // VERTEX BUFFER DATA
   VkPipelineVertexInputStateCreateInfo vertexInputInfo{};

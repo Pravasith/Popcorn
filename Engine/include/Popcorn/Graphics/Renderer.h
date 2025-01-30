@@ -18,6 +18,7 @@ enum class RendererType {
 
 class RendererOpenGL;
 class RendererVk;
+class VertexBuffer;
 
 // SINGLETON
 class Renderer {
@@ -51,6 +52,8 @@ private:
   static RendererType s_type;
   static Renderer *s_instance;
   static std::variant<RendererVk *, RendererOpenGL *> s_renderer;
+
+  static VertexBuffer *s_vertexBuffer;
 
   void Init() const;
 

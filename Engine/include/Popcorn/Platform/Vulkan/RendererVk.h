@@ -32,15 +32,14 @@ public:
   virtual void DrawFrame() override;
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) override;
 
-  inline void BindVertexBuffer(VertexBufferVk &vertexBufferVk) {
-    m_vertexBufferVk = std::move(vertexBufferVk);
+  inline void BindVertexBuffer(VertexBufferVk *vertexBufferVk) {
+    m_vertexBufferVk = vertexBufferVk;
   };
 
   void InitVulkan();
 
 private:
   void CleanUp();
-
   void CreateInstance();
 
   std::vector<const char *> GetRequiredExtensions();
@@ -78,7 +77,7 @@ private:
   const QueueFamilyIndices &m_queueFamilyIndices;
   PresentVk m_PresentVk;
 
-  VertexBufferVk m_vertexBufferVk;
+  VertexBufferVk *m_vertexBufferVk = nullptr;
 };
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

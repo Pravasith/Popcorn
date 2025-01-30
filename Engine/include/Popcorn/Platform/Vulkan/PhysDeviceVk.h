@@ -18,6 +18,8 @@ class PhysDeviceVk {
   friend class LogiDeviceVk;
 
 public:
+  uint32_t FindGPUMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags) const;
+
 private:
   PhysDeviceVk(const VkInstance &vkInst, const VkSurfaceKHR &surface)
       : m_vkInst(vkInst), m_physDevice(VK_NULL_HANDLE), m_surface(surface) {

@@ -44,12 +44,15 @@ public:
 
     const uint64_t size = sizeof(T) * list.size();
     AllocBytes(size);
+
     // THESE LINES HERE DON'T WORK AS EXPECTED. THE m_count IS ZERO??
     m_count = list.size();
     m_size = size;
     memcpy(m_data, list.begin(), size);
-    // m_count = list.size();
-    // m_size = size;
+  };
+
+  inline const byte_t *GetData() const {
+    return static_cast<byte_t *>(m_data);
   };
 
   template <typename T, uint64_t Count = 0>

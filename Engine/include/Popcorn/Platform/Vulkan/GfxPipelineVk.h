@@ -31,7 +31,7 @@ private:
     return m_gfxPipeline;
   };
 
-  inline void AttachVertexBuffer(VertexBufferVk &vBfr) {
+  inline void AttachVertexBuffer(VertexBufferVk *vBfr) {
     PC_PRINT("VERTEX BUFFER", TagType::Print, "ELEMENT OFFSETS")
     m_vertexBufferVk = std::move(vBfr);
   };
@@ -53,7 +53,7 @@ private:
   VkRenderPass m_renderPass;
   VkPipelineLayout m_pipelineLayout;
   VkPipeline m_gfxPipeline;
-  VertexBufferVk m_vertexBufferVk;
+  VertexBufferVk *m_vertexBufferVk;
 };
 
 GFX_NAMESPACE_END
