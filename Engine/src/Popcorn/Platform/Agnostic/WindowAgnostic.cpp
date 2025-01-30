@@ -54,6 +54,7 @@ WindowAgnostic::WindowAgnostic(const Props &props) : m_title(props.Title) {
   s_osWindow = glfwCreateWindow(props.W, props.H, m_title.c_str(), NULL, NULL);
 
   if (!s_osWindow) {
+    PC_PRINT("Failed to create GLFW window", TagType::Print, "WINDOW-AGNOSTIC")
     pc_write_log("Failed to create GLFW Window");
     glfwTerminate();
   }

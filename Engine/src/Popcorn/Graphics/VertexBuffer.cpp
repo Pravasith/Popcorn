@@ -6,7 +6,8 @@
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
-VertexBuffer *VertexBuffer::Init() const {
+
+VertexBuffer *VertexBuffer::Create() {
   switch (Renderer::GetAPI()) {
   case RendererType::Vulkan: {
     return new VertexBufferVk();

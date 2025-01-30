@@ -1,7 +1,9 @@
 #include "CmdPoolVk.h"
 #include "CommonVk.h"
 #include "GlobalMacros.h"
+#include "Popcorn/Core/Base.h"
 #include <cstdint>
+#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -85,7 +87,12 @@ void CmdPoolVk::RecordCmdBfrFtr::operator()(VkCommandBuffer &cmdBfr,
   scssr.extent = m_swpChnExt;
   vkCmdSetScissor(cmdBfr, 0, 1, &scssr);
 
-  vkCmdDraw(cmdBfr, 3, 1, 0, 0);
+  // BIND VERTEX BUFFER
+  VkBuffer vertexBuffers[] = {m_vertexBfrVk->GetVulkanVertexBuffer()};
+  VkDeviceSize offsets[] = {0};
+  vkCmdBindVertexBuffers(cmdBfr, 0, 1, vertexBuffers, offsets);
+
+  vkCmdDraw(cmdBfr, static_cast<uint32_t>(m_vertexBfrVk->GetSize()), 1, 0, 0);
 
   vkCmdEndRenderPass(cmdBfr);
 

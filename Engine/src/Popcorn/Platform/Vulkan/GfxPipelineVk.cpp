@@ -1,5 +1,6 @@
 #include "GfxPipelineVk.h"
 #include "GlobalMacros.h"
+#include "Popcorn/Core/Base.h"
 #include "Sources.h"
 #include <stdexcept>
 #include <vector>
@@ -37,14 +38,22 @@ void GfxPipelineVk::CreateGfxPipeline(const VkDevice &dev,
   VkPipelineShaderStageCreateInfo shaderStages[] = {vertShdrStageInfo,
                                                     fragShdrStageInfo};
 
+  // FROM VERTEX BUFFER VK
+  auto &vertexLayout = m_vertexBufferVk->GetLayout();
+
+  auto bindingDescription = VertexBufferVk::GetBindingDescription(vertexLayout);
+  auto attributeDescriptions =
+      VertexBufferVk::GetAttrDescriptions(vertexLayout);
+
   // VERTEX BUFFER DATA
   VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
   vertexInputInfo.sType =
       VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-  vertexInputInfo.vertexBindingDescriptionCount = 0;
-  vertexInputInfo.pVertexBindingDescriptions = nullptr;
-  vertexInputInfo.vertexAttributeDescriptionCount = 0;
-  vertexInputInfo.pVertexAttributeDescriptions = nullptr;
+  vertexInputInfo.vertexBindingDescriptionCount = 1;
+  vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+  vertexInputInfo.vertexAttributeDescriptionCount =
+      static_cast<uint32_t>(attributeDescriptions.size());
+  vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
   // INPUT ASSEMBLY
   VkPipelineInputAssemblyStateCreateInfo inptAsmInfo{};

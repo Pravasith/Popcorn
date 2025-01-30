@@ -11,6 +11,7 @@
 #include "Renderer.h"
 #include "SwapChainVk.h"
 #include "ValidationLyrsVk.h"
+#include "VertexBufferVk.h"
 #include "WinSurfaceVk.h"
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
@@ -18,58 +19,65 @@
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
+
 class RendererVk : public Renderer {
 public:
   RendererVk(const Window &appWin);
   ~RendererVk();
 
-  constexpr inline static bool IsValLyrsEnabled() {
+  constexpr inline static bool AreValLayersEnabled() {
     return s_enableValidationLayers;
   };
 
   virtual void DrawFrame() override;
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) override;
 
-private:
-  void InitVulkan();
-  void CleanUp();
+  inline void BindVertexBuffer(VertexBufferVk *vertexBufferVk) {
+    m_vertexBufferVk = vertexBufferVk;
+  };
 
+  void InitVulkan();
+
+private:
+  void CleanUp();
   void CreateInstance();
 
   std::vector<const char *> GetRequiredExtensions();
 
 private:
   [[nodiscard]] inline const VkSurfaceKHR &GetSurface() const {
-    if (!m_WinSrfcVk.GetSurface()) {
+    if (!m_WinSurfaceVk.GetSurface()) {
       PC_WARN("SURFACE NOT AVAILABLE");
     };
-    return m_WinSrfcVk.GetSurface();
+    return m_WinSurfaceVk.GetSurface();
   };
 
   [[nodiscard]] inline const VkPhysicalDevice &GetPhysDevice() const {
-    if (!m_PhysDevVk.GetPhysDevice()) {
+    if (!m_PhysDeviceVk.GetPhysDevice()) {
       PC_WARN("PHYS DEV NOT AVAILABLE");
     };
-    return m_PhysDevVk.GetPhysDevice();
+    return m_PhysDeviceVk.GetPhysDevice();
   };
 
   VkInstance m_vkInstance;
+
 #ifdef NDEBUG
   static constexpr bool s_enableValidationLayers = false;
 #else
   static constexpr bool s_enableValidationLayers = true;
 #endif
 
-  ValidationLyrsVk m_ValLyrsVk;
-  WinSurfaceVk m_WinSrfcVk;
-  PhysDeviceVk m_PhysDevVk;
-  LogiDeviceVk m_LogiDevVk;
-  GfxPipelineVk m_GfxPlineVk;
-  SwapChainVk m_SwpChnVk;
+  ValidationLyrsVk m_ValLayersVk;
+  WinSurfaceVk m_WinSurfaceVk;
+  PhysDeviceVk m_PhysDeviceVk;
+  LogiDeviceVk m_LogiDeviceVk;
+  GfxPipelineVk m_GfxPipelineVk;
+  SwapChainVk m_SwapChainVk;
   CmdPoolVk m_CmdPoolVk;
-  const QueueFamilyIndices &m_qFamIndices;
-
+  const QueueFamilyIndices &m_queueFamilyIndices;
   PresentVk m_PresentVk;
+
+  VertexBufferVk *m_vertexBufferVk = nullptr;
 };
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

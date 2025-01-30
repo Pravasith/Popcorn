@@ -3,6 +3,7 @@
 #include "CommonVk.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include "VertexBufferVk.h"
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
@@ -20,9 +21,10 @@ public:
   struct RecordCmdBfrFtr {
     RecordCmdBfrFtr(const VkRenderPass &rpass,
                     const std::vector<VkFramebuffer> &fbfrs,
-                    const VkExtent2D &ext, const VkPipeline &pl)
+                    const VkExtent2D &ext, const VkPipeline &pl,
+                    VertexBufferVk *vertexBfrVk)
         : m_rndrPass(rpass), m_frameBfrs(fbfrs), m_swpChnExt(ext),
-          m_pipeline(pl) {};
+          m_pipeline(pl), m_vertexBfrVk(vertexBfrVk) {};
 
     void operator()(VkCommandBuffer &cmdBfr, uint32_t imgIdx);
 
@@ -31,6 +33,7 @@ public:
     const std::vector<VkFramebuffer> &m_frameBfrs;
     const VkExtent2D &m_swpChnExt;
     const VkPipeline &m_pipeline;
+    VertexBufferVk *m_vertexBfrVk;
   };
 
 private:

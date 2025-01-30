@@ -2,7 +2,9 @@
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include "SwapChainVk.h"
+#include <cstdint>
 #include <set>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -30,6 +32,28 @@ void PhysDeviceVk::PickPhysDevice(const SwapChainVk &swpChnVk) {
   if (m_physDevice == VK_NULL_HANDLE) {
     throw std::runtime_error("FAILED TO FIND A SUITABLE GPU!");
   }
+};
+
+uint32_t
+PhysDeviceVk::FindGPUMemoryType(uint32_t typeFilter,
+                                VkMemoryPropertyFlags properties) const {
+  // HAS MEMORY TYPES & MEMORY HEAPS
+  VkPhysicalDeviceMemoryProperties memProperties{};
+  vkGetPhysicalDeviceMemoryProperties(m_physDevice, &memProperties);
+
+  // FIND AND GET A SUITABLE GPU-MEMORY-TYPE FROM memProperties{} FOR YOUR
+  // BUFFER-TYPE(PROVIDED BY typeFilter)
+  for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+
+    if ((1 << i) & typeFilter && (memProperties.memoryTypes[i].propertyFlags &
+                                  properties) == properties) {
+      return i;
+    };
+  };
+
+  throw std::runtime_error(
+      "Physical device does not have a suitable memory-type that matches the "
+      "required memory-type for your buffer.");
 };
 
 bool PhysDeviceVk::IsDeviceSuitable(const VkPhysicalDevice &device,

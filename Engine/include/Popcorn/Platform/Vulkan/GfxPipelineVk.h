@@ -2,6 +2,7 @@
 
 #include "GlobalMacros.h"
 #include "ShaderVk.h"
+#include "VertexBufferVk.h"
 #include <stdexcept>
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
@@ -9,6 +10,7 @@
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
+
 class GfxPipelineVk {
   friend class RendererVk;
 
@@ -29,6 +31,11 @@ private:
     return m_gfxPipeline;
   };
 
+  inline void AttachVertexBuffer(VertexBufferVk *vBfr) {
+    PC_PRINT("VERTEX BUFFER", TagType::Print, "ELEMENT OFFSETS")
+    m_vertexBufferVk = std::move(vBfr);
+  };
+
 private:
   GfxPipelineVk() { PC_PRINT("CREATED", TagType::Constr, "GFX-PIPELINE-VK"); };
   ~GfxPipelineVk() {
@@ -46,6 +53,7 @@ private:
   VkRenderPass m_renderPass;
   VkPipelineLayout m_pipelineLayout;
   VkPipeline m_gfxPipeline;
+  VertexBufferVk *m_vertexBufferVk;
 };
 
 GFX_NAMESPACE_END

@@ -9,10 +9,7 @@ using namespace Popcorn;
 
 class GameLayer : public Layer {
 public:
-  GameLayer() {
-    PC_PRINT("CREATED", TagType::Constr, "GAME-LAYER")
-
-  };
+  GameLayer() { PC_PRINT("CREATED", TagType::Constr, "GAME-LAYER") };
   ~GameLayer() { PC_PRINT("DESTROYED", TagType::Destr, "GAME-LAYER") };
 
   virtual void OnAttach() override {
@@ -39,7 +36,10 @@ public:
     // bfr.PrintBuffer<Vertex>();
   };
   virtual void OnDetach() override {};
-  virtual void OnUpdate() override { Renderer::Get().DrawFrame(); };
+  virtual void OnUpdate() override {
+    //
+    Renderer::Get().DrawFrame();
+  };
   virtual void OnEvent(Event &e) override {};
 };
 

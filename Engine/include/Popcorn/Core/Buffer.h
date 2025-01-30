@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "GlobalMacros.h"
@@ -41,21 +40,20 @@ public:
   };
 
   template <typename T> void SetData(std::initializer_list<T> list) {
-    PC_PRINT("CREATED(INIT-LIST)", TagType::Constr, "BUFFER")
+    PC_PRINT("DATA SET(INIT-LIST)", TagType::Constr, "BUFFER")
 
     const uint64_t size = sizeof(T) * list.size();
-    FreeBytes();
     AllocBytes(size);
+
     // THESE LINES HERE DON'T WORK AS EXPECTED. THE m_count IS ZERO??
     m_count = list.size();
     m_size = size;
     memcpy(m_data, list.begin(), size);
-    // m_count = list.size();
-    // m_size = size;
   };
 
-  // TODO: IMPLEMENT FLUSH
-  void Flush() {};
+  inline const byte_t *GetData() const {
+    return static_cast<byte_t *>(m_data);
+  };
 
   template <typename T, uint64_t Count = 0>
   Buffer() : m_count(Count), m_size((sizeof(T) * m_count)) {
@@ -64,7 +62,7 @@ public:
   };
 
   template <typename T> Buffer(uint64_t count) : m_count(count) {
-    PC_PRINT("THIS_CREATED", TagType::Constr, "BUFFER")
+    PC_PRINT("CREATED", TagType::Constr, "BUFFER")
     AllocBytes(count * sizeof(T));
   };
   template <typename T>
@@ -72,11 +70,16 @@ public:
       : m_data(data),
         m_count(count){PC_PRINT("CREATED", TagType::Constr, "BUFFER")};
 
-  Buffer(const Buffer &other, const uint64_t size) {
+  // COPY CONSTRUCTOR ------------------------------------------------------
+  Buffer(const Buffer &other) {
+    PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Print, "BUFFER")
+    if (this == &other)
+      return;
+
+    size_t size = other.m_size;
     AllocBytes(size);
     memcpy(m_data, other.m_data, size);
   };
-
   Buffer &operator=(const Buffer &other) {
     PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print, "BUFFER")
 
@@ -88,6 +91,39 @@ public:
     memcpy(m_data, other.m_data, size);
 
     return *this;
+  };
+
+  // MOVE CONSTRUCTOR ------------------------------------------------------
+  Buffer(Buffer &&other) {
+    PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Print, "BUFFER")
+    if (this == &other) {
+      return;
+    };
+
+    m_data = other.m_data;
+    m_size = other.m_size;
+    m_count = other.m_count;
+
+    other.m_data = nullptr;
+    other.m_size = 0;
+    other.m_count = 0;
+  };
+  Buffer &&operator=(Buffer &&other) {
+    PC_PRINT("MOVE ASSIGNMENT EVOKED", TagType::Print, "BUFFER")
+    if (this == &other) {
+      return std::move(*this);
+    };
+
+    m_data = other.m_data;
+    m_size = other.m_size;
+    m_count = other.m_count;
+
+    other.m_data = nullptr;
+    other.m_size = 0;
+    other.m_count = 0;
+
+    // delete (decltype(other.m_data) *)other.m_data;
+    return std::move(*this);
   };
 
   [[nodiscard]] inline const uint64_t GetCount() const { return m_count; };
@@ -104,7 +140,21 @@ public:
 
 #ifdef PC_DEBUG
   template <typename T> inline static void Print(Buffer &buffer) {
+    PC_PRINT("PRINT EVOKED", TagType::Print, "VERTEX-BUFFER")
+    if (!buffer.m_data) {
+      PC_PRINT("NO DATA IN BUFFER", TagType::Print, "Buffer.h")
+      return;
+    };
+
     if constexpr (HasPrint<T>()) {
+      PC_PRINT("BEGIN: " << buffer.begin<T>() << " END: " << buffer.end<T>(),
+               TagType::Print, "Buffer.h")
+
+      if (buffer.begin<T>() == buffer.end<T>()) {
+        PC_PRINT("Buffer iterator begin is same as end!", TagType::Print,
+                 "Buffer.h")
+      };
+
       for (T *it = buffer.begin<T>(); it != buffer.end<T>(); ++it) {
         PC_PRINT(((T &)(*it)).Print(), TagType::Print, "BUFFER")
       };
@@ -120,15 +170,16 @@ private:
   void AllocBytes(uint64_t size) {
     FreeBytes();
 
-    if (size == 0)
-      return;
+    // if (size == 0)
+    //   return;
 
     m_data = new byte_t[size];
     m_size = size;
   };
 
   void FreeBytes() {
-    delete[] static_cast<byte_t *>(m_data);
+    if (m_data)
+      delete[] static_cast<byte_t *>(m_data);
     m_data = nullptr;
     m_size = 0;
     m_count = 0;
