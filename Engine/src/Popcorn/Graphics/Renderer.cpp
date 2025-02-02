@@ -15,8 +15,6 @@ GFX_NAMESPACE_BEGIN
 // SINGLETON
 Renderer *Renderer::s_instance = nullptr;
 RendererType Renderer::s_type = RendererType::Vulkan;
-std::variant<RendererVk *, RendererOpenGL *> Renderer::s_renderer{
-    static_cast<RendererVk *>(nullptr)};
 
 VertexBuffer *Renderer::s_vertexBuffer = nullptr;
 
@@ -26,9 +24,14 @@ Renderer::Renderer(const Window &appWin) : m_AppWin(appWin) {
 
 Renderer::~Renderer() { PC_PRINT("DESTROYED", TagType::Destr, "RENDERER") };
 
-void Renderer::Init() const {
+void Renderer::Init(const Window &appWin) {
+  if (s_instance) {
+    PC_WARN("Renderer instance (s_instance) exists!")
+    return;
+  };
+
   if (s_type == RendererType::Vulkan) {
-    s_renderer = new RendererVk(m_AppWin);
+    s_instance = new RendererVk(appWin);
 
     // ----------------------------------------------------------
     // Vertex buffer --------------------------------------------
@@ -55,9 +58,10 @@ void Renderer::Init() const {
     s_vertexBuffer->SetLayout<VertexBuffer::AttrTypes::Float2,
                               VertexBuffer::AttrTypes::Float3>();
 
-    auto *vkRenderer = std::get<RendererVk *>(s_renderer);
+    RendererVk *vkRenderer = static_cast<RendererVk *>(s_instance);
     vkRenderer->BindVertexBuffer(static_cast<VertexBufferVk *>(s_vertexBuffer));
     vkRenderer->InitVulkan();
+    //
 
     // s_vertexBuffer->PrintBuffer<Vertex>();
     // ----------------------------------------------------------
@@ -65,28 +69,15 @@ void Renderer::Init() const {
     // ----------------------------------------------------------
 
   } else if (s_type == RendererType::OpenGL) {
-    s_renderer = new RendererOpenGL(m_AppWin);
+    s_instance = new RendererOpenGL(appWin);
   } else {
     PC_STATIC_ASSERT(true, "UNSUPPORTED RENDERER TYPE");
-  }
-};
-
-Renderer *Renderer::GetRenderer() {
-  // PC_ASSERT(s_renderer, "NO RENDERER INSTANCE");
-  if (s_type == RendererType::Vulkan) {
-    return std::get<RendererVk *>(s_renderer);
-  } else if (s_type == RendererType::OpenGL) {
-    return std::get<RendererOpenGL *>(s_renderer);
-  } else {
-    PC_STATIC_ASSERT(true, "UNSUPPORTED RENDERER TYPE");
-    return nullptr;
   }
 };
 
 void Renderer::DrawFrame() {
   if (s_type == RendererType::Vulkan) {
-    // Use GDB
-    std::get<RendererVk *>(s_renderer)->DrawFrame();
+    static_cast<RendererVk *>(s_instance)->DrawFrame();
   } else {
     // std::get<RendererOpenGL *>(s_renderer)->OnUpdate();
   }
@@ -94,7 +85,7 @@ void Renderer::DrawFrame() {
 
 bool Renderer::OnFrameBfrResize(FrameBfrResizeEvent &e) {
   if (s_type == RendererType::Vulkan) {
-    return std::get<RendererVk *>(s_renderer)->OnFrameBfrResize(e);
+    return static_cast<RendererVk *>(s_instance)->OnFrameBfrResize(e);
   } else {
     // std::get<RendererOpenGL *>(s_renderer)->OnEvent();
   }
@@ -103,16 +94,9 @@ bool Renderer::OnFrameBfrResize(FrameBfrResizeEvent &e) {
 }
 
 void Renderer::Destroy() {
-  if (auto vulkanRenderer = std::get_if<RendererVk *>(&Renderer::s_renderer)) {
-    VertexBuffer::Destroy(s_vertexBuffer);
-    delete *vulkanRenderer;
-  } else if (auto openGLRenderer =
-                 std::get_if<RendererOpenGL *>(&Renderer::s_renderer)) {
-    delete *openGLRenderer;
-  };
-
-  Renderer::s_renderer = static_cast<RendererVk *>(nullptr);
+  VertexBuffer::Destroy(s_vertexBuffer);
   delete s_instance;
+
   s_instance = nullptr;
 };
 

@@ -32,15 +32,19 @@ RendererVk::~RendererVk() {
 };
 
 void RendererVk::InitVulkan() {
+  // CREATES INSTANCE
   CreateInstance();
 
+  // ENABLE VALIDATION LAYERS
   if constexpr (s_enableValidationLayers) {
     m_ValLayersVk.SetupDbgMsngr();
   };
 
-  // SURFACE, PHYS DEVICE, LOGICAL DEVICE CREATION
+  // CREATES SURFACE FOR SWAPCHAIN
   m_WinSurfaceVk.CreateSurface(m_AppWin.GetOSWindow());
+
   m_PhysDeviceVk.PickPhysDevice(m_SwapChainVk);
+
   m_LogiDeviceVk.CreateLogicalDevice(m_PhysDeviceVk.GetQueueFamilyIndices(),
                                      m_ValLayersVk.GetValidationLayers(),
                                      m_PhysDeviceVk.GetPhysDevice(),
@@ -51,6 +55,7 @@ void RendererVk::InitVulkan() {
       m_AppWin.GetFramebufferSize().first, // FRAME BFR WIDTH
       m_AppWin.GetFramebufferSize().second // FRAME BFR HEIGHT
   );
+
   m_SwapChainVk.CreateImgViews();
 
   // CREATE GFX PIPELINE
