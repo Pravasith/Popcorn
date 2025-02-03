@@ -1,5 +1,6 @@
 #include "Application.h"
 #include "Base.h"
+#include "DebugUIOverlay.h"
 #include "Renderer.h"
 
 ENGINE_NAMESPACE_BEGIN
@@ -8,6 +9,7 @@ LayerStack *Application::s_layerStack = nullptr;
 Window *Application::s_window = nullptr;
 Time *Application::s_time = nullptr;
 Renderer *Application::s_Renderer = nullptr;
+DebugUIOverlay *Application::s_debugUIOverlay = nullptr;
 
 Application::Application() {
   PC_PRINT("APPLICATION STARTED", TagType::Constr, "APP");

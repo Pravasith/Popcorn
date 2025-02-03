@@ -50,7 +50,6 @@ public:
 private:
   static RendererType s_type;
   static Renderer *s_instance;
-
   static VertexBuffer *s_vertexBuffer;
 
 protected:

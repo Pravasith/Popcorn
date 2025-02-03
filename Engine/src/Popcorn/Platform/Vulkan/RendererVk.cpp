@@ -42,9 +42,7 @@ void RendererVk::InitVulkan() {
 
   // CREATES SURFACE FOR SWAPCHAIN
   m_WinSurfaceVk.CreateSurface(m_AppWin.GetOSWindow());
-
   m_PhysDeviceVk.PickPhysDevice(m_SwapChainVk);
-
   m_LogiDeviceVk.CreateLogicalDevice(m_PhysDeviceVk.GetQueueFamilyIndices(),
                                      m_ValLayersVk.GetValidationLayers(),
                                      m_PhysDeviceVk.GetPhysDevice(),

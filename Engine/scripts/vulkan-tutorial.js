@@ -45,6 +45,22 @@ javascript: (function () {
     h2Tags[i].style.color = "white";
   }
 
+  const h3Tags = document
+    .getElementsByClassName("doc_content")[0]
+    .getElementsByTagName("h3");
+
+  for (let i = 0; i < h3Tags.length; i++) {
+    h3Tags[i].style.color = "white";
+  }
+
+  const h4Tags = document
+    .getElementsByClassName("doc_content")[0]
+    .getElementsByTagName("h4");
+
+  for (let i = 0; i < h4Tags.length; i++) {
+    h4Tags[i].style.color = "white";
+  }
+
   const liTags = document
     .getElementsByClassName("doc_content")[0]
     .getElementsByTagName("li");

@@ -13,6 +13,7 @@
 
 ENGINE_NAMESPACE_BEGIN
 using namespace Gfx;
+class DebugUIOverlay;
 
 // SINGLETON
 class Application : public Subscriber {
@@ -59,5 +60,6 @@ private:
   static Window *s_window;
   static Time *s_time;
   static Renderer *s_Renderer;
+  static DebugUIOverlay *s_debugUIOverlay;
 };
 ENGINE_NAMESPACE_END
