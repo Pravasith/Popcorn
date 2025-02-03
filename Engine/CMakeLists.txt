@@ -87,6 +87,7 @@ target_include_directories(
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic>
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic/imgui>
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic/backends>
   PRIVATE $<INSTALL_INTERFACE:include>)
 
 # PRECOMPILE

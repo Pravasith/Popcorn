@@ -28,14 +28,13 @@ public:
   static void Destroy();
 
   // template <RendererType T>
-  static Renderer &Get() { return *GetRenderer(); };
-  static Renderer *GetRenderer();
+  static Renderer &Get() { return *s_instance; };
 
   [[nodiscard]] const static RendererType GetAPI() { return s_type; };
 
   // PASS IN SCENE & CAMERA ETC.
-  virtual void DrawFrame();
-  virtual bool OnFrameBfrResize(FrameBfrResizeEvent &);
+  virtual void DrawFrame() = 0;
+  virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) = 0;
 
   Renderer(const Renderer &) = delete;
   Renderer &operator=(const Renderer &) = delete;
@@ -44,29 +43,29 @@ public:
   Renderer &operator=(const Renderer &&) = delete;
 
   Renderer(const Window &);
+
+  Renderer();
   virtual ~Renderer();
 
 private:
-  Renderer();
-
   static RendererType s_type;
   static Renderer *s_instance;
-  static std::variant<RendererVk *, RendererOpenGL *> s_renderer;
-
   static VertexBuffer *s_vertexBuffer;
-
-  void Init() const;
 
 protected:
   const Window &m_AppWin;
+
+private:
+  static void Init(const Window &);
 };
 
 template <RendererType T> Renderer *Renderer::Create(const Window &appWin) {
   if (!s_instance) {
     // PC_ASSERT(s_instance, "NO RENDERER INSTANCE");
     s_type = T;
-    s_instance = new Renderer(appWin);
-    s_instance->Init();
+
+    // s_instance = new Renderer(appWin);
+    Renderer::Init(appWin);
   }
 
   return s_instance;

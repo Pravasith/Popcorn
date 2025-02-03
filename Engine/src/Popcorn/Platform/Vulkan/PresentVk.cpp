@@ -40,11 +40,10 @@ void PresentVk::DrawFrame(
     std::vector<VkCommandBuffer> &cmdBfrs,
     CmdPoolVk::RecordCmdBfrFtr recordCmdBfr,
     SwapChainVk::RecreateSwapChainFtr recreateSwapChain) const {
-
   // ACQUIRE IMAGE FROM THE SWAP CHAIN
   // USING SEPHAMORES AND FENCES
   // SYNC CODE - WAIT UNTIL m_inFlightFences[s_currFrame] IS SIGNALLED - (IT'S
-  // SIGNALLED WHEN THE CMD BFR HAS BEEN SUBMITTED TO THE SWAPCHAIN)
+  // SIGNALLED WHEN THE CMD-BFR HAS BEEN SUBMITTED TO THE SWAPCHAIN)
   vkWaitForFences(m_logiDevice, 1, &m_inFlightFences[s_currFrame], VK_TRUE,
                   UINT64_MAX);
 

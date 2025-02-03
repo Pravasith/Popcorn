@@ -23,7 +23,7 @@ GFX_NAMESPACE_BEGIN
 class RendererVk : public Renderer {
 public:
   RendererVk(const Window &appWin);
-  ~RendererVk();
+  ~RendererVk() override;
 
   constexpr inline static bool AreValLayersEnabled() {
     return s_enableValidationLayers;
