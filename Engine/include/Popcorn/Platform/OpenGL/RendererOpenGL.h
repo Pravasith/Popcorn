@@ -11,6 +11,7 @@ public:
   ~RendererOpenGL() override;
 
   virtual void DrawFrame() override {};
+  virtual void PresentFrame() override {};
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) override {
     return false;
   };

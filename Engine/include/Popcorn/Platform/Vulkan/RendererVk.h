@@ -1,21 +1,11 @@
-#pragma once
 
-#include "CmdPoolVk.h"
-#include "CommonVk.h"
-#include "GfxPipelineVk.h"
 #include "GlobalMacros.h"
-#include "LogiDeviceVk.h"
-#include "PhysDeviceVk.h"
-#include "Popcorn/Core/Base.h"
-#include "PresentVk.h"
+#include "Popcorn/Core/Window.h"
+#include "Popcorn/Events/WindowEvent.h"
 #include "Renderer.h"
-#include "SwapChainVk.h"
-#include "ValidationLyrsVk.h"
-#include "VertexBufferVk.h"
-#include "WinSurfaceVk.h"
+#include <cstdint>
 #include <vector>
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -25,59 +15,31 @@ public:
   RendererVk(const Window &appWin);
   ~RendererVk() override;
 
-  constexpr inline static bool AreValLayersEnabled() {
-    return s_enableValidationLayers;
-  };
+  // Sets up devices, configure swapchains, creates depth buffers
+  // also allocates command pools
+  void VulkanInit() {};
+  void VulkanDestroy() {};
 
   virtual void DrawFrame() override;
+  virtual void PresentFrame() override;
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) override;
 
-  inline void BindVertexBuffer(VertexBufferVk *vertexBufferVk) {
-    m_vertexBufferVk = vertexBufferVk;
-  };
-
-  void InitVulkan();
-
 private:
-  void CleanUp();
-  void CreateInstance();
+  static VkInstance s_instance;
+  static VkPhysicalDevice s_physicalDevice;
+  static VkDevice s_device;
 
-  std::vector<const char *> GetRequiredExtensions();
+  uint32_t s_queueFamilyIndex;
+  VkQueue s_queue;
 
-private:
-  [[nodiscard]] inline const VkSurfaceKHR &GetSurface() const {
-    if (!m_WinSurfaceVk.GetSurface()) {
-      PC_WARN("SURFACE NOT AVAILABLE");
-    };
-    return m_WinSurfaceVk.GetSurface();
-  };
+  std::vector<VkDescriptorPool> s_descriptorPools;
+  std::vector<VkRenderPass> s_renderPasses;
 
-  [[nodiscard]] inline const VkPhysicalDevice &GetPhysDevice() const {
-    if (!m_PhysDeviceVk.GetPhysDevice()) {
-      PC_WARN("PHYS DEV NOT AVAILABLE");
-    };
-    return m_PhysDeviceVk.GetPhysDevice();
-  };
-
-  VkInstance m_vkInstance;
-
-#ifdef NDEBUG
-  static constexpr bool s_enableValidationLayers = false;
-#else
-  static constexpr bool s_enableValidationLayers = true;
-#endif
-
-  ValidationLyrsVk m_ValLayersVk;
-  WinSurfaceVk m_WinSurfaceVk;
-  PhysDeviceVk m_PhysDeviceVk;
-  LogiDeviceVk m_LogiDeviceVk;
-  GfxPipelineVk m_GfxPipelineVk;
-  SwapChainVk m_SwapChainVk;
-  CmdPoolVk m_CmdPoolVk;
-  const QueueFamilyIndices &m_queueFamilyIndices;
-  PresentVk m_PresentVk;
-
-  VertexBufferVk *m_vertexBufferVk = nullptr;
+  // Swapchain images
+  uint32_t s_minImageCount;
+  uint32_t s_imageCount;
+  uint32_t s_subpass;
 };
+
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

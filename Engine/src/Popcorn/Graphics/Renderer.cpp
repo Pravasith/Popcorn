@@ -6,7 +6,7 @@
 #include "RendererOpenGL.h"
 #include "RendererVk.h"
 #include "VertexBuffer.h"
-#include "VertexBufferVk.h"
+// #include "VertexBufferVk.h"
 #include <glm/glm.hpp>
 #include <string>
 
@@ -59,8 +59,9 @@ void Renderer::Init(const Window &appWin) {
                               VertexBuffer::AttrTypes::Float3>();
 
     RendererVk *vkRenderer = static_cast<RendererVk *>(s_instance);
-    vkRenderer->BindVertexBuffer(static_cast<VertexBufferVk *>(s_vertexBuffer));
-    vkRenderer->InitVulkan();
+    // vkRenderer->BindVertexBuffer(static_cast<VertexBufferVk
+    // *>(s_vertexBuffer));
+    vkRenderer->VulkanInit();
     //
 
     // s_vertexBuffer->PrintBuffer<Vertex>();

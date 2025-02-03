@@ -12,12 +12,13 @@ ENGINE_NAMESPACE_BEGIN
 
 void *Window::s_osWindow = nullptr;
 
+Window::Window() { PC_PRINT("CREATED", TagType::Constr, "WINDOW"); };
+Window::~Window() { PC_PRINT("DESTROYED", TagType::Destr, "WINDOW"); };
+
 Window *Window::Create(const Props &props) {
   if (s_osWindow) {
     return static_cast<Window *>(s_osWindow);
   };
-
-  PC_PRINT("CREATED", TagType::Constr, "WINDOW");
 
   /* ---- NOTE ---- */
   /* Multiple window creation not supported at the moment */
@@ -62,6 +63,4 @@ void Window::OnUpdate() {
   /* #endif */
 };
 
-Window::Window() { PC_PRINT("CREATED", TagType::Constr, "WINDOW"); };
-Window::~Window() { PC_PRINT("DESTROYED", TagType::Destr, "WINDOW"); };
 ENGINE_NAMESPACE_END

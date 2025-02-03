@@ -24,7 +24,7 @@ Application::~Application() {
   s_Renderer = nullptr;
 
   Window::UnSubscribe(s_instance);
-  Window::Destroy();
+  Popcorn::Window::Destroy();
 
   PC_PRINT("APPLICATION STOPPED", TagType::Destr, "APP");
 };
@@ -35,8 +35,8 @@ Window &Application::GetAppWindow() const { return *s_window; }
 void Application::Start() {
   if (!s_instance) {
     // DONT MOVE THIS BLOCK
-    auto windowProps = Popcorn::Window::Props("Triangle App", 500, 500);
-    auto AppWin = Popcorn::Window::Create(windowProps);
+    auto windowProps = Window::Props("Triangle App", 500, 500);
+    auto AppWin = Window::Create(windowProps);
 
     s_window = AppWin;
     s_instance = new Application();

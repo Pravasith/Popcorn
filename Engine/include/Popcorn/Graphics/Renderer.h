@@ -4,7 +4,6 @@
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Window.h"
 #include "Popcorn/Events/WindowEvent.h"
-#include <variant>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -34,6 +33,7 @@ public:
 
   // PASS IN SCENE & CAMERA ETC.
   virtual void DrawFrame() = 0;
+  virtual void PresentFrame() = 0;
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) = 0;
 
   Renderer(const Renderer &) = delete;

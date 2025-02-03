@@ -124,14 +124,6 @@ WindowAgnostic::WindowAgnostic(const Props &props) : m_title(props.Title) {
   }
 }
 
-void WindowAgnostic::OnUpdate() {
-  // glViewport(0, 0, WindowAgnostic::GetWidth(),
-  // WindowAgnostic::GetHeight());
-
-  // glfwSwapBuffers(s_osWindow);
-  glfwPollEvents();
-}
-
 WindowAgnostic::~WindowAgnostic() {
   glfwDestroyWindow(s_osWindow);
   glfwTerminate();
@@ -139,6 +131,14 @@ WindowAgnostic::~WindowAgnostic() {
   PC_PRINT("TERMINATED", TagType::Destr, "GLFW");
   PC_PRINT("DESTROYED", TagType::Destr, "WINDOW-AGNOSTIC");
 };
+
+void WindowAgnostic::OnUpdate() {
+  // glViewport(0, 0, WindowAgnostic::GetWidth(),
+  // WindowAgnostic::GetHeight());
+
+  // glfwSwapBuffers(s_osWindow);
+  glfwPollEvents();
+}
 
 void WindowAgnostic::Terminate() {
   if (!s_osWindow || !s_instance) {
