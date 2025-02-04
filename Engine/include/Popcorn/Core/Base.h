@@ -37,6 +37,9 @@ static void PC_Print(const std::string &msg, const TagType tag,
   std::stringstream ss;
   auto lvl = PC_print_lvl < 10 ? " " + std::to_string(PC_print_lvl)
                                : std::to_string(PC_print_lvl);
+  if (tag == TagType::Print) {
+    lvl = "  ";
+  };
 
   ss << lvl << " ";
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DeviceVk.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Window.h"
 #include "Popcorn/Events/WindowEvent.h"
@@ -9,8 +10,6 @@
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
-
-class DeviceVk;
 
 class RendererVk : public Renderer {
 public:
@@ -44,7 +43,8 @@ public:
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) override;
 
 private:
-  // DeviceVk &deviceVk;
+  DeviceVk m_deviceVk;
+
   // std::vector<VkDescriptorPool> s_descriptorPools;
   // std::vector<VkRenderPass> s_renderPasses;
 

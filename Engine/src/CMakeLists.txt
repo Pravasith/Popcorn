@@ -44,4 +44,5 @@ add_library(
   #
   # VULKAN CLASSES
   ${PLATFORM_IMPL_DIR}/Vulkan/RendererVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/DeviceVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/VertexBufferVk.cpp)

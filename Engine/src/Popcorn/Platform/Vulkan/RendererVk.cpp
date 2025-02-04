@@ -8,9 +8,12 @@ GFX_NAMESPACE_BEGIN
 
 RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VK");
+  m_deviceVk.CreateInstance({"Vulkan App", 1, 0, 0});
+  m_deviceVk.SetupDebugMessenger();
 };
 
 RendererVk::~RendererVk() {
+  m_deviceVk.CleanUp();
   PC_PRINT("DESTROYED", TagType::Destr, "RENDERER-VULKAN");
 };
 
