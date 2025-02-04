@@ -16,7 +16,6 @@ Application::Application() {
 };
 
 Application::~Application() {
-
   // LAYERS ARE DELETED INTERNALLY IN THE LAYERSTACK DESTRUCTOR
   delete s_layerStack;
 
