@@ -8,6 +8,7 @@ LayerStack::~LayerStack() {
   for (Layer *l : m_layer_stack) {
     l->OnDetach();
     delete l;
+    l = nullptr;
   }
 
   m_layer_stack.clear();

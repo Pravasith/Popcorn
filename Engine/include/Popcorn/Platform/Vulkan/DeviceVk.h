@@ -11,10 +11,13 @@ GFX_NAMESPACE_BEGIN
 
 class DeviceVk {
   struct specs {
+    /** Instance specs ------ */
     std::string appName;
     int appVersionMajor;
     int appVersionMinor;
     int appVersionPatch;
+
+    /** Physical device specs ------ */
   };
 
   DeviceVk() { PC_PRINT("CREATED", TagType::Constr, "DeviceVk.h") };
@@ -23,6 +26,7 @@ class DeviceVk {
     PC_PRINT("DESTROYED", TagType::Destr, "DeviceVk.h")
   };
 
+  void CreateInstance();
   void CreateInstance(const specs &appSpecs);
   void CleanUp();
 

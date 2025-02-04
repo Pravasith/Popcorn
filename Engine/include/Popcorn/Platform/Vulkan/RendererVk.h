@@ -10,6 +10,8 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+class DeviceVk;
+
 class RendererVk : public Renderer {
 public:
   RendererVk(const Window &appWin);
@@ -42,6 +44,7 @@ public:
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) override;
 
 private:
+  // DeviceVk &deviceVk;
   // std::vector<VkDescriptorPool> s_descriptorPools;
   // std::vector<VkRenderPass> s_renderPasses;
 

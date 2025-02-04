@@ -16,8 +16,10 @@ Application::Application() {
 };
 
 Application::~Application() {
+  Time::Destroy();
   // LAYERS ARE DELETED INTERNALLY IN THE LAYERSTACK DESTRUCTOR
   delete s_layerStack;
+  s_layerStack = nullptr;
 
   Renderer::Destroy();
   s_Renderer = nullptr;
@@ -43,6 +45,7 @@ void Application::Start() {
     Window::Subscribe(s_instance);
 
     s_layerStack = new LayerStack();
+    s_time = Time::Create();
 
     // OVERLAYS - EXAMPLE
     // s_debugUIOverlay = new DebugUIOverlay();
@@ -54,7 +57,6 @@ void Application::Start() {
     // s_layerStack->PushLayer(s_renderLayer);
     // s_renderLayer->OnAttach();
 
-    s_time = Time::Get();
   } else {
     PC_WARN(
         "ATTEMPT TO CREATE APPLICATION CLASS, WHEN INSTANCE ALREADY EXISTS");
@@ -71,7 +73,6 @@ void Application::AddLayer(Layer *layer) {
 };
 
 void Application::Stop() {
-  // DESTROY WINDOW
   if (s_instance) {
     delete s_instance;
     s_instance = nullptr;

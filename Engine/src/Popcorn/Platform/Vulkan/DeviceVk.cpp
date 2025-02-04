@@ -1,13 +1,20 @@
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
+#include "Popcorn/Core/Base.h"
 #include <stdexcept>
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+void DeviceVk::CreateInstance() { CreateInstance({"Vulkan App", 1, 0, 0}); };
 void DeviceVk::CreateInstance(const specs &appSpecs = specs{"Vulkan App", 1, 0,
                                                             0}) {
+  if (m_instance) {
+    PC_WARN("Instance already created!")
+    return;
+  };
+
   VkApplicationInfo appInfo{};
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appInfo.pApplicationName = appSpecs.appName.c_str();
