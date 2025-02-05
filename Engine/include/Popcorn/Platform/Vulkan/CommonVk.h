@@ -9,6 +9,7 @@
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
+
 struct SwapChainSupportDetails {
   VkSurfaceCapabilitiesKHR capabilities;
   std::vector<VkSurfaceFormatKHR> formats;
@@ -19,8 +20,9 @@ struct QueueFamilyIndices {
   std::optional<uint32_t> graphicsFamily;
   std::optional<uint32_t> presentFamily;
 
-  bool isComplete() const {
-    return graphicsFamily.has_value() && presentFamily.has_value();
+  [[nodiscard]] inline bool isComplete() const {
+    return graphicsFamily.has_value();
+    // && presentFamily.has_value();
   }
 };
 

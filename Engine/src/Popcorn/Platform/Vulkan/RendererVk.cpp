@@ -8,8 +8,11 @@ GFX_NAMESPACE_BEGIN
 
 RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VK");
-  m_deviceVk.CreateInstance({"Vulkan App", 1, 0, 0});
-  m_deviceVk.SetupDebugMessenger();
+
+  m_deviceVk.CreateInstance({"Vulkan App", 1, 0, 0}); // Vulkan instance
+  m_deviceVk.SetupDebugMessenger();                   // Validation layers
+  m_deviceVk.PickPhysicalDevice();                    // Physical device
+  m_deviceVk.CreateLogicalDevice();                   // Logical device
 };
 
 RendererVk::~RendererVk() {

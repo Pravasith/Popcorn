@@ -3,7 +3,9 @@
 #include "Popcorn/Core/Base.h"
 #include <string>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
+#include "CommonVk.h"
 #include "GlobalMacros.h"
 #include <GLFW/glfw3.h>
 
@@ -17,8 +19,6 @@ class DeviceVk {
     int appVersionMajor;
     int appVersionMinor;
     int appVersionPatch;
-
-    /** Physical device specs ------ */
   };
 
 public:
@@ -27,11 +27,18 @@ public:
 
   void CreateInstance(const specs &appSpecs);
   void SetupDebugMessenger();
+  void PickPhysicalDevice();
+  void CreateLogicalDevice();
+
   void CleanUp();
 
 private:
-  bool CheckValidationLayerSupport();
   std::vector<const char *> GetRequiredExtensions();
+
+  /** -------------------------------------------------------------------
+   *  ------ VALIDATION LAYERS ------------------------------------------
+   *  ------------------------------------------------------------------- */
+  bool CheckValidationLayerSupport();
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL
   DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -42,13 +49,23 @@ private:
   void PopulateDebugMessengerCreateInfo(
       VkDebugUtilsMessengerCreateInfoEXT &createInfo);
 
+  /** -------------------------------------------------------------------
+   *  ------ PHYSICAL DEVICE --------------------------------------------
+   *  ------------------------------------------------------------------- */
+  bool IsDeviceSuitable(VkPhysicalDevice device);
+
+  QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
+
+  /** -------------------------------------------------------------------
+   *  ------ PHYSICAL DEVICE --------------------------------------------
+   *  ------------------------------------------------------------------- */
+
 private:
   VkInstance m_instance;
-  VkPhysicalDevice m_physicalDevice;
+  VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
   VkDevice m_device;
 
-  uint32_t m_queueFamilyIndex;
-  VkQueue m_queue;
+  VkQueue m_gfxQueue;
 
   const std::vector<const char *> m_validationLayers = {
       "VK_LAYER_KHRONOS_validation"};
