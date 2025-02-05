@@ -2,7 +2,6 @@
 #include "GlobalMacros.h"
 #include <stdexcept>
 #include <vector>
-#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN

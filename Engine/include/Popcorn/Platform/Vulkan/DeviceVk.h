@@ -3,7 +3,6 @@
 #include "Popcorn/Core/Base.h"
 #include <string>
 #include <vector>
-#include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 #include "CommonVk.h"
 #include "GlobalMacros.h"
