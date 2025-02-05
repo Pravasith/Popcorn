@@ -29,9 +29,19 @@ public:
     return m_instance;
   };
 
+  [[nodiscard]] inline const VkDevice &GetDevice() const {
+    PC_VK_NULL_CHECK(m_device)
+    return m_device;
+  };
+
   [[nodiscard]] inline SwapChainSupportDetails
   GetSwapChainSupportDetails(const VkSurfaceKHR &surface) const {
     return QuerySwapChainSupport(m_physicalDevice, surface);
+  };
+
+  [[nodiscard]] inline QueueFamilyIndices
+  GetQueueFamilyIndices(const VkSurfaceKHR &surface) const {
+    return FindQueueFamilies(m_physicalDevice, surface);
   };
 
   void CreateInstance(const specs &appSpecs);
@@ -66,7 +76,7 @@ private:
                         const VkSurfaceKHR &surface);
 
   QueueFamilyIndices FindQueueFamilies(const VkPhysicalDevice &device,
-                                       const VkSurfaceKHR &surface);
+                                       const VkSurfaceKHR &surface) const;
 
   /** -------------------------------------------------------------------
    *  ------ SWAP CHAIN HELPERS -----------------------------------------

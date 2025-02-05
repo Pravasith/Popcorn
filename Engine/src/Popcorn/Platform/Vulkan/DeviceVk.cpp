@@ -166,8 +166,8 @@ VKAPI_ATTR VkBool32 VKAPI_CALL DeviceVk::DebugCallback(
     VkDebugUtilsMessageTypeFlagsEXT messageType,
     const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
     void *pUserData) {
-  PC_WARN("Validation-Layer: " << pCallbackData->pMessage)
 
+  PC_WARN("Validation Layer: " << pCallbackData->pMessage)
   return VK_FALSE;
 }
 
@@ -260,8 +260,9 @@ bool DeviceVk::IsDeviceSuitable(const VkPhysicalDevice &device,
   return indices.isComplete() && extensionsSupported && swapChainAdequate;
 }
 
-QueueFamilyIndices DeviceVk::FindQueueFamilies(const VkPhysicalDevice &device,
-                                               const VkSurfaceKHR &surface) {
+QueueFamilyIndices
+DeviceVk::FindQueueFamilies(const VkPhysicalDevice &device,
+                            const VkSurfaceKHR &surface) const {
   QueueFamilyIndices indices;
 
   uint32_t queueFamilyCount = 0;

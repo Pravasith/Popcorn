@@ -169,7 +169,7 @@ target_link_libraries(Graphics PUBLIC glm::glm)
 
 target_link_libraries(Window PRIVATE glad glfw)
 target_link_libraries(Window PRIVATE Events)
-target_link_libraries(ImGui PRIVATE glfw)
+target_link_libraries(ImGui PUBLIC glfw Vulkan::Headers Vulkan::Loader)
 target_link_libraries(Popcorn PRIVATE glad glfw)
 target_link_libraries(Popcorn PRIVATE Graphics Window ImGui)
 
