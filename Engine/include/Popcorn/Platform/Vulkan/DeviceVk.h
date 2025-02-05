@@ -30,18 +30,24 @@ public:
     return m_instance;
   };
 
+  [[nodiscard]] inline SwapChainSupportDetails
+  GetSwapChainSupportDetails(const VkSurfaceKHR &surface) const {
+    return QuerySwapChainSupport(m_physicalDevice, surface);
+  };
+
   void CreateInstance(const specs &appSpecs);
   void SetupDebugMessenger();
-  void PickPhysicalDevice();
-  void CreateLogicalDevice();
+  void PickPhysicalDevice(const VkSurfaceKHR &surface);
+  void CreateLogicalDevice(const VkSurfaceKHR &surface);
 
   void CleanUp();
 
 private:
   std::vector<const char *> GetRequiredExtensions();
+  bool CheckDeviceExtensionSupport(const VkPhysicalDevice &);
 
   /** -------------------------------------------------------------------
-   *  ------ VALIDATION LAYERS ------------------------------------------
+   *  ------ VALIDATION LAYERS HELPERS ----------------------------------
    *  ------------------------------------------------------------------- */
   bool CheckValidationLayerSupport();
 
@@ -55,15 +61,20 @@ private:
       VkDebugUtilsMessengerCreateInfoEXT &createInfo);
 
   /** -------------------------------------------------------------------
-   *  ------ PHYSICAL DEVICE --------------------------------------------
+   *  ------ PHYSICAL DEVICE HELPERS ------------------------------------
    *  ------------------------------------------------------------------- */
-  bool IsDeviceSuitable(VkPhysicalDevice device);
+  bool IsDeviceSuitable(const VkPhysicalDevice &device,
+                        const VkSurfaceKHR &surface);
 
-  QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
+  QueueFamilyIndices FindQueueFamilies(const VkPhysicalDevice &device,
+                                       const VkSurfaceKHR &surface);
 
   /** -------------------------------------------------------------------
-   *  ------ PHYSICAL DEVICE --------------------------------------------
+   *  ------ SWAP CHAIN HELPERS -----------------------------------------
    *  ------------------------------------------------------------------- */
+  SwapChainSupportDetails
+  QuerySwapChainSupport(const VkPhysicalDevice &device,
+                        const VkSurfaceKHR &surface) const;
 
 private:
   VkInstance m_instance = VK_NULL_HANDLE;
@@ -71,10 +82,15 @@ private:
   VkDevice m_device = VK_NULL_HANDLE;
 
   VkQueue m_gfxQueue = VK_NULL_HANDLE;
+  VkQueue m_presentQueue = VK_NULL_HANDLE;
 
   const std::vector<const char *> m_validationLayers = {
       "VK_LAYER_KHRONOS_validation"};
-  VkDebugUtilsMessengerEXT m_debugMessenger;
+
+  const std::vector<const char *> m_deviceExtensions = {
+      VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+
+  VkDebugUtilsMessengerEXT m_debugMessenger = VK_NULL_HANDLE;
 
 #ifdef NDEBUG
   static constexpr bool s_enableValidationLayers = false;

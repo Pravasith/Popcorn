@@ -28,7 +28,7 @@ ENGINE_NAMESPACE_BEGIN
   } while (0);
 
 #define PC_VK_NULL_CHECK(vulkan_obj)                                           \
-  if (vulkan_obj != VK_NULL_HANDLE) {                                          \
+  if (vulkan_obj == VK_NULL_HANDLE) {                                          \
     PC_WARN(#vulkan_obj << " isn't null in " << PC_FUNC_NAME)                  \
   };
 #else

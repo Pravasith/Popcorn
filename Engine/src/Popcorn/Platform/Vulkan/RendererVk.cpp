@@ -8,20 +8,38 @@ GFX_NAMESPACE_BEGIN
 
 RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VK");
-
-  m_deviceVk.CreateInstance({"Vulkan App", 1, 0, 0}); // Vulkan instance
-  m_deviceVk.SetupDebugMessenger();                   // Validation layers
-  m_deviceVk.PickPhysicalDevice();                    // Physical device
-  m_deviceVk.CreateLogicalDevice();                   // Logical device
-
-  m_surfaceVk.CreateWindowSurface(
-      m_deviceVk.GetInstance(),
-      static_cast<GLFWwindow *>(appWin.GetOSWindow()));
+  VulkanInit();
 };
 
 RendererVk::~RendererVk() {
-  m_deviceVk.CleanUp();
+  VulkanDestroy();
   PC_PRINT("DESTROYED", TagType::Destr, "RENDERER-VULKAN");
+};
+
+void RendererVk::VulkanInit() {
+  GLFWwindow *osWindow = static_cast<GLFWwindow *>(m_AppWin.GetOSWindow());
+
+  // CREATE INSTANCE, SET UP DEBUGGING LAYERS
+  m_deviceVk.CreateInstance({"Vulkan App", 1, 0, 0});
+  m_deviceVk.SetupDebugMessenger();
+
+  const auto &instance = m_deviceVk.GetInstance();
+
+  // CREATE WINDOW SURFACE
+  m_surfaceVk.CreateWindowSurface(instance, osWindow);
+
+  const auto &surface = m_surfaceVk.GetSurface();
+
+  // CREATE PHYSICAL & LOGICAL DEVICE
+  m_deviceVk.PickPhysicalDevice(surface);
+  m_deviceVk.CreateLogicalDevice(surface);
+};
+
+void RendererVk::VulkanDestroy() {
+  const auto &instance = m_deviceVk.GetInstance();
+
+  m_surfaceVk.CleanUp(instance);
+  m_deviceVk.CleanUp();
 };
 
 void RendererVk::DrawFrame() {};

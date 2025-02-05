@@ -19,8 +19,8 @@ public:
 
   // Sets up devices, configure swapchains, creates depth buffers
   // also allocates command pools
-  void VulkanInit() {};
-  void VulkanDestroy() {};
+  void VulkanInit();
+  void VulkanDestroy();
 
   // STATIC UTILS BEGIN ------------------
   static void CreateShaderModules() {};
