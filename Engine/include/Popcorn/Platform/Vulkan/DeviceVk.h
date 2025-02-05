@@ -25,6 +25,11 @@ public:
   DeviceVk() { PC_PRINT("CREATED", TagType::Constr, "DeviceVk.h") };
   ~DeviceVk() { PC_PRINT("DESTROYED", TagType::Destr, "DeviceVk.h") };
 
+  [[nodiscard]] inline const VkInstance &GetInstance() const {
+    PC_VK_NULL_CHECK(m_instance)
+    return m_instance;
+  };
+
   void CreateInstance(const specs &appSpecs);
   void SetupDebugMessenger();
   void PickPhysicalDevice();
@@ -61,11 +66,11 @@ private:
    *  ------------------------------------------------------------------- */
 
 private:
-  VkInstance m_instance;
+  VkInstance m_instance = VK_NULL_HANDLE;
   VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
-  VkDevice m_device;
+  VkDevice m_device = VK_NULL_HANDLE;
 
-  VkQueue m_gfxQueue;
+  VkQueue m_gfxQueue = VK_NULL_HANDLE;
 
   const std::vector<const char *> m_validationLayers = {
       "VK_LAYER_KHRONOS_validation"};

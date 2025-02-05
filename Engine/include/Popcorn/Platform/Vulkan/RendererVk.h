@@ -5,6 +5,7 @@
 #include "Popcorn/Core/Window.h"
 #include "Popcorn/Events/WindowEvent.h"
 #include "Renderer.h"
+#include "SurfaceVk.h"
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -44,6 +45,7 @@ public:
 
 private:
   DeviceVk m_deviceVk;
+  SurfaceVk m_surfaceVk;
 
   // std::vector<VkDescriptorPool> s_descriptorPools;
   // std::vector<VkRenderPass> s_renderPasses;

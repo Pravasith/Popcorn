@@ -1,78 +1,41 @@
 #pragma once
 
-#include "GlobalMacros.h"
-#include <cstddef>
-#include <cstdint>
-
-#ifdef PC_DEBUG
-#include <iostream>
-#include <sstream>
-#include <string>
-#endif
-
+#include "Helpers.h"
 #include <sys/types.h>
 
 ENGINE_NAMESPACE_BEGIN
-constexpr std::size_t shift_l(std::size_t n) { return 1 << n; }
-
-enum TagType { Constr, Destr, Print };
-
-using byte_t = uint8_t;
 
 #ifdef PC_DEBUG
-extern int PC_print_lvl;
-static void PC_Print(const std::string &msg, const TagType tag,
-                     const std::string &className) {
-
-  if (PC_print_lvl < 0) {
-    std::cout << "MISSING CONSTRUCTOR MESSAGE" << '\n';
-    return;
-  };
-
-  if (tag == TagType::Constr) {
-    PC_print_lvl++;
-  } else if (tag == TagType::Destr)
-    PC_print_lvl--;
-
-  std::stringstream ss;
-  auto lvl = PC_print_lvl < 10 ? " " + std::to_string(PC_print_lvl)
-                               : std::to_string(PC_print_lvl);
-  if (tag == TagType::Print) {
-    lvl = "  ";
-  };
-
-  ss << lvl << " ";
-
-  for (int i = 0; i < PC_print_lvl; ++i) {
-    ss << "| ";
-  }
-
-  ss << "| " << className << ": " << msg << '\n';
-  std::cout << ss.str();
-};
-
 #define PC_PRINT(msg, tag, className)                                          \
   do {                                                                         \
     std::ostringstream oss;                                                    \
     oss << msg;                                                                \
     PC_Print(oss.str(), tag, className);                                       \
   } while (0);
+
 #define PC_WARN(msg)                                                           \
   do {                                                                         \
     std::ostringstream oss;                                                    \
-    oss << "WARNING !! " << msg;                                               \
+    oss << "\033[33mWARNING!! " << msg << "\033[0m";                           \
     PC_Print(oss.str(), TagType::Print, "");                                   \
   } while (0);
+
 #define PC_ERROR(msg, errType)                                                 \
   do {                                                                         \
     std::ostringstream oss;                                                    \
-    oss << "ERROR !! " << msg;                                                 \
+    oss << "\033[31mERROR!! " << msg << "\033[0m";                             \
     PC_Print(oss.str(), TagType::Print, errType);                              \
   } while (0);
+
+#define PC_VK_NULL_CHECK(vulkan_obj)                                           \
+  if (vulkan_obj != VK_NULL_HANDLE) {                                          \
+    PC_WARN(#vulkan_obj << " isn't null in " << PC_FUNC_NAME)                  \
+  };
 #else
 #define PC_PRINT(x, y, z)
 #define PC_WARN(msg)
 #define PC_ERROR(msg, errType)
+#define PC_VK_NULL_CHECK(vulkan_obj, classname)
 #endif
 
 // VARIANT 1: (std::bind -- slow)

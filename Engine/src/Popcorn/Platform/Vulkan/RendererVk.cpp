@@ -13,6 +13,10 @@ RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
   m_deviceVk.SetupDebugMessenger();                   // Validation layers
   m_deviceVk.PickPhysicalDevice();                    // Physical device
   m_deviceVk.CreateLogicalDevice();                   // Logical device
+
+  m_surfaceVk.CreateWindowSurface(
+      m_deviceVk.GetInstance(),
+      static_cast<GLFWwindow *>(appWin.GetOSWindow()));
 };
 
 RendererVk::~RendererVk() {
