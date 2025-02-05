@@ -18,6 +18,9 @@ public:
   void CreateSwapChain(const VkDevice &, const SwapChainSupportDetails &,
                        GLFWwindow *, const VkSurfaceKHR &,
                        const QueueFamilyIndices &);
+
+  void CreateImageViews(const VkDevice &);
+
   void CleanUp(const VkDevice &);
 
 private:
@@ -32,6 +35,11 @@ private:
 
 private:
   VkSwapchainKHR m_swapChain;
+  std::vector<VkImage> m_swapChainImages;
+  VkFormat m_swapChainImageFormat;
+  VkExtent2D m_swapChainExtent;
+
+  std::vector<VkImageView> m_swapChainImageViews;
 };
 
 GFX_NAMESPACE_END
