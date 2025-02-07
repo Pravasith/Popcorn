@@ -1,6 +1,7 @@
 #include "RendererVk.h"
-#include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include "Shader.h"
+#include "Sources.h"
 #include <cstring>
 
 ENGINE_NAMESPACE_BEGIN
@@ -42,6 +43,9 @@ void RendererVk::VulkanInit() {
   // CREATE SWAPCHAIN --------------------------------------------------------
   m_swapChainVk.CreateSwapChain(device, swapChainSupportDetails, osWindow,
                                 surface, queueFamilyIndices);
+
+  Shader s;
+  auto vertShdr = s.ReadSpvFile(PC_src_map[VkTriVert]);
 };
 
 void RendererVk::VulkanDestroy() {

@@ -9,7 +9,8 @@ enum ShaderFiles { VkTriVert = 0, VkTriFrag };
 
 // ALL SOURCES ARE RELATIVE TO THE FINAL DIST BUILD BINARIES
 static std::unordered_map<ShaderFiles, const char *> PC_src_map = {
-    {VkTriVert, "shaders/tri_vert.spv"},
+    {VkTriVert, "shaders/tri.txt"},
+    // {VkTriVert, "shaders/tri_vert.spv"},
     {VkTriFrag, "shaders/tri_frag.spv"},
 };
 

@@ -1,11 +1,13 @@
 #pragma once
 
 #include "GlobalMacros.h"
+#include "Helpers.h"
 #include "Popcorn/Core/Base.h"
 #include <cassert>
 #include <cstdint>
 #include <cstring>
 #include <initializer_list>
+#include <iostream>
 #include <type_traits>
 
 ENGINE_NAMESPACE_BEGIN
@@ -39,36 +41,42 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "BUFFER")
   };
 
+  void Resize(uint64_t newSize) { AllocBytes(newSize); }
+
   template <typename T> void SetData(std::initializer_list<T> list) {
     PC_PRINT("DATA SET(INIT-LIST)", TagType::Constr, "BUFFER")
 
     const uint64_t size = sizeof(T) * list.size();
     AllocBytes(size);
 
-    // THESE LINES HERE DON'T WORK AS EXPECTED. THE m_count IS ZERO??
     m_count = list.size();
     m_size = size;
     memcpy(m_data, list.begin(), size);
   };
 
-  inline const byte_t *GetData() const {
+  [[nodiscard]] inline byte_t *GetData() const {
     return static_cast<byte_t *>(m_data);
   };
 
+  // TODO: FIX THIS
   template <typename T, uint64_t Count = 0>
   Buffer() : m_count(Count), m_size((sizeof(T) * m_count)) {
     PC_PRINT("CREATED", TagType::Constr, "BUFFER")
     AllocBytes(SizeOf<T, Count>::value);
   };
 
+  // TODO: FIX THIS
   template <typename T> Buffer(uint64_t count) : m_count(count) {
     PC_PRINT("CREATED", TagType::Constr, "BUFFER")
     AllocBytes(count * sizeof(T));
   };
+
+  // TODO: FIX THIS
   template <typename T>
   Buffer(T *data, uint64_t count = 0)
-      : m_data(data),
-        m_count(count){PC_PRINT("CREATED", TagType::Constr, "BUFFER")};
+      : m_data(data), m_count(count)
+        //
+        {PC_PRINT("CREATED", TagType::Constr, "BUFFER")};
 
   // COPY CONSTRUCTOR ------------------------------------------------------
   Buffer(const Buffer &other) {
@@ -140,7 +148,9 @@ public:
 
 #ifdef PC_DEBUG
   template <typename T> inline static void Print(Buffer &buffer) {
-    PC_PRINT("PRINT EVOKED", TagType::Print, "VERTEX-BUFFER")
+
+    PC_PRINT("PRINT EVOKED", TagType::Print, "BUFFER")
+
     if (!buffer.m_data) {
       PC_PRINT("NO DATA IN BUFFER", TagType::Print, "Buffer.h")
       return;
@@ -158,20 +168,20 @@ public:
       for (T *it = buffer.begin<T>(); it != buffer.end<T>(); ++it) {
         PC_PRINT(((T &)(*it)).Print(), TagType::Print, "BUFFER")
       };
-    }
+    } else {
+      PC_PRINT("PRINT EVOKED IN BYTES", TagType::Print, "BUFFER")
+      std::cout << buffer.begin<char>();
+    };
   };
 #else
   static void Print(Buffer &buffer) {};
 #endif
 
-  template <typename T> T *AsType() { return (T *)m_data; };
+  template <typename T> T *AsType() const { return static_cast<T *>(m_data); };
 
 private:
   void AllocBytes(uint64_t size) {
     FreeBytes();
-
-    // if (size == 0)
-    //   return;
 
     m_data = new byte_t[size];
     m_size = size;

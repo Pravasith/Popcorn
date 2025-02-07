@@ -23,7 +23,7 @@ public:
   void VulkanInit();
   void VulkanDestroy();
 
-  // STATIC UTILS BEGIN ------------------
+  // STATIC UTILS BEGIN ----------------------------------------------
   static void CreateShaderModules() {};
   static void CreatePipeline(void *shaderModules) {};
 
@@ -34,7 +34,7 @@ public:
 
   static void EndRenderPass(void *polySubrenderPass) {};
   static void EndSubRenderPass(void *polySubrenderPass) {};
-  // STATIC UTILS END --------------------
+  // STATIC UTILS END ------------------------------------------------
 
   void RecordCmdBuffer(void *renderPass, void *pipeline) {};
   void SubmitCmdBuffer(void *cmdBuffer) {};

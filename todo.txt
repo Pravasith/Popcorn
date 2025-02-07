@@ -1,10 +1,6 @@
 TODO:
 ----------
-::  Check GLFW installation for linux & windows
-::  Architecture for Sandbox - scripts
-    - script to build & install engine in sandbox
-    - make main.cpp work
-    - script to create a new Game project
+:: Fix Buffer class constructors
 
 ::  Build for windows
 ::  Make Readme for the project
@@ -14,9 +10,7 @@ TODO:
 
 ::  Check Events class for perf issues
 
-::  Check OnUpdate Method of RendererVk
 
-::  Refactor the Renderer
 
 ::  Precompiled headers
     Add precompiled headers to the project and in cmake

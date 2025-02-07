@@ -60,7 +60,6 @@ void Renderer::Init(const Window &appWin) {
     RendererVk *vkRenderer = static_cast<RendererVk *>(s_instance);
     // vkRenderer->BindVertexBuffer(static_cast<VertexBufferVk
     // *>(s_vertexBuffer));
-    vkRenderer->VulkanInit();
     //
 
     // s_vertexBuffer->PrintBuffer<Vertex>();
