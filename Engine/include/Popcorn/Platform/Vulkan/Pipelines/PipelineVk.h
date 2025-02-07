@@ -2,7 +2,10 @@
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
+#include "Popcorn/Core/Helpers.h"
 #include <cstdint>
+#include <forward_list>
+#include <vector>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -10,15 +13,52 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 class PipelineVk {
-  enum Types { None = 0, GfxPipeline };
-
 public:
-  PipelineVk() { PC_PRINT("CREATED", TagType::Constr, "PipelineVk"); };
+  enum Types { GraphicsType = 1, ComputeType, RaytracingType };
+
+  enum ShaderStages {
+    //
+    // Graphics types
+    Vertex = 1,
+    Tesselation = shift_l(1),
+    Geometry = shift_l(2),
+    Fragment = shift_l(3),
+    //
+    // Compute types
+    Compute = shift_l(4)
+    //
+    // Ray tracing types
+    // TODO: Fill it out
+  };
+
+  PipelineVk(Types type) {
+    type_value = type;
+    PC_PRINT("CREATED", TagType::Constr, "PipelineVk");
+  };
   ~PipelineVk() { PC_PRINT("DESTROYED", TagType::Destr, "PipelineVk"); };
 
-  // class Builder {
-  //   void Build(PipelineVk *pipeline) {};
-  // };
+  inline void SetShaderStages(int enabledShaderStagesMask) {
+    // Error check
+    switch (type_value) {
+    case GraphicsType:
+      if (enabledShaderStagesMask &
+          (ShaderStages::Vertex | ShaderStages::Fragment)) {
+        PC_ERROR(
+            "Either vertex shader or fragment shader or both are not enabled",
+            "PipelineVk")
+      };
+      break;
+    case ComputeType:
+      if (enabledShaderStagesMask & ShaderStages::Compute)
+        PC_ERROR("Compute shader is not enabled", "PipelineVk")
+      break;
+    case RaytracingType:
+      // TODO: Fill it out
+      break;
+    }
+
+    enabledShaderStagesMask = m_enabledShaderStagesMask;
+  };
 
   inline static VkShaderModule CreateShaderModule(const VkDevice &device,
                                                   const Buffer &bytecode) {
@@ -35,6 +75,22 @@ public:
 
     return shaderModule;
   };
+
+  inline static void DestroyShaderModule(const VkDevice &device,
+                                         VkShaderModule shaderModule) {
+    vkDestroyShaderModule(device, shaderModule, nullptr);
+  };
+
+protected:
+  virtual std::vector<VkPipelineShaderStageCreateInfo>
+  CreateShaderStages(std::forward_list<VkShaderModule> shaderModules) = 0;
+  virtual void CreatePipeline() = 0;
+  virtual void ConfigureDynamicStates() = 0;
+
+protected:
+  int m_enabledShaderStagesMask = 0;
+  // Defaults to Graphics pipeline
+  uint16_t type_value = (uint16_t)Types::GraphicsType;
 };
 
 GFX_NAMESPACE_END

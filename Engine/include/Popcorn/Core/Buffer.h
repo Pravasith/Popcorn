@@ -41,7 +41,13 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "BUFFER")
   };
 
+  // TODO: Add memcpy to a new block of contiguous memory logic
   void Resize(uint64_t newSize) { AllocBytes(newSize); }
+
+  Buffer(uint64_t size) {
+    PC_PRINT("CREATED(Fixed size runtime)", TagType::Constr, "BUFFER")
+    AllocBytes(size);
+  };
 
   template <typename T> void SetData(std::initializer_list<T> list) {
     PC_PRINT("DATA SET(INIT-LIST)", TagType::Constr, "BUFFER")
