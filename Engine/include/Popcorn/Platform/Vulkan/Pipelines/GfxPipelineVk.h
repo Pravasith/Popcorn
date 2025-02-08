@@ -15,10 +15,30 @@ class GfxPipelineVk : public PipelineVk {
 
   virtual void CreatePipeline() override;
 
-  virtual void ConfigureDynamicStates() override;
-
   virtual std::vector<VkPipelineShaderStageCreateInfo>
   CreateShaderStages(std::forward_list<VkShaderModule> shaderModules) override;
+
+  virtual void ConfigureDynamicStates(
+      VkPipelineDynamicStateCreateInfo &dynamicState) override;
+
+  virtual void ConfigureVertexInputState(
+      VkPipelineVertexInputStateCreateInfo &vertexInputState) override;
+
+  virtual void ConfigureInputAssemblyState(
+      VkPipelineInputAssemblyStateCreateInfo &inputAssemblyState) override;
+
+  virtual void
+  ConfigureViewportState(VkPipelineViewportStateCreateInfo &viewportState,
+                         const VkExtent2D &extent) override;
+
+  virtual void ConfigureRasterizationState(
+      VkPipelineRasterizationStateCreateInfo &rasterizationState) override;
+
+  virtual void ConfigureMultisampleState(
+      VkPipelineMultisampleStateCreateInfo &multisampleState) override;
+
+  virtual std::pair<VkViewport, VkRect2D>
+  GetViewportAndScissor(const VkExtent2D &swapchainExtent) const override;
 };
 
 GFX_NAMESPACE_END

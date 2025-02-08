@@ -82,10 +82,35 @@ public:
   };
 
 protected:
+  virtual void CreatePipeline() = 0;
+
   virtual std::vector<VkPipelineShaderStageCreateInfo>
   CreateShaderStages(std::forward_list<VkShaderModule> shaderModules) = 0;
-  virtual void CreatePipeline() = 0;
-  virtual void ConfigureDynamicStates() = 0;
+
+  /** graphics pipelines helpers ------------------------------------------- */
+  virtual void
+  ConfigureDynamicStates(VkPipelineDynamicStateCreateInfo &dynamicState);
+
+  virtual void ConfigureVertexInputState(
+      VkPipelineVertexInputStateCreateInfo &vertexInputState);
+
+  virtual void ConfigureInputAssemblyState(
+      VkPipelineInputAssemblyStateCreateInfo &inputAssemblyState);
+
+  virtual void
+  ConfigureViewportState(VkPipelineViewportStateCreateInfo &viewportState,
+                         const VkExtent2D &extent);
+
+  virtual void ConfigureRasterizationState(
+      VkPipelineRasterizationStateCreateInfo &rasterizationState);
+
+  virtual void ConfigureMultisampleState(
+      VkPipelineMultisampleStateCreateInfo &multisampleState);
+
+  virtual std::pair<VkViewport, VkRect2D>
+  GetViewportAndScissor(const VkExtent2D &swapchainExtent) const;
+
+  // TODO: Color blending
 
 protected:
   int m_enabledShaderStagesMask = 0;
