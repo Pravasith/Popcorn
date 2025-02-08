@@ -110,7 +110,8 @@ protected:
   virtual std::pair<VkViewport, VkRect2D>
   GetViewportAndScissor(const VkExtent2D &swapchainExtent) const;
 
-  // TODO: Color blending
+  virtual void
+  ConfigureColorBlendingState(VkPipelineColorBlendStateCreateInfo &);
 
 protected:
   int m_enabledShaderStagesMask = 0;

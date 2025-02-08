@@ -39,6 +39,11 @@ class GfxPipelineVk : public PipelineVk {
 
   virtual std::pair<VkViewport, VkRect2D>
   GetViewportAndScissor(const VkExtent2D &swapchainExtent) const override;
+
+  virtual void
+  ConfigureColorBlendingState(VkPipelineColorBlendStateCreateInfo &) override;
+
+  // virtual void ConfigurePipelineLayout()
 };
 
 GFX_NAMESPACE_END
