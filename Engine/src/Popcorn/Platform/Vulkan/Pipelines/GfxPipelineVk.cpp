@@ -7,6 +7,8 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+void GfxPipelineVk::Make() {};
+
 std::vector<VkPipelineShaderStageCreateInfo> GfxPipelineVk::CreateShaderStages(
     std::forward_list<VkShaderModule> shaderModules) {
 
@@ -56,7 +58,7 @@ std::vector<VkPipelineShaderStageCreateInfo> GfxPipelineVk::CreateShaderStages(
   return shaderStages;
 };
 
-void GfxPipelineVk::ConfigureInputAssemblyState(
+void GfxPipelineVk::SetDefaultInputAssemblyState(
     VkPipelineInputAssemblyStateCreateInfo &inputAssemblyState) {
   inputAssemblyState.sType =
       VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -64,7 +66,7 @@ void GfxPipelineVk::ConfigureInputAssemblyState(
   inputAssemblyState.primitiveRestartEnable = VK_FALSE;
 };
 
-void GfxPipelineVk::ConfigureViewportState(
+void GfxPipelineVk::SetDefaultViewportState(
     VkPipelineViewportStateCreateInfo &viewportState,
     const VkExtent2D &extent) {
 
@@ -91,9 +93,7 @@ GfxPipelineVk::GetViewportAndScissor(const VkExtent2D &swapchainExtent) const {
   return std::make_pair(viewport, scissor);
 };
 
-void GfxPipelineVk::CreatePipeline() {};
-
-void GfxPipelineVk::ConfigureMultisampleState(
+void GfxPipelineVk::SetDefaultMultisampleState(
     VkPipelineMultisampleStateCreateInfo &multisampleState) {
   multisampleState.sType =
       VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -105,7 +105,7 @@ void GfxPipelineVk::ConfigureMultisampleState(
   multisampleState.alphaToOneEnable = VK_FALSE;      // Optional
 };
 
-void GfxPipelineVk::ConfigureRasterizationState(
+void GfxPipelineVk::SetDefaultRasterizationState(
     VkPipelineRasterizationStateCreateInfo &rasterizationState) {
   rasterizationState.sType =
       VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
@@ -122,7 +122,7 @@ void GfxPipelineVk::ConfigureRasterizationState(
   rasterizationState.depthBiasSlopeFactor = 0.0f;    // Optional
 };
 
-void GfxPipelineVk::ConfigureDynamicStates(
+void GfxPipelineVk::SetDefaultDynamicStates(
     VkPipelineDynamicStateCreateInfo &dynamicState) {
   // TODO: Make this function flexible to handle other dynamic states
   //
@@ -133,7 +133,7 @@ void GfxPipelineVk::ConfigureDynamicStates(
   dynamicState.pDynamicStates = dynamicStates.data();
 };
 
-void GfxPipelineVk::ConfigureVertexInputState(
+void GfxPipelineVk::SetDefaultVertexInputState(
     VkPipelineVertexInputStateCreateInfo &vertexInputInfo) {
   vertexInputInfo.sType =
       VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -143,7 +143,7 @@ void GfxPipelineVk::ConfigureVertexInputState(
   vertexInputInfo.pVertexAttributeDescriptions = nullptr; // Optional
 };
 
-void GfxPipelineVk::ConfigureColorBlendingState(
+void GfxPipelineVk::SetDefaultColorBlendingState(
     VkPipelineColorBlendStateCreateInfo &) {
 
   // Per framebuffer
@@ -170,6 +170,24 @@ void GfxPipelineVk::ConfigureColorBlendingState(
   colorBlending.blendConstants[1] = 0.0f; // Optional
   colorBlending.blendConstants[2] = 0.0f; // Optional
   colorBlending.blendConstants[3] = 0.0f; // Optional
+};
+
+void GfxPipelineVk::SetDefaultPipelineLayout(const VkDevice &device) {
+  VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+  pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+  pipelineLayoutInfo.setLayoutCount = 0;            // Optional
+  pipelineLayoutInfo.pSetLayouts = nullptr;         // Optional
+  pipelineLayoutInfo.pushConstantRangeCount = 0;    // Optional
+  pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
+
+  if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr,
+                             &m_pipelineLayout) != VK_SUCCESS) {
+    throw std::runtime_error("failed to create pipeline layout!");
+  }
+};
+
+void GfxPipelineVk::DestroyPipelineLayout(const VkDevice &device) {
+  vkDestroyPipelineLayout(device, m_pipelineLayout, nullptr);
 };
 
 GFX_NAMESPACE_END

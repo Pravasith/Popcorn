@@ -1,3 +1,4 @@
+#pragma once
 
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
@@ -82,41 +83,47 @@ public:
   };
 
 protected:
-  virtual void CreatePipeline() = 0;
+  virtual void Make() = 0;
 
   virtual std::vector<VkPipelineShaderStageCreateInfo>
   CreateShaderStages(std::forward_list<VkShaderModule> shaderModules) = 0;
 
-  /** graphics pipelines helpers ------------------------------------------- */
+  /** GRAPHICS PIPELINES HELPERS ------------------------------------------- *
+   *  ---------------------------------------------------------------------- *
+   *  ---------------------------------------------------------------------- */
   virtual void
-  ConfigureDynamicStates(VkPipelineDynamicStateCreateInfo &dynamicState);
+  SetDefaultDynamicStates(VkPipelineDynamicStateCreateInfo &dynamicState);
 
-  virtual void ConfigureVertexInputState(
+  virtual void SetDefaultVertexInputState(
       VkPipelineVertexInputStateCreateInfo &vertexInputState);
 
-  virtual void ConfigureInputAssemblyState(
+  virtual void SetDefaultInputAssemblyState(
       VkPipelineInputAssemblyStateCreateInfo &inputAssemblyState);
 
   virtual void
-  ConfigureViewportState(VkPipelineViewportStateCreateInfo &viewportState,
-                         const VkExtent2D &extent);
+  SetDefaultViewportState(VkPipelineViewportStateCreateInfo &viewportState,
+                          const VkExtent2D &extent);
 
-  virtual void ConfigureRasterizationState(
+  virtual void SetDefaultRasterizationState(
       VkPipelineRasterizationStateCreateInfo &rasterizationState);
 
-  virtual void ConfigureMultisampleState(
+  virtual void SetDefaultMultisampleState(
       VkPipelineMultisampleStateCreateInfo &multisampleState);
 
   virtual std::pair<VkViewport, VkRect2D>
   GetViewportAndScissor(const VkExtent2D &swapchainExtent) const;
 
   virtual void
-  ConfigureColorBlendingState(VkPipelineColorBlendStateCreateInfo &);
+  SetDefaultColorBlendingState(VkPipelineColorBlendStateCreateInfo &);
+
+  virtual void SetDefaultPipelineLayout(const VkDevice &device);
+  virtual void DestroyPipelineLayout(const VkDevice &device);
 
 protected:
   int m_enabledShaderStagesMask = 0;
   // Defaults to Graphics pipeline
   uint16_t type_value = (uint16_t)Types::GraphicsType;
+  VkPipelineLayout m_pipelineLayout;
 };
 
 GFX_NAMESPACE_END
