@@ -1,4 +1,4 @@
-#include "Pipelines/GfxPipelineVk.h"
+#include "GfxPipelineVk.h"
 #include "GlobalMacros.h"
 #include <utility>
 #define GLFW_INCLUDE_VULKAN
@@ -7,7 +7,9 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-void GfxPipelineVk::Make() {};
+void GfxPipelineVk::Make(const CreateInfoVariant *) {
+  // TODO: Make the pipeline
+};
 
 std::vector<VkPipelineShaderStageCreateInfo> GfxPipelineVk::CreateShaderStages(
     std::forward_list<VkShaderModule> shaderModules) {
@@ -105,6 +107,11 @@ void GfxPipelineVk::SetDefaultMultisampleState(
   multisampleState.alphaToOneEnable = VK_FALSE;      // Optional
 };
 
+void GfxPipelineVk::SetDefaultDepthStencilState(
+    VkPipelineDepthStencilStateCreateInfo &depthStencilState) {
+  // TODO: Depth & stencil testing
+};
+
 void GfxPipelineVk::SetDefaultRasterizationState(
     VkPipelineRasterizationStateCreateInfo &rasterizationState) {
   rasterizationState.sType =
@@ -122,7 +129,7 @@ void GfxPipelineVk::SetDefaultRasterizationState(
   rasterizationState.depthBiasSlopeFactor = 0.0f;    // Optional
 };
 
-void GfxPipelineVk::SetDefaultDynamicStates(
+void GfxPipelineVk::SetDefaultDynamicState(
     VkPipelineDynamicStateCreateInfo &dynamicState) {
   // TODO: Make this function flexible to handle other dynamic states
   //

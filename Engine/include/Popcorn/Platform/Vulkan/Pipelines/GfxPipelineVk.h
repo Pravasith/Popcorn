@@ -2,24 +2,23 @@
 
 #include "GlobalMacros.h"
 #include "PipelineVk.h"
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 class GfxPipelineVk : public PipelineVk {
-  GfxPipelineVk() : PipelineVk(Types::GraphicsType) {
+public:
+  GfxPipelineVk() : PipelineVk(PipelineTypes::GraphicsType) {
     PC_PRINT("CREATED", TagType::Constr, "GfxPipelineVk");
   };
   ~GfxPipelineVk() { PC_PRINT("DESTROYED", TagType::Destr, "GfxPipelineVk"); };
 
-  virtual void Make() override;
+  virtual void Make(const CreateInfoVariant *) override;
 
-  virtual std::vector<VkPipelineShaderStageCreateInfo>
+  [[nodiscard]] virtual std::vector<VkPipelineShaderStageCreateInfo>
   CreateShaderStages(std::forward_list<VkShaderModule> shaderModules) override;
 
-  virtual void SetDefaultDynamicStates(
+  virtual void SetDefaultDynamicState(
       VkPipelineDynamicStateCreateInfo &dynamicState) override;
 
   virtual void SetDefaultVertexInputState(
@@ -37,6 +36,9 @@ class GfxPipelineVk : public PipelineVk {
 
   virtual void SetDefaultMultisampleState(
       VkPipelineMultisampleStateCreateInfo &multisampleState) override;
+
+  virtual void SetDefaultDepthStencilState(
+      VkPipelineDepthStencilStateCreateInfo &depthStencilState) override;
 
   virtual std::pair<VkViewport, VkRect2D>
   GetViewportAndScissor(const VkExtent2D &swapchainExtent) const override;

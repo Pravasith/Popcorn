@@ -21,6 +21,10 @@ public:
 
   void CreateImageViews(const VkDevice &);
 
+  [[nodiscard]] inline const VkExtent2D &GetSwapchainExtent() const {
+    return m_swapChainExtent;
+  };
+
   void CleanUp(const VkDevice &);
 
 private:

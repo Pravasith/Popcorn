@@ -36,6 +36,9 @@ public:
   virtual void PresentFrame() = 0;
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) = 0;
 
+  // TODO: Abstract everything in here
+  void CreateTerrainMesh() {};
+
   Renderer(const Renderer &) = delete;
   Renderer &operator=(const Renderer &) = delete;
 

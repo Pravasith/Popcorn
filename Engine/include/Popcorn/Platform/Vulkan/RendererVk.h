@@ -21,11 +21,11 @@ public:
   // Sets up devices, configure swapchains, creates depth buffers
   // also allocates command pools
   void VulkanInit();
+  void CreateVulkanPipeline();
   void VulkanDestroy();
 
   // STATIC UTILS BEGIN ----------------------------------------------
   static void CreateShaderModules() {};
-  static void CreatePipeline(void *shaderModules) {};
 
   static void BindPipeline(void *pipeline, void *renderPass) {};
 
@@ -52,7 +52,7 @@ private:
   // std::vector<VkDescriptorPool> s_descriptorPools;
   // std::vector<VkRenderPass> s_renderPasses;
 
-  // // Swapchain images
+  // SWAPCHAIN IMAGES
   // uint32_t s_minImageCount;
   // uint32_t s_imageCount;
   // uint32_t s_subpass;

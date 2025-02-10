@@ -21,7 +21,10 @@ Renderer::Renderer(const Window &appWin) : m_AppWin(appWin) {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER");
 };
 
-Renderer::~Renderer() { PC_PRINT("DESTROYED", TagType::Destr, "RENDERER") };
+Renderer::~Renderer() {
+  ((RendererVk *)s_instance)->VulkanDestroy();
+  PC_PRINT("DESTROYED", TagType::Destr, "RENDERER")
+};
 
 void Renderer::Init(const Window &appWin) {
   if (s_instance) {
@@ -60,6 +63,8 @@ void Renderer::Init(const Window &appWin) {
     RendererVk *vkRenderer = static_cast<RendererVk *>(s_instance);
     // vkRenderer->BindVertexBuffer(static_cast<VertexBufferVk
     // *>(s_vertexBuffer));
+    vkRenderer->VulkanInit();
+    vkRenderer->CreateVulkanPipeline();
     //
 
     // s_vertexBuffer->PrintBuffer<Vertex>();

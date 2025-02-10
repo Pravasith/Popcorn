@@ -34,6 +34,22 @@ public:
     //     //
     // });
     // bfr.PrintBuffer<Vertex>();
+
+    // Popcorn::VertexBuffer terrainVertexBuffer;
+    // Popcorn::TerrainAttachment[] terrainAttachments
+    // { terrainTexture, heightMapTexture... } // etc
+    //
+    // Popcorn::ModelFactory::ProduceTerrainMesh(
+    // &terrainVertexBuffer, &terrainAttachments, PC_NULL);
+    //
+    //
+    //
+    // auto modelMesh = Popcorn::ModelFactory::ProduceMesh();
+    // terrain.SetMaterial({
+    //    .Color = glm::vec3(1., 0.3, 0.5, 0.5);
+    // });
+    // Scene.Add(ModelMesh);
+
   };
   virtual void OnDetach() override {};
   virtual void OnUpdate() override {

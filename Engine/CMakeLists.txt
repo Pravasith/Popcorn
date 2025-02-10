@@ -122,10 +122,12 @@ target_include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Graphics>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/OpenGL>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Pipelines>
   INTERFACE $<INSTALL_INTERFACE:include>
             $<INSTALL_INTERFACE:include/Popcorn/Graphics>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/OpenGL>
-            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan>)
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan>
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Pipelines>)
 
 target_include_directories(
   Popcorn
@@ -171,7 +173,9 @@ target_link_libraries(Window PRIVATE glad glfw)
 target_link_libraries(Window PRIVATE Events)
 target_link_libraries(ImGui PUBLIC glfw Vulkan::Headers Vulkan::Loader)
 target_link_libraries(Popcorn PRIVATE glad glfw)
-target_link_libraries(Popcorn PRIVATE Graphics Window ImGui)
+
+target_link_libraries(Popcorn PUBLIC Graphics)
+target_link_libraries(Popcorn PRIVATE Window ImGui)
 
 # INTERFACE LIBS
 target_link_libraries(Popcorn INTERFACE glm::glm)
