@@ -5,19 +5,13 @@
 #include "Popcorn/Core/Buffer.h"
 #include "Popcorn/Core/Helpers.h"
 #include <forward_list>
-#include <variant>
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
-enum class PipelineTypes {
-  None = 0,
-  GraphicsType = 1,
-  ComputeType,
-  RaytracingType
-};
+enum class PipelineTypes { GraphicsType = 1, ComputeType, RaytracingType };
 
 enum ShaderStages {
   Null = 0,
@@ -35,89 +29,149 @@ enum ShaderStages {
   // TODO: Fill it out
 };
 
-class PipelineVk {
+struct GfxPipelineCreateInfo {
+  constexpr static PipelineTypes type_value = PipelineTypes::GraphicsType;
+  VkPipelineShaderStageCreateInfo shaderStageInfo = {};
+  VkExtent2D swapchainExtent = {};
+  VkPipelineDynamicStateCreateInfo dynamicState = {};
+  VkPipelineVertexInputStateCreateInfo vertexInputState = {};
+  VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = {};
+  VkPipelineViewportStateCreateInfo viewportState = {};
+  VkPipelineRasterizationStateCreateInfo rasterizationState = {};
+  VkPipelineDepthStencilStateCreateInfo depthStencilState = {};
+  VkPipelineMultisampleStateCreateInfo multisampleState = {};
+  VkPipelineColorBlendStateCreateInfo colorBlendState = {};
+  VkPipelineLayoutCreateInfo pipelineLayout = {};
+};
+
+struct ComputePipelineCreateInfo {
+  constexpr static PipelineTypes type_value = PipelineTypes::ComputeType;
+  VkPipelineShaderStageCreateInfo shaderStageInfo = {};
+  VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
+  VkPipelineCache pipelineCache = VK_NULL_HANDLE;
+  VkPipelineCreateFlags flags = 0;
+  VkPipeline basePipelineHandle = VK_NULL_HANDLE;
+  int32_t basePipelineIndex = -1;
+};
+
+struct RaytracingPipelineCreateInfo {
+  constexpr static PipelineTypes type_value = PipelineTypes::RaytracingType;
+  std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
+  std::vector<VkRayTracingShaderGroupCreateInfoKHR> shaderGroups;
+  VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
+  uint32_t maxRecursionDepth = 1;
+  VkPipelineCache pipelineCache = VK_NULL_HANDLE;
+  VkPipelineCreateFlags flags = 0;
+  VkPipelineLibraryCreateInfoKHR libraryInfo = {};
+};
+
+// PRIMARY TEMPLATE
+template <PipelineTypes T> struct DerivePipelineCreateInfoType;
+
+// SPECIALIZATION TEMPLATES
+template <> struct DerivePipelineCreateInfoType<PipelineTypes::GraphicsType> {
+  using type = GfxPipelineCreateInfo;
+};
+
+template <> struct DerivePipelineCreateInfoType<PipelineTypes::ComputeType> {
+  using type = ComputePipelineCreateInfo;
+};
+
+template <> struct DerivePipelineCreateInfoType<PipelineTypes::RaytracingType> {
+  using type = RaytracingPipelineCreateInfo;
+};
+
+//
+// ----------------------------------------------------------------------------
+// STATIC SHADER HELPERS ------------------------------------------------------
+[[nodiscard]] static VkShaderModule
+PC_CreateShaderModule(const VkDevice &device, const Buffer &bytecode) {
+  VkShaderModuleCreateInfo createInfo{};
+  createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+  createInfo.codeSize = bytecode.GetSize();
+  createInfo.pCode = bytecode.AsType<uint32_t>();
+
+  VkShaderModule shaderModule;
+  if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) !=
+      VK_SUCCESS) {
+    throw std::runtime_error("failed to create shader module!");
+  }
+
+  return shaderModule;
+};
+
+inline static void PC_DestroyShaderModule(const VkDevice &device,
+                                          VkShaderModule shaderModule) {
+  vkDestroyShaderModule(device, shaderModule, nullptr);
+};
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+//
+
+template <PipelineTypes T> class PipelineVk {
 public:
-  struct GfxTypeCreateInfo {
-    VkDevice &device;
-    VkExtent2D &swapchainExtent;
-    VkPipelineDynamicStateCreateInfo &dynamicState;
-    VkPipelineVertexInputStateCreateInfo &vertexInputStateCreateInfo;
-    VkPipelineInputAssemblyStateCreateInfo &inputAssemblyStateCreateInfo;
-    VkPipelineViewportStateCreateInfo &viewportStateCreateInfo;
-    VkPipelineRasterizationStateCreateInfo &rasterizationStateCreateInfo;
-    VkPipelineMultisampleStateCreateInfo &multisampleStateCreateInfo;
-    VkPipelineColorBlendStateCreateInfo &colorBlendStateCreateInfo;
-  };
-
-  struct ComputeTypeCreateInfo {};
-
-  struct RaytracingTypeCreateInfo {};
-
-  PipelineVk(PipelineTypes type) {
-    type_value = type;
+  PipelineVk() {
+    type_value = T;
     PC_PRINT("CREATED", TagType::Constr, "PipelineVk");
   };
-  ~PipelineVk() { PC_PRINT("DESTROYED", TagType::Destr, "PipelineVk"); };
-
-  void SetShaderStages(ShaderStages enabledShaderStagesMask);
-
-  virtual std::vector<VkPipelineShaderStageCreateInfo>
-  CreateShaderStages(std::forward_list<VkShaderModule> shaderModules) = 0;
-
-  [[nodiscard]] static VkShaderModule
-  CreateShaderModule(const VkDevice &device, const Buffer &bytecode);
-
-  inline static void DestroyShaderModule(const VkDevice &device,
-                                         VkShaderModule shaderModule) {
-    vkDestroyShaderModule(device, shaderModule, nullptr);
+  virtual ~PipelineVk() {
+    PC_PRINT("DESTROYED", TagType::Destr, "PipelineVk");
   };
 
-  using CreateInfoVariant =
-      std::variant<const GfxTypeCreateInfo *, const ComputeTypeCreateInfo *,
-                   const RaytracingTypeCreateInfo *>;
+  using CreateInfo_type = DerivePipelineCreateInfoType<T>::type;
+
+  virtual void GetDefaultPipelineCreateInfo(CreateInfo_type &createInfo) = 0;
+
+  // Shaders
+  void SetShaderStagesMask(ShaderStages enabledShaderStagesMask) {
+    PC_PRINT((int)enabledShaderStagesMask, TagType::Print, "PipelineVk")
+
+    // Error check
+    switch (type_value) {
+    // case PipelineTypes::None:
+    //   PC_ERROR("PipelineType not set yet!!", "PipelineVk")
+    //   break;
+    case PipelineTypes::GraphicsType:
+      if ((enabledShaderStagesMask &
+           (ShaderStages::Vertex | ShaderStages::Fragment)) !=
+          (ShaderStages::Vertex | ShaderStages::Fragment)) {
+        PC_ERROR(
+            "Either vertex shader or fragment shader or both are not enabled",
+            "PipelineVk")
+      };
+      break;
+    case PipelineTypes::ComputeType:
+      if (!(enabledShaderStagesMask & ShaderStages::Compute))
+        PC_ERROR("Compute shader is not enabled", "PipelineVk")
+      break;
+    case PipelineTypes::RaytracingType:
+      // TODO: Fill it out
+      break;
+    }
+
+    m_enabledShaderStagesMask = enabledShaderStagesMask;
+  };
+
+  virtual std::vector<VkPipelineShaderStageCreateInfo>
+  CreateShaderStages(std::forward_list<VkShaderModule> &shaderModules) = 0;
+
+  inline void SetDevice(const VkDevice &device) { m_device = device; };
+
+  // Layout
+  //
+  virtual void GetDefaultPipelineLayout(
+      VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo) const = 0;
+  virtual void
+  SetPipelineLayout(const VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo,
+                    const VkDevice &device) = 0;
+  virtual void DestroyPipelineLayout(const VkDevice &device) = 0;
 
 protected:
-  virtual void Make(const CreateInfoVariant *) = 0;
-
-  /** GRAPHICS PIPELINES HELPERS ------------------------------------------- *
-   *  ---------------------------------------------------------------------- *
-   *  ---------------------------------------------------------------------- */
-  virtual void
-  SetDefaultDynamicState(VkPipelineDynamicStateCreateInfo &dynamicState);
-
-  virtual void SetDefaultVertexInputState(
-      VkPipelineVertexInputStateCreateInfo &vertexInputState);
-
-  virtual void SetDefaultInputAssemblyState(
-      VkPipelineInputAssemblyStateCreateInfo &inputAssemblyState);
-
-  virtual void
-  SetDefaultViewportState(VkPipelineViewportStateCreateInfo &viewportState,
-                          const VkExtent2D &extent);
-
-  virtual void SetDefaultRasterizationState(
-      VkPipelineRasterizationStateCreateInfo &rasterizationState);
-
-  virtual void SetDefaultMultisampleState(
-      VkPipelineMultisampleStateCreateInfo &multisampleState);
-
-  virtual void SetDefaultDepthStencilState(
-      VkPipelineDepthStencilStateCreateInfo &depthStencilState);
-
-  virtual std::pair<VkViewport, VkRect2D>
-  GetViewportAndScissor(const VkExtent2D &swapchainExtent) const;
-
-  virtual void
-  SetDefaultColorBlendingState(VkPipelineColorBlendStateCreateInfo &);
-
-  virtual void SetDefaultPipelineLayout(const VkDevice &device);
-  virtual void DestroyPipelineLayout(const VkDevice &device);
-
-protected:
-  ShaderStages m_enabledShaderStagesMask = ShaderStages::Null;
   // Defaults to Graphics pipeline
   PipelineTypes type_value = PipelineTypes::GraphicsType;
-  VkPipelineLayout m_pipelineLayout;
+  ShaderStages m_enabledShaderStagesMask = ShaderStages::Null;
+  VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
+  VkDevice m_device = VK_NULL_HANDLE;
 };
 
 GFX_NAMESPACE_END

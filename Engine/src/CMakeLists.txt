@@ -48,5 +48,4 @@ add_library(
   ${PLATFORM_IMPL_DIR}/Vulkan/SurfaceVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/SwapChainVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/VertexBufferVk.cpp
-  ${PLATFORM_IMPL_DIR}/Vulkan/Pipelines/PipelineVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/Pipelines/GfxPipelineVk.cpp)

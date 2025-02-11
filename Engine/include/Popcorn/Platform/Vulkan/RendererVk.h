@@ -22,6 +22,7 @@ public:
   // also allocates command pools
   void VulkanInit();
   void CreateVulkanPipeline();
+  void CreateVulkanRenderPass();
   void VulkanDestroy();
 
   // STATIC UTILS BEGIN ----------------------------------------------

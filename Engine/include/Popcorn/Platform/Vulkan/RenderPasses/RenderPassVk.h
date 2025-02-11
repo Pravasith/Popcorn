@@ -12,9 +12,8 @@ class RenderPassVk {
   RenderPassVk() { PC_PRINT("CREATED", TagType::Constr, "RenderPassVk"); };
   ~RenderPassVk() { PC_PRINT("DESTROYED", TagType::Destr, "RenderPassVk"); };
 
-  void CreateAttachment();
+  virtual void CreateAttachment(VkAttachmentDescription &attachment) {};
   void CreateSubpass();
-  // void SpecifyAttachment
 };
 
 GFX_NAMESPACE_END
