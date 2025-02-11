@@ -14,7 +14,7 @@ GFX_NAMESPACE_BEGIN
 enum class PipelineTypes { GraphicsType = 1, ComputeType, RaytracingType };
 
 enum ShaderStages {
-  Null = 0,
+  None = 0,
   //
   // Graphics types
   Vertex = 1,
@@ -155,7 +155,10 @@ public:
   virtual std::vector<VkPipelineShaderStageCreateInfo>
   CreateShaderStages(std::forward_list<VkShaderModule> &shaderModules) = 0;
 
-  inline void SetDevice(const VkDevice &device) { m_device = device; };
+  inline void SetDevice(const VkDevice &device) {
+    PC_VK_NULL_CHECK(device)
+    m_device = device;
+  };
 
   // Layout
   //
@@ -167,9 +170,8 @@ public:
   virtual void DestroyPipelineLayout(const VkDevice &device) = 0;
 
 protected:
-  // Defaults to Graphics pipeline
   PipelineTypes type_value = PipelineTypes::GraphicsType;
-  ShaderStages m_enabledShaderStagesMask = ShaderStages::Null;
+  ShaderStages m_enabledShaderStagesMask = ShaderStages::None;
   VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
   VkDevice m_device = VK_NULL_HANDLE;
 };

@@ -52,19 +52,7 @@ void RendererVk::CreateVulkanPipeline() {
   const auto &device = m_deviceVk.GetDevice();
   const auto &swapchainExtent = m_swapChainVk.GetSwapchainExtent();
 
-  // PIPELINE
-  GfxPipelineVk trianglePipeline{};
-  trianglePipeline.SetDevice(device);
-
-  VkPipelineDynamicStateCreateInfo dynamicState{};
-  VkPipelineVertexInputStateCreateInfo vertexInputState{};
-  VkPipelineInputAssemblyStateCreateInfo inputAssemblyState{};
-  VkPipelineViewportStateCreateInfo viewportState{};
-  VkPipelineRasterizationStateCreateInfo rasterizationState{};
-  VkPipelineMultisampleStateCreateInfo multisampleState{};
-  VkPipelineDepthStencilStateCreateInfo depthStencilState{};
-  VkPipelineColorBlendStateCreateInfo colorBlendState{};
-
+  // CREATE SHADER MODULES
   Shader s;
   auto vertShaderBuffer =
       s.ReadSpvFile(PC_SHADER_SOURCE_MAP[VertShaderTriangle]);
@@ -76,14 +64,20 @@ void RendererVk::CreateVulkanPipeline() {
 
   std::forward_list<VkShaderModule> shaderModules = {vertShaderModule,
                                                      fragShaderModule};
+
+  // CREATE BASIC PIPELINE
+  GfxPipelineVk trianglePipeline{};
+  trianglePipeline.SetDevice(device);
   trianglePipeline.SetShaderStagesMask(
       static_cast<ShaderStages>(ShaderStages::Vertex | ShaderStages::Fragment));
   auto shaderStages = trianglePipeline.CreateShaderStages(shaderModules);
 
+  // SET FIXED FUNCTION PIPELINE STATE & SET LAYOUT
   GfxPipelineCreateInfo createInfo{};
   trianglePipeline.GetDefaultPipelineCreateInfo(createInfo);
   trianglePipeline.SetPipelineLayout(createInfo.pipelineLayout, device);
 
+  // DESTROY SHADER MODULES
   PC_DestroyShaderModule(device, vertShaderModule);
   PC_DestroyShaderModule(device, fragShaderModule);
 };
