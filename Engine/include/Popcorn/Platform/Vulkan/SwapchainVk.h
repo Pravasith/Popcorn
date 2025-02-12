@@ -10,19 +10,23 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-class SwapChainVk {
+class SwapchainVk {
 public:
-  SwapChainVk() { PC_PRINT("CREATED", TagType::Constr, "SwapChain.h"); };
-  ~SwapChainVk() { PC_PRINT("DESTROYED", TagType::Destr, "SwapChain.h"); };
+  SwapchainVk() { PC_PRINT("CREATED", TagType::Constr, "Swapchain.h"); };
+  ~SwapchainVk() { PC_PRINT("DESTROYED", TagType::Destr, "Swapchain.h"); };
 
-  void CreateSwapChain(const VkDevice &, const SwapChainSupportDetails &,
+  void CreateSwapchain(const VkDevice &, const SwapchainSupportDetails &,
                        GLFWwindow *, const VkSurfaceKHR &,
                        const QueueFamilyIndices &);
 
   void CreateImageViews(const VkDevice &);
 
   [[nodiscard]] inline const VkExtent2D &GetSwapchainExtent() const {
-    return m_swapChainExtent;
+    return m_swapchainExtent;
+  };
+
+  [[nodiscard]] inline const VkFormat &GetSwapchainImageFormat() const {
+    return m_swapchainImageFormat;
   };
 
   void CleanUp(const VkDevice &);
@@ -38,12 +42,12 @@ private:
                               GLFWwindow *window);
 
 private:
-  VkSwapchainKHR m_swapChain;
-  std::vector<VkImage> m_swapChainImages;
-  VkFormat m_swapChainImageFormat;
-  VkExtent2D m_swapChainExtent;
+  VkSwapchainKHR m_swapchain;
+  std::vector<VkImage> m_swapchainImages;
+  VkFormat m_swapchainImageFormat;
+  VkExtent2D m_swapchainExtent;
 
-  std::vector<VkImageView> m_swapChainImageViews;
+  std::vector<VkImageView> m_swapchainImageViews;
 };
 
 GFX_NAMESPACE_END

@@ -249,15 +249,15 @@ bool DeviceVk::IsDeviceSuitable(const VkPhysicalDevice &device,
 
   bool extensionsSupported = CheckDeviceExtensionSupport(device);
 
-  bool swapChainAdequate = false;
+  bool swapchainAdequate = false;
   if (extensionsSupported) {
-    SwapChainSupportDetails swapChainSupport =
-        QuerySwapChainSupport(device, surface);
-    swapChainAdequate = !swapChainSupport.formats.empty() &&
-                        !swapChainSupport.presentModes.empty();
+    SwapchainSupportDetails swapchainSupport =
+        QuerySwapchainSupport(device, surface);
+    swapchainAdequate = !swapchainSupport.formats.empty() &&
+                        !swapchainSupport.presentModes.empty();
   }
 
-  return indices.isComplete() && extensionsSupported && swapChainAdequate;
+  return indices.isComplete() && extensionsSupported && swapchainAdequate;
 }
 
 QueueFamilyIndices
@@ -349,10 +349,10 @@ void DeviceVk::CreateLogicalDevice(const VkSurfaceKHR &surface) {
 /** -------------------------------------------------------------------
  *  ------ SWAP CHAIN -------------------------------------------------
  *  ------------------------------------------------------------------- */
-SwapChainSupportDetails
-DeviceVk::QuerySwapChainSupport(const VkPhysicalDevice &device,
+SwapchainSupportDetails
+DeviceVk::QuerySwapchainSupport(const VkPhysicalDevice &device,
                                 const VkSurfaceKHR &surface) const {
-  SwapChainSupportDetails details;
+  SwapchainSupportDetails details;
   vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface,
                                             &details.capabilities);
 

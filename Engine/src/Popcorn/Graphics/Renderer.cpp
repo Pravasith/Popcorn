@@ -64,7 +64,12 @@ void Renderer::Init(const Window &appWin) {
     // vkRenderer->BindVertexBuffer(static_cast<VertexBufferVk
     // *>(s_vertexBuffer));
     vkRenderer->VulkanInit();
-    vkRenderer->CreateVulkanPipeline();
+
+    // TEMP FUNCTIONS
+    // CREATE ALL PIPELINES
+    // CREATE ALL RENDERPASSES
+    vkRenderer->CreateTrianglePipeline();
+    vkRenderer->CreateTriangleRenderPass();
     //
 
     // s_vertexBuffer->PrintBuffer<Vertex>();

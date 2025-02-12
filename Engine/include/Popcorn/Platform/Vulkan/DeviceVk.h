@@ -34,9 +34,9 @@ public:
     return m_device;
   };
 
-  [[nodiscard]] inline SwapChainSupportDetails
-  GetSwapChainSupportDetails(const VkSurfaceKHR &surface) const {
-    return QuerySwapChainSupport(m_physicalDevice, surface);
+  [[nodiscard]] inline SwapchainSupportDetails
+  GetSwapchainSupportDetails(const VkSurfaceKHR &surface) const {
+    return QuerySwapchainSupport(m_physicalDevice, surface);
   };
 
   [[nodiscard]] inline QueueFamilyIndices
@@ -81,8 +81,8 @@ private:
   /** -------------------------------------------------------------------
    *  ------ SWAP CHAIN HELPERS -----------------------------------------
    *  ------------------------------------------------------------------- */
-  SwapChainSupportDetails
-  QuerySwapChainSupport(const VkPhysicalDevice &device,
+  SwapchainSupportDetails
+  QuerySwapchainSupport(const VkPhysicalDevice &device,
                         const VkSurfaceKHR &surface) const;
 
 private:

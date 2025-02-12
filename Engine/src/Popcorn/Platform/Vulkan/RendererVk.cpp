@@ -3,10 +3,12 @@
 #include "Pipelines/GfxPipelineVk.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
+#include "RenderPasses/RenderPassVk.h"
 #include "Shader.h"
 #include "Sources.h"
 #include <cstring>
 #include <forward_list>
+#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -38,19 +40,19 @@ void RendererVk::VulkanInit() {
   m_deviceVk.CreateLogicalDevice(surface);
 
   const auto &device = m_deviceVk.GetDevice();
-  const auto &swapChainSupportDetails =
-      m_deviceVk.GetSwapChainSupportDetails(surface);
+  const auto &swapchainSupportDetails =
+      m_deviceVk.GetSwapchainSupportDetails(surface);
   const auto &queueFamilyIndices = m_deviceVk.GetQueueFamilyIndices(surface);
 
   // CREATE SWAPCHAIN --------------------------------------------------------
-  m_swapChainVk.CreateSwapChain(device, swapChainSupportDetails, osWindow,
+  m_swapchainVk.CreateSwapchain(device, swapchainSupportDetails, osWindow,
                                 surface, queueFamilyIndices);
 };
 
 // TODO: Move this function to a separate class
-void RendererVk::CreateVulkanPipeline() {
+void RendererVk::CreateTrianglePipeline() {
   const auto &device = m_deviceVk.GetDevice();
-  const auto &swapchainExtent = m_swapChainVk.GetSwapchainExtent();
+  const auto &swapchainExtent = m_swapchainVk.GetSwapchainExtent();
 
   // CREATE SHADER MODULES
   Shader s;
@@ -67,30 +69,77 @@ void RendererVk::CreateVulkanPipeline() {
 
   // CREATE BASIC PIPELINE
   GfxPipelineVk trianglePipeline{};
+
+  // SET PIPELINE DEVICE
   trianglePipeline.SetDevice(device);
+
+  // SET SHADER STAGES
   trianglePipeline.SetShaderStagesMask(
       static_cast<ShaderStages>(ShaderStages::Vertex | ShaderStages::Fragment));
-  auto shaderStages = trianglePipeline.CreateShaderStages(shaderModules);
+  std::vector<VkPipelineShaderStageCreateInfo> shaderStages =
+      trianglePipeline.CreateShaderStages(shaderModules);
 
   // SET FIXED FUNCTION PIPELINE STATE & SET LAYOUT
   GfxPipelineCreateInfo createInfo{};
   trianglePipeline.GetDefaultPipelineCreateInfo(createInfo);
-  trianglePipeline.SetPipelineLayout(createInfo.pipelineLayout, device);
+  trianglePipeline.SetShaderStageCreateInfos(shaderStages);
+  trianglePipeline.SetPipelineLayout(createInfo.pipelineLayout);
+
+  //
+
+  // CREATE PIPELINE
+  trianglePipeline.Create(createInfo);
 
   // DESTROY SHADER MODULES
   PC_DestroyShaderModule(device, vertShaderModule);
   PC_DestroyShaderModule(device, fragShaderModule);
 };
 
-void CreateVulkanRenderPass() {
+// TODO: Move this function to a separate class
+void RendererVk::CreateTriangleRenderPass() {
 
+  // ATTACHMENT DESCRIPTIONS
+  VkAttachmentDescription colorAttachment{};
+  RenderPassVk::GetDefaultAttachmentDescription(colorAttachment);
+  colorAttachment.format = m_swapchainVk.GetSwapchainImageFormat();
+
+  std::vector<VkAttachmentDescription> attachments{}; // size 0
+  attachments.emplace_back(colorAttachment);          // size 1
+
+  // ATTACHMENT REFERENCES
+  VkAttachmentReference colorAttachmentRef{};
+  RenderPassVk::GetAttachmentRef(colorAttachmentRef, 0); // index 0
+
+  std::vector<VkAttachmentReference> attachmentRefs{}; // size 0
+  attachmentRefs.emplace_back(colorAttachmentRef);     // size 1
+
+  // SUBPASSES
+  VkSubpassDescription subpass1{};
+  RenderPassVk::GetDefaultSubpassDescription(subpass1);
+  subpass1.pColorAttachments = attachmentRefs.data();
+
+  // VkSubpassDescription subpass2{};
+  // RenderPassVk::GetDefaultSubpassDescription(subpass2);
+
+  std::vector<VkSubpassDescription> subpasses{}; // size 0
+  subpasses.emplace_back(subpass1);              // size 1
+
+  // CREATE RENDER PASS
+  VkRenderPassCreateInfo renderPass1CreateInfo{};
+  RenderPassVk::SetDefaultRenderPassCreateInfo(renderPass1CreateInfo);
+  renderPass1CreateInfo.pSubpasses = subpasses.data();
+
+  RenderPassVk renderPass1;
+
+  renderPass1.Create(renderPass1CreateInfo);
+  renderPass1.Destroy();
 };
 
 void RendererVk::VulkanDestroy() {
   const auto &instance = m_deviceVk.GetInstance();
   const auto &device = m_deviceVk.GetDevice();
 
-  m_swapChainVk.CleanUp(device);
+  m_swapchainVk.CleanUp(device);
   m_surfaceVk.CleanUp(instance);
   m_deviceVk.CleanUp();
 };

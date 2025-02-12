@@ -11,6 +11,7 @@
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
+
 enum class PipelineTypes { GraphicsType = 1, ComputeType, RaytracingType };
 
 enum ShaderStages {
@@ -31,7 +32,7 @@ enum ShaderStages {
 
 struct GfxPipelineCreateInfo {
   constexpr static PipelineTypes type_value = PipelineTypes::GraphicsType;
-  VkPipelineShaderStageCreateInfo shaderStageInfo = {};
+
   VkExtent2D swapchainExtent = {};
   VkPipelineDynamicStateCreateInfo dynamicState = {};
   VkPipelineVertexInputStateCreateInfo vertexInputState = {};
@@ -46,7 +47,8 @@ struct GfxPipelineCreateInfo {
 
 struct ComputePipelineCreateInfo {
   constexpr static PipelineTypes type_value = PipelineTypes::ComputeType;
-  VkPipelineShaderStageCreateInfo shaderStageInfo = {};
+  std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos;
+
   VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
   VkPipelineCache pipelineCache = VK_NULL_HANDLE;
   VkPipelineCreateFlags flags = 0;
@@ -120,6 +122,8 @@ public:
 
   using CreateInfo_type = DerivePipelineCreateInfoType<T>::type;
 
+  virtual void Create(const CreateInfo_type &createInfo) = 0;
+
   virtual void GetDefaultPipelineCreateInfo(CreateInfo_type &createInfo) = 0;
 
   // Shaders
@@ -155,6 +159,11 @@ public:
   virtual std::vector<VkPipelineShaderStageCreateInfo>
   CreateShaderStages(std::forward_list<VkShaderModule> &shaderModules) = 0;
 
+  virtual void SetShaderStageCreateInfos(
+      std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos) {
+    m_shaderStageCreateInfos = shaderStageCreateInfos;
+  };
+
   inline void SetDevice(const VkDevice &device) {
     PC_VK_NULL_CHECK(device)
     m_device = device;
@@ -164,16 +173,19 @@ public:
   //
   virtual void GetDefaultPipelineLayout(
       VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo) const = 0;
-  virtual void
-  SetPipelineLayout(const VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo,
-                    const VkDevice &device) = 0;
+
+  virtual void SetPipelineLayout(
+      const VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo) = 0;
   virtual void DestroyPipelineLayout(const VkDevice &device) = 0;
 
 protected:
   PipelineTypes type_value = PipelineTypes::GraphicsType;
-  ShaderStages m_enabledShaderStagesMask = ShaderStages::None;
-  VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
   VkDevice m_device = VK_NULL_HANDLE;
+
+  VkPipeline m_pipeline = VK_NULL_HANDLE;
+  VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
+  ShaderStages m_enabledShaderStagesMask = ShaderStages::None;
+  std::vector<VkPipelineShaderStageCreateInfo> m_shaderStageCreateInfos;
 };
 
 GFX_NAMESPACE_END

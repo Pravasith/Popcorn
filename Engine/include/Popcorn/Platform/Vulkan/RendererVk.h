@@ -6,7 +6,7 @@
 #include "Popcorn/Events/WindowEvent.h"
 #include "Renderer.h"
 #include "SurfaceVk.h"
-#include "SwapChainVk.h"
+#include "SwapchainVk.h"
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -21,8 +21,11 @@ public:
   // Sets up devices, configure swapchains, creates depth buffers
   // also allocates command pools
   void VulkanInit();
-  void CreateVulkanPipeline();
-  void CreateVulkanRenderPass();
+
+  // Temp functions
+  void CreateTrianglePipeline();
+  void CreateTriangleRenderPass();
+
   void VulkanDestroy();
 
   // STATIC UTILS BEGIN ----------------------------------------------
@@ -48,7 +51,7 @@ public:
 private:
   DeviceVk m_deviceVk;
   SurfaceVk m_surfaceVk;
-  SwapChainVk m_swapChainVk;
+  SwapchainVk m_swapchainVk;
 
   // std::vector<VkDescriptorPool> s_descriptorPools;
   // std::vector<VkRenderPass> s_renderPasses;

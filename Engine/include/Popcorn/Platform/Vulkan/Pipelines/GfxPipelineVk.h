@@ -3,6 +3,7 @@
 #include "GlobalMacros.h"
 #include "PipelineVk.h"
 #include "Popcorn/Core/Base.h"
+#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -14,6 +15,44 @@ public:
     PC_VK_NULL_CHECK(m_device)
     DestroyPipelineLayout(m_device);
     PC_PRINT("DESTROYED", TagType::Destr, "GfxPipelineVk");
+  };
+
+  virtual void Create(const CreateInfo_type &pipelineCreateInfo) override {
+    GfxPipelineCreateInfo createInfo = pipelineCreateInfo;
+    if (m_shaderStageCreateInfos.size() == 0) {
+      PC_WARN("No shader stages set")
+    };
+
+    PC_VK_NULL_CHECK(m_pipelineLayout);
+
+    VkGraphicsPipelineCreateInfo pipelineInfo{};
+    pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+
+    pipelineInfo.stageCount = m_shaderStageCreateInfos.size();
+    pipelineInfo.pStages = m_shaderStageCreateInfos.data();
+
+    pipelineInfo.pVertexInputState = &createInfo.vertexInputState;
+    pipelineInfo.pInputAssemblyState = &createInfo.inputAssemblyState;
+    pipelineInfo.pViewportState = &createInfo.viewportState;
+    pipelineInfo.pRasterizationState = &createInfo.rasterizationState;
+    // pipelineInfo.pDepthStencilState = &createInfo.depthStencilState;
+    pipelineInfo.pDepthStencilState = nullptr;
+    pipelineInfo.pMultisampleState = &createInfo.multisampleState;
+    pipelineInfo.pColorBlendState = &createInfo.colorBlendState;
+    pipelineInfo.pDynamicState = &createInfo.dynamicState;
+
+    pipelineInfo.layout = m_pipelineLayout;
+
+    pipelineInfo.renderPass = renderPass;
+    pipelineInfo.subpass = 0;
+
+    pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
+    pipelineInfo.basePipelineIndex = -1;              // Optional
+
+    if (vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &pipelineInfo,
+                                  nullptr, &m_pipeline) != VK_SUCCESS) {
+      throw std::runtime_error("failed to create graphics pipeline!");
+    }
   };
 
   //
@@ -41,10 +80,10 @@ public:
   void GetDefaultPipelineLayout(
       VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo) const override;
 
-  virtual void
-  SetPipelineLayout(const VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo,
-                    const VkDevice &device) override;
+  virtual void SetPipelineLayout(
+      const VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo) override;
   virtual void DestroyPipelineLayout(const VkDevice &device) override;
+
   // OVERRIDE METHODS ---------------------------------------------------------
   // --------------------------------------------------------------------------
   //
@@ -79,6 +118,7 @@ public:
 
   virtual void GetDefaultColorBlendingState(
       VkPipelineColorBlendStateCreateInfo &colorBlendState) const;
+
   // GFX PIPELINE METHODS -----------------------------------------------------
   // --------------------------------------------------------------------------
   //

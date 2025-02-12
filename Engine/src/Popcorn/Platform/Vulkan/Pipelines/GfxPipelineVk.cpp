@@ -1,5 +1,6 @@
 #include "GfxPipelineVk.h"
 #include "GlobalMacros.h"
+#include "Popcorn/Core/Base.h"
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -181,9 +182,10 @@ void GfxPipelineVk::GetDefaultPipelineLayout(
 };
 
 void GfxPipelineVk::SetPipelineLayout(
-    const VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo,
-    const VkDevice &device) {
-  if (vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr,
+    const VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo) {
+  PC_VK_NULL_CHECK(m_device)
+
+  if (vkCreatePipelineLayout(m_device, &pipelineLayoutCreateInfo, nullptr,
                              &m_pipelineLayout) != VK_SUCCESS) {
     throw std::runtime_error("failed to create pipeline layout!");
   }
