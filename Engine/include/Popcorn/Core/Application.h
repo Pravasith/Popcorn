@@ -1,15 +1,15 @@
 #pragma once
 
 #include "Assert.h"
+#include "Event.h"
 #include "GlobalMacros.h"
 #include "LayerStack.h"
-#include "Popcorn/Events/Event.h"
-#include "Popcorn/Events/Subscriber.h"
-#include "Popcorn/Events/TimeEvent.h"
-#include "Popcorn/Events/WindowEvent.h"
-#include "Popcorn/Graphics/Renderer.h"
+#include "Renderer.h"
+#include "Subscriber.h"
 #include "Time.h"
+#include "TimeEvent.h"
 #include "Window.h"
+#include "WindowEvent.h"
 
 ENGINE_NAMESPACE_BEGIN
 using namespace Gfx;
@@ -47,12 +47,15 @@ public:
 
 private:
   Application();
-  ~Application();
+  virtual ~Application() override;
 
-  void OnEvent(Event &) const override;
+  virtual void OnEvent(Event &) override final;
+  virtual bool OnUpdate(TimeEvent &) override final;
+
+  bool OnClockTick(TimeEvent &);
+
   bool OnWindowResize(WindowResizeEvent &) const;
   bool OnWindowClose(WindowCloseEvent &) const;
-  bool OnCPUClockTick(TimeEvent &) const;
 
 private:
   static Application *s_instance;

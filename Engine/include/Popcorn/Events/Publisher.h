@@ -3,18 +3,21 @@
 #include "Event.h"
 #include "GlobalMacros.h"
 #include "Subscriber.h"
+#include <string>
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
 class Publisher {
 public:
-  Publisher();
+  Publisher(std::string name);
   virtual ~Publisher() = 0;
-  static void PublishEvent(Event &e);
-  static void Subscribe(const Subscriber *s);
-  static void UnSubscribe(const Subscriber *s);
+
+  void PublishEvent(Event &e) const;
+  void Subscribe(Subscriber *s);
+  void UnSubscribe(Subscriber *s);
 
 private:
-  static std::vector<const Subscriber *> s_subscribers;
+  std::vector<Subscriber *> m_subscribers{};
+  std::string m_name;
 };
 ENGINE_NAMESPACE_END

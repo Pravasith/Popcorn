@@ -43,7 +43,7 @@ public:
 
     pipelineInfo.layout = m_pipelineLayout;
 
-    pipelineInfo.renderPass = renderPass;
+    // pipelineInfo.renderPass = renderPass;
     pipelineInfo.subpass = 0;
 
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional

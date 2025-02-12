@@ -41,7 +41,7 @@ public:
 
 private:
   Time()
-      : m_now(0.0),
+      : Publisher("Time"), m_now(0.0),
         // Assumption: First frame took 16.66 ms
         m_delta(16.66), m_elapsed(0.0), m_is_game_loop_running(true) {
           PC_PRINT("CREATED", TagType::Constr, "TIME")

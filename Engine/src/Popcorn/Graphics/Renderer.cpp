@@ -13,7 +13,7 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 // SINGLETON
 Renderer *Renderer::s_instance = nullptr;
-RendererType Renderer::s_type = RendererType::Vulkan;
+RendererType Renderer::s_type = RendererType::None;
 
 VertexBuffer *Renderer::s_vertexBuffer = nullptr;
 
@@ -29,6 +29,11 @@ Renderer::~Renderer() {
 void Renderer::Init(const Window &appWin) {
   if (s_instance) {
     PC_WARN("Renderer instance (s_instance) exists!")
+    return;
+  };
+
+  if (s_type == RendererType::None) {
+    PC_WARN("Attempt to create renderer without setting it's type")
     return;
   };
 

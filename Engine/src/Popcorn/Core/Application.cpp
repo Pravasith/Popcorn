@@ -11,7 +11,7 @@ Time *Application::s_time = nullptr;
 Renderer *Application::s_Renderer = nullptr;
 DebugUIOverlay *Application::s_debugUIOverlay = nullptr;
 
-Application::Application() {
+Application::Application() : Subscriber("Application") {
   PC_PRINT("APPLICATION STARTED", TagType::Constr, "APP");
 };
 
@@ -24,7 +24,7 @@ Application::~Application() {
   Renderer::Destroy();
   s_Renderer = nullptr;
 
-  Window::UnSubscribe(s_instance);
+  s_window->UnSubscribe(s_instance);
   Popcorn::Window::Destroy();
 
   PC_PRINT("APPLICATION STOPPED", TagType::Destr, "APP");
@@ -42,7 +42,7 @@ void Application::Start() {
     s_window = AppWin;
     s_instance = new Application();
 
-    Window::Subscribe(s_instance);
+    s_window->Subscribe(s_instance);
 
     s_layerStack = new LayerStack();
     s_time = Time::Create();
@@ -98,15 +98,23 @@ bool Application::OnWindowClose(WindowCloseEvent &e) const {
   return true;
 };
 
-bool Application::OnCPUClockTick(TimeEvent &e) const {
-  Window::OnUpdate();
+bool Application::OnUpdate(TimeEvent &e) {
+  // Window::OnUpdate(e);
+  // // RENDER LAYER UPDATES HERE
+  // s_layerStack->UpdateLayerStack();
+  // // s_Renderer->DrawFrame();
+  return true;
+};
+
+bool Application::OnClockTick(TimeEvent &e) {
+  Window::OnUpdate(e);
   // RENDER LAYER UPDATES HERE
   s_layerStack->UpdateLayerStack();
   // s_Renderer->DrawFrame();
   return true;
 };
 
-void Application::OnEvent(Event &e) const {
+void Application::OnEvent(Event &e) {
   EventDispatcher dispatcher{e};
 
   dispatcher.Dispatch<WindowResizeEvent>(
@@ -120,7 +128,7 @@ void Application::OnEvent(Event &e) const {
   dispatcher.Dispatch<WindowCloseEvent>(
       PC_BIND_EVENT_FUNC(WindowCloseEvent, OnWindowClose));
 
-  dispatcher.Dispatch<TimeEvent>(PC_BIND_EVENT_FUNC(TimeEvent, OnCPUClockTick));
+  dispatcher.Dispatch<TimeEvent>(PC_BIND_EVENT_FUNC(TimeEvent, OnClockTick));
 
   // auto layerStack = Application::GetLayerStack();
   // layerStack.IterateBackwards([&](Event &e) {

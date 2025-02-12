@@ -179,6 +179,7 @@ target_link_libraries(Popcorn PRIVATE Window ImGui)
 
 # INTERFACE LIBS
 target_link_libraries(Popcorn INTERFACE glm::glm)
+target_link_libraries(Popcorn PUBLIC Events)
 
 target_compile_features(${PROJECT} PUBLIC cxx_std_17)
 
