@@ -3,6 +3,7 @@
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Window.h"
 #include "Popcorn/Events/WindowEvent.h"
+#include "Scene.h"
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -32,11 +33,16 @@ public:
 
   static Renderer &Get() { return *s_instance; };
 
-  [[nodiscard]] const static RendererType GetAPI() { return s_type; };
+  [[nodiscard]] const static RendererType GetAPI() {
+    if (s_type == RendererType::None) {
+      PC_WARN("Trying to access an undefined s_type!")
+    };
+
+    return s_type;
+  };
 
   // PASS IN SCENE & CAMERA ETC.
-  virtual void DrawFrame() = 0;
-  virtual void PresentFrame() = 0;
+  virtual void DrawFrame(const Scene &scene) const = 0;
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) = 0;
 
   // TODO: Abstract everything in here
@@ -51,7 +57,6 @@ public:
 private:
   static RendererType s_type;
   static Renderer *s_instance;
-  static VertexBuffer *s_vertexBuffer;
 
 protected:
   const Window &m_AppWin;

@@ -144,8 +144,7 @@ void RendererVk::VulkanDestroy() {
   m_deviceVk.CleanUp();
 };
 
-void RendererVk::DrawFrame() {};
-void RendererVk::PresentFrame() {};
+void RendererVk::DrawFrame(const Scene &scene) const {};
 bool RendererVk::OnFrameBfrResize(FrameBfrResizeEvent &) { return true; };
 
 GFX_NAMESPACE_END

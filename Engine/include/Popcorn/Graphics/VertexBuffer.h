@@ -96,6 +96,10 @@ public:
 
   static VertexBuffer *Create();
   inline static void Destroy(VertexBuffer *vBfr) {
+    if (!vBfr) {
+      PC_WARN("Attempt to delete a null vBfr")
+    };
+
     delete vBfr;
     vBfr = nullptr;
   };

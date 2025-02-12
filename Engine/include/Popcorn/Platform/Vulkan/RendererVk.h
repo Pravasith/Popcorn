@@ -44,8 +44,7 @@ public:
   void SubmitCmdBuffer(void *cmdBuffer) {};
 
   // Can potentially take "void *frame" as a param
-  virtual void DrawFrame() override;
-  virtual void PresentFrame() override;
+  virtual void DrawFrame(const Scene &scene) const override;
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) override;
 
 private:
