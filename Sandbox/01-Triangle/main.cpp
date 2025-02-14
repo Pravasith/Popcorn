@@ -1,8 +1,11 @@
 #include <Application.h>
+#include <Material.h>
 #include <Popcorn.h>
+#include <Popcorn/Graphics/Mesh.h>
 #include <Popcorn/Graphics/Renderer.h>
 #include <Popcorn/Graphics/VertexBuffer.h>
 #include <Popcorn/Scene/Scene.h>
+#include <Sources.h>
 #include <glm/glm.hpp>
 
 using namespace Popcorn;
@@ -15,16 +18,22 @@ public:
   virtual void OnAttach() override {
 
     class TriangleScene : public Scene {};
-    // class S2 : public Scene {};
+
+    std::vector shaders {
+        ShaderFiles::VertShaderTriangle,
+        ShaderFiles::FragShaderTriangle,
+    };
+    Material triMat(shaders);
+
+    Mesh triMesh;
+    triMesh.AddMaterial(triMat);
 
     TriangleScene triangleScene;
+    triangleScene.Add(&triMesh);
 
-    // triangleMesh();
 
-    // Mesh
-
-    // triangleScene.Add(GameObject *node);
   };
+
 
   virtual void OnDetach() override {};
   virtual void OnUpdate() override {

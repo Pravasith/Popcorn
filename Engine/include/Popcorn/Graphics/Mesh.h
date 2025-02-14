@@ -21,6 +21,10 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "MESH");
   };
 
+  void AddMaterial(Material &material) {
+
+  };
+
   virtual void OnAttach(const SceneData &) override {
     // TODO: inject vertices from outside this class instead
     struct Vertex {
