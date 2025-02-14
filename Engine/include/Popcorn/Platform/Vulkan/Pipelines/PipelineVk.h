@@ -117,12 +117,14 @@ public:
     PC_PRINT("CREATED", TagType::Constr, "PipelineVk");
   };
   virtual ~PipelineVk() {
+
     PC_PRINT("DESTROYED", TagType::Destr, "PipelineVk");
   };
 
   using CreateInfo_type = DerivePipelineCreateInfoType<T>::type;
 
   virtual void Create(const CreateInfo_type &createInfo) = 0;
+  virtual void Destroy() = 0;
 
   virtual void GetDefaultPipelineCreateInfo(CreateInfo_type &createInfo) = 0;
 

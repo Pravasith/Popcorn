@@ -23,6 +23,7 @@ add_library(
 set(EVENTS_IMPL_DIR Popcorn/Events)
 set(PLATFORM_IMPL_DIR Popcorn/Platform)
 set(GRAPHICS_IMPL_DIR Popcorn/Graphics)
+set(SCENE_IMPL_DIR Popcorn/Scene)
 
 # WINDOW LIB
 add_library(Window ${CORE_IMPL_DIR}/Window.cpp
@@ -38,6 +39,8 @@ add_library(
   # MAIN CLASS
   ${GRAPHICS_IMPL_DIR}/Renderer.cpp
   ${GRAPHICS_IMPL_DIR}/VertexBuffer.cpp
+  ${GRAPHICS_IMPL_DIR}/Material.cpp
+  ${SCENE_IMPL_DIR}/Scene.cpp
   #
   # OPENGL CLASSES
   ${PLATFORM_IMPL_DIR}/OpenGL/RendererOpenGL.cpp
@@ -48,4 +51,7 @@ add_library(
   ${PLATFORM_IMPL_DIR}/Vulkan/SurfaceVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/SwapchainVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/VertexBufferVk.cpp
-  ${PLATFORM_IMPL_DIR}/Vulkan/Pipelines/GfxPipelineVk.cpp)
+  ${PLATFORM_IMPL_DIR}/Vulkan/Pipelines/GfxPipelineVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/Materials/MaterialVk.cpp)
+
+#

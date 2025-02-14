@@ -12,12 +12,17 @@ class GfxPipelineVk : public PipelineVk<PipelineTypes::GraphicsType> {
 public:
   GfxPipelineVk() { PC_PRINT("CREATED", TagType::Constr, "GfxPipelineVk"); };
   ~GfxPipelineVk() {
-    PC_VK_NULL_CHECK(m_device)
-    DestroyPipelineLayout(m_device);
+    Destroy();
+
     PC_PRINT("DESTROYED", TagType::Destr, "GfxPipelineVk");
   };
 
   virtual void Create(const CreateInfo_type &pipelineCreateInfo) override {
+    if (m_pipeline != VK_NULL_HANDLE) {
+      PC_WARN("Attempt to create GfxPipeline when it already exists")
+      return;
+    };
+
     GfxPipelineCreateInfo createInfo = pipelineCreateInfo;
     if (m_shaderStageCreateInfos.size() == 0) {
       PC_WARN("No shader stages set")
@@ -53,6 +58,17 @@ public:
                                   nullptr, &m_pipeline) != VK_SUCCESS) {
       throw std::runtime_error("failed to create graphics pipeline!");
     }
+  };
+
+  virtual void Destroy() override {
+    PC_VK_NULL_CHECK(m_device)
+    DestroyPipelineLayout(m_device);
+
+    if (m_pipeline != VK_NULL_HANDLE) {
+      vkDestroyPipeline(m_device, m_pipeline, nullptr);
+      m_pipeline = VK_NULL_HANDLE;
+      m_device = VK_NULL_HANDLE;
+    };
   };
 
   //

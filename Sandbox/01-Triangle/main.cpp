@@ -2,8 +2,8 @@
 #include <Popcorn.h>
 #include <Popcorn/Graphics/Renderer.h>
 #include <Popcorn/Graphics/VertexBuffer.h>
+#include <Popcorn/Scene/Scene.h>
 #include <glm/glm.hpp>
-#include <iostream>
 
 using namespace Popcorn;
 
@@ -13,48 +13,23 @@ public:
   ~GameLayer() { PC_PRINT("DESTROYED", TagType::Destr, "GAME-LAYER") };
 
   virtual void OnAttach() override {
-    // struct Vertex {
-    //   glm::vec2 pos;
-    //   glm::vec3 color;
-    //   std::string Print() {
-    //     std::stringstream ss;
-    //     ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g
-    //        << ", " << color.b;
-    //
-    //     return ss.str();
-    //   };
-    // };
 
-    // Gfx::VertexBuffer bfr;
-    // bfr.Fill<Vertex>({
-    //     //
-    //     {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
-    //     {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-    //     {{0.0f, 0.5f}, {1.0f, 0.0f, 0.0f}},
-    //     //
-    // });
-    // bfr.PrintBuffer<Vertex>();
+    class TriangleScene : public Scene {};
+    // class S2 : public Scene {};
 
-    // Popcorn::VertexBuffer terrainVertexBuffer;
-    // Popcorn::TerrainAttachment[] terrainAttachments
-    // { terrainTexture, heightMapTexture... } // etc
-    //
-    // Popcorn::ModelFactory::ProduceTerrainMesh(
-    // &terrainVertexBuffer, &terrainAttachments, PC_NULL);
-    //
-    //
-    //
-    // auto modelMesh = Popcorn::ModelFactory::ProduceMesh();
-    // terrain.SetMaterial({
-    //    .Color = glm::vec3(1., 0.3, 0.5, 0.5);
-    // });
-    // Scene.Add(ModelMesh);
+    TriangleScene triangleScene;
 
+    // triangleMesh();
+
+    // Mesh
+
+    // triangleScene.Add(GameObject *node);
   };
+
   virtual void OnDetach() override {};
   virtual void OnUpdate() override {
     //
-    Renderer::Get().DrawFrame();
+    // Renderer::Get().DrawFrame();
   };
   virtual void OnEvent(Event &e) override {};
 };

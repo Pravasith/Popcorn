@@ -55,11 +55,10 @@ void RendererVk::CreateTrianglePipeline() {
   const auto &swapchainExtent = m_swapchainVk.GetSwapchainExtent();
 
   // CREATE SHADER MODULES
-  Shader s;
-  auto vertShaderBuffer =
-      s.ReadSpvFile(PC_SHADER_SOURCE_MAP[VertShaderTriangle]);
-  auto fragShaderBuffer =
-      s.ReadSpvFile(PC_SHADER_SOURCE_MAP[FragShaderTriangle]);
+  auto vertShaderBuffer = Shader::ReadSpvFile(
+      PC_SHADER_SOURCE_MAP[ShaderFiles::VertShaderTriangle]);
+  auto fragShaderBuffer = Shader::ReadSpvFile(
+      PC_SHADER_SOURCE_MAP[ShaderFiles::FragShaderTriangle]);
 
   auto vertShaderModule = PC_CreateShaderModule(device, vertShaderBuffer);
   auto fragShaderModule = PC_CreateShaderModule(device, fragShaderBuffer);

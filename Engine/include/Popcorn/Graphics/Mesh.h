@@ -21,7 +21,7 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "MESH");
   };
 
-  virtual void OnAttach() override {
+  virtual void OnAttach(const SceneData &) override {
     // TODO: inject vertices from outside this class instead
     struct Vertex {
       glm::vec2 pos;
@@ -44,18 +44,19 @@ public:
     m_vertexBuffer->SetLayout<VertexBuffer::AttrTypes::Float2,
                               VertexBuffer::AttrTypes::Float3>();
   };
-  virtual void OnUpdate() override {};
-  virtual void OnRender() override {
-    if (Renderer::GetAPI() == RendererType::Vulkan) {
-
-    } else {
-      // Other renderers render
+  virtual void OnUpdate(const SceneData &) override {};
+  virtual void OnRender(const SceneData &) override {
+    if (m_material == nullptr) {
+      PC_WARN("m_material is nullptr");
+      return;
     }
+
+    // FIND MATERIALS & RENDER THEM WITH THE RENDERPASS INFORMATION
   };
 
 private:
-  VertexBuffer *m_vertexBuffer;
-  Material m_material;
+  VertexBuffer *m_vertexBuffer = nullptr;
+  Material *m_material = nullptr;
 };
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
