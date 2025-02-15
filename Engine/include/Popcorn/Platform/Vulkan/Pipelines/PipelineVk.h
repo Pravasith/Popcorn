@@ -7,28 +7,13 @@
 #include <forward_list>
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
+#include "Material.h"
 #include <GLFW/glfw3.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 enum class PipelineTypes { GraphicsType = 1, ComputeType, RaytracingType };
-
-enum ShaderStages {
-  None = 0,
-  //
-  // Graphics types
-  Vertex = 1,
-  Tesselation = shift_l(1),
-  Geometry = shift_l(2),
-  Fragment = shift_l(3),
-  //
-  // Compute types
-  Compute = shift_l(4)
-  //
-  // Ray tracing types
-  // TODO: Fill it out
-};
 
 struct GfxPipelineCreateInfo {
   constexpr static PipelineTypes type_value = PipelineTypes::GraphicsType;
@@ -129,8 +114,8 @@ public:
   virtual void GetDefaultPipelineCreateInfo(CreateInfo_type &createInfo) = 0;
 
   // Shaders
-  void SetShaderStagesMask(ShaderStages enabledShaderStagesMask) {
-    PC_PRINT((int)enabledShaderStagesMask, TagType::Print, "PipelineVk")
+  void SetShaderStagesMask(int enabledShaderStagesMask) {
+    PC_PRINT(enabledShaderStagesMask, TagType::Print, "PipelineVk")
 
     // Error check
     switch (type_value) {
@@ -139,15 +124,15 @@ public:
     //   break;
     case PipelineTypes::GraphicsType:
       if ((enabledShaderStagesMask &
-           (ShaderStages::Vertex | ShaderStages::Fragment)) !=
-          (ShaderStages::Vertex | ShaderStages::Fragment)) {
+           (ShaderStages::VertexBit | ShaderStages::FragmentBit)) !=
+          (ShaderStages::VertexBit | ShaderStages::FragmentBit)) {
         PC_ERROR(
             "Either vertex shader or fragment shader or both are not enabled",
             "PipelineVk")
       };
       break;
     case PipelineTypes::ComputeType:
-      if (!(enabledShaderStagesMask & ShaderStages::Compute))
+      if (!(enabledShaderStagesMask & ShaderStages::ComputeBit))
         PC_ERROR("Compute shader is not enabled", "PipelineVk")
       break;
     case PipelineTypes::RaytracingType:
@@ -186,7 +171,7 @@ protected:
 
   VkPipeline m_pipeline = VK_NULL_HANDLE;
   VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
-  ShaderStages m_enabledShaderStagesMask = ShaderStages::None;
+  int m_enabledShaderStagesMask = ShaderStages::None;
   std::vector<VkPipelineShaderStageCreateInfo> m_shaderStageCreateInfos;
 };
 

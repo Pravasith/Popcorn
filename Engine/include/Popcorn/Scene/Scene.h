@@ -13,16 +13,16 @@ GFX_NAMESPACE_BEGIN
 // For now, the scene graph contains a linear list of nodes
 class Scene {
 public:
-  Scene() : m_sceneData({}) {
+  Scene() {
     ++s_sceneId;
     m_sceneData.sceneId = s_sceneId;
     PC_PRINT("CREATED with id: " << m_sceneData.sceneId, TagType::Constr,
              "Scene");
   };
   virtual ~Scene() {
-    for (auto *node : m_nodes) {
-      delete node;
-    };
+    // for (auto *node : m_nodes) {
+    //   delete node;
+    // };
     m_nodes.clear();
     --s_sceneId;
     PC_PRINT("DESTROYED", TagType::Destr, "Scene");
@@ -53,7 +53,7 @@ private:
   static uint32_t s_sceneId;
 
   std::vector<GameObject *> m_nodes{};
-  SceneData m_sceneData; // like ambient lights data, env map etc.
+  SceneData m_sceneData{}; // like ambient lights data, env map etc.
 };
 
 GFX_NAMESPACE_END

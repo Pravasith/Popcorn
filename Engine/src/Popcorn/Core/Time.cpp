@@ -1,5 +1,6 @@
 
 #include "Time.h"
+#include "Base.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Events/TimeEvent.h"
 

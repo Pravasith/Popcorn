@@ -30,14 +30,14 @@ std::vector<VkPipelineShaderStageCreateInfo> GfxPipelineVk::CreateShaderStages(
 
   //
   // TESSELATION STAGE ------------------------------------------------
-  if (m_enabledShaderStagesMask & ShaderStages::Tesselation) {
+  if (m_enabledShaderStagesMask & ShaderStages::TesselationBit) {
     // TODO: FILL THIS OUT
     // shaderStages.emplace_back(tessShaderStageInfo);
   };
 
   //
   // GEOMETRY STAGE ---------------------------------------------------
-  if (m_enabledShaderStagesMask & ShaderStages::Geometry) {
+  if (m_enabledShaderStagesMask & ShaderStages::GeometryBit) {
     // TODO: FILL THIS OUT
     // shaderStages.emplace_back(geometryShaderStageInfo);
   };

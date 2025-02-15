@@ -8,7 +8,6 @@
 #include "Sources.h"
 #include <cstring>
 #include <forward_list>
-#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -73,8 +72,8 @@ void RendererVk::CreateTrianglePipeline() {
   trianglePipeline.SetDevice(device);
 
   // SET SHADER STAGES
-  trianglePipeline.SetShaderStagesMask(
-      static_cast<ShaderStages>(ShaderStages::Vertex | ShaderStages::Fragment));
+  trianglePipeline.SetShaderStagesMask(static_cast<ShaderStages>(
+      ShaderStages::VertexBit | ShaderStages::FragmentBit));
   std::vector<VkPipelineShaderStageCreateInfo> shaderStages =
       trianglePipeline.CreateShaderStages(shaderModules);
 

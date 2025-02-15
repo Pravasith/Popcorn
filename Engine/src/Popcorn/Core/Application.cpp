@@ -46,6 +46,7 @@ void Application::Start() {
 
     s_layerStack = new LayerStack();
     s_time = Time::Create();
+    s_time->Subscribe(s_instance);
 
     // OVERLAYS - EXAMPLE
     // s_debugUIOverlay = new DebugUIOverlay();
@@ -70,6 +71,8 @@ bool Application::IsGameLoopRunning() { return s_time->IsGameLoopRunning(); };
 void Application::AddLayer(Layer *layer) {
   s_layerStack->PushLayer(layer);
   layer->OnAttach();
+
+  PC_WARN("Attached ")
 };
 
 void Application::Stop() {
@@ -99,15 +102,21 @@ bool Application::OnWindowClose(WindowCloseEvent &e) const {
 };
 
 bool Application::OnUpdate(TimeEvent &e) {
+  // Window::OnUpdate(e);
+  // // RENDER LAYER UPDATES HERE
+  // s_layerStack->UpdateLayerStack();
+  // // s_Renderer->DrawFrame();
+  return true;
+};
+
+bool Application::OnClockTick(TimeEvent &e) {
+
   Window::OnUpdate(e);
   // RENDER LAYER UPDATES HERE
   s_layerStack->UpdateLayerStack();
   // s_Renderer->DrawFrame();
   return true;
 };
-
-// TODO: unused function
-bool Application::OnClockTick(TimeEvent &e) { return true; };
 
 void Application::OnEvent(Event &e) {
   EventDispatcher dispatcher{e};
@@ -123,7 +132,7 @@ void Application::OnEvent(Event &e) {
   dispatcher.Dispatch<WindowCloseEvent>(
       PC_BIND_EVENT_FUNC(WindowCloseEvent, OnWindowClose));
 
-  dispatcher.Dispatch<TimeEvent>(PC_BIND_EVENT_FUNC(TimeEvent, OnUpdate));
+  dispatcher.Dispatch<TimeEvent>(PC_BIND_EVENT_FUNC(TimeEvent, OnClockTick));
 
   // auto layerStack = Application::GetLayerStack();
   // layerStack.IterateBackwards([&](Event &e) {

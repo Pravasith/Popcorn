@@ -76,8 +76,8 @@ void Renderer::Init(const Window &appWin) {
     // TEMP FUNCTIONS
     // CREATE ALL PIPELINES
     // CREATE ALL RENDERPASSES
-    vkRenderer->CreateTrianglePipeline();
-    vkRenderer->CreateTriangleRenderPass();
+    // vkRenderer->CreateTrianglePipeline();
+    // vkRenderer->CreateTriangleRenderPass();
     //
 
   } else if (s_type == RendererType::OpenGL) {
