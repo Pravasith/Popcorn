@@ -71,8 +71,6 @@ bool Application::IsGameLoopRunning() { return s_time->IsGameLoopRunning(); };
 void Application::AddLayer(Layer *layer) {
   s_layerStack->PushLayer(layer);
   layer->OnAttach();
-
-  PC_WARN("Attached ")
 };
 
 void Application::Stop() {
@@ -110,7 +108,6 @@ bool Application::OnUpdate(TimeEvent &e) {
 };
 
 bool Application::OnClockTick(TimeEvent &e) {
-
   Window::OnUpdate(e);
   // RENDER LAYER UPDATES HERE
   s_layerStack->UpdateLayerStack();

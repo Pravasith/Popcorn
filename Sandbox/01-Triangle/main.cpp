@@ -22,60 +22,56 @@ public:
   };
 
   virtual void OnAttach() override {
-    // // TODO: Move all of this to proper functions
-    // //
-    // struct Vertex {
-    //   glm::vec2 pos;
-    //   glm::vec3 color;
-    //   std::string Print() {
-    //     std::stringstream ss;
-    //     ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g
-    //        << ", " << color.b;
+    // TODO: Move all of this to proper functions
     //
-    //     return ss.str();
-    //   };
-    // };
-    //
-    // auto *vertexBuffer = VertexBuffer::Create();
-    //
-    // vertexBuffer->Fill<Vertex>({
-    //     {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
-    //     {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-    //     {{0.0f, 0.5f}, {1.0f, 0.0f, 0.0f}},
-    // });
-    //
-    // vertexBuffer->SetLayout<VertexBuffer::AttrTypes::Float2,
-    //                         VertexBuffer::AttrTypes::Float3>();
-    //
-    // std::vector shaders{
-    //     ShaderFiles::VertShaderTriangle,
-    //     ShaderFiles::FragShaderTriangle,
-    // };
-    //
-    // MaterialData matData{(ShaderStages::VertexBit |
-    // ShaderStages::FragmentBit),
-    //                      shaders};
-    //
-    // BasicMaterial triMat(matData);
-    // auto &vertBuffer = vertexBuffer;
-    //
-    // Mesh triMesh{*vertexBuffer, triMat};
-    //
-    // TriangleScene triScene{};
-    // triScene.Add(&triMesh);
-    //
-    // // AND THEN IN THE RENDER LOOP
-    // // Renderer.Render(triScene);
-    //
-    // vertexBuffer->PrintBuffer<Vertex>();
-    // VertexBuffer::Destroy(vertexBuffer);
-    //
-    // PC_WARN("END ReACHED")
+    struct Vertex {
+      glm::vec2 pos;
+      glm::vec3 color;
+      std::string Print() {
+        std::stringstream ss;
+        ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g
+           << ", " << color.b;
+
+        return ss.str();
+      };
+    };
+
+    auto *vertexBuffer = VertexBuffer::Create();
+
+    vertexBuffer->Fill<Vertex>({
+        {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
+        {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+        {{0.0f, 0.5f}, {1.0f, 0.0f, 0.0f}},
+    });
+
+    vertexBuffer->SetLayout<VertexBuffer::AttrTypes::Float2,
+                            VertexBuffer::AttrTypes::Float3>();
+
+    std::vector shaders{
+        ShaderFiles::VertShaderTriangle,
+        ShaderFiles::FragShaderTriangle,
+    };
+
+    MaterialData matData{(ShaderStages::VertexBit | ShaderStages::FragmentBit),
+                         shaders};
+
+    BasicMaterial triMat(matData);
+    auto &vertBuffer = vertexBuffer;
+
+    Mesh triMesh{*vertexBuffer, triMat};
+
+    TriangleScene triScene{};
+    triScene.Add(&triMesh);
+
+    // AND THEN IN THE RENDER LOOP
+    // Renderer.Render(triScene);
+
+    vertexBuffer->PrintBuffer<Vertex>();
+    VertexBuffer::Destroy(vertexBuffer);
   };
 
   virtual void OnDetach() override {};
   virtual void OnUpdate() override {
-    PC_WARN("UPDATE")
     //
     // Renderer::Get().DrawFrame();
   };
