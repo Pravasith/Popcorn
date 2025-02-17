@@ -29,6 +29,7 @@ public:
     };
 
     PC_VK_NULL_CHECK(m_pipelineLayout);
+    PC_VK_NULL_CHECK(m_renderPass);
 
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -48,7 +49,7 @@ public:
 
     pipelineInfo.layout = m_pipelineLayout;
 
-    // pipelineInfo.renderPass = renderPass;
+    pipelineInfo.renderPass = m_renderPass;
     pipelineInfo.subpass = 0;
 
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional

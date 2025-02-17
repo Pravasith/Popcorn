@@ -3,7 +3,7 @@
 #include "Pipelines/GfxPipelineVk.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
-#include "RenderPasses/RenderPassVk.h"
+#include "RenderPassVk.h"
 #include "Shader.h"
 #include "Sources.h"
 #include <cstring>

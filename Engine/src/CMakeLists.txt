@@ -40,6 +40,8 @@ add_library(
   ${GRAPHICS_IMPL_DIR}/Renderer.cpp
   ${GRAPHICS_IMPL_DIR}/VertexBuffer.cpp
   ${GRAPHICS_IMPL_DIR}/Materials/Material.cpp
+  ${GRAPHICS_IMPL_DIR}/Materials/MaterialHandler.cpp
+  ${GRAPHICS_IMPL_DIR}/Mesh.cpp
   # TODO: Separate the scene to a different library when time comes
   ${SCENE_IMPL_DIR}/Scene.cpp
   #

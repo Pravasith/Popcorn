@@ -3,12 +3,13 @@
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
-#include "Shader.h"
-#include "Sources.h"
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
+
+class Mesh;
+class MaterialHandler;
 
 enum class MaterialTypes {
   BasicMat = 1,
@@ -40,34 +41,27 @@ struct MaterialData {
   // RenderStates renderStates; // blending, depth testing  ..etc
 };
 
-// TODO: Make a material map
 class Material {
 public:
   Material(MaterialData &matData) : m_materialData(matData) {
     PC_PRINT("CREATED", TagType::Constr, "Material.h");
     LoadShaders();
   };
-
   virtual ~Material() { PC_PRINT("DESTROYED", TagType::Destr, "Material.h"); };
 
   virtual void Bind() = 0;
+  void AddMesh(const Mesh *meshPtr);
+  void RemoveMesh(const Mesh *meshPtr);
 
 private:
-  void LoadShaders() {
-    PC_WARN("BUFFER: Shader files are loaded here -- expensive if not handled "
-            "properly")
-    m_shaders.reserve(m_materialData.shaderFiles.size());
-
-    for (auto &filename : m_materialData.shaderFiles) {
-      m_shaders.emplace_back(Shader::ReadSpvFile(filename));
-    };
-
-    PC_WARN("BUFFER: shaders are loaded!")
-  };
+  void LoadShaders();
 
 protected:
   MaterialData &m_materialData;
   std::vector<Buffer> m_shaders;
+  std::vector<const Mesh *> m_linkedMeshes;
+
+  static const MaterialHandler *s_materialHandler;
 };
 
 GFX_NAMESPACE_END

@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "Base.h"
 #include "DebugUIOverlay.h"
+#include "MaterialHandler.h"
 #include "Renderer.h"
 
 ENGINE_NAMESPACE_BEGIN
@@ -12,10 +13,14 @@ Renderer *Application::s_Renderer = nullptr;
 DebugUIOverlay *Application::s_debugUIOverlay = nullptr;
 
 Application::Application() : Subscriber("Application") {
+  MaterialHandler::Get();
   PC_PRINT("APPLICATION STARTED", TagType::Constr, "APP");
 };
 
 Application::~Application() {
+  PC_WARN(MaterialHandler::Get());
+  MaterialHandler::Destroy();
+
   Time::Destroy();
   // LAYERS ARE DELETED INTERNALLY IN THE LAYERSTACK DESTRUCTOR
   delete s_layerStack;

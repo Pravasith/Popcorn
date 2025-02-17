@@ -6,6 +6,7 @@
 #include "Popcorn/Core/Helpers.h"
 #include <forward_list>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 #include "Material.h"
 #include <GLFW/glfw3.h>
@@ -108,10 +109,9 @@ public:
 
   using CreateInfo_type = DerivePipelineCreateInfoType<T>::type;
 
+  virtual void GetDefaultPipelineCreateInfo(CreateInfo_type &createInfo) = 0;
   virtual void Create(const CreateInfo_type &createInfo) = 0;
   virtual void Destroy() = 0;
-
-  virtual void GetDefaultPipelineCreateInfo(CreateInfo_type &createInfo) = 0;
 
   // Shaders
   void SetShaderStagesMask(int enabledShaderStagesMask) {
@@ -173,6 +173,8 @@ protected:
   VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
   int m_enabledShaderStagesMask = ShaderStages::None;
   std::vector<VkPipelineShaderStageCreateInfo> m_shaderStageCreateInfos;
+
+  VkRenderPass m_renderPass = VK_NULL_HANDLE;
 };
 
 GFX_NAMESPACE_END
