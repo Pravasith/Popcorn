@@ -47,18 +47,19 @@ public:
     vertexBuffer->SetLayout<VertexBuffer::AttrTypes::Float2,
                             VertexBuffer::AttrTypes::Float3>();
 
-    std::vector shaders{
-        ShaderFiles::VertShaderTriangle,
-        ShaderFiles::FragShaderTriangle,
+    std::vector shaderFiles{
+        "shaders/tri_vert.spv",
+        "shaders/tri_frag.spv",
     };
 
+    // NOTE: Shader files are loaded here -- expensive if not handled properly
     MaterialData matData{(ShaderStages::VertexBit | ShaderStages::FragmentBit),
-                         shaders};
+                         shaderFiles};
 
     BasicMaterial triMat(matData);
-    auto &vertBuffer = vertexBuffer;
 
-    Mesh triMesh{*vertexBuffer, triMat};
+    // Mesh triMesh{*vertexBuffer, triMat};
+    Mesh triMesh{nullptr, triMat};
 
     TriangleScene triScene{};
     triScene.Add(&triMesh);

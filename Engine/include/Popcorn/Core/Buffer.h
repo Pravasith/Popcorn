@@ -50,7 +50,7 @@ public:
   };
 
   template <typename T> void SetData(std::initializer_list<T> list) {
-    PC_PRINT("DATA SET(INIT-LIST)", TagType::Constr, "BUFFER")
+    PC_PRINT("DATA SET(INIT-LIST)", TagType::Print, "BUFFER")
 
     const uint64_t size = sizeof(T) * list.size();
     AllocBytes(size);
@@ -86,7 +86,7 @@ public:
 
   // COPY CONSTRUCTOR ------------------------------------------------------
   Buffer(const Buffer &other) {
-    PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Print, "BUFFER")
+    PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Constr, "BUFFER")
     if (this == &other)
       return;
 
@@ -94,6 +94,7 @@ public:
     AllocBytes(size);
     memcpy(m_data, other.m_data, size);
   };
+
   Buffer &operator=(const Buffer &other) {
     PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print, "BUFFER")
 
@@ -109,7 +110,7 @@ public:
 
   // MOVE CONSTRUCTOR ------------------------------------------------------
   Buffer(Buffer &&other) {
-    PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Print, "BUFFER")
+    PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Constr, "BUFFER")
     if (this == &other) {
       return;
     };
@@ -122,6 +123,7 @@ public:
     other.m_size = 0;
     other.m_count = 0;
   };
+
   Buffer &&operator=(Buffer &&other) {
     PC_PRINT("MOVE ASSIGNMENT EVOKED", TagType::Print, "BUFFER")
     if (this == &other) {

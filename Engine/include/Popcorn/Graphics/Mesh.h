@@ -12,7 +12,7 @@ GFX_NAMESPACE_BEGIN
 
 class Mesh : public GameObject {
 public:
-  Mesh(VertexBuffer &geometry, Material &material)
+  Mesh(VertexBuffer *geometry, Material &material)
       : m_vertexBuffer(geometry), m_material(material) {
     PC_PRINT("CREATED", TagType::Constr, "MESH");
   };
@@ -36,7 +36,7 @@ public:
   };
 
 private:
-  VertexBuffer &m_vertexBuffer;
+  VertexBuffer *m_vertexBuffer;
   // TODO: Make this a Vector as required
   Material &m_material;
 };

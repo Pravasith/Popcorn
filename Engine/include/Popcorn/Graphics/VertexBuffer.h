@@ -114,7 +114,7 @@ public:
 
   // COPY CONSTRUCTOR
   VertexBuffer(const VertexBuffer &other) {
-    PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Print,
+    PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Constr,
              "VERTEX-BUFFER(INHERITED)")
     m_buffer = other.m_buffer;
     m_layout = other.m_layout;
@@ -133,7 +133,7 @@ public:
 
   // MOVE CONSTRUCTOR
   VertexBuffer(VertexBuffer &&other) {
-    PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Print,
+    PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Constr,
              "VERTEX-BUFFER(INHERITED)")
     if (this == &other) {
       return;
