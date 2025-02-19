@@ -2,6 +2,9 @@
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
+
+SurfaceVk *SurfaceVk::s_instance = nullptr;
+
 void SurfaceVk::CreateWindowSurface(const VkInstance &instance,
                                     GLFWwindow *window) {
   if (glfwCreateWindowSurface(instance, window, nullptr, &m_surface) !=

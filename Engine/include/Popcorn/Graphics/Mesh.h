@@ -4,7 +4,6 @@
 #include "GlobalMacros.h"
 #include "Material.h"
 #include "Popcorn/Core/Base.h"
-#include "Renderer.h"
 #include "VertexBuffer.h"
 
 ENGINE_NAMESPACE_BEGIN
@@ -15,10 +14,12 @@ public:
   // TODO: Handle the case of duplicating meshes & materials
   Mesh(VertexBuffer *geometry, Material &material)
       : m_vertexBuffer(geometry), m_material(material) {
+    // Add a mesh reference back to material
     m_material.AddMesh(this);
     PC_PRINT("CREATED", TagType::Constr, "MESH");
   };
   ~Mesh() {
+    // Remove the mesh reference to material
     m_material.RemoveMesh(this);
     PC_PRINT("DESTROYED", TagType::Destr, "MESH");
   };
@@ -26,6 +27,10 @@ public:
   virtual void OnAttach(const SceneData &) override;
   virtual void OnUpdate(const SceneData &) override;
   virtual void OnRender(const SceneData &) override;
+
+  virtual constexpr GameObjectTypes GetType() const override {
+    return GameObjectTypes::Mesh;
+  };
 
 protected:
   VertexBuffer *m_vertexBuffer;

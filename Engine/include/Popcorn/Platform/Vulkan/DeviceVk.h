@@ -21,12 +21,27 @@ class DeviceVk {
   };
 
 public:
-  DeviceVk() { PC_PRINT("CREATED", TagType::Constr, "DeviceVk.h") };
-  ~DeviceVk() { PC_PRINT("DESTROYED", TagType::Destr, "DeviceVk.h") };
+  [[nodiscard]] inline static DeviceVk *Get() {
+    if (s_instance) {
+      return s_instance;
+    };
 
-  [[nodiscard]] inline const VkInstance &GetInstance() const {
-    PC_VK_NULL_CHECK(m_instance)
-    return m_instance;
+    s_instance = new DeviceVk();
+    return s_instance;
+  };
+
+  static void Destroy() {
+    if (s_instance) {
+      delete s_instance;
+      s_instance = nullptr;
+    } else {
+      PC_WARN("Trying to destroy a non-existant instance of MaterialHandler")
+    };
+  };
+
+  [[nodiscard]] inline const VkInstance &GetVkInstance() const {
+    PC_VK_NULL_CHECK(m_vkInstance)
+    return m_vkInstance;
   };
 
   [[nodiscard]] inline const VkDevice &GetDevice() const {
@@ -86,7 +101,12 @@ private:
                         const VkSurfaceKHR &surface) const;
 
 private:
-  VkInstance m_instance = VK_NULL_HANDLE;
+  DeviceVk() { PC_PRINT("CREATED", TagType::Constr, "DeviceVk.h") };
+  ~DeviceVk() { PC_PRINT("DESTROYED", TagType::Destr, "DeviceVk.h") };
+
+  static DeviceVk *s_instance;
+
+  VkInstance m_vkInstance = VK_NULL_HANDLE;
   VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
   VkDevice m_device = VK_NULL_HANDLE;
 

@@ -4,9 +4,11 @@
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Window.h"
 #include "Popcorn/Events/WindowEvent.h"
+#include "RenderWorkflowVk.h"
 #include "Renderer.h"
 #include "SurfaceVk.h"
 #include "SwapchainVk.h"
+#include <vector>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -16,7 +18,12 @@ GFX_NAMESPACE_BEGIN
 class RendererVk : public Renderer {
 public:
   RendererVk(const Window &appWin);
-  ~RendererVk() override;
+  virtual ~RendererVk() override;
+
+  // Can potentially take "void *frame" as a param
+  virtual void DrawFrame(const Scene &scene) const override;
+  virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) override;
+  virtual void CreateRenderWorkflows() override;
 
   // Sets up devices, configure swapchains, creates depth buffers
   // also allocates command pools
@@ -43,22 +50,12 @@ public:
   void RecordCmdBuffer(void *renderPass, void *pipeline) {};
   void SubmitCmdBuffer(void *cmdBuffer) {};
 
-  // Can potentially take "void *frame" as a param
-  virtual void DrawFrame(const Scene &scene) const override;
-  virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) override;
-
 private:
-  DeviceVk m_deviceVk;
-  SurfaceVk m_surfaceVk;
-  SwapchainVk m_swapchainVk;
+  static DeviceVk *s_deviceVk;
+  static SurfaceVk *s_surfaceVk;
+  static SwapchainVk *s_swapchainVk;
 
-  // std::vector<VkDescriptorPool> s_descriptorPools;
-  // std::vector<VkRenderPass> s_renderPasses;
-
-  // SWAPCHAIN IMAGES
-  // uint32_t s_minImageCount;
-  // uint32_t s_imageCount;
-  // uint32_t s_subpass;
+  static std::vector<RenderWorkflowVk> s_renderWorkflows;
 };
 
 GFX_NAMESPACE_END

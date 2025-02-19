@@ -12,8 +12,23 @@ GFX_NAMESPACE_BEGIN
 
 class SwapchainVk {
 public:
-  SwapchainVk() { PC_PRINT("CREATED", TagType::Constr, "Swapchain.h"); };
-  ~SwapchainVk() { PC_PRINT("DESTROYED", TagType::Destr, "Swapchain.h"); };
+  static SwapchainVk *Get() {
+    if (s_instance) {
+      return s_instance;
+    };
+
+    s_instance = new SwapchainVk();
+    return s_instance;
+  };
+
+  static void Destroy() {
+    if (s_instance) {
+      delete s_instance;
+      s_instance = nullptr;
+    } else {
+      PC_WARN("Trying to destroy a non-existant instance of SwapchainVk")
+    };
+  };
 
   void CreateSwapchain(const VkDevice &, const SwapchainSupportDetails &,
                        GLFWwindow *, const VkSurfaceKHR &,
@@ -42,6 +57,11 @@ private:
                               GLFWwindow *window);
 
 private:
+  SwapchainVk() { PC_PRINT("CREATED", TagType::Constr, "SwapchainVk.h"); };
+  ~SwapchainVk() { PC_PRINT("DESTROYED", TagType::Destr, "SwapchainVk.h"); };
+
+  static SwapchainVk *s_instance;
+
   VkSwapchainKHR m_swapchain;
   std::vector<VkImage> m_swapchainImages;
   VkFormat m_swapchainImageFormat;

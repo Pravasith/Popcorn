@@ -125,13 +125,16 @@ target_include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/OpenGL>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Pipelines>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/RenderWorkflows>
   INTERFACE $<INSTALL_INTERFACE:include>
             $<INSTALL_INTERFACE:include/Popcorn/Graphics>
             $<INSTALL_INTERFACE:include/Popcorn/Graphics/Materials>
             $<INSTALL_INTERFACE:include/Popcorn/Scene>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/OpenGL>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan>
-            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Pipelines>)
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Pipelines>
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/RenderWorkflows>
+)
 
 target_include_directories(
   Popcorn

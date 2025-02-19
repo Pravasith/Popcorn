@@ -22,16 +22,11 @@ class VertexBuffer;
 
 // SINGLETON
 class Renderer {
-public:
-  Renderer();
-  Renderer(const Window &);
-  virtual ~Renderer();
 
 public:
+  static Renderer &Get() { return *s_instance; };
   template <RendererType T> static Renderer *Create(const Window &);
   static void Destroy();
-
-  static Renderer &Get() { return *s_instance; };
 
   [[nodiscard]] const static RendererType GetAPI() {
     if (s_type == RendererType::None) {
@@ -42,17 +37,19 @@ public:
   };
 
   // PASS IN SCENE & CAMERA ETC.
+  virtual void CreateRenderWorkflows() = 0;
   virtual void DrawFrame(const Scene &scene) const = 0;
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) = 0;
-
-  // TODO: Abstract everything in here
-  void CreateTerrainMesh() {};
 
   Renderer(const Renderer &) = delete;
   Renderer &operator=(const Renderer &) = delete;
 
   Renderer(Renderer &&) = delete;
   Renderer &operator=(const Renderer &&) = delete;
+
+protected:
+  Renderer(const Window &);
+  virtual ~Renderer();
 
 private:
   static RendererType s_type;

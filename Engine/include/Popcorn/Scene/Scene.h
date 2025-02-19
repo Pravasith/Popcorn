@@ -20,12 +20,13 @@ public:
              "Scene");
   };
   virtual ~Scene() {
-    // for (auto *node : m_nodes) {
-    //   delete node;
-    // };
     m_nodes.clear();
     --s_sceneId;
     PC_PRINT("DESTROYED", TagType::Destr, "Scene");
+  };
+
+  [[nodiscard]] inline const std::vector<GameObject *> &GetNodes() const {
+    return m_nodes;
   };
 
   // Adds a node
@@ -35,7 +36,7 @@ public:
   };
 
   // Update nodes
-  inline void Update() {
+  inline void OnUpdate() {
     // Updates m_sceneData{}; // like ambient lights data, env map etc.
     for (auto &node : m_nodes) {
       node->OnUpdate(m_sceneData);
@@ -43,7 +44,7 @@ public:
   };
 
   // Renders all nodes
-  inline void Render() {
+  inline void OnRender() {
     for (auto &node : m_nodes) {
       node->OnRender(m_sceneData);
     }

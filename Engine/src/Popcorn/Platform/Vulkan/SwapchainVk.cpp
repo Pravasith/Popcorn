@@ -5,6 +5,8 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+SwapchainVk *SwapchainVk::s_instance = nullptr;
+
 void SwapchainVk::CreateSwapchain(
     const VkDevice &device, const SwapchainSupportDetails &swapchainSupport,
     GLFWwindow *window, const VkSurfaceKHR &surface,

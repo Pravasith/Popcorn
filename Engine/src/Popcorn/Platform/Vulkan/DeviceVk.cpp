@@ -8,6 +8,9 @@
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
+
+DeviceVk *DeviceVk::s_instance = nullptr;
+
 VkResult CreateDebugUtilsMessengerEXT(
     VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
     const VkAllocationCallbacks *pAllocator,
@@ -87,7 +90,7 @@ void DeviceVk::CreateInstance(const specs &appSpecs = specs{"Vulkan App", 1, 0,
   }
 
   // Create instance call
-  if (vkCreateInstance(&createInfo, nullptr, &m_instance) != VK_SUCCESS) {
+  if (vkCreateInstance(&createInfo, nullptr, &m_vkInstance) != VK_SUCCESS) {
     throw std::runtime_error("failed to create instance!");
   }
 
@@ -111,10 +114,10 @@ void DeviceVk::CleanUp() {
   vkDestroyDevice(m_device, nullptr);
 
   if constexpr (s_enableValidationLayers) {
-    DestroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
+    DestroyDebugUtilsMessengerEXT(m_vkInstance, m_debugMessenger, nullptr);
   }
-  vkDestroyInstance(m_instance, nullptr);
-  m_instance = nullptr;
+  vkDestroyInstance(m_vkInstance, nullptr);
+  m_vkInstance = nullptr;
 };
 
 std::vector<const char *> DeviceVk::GetRequiredExtensions() {
@@ -142,7 +145,7 @@ void DeviceVk::SetupDebugMessenger() {
   VkDebugUtilsMessengerCreateInfoEXT createInfo{};
   PopulateDebugMessengerCreateInfo(createInfo);
 
-  if (CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr,
+  if (CreateDebugUtilsMessengerEXT(m_vkInstance, &createInfo, nullptr,
                                    &m_debugMessenger) != VK_SUCCESS) {
     throw std::runtime_error("failed to set up debug messenger!");
   }
@@ -220,14 +223,14 @@ bool DeviceVk::CheckDeviceExtensionSupport(const VkPhysicalDevice &device) {
  *  ------------------------------------------------------------------- */
 void DeviceVk::PickPhysicalDevice(const VkSurfaceKHR &surface) {
   uint32_t deviceCount = 0;
-  vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
+  vkEnumeratePhysicalDevices(m_vkInstance, &deviceCount, nullptr);
 
   if (deviceCount == 0) {
     throw std::runtime_error("failed to find GPUs with Vulkan support!");
   }
 
   std::vector<VkPhysicalDevice> devices(deviceCount);
-  vkEnumeratePhysicalDevices(m_instance, &deviceCount, devices.data());
+  vkEnumeratePhysicalDevices(m_vkInstance, &deviceCount, devices.data());
 
   for (const auto &device : devices) {
     // Checks for extensions support, if it has required queue families, and

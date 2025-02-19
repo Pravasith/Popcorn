@@ -1,22 +1,50 @@
 #include "RendererVk.h"
+#include "DeviceVk.h"
 #include "PipelineVk.h"
 #include "Pipelines/GfxPipelineVk.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
-#include "RenderPassVk.h"
 #include "Shader.h"
 #include "Sources.h"
+#include "SurfaceVk.h"
+#include "SwapchainVk.h"
 #include <cstring>
 #include <forward_list>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+DeviceVk *RendererVk::s_deviceVk = DeviceVk::Get();
+SurfaceVk *RendererVk::s_surfaceVk = SurfaceVk::Get();
+SwapchainVk *RendererVk::s_swapchainVk = SwapchainVk::Get();
+
+std::vector<RenderWorkflowVk> RendererVk::s_renderWorkflows = {};
+
+//
+// -------------------------------------------------------------------------
+// --- PUBLIC METHODS ------------------------------------------------------
+
+void RendererVk::DrawFrame(const Scene &scene) const {};
+bool RendererVk::OnFrameBfrResize(FrameBfrResizeEvent &) { return true; };
+void RendererVk::CreateRenderWorkflows() {
+  //
+  // --- BASIC MATERIAL WORK FLOW ------------------------------------------
+  // -----------------------------------------------------------------------
+};
+
+//
+// -------------------------------------------------------------------------
+// --- PRIVATE METHODS -----------------------------------------------------
+
 RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VK");
 };
 
 RendererVk::~RendererVk() {
+  SwapchainVk::Destroy();
+  SurfaceVk::Destroy();
+  DeviceVk::Destroy();
+
   PC_PRINT("DESTROYED", TagType::Destr, "RENDERER-VULKAN");
 };
 
@@ -24,34 +52,34 @@ void RendererVk::VulkanInit() {
   GLFWwindow *osWindow = static_cast<GLFWwindow *>(m_AppWin.GetOSWindow());
 
   // CREATE INSTANCE, SET UP DEBUGGING LAYERS --------------------------------
-  m_deviceVk.CreateInstance({"Vulkan App", 1, 0, 0});
-  m_deviceVk.SetupDebugMessenger();
+  s_deviceVk->CreateInstance({"Vulkan App", 1, 0, 0});
+  s_deviceVk->SetupDebugMessenger();
 
-  const auto &instance = m_deviceVk.GetInstance();
+  const auto &instance = s_deviceVk->GetVkInstance();
 
   // CREATE WINDOW SURFACE ---------------------------------------------------
-  m_surfaceVk.CreateWindowSurface(instance, osWindow);
+  s_surfaceVk->CreateWindowSurface(instance, osWindow);
 
-  const auto &surface = m_surfaceVk.GetSurface();
+  const auto &surface = s_surfaceVk->GetSurface();
 
   // CREATE PHYSICAL & LOGICAL DEVICE ----------------------------------------
-  m_deviceVk.PickPhysicalDevice(surface);
-  m_deviceVk.CreateLogicalDevice(surface);
+  s_deviceVk->PickPhysicalDevice(surface);
+  s_deviceVk->CreateLogicalDevice(surface);
 
-  const auto &device = m_deviceVk.GetDevice();
+  const auto &device = s_deviceVk->GetDevice();
   const auto &swapchainSupportDetails =
-      m_deviceVk.GetSwapchainSupportDetails(surface);
-  const auto &queueFamilyIndices = m_deviceVk.GetQueueFamilyIndices(surface);
+      s_deviceVk->GetSwapchainSupportDetails(surface);
+  const auto &queueFamilyIndices = s_deviceVk->GetQueueFamilyIndices(surface);
 
   // CREATE SWAPCHAIN --------------------------------------------------------
-  m_swapchainVk.CreateSwapchain(device, swapchainSupportDetails, osWindow,
-                                surface, queueFamilyIndices);
+  s_swapchainVk->CreateSwapchain(device, swapchainSupportDetails, osWindow,
+                                 surface, queueFamilyIndices);
 };
 
 // TODO: Move this function to a separate class
 void RendererVk::CreateTrianglePipeline() {
-  const auto &device = m_deviceVk.GetDevice();
-  const auto &swapchainExtent = m_swapchainVk.GetSwapchainExtent();
+  const auto &device = s_deviceVk->GetDevice();
+  const auto &swapchainExtent = s_swapchainVk->GetSwapchainExtent();
 
   // CREATE SHADER MODULES
   auto vertShaderBuffer = Shader::ReadSpvFile(
@@ -96,54 +124,16 @@ void RendererVk::CreateTrianglePipeline() {
 // TODO: Move this function to a separate class
 void RendererVk::CreateTriangleRenderPass() {
 
-  // ATTACHMENT DESCRIPTIONS
-  VkAttachmentDescription colorAttachment{};
-  RenderPassVk::GetDefaultAttachmentDescription(colorAttachment);
-  colorAttachment.format = m_swapchainVk.GetSwapchainImageFormat();
-
-  std::vector<VkAttachmentDescription> attachments{}; // size 0
-  attachments.emplace_back(colorAttachment);          // size 1
-
-  // ATTACHMENT REFERENCES
-  VkAttachmentReference colorAttachmentRef{};
-  RenderPassVk::GetAttachmentRef(colorAttachmentRef, 0); // index 0
-
-  std::vector<VkAttachmentReference> attachmentRefs{}; // size 0
-  attachmentRefs.emplace_back(colorAttachmentRef);     // size 1
-
-  // SUBPASSES
-  VkSubpassDescription subpass1{};
-  RenderPassVk::GetDefaultSubpassDescription(subpass1);
-  subpass1.pColorAttachments = attachmentRefs.data();
-
-  // VkSubpassDescription subpass2{};
-  // RenderPassVk::GetDefaultSubpassDescription(subpass2);
-
-  std::vector<VkSubpassDescription> subpasses{}; // size 0
-  subpasses.emplace_back(subpass1);              // size 1
-
-  // CREATE RENDER PASS
-  VkRenderPassCreateInfo renderPass1CreateInfo{};
-  RenderPassVk::SetDefaultRenderPassCreateInfo(renderPass1CreateInfo);
-  renderPass1CreateInfo.pSubpasses = subpasses.data();
-
-  RenderPassVk renderPass1;
-
-  renderPass1.Create(renderPass1CreateInfo);
-  renderPass1.Destroy();
 };
 
 void RendererVk::VulkanDestroy() {
-  const auto &instance = m_deviceVk.GetInstance();
-  const auto &device = m_deviceVk.GetDevice();
+  const auto &instance = s_deviceVk->GetVkInstance();
+  const auto &device = s_deviceVk->GetDevice();
 
-  m_swapchainVk.CleanUp(device);
-  m_surfaceVk.CleanUp(instance);
-  m_deviceVk.CleanUp();
+  s_swapchainVk->CleanUp(device);
+  s_surfaceVk->CleanUp(instance);
+  s_deviceVk->CleanUp();
 };
-
-void RendererVk::DrawFrame(const Scene &scene) const {};
-bool RendererVk::OnFrameBfrResize(FrameBfrResizeEvent &) { return true; };
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
