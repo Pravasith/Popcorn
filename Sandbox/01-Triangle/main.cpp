@@ -63,7 +63,7 @@ public:
     Mesh triMesh{vertexBuffer, triMat};
 
     TriangleScene triScene{};
-    triScene.Add(&triMesh);
+    triScene.Add(&triMesh); // HERE IS THE MATERIAL READY STAGE
 
     // AND THEN IN THE RENDER LOOP
     // Renderer.Render(triScene);

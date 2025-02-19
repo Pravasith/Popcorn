@@ -4,10 +4,13 @@
 #include "GlobalMacros.h"
 #include "Material.h"
 #include "Popcorn/Core/Base.h"
+#include "Renderer.h"
 #include "VertexBuffer.h"
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
+
+class SceneObjectsHandler;
 
 class Mesh : public GameObject {
 public:
@@ -37,7 +40,7 @@ protected:
   // TODO: Make this a Vector as required
   Material &m_material;
 
-  static const MaterialHandler *s_materialHandler;
+  static const SceneObjectsHandler *s_meshHandler;
 };
 
 GFX_NAMESPACE_END

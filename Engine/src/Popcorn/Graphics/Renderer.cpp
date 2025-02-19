@@ -72,6 +72,7 @@ void Renderer::Init(const Window &appWin) {
 
     RendererVk *vkRenderer = static_cast<RendererVk *>(s_instance);
     vkRenderer->VulkanInit();
+    vkRenderer->CreateRenderWorkflows();
 
     // TEMP FUNCTIONS
     // CREATE ALL PIPELINES

@@ -2,7 +2,6 @@
 
 #include "GfxPipelineVk.h"
 #include "GlobalMacros.h"
-#include "Material.h"
 #include "Popcorn/Core/Base.h"
 #include "RenderPassVk.h"
 #include <vector>
@@ -13,6 +12,11 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+enum class RenderWorkflowIndices {
+  Basic = 1, // Basic colors
+  Shadows,   // Simple hard shadows
+};
+
 class RenderWorkflowVk {
 public:
   RenderWorkflowVk() {
@@ -21,6 +25,10 @@ public:
   virtual ~RenderWorkflowVk() {
     PC_PRINT("DESTROYED", TagType::Destr, "RenderWorkflowVk")
   };
+
+private:
+  virtual void Init() = 0;
+  virtual void CleanUp() = 0;
 
   virtual void CreateRenderPasses() = 0;
   virtual void CreateVkPipelines(const Material &) = 0;

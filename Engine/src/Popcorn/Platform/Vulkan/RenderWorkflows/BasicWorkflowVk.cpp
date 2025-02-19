@@ -6,7 +6,11 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-void BasicRenderWorkflowVk::CreateRenderPass() {
+void BasicRenderWorkflowVk::CreateRenderPasses() {
+  //
+  // ----------------------------------------------------------------
+  // --- Basic RenderPass -------------------------------------------
+  //
   // ATTACHMENT DESCRIPTIONS
   VkAttachmentDescription colorAttachment{};
   RenderPassVk::GetDefaultAttachmentDescription(colorAttachment);
@@ -43,6 +47,8 @@ void BasicRenderWorkflowVk::CreateRenderPass() {
   RenderPassVk renderPass1;
 
   renderPass1.Create(renderPass1CreateInfo);
+
+  m_renderPasses.emplace_back(renderPass1);
   renderPass1.Destroy();
 };
 

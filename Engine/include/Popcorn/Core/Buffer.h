@@ -84,7 +84,9 @@ public:
         //
         {PC_PRINT("CREATED", TagType::Constr, "BUFFER")};
 
-  // COPY CONSTRUCTOR ------------------------------------------------------
+  //
+  // -----------------------------------------------------------------------
+  // --- COPY SEMANTICS ----------------------------------------------------
   Buffer(const Buffer &other) {
     PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Constr, "BUFFER")
     if (this == &other)
@@ -108,7 +110,9 @@ public:
     return *this;
   };
 
-  // MOVE CONSTRUCTOR ------------------------------------------------------
+  //
+  // -----------------------------------------------------------------------
+  // --- MOVE SEMANTICS ----------------------------------------------------
   Buffer(Buffer &&other) {
     PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Constr, "BUFFER")
     if (this == &other) {

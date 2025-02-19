@@ -23,11 +23,12 @@ public:
   // Can potentially take "void *frame" as a param
   virtual void DrawFrame(const Scene &scene) const override;
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) override;
-  virtual void CreateRenderWorkflows() override;
+  // virtual RenderWorkflowVk*
 
   // Sets up devices, configure swapchains, creates depth buffers
   // also allocates command pools
   void VulkanInit();
+  void CreateRenderWorkflows();
 
   // Temp functions
   void CreateTrianglePipeline();
@@ -35,18 +36,39 @@ public:
 
   void VulkanDestroy();
 
-  // STATIC UTILS BEGIN ----------------------------------------------
-  static void CreateShaderModules() {};
+  static RenderWorkflowVk *GetRenderWorkflow(const RenderWorkflowIndices index);
 
-  static void BindPipeline(void *pipeline, void *renderPass) {};
+private:
+  void RenderScene() {
 
-  static void BeginRenderPass(void *polyRenderPass) {};
-  static void BeginSubRenderPass(void *polyRenderPass) {};
+    // --- RENDER COLORS ---------------------------------------------------
+    // BasicWorkflow::Render(Scene);
+    // // Implementation inside BasicWorkflow::Render
+    // auto regMaterials = Scene.GetRegisteredMaterials()
+    // for (auto &mat : regMaterials) {
+    //      for (auto &mesh : mat.GetMeshes()) {
+    //         // Renderpass
+    //         BasicPipelineVk.Get(mat.data, m_renderPass); // mat.data like
+    //         uniforms
+    //      };
+    // };
 
-  static void EndRenderPass(void *polySubrenderPass) {};
-  static void EndSubRenderPass(void *polySubrenderPass) {};
-  // STATIC UTILS END ------------------------------------------------
+    // --- RENDER SHADOWS --------------------------------------------------
+    // ShadowsWorkflow::Render(Scene);
+    // // Implementation inside ShadowsWorkflow::Render
+    // auto regMaterials = Scene.GetRegisteredMaterials()
+    // for (auto &mat : regMaterials) {
+    //      for (auto &mesh : mat.GetMeshes()) {
+    //         // Renderpass
+    //         ShadowPipelineVk.Get(mat.data, m_renderPass); // mat.data like
+    //         uniforms
+    //      };
+    // };
+  };
 
+  //
+  // -----------------------------------------------------------------------
+  // --- TODO: Potential methods -------------------------------------------
   void RecordCmdBuffer(void *renderPass, void *pipeline) {};
   void SubmitCmdBuffer(void *cmdBuffer) {};
 
@@ -55,7 +77,7 @@ private:
   static SurfaceVk *s_surfaceVk;
   static SwapchainVk *s_swapchainVk;
 
-  static std::vector<RenderWorkflowVk> s_renderWorkflows;
+  static std::vector<RenderWorkflowVk *> s_renderWorkflows;
 };
 
 GFX_NAMESPACE_END

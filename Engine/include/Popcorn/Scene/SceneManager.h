@@ -1,24 +1,26 @@
 #pragma once
 
 #include "GlobalMacros.h"
-#include "Material.h"
 #include "Popcorn/Core/Base.h"
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+class Mesh;
+class Material;
+
 // TODO: Make this class handle batch rendering with Scene-Mesh-Material ECS
 // system
 // TODO: Handle the case of duplicating meshes & materials
-class MaterialHandler {
+class SceneManager {
 public:
-  static const MaterialHandler *Get() {
+  static const SceneManager *Get() {
     if (s_instance) {
       return s_instance;
     };
 
-    s_instance = new MaterialHandler();
+    s_instance = new SceneManager();
     return s_instance;
   };
 
@@ -27,24 +29,22 @@ public:
       delete s_instance;
       s_instance = nullptr;
     } else {
-      PC_WARN("Trying to destroy a non-existant instance of MaterialHandler")
+      PC_WARN("Trying to destroy a non-existant instance of SceneManager")
     };
   };
 
   void RegisterMaterial(Material *materialPtr) const;
   void UnRegisterMaterial(Material *materialPtr) const;
 
-  void Draw();
-
 private:
-  MaterialHandler() { PC_PRINT("CREATED", TagType::Constr, "MaterialHandler") };
-  ~MaterialHandler() {
+  SceneManager() { PC_PRINT("CREATED", TagType::Constr, "SceneManager") };
+  ~SceneManager() {
     s_materialsLibrary.clear();
-    PC_PRINT("DESTROYED", TagType::Destr, "MaterialHandler")
+    PC_PRINT("DESTROYED", TagType::Destr, "SceneManager")
   };
 
 private:
-  static MaterialHandler *s_instance;
+  static SceneManager *s_instance;
   static std::vector<Material *> s_materialsLibrary;
 };
 

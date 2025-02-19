@@ -14,10 +14,22 @@ GFX_NAMESPACE_BEGIN
 class BasicRenderWorkflowVk : public RenderWorkflowVk {
 public:
   BasicRenderWorkflowVk() {
+    Init();
     PC_PRINT("CREATED", TagType::Constr, "BasicWorkflowVk")
   };
-  ~BasicRenderWorkflowVk() {
+  ~BasicRenderWorkflowVk() override {
+    CleanUp();
     PC_PRINT("DESTROYED", TagType::Destr, "BasicWorkflowVk")
+  };
+
+private:
+  virtual void Init() override {
+    CreateRenderPasses();
+    // CreateVkPipelines(const Material &);
+  };
+  virtual void CleanUp() override {
+    // Cleanup render passes
+    // Cleanup pipelines
   };
 
   virtual void CreateRenderPasses() override;

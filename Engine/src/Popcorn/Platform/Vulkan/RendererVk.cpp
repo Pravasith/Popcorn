@@ -1,9 +1,11 @@
 #include "RendererVk.h"
+#include "BasicWorkflowVk.h"
 #include "DeviceVk.h"
 #include "PipelineVk.h"
 #include "Pipelines/GfxPipelineVk.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
+#include "RenderWorkflowVk.h"
 #include "Shader.h"
 #include "Sources.h"
 #include "SurfaceVk.h"
@@ -18,7 +20,7 @@ DeviceVk *RendererVk::s_deviceVk = DeviceVk::Get();
 SurfaceVk *RendererVk::s_surfaceVk = SurfaceVk::Get();
 SwapchainVk *RendererVk::s_swapchainVk = SwapchainVk::Get();
 
-std::vector<RenderWorkflowVk> RendererVk::s_renderWorkflows = {};
+std::vector<RenderWorkflowVk *> RendererVk::s_renderWorkflows = {};
 
 //
 // -------------------------------------------------------------------------
@@ -26,11 +28,6 @@ std::vector<RenderWorkflowVk> RendererVk::s_renderWorkflows = {};
 
 void RendererVk::DrawFrame(const Scene &scene) const {};
 bool RendererVk::OnFrameBfrResize(FrameBfrResizeEvent &) { return true; };
-void RendererVk::CreateRenderWorkflows() {
-  //
-  // --- BASIC MATERIAL WORK FLOW ------------------------------------------
-  // -----------------------------------------------------------------------
-};
 
 //
 // -------------------------------------------------------------------------
@@ -41,6 +38,12 @@ RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
 };
 
 RendererVk::~RendererVk() {
+  // Destroy render workflows
+  for (auto *workflow : s_renderWorkflows) {
+    delete workflow;
+  }
+  s_renderWorkflows.clear();
+
   SwapchainVk::Destroy();
   SurfaceVk::Destroy();
   DeviceVk::Destroy();
@@ -48,20 +51,35 @@ RendererVk::~RendererVk() {
   PC_PRINT("DESTROYED", TagType::Destr, "RENDERER-VULKAN");
 };
 
+//
+// ---------------------------------------------------------------------------
+// --- RENDER WORKFLOWS ------------------------------------------------------
+void RendererVk::CreateRenderWorkflows() {
+  auto *basicRendererWorkflow = new BasicRenderWorkflowVk;
+  s_renderWorkflows.push_back(basicRendererWorkflow);
+};
+
+RenderWorkflowVk *
+RendererVk::GetRenderWorkflow(const RenderWorkflowIndices index) {
+  return s_renderWorkflows[(int)index];
+};
+
 void RendererVk::VulkanInit() {
   GLFWwindow *osWindow = static_cast<GLFWwindow *>(m_AppWin.GetOSWindow());
-
+  //
   // CREATE INSTANCE, SET UP DEBUGGING LAYERS --------------------------------
   s_deviceVk->CreateInstance({"Vulkan App", 1, 0, 0});
   s_deviceVk->SetupDebugMessenger();
 
   const auto &instance = s_deviceVk->GetVkInstance();
 
+  //
   // CREATE WINDOW SURFACE ---------------------------------------------------
   s_surfaceVk->CreateWindowSurface(instance, osWindow);
 
   const auto &surface = s_surfaceVk->GetSurface();
 
+  //
   // CREATE PHYSICAL & LOGICAL DEVICE ----------------------------------------
   s_deviceVk->PickPhysicalDevice(surface);
   s_deviceVk->CreateLogicalDevice(surface);
@@ -71,6 +89,7 @@ void RendererVk::VulkanInit() {
       s_deviceVk->GetSwapchainSupportDetails(surface);
   const auto &queueFamilyIndices = s_deviceVk->GetQueueFamilyIndices(surface);
 
+  //
   // CREATE SWAPCHAIN --------------------------------------------------------
   s_swapchainVk->CreateSwapchain(device, swapchainSupportDetails, osWindow,
                                  surface, queueFamilyIndices);

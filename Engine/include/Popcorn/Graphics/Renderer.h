@@ -37,7 +37,6 @@ public:
   };
 
   // PASS IN SCENE & CAMERA ETC.
-  virtual void CreateRenderWorkflows() = 0;
   virtual void DrawFrame(const Scene &scene) const = 0;
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) = 0;
 
@@ -46,6 +45,8 @@ public:
 
   Renderer(Renderer &&) = delete;
   Renderer &operator=(const Renderer &&) = delete;
+
+private:
 
 protected:
   Renderer(const Window &);
