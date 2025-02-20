@@ -1,6 +1,5 @@
 #include "Material.h"
 #include "GlobalMacros.h"
-#include "MaterialHandler.h"
 #include "Mesh.h"
 #include "Shader.h"
 #include <algorithm>

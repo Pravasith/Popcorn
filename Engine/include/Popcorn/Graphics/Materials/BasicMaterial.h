@@ -15,7 +15,9 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "BasicMaterial.h");
   };
 
-  static constexpr MaterialTypes type_value = MaterialTypes::BasicMat;
+  virtual const MaterialTypes GetMaterialType() const override {
+    return MaterialTypes::BasicMat;
+  };
 
   virtual void Bind() override {
     // TODO: Do some bind stuff..

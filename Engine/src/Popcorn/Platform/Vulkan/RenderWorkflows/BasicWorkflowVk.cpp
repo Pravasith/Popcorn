@@ -1,34 +1,84 @@
 #include "BasicWorkflowVk.h"
+#include "DeviceVk.h"
+#include "GfxPipelineVk.h"
 #include "GlobalMacros.h"
+#include "Material.h"
+#include "PipelineVk.h"
 #include "RenderPassVk.h"
 #include "SwapchainVk.h"
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-void BasicRenderWorkflowVk::CreateRenderPasses() {
+void BasicRenderWorkflowVk::CreateVkPipeline(const Material &material) {
+  auto *deviceVkStn = DeviceVk::Get();
+  auto &device = deviceVkStn->GetDevice();
+  auto *swapchainVk = SwapchainVk::Get();
+
+  const auto &swapchainExtent = swapchainVk->GetSwapchainExtent();
+
+  auto vertShaderBuffer = material.GetShaders()[0];
+  auto fragShaderBuffer = material.GetShaders()[1];
+
+  auto vertShaderModule = PC_CreateShaderModule(device, vertShaderBuffer);
+  auto fragShaderModule = PC_CreateShaderModule(device, fragShaderBuffer);
+
+  std::forward_list<VkShaderModule> shaderModules = {vertShaderModule,
+                                                     fragShaderModule};
+
+  // CREATE BASIC PIPELINE
+  GfxPipelineVk m_basicGfxPipeline{};
+
+  // SET PIPELINE DEVICE
+  m_basicGfxPipeline.SetDevice(device);
+
+  // SET SHADER STAGES
+  m_basicGfxPipeline.SetShaderStagesMask(static_cast<ShaderStages>(
+      ShaderStages::VertexBit | ShaderStages::FragmentBit));
+  std::vector<VkPipelineShaderStageCreateInfo> shaderStages =
+      m_basicGfxPipeline.CreateShaderStages(shaderModules);
+
+  // SET FIXED FUNCTION PIPELINE STATE & SET LAYOUT
+  GfxPipelineCreateInfo createInfo{};
+  m_basicGfxPipeline.GetDefaultPipelineCreateInfo(createInfo);
+  m_basicGfxPipeline.SetShaderStageCreateInfos(shaderStages);
+  m_basicGfxPipeline.SetPipelineLayout(createInfo.pipelineLayout);
+
+  //
+
+  // CREATE PIPELINE
+  m_basicGfxPipeline.Create(createInfo);
+
+  // DESTROY SHADER MODULES
+  PC_DestroyShaderModule(device, vertShaderModule);
+  PC_DestroyShaderModule(device, fragShaderModule);
+};
+
+void BasicRenderWorkflowVk::CreateRenderPass() {
   //
   // ----------------------------------------------------------------
   // --- Basic RenderPass -------------------------------------------
   //
-  // ATTACHMENT DESCRIPTIONS
+  // ATTACHMENT DESCRIPTIONS ----------------------------------------
   VkAttachmentDescription colorAttachment{};
   RenderPassVk::GetDefaultAttachmentDescription(colorAttachment);
 
-  auto swapchainVk = SwapchainVk::Get();
+  auto *swapchainVk = SwapchainVk::Get();
   colorAttachment.format = swapchainVk->GetSwapchainImageFormat();
 
   std::vector<VkAttachmentDescription> attachments{}; // size 0
   attachments.emplace_back(colorAttachment);          // size 1
 
-  // ATTACHMENT REFERENCES
+  //
+  // ATTACHMENT REFERENCES ------------------------------------------
   VkAttachmentReference colorAttachmentRef{};
   RenderPassVk::GetAttachmentRef(colorAttachmentRef, 0); // index 0
 
   std::vector<VkAttachmentReference> attachmentRefs{}; // size 0
   attachmentRefs.emplace_back(colorAttachmentRef);     // size 1
 
-  // SUBPASSES
+  //
+  // SUBPASSES ------------------------------------------------------
   VkSubpassDescription subpass1{};
   RenderPassVk::GetDefaultSubpassDescription(subpass1);
   subpass1.pColorAttachments = attachmentRefs.data();
@@ -39,17 +89,16 @@ void BasicRenderWorkflowVk::CreateRenderPasses() {
   std::vector<VkSubpassDescription> subpasses{}; // size 0
   subpasses.emplace_back(subpass1);              // size 1
 
-  // CREATE RENDER PASS
+  //
+  // CREATE RENDER PASS INFO ----------------------------------------
   VkRenderPassCreateInfo renderPass1CreateInfo{};
   RenderPassVk::SetDefaultRenderPassCreateInfo(renderPass1CreateInfo);
   renderPass1CreateInfo.pSubpasses = subpasses.data();
 
-  RenderPassVk renderPass1;
-
-  renderPass1.Create(renderPass1CreateInfo);
-
-  m_renderPasses.emplace_back(renderPass1);
-  renderPass1.Destroy();
+  //
+  // CREATE VULKAN RENDER PASS --------------------------------------
+  auto *deviceSingleton = DeviceVk::Get();
+  m_basicRenderPass.Create(renderPass1CreateInfo, deviceSingleton->GetDevice());
 };
 
 GFX_NAMESPACE_END

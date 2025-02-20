@@ -1,6 +1,7 @@
 #include "RendererVk.h"
 #include "BasicWorkflowVk.h"
 #include "DeviceVk.h"
+#include "Material.h"
 #include "PipelineVk.h"
 #include "Pipelines/GfxPipelineVk.h"
 #include "Popcorn/Core/Base.h"
@@ -28,6 +29,22 @@ std::vector<RenderWorkflowVk *> RendererVk::s_renderWorkflows = {};
 
 void RendererVk::DrawFrame(const Scene &scene) const {};
 bool RendererVk::OnFrameBfrResize(FrameBfrResizeEvent &) { return true; };
+
+void RendererVk::PrepareMaterialForRender(Material *materialPtr) {
+  switch (materialPtr->GetMaterialType()) {
+  case MaterialTypes::BasicMat:
+    // Creates Vulkan Pipelines necessary for the basic materials
+    {
+      auto *basicRenderWorkflow =
+          s_renderWorkflows[(int)RenderWorkflowIndices::Basic];
+      basicRenderWorkflow->CreateRenderPass();
+      basicRenderWorkflow->CreateVkPipeline(*materialPtr);
+    }
+    break;
+  case MaterialTypes::PbrMat:
+    break;
+  }
+};
 
 //
 // -------------------------------------------------------------------------
@@ -96,54 +113,7 @@ void RendererVk::VulkanInit() {
 };
 
 // TODO: Move this function to a separate class
-void RendererVk::CreateTrianglePipeline() {
-  const auto &device = s_deviceVk->GetDevice();
-  const auto &swapchainExtent = s_swapchainVk->GetSwapchainExtent();
-
-  // CREATE SHADER MODULES
-  auto vertShaderBuffer = Shader::ReadSpvFile(
-      PC_SHADER_SOURCE_MAP[ShaderFiles::VertShaderTriangle]);
-  auto fragShaderBuffer = Shader::ReadSpvFile(
-      PC_SHADER_SOURCE_MAP[ShaderFiles::FragShaderTriangle]);
-
-  auto vertShaderModule = PC_CreateShaderModule(device, vertShaderBuffer);
-  auto fragShaderModule = PC_CreateShaderModule(device, fragShaderBuffer);
-
-  std::forward_list<VkShaderModule> shaderModules = {vertShaderModule,
-                                                     fragShaderModule};
-
-  // CREATE BASIC PIPELINE
-  GfxPipelineVk trianglePipeline{};
-
-  // SET PIPELINE DEVICE
-  trianglePipeline.SetDevice(device);
-
-  // SET SHADER STAGES
-  trianglePipeline.SetShaderStagesMask(static_cast<ShaderStages>(
-      ShaderStages::VertexBit | ShaderStages::FragmentBit));
-  std::vector<VkPipelineShaderStageCreateInfo> shaderStages =
-      trianglePipeline.CreateShaderStages(shaderModules);
-
-  // SET FIXED FUNCTION PIPELINE STATE & SET LAYOUT
-  GfxPipelineCreateInfo createInfo{};
-  trianglePipeline.GetDefaultPipelineCreateInfo(createInfo);
-  trianglePipeline.SetShaderStageCreateInfos(shaderStages);
-  trianglePipeline.SetPipelineLayout(createInfo.pipelineLayout);
-
-  //
-
-  // CREATE PIPELINE
-  trianglePipeline.Create(createInfo);
-
-  // DESTROY SHADER MODULES
-  PC_DestroyShaderModule(device, vertShaderModule);
-  PC_DestroyShaderModule(device, fragShaderModule);
-};
-
-// TODO: Move this function to a separate class
-void RendererVk::CreateTriangleRenderPass() {
-
-};
+void RendererVk::CreateTrianglePipeline() {};
 
 void RendererVk::VulkanDestroy() {
   const auto &instance = s_deviceVk->GetVkInstance();

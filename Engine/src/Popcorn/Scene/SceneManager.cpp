@@ -1,5 +1,6 @@
 #include "SceneManager.h"
 #include "Material.h"
+#include "Renderer.h"
 #include <algorithm>
 
 ENGINE_NAMESPACE_BEGIN
@@ -16,7 +17,14 @@ void SceneManager::RegisterMaterial(Material *materialPtr) const {
     return;
   };
 
+  //
+  // ADD TO MATERIAL LIBRARY ---------------------------------------------
   s_materialsLibrary.push_back(materialPtr);
+
+  //
+  // INIT MATERIAL PIPELINES ---------------------------------------------
+  auto &rendererStn = Renderer::Get();
+  rendererStn.PrepareMaterialForRender(materialPtr);
 }
 
 void SceneManager::UnRegisterMaterial(Material *materialPtr) const {

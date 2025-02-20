@@ -12,6 +12,43 @@ public:
   RenderPassVk() { PC_PRINT("CREATED", TagType::Constr, "RenderPassVk"); };
   ~RenderPassVk() { PC_PRINT("DESTROYED", TagType::Destr, "RenderPassVk"); };
 
+  //
+  // -----------------------------------------------------------------------
+  // --- COPY SEMANTICS ----------------------------------------------------
+  RenderPassVk(const RenderPassVk &other)
+      : m_renderPass(other.m_renderPass) {
+          PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Constr, "BUFFER")
+        };
+  RenderPassVk &operator=(const RenderPassVk &other) {
+    PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print, "BUFFER")
+
+    if (this == &other)
+      return *this;
+
+    this->m_renderPass = other.m_renderPass;
+
+    return *this;
+  };
+
+  //
+  // -----------------------------------------------------------------------
+  // --- MOVE SEMANTICS ----------------------------------------------------
+  RenderPassVk(RenderPassVk &&other) : m_renderPass(other.m_renderPass) {
+    PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Constr, "BUFFER")
+    other.m_renderPass = VK_NULL_HANDLE;
+  };
+  RenderPassVk &operator=(RenderPassVk &&other) {
+    PC_PRINT("MOVE ASSIGNMENT EVOKED", TagType::Print, "BUFFER")
+    if (this == &other) {
+      return *this;
+    };
+
+    this->m_renderPass = other.m_renderPass;
+    other.m_renderPass = VK_NULL_HANDLE;
+
+    return *this;
+  };
+
   static void
   GetDefaultAttachmentDescription(VkAttachmentDescription &attachment) {
     // Color attachment
@@ -52,26 +89,26 @@ public:
     renderPassInfo.pSubpasses = VK_NULL_HANDLE;
   };
 
-  void Create(const VkRenderPassCreateInfo &renderPassInfo) {
-    PC_VK_NULL_CHECK(m_device)
+  void Create(const VkRenderPassCreateInfo &renderPassInfo,
+              const VkDevice &device) {
+    PC_VK_NULL_CHECK(device)
     PC_VK_NULL_CHECK(m_renderPass)
 
-    if (vkCreateRenderPass(m_device, &renderPassInfo, nullptr, &m_renderPass) !=
+    if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &m_renderPass) !=
         VK_SUCCESS) {
       throw std::runtime_error("failed to create render pass!");
     };
   };
 
-  void Destroy() {
-    PC_VK_NULL_CHECK(m_device)
+  void Destroy(const VkDevice &device) {
+    PC_VK_NULL_CHECK(device)
     PC_VK_NULL_CHECK(m_renderPass)
 
-    vkDestroyRenderPass(m_device, m_renderPass, nullptr);
+    vkDestroyRenderPass(device, m_renderPass, nullptr);
   };
 
 private:
   VkRenderPass m_renderPass = VK_NULL_HANDLE;
-  VkDevice m_device = VK_NULL_HANDLE;
 };
 
 GFX_NAMESPACE_END

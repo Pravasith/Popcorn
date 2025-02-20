@@ -10,8 +10,6 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-class SceneObjectsHandler;
-
 class Mesh : public GameObject {
 public:
   // TODO: Handle the case of duplicating meshes & materials
@@ -39,8 +37,6 @@ protected:
   VertexBuffer *m_vertexBuffer;
   // TODO: Make this a Vector as required
   Material &m_material;
-
-  static const SceneObjectsHandler *s_meshHandler;
 };
 
 GFX_NAMESPACE_END

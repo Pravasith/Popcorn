@@ -1,16 +1,14 @@
 #include "Mesh.h"
 #include "Material.h"
-#include "SceneObjectsHandler.h"
+#include "SceneManager.h"
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-const SceneObjectsHandler *Mesh::s_meshHandler = SceneObjectsHandler::Get();
-
 // Fires when the mesh is added to a Scene
 void Mesh::OnAttach(const SceneData &) {
-  s_meshHandler->RegisterMaterial(&m_material);
-  // s_meshHandler->PrepareMeshForRender(this);
+  auto *sceneManagerStn = SceneManager::Get();
+  sceneManagerStn->RegisterMaterial(&m_material);
 };
 
 void Mesh::OnUpdate(const SceneData &) {};

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GlobalMacros.h"
+#include "Material.h"
 #include "Popcorn/Core/Window.h"
 #include "Popcorn/Events/WindowEvent.h"
 #include "Scene.h"
@@ -37,16 +38,17 @@ public:
   };
 
   // PASS IN SCENE & CAMERA ETC.
+
   virtual void DrawFrame(const Scene &scene) const = 0;
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) = 0;
+
+  virtual void PrepareMaterialForRender(Material *materialPtr) = 0;
 
   Renderer(const Renderer &) = delete;
   Renderer &operator=(const Renderer &) = delete;
 
   Renderer(Renderer &&) = delete;
   Renderer &operator=(const Renderer &&) = delete;
-
-private:
 
 protected:
   Renderer(const Window &);

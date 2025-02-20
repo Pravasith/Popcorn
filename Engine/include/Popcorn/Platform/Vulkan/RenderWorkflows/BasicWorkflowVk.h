@@ -1,8 +1,10 @@
 #pragma once
 
+#include "DeviceVk.h"
+#include "GfxPipelineVk.h"
 #include "GlobalMacros.h"
-#include "Material.h"
 #include "Popcorn/Core/Base.h"
+#include "RenderPassVk.h"
 #include "RenderWorkflowVk.h"
 #include <vulkan/vulkan_core.h>
 
@@ -14,7 +16,6 @@ GFX_NAMESPACE_BEGIN
 class BasicRenderWorkflowVk : public RenderWorkflowVk {
 public:
   BasicRenderWorkflowVk() {
-    Init();
     PC_PRINT("CREATED", TagType::Constr, "BasicWorkflowVk")
   };
   ~BasicRenderWorkflowVk() override {
@@ -22,18 +23,22 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "BasicWorkflowVk")
   };
 
+  virtual void CreateRenderPass() override;
+  virtual void CreateVkPipeline(const Material &) override;
+
 private:
-  virtual void Init() override {
-    CreateRenderPasses();
-    // CreateVkPipelines(const Material &);
-  };
   virtual void CleanUp() override {
-    // Cleanup render passes
+    auto *deviceSingleton = DeviceVk::Get();
     // Cleanup pipelines
+    m_basicGfxPipeline.Destroy();
+
+    // Cleanup render passes
+    m_basicRenderPass.Destroy(deviceSingleton->GetDevice());
   };
 
-  virtual void CreateRenderPasses() override;
-  virtual void CreateVkPipelines(const Material &) override;
+private:
+  RenderPassVk m_basicRenderPass;
+  GfxPipelineVk m_basicGfxPipeline;
 };
 
 GFX_NAMESPACE_END

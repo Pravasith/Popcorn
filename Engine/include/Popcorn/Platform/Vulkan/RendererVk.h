@@ -23,7 +23,7 @@ public:
   // Can potentially take "void *frame" as a param
   virtual void DrawFrame(const Scene &scene) const override;
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) override;
-  // virtual RenderWorkflowVk*
+  virtual void PrepareMaterialForRender(Material *materialPtr) override;
 
   // Sets up devices, configure swapchains, creates depth buffers
   // also allocates command pools
