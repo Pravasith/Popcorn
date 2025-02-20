@@ -2,17 +2,12 @@
 #include "BasicWorkflowVk.h"
 #include "DeviceVk.h"
 #include "Material.h"
-#include "PipelineVk.h"
-#include "Pipelines/GfxPipelineVk.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
 #include "RenderWorkflowVk.h"
-#include "Shader.h"
-#include "Sources.h"
 #include "SurfaceVk.h"
 #include "SwapchainVk.h"
 #include <cstring>
-#include <forward_list>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -35,6 +30,8 @@ void RendererVk::PrepareMaterialForRender(Material *materialPtr) {
   case MaterialTypes::BasicMat:
     // Creates Vulkan Pipelines necessary for the basic materials
     {
+      PC_WARN(s_renderWorkflows.size());
+
       auto *basicRenderWorkflow =
           s_renderWorkflows[(int)RenderWorkflowIndices::Basic];
       basicRenderWorkflow->CreateRenderPass();
@@ -60,6 +57,8 @@ RendererVk::~RendererVk() {
     delete workflow;
   }
   s_renderWorkflows.clear();
+
+  VulkanDestroy();
 
   SwapchainVk::Destroy();
   SurfaceVk::Destroy();
@@ -111,9 +110,6 @@ void RendererVk::VulkanInit() {
   s_swapchainVk->CreateSwapchain(device, swapchainSupportDetails, osWindow,
                                  surface, queueFamilyIndices);
 };
-
-// TODO: Move this function to a separate class
-void RendererVk::CreateTrianglePipeline() {};
 
 void RendererVk::VulkanDestroy() {
   const auto &instance = s_deviceVk->GetVkInstance();

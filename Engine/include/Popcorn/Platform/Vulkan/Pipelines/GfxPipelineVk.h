@@ -11,13 +11,11 @@ GFX_NAMESPACE_BEGIN
 class GfxPipelineVk : public PipelineVk<PipelineTypes::GraphicsType> {
 public:
   GfxPipelineVk() { PC_PRINT("CREATED", TagType::Constr, "GfxPipelineVk"); };
-  ~GfxPipelineVk() {
-    Destroy();
+  ~GfxPipelineVk() { PC_PRINT("DESTROYED", TagType::Destr, "GfxPipelineVk"); };
 
-    PC_PRINT("DESTROYED", TagType::Destr, "GfxPipelineVk");
-  };
-
-  virtual void Create(const CreateInfo_type &pipelineCreateInfo) override {
+  virtual void CreateVkPipeline(const VkDevice &device,
+                                const CreateInfo_type &pipelineCreateInfo,
+                                const VkRenderPass &renderPass) override {
     if (m_pipeline != VK_NULL_HANDLE) {
       PC_WARN("Attempt to create GfxPipeline when it already exists")
       return;
@@ -29,7 +27,6 @@ public:
     };
 
     PC_VK_NULL_CHECK(m_pipelineLayout);
-    PC_VK_NULL_CHECK(m_renderPass);
 
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -49,27 +46,25 @@ public:
 
     pipelineInfo.layout = m_pipelineLayout;
 
-    pipelineInfo.renderPass = m_renderPass;
+    pipelineInfo.renderPass = renderPass;
     pipelineInfo.subpass = 0;
 
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
     pipelineInfo.basePipelineIndex = -1;              // Optional
 
-    if (vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &pipelineInfo,
+    if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo,
                                   nullptr, &m_pipeline) != VK_SUCCESS) {
       throw std::runtime_error("failed to create graphics pipeline!");
     }
   };
 
-  virtual void Destroy() override {
-    PC_VK_NULL_CHECK(m_device)
-    DestroyPipelineLayout(m_device);
+  virtual void Destroy(const VkDevice &device) override {
+    PC_VK_NULL_CHECK(device)
+    PC_VK_NULL_CHECK(m_pipeline)
+    DestroyPipelineLayout(device);
 
-    if (m_pipeline != VK_NULL_HANDLE) {
-      vkDestroyPipeline(m_device, m_pipeline, nullptr);
-      m_pipeline = VK_NULL_HANDLE;
-      m_device = VK_NULL_HANDLE;
-    };
+    vkDestroyPipeline(device, m_pipeline, nullptr);
+    m_pipeline = VK_NULL_HANDLE;
   };
 
   //
@@ -91,13 +86,14 @@ public:
     GetDefaultMultisampleState(createGfxPipelineInfo.multisampleState);
     GetDefaultDepthStencilState(createGfxPipelineInfo.depthStencilState);
     GetDefaultColorBlendingState(createGfxPipelineInfo.colorBlendState);
-    GetDefaultPipelineLayout(createGfxPipelineInfo.pipelineLayout);
+    GetDefaultPipelineLayoutCreateInfo(createGfxPipelineInfo.pipelineLayout);
   };
 
-  void GetDefaultPipelineLayout(
+  void GetDefaultPipelineLayoutCreateInfo(
       VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo) const override;
 
   virtual void SetPipelineLayout(
+      const VkDevice &device,
       const VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo) override;
   virtual void DestroyPipelineLayout(const VkDevice &device) override;
 
@@ -134,11 +130,16 @@ public:
                                const VkExtent2D &swapchainExtent) const;
 
   virtual void GetDefaultColorBlendingState(
-      VkPipelineColorBlendStateCreateInfo &colorBlendState) const;
+      VkPipelineColorBlendStateCreateInfo &colorBlendState);
 
   // GFX PIPELINE METHODS -----------------------------------------------------
   // --------------------------------------------------------------------------
   //
+
+private:
+  std::vector<VkDynamicState> m_dynamicStatesDefault{VK_DYNAMIC_STATE_VIEWPORT,
+                                                     VK_DYNAMIC_STATE_SCISSOR};
+  VkPipelineColorBlendAttachmentState m_colorBlendAttachmentDefault{};
 };
 
 GFX_NAMESPACE_END

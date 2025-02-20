@@ -15,6 +15,8 @@ public:
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) override {
     return false;
   };
+
+  virtual void PrepareMaterialForRender(Material *materialPtr) override {};
 };
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

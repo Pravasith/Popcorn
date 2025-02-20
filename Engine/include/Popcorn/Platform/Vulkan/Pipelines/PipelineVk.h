@@ -103,20 +103,19 @@ public:
     PC_PRINT("CREATED", TagType::Constr, "PipelineVk");
   };
   virtual ~PipelineVk() {
-
     PC_PRINT("DESTROYED", TagType::Destr, "PipelineVk");
   };
 
   using CreateInfo_type = DerivePipelineCreateInfoType<T>::type;
 
   virtual void GetDefaultPipelineCreateInfo(CreateInfo_type &createInfo) = 0;
-  virtual void Create(const CreateInfo_type &createInfo) = 0;
-  virtual void Destroy() = 0;
+  virtual void CreateVkPipeline(const VkDevice &device,
+                                const CreateInfo_type &pipelineCreateInfo,
+                                const VkRenderPass &renderPass) = 0;
+  virtual void Destroy(const VkDevice &) = 0;
 
   // Shaders
   void SetShaderStagesMask(int enabledShaderStagesMask) {
-    PC_PRINT(enabledShaderStagesMask, TagType::Print, "PipelineVk")
-
     // Error check
     switch (type_value) {
     // case PipelineTypes::None:
@@ -151,30 +150,23 @@ public:
     m_shaderStageCreateInfos = shaderStageCreateInfos;
   };
 
-  inline void SetDevice(const VkDevice &device) {
-    PC_VK_NULL_CHECK(device)
-    m_device = device;
-  };
-
   // Layout
   //
-  virtual void GetDefaultPipelineLayout(
+  virtual void GetDefaultPipelineLayoutCreateInfo(
       VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo) const = 0;
 
   virtual void SetPipelineLayout(
+      const VkDevice &device,
       const VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo) = 0;
   virtual void DestroyPipelineLayout(const VkDevice &device) = 0;
 
 protected:
   PipelineTypes type_value = PipelineTypes::GraphicsType;
-  VkDevice m_device = VK_NULL_HANDLE;
 
   VkPipeline m_pipeline = VK_NULL_HANDLE;
   VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
   int m_enabledShaderStagesMask = ShaderStages::None;
   std::vector<VkPipelineShaderStageCreateInfo> m_shaderStageCreateInfos;
-
-  VkRenderPass m_renderPass = VK_NULL_HANDLE;
 };
 
 GFX_NAMESPACE_END

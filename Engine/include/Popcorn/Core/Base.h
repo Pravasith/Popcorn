@@ -29,7 +29,7 @@ ENGINE_NAMESPACE_BEGIN
 
 #define PC_VK_NULL_CHECK(vulkan_obj)                                           \
   if (vulkan_obj == VK_NULL_HANDLE) {                                          \
-    PC_WARN(#vulkan_obj << " isn't null in " << PC_FUNC_NAME)                  \
+    PC_WARN(#vulkan_obj << " is null in " << PC_FUNC_NAME)                     \
   };
 #else
 #define PC_PRINT(x, y, z)

@@ -169,9 +169,6 @@ public:
     };
 
     if constexpr (HasPrint<T>()) {
-      PC_PRINT("BEGIN: " << buffer.begin<T>() << " END: " << buffer.end<T>(),
-               TagType::Print, "Buffer.h")
-
       if (buffer.begin<T>() == buffer.end<T>()) {
         PC_PRINT("Buffer iterator begin is same as end!", TagType::Print,
                  "Buffer.h")

@@ -30,10 +30,6 @@ public:
   void VulkanInit();
   void CreateRenderWorkflows();
 
-  // Temp functions
-  void CreateTrianglePipeline();
-  void CreateTriangleRenderPass();
-
   void VulkanDestroy();
 
   static RenderWorkflowVk *GetRenderWorkflow(const RenderWorkflowIndices index);

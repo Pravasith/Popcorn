@@ -12,6 +12,10 @@ public:
   RenderPassVk() { PC_PRINT("CREATED", TagType::Constr, "RenderPassVk"); };
   ~RenderPassVk() { PC_PRINT("DESTROYED", TagType::Destr, "RenderPassVk"); };
 
+  [[nodiscard]] inline const VkRenderPass &GetVkRenderPass() const {
+    return m_renderPass;
+  };
+
   //
   // -----------------------------------------------------------------------
   // --- COPY SEMANTICS ----------------------------------------------------
@@ -92,7 +96,6 @@ public:
   void Create(const VkRenderPassCreateInfo &renderPassInfo,
               const VkDevice &device) {
     PC_VK_NULL_CHECK(device)
-    PC_VK_NULL_CHECK(m_renderPass)
 
     if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &m_renderPass) !=
         VK_SUCCESS) {

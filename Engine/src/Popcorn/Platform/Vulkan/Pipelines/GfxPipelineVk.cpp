@@ -126,11 +126,10 @@ void GfxPipelineVk::GetDefaultDynamicState(
     VkPipelineDynamicStateCreateInfo &dynamicState) const {
   // TODO: Make this function flexible to handle other dynamic states
   //
-  std::vector<VkDynamicState> dynamicStates = {VK_DYNAMIC_STATE_VIEWPORT,
-                                               VK_DYNAMIC_STATE_SCISSOR};
   dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-  dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
-  dynamicState.pDynamicStates = dynamicStates.data();
+  dynamicState.dynamicStateCount =
+      static_cast<uint32_t>(m_dynamicStatesDefault.size());
+  dynamicState.pDynamicStates = m_dynamicStatesDefault.data();
 };
 
 void GfxPipelineVk::GetDefaultVertexInputState(
@@ -144,34 +143,38 @@ void GfxPipelineVk::GetDefaultVertexInputState(
 };
 
 void GfxPipelineVk::GetDefaultColorBlendingState(
-    VkPipelineColorBlendStateCreateInfo &colorBlending) const {
+    VkPipelineColorBlendStateCreateInfo &colorBlending) {
 
   // Per framebuffer
-  VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-  colorBlendAttachment.colorWriteMask =
+  // VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+  m_colorBlendAttachmentDefault.colorWriteMask =
       VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
       VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-  colorBlendAttachment.blendEnable = VK_FALSE;
-  colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;  // Optional
-  colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
-  colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;             // Optional
-  colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;  // Optional
-  colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
-  colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;             // Optional
+  m_colorBlendAttachmentDefault.blendEnable = VK_FALSE;
+  m_colorBlendAttachmentDefault.srcColorBlendFactor =
+      VK_BLEND_FACTOR_ONE; // Optional
+  m_colorBlendAttachmentDefault.dstColorBlendFactor =
+      VK_BLEND_FACTOR_ZERO;                                     // Optional
+  m_colorBlendAttachmentDefault.colorBlendOp = VK_BLEND_OP_ADD; // Optional
+  m_colorBlendAttachmentDefault.srcAlphaBlendFactor =
+      VK_BLEND_FACTOR_ONE; // Optional
+  m_colorBlendAttachmentDefault.dstAlphaBlendFactor =
+      VK_BLEND_FACTOR_ZERO;                                     // Optional
+  m_colorBlendAttachmentDefault.alphaBlendOp = VK_BLEND_OP_ADD; // Optional
 
   colorBlending.sType =
       VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
   colorBlending.logicOpEnable = VK_FALSE;
   colorBlending.logicOp = VK_LOGIC_OP_COPY; // Optional
   colorBlending.attachmentCount = 1;
-  colorBlending.pAttachments = &colorBlendAttachment;
+  colorBlending.pAttachments = &m_colorBlendAttachmentDefault;
   colorBlending.blendConstants[0] = 0.0f; // Optional
   colorBlending.blendConstants[1] = 0.0f; // Optional
   colorBlending.blendConstants[2] = 0.0f; // Optional
   colorBlending.blendConstants[3] = 0.0f; // Optional
 };
 
-void GfxPipelineVk::GetDefaultPipelineLayout(
+void GfxPipelineVk::GetDefaultPipelineLayoutCreateInfo(
     VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo) const {
   pipelineLayoutCreateInfo.sType =
       VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -182,10 +185,11 @@ void GfxPipelineVk::GetDefaultPipelineLayout(
 };
 
 void GfxPipelineVk::SetPipelineLayout(
+    const VkDevice &device,
     const VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo) {
-  PC_VK_NULL_CHECK(m_device)
+  PC_VK_NULL_CHECK(device)
 
-  if (vkCreatePipelineLayout(m_device, &pipelineLayoutCreateInfo, nullptr,
+  if (vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr,
                              &m_pipelineLayout) != VK_SUCCESS) {
     throw std::runtime_error("failed to create pipeline layout!");
   }

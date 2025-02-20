@@ -40,10 +40,12 @@ add_library(
   ${GRAPHICS_IMPL_DIR}/Renderer.cpp
   ${GRAPHICS_IMPL_DIR}/VertexBuffer.cpp
   ${GRAPHICS_IMPL_DIR}/Materials/Material.cpp
-  ${GRAPHICS_IMPL_DIR}/Materials/MaterialHandler.cpp
   ${GRAPHICS_IMPL_DIR}/Mesh.cpp
+  #
+  # SCENE CLASSES
   # TODO: Separate the scene to a different library when time comes
   ${SCENE_IMPL_DIR}/Scene.cpp
+  ${SCENE_IMPL_DIR}/SceneManager.cpp
   #
   # OPENGL CLASSES
   ${PLATFORM_IMPL_DIR}/OpenGL/RendererOpenGL.cpp

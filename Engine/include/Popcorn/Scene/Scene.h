@@ -3,6 +3,7 @@
 #include "GameObject.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include "SceneManager.h"
 #include <cstdint>
 #include <vector>
 
@@ -14,14 +15,17 @@ GFX_NAMESPACE_BEGIN
 class Scene {
 public:
   Scene() {
-    ++s_sceneId;
-    m_sceneData.sceneId = s_sceneId;
     PC_PRINT("CREATED with id: " << m_sceneData.sceneId, TagType::Constr,
              "Scene");
+    SceneManager::Get();
+    ++s_sceneId;
+    m_sceneData.sceneId = s_sceneId;
   };
   virtual ~Scene() {
     m_nodes.clear();
     --s_sceneId;
+
+    SceneManager::Destroy();
     PC_PRINT("DESTROYED", TagType::Destr, "Scene");
   };
 

@@ -12,10 +12,9 @@ GFX_NAMESPACE_BEGIN
 
 void BasicRenderWorkflowVk::CreateVkPipeline(const Material &material) {
   auto *deviceVkStn = DeviceVk::Get();
+  auto *swapchainVkStn = SwapchainVk::Get();
   auto &device = deviceVkStn->GetDevice();
-  auto *swapchainVk = SwapchainVk::Get();
-
-  const auto &swapchainExtent = swapchainVk->GetSwapchainExtent();
+  const auto &swapchainExtent = swapchainVkStn->GetSwapchainExtent();
 
   auto vertShaderBuffer = material.GetShaders()[0];
   auto fragShaderBuffer = material.GetShaders()[1];
@@ -26,12 +25,6 @@ void BasicRenderWorkflowVk::CreateVkPipeline(const Material &material) {
   std::forward_list<VkShaderModule> shaderModules = {vertShaderModule,
                                                      fragShaderModule};
 
-  // CREATE BASIC PIPELINE
-  GfxPipelineVk m_basicGfxPipeline{};
-
-  // SET PIPELINE DEVICE
-  m_basicGfxPipeline.SetDevice(device);
-
   // SET SHADER STAGES
   m_basicGfxPipeline.SetShaderStagesMask(static_cast<ShaderStages>(
       ShaderStages::VertexBit | ShaderStages::FragmentBit));
@@ -41,13 +34,15 @@ void BasicRenderWorkflowVk::CreateVkPipeline(const Material &material) {
   // SET FIXED FUNCTION PIPELINE STATE & SET LAYOUT
   GfxPipelineCreateInfo createInfo{};
   m_basicGfxPipeline.GetDefaultPipelineCreateInfo(createInfo);
+  // m_basicGfxPipeline.GetDefaultPipelineLayoutCreateInfo(
+  //     createInfo.pipelineLayout); // Already in
+  //     GetDefaultPipelineCreateInfo()
   m_basicGfxPipeline.SetShaderStageCreateInfos(shaderStages);
-  m_basicGfxPipeline.SetPipelineLayout(createInfo.pipelineLayout);
-
-  //
+  m_basicGfxPipeline.SetPipelineLayout(device, createInfo.pipelineLayout);
 
   // CREATE PIPELINE
-  m_basicGfxPipeline.Create(createInfo);
+  m_basicGfxPipeline.CreateVkPipeline(device, createInfo,
+                                      m_basicRenderPass.GetVkRenderPass());
 
   // DESTROY SHADER MODULES
   PC_DestroyShaderModule(device, vertShaderModule);
@@ -93,6 +88,7 @@ void BasicRenderWorkflowVk::CreateRenderPass() {
   // CREATE RENDER PASS INFO ----------------------------------------
   VkRenderPassCreateInfo renderPass1CreateInfo{};
   RenderPassVk::SetDefaultRenderPassCreateInfo(renderPass1CreateInfo);
+  renderPass1CreateInfo.pAttachments = attachments.data();
   renderPass1CreateInfo.pSubpasses = subpasses.data();
 
   //

@@ -5,7 +5,6 @@
 #include "Popcorn/Events/WindowEvent.h"
 #include "RendererOpenGL.h"
 #include "RendererVk.h"
-#include "VertexBuffer.h"
 #include <glm/glm.hpp>
 #include <string>
 
@@ -19,10 +18,7 @@ Renderer::Renderer(const Window &appWin) : m_AppWin(appWin) {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER");
 };
 
-Renderer::~Renderer() {
-  ((RendererVk *)s_instance)->VulkanDestroy();
-  PC_PRINT("DESTROYED", TagType::Destr, "RENDERER")
-};
+Renderer::~Renderer() { PC_PRINT("DESTROYED", TagType::Destr, "RENDERER") };
 
 void Renderer::Init(const Window &appWin) {
   if (s_instance) {

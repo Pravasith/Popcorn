@@ -29,11 +29,13 @@ public:
 private:
   virtual void CleanUp() override {
     auto *deviceSingleton = DeviceVk::Get();
+    auto &device = deviceSingleton->GetDevice();
+
     // Cleanup pipelines
-    m_basicGfxPipeline.Destroy();
+    m_basicGfxPipeline.Destroy(device);
 
     // Cleanup render passes
-    m_basicRenderPass.Destroy(deviceSingleton->GetDevice());
+    m_basicRenderPass.Destroy(device);
   };
 
 private:

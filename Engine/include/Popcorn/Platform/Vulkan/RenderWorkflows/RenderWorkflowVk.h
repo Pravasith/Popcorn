@@ -12,8 +12,8 @@ GFX_NAMESPACE_BEGIN
 class Material;
 
 enum class RenderWorkflowIndices {
-  Basic = 1, // Basic colors
-  Shadows,   // Simple hard shadows
+  Basic = 0,   // Basic colors
+  Shadows = 1, // Simple hard shadows
 };
 
 class RenderWorkflowVk {
