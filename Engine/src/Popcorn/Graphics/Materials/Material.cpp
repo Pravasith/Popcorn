@@ -9,11 +9,11 @@ GFX_NAMESPACE_BEGIN
 
 const MaterialHandler *Material::s_materialHandler = nullptr;
 
-void Material::AddMesh(const Mesh *meshPtr) {
+void Material::LinkMesh(const Mesh *meshPtr) {
   m_linkedMeshes.push_back(meshPtr);
 };
 
-void Material::RemoveMesh(const Mesh *meshPtr) {
+void Material::UnlinkMesh(const Mesh *meshPtr) {
   auto itr = std::find(m_linkedMeshes.begin(), m_linkedMeshes.end(), meshPtr);
   if (itr != m_linkedMeshes.end()) {
     m_linkedMeshes.erase(itr);

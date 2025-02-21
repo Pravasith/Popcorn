@@ -5,7 +5,6 @@
 
 --- 18 Feb ------------------------------------
 
-:: Finish Workflow models - tonight
 :: Make Triangle again -
 :: Implement descriptor sets & index buffers
 :: Implement staging buffers

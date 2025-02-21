@@ -59,7 +59,7 @@ public:
     BasicMaterial triMat(matData);
     // BasicMaterial triMat2(matData);
 
-    // Mesh triMesh{*vertexBuffer, triMat};
+    // Mesh triMesh{nullptr, triMat};
     Mesh triMesh{vertexBuffer, triMat};
 
     TriangleScene triScene{};

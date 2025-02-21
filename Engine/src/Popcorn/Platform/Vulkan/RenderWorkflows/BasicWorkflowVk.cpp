@@ -10,14 +10,14 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-void BasicRenderWorkflowVk::CreateVkPipeline(const Material &material) {
+void BasicRenderWorkflowVk::CreateVkPipeline(Material &material) {
   auto *deviceVkStn = DeviceVk::Get();
   auto *swapchainVkStn = SwapchainVk::Get();
   auto &device = deviceVkStn->GetDevice();
   const auto &swapchainExtent = swapchainVkStn->GetSwapchainExtent();
 
-  auto vertShaderBuffer = material.GetShaders()[0];
-  auto fragShaderBuffer = material.GetShaders()[1];
+  auto vertShaderBuffer = std::move(material.GetShaders()[0]);
+  auto fragShaderBuffer = std::move(material.GetShaders()[1]);
 
   auto vertShaderModule = PC_CreateShaderModule(device, vertShaderBuffer);
   auto fragShaderModule = PC_CreateShaderModule(device, fragShaderBuffer);
@@ -32,16 +32,16 @@ void BasicRenderWorkflowVk::CreateVkPipeline(const Material &material) {
       m_basicGfxPipeline.CreateShaderStages(shaderModules);
 
   // SET FIXED FUNCTION PIPELINE STATE & SET LAYOUT
-  GfxPipelineCreateInfo createInfo{};
-  m_basicGfxPipeline.GetDefaultPipelineCreateInfo(createInfo);
+  GfxPipelineState pipelineState{};
+  m_basicGfxPipeline.GetDefaultPipelineState(pipelineState);
   // m_basicGfxPipeline.GetDefaultPipelineLayoutCreateInfo(
   //     createInfo.pipelineLayout); // Already in
   //     GetDefaultPipelineCreateInfo()
   m_basicGfxPipeline.SetShaderStageCreateInfos(shaderStages);
-  m_basicGfxPipeline.SetPipelineLayout(device, createInfo.pipelineLayout);
+  m_basicGfxPipeline.SetPipelineLayout(device, pipelineState.pipelineLayout);
 
   // CREATE PIPELINE
-  m_basicGfxPipeline.CreateVkPipeline(device, createInfo,
+  m_basicGfxPipeline.CreateVkPipeline(device, pipelineState,
                                       m_basicRenderPass.GetVkRenderPass());
 
   // DESTROY SHADER MODULES

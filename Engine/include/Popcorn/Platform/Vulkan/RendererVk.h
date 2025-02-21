@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DeviceVk.h"
+#include "FramebuffersVk.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Window.h"
 #include "Popcorn/Events/WindowEvent.h"
@@ -72,6 +73,7 @@ private:
   static DeviceVk *s_deviceVk;
   static SurfaceVk *s_surfaceVk;
   static SwapchainVk *s_swapchainVk;
+  static FramebuffersVk *s_framebuffersVk;
 
   static std::vector<RenderWorkflowVk *> s_renderWorkflows;
 };

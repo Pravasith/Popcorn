@@ -1,6 +1,7 @@
 #include "RendererVk.h"
 #include "BasicWorkflowVk.h"
 #include "DeviceVk.h"
+#include "FramebuffersVk.h"
 #include "Material.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
@@ -15,6 +16,7 @@ GFX_NAMESPACE_BEGIN
 DeviceVk *RendererVk::s_deviceVk = DeviceVk::Get();
 SurfaceVk *RendererVk::s_surfaceVk = SurfaceVk::Get();
 SwapchainVk *RendererVk::s_swapchainVk = SwapchainVk::Get();
+FramebuffersVk *RendererVk::s_framebuffersVk = FramebuffersVk::Get();
 
 std::vector<RenderWorkflowVk *> RendererVk::s_renderWorkflows = {};
 
@@ -36,6 +38,7 @@ void RendererVk::PrepareMaterialForRender(Material *materialPtr) {
           s_renderWorkflows[(int)RenderWorkflowIndices::Basic];
       basicRenderWorkflow->CreateRenderPass();
       basicRenderWorkflow->CreateVkPipeline(*materialPtr);
+      basicRenderWorkflow->CreateSwapchainFramebuffers();
     }
     break;
   case MaterialTypes::PbrMat:
@@ -60,6 +63,7 @@ RendererVk::~RendererVk() {
 
   VulkanDestroy();
 
+  FramebuffersVk::Destroy();
   SwapchainVk::Destroy();
   SurfaceVk::Destroy();
   DeviceVk::Destroy();

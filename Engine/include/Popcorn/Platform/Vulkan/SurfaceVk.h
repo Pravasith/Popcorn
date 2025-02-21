@@ -40,6 +40,14 @@ private:
   SurfaceVk() { PC_PRINT("CREATED", TagType::Constr, "SurfaceVk.h"); };
   ~SurfaceVk() { PC_PRINT("DESTROYED", TagType::Destr, "SurfaceVk.h"); };
 
+  // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
+  SurfaceVk(const SurfaceVk &) = delete;
+  SurfaceVk &operator=(const SurfaceVk &) = delete;
+
+  // DELETE THE MOVE CONSTRUCTOR AND MOVE ASSIGNMENT OPERATOR
+  SurfaceVk(SurfaceVk &&) = delete;
+  SurfaceVk &operator=(SurfaceVk &&) = delete;
+
   VkSurfaceKHR m_surface = VK_NULL_HANDLE;
 
   static SurfaceVk *s_instance;

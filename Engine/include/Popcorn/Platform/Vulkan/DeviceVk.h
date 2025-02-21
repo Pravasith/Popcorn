@@ -67,6 +67,14 @@ public:
   void CleanUp();
 
 private:
+  // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
+  DeviceVk(const DeviceVk &) = delete;
+  DeviceVk &operator=(const DeviceVk &) = delete;
+
+  // DELETE THE MOVE CONSTRUCTOR AND MOVE ASSIGNMENT OPERATOR
+  DeviceVk(DeviceVk &&) = delete;
+  DeviceVk &operator=(DeviceVk &&) = delete;
+
   std::vector<const char *> GetRequiredExtensions();
   bool CheckDeviceExtensionSupport(const VkPhysicalDevice &);
 

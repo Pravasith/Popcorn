@@ -3,6 +3,7 @@
 #include "CommonVk.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <vector>
@@ -44,6 +45,11 @@ public:
     return m_swapchainImageFormat;
   };
 
+  [[nodiscard]] inline const std::vector<VkImageView> &
+  GetSwapchainImageViews() const {
+    return m_swapchainImageViews;
+  };
+
   void CleanUp(const VkDevice &);
 
 private:
@@ -60,6 +66,15 @@ private:
   SwapchainVk() { PC_PRINT("CREATED", TagType::Constr, "SwapchainVk.h"); };
   ~SwapchainVk() { PC_PRINT("DESTROYED", TagType::Destr, "SwapchainVk.h"); };
 
+  // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
+  SwapchainVk(const SwapchainVk &) = delete;
+  SwapchainVk &operator=(const SwapchainVk &) = delete;
+
+  // DELETE THE MOVE CONSTRUCTOR AND MOVE ASSIGNMENT OPERATOR
+  SwapchainVk(SwapchainVk &&) = delete;
+  SwapchainVk &operator=(SwapchainVk &&) = delete;
+
+private:
   static SwapchainVk *s_instance;
 
   VkSwapchainKHR m_swapchain;

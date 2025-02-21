@@ -14,14 +14,14 @@ public:
   ~GfxPipelineVk() { PC_PRINT("DESTROYED", TagType::Destr, "GfxPipelineVk"); };
 
   virtual void CreateVkPipeline(const VkDevice &device,
-                                const CreateInfo_type &pipelineCreateInfo,
+                                const PiplelineStateType &pipelineCreateInfo,
                                 const VkRenderPass &renderPass) override {
     if (m_pipeline != VK_NULL_HANDLE) {
       PC_WARN("Attempt to create GfxPipeline when it already exists")
       return;
     };
 
-    GfxPipelineCreateInfo createInfo = pipelineCreateInfo;
+    GfxPipelineState createInfo = pipelineCreateInfo;
     if (m_shaderStageCreateInfos.size() == 0) {
       PC_WARN("No shader stages set")
     };
@@ -74,9 +74,9 @@ public:
   CreateShaderStages(std::forward_list<VkShaderModule> &shaderModules) override;
 
   inline virtual void
-  GetDefaultPipelineCreateInfo(CreateInfo_type &createInfo) override {
+  GetDefaultPipelineState(PiplelineStateType &pipelineState) override {
     auto &createGfxPipelineInfo =
-        static_cast<GfxPipelineCreateInfo &>(createInfo);
+        static_cast<GfxPipelineState &>(pipelineState);
 
     GetDefaultDynamicState(createGfxPipelineInfo.dynamicState);
     GetDefaultVertexInputState(createGfxPipelineInfo.vertexInputState);

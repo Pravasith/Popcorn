@@ -16,24 +16,23 @@ GFX_NAMESPACE_BEGIN
 
 enum class PipelineTypes { GraphicsType = 1, ComputeType, RaytracingType };
 
-struct GfxPipelineCreateInfo {
+struct GfxPipelineState {
   constexpr static PipelineTypes type_value = PipelineTypes::GraphicsType;
 
-  VkExtent2D swapchainExtent = {};
-  VkPipelineDynamicStateCreateInfo dynamicState = {};
-  VkPipelineVertexInputStateCreateInfo vertexInputState = {};
-  VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = {};
-  VkPipelineViewportStateCreateInfo viewportState = {};
-  VkPipelineRasterizationStateCreateInfo rasterizationState = {};
-  VkPipelineDepthStencilStateCreateInfo depthStencilState = {};
-  VkPipelineMultisampleStateCreateInfo multisampleState = {};
-  VkPipelineColorBlendStateCreateInfo colorBlendState = {};
-  VkPipelineLayoutCreateInfo pipelineLayout = {};
+  VkExtent2D swapchainExtent{};
+  VkPipelineDynamicStateCreateInfo dynamicState{};
+  VkPipelineVertexInputStateCreateInfo vertexInputState{};
+  VkPipelineInputAssemblyStateCreateInfo inputAssemblyState{};
+  VkPipelineViewportStateCreateInfo viewportState{};
+  VkPipelineRasterizationStateCreateInfo rasterizationState{};
+  VkPipelineDepthStencilStateCreateInfo depthStencilState{};
+  VkPipelineMultisampleStateCreateInfo multisampleState{};
+  VkPipelineColorBlendStateCreateInfo colorBlendState{};
+  VkPipelineLayoutCreateInfo pipelineLayout{};
 };
 
-struct ComputePipelineCreateInfo {
+struct ComputePipelineState {
   constexpr static PipelineTypes type_value = PipelineTypes::ComputeType;
-  std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos;
 
   VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
   VkPipelineCache pipelineCache = VK_NULL_HANDLE;
@@ -42,15 +41,15 @@ struct ComputePipelineCreateInfo {
   int32_t basePipelineIndex = -1;
 };
 
-struct RaytracingPipelineCreateInfo {
+struct RaytracingPipelineState {
   constexpr static PipelineTypes type_value = PipelineTypes::RaytracingType;
-  std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
-  std::vector<VkRayTracingShaderGroupCreateInfoKHR> shaderGroups;
+
+  std::vector<VkRayTracingShaderGroupCreateInfoKHR> shaderGroups{};
   VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
   uint32_t maxRecursionDepth = 1;
   VkPipelineCache pipelineCache = VK_NULL_HANDLE;
   VkPipelineCreateFlags flags = 0;
-  VkPipelineLibraryCreateInfoKHR libraryInfo = {};
+  VkPipelineLibraryCreateInfoKHR libraryInfo{};
 };
 
 // PRIMARY TEMPLATE
@@ -58,15 +57,15 @@ template <PipelineTypes T> struct DerivePipelineCreateInfoType;
 
 // SPECIALIZATION TEMPLATES
 template <> struct DerivePipelineCreateInfoType<PipelineTypes::GraphicsType> {
-  using type = GfxPipelineCreateInfo;
+  using type = GfxPipelineState;
 };
 
 template <> struct DerivePipelineCreateInfoType<PipelineTypes::ComputeType> {
-  using type = ComputePipelineCreateInfo;
+  using type = ComputePipelineState;
 };
 
 template <> struct DerivePipelineCreateInfoType<PipelineTypes::RaytracingType> {
-  using type = RaytracingPipelineCreateInfo;
+  using type = RaytracingPipelineState;
 };
 
 //
@@ -106,11 +105,11 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "PipelineVk");
   };
 
-  using CreateInfo_type = DerivePipelineCreateInfoType<T>::type;
+  using PiplelineStateType = DerivePipelineCreateInfoType<T>::type;
 
-  virtual void GetDefaultPipelineCreateInfo(CreateInfo_type &createInfo) = 0;
+  virtual void GetDefaultPipelineState(PiplelineStateType &pipelineState) = 0;
   virtual void CreateVkPipeline(const VkDevice &device,
-                                const CreateInfo_type &pipelineCreateInfo,
+                                const PiplelineStateType &pipelineCreateInfo,
                                 const VkRenderPass &renderPass) = 0;
   virtual void Destroy(const VkDevice &) = 0;
 

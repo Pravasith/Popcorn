@@ -3,9 +3,8 @@
 #include "GlobalMacros.h"
 #include <cstdint>
 #include <optional>
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN

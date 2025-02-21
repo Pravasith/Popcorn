@@ -26,7 +26,8 @@ public:
   };
 
   virtual void CreateRenderPass() = 0;
-  virtual void CreateVkPipeline(const Material &) = 0;
+  virtual void CreateVkPipeline(Material &) = 0;
+  virtual void CreateSwapchainFramebuffers() = 0;
 
 private:
   virtual void CleanUp() = 0;
