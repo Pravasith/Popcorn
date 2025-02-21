@@ -120,12 +120,21 @@ target_include_directories(
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Graphics>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Graphics/Materials>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Scene>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/OpenGL>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Pipelines>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/RenderWorkflows>
   INTERFACE $<INSTALL_INTERFACE:include>
             $<INSTALL_INTERFACE:include/Popcorn/Graphics>
+            $<INSTALL_INTERFACE:include/Popcorn/Graphics/Materials>
+            $<INSTALL_INTERFACE:include/Popcorn/Scene>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/OpenGL>
-            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan>)
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan>
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Pipelines>
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/RenderWorkflows>
+)
 
 target_include_directories(
   Popcorn
@@ -147,17 +156,37 @@ if(PC_DEBUG)
   target_compile_definitions(Popcorn PUBLIC "PC_DEBUG")
 endif()
 
+if(BUILD_FOR_LINUX)
+  target_compile_definitions(Window PUBLIC "PC_OS_LINUX")
+  target_compile_definitions(Graphics PUBLIC "PC_OS_LINUX")
+  target_compile_definitions(Events PUBLIC "PC_OS_LINUX")
+  target_compile_definitions(Popcorn PUBLIC "PC_OS_LINUX")
+elseif(BUILD_FOR_WIN)
+  target_compile_definitions(Window PUBLIC "PC_OS_WINDOWS")
+  target_compile_definitions(Graphics PUBLIC "PC_OS_WINDOWS")
+  target_compile_definitions(Events PUBLIC "PC_OS_WINDOWS")
+  target_compile_definitions(Popcorn PUBLIC "PC_OS_WINDOWS")
+elseif(BUILD_FOR_MACOS)
+  target_compile_definitions(Window PUBLIC "PC_OS_MAC")
+  target_compile_definitions(Graphics PUBLIC "PC_OS_MAC")
+  target_compile_definitions(Events PUBLIC "PC_OS_MAC")
+  target_compile_definitions(Popcorn PUBLIC "PC_OS_MAC")
+endif()
+
 target_link_libraries(Graphics PRIVATE Vulkan::Headers Vulkan::Loader glfw)
 target_link_libraries(Graphics PUBLIC glm::glm)
 
 target_link_libraries(Window PRIVATE glad glfw)
 target_link_libraries(Window PRIVATE Events)
-target_link_libraries(ImGui PRIVATE glfw)
+target_link_libraries(ImGui PUBLIC glfw Vulkan::Headers Vulkan::Loader)
 target_link_libraries(Popcorn PRIVATE glad glfw)
-target_link_libraries(Popcorn PRIVATE Graphics Window ImGui)
+
+target_link_libraries(Popcorn PUBLIC Graphics)
+target_link_libraries(Popcorn PRIVATE Window ImGui)
 
 # INTERFACE LIBS
 target_link_libraries(Popcorn INTERFACE glm::glm)
+target_link_libraries(Popcorn PUBLIC Events)
 
 target_compile_features(${PROJECT} PUBLIC cxx_std_17)
 
