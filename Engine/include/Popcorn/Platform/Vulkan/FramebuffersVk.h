@@ -37,6 +37,7 @@ public:
     createInfo.width = 100;
     createInfo.height = 100;
     createInfo.layers = 1;
+    createInfo.pNext = VK_NULL_HANDLE;
   };
 
   void CreateVkFramebuffer(const VkDevice &device,

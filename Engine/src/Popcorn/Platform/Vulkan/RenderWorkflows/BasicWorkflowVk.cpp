@@ -16,8 +16,8 @@ void BasicRenderWorkflowVk::CreateVkPipeline(Material &material) {
   auto &device = deviceVkStn->GetDevice();
   const auto &swapchainExtent = swapchainVkStn->GetSwapchainExtent();
 
-  auto vertShaderBuffer = std::move(material.GetShaders()[0]);
-  auto fragShaderBuffer = std::move(material.GetShaders()[1]);
+  Buffer vertShaderBuffer = std::move(material.GetShaders()[0]);
+  Buffer fragShaderBuffer = std::move(material.GetShaders()[1]);
 
   auto vertShaderModule = PC_CreateShaderModule(device, vertShaderBuffer);
   auto fragShaderModule = PC_CreateShaderModule(device, fragShaderBuffer);

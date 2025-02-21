@@ -38,7 +38,6 @@ void RendererVk::PrepareMaterialForRender(Material *materialPtr) {
           s_renderWorkflows[(int)RenderWorkflowIndices::Basic];
       basicRenderWorkflow->CreateRenderPass();
       basicRenderWorkflow->CreateVkPipeline(*materialPtr);
-      basicRenderWorkflow->CreateSwapchainFramebuffers();
     }
     break;
   case MaterialTypes::PbrMat:
@@ -113,6 +112,7 @@ void RendererVk::VulkanInit() {
   // CREATE SWAPCHAIN --------------------------------------------------------
   s_swapchainVk->CreateSwapchain(device, swapchainSupportDetails, osWindow,
                                  surface, queueFamilyIndices);
+  s_swapchainVk->CreateImageViews(device);
 };
 
 void RendererVk::VulkanDestroy() {

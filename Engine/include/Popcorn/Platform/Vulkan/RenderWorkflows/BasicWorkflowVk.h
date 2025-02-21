@@ -18,6 +18,7 @@ GFX_NAMESPACE_BEGIN
 class BasicRenderWorkflowVk : public RenderWorkflowVk {
 public:
   BasicRenderWorkflowVk() {
+    CreateSwapchainFramebuffers();
     PC_PRINT("CREATED", TagType::Constr, "BasicWorkflowVk")
   };
   ~BasicRenderWorkflowVk() override {
@@ -83,7 +84,7 @@ private:
 private:
   RenderPassVk m_basicRenderPass;
   GfxPipelineVk m_basicGfxPipeline;
-  std::vector<VkFramebuffer> m_swapchainFramebuffers{};
+  std::vector<VkFramebuffer> m_swapchainFramebuffers;
 };
 
 GFX_NAMESPACE_END
