@@ -1,5 +1,6 @@
 #include "RendererVk.h"
 #include "BasicWorkflowVk.h"
+#include "CommandPoolVk.h"
 #include "DeviceVk.h"
 #include "FramebuffersVk.h"
 #include "Material.h"
@@ -13,12 +14,14 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+// Singleton members
 DeviceVk *RendererVk::s_deviceVk = DeviceVk::Get();
 SurfaceVk *RendererVk::s_surfaceVk = SurfaceVk::Get();
 SwapchainVk *RendererVk::s_swapchainVk = SwapchainVk::Get();
 FramebuffersVk *RendererVk::s_framebuffersVk = FramebuffersVk::Get();
-
-std::vector<RenderWorkflowVk *> RendererVk::s_renderWorkflows = {};
+CommandPoolVk *RendererVk::s_commandPoolVk = CommandPoolVk::Get();
+// Other members
+std::vector<RenderWorkflowVk *> RendererVk::s_renderWorkflows{};
 
 //
 // -------------------------------------------------------------------------
@@ -36,8 +39,7 @@ void RendererVk::PrepareMaterialForRender(Material *materialPtr) {
 
       auto *basicRenderWorkflow =
           s_renderWorkflows[(int)RenderWorkflowIndices::Basic];
-      basicRenderWorkflow->CreateRenderPass();
-      basicRenderWorkflow->CreateVkPipeline(*materialPtr);
+      basicRenderWorkflow->CreateWorkflowResources(materialPtr);
     }
     break;
   case MaterialTypes::PbrMat:
@@ -74,7 +76,7 @@ RendererVk::~RendererVk() {
 // ---------------------------------------------------------------------------
 // --- RENDER WORKFLOWS ------------------------------------------------------
 void RendererVk::CreateRenderWorkflows() {
-  auto *basicRendererWorkflow = new BasicRenderWorkflowVk;
+  BasicRenderWorkflowVk *basicRendererWorkflow = new BasicRenderWorkflowVk;
   s_renderWorkflows.push_back(basicRendererWorkflow);
 };
 

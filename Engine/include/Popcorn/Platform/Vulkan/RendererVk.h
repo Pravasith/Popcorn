@@ -1,5 +1,6 @@
 #pragma once
 
+#include "CommandPoolVk.h"
 #include "DeviceVk.h"
 #include "FramebuffersVk.h"
 #include "GlobalMacros.h"
@@ -74,6 +75,7 @@ private:
   static SurfaceVk *s_surfaceVk;
   static SwapchainVk *s_swapchainVk;
   static FramebuffersVk *s_framebuffersVk;
+  static CommandPoolVk *s_commandPoolVk;
 
   static std::vector<RenderWorkflowVk *> s_renderWorkflows;
 };

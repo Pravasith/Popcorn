@@ -25,11 +25,19 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "RenderWorkflowVk")
   };
 
-  virtual void CreateRenderPass() = 0;
-  virtual void CreateVkPipeline(Material &) = 0;
-  virtual void CreateSwapchainFramebuffers() = 0;
+  //
+  // PURE
+  virtual void CreateWorkflowResources(Material *materialPtr) = 0;
 
 private:
+  //
+  // WORKFLOW UTILS
+
+  virtual void CreateRenderPass() {};
+  virtual void CreateVkPipeline(Material &) {};
+  virtual void CreateFramebuffers() {};
+  virtual void CreateCommandBuffer() {};
+
   virtual void CleanUp() = 0;
 };
 
