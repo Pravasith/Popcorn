@@ -27,7 +27,12 @@ std::vector<RenderWorkflowVk *> RendererVk::s_renderWorkflows{};
 // -------------------------------------------------------------------------
 // --- PUBLIC METHODS ------------------------------------------------------
 
-void RendererVk::DrawFrame(const Scene &scene) const {};
+void RendererVk::DrawFrame(const Scene &scene) const {
+  s_commandPoolVk->BeginCommandBuffer(m_renderingCommandBuffer);
+  // Execute work flow
+  s_commandPoolVk->EndCommandBuffer(m_renderingCommandBuffer);
+};
+
 bool RendererVk::OnFrameBfrResize(FrameBfrResizeEvent &) { return true; };
 
 void RendererVk::PrepareMaterialForRender(Material *materialPtr) {
@@ -47,15 +52,26 @@ void RendererVk::PrepareMaterialForRender(Material *materialPtr) {
   }
 };
 
+void RendererVk::CreateBasicCommandBuffer() {
+  auto *commandPoolVkStn = CommandPoolVk::Get();
+  VkCommandBufferAllocateInfo allocInfo{};
+
+  commandPoolVkStn->GetDefaultCommandBufferAllocInfo(allocInfo);
+  commandPoolVkStn->AllocCommandBuffer(allocInfo, m_renderingCommandBuffer);
+}
+
 //
 // -------------------------------------------------------------------------
 // --- PRIVATE METHODS -----------------------------------------------------
 
 RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
+  s_commandPoolVk->CreateCommandPool();
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VK");
 };
 
 RendererVk::~RendererVk() {
+  s_commandPoolVk->DestroyCommandPool();
+
   // Destroy render workflows
   for (auto *workflow : s_renderWorkflows) {
     delete workflow;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "CommandPoolVk.h"
 #include "GfxPipelineVk.h"
 #include "GlobalMacros.h"
 #include "Material.h"
@@ -17,8 +16,8 @@ GFX_NAMESPACE_BEGIN
 class BasicRenderWorkflowVk : public RenderWorkflowVk {
 public:
   BasicRenderWorkflowVk() {
-    auto *commandBufferVkStn = CommandPoolVk::Get();
-    commandBufferVkStn->CreateCommandPool();
+    // auto *commandBufferVkStn = CommandPoolVk::Get();
+    // commandBufferVkStn->CreateCommandPool();
 
     PC_PRINT("CREATED", TagType::Constr, "BasicWorkflowVk")
   };
@@ -36,14 +35,16 @@ public:
     CreateFramebuffers();
   };
 
-private:
+  virtual void BeginRenderPass() override;
+  virtual void EndRenderPass() override;
+
   virtual void CreateRenderPass() override;
   virtual void CreateVkPipeline(Material &) override;
   virtual void CreateFramebuffers() override;
-  virtual void CreateCommandBuffer() override;
 
   virtual void CleanUp() override;
 
+private:
 private:
   RenderPassVk m_basicRenderPassVk;
   GfxPipelineVk m_basicGfxPipelineVk;

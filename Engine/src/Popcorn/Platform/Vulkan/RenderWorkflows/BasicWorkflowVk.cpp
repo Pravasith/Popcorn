@@ -1,5 +1,4 @@
 #include "BasicWorkflowVk.h"
-#include "CommandPoolVk.h"
 #include "DeviceVk.h"
 #include "FramebuffersVk.h"
 #include "GfxPipelineVk.h"
@@ -127,14 +126,6 @@ void BasicRenderWorkflowVk::CreateFramebuffers() {
   };
 };
 
-void BasicRenderWorkflowVk::CreateCommandBuffer() {
-  auto *commandPoolVkStn = CommandPoolVk::Get();
-  VkCommandBufferAllocateInfo allocInfo{};
-
-  commandPoolVkStn->GetDefaultCommandBufferAllocInfo(allocInfo);
-  commandPoolVkStn->AllocCommandBuffer(allocInfo, m_commandBuffer);
-};
-
 void BasicRenderWorkflowVk::CleanUp() {
   if (m_swapchainFramebuffers.size() == 0) {
     PC_ERROR("Tried to clear m_swapchainFramebuffers but size is 0!",
@@ -160,6 +151,15 @@ void BasicRenderWorkflowVk::CleanUp() {
   // Destroy command pool
   // DestroyCommandPool();
 };
+
+void BasicRenderWorkflowVk::BeginRenderPass() {
+  // VkRenderPassBeginInfo renderPassInfo{};
+  // renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+  // renderPassInfo.renderPass = m_basicRenderPassVk.GetVkRenderPass();
+  // renderPassInfo.framebuffer = m_swapchainFramebuffers[imageIndex];
+};
+
+void BasicRenderWorkflowVk::EndRenderPass() {};
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

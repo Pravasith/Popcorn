@@ -35,6 +35,7 @@ public:
   void VulkanDestroy();
 
   static RenderWorkflowVk *GetRenderWorkflow(const RenderWorkflowIndices index);
+  void CreateBasicCommandBuffer();
 
 private:
   void RenderScene() {
@@ -78,6 +79,8 @@ private:
   static CommandPoolVk *s_commandPoolVk;
 
   static std::vector<RenderWorkflowVk *> s_renderWorkflows;
+
+  VkCommandBuffer m_renderingCommandBuffer = VK_NULL_HANDLE;
 };
 
 GFX_NAMESPACE_END

@@ -32,7 +32,7 @@ public:
   void AllocCommandBuffer(const VkCommandBufferAllocateInfo &allocInfo,
                           VkCommandBuffer &commandBuffer);
 
-  void BeginCommandBufferRecording(VkCommandBuffer &commandBuffer) {
+  void BeginCommandBuffer(const VkCommandBuffer &commandBuffer) {
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = 0;                  // Optional
@@ -43,7 +43,7 @@ public:
     }
   };
 
-  void EndCommandBufferRecording(VkCommandBuffer &commandBuffer) {
+  void EndCommandBuffer(const VkCommandBuffer &commandBuffer) {
     PC_VK_NULL_CHECK(commandBuffer)
 
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {

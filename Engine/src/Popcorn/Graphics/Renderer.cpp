@@ -69,6 +69,7 @@ void Renderer::Init(const Window &appWin) {
     RendererVk *vkRenderer = static_cast<RendererVk *>(s_instance);
     vkRenderer->VulkanInit();
     vkRenderer->CreateRenderWorkflows();
+    vkRenderer->CreateBasicCommandBuffer();
 
     // TEMP FUNCTIONS
     // CREATE ALL PIPELINES
@@ -83,14 +84,6 @@ void Renderer::Init(const Window &appWin) {
     PC_STATIC_ASSERT(true, "UNSUPPORTED RENDERER TYPE");
   }
 };
-
-void Renderer::DrawFrame(const Scene &scene) const {
-  if (s_type == RendererType::Vulkan) {
-    static_cast<RendererVk *>(s_instance)->DrawFrame(scene);
-  } else {
-    // std::get<RendererOpenGL *>(s_renderer)->OnUpdate();
-  }
-}
 
 bool Renderer::OnFrameBfrResize(FrameBfrResizeEvent &e) {
   if (s_type == RendererType::Vulkan) {

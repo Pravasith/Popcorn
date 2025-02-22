@@ -28,11 +28,12 @@ public:
   //
   // PURE
   virtual void CreateWorkflowResources(Material *materialPtr) = 0;
+  virtual void BeginRenderPass() = 0;
+  virtual void EndRenderPass() = 0;
 
 private:
   //
   // WORKFLOW UTILS
-
   virtual void CreateRenderPass() {};
   virtual void CreateVkPipeline(Material &) {};
   virtual void CreateFramebuffers() {};
