@@ -7,24 +7,34 @@
 
 ENGINE_NAMESPACE_BEGIN
 
-std::vector<const Subscriber *> Publisher::s_subscribers;
+Publisher::Publisher(std::string name)
+    : m_name(name) {
+        PC_PRINT(m_name << " CREATED.", TagType::Constr, "PUBLISHER")
+      };
 
-void Publisher::Subscribe(const Subscriber *subscriber) {
-  s_subscribers.push_back(subscriber);
-  PC_PRINT("SUBSCRIBED", TagType::Print, "PUBLISHERS")
+Publisher::~Publisher() {
+  m_subscribers.clear();
+  PC_PRINT(m_subscribers.size(), TagType::Print, "publisher current count")
+  PC_PRINT("DESTROYED", TagType::Destr, "PUBLISHER")
+}
+
+void Publisher::Subscribe(Subscriber *subscriber) {
+  m_subscribers.push_back(subscriber);
+  PC_PRINT(subscriber->GetName() << " subscribed to " << m_name, TagType::Print,
+           "PUBLISHERS")
 };
 
-void Publisher::UnSubscribe(const Subscriber *subscriber) {
-  auto iter = std::find(s_subscribers.begin(), s_subscribers.end(), subscriber);
-
-  if (iter != s_subscribers.end()) {
-    s_subscribers.erase(iter);
+void Publisher::UnSubscribe(Subscriber *subscriber) {
+  auto iter = std::find(m_subscribers.begin(), m_subscribers.end(), subscriber);
+  if (iter != m_subscribers.end()) {
+    PC_PRINT(subscriber->GetName() << " un-subscribed from " << m_name,
+             TagType::Print, "PUBLISHERS")
+    m_subscribers.erase(iter);
   };
-  PC_PRINT("UNSUBSCRIBED", TagType::Print, "PUBLISHERS")
 };
 
-void Publisher::PublishEvent(Event &e) {
-  for (const Subscriber *s : s_subscribers) {
+void Publisher::PublishEvent(Event &e) const {
+  for (Subscriber *s : m_subscribers) {
     s->OnEvent(e);
 
     if (e.IsHandled()) {
@@ -33,17 +43,4 @@ void Publisher::PublishEvent(Event &e) {
   }
 };
 
-Publisher::Publisher() {
-  PC_PRINT("CREATED", TagType::Constr, "PUBLISHER")
-
-      PC_PRINT("PUBLISHERS SIZE: " << s_subscribers.size(), TagType::Print,
-               "PUBLISHER")
-};
-
-Publisher::~Publisher() {
-  s_subscribers.clear();
-  PC_PRINT("PUBLISHERS SIZE: " << s_subscribers.size(), TagType::Print,
-           "PUBLISHER")
-  PC_PRINT("DESTROYED", TagType::Destr, "PUBLISHER")
-}
 ENGINE_NAMESPACE_END
