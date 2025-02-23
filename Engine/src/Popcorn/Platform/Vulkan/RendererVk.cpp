@@ -30,15 +30,14 @@ std::vector<RenderWorkflowVk *> RendererVk::s_renderWorkflows{};
 void RendererVk::DrawFrame(const Scene &scene) const {
   auto *basicRenderWorkflow =
       s_renderWorkflows[(int)RenderWorkflowIndices::Basic];
-  s_commandPoolVk->BeginCommandBuffer(m_renderingCommandBuffer);
-  //
-  // TODO: Scene must own renderflows, implement -
-  // scene.renderflows.forEach((renderflow, i) => {
-  //   renderflow.RecordRenderCommands(m_renderingCommandBuffer, imageIndex);
-  // });
-  //
-  // basicRenderWorkflow->RecordRenderCommands(m_renderingCommandBuffer, 1);
-  s_commandPoolVk->EndCommandBuffer(m_renderingCommandBuffer);
+  s_commandPoolVk->BeginCommandBuffer(m_drawingCommandBuffer);
+
+  // BASIC RENDERPASS ------------------------------------------------------
+  basicRenderWorkflow->RecordRenderCommands(scene, m_drawingCommandBuffer,
+                                            1); // 1 is image index for multiple
+                                                // frames in flight
+
+  s_commandPoolVk->EndCommandBuffer(m_drawingCommandBuffer);
 };
 
 bool RendererVk::OnFrameBfrResize(FrameBfrResizeEvent &) { return true; };
@@ -65,7 +64,7 @@ void RendererVk::CreateBasicCommandBuffer() {
   VkCommandBufferAllocateInfo allocInfo{};
 
   commandPoolVkStn->GetDefaultCommandBufferAllocInfo(allocInfo);
-  commandPoolVkStn->AllocCommandBuffer(allocInfo, m_renderingCommandBuffer);
+  commandPoolVkStn->AllocCommandBuffer(allocInfo, m_drawingCommandBuffer);
 }
 
 //

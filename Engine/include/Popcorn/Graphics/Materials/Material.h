@@ -49,10 +49,13 @@ public:
   };
   virtual ~Material() { PC_PRINT("DESTROYED", TagType::Destr, "Material.h"); };
 
+  [[nodiscard]] inline std::vector<Buffer> &GetShaders() { return m_shaders; };
+  [[nodiscard]] inline std::vector<const Mesh *> &GetLinkedMeshes() {
+    return m_linkedMeshes;
+  };
+
   void LinkMesh(const Mesh *meshPtr);
   void UnlinkMesh(const Mesh *meshPtr);
-
-  [[nodiscard]] inline std::vector<Buffer> &GetShaders() { return m_shaders; };
 
   virtual const MaterialTypes GetMaterialType() const = 0;
   virtual void Bind() = 0;

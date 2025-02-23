@@ -1,14 +1,14 @@
 #include "Mesh.h"
 #include "Material.h"
-#include "SceneManager.h"
+#include "Scene.h"
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 // Fires when the mesh is added to a Scene
 void Mesh::OnAttach(const SceneData &) {
-  auto *sceneManagerStn = SceneManager::Get();
-  sceneManagerStn->RegisterMaterial(&m_material);
+  // auto *sceneManagerStn = SceneManager::Get();
+  // sceneManagerStn->RegisterMaterial(&m_material);
 };
 
 void Mesh::OnUpdate(const SceneData &) {};

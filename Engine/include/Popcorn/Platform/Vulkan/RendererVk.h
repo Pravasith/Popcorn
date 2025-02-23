@@ -80,7 +80,7 @@ private:
 
   static std::vector<RenderWorkflowVk *> s_renderWorkflows;
 
-  VkCommandBuffer m_renderingCommandBuffer = VK_NULL_HANDLE;
+  VkCommandBuffer m_drawingCommandBuffer = VK_NULL_HANDLE;
 };
 
 GFX_NAMESPACE_END

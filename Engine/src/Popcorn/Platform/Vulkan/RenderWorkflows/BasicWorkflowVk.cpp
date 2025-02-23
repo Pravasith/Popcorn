@@ -30,23 +30,23 @@ void BasicRenderWorkflowVk::CreateVkPipeline(Material &material) {
                                                      fragShaderModule};
 
   // SET SHADER STAGES
-  m_basicGfxPipelineVk.SetShaderStagesMask(static_cast<ShaderStages>(
+  m_colorPipelineVk.SetShaderStagesMask(static_cast<ShaderStages>(
       ShaderStages::VertexBit | ShaderStages::FragmentBit));
   std::vector<VkPipelineShaderStageCreateInfo> shaderStages =
-      m_basicGfxPipelineVk.CreateShaderStages(shaderModules);
+      m_colorPipelineVk.CreateShaderStages(shaderModules);
 
   // SET FIXED FUNCTION PIPELINE STATE & SET LAYOUT
   GfxPipelineState pipelineState{};
-  m_basicGfxPipelineVk.GetDefaultPipelineState(pipelineState);
+  m_colorPipelineVk.GetDefaultPipelineState(pipelineState);
   // m_basicGfxPipeline.GetDefaultPipelineLayoutCreateInfo(
   //     createInfo.pipelineLayout); // Already in
   //     GetDefaultPipelineCreateInfo()
-  m_basicGfxPipelineVk.SetShaderStageCreateInfos(shaderStages);
-  m_basicGfxPipelineVk.SetPipelineLayout(device, pipelineState.pipelineLayout);
+  m_colorPipelineVk.SetShaderStageCreateInfos(shaderStages);
+  m_colorPipelineVk.SetPipelineLayout(device, pipelineState.pipelineLayout);
 
   // CREATE PIPELINE
-  m_basicGfxPipelineVk.CreateVkPipeline(device, pipelineState,
-                                        m_basicRenderPassVk.GetVkRenderPass());
+  m_colorPipelineVk.CreateVkPipeline(device, pipelineState,
+                                     m_basicRenderPassVk.GetVkRenderPass());
 
   // DESTROY SHADER MODULES
   PC_DestroyShaderModule(device, vertShaderModule);
@@ -146,14 +146,15 @@ void BasicRenderWorkflowVk::CleanUp() {
   };
 
   // Cleanup pipelines
-  m_basicGfxPipelineVk.Destroy(device);
+  m_colorPipelineVk.Destroy(device);
 
   // Cleanup render passes
   m_basicRenderPassVk.Destroy(device);
 };
 
 void BasicRenderWorkflowVk::RecordRenderCommands(
-    const VkCommandBuffer commandBuffer, uint32_t imageIndex) {
+    const Scene &scene, const VkCommandBuffer &commandBuffer,
+    uint32_t imageIndex) {
   // auto &renderPass = m_basicRenderPassVk.GetVkRenderPass();
   // PC_VK_NULL_CHECK(renderPass);
   auto *swapchainVkStn = SwapchainVk::Get();
@@ -170,21 +171,28 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
 
   //
   // BIND PIPELINE -------------------------------------------------------------
-  m_basicGfxPipelineVk.RecordBindCmdPipelineCommand(commandBuffer);
+  m_colorPipelineVk.RecordBindCmdPipelineCommand(commandBuffer);
 
   //
   // SET VIEWPORT AND SCISSOR SIZE ---------------------------------------------
   VkViewport viewport{};
   VkRect2D scissor{};
-  m_basicGfxPipelineVk.GetDefaultViewportAndScissorState(
+  m_colorPipelineVk.GetDefaultViewportAndScissorState(
       viewport, scissor, swapchainVkStn->GetSwapchainExtent());
   vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
   vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
   //
-  // TODO: Abstract this accordingly
   // DRAW COMMAND --------------------------------------------------------------
-  vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+  auto &sceneMaterials = scene.GetSceneMaterials();
+
+  for (auto &material : sceneMaterials) {
+    auto &linkedMeshes = material->GetLinkedMeshes();
+    for (auto &linkedMesh : linkedMeshes) {
+      // TODO: inject vertex data instead of hardcoding
+      vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+    }
+  }
 
   //
   // END RENDER PASS -----------------------------------------------------------

@@ -6,6 +6,7 @@
 #include "Popcorn/Core/Base.h"
 #include "RenderPassVk.h"
 #include "RenderWorkflowVk.h"
+#include "Scene.h"
 #include <vulkan/vulkan_core.h>
 
 // TODO: Redo this class. But only after a full working animated scene is
@@ -27,8 +28,8 @@ public:
   };
 
   virtual void CreateWorkflowResources(Material *materialPtr) override {
-    PC_WARN("Expensive initialization operation: Creating workflow resources! "
-            "Should only be done once per workflow object init.")
+    PC_WARN("Expensive initialization operation: Creating workflow Vulkan "
+            "resources! Should only be done once per workflow object init.")
 
     CreateRenderPass();
     CreateVkPipeline(*materialPtr);
@@ -39,7 +40,8 @@ public:
   virtual void CreateVkPipeline(Material &) override;
   virtual void CreateFramebuffers() override;
 
-  virtual void RecordRenderCommands(const VkCommandBuffer commandBuffer,
+  virtual void RecordRenderCommands(const Scene &scene,
+                                    const VkCommandBuffer &commandBuffer,
                                     uint32_t imageIndex) override;
 
   virtual void CleanUp() override;
@@ -47,7 +49,7 @@ public:
 private:
 private:
   RenderPassVk m_basicRenderPassVk;
-  GfxPipelineVk m_basicGfxPipelineVk;
+  GfxPipelineVk m_colorPipelineVk;
 
   std::vector<VkFramebuffer> m_swapchainFramebuffers;
 };

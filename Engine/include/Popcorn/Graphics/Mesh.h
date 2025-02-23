@@ -33,6 +33,8 @@ public:
     return GameObjectTypes::Mesh;
   };
 
+  [[nodiscard]] inline Material &GetMaterial() const { return m_material; };
+
 protected:
   VertexBuffer *m_vertexBuffer;
   // TODO: Make this a Vector as required

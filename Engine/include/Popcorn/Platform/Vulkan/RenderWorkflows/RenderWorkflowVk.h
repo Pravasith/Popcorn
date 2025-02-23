@@ -2,6 +2,7 @@
 
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include "Scene.h"
 #include <vulkan/vulkan_core.h>
 
 // TODO: Redo this class. But only after a full working animated scene is
@@ -28,7 +29,8 @@ public:
   //
   // PURE
   virtual void CreateWorkflowResources(Material *materialPtr) = 0;
-  virtual void RecordRenderCommands(const VkCommandBuffer commandBuffer,
+  virtual void RecordRenderCommands(const Scene &scene,
+                                    const VkCommandBuffer &commandBuffer,
                                     uint32_t imageIndex) = 0;
 
 private:

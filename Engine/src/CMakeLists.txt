@@ -45,7 +45,6 @@ add_library(
   # SCENE CLASSES
   # TODO: Separate the scene to a different library when time comes
   ${SCENE_IMPL_DIR}/Scene.cpp
-  ${SCENE_IMPL_DIR}/SceneManager.cpp
   #
   # OPENGL CLASSES
   ${PLATFORM_IMPL_DIR}/OpenGL/RendererOpenGL.cpp

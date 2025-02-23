@@ -10,7 +10,12 @@
 :: Implement staging buffers
 :: Transform matrices & shader uniforms
 :: Implement camera
-:: Textures & Model loaders
+:: Textures & model loaders
+
+:: Make all singletons stack allocated with static local variables
+   BE CAREFUL ABOUT THIS ONE ^^
+   Stack allocated local variables last until the end of the program.
+
 
 --- 18 Feb ------------------------------------
 --- Make video - 28th Feb --------------------------
