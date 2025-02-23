@@ -28,8 +28,16 @@ std::vector<RenderWorkflowVk *> RendererVk::s_renderWorkflows{};
 // --- PUBLIC METHODS ------------------------------------------------------
 
 void RendererVk::DrawFrame(const Scene &scene) const {
+  auto *basicRenderWorkflow =
+      s_renderWorkflows[(int)RenderWorkflowIndices::Basic];
   s_commandPoolVk->BeginCommandBuffer(m_renderingCommandBuffer);
-  // Execute work flow
+  //
+  // TODO: Scene must own renderflows, implement -
+  // scene.renderflows.forEach((renderflow, i) => {
+  //   renderflow.RecordRenderCommands(m_renderingCommandBuffer, imageIndex);
+  // });
+  //
+  // basicRenderWorkflow->RecordRenderCommands(m_renderingCommandBuffer, 1);
   s_commandPoolVk->EndCommandBuffer(m_renderingCommandBuffer);
 };
 

@@ -5,8 +5,11 @@
 #include "GlobalMacros.h"
 #include "Material.h"
 #include "PipelineVk.h"
+#include "Popcorn/Core/Base.h"
 #include "RenderPassVk.h"
 #include "SwapchainVk.h"
+#include <cstdint>
+#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -147,19 +150,46 @@ void BasicRenderWorkflowVk::CleanUp() {
 
   // Cleanup render passes
   m_basicRenderPassVk.Destroy(device);
-
-  // Destroy command pool
-  // DestroyCommandPool();
 };
 
-void BasicRenderWorkflowVk::BeginRenderPass() {
-  // VkRenderPassBeginInfo renderPassInfo{};
-  // renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-  // renderPassInfo.renderPass = m_basicRenderPassVk.GetVkRenderPass();
-  // renderPassInfo.framebuffer = m_swapchainFramebuffers[imageIndex];
-};
+void BasicRenderWorkflowVk::RecordRenderCommands(
+    const VkCommandBuffer commandBuffer, uint32_t imageIndex) {
+  // auto &renderPass = m_basicRenderPassVk.GetVkRenderPass();
+  // PC_VK_NULL_CHECK(renderPass);
+  auto *swapchainVkStn = SwapchainVk::Get();
 
-void BasicRenderWorkflowVk::EndRenderPass() {};
+  VkRenderPassBeginInfo renderPassCreateInfo{};
+
+  //
+  // BEGIN RENDER PASS ---------------------------------------------------------
+  m_basicRenderPassVk.GetDefaultCmdBeginRenderPassInfo(
+      m_swapchainFramebuffers[imageIndex], swapchainVkStn->GetSwapchainExtent(),
+      renderPassCreateInfo);
+  m_basicRenderPassVk.RecordBeginRenderPassCommand(commandBuffer,
+                                                   renderPassCreateInfo);
+
+  //
+  // BIND PIPELINE -------------------------------------------------------------
+  m_basicGfxPipelineVk.RecordBindCmdPipelineCommand(commandBuffer);
+
+  //
+  // SET VIEWPORT AND SCISSOR SIZE ---------------------------------------------
+  VkViewport viewport{};
+  VkRect2D scissor{};
+  m_basicGfxPipelineVk.GetDefaultViewportAndScissorState(
+      viewport, scissor, swapchainVkStn->GetSwapchainExtent());
+  vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+  vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+  //
+  // TODO: Abstract this accordingly
+  // DRAW COMMAND --------------------------------------------------------------
+  vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+
+  //
+  // END RENDER PASS -----------------------------------------------------------
+  m_basicRenderPassVk.RecordEndRenderPassCommand(commandBuffer);
+};
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

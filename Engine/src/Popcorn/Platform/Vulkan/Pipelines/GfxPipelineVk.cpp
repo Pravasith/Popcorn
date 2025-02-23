@@ -72,14 +72,14 @@ void GfxPipelineVk::GetDefaultViewportState(
 };
 
 // FOR DYNAMIC VIEWPORT & SCISSOR STATE DURING DRAW CMD
-void GfxPipelineVk::GetDefaultViewportAndScissor(
+void GfxPipelineVk::GetDefaultViewportAndScissorState(
     VkViewport &viewport, VkRect2D &scissor,
     const VkExtent2D &swapchainExtent) const {
   // Viewport (acts as a transformation)
   viewport.x = 0.0f;
   viewport.y = 0.0f;
-  viewport.width = swapchainExtent.width;
-  viewport.height = swapchainExtent.height;
+  viewport.width = (float)swapchainExtent.width;
+  viewport.height = (float)swapchainExtent.height;
   viewport.minDepth = 0.0f;
   viewport.maxDepth = 1.0f;
 

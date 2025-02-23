@@ -126,8 +126,8 @@ public:
       VkPipelineDepthStencilStateCreateInfo &depthStencilState) const;
 
   virtual void
-  GetDefaultViewportAndScissor(VkViewport &viewport, VkRect2D &scissor,
-                               const VkExtent2D &swapchainExtent) const;
+  GetDefaultViewportAndScissorState(VkViewport &viewport, VkRect2D &scissor,
+                                    const VkExtent2D &swapchainExtent) const;
 
   virtual void GetDefaultColorBlendingState(
       VkPipelineColorBlendStateCreateInfo &colorBlendState);

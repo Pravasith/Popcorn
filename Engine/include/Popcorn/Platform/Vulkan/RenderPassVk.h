@@ -110,6 +110,30 @@ public:
     vkDestroyRenderPass(device, m_renderPass, nullptr);
   };
 
+  void GetDefaultCmdBeginRenderPassInfo(const VkFramebuffer &frameBuffer,
+                                        const VkExtent2D &frameExtent,
+                                        VkRenderPassBeginInfo &renderPassInfo) {
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = m_renderPass;
+    renderPassInfo.framebuffer = frameBuffer;
+    renderPassInfo.renderArea.offset = {0, 0};
+    renderPassInfo.renderArea.extent = frameExtent;
+    VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+    renderPassInfo.clearValueCount = 1;
+    renderPassInfo.pClearValues = &clearColor;
+  };
+
+  void RecordBeginRenderPassCommand(
+      const VkCommandBuffer &commandBuffer,
+      const VkRenderPassBeginInfo &renderPassBeginInfo) {
+    vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo,
+                         VK_SUBPASS_CONTENTS_INLINE);
+  };
+
+  void RecordEndRenderPassCommand(const VkCommandBuffer &commandBuffer) {
+    vkCmdEndRenderPass(commandBuffer);
+  };
+
 private:
   VkRenderPass m_renderPass = VK_NULL_HANDLE;
 };

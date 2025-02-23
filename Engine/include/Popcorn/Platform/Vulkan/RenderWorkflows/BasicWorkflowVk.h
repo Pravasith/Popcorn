@@ -35,12 +35,12 @@ public:
     CreateFramebuffers();
   };
 
-  virtual void BeginRenderPass() override;
-  virtual void EndRenderPass() override;
-
   virtual void CreateRenderPass() override;
   virtual void CreateVkPipeline(Material &) override;
   virtual void CreateFramebuffers() override;
+
+  virtual void RecordRenderCommands(const VkCommandBuffer commandBuffer,
+                                    uint32_t imageIndex) override;
 
   virtual void CleanUp() override;
 
@@ -50,7 +50,6 @@ private:
   GfxPipelineVk m_basicGfxPipelineVk;
 
   std::vector<VkFramebuffer> m_swapchainFramebuffers;
-  VkCommandBuffer m_commandBuffer;
 };
 
 GFX_NAMESPACE_END

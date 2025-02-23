@@ -28,8 +28,8 @@ public:
   //
   // PURE
   virtual void CreateWorkflowResources(Material *materialPtr) = 0;
-  virtual void BeginRenderPass() = 0;
-  virtual void EndRenderPass() = 0;
+  virtual void RecordRenderCommands(const VkCommandBuffer commandBuffer,
+                                    uint32_t imageIndex) = 0;
 
 private:
   //

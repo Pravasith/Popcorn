@@ -107,6 +107,10 @@ public:
 
   using PiplelineStateType = DerivePipelineCreateInfoType<T>::type;
 
+  [[nodiscard]] inline const VkPipeline GetVkPipeline() const {
+    return m_pipeline;
+  };
+
   virtual void GetDefaultPipelineState(PiplelineStateType &pipelineState) = 0;
   virtual void CreateVkPipeline(const VkDevice &device,
                                 const PiplelineStateType &pipelineCreateInfo,
@@ -158,6 +162,14 @@ public:
       const VkDevice &device,
       const VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo) = 0;
   virtual void DestroyPipelineLayout(const VkDevice &device) = 0;
+
+  void RecordBindCmdPipelineCommand(const VkCommandBuffer &cmdBfr) {
+    PC_VK_NULL_CHECK(cmdBfr)
+    PC_VK_NULL_CHECK(m_pipeline)
+
+    // Bind pipeline
+    vkCmdBindPipeline(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
+  };
 
 protected:
   PipelineTypes type_value = PipelineTypes::GraphicsType;
