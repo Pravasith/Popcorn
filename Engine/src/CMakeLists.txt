@@ -39,8 +39,8 @@ add_library(
   # MAIN CLASS
   ${GRAPHICS_IMPL_DIR}/Renderer.cpp
   ${GRAPHICS_IMPL_DIR}/VertexBuffer.cpp
-  ${GRAPHICS_IMPL_DIR}/Materials/Material.cpp
   ${GRAPHICS_IMPL_DIR}/Mesh.cpp
+  ${GRAPHICS_IMPL_DIR}/Materials/Material.cpp
   #
   # SCENE CLASSES
   # TODO: Separate the scene to a different library when time comes
@@ -56,6 +56,8 @@ add_library(
   ${PLATFORM_IMPL_DIR}/Vulkan/SwapchainVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/FramebuffersVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/VertexBufferVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/FrameVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/CommandPoolVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/Pipelines/GfxPipelineVk.cpp
   #
   # RENDER WORK FLOWS

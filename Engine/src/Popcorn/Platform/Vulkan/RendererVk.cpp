@@ -33,30 +33,17 @@ void RendererVk::DrawFrame(const Scene &scene) {
       reinterpret_cast<BasicRenderWorkflowVk *>(
           s_renderWorkflows[(int)RenderWorkflowIndices::Basic]);
 
-  s_frameVk->Draw(
-      m_drawingCommandBuffer,
-      // RECORD COMMANDS LAMBDA --------------------------------------------
-      [&](const uint32_t frameIndex) {
-        vkResetCommandBuffer(m_drawingCommandBuffer, 0);
-        s_commandPoolVk->BeginCommandBuffer(m_drawingCommandBuffer);
-        // TODO: Write a loop for render workflows instead
-        {
-          basicRenderWorkflow->RecordRenderCommands(
-              scene, m_drawingCommandBuffer, frameIndex);
-        }
-        s_commandPoolVk->EndCommandBuffer(m_drawingCommandBuffer);
-      });
-
-  s_frameVk->SubmitDrawCommands(m_drawingCommandBuffer);
-
-  //
-  // SYNC OBJS -------------------------------------------------------------
-
-  // Wait for the prev frame to finish rendering
-  // Acquire and image from the Swapchain
-  // Record a command buffer to draw the scene to the acquired image
-  // Submit the recorded buffer
-  // Present the Swapchain image - Actual rendering happens
+  s_frameVk->Draw(m_drawingCommandBuffer,
+                  // Record commands lambda
+                  [&](const uint32_t frameIndex) {
+                    s_commandPoolVk->BeginCommandBuffer(m_drawingCommandBuffer);
+                    // TODO: Write a loop for render workflows instead
+                    {
+                      basicRenderWorkflow->RecordRenderCommands(
+                          scene, m_drawingCommandBuffer, frameIndex);
+                    }
+                    s_commandPoolVk->EndCommandBuffer(m_drawingCommandBuffer);
+                  });
 };
 
 bool RendererVk::OnFrameBfrResize(FrameBfrResizeEvent &) { return true; };

@@ -8,6 +8,9 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+FrameVk *FrameVk::s_instance = nullptr;
+uint32_t FrameVk::s_swapchainImageIndex = 0;
+
 void FrameVk::CreateRenderSyncObjects() {
   auto *deviceVkStn = DeviceVk::Get();
   auto &device = deviceVkStn->GetDevice();
@@ -56,6 +59,7 @@ void FrameVk::Draw(
   //
   // Reset command buffer & start recording commands to it (lambda called from
   // the RendererVk class)
+  vkResetCommandBuffer(commandBuffer, 0);
   recordDrawCommands(s_swapchainImageIndex);
 
   //

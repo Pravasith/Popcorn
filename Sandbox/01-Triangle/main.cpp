@@ -11,8 +11,6 @@
 
 using namespace Popcorn;
 
-class TriangleScene : public Scene {};
-
 class GameLayer : public Layer {
 public:
   GameLayer() { PC_PRINT("CREATED", TagType::Constr, "GAME-LAYER") };
@@ -36,6 +34,7 @@ public:
       };
     };
 
+    class TriangleScene : public Scene {};
     auto *vertexBuffer = VertexBuffer::Create();
 
     vertexBuffer->Fill<Vertex>({

@@ -9,9 +9,9 @@ GFX_NAMESPACE_BEGIN
 class RendererOpenGL : public Renderer {
 public:
   RendererOpenGL(const Window &appWin);
-  ~RendererOpenGL() override;
+  virtual ~RendererOpenGL() override;
 
-  virtual void DrawFrame(const Scene &) const override {};
+  virtual void DrawFrame(const Scene &) override {};
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) override {
     return false;
   };

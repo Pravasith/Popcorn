@@ -22,10 +22,10 @@ public:
   };
 
   // Adds a node
-  inline void Add(GameObject *node);
+  void Add(GameObject *node);
 
   // Update nodes
-  inline void OnUpdate();
+  void OnUpdate();
 
   void RegisterMaterial(Material *materialPtr);
   void UnRegisterMaterial(Material *materialPtr);

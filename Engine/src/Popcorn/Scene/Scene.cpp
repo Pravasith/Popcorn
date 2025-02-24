@@ -26,7 +26,7 @@ Scene::~Scene() {
 };
 
 // Adds a node
-inline void Scene::Add(GameObject *node) {
+void Scene::Add(GameObject *node) {
   node->OnAttach(m_sceneData);
   m_nodes.push_back(node);
 
