@@ -82,6 +82,21 @@ void BasicRenderWorkflowVk::CreateRenderPass() {
   RenderPassVk::GetDefaultSubpassDescription(subpass1);
   subpass1.pColorAttachments = attachmentRefs.data();
 
+  // INFO: The subpass attachment layouts are automatically set implicitly  with
+  // the help of some internal dependencies from user-specified "in & out
+  // attachment types" in the attachment data. But when you're writing to a
+  // Swapchain image (in case of final render), you need to let it know to wait
+  // until the image is actually available. So we create an external dependency
+  // to ask the renderpass to wait at the required "stage" (in this case,
+  // color-output stage).
+  VkSubpassDependency dependency{};
+  dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+  dependency.dstSubpass = 0;
+  dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  dependency.srcAccessMask = 0;
+  dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
   // VkSubpassDescription subpass2{};
   // RenderPassVk::GetDefaultSubpassDescription(subpass2);
 
@@ -92,6 +107,12 @@ void BasicRenderWorkflowVk::CreateRenderPass() {
   // CREATE RENDER PASS INFO ----------------------------------------
   VkRenderPassCreateInfo renderPass1CreateInfo{};
   RenderPassVk::SetDefaultRenderPassCreateInfo(renderPass1CreateInfo);
+
+  // Dependencies -- For making the renderpass to wait on the color output
+  // pipeline stage triggered by "swapchain image available" semaphore
+  renderPass1CreateInfo.dependencyCount = 1;
+  renderPass1CreateInfo.pDependencies = &dependency;
+
   renderPass1CreateInfo.pAttachments = attachments.data();
   renderPass1CreateInfo.pSubpasses = subpasses.data();
 
@@ -154,7 +175,7 @@ void BasicRenderWorkflowVk::CleanUp() {
 
 void BasicRenderWorkflowVk::RecordRenderCommands(
     const Scene &scene, const VkCommandBuffer &commandBuffer,
-    uint32_t imageIndex) {
+    const uint32_t imageIndex) {
   // auto &renderPass = m_basicRenderPassVk.GetVkRenderPass();
   // PC_VK_NULL_CHECK(renderPass);
   auto *swapchainVkStn = SwapchainVk::Get();

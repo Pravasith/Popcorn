@@ -31,7 +31,7 @@ public:
   virtual void CreateWorkflowResources(Material *materialPtr) = 0;
   virtual void RecordRenderCommands(const Scene &scene,
                                     const VkCommandBuffer &commandBuffer,
-                                    uint32_t imageIndex) = 0;
+                                    const uint32_t imageIndex) = 0;
 
 private:
   //

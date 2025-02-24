@@ -2,6 +2,7 @@
 
 #include "CommandPoolVk.h"
 #include "DeviceVk.h"
+#include "FrameVk.h"
 #include "FramebuffersVk.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Window.h"
@@ -23,7 +24,7 @@ public:
   virtual ~RendererVk() override;
 
   // Can potentially take "void *frame" as a param
-  virtual void DrawFrame(const Scene &scene) const override;
+  virtual void DrawFrame(const Scene &scene) override;
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) override;
   virtual void PrepareMaterialForRender(Material *materialPtr) override;
 
@@ -77,6 +78,7 @@ private:
   static SwapchainVk *s_swapchainVk;
   static FramebuffersVk *s_framebuffersVk;
   static CommandPoolVk *s_commandPoolVk;
+  static FrameVk *s_frameVk;
 
   static std::vector<RenderWorkflowVk *> s_renderWorkflows;
 

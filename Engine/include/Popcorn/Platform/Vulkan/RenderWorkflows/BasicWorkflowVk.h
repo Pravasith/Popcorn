@@ -42,7 +42,7 @@ public:
 
   virtual void RecordRenderCommands(const Scene &scene,
                                     const VkCommandBuffer &commandBuffer,
-                                    uint32_t imageIndex) override;
+                                    const uint32_t imageIndex) override;
 
   virtual void CleanUp() override;
 

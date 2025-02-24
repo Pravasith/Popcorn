@@ -20,6 +20,7 @@ SurfaceVk *RendererVk::s_surfaceVk = SurfaceVk::Get();
 SwapchainVk *RendererVk::s_swapchainVk = SwapchainVk::Get();
 FramebuffersVk *RendererVk::s_framebuffersVk = FramebuffersVk::Get();
 CommandPoolVk *RendererVk::s_commandPoolVk = CommandPoolVk::Get();
+FrameVk *RendererVk::s_frameVk = FrameVk::Get();
 // Other members
 std::vector<RenderWorkflowVk *> RendererVk::s_renderWorkflows{};
 
@@ -27,15 +28,26 @@ std::vector<RenderWorkflowVk *> RendererVk::s_renderWorkflows{};
 // -------------------------------------------------------------------------
 // --- PUBLIC METHODS ------------------------------------------------------
 
-void RendererVk::DrawFrame(const Scene &scene) const {
-  auto *basicRenderWorkflow =
-      s_renderWorkflows[(int)RenderWorkflowIndices::Basic];
-  //
-  // RECORD COMMANDS -------------------------------------------------------
-  s_commandPoolVk->BeginCommandBuffer(m_drawingCommandBuffer);
-  // BASIC RENDERPASS
-  basicRenderWorkflow->RecordRenderCommands(scene, m_drawingCommandBuffer, 1);
-  s_commandPoolVk->EndCommandBuffer(m_drawingCommandBuffer);
+void RendererVk::DrawFrame(const Scene &scene) {
+  BasicRenderWorkflowVk *basicRenderWorkflow =
+      reinterpret_cast<BasicRenderWorkflowVk *>(
+          s_renderWorkflows[(int)RenderWorkflowIndices::Basic]);
+
+  s_frameVk->Draw(
+      m_drawingCommandBuffer,
+      // RECORD COMMANDS LAMBDA --------------------------------------------
+      [&](const uint32_t frameIndex) {
+        vkResetCommandBuffer(m_drawingCommandBuffer, 0);
+        s_commandPoolVk->BeginCommandBuffer(m_drawingCommandBuffer);
+        // TODO: Write a loop for render workflows instead
+        {
+          basicRenderWorkflow->RecordRenderCommands(
+              scene, m_drawingCommandBuffer, frameIndex);
+        }
+        s_commandPoolVk->EndCommandBuffer(m_drawingCommandBuffer);
+      });
+
+  s_frameVk->SubmitDrawCommands(m_drawingCommandBuffer);
 
   //
   // SYNC OBJS -------------------------------------------------------------

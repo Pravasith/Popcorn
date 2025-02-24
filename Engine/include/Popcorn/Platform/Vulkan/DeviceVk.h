@@ -49,6 +49,16 @@ public:
     return m_device;
   };
 
+  [[nodiscard]] inline const VkQueue &GetGraphicsQueue() const {
+    PC_VK_NULL_CHECK(m_graphicsQueue)
+    return m_graphicsQueue;
+  };
+
+  [[nodiscard]] inline const VkQueue &GetPresentQueue() const {
+    PC_VK_NULL_CHECK(m_presentQueue)
+    return m_presentQueue;
+  };
+
   [[nodiscard]] inline SwapchainSupportDetails
   GetSwapchainSupportDetails(const VkSurfaceKHR &surface) const {
     return QuerySwapchainSupport(m_physicalDevice, surface);
@@ -118,7 +128,7 @@ private:
   VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
   VkDevice m_device = VK_NULL_HANDLE;
 
-  VkQueue m_gfxQueue = VK_NULL_HANDLE;
+  VkQueue m_graphicsQueue = VK_NULL_HANDLE;
   VkQueue m_presentQueue = VK_NULL_HANDLE;
 
   const std::vector<const char *> m_validationLayers = {
