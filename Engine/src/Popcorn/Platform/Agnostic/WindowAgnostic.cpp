@@ -124,6 +124,15 @@ WindowAgnostic::WindowAgnostic(const Props &props) : m_title(props.Title) {
   }
 }
 
+WindowAgnostic::~WindowAgnostic() {
+  glfwDestroyWindow(s_osWindow);
+  glfwTerminate();
+  s_osWindow = nullptr;
+
+  PC_PRINT("TERMINATED", TagType::Destr, "GLFW");
+  PC_PRINT("DESTROYED", TagType::Destr, "WINDOW-AGNOSTIC");
+};
+
 void WindowAgnostic::OnUpdate() {
   // glViewport(0, 0, WindowAgnostic::GetWidth(),
   // WindowAgnostic::GetHeight());
@@ -131,14 +140,6 @@ void WindowAgnostic::OnUpdate() {
   // glfwSwapBuffers(s_osWindow);
   glfwPollEvents();
 }
-
-WindowAgnostic::~WindowAgnostic() {
-  glfwDestroyWindow(s_osWindow);
-  glfwTerminate();
-
-  PC_PRINT("TERMINATED", TagType::Destr, "GLFW");
-  PC_PRINT("DESTROYED", TagType::Destr, "WINDOW-AGNOSTIC");
-};
 
 void WindowAgnostic::Terminate() {
   if (!s_osWindow || !s_instance) {
@@ -148,7 +149,6 @@ void WindowAgnostic::Terminate() {
 
   else {
     // NO NEED TO DELETE s_osWindow BC glfwTerminate() HANDLES DELETION
-    s_osWindow = nullptr;
 
     delete s_instance;
     s_instance = nullptr;

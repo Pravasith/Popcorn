@@ -1,10 +1,36 @@
-TODO:
-----------
-::  Check GLFW installation for linux & windows
-::  Architecture for Sandbox - scripts
-    - script to build & install engine in sandbox
-    - make main.cpp work
-    - script to create a new Game project
+
+
+--- TASKS ------------------------------------------------------------------
+----------------------------------------------------------------------------
+
+--- 18 Feb ------------------------------------
+
+:: Make Triangle again -
+:: Implement descriptor sets & index buffers
+:: Implement staging buffers
+:: Transform matrices & shader uniforms
+:: Implement camera
+:: Textures & model loaders
+
+:: Make all singletons stack allocated with static local variables
+   BE CAREFUL ABOUT THIS ONE ^^
+   Stack allocated local variables last until the end of the program.
+
+
+--- 18 Feb ------------------------------------
+--- Make video - 28th Feb --------------------------
+
+:: Implement ImGui
+
+
+
+--- TASKS ------------------------------------------------------------------
+----------------------------------------------------------------------------
+
+LOW PRIORITY:
+-------------
+
+:: Fix Buffer class constructors
 
 ::  Build for windows
 ::  Make Readme for the project
@@ -14,14 +40,5 @@ TODO:
 
 ::  Check Events class for perf issues
 
-::  Check OnUpdate Method of RendererVk
-
-::  Refactor the Renderer
-
 ::  Precompiled headers
     Add precompiled headers to the project and in cmake
-
-DONE:
-----------
- :: Mem check resolution
-    Valgrind memory check

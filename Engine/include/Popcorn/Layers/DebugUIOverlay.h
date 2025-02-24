@@ -3,12 +3,12 @@
 #include "GlobalMacros.h"
 #include "Layer.h"
 #include "Popcorn/Events/Event.h"
-#include <backends/imgui_impl_glfw.h>
-#include <backends/imgui_impl_vulkan.h>
 #include <imgui.h>
 #define GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_vulkan.h>
 
 ENGINE_NAMESPACE_BEGIN
 class DebugUIOverlay : public Layer {
