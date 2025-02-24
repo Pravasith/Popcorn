@@ -37,6 +37,10 @@ public:
 
   void CreateImageViews(const VkDevice &);
 
+  [[nodiscard]] inline const VkSwapchainKHR &GetVkSwapchain() const {
+    return m_swapchain;
+  };
+
   [[nodiscard]] inline const VkExtent2D &GetSwapchainExtent() const {
     return m_swapchainExtent;
   };

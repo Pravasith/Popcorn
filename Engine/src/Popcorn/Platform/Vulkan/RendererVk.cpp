@@ -30,14 +30,21 @@ std::vector<RenderWorkflowVk *> RendererVk::s_renderWorkflows{};
 void RendererVk::DrawFrame(const Scene &scene) const {
   auto *basicRenderWorkflow =
       s_renderWorkflows[(int)RenderWorkflowIndices::Basic];
+  //
+  // RECORD COMMANDS -------------------------------------------------------
   s_commandPoolVk->BeginCommandBuffer(m_drawingCommandBuffer);
-
-  // BASIC RENDERPASS ------------------------------------------------------
-  basicRenderWorkflow->RecordRenderCommands(scene, m_drawingCommandBuffer,
-                                            1); // 1 is image index for multiple
-                                                // frames in flight
-
+  // BASIC RENDERPASS
+  basicRenderWorkflow->RecordRenderCommands(scene, m_drawingCommandBuffer, 1);
   s_commandPoolVk->EndCommandBuffer(m_drawingCommandBuffer);
+
+  //
+  // SYNC OBJS -------------------------------------------------------------
+
+  // Wait for the prev frame to finish rendering
+  // Acquire and image from the Swapchain
+  // Record a command buffer to draw the scene to the acquired image
+  // Submit the recorded buffer
+  // Present the Swapchain image - Actual rendering happens
 };
 
 bool RendererVk::OnFrameBfrResize(FrameBfrResizeEvent &) { return true; };
