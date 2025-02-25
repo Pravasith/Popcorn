@@ -156,10 +156,8 @@ void BasicRenderWorkflowVk::CleanUp() {
              "BasicWorkFlow")
   };
 
-  auto *deviceSingleton = DeviceVk::Get();
-  auto &device = deviceSingleton->GetDevice();
+  auto &device = DeviceVk::Get()->GetDevice();
   auto *framebuffersVkStn = FramebuffersVk::Get();
-  // auto *commandPoolVkStn = CommandPoolVk::Get();
 
   // Cleanup framebuffers
   for (auto &framebuffer : m_swapchainFramebuffers) {

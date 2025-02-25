@@ -83,6 +83,11 @@ void FrameVk::Draw(
       frameRendered,
       // Image index
       swapchainImageIndex);
+
+  //
+  // Wait until all the commandBuffers are executed before moving to the next
+  // steps after the gameloop in the program (usually cleanup)
+  vkDeviceWaitIdle(device);
 };
 
 void FrameVk::PresentImageToSwapchain(VkSemaphore *signalSemaphores,

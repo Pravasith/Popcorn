@@ -32,6 +32,7 @@ public:
   virtual void RecordRenderCommands(const Scene &scene,
                                     const VkCommandBuffer &commandBuffer,
                                     const uint32_t imageIndex) = 0;
+  virtual void CleanUp() = 0;
 
 private:
   //
@@ -40,8 +41,6 @@ private:
   virtual void CreateVkPipeline(Material &) {};
   virtual void CreateFramebuffers() {};
   virtual void CreateCommandBuffer() {};
-
-  virtual void CleanUp() = 0;
 };
 
 GFX_NAMESPACE_END

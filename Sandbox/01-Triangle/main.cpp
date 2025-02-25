@@ -1,4 +1,5 @@
 #include <Base.h>
+#include <Material.h>
 #include <Popcorn.h>
 #include <Popcorn/Core/Application.h>
 #include <Popcorn/Graphics/Materials/BasicMaterial.h>
@@ -16,10 +17,7 @@ class GameLayer : public Layer {
 
 public:
   GameLayer() { PC_PRINT("CREATED", TagType::Constr, "GAME-LAYER") };
-  ~GameLayer() {
-
-    PC_PRINT("DESTROYED", TagType::Destr, "GAME-LAYER")
-  };
+  ~GameLayer() { PC_PRINT("DESTROYED", TagType::Destr, "GAME-LAYER") };
 
   virtual void OnAttach() override {
     // TODO: Move all of this to proper functions
@@ -57,10 +55,10 @@ public:
     MaterialData matData{(ShaderStages::VertexBit | ShaderStages::FragmentBit),
                          shaderFiles};
 
-    BasicMaterial *triMat = new BasicMaterial(matData);
+    triMat = new BasicMaterial(matData);
 
     // Mesh triMesh{nullptr, triMat};
-    Mesh *triMesh = new Mesh{vertexBuffer, *triMat};
+    triMesh = new Mesh{vertexBuffer, *triMat};
 
     triScene.Add(triMesh); // HERE IS THE MATERIAL READY STAGE
 
@@ -71,7 +69,14 @@ public:
     VertexBuffer::Destroy(vertexBuffer);
   };
 
-  virtual void OnDetach() override {};
+  virtual void OnDetach() override {
+    delete triMesh;
+    triMesh = nullptr;
+
+    delete triMat;
+    triMat = nullptr;
+  };
+
   virtual void OnUpdate() override {
     //
     Renderer::Get().DrawFrame(triScene);
@@ -80,6 +85,8 @@ public:
 
 private:
   TriangleScene triScene{};
+  Mesh *triMesh;
+  Material *triMat;
 };
 
 int main(int argc, char **argv) {

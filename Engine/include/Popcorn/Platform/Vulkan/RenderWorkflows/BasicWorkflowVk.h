@@ -19,11 +19,9 @@ public:
   BasicRenderWorkflowVk() {
     // auto *commandBufferVkStn = CommandPoolVk::Get();
     // commandBufferVkStn->CreateCommandPool();
-
     PC_PRINT("CREATED", TagType::Constr, "BasicWorkflowVk")
   };
   ~BasicRenderWorkflowVk() override {
-    CleanUp();
     PC_PRINT("DESTROYED", TagType::Destr, "BasicWorkflowVk")
   };
 

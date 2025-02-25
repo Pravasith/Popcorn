@@ -90,34 +90,36 @@ RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
 };
 
 RendererVk::~RendererVk() {
-
-  // Destroy render workflows
-  for (auto *workflow : s_renderWorkflows) {
-    delete workflow;
-  }
-  s_renderWorkflows.clear();
-
   VulkanCleanUp();
-
-  CommandPoolVk::Destroy();
-  FrameVk::Destroy();
-  FramebuffersVk::Destroy();
-  SwapchainVk::Destroy();
-  SurfaceVk::Destroy();
-  DeviceVk::Destroy();
-
   PC_PRINT("DESTROYED", TagType::Destr, "RENDERER-VULKAN");
 };
 
 void RendererVk::VulkanCleanUp() {
-  const auto &instance = s_deviceVk->GetVkInstance();
-  const auto &device = s_deviceVk->GetDevice();
+  auto &instance = s_deviceVk->GetVkInstance();
+  auto &device = s_deviceVk->GetDevice();
+
+  for (auto *workflow : s_renderWorkflows) {
+    workflow->CleanUp();
+    delete workflow;
+  }
+
+  s_frameVk->CleanUp();
+  FrameVk::Destroy();
 
   s_commandPoolVk->CleanUp();
-  s_frameVk->CleanUp();
+  CommandPoolVk::Destroy();
+
+  s_renderWorkflows.clear();
+  FramebuffersVk::Destroy();
+
   s_swapchainVk->CleanUp(device);
+  SwapchainVk::Destroy();
+
   s_surfaceVk->CleanUp(instance);
+  SurfaceVk::Destroy();
+
   s_deviceVk->CleanUp();
+  DeviceVk::Destroy();
 };
 
 //
