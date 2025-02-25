@@ -1,192 +1,175 @@
 #include "RendererVk.h"
-#include "GlobalMacros.h"
+#include "BasicWorkflowVk.h"
+#include "CommandPoolVk.h"
+#include "DeviceVk.h"
+#include "FrameVk.h"
+#include "FramebuffersVk.h"
+#include "Material.h"
 #include "Popcorn/Core/Base.h"
-#include "VertexBufferVk.h"
-#include <cstdint>
+#include "Popcorn/Core/Helpers.h"
+#include "RenderWorkflowVk.h"
+#include "SurfaceVk.h"
+#include "SwapchainVk.h"
 #include <cstring>
-#include <vector>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-RendererVk::RendererVk(const Window &appWin)
-    : Renderer(appWin), m_ValLayersVk(m_vkInstance),
-      m_WinSurfaceVk(m_vkInstance), m_PhysDeviceVk(m_vkInstance, GetSurface()),
-      m_LogiDeviceVk(m_vkInstance), m_GfxPipelineVk(),
-      m_SwapChainVk(m_LogiDeviceVk.GetLogiDevice(),
-                    m_PhysDeviceVk.GetPhysDevice(), m_WinSurfaceVk.GetSurface(),
-                    m_PhysDeviceVk.GetQueueFamilyIndices(),
-                    m_GfxPipelineVk.GetRenderPass()),
-      m_CmdPoolVk(),
-      m_queueFamilyIndices(m_PhysDeviceVk.GetQueueFamilyIndices()),
-      m_PresentVk{m_LogiDeviceVk.GetLogiDevice(), m_SwapChainVk.GetSwapChain(),
-                  m_LogiDeviceVk.GetDeviceQueue(),
-                  m_LogiDeviceVk.GetPresentQueue(),
-                  m_AppWin.GetFramebufferSize()} {
-  PC_PRINT("CREATED", TagType::Constr, "RENDERER-VULKAN");
+// Singleton members
+DeviceVk *RendererVk::s_deviceVk = nullptr;
+SurfaceVk *RendererVk::s_surfaceVk = nullptr;
+SwapchainVk *RendererVk::s_swapchainVk = nullptr;
+FramebuffersVk *RendererVk::s_framebuffersVk = nullptr;
+CommandPoolVk *RendererVk::s_commandPoolVk = nullptr;
+FrameVk *RendererVk::s_frameVk = nullptr;
+// Other members
+std::vector<RenderWorkflowVk *> RendererVk::s_renderWorkflows{};
+
+//
+// -------------------------------------------------------------------------
+// --- PUBLIC METHODS ------------------------------------------------------
+
+void RendererVk::DrawFrame(const Scene &scene) {
+  BasicRenderWorkflowVk *basicRenderWorkflow =
+      reinterpret_cast<BasicRenderWorkflowVk *>(
+          s_renderWorkflows[(int)RenderWorkflowIndices::Basic]);
+
+  s_frameVk->Draw(m_drawingCommandBuffer,
+                  // Record commands lambda
+                  [&](const uint32_t frameIndex) {
+                    s_commandPoolVk->BeginCommandBuffer(m_drawingCommandBuffer);
+                    // TODO: Write a loop for render workflows instead
+                    // {
+                    basicRenderWorkflow->RecordRenderCommands(
+                        scene, m_drawingCommandBuffer, frameIndex);
+                    // }
+                    s_commandPoolVk->EndCommandBuffer(m_drawingCommandBuffer);
+                  });
+};
+
+bool RendererVk::OnFrameBfrResize(FrameBfrResizeEvent &) { return true; };
+
+void RendererVk::PrepareMaterialForRender(Material *materialPtr) {
+  switch (materialPtr->GetMaterialType()) {
+  case MaterialTypes::BasicMat:
+    // Creates Vulkan Pipelines necessary for the basic materials
+    {
+      PC_WARN(s_renderWorkflows.size());
+
+      auto *basicRenderWorkflow =
+          s_renderWorkflows[(int)RenderWorkflowIndices::Basic];
+      basicRenderWorkflow->CreateWorkflowResources(materialPtr);
+    }
+    break;
+  case MaterialTypes::PbrMat:
+    break;
+  }
+};
+
+void RendererVk::CreateBasicCommandBuffer() {
+  auto *commandPoolVkStn = CommandPoolVk::Get();
+  VkCommandBufferAllocateInfo allocInfo{};
+
+  commandPoolVkStn->GetDefaultCommandBufferAllocInfo(allocInfo);
+  commandPoolVkStn->AllocCommandBuffer(allocInfo, m_drawingCommandBuffer);
+}
+
+//
+// -------------------------------------------------------------------------
+// --- PRIVATE METHODS -----------------------------------------------------
+
+RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
+  PC_PRINT("CREATED", TagType::Constr, "RENDERER-VK");
+
+  s_deviceVk = DeviceVk::Get();
+  s_surfaceVk = SurfaceVk::Get();
+  s_swapchainVk = SwapchainVk::Get();
+  s_framebuffersVk = FramebuffersVk::Get();
+  s_commandPoolVk = CommandPoolVk::Get();
+  s_frameVk = FrameVk::Get();
 };
 
 RendererVk::~RendererVk() {
+  VulkanCleanUp();
   PC_PRINT("DESTROYED", TagType::Destr, "RENDERER-VULKAN");
-  CleanUp();
 };
 
-void RendererVk::InitVulkan() {
-  // CREATES INSTANCE
-  CreateInstance();
+void RendererVk::VulkanCleanUp() {
+  auto &instance = s_deviceVk->GetVkInstance();
+  auto &device = s_deviceVk->GetDevice();
 
-  // ENABLE VALIDATION LAYERS
-  if constexpr (s_enableValidationLayers) {
-    m_ValLayersVk.SetupDbgMsngr();
-  };
-
-  // CREATES SURFACE FOR SWAPCHAIN
-  m_WinSurfaceVk.CreateSurface(m_AppWin.GetOSWindow());
-  m_PhysDeviceVk.PickPhysDevice(m_SwapChainVk);
-  m_LogiDeviceVk.CreateLogicalDevice(m_PhysDeviceVk.GetQueueFamilyIndices(),
-                                     m_ValLayersVk.GetValidationLayers(),
-                                     m_PhysDeviceVk.GetPhysDevice(),
-                                     m_PhysDeviceVk.GetDeviceExts());
-
-  // SWAP CHAIN RELATED
-  m_SwapChainVk.CreateSwapChain(
-      m_AppWin.GetFramebufferSize().first, // FRAME BFR WIDTH
-      m_AppWin.GetFramebufferSize().second // FRAME BFR HEIGHT
-  );
-
-  m_SwapChainVk.CreateImgViews();
-
-  // CREATE GFX PIPELINE
-  m_GfxPipelineVk.CreateRenderPass(m_SwapChainVk.GetImgFormat(),
-                                   m_LogiDeviceVk.GetLogiDevice());
-
-  m_GfxPipelineVk.AttachVertexBuffer(m_vertexBufferVk);
-
-  m_GfxPipelineVk.CreateGfxPipeline(m_LogiDeviceVk.GetLogiDevice(),
-                                    m_SwapChainVk.GetSwapChainExtent());
-
-  // FRAME BUFFERS
-  m_SwapChainVk.CreateFrameBfrs();
-
-  // CMD BFRS
-  m_CmdPoolVk.CreateCmdPool(m_PhysDeviceVk.GetQueueFamilyIndices(),
-                            m_LogiDeviceVk.GetLogiDevice());
-
-  // CREATE VULKAN VERTEX BUFFER
-  m_vertexBufferVk->CreateVulkanBuffer(m_LogiDeviceVk.GetLogiDevice(),
-                                       m_PhysDeviceVk);
-
-  m_CmdPoolVk.CreateCmdBfrs(m_LogiDeviceVk.GetLogiDevice());
-
-  // PRESENTATION SYNC OBJS FOR DRAW FRAME
-  m_PresentVk.CreateSyncObjs(m_LogiDeviceVk.GetLogiDevice());
-};
-
-void RendererVk::CreateInstance() {
-  VkApplicationInfo appInfo{};
-
-  appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-  appInfo.pApplicationName = "HELLO TRIANGLE";
-  appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-  appInfo.pEngineName = "Popcorn Engine";
-  appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-  appInfo.apiVersion = VK_API_VERSION_1_0;
-
-  // EXTENSIONS INFO
-  VkInstanceCreateInfo createInfo{};
-  createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-  createInfo.pApplicationInfo = &appInfo;
-
-  auto extensions = GetRequiredExtensions();
-  createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-  createInfo.ppEnabledExtensionNames = extensions.data();
-
-  createInfo.enabledLayerCount = 0;
-
-  // CHECK FOR VALIDATION LAYER SUPPORT
-  if constexpr (s_enableValidationLayers) {
-
-    if (!m_ValLayersVk.CheckVkVLSupport()) {
-      throw std::runtime_error(
-          "VALIDATION LAYERS REQUESTED, BUT NOT AVAILABLE!");
-    }
-
-    VkDebugUtilsMessengerCreateInfoEXT dbgCreateInfo{};
-
-    // UPDATE CREATE INFO
-    createInfo.enabledLayerCount =
-        static_cast<uint32_t>(m_ValLayersVk.GetValidationLayers().size());
-    createInfo.ppEnabledLayerNames = m_ValLayersVk.GetValidationLayers().data();
-
-    m_ValLayersVk.PopulateDbgMsngrCreateInfo(dbgCreateInfo);
-    createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&dbgCreateInfo;
-  } else {
-    createInfo.enabledLayerCount = 0;
-    createInfo.pNext = nullptr;
+  for (auto *workflow : s_renderWorkflows) {
+    workflow->CleanUp();
+    delete workflow;
   }
 
-  // CREATE INSTANCE
-  VkResult result = vkCreateInstance(&createInfo, nullptr, &m_vkInstance);
+  s_frameVk->CleanUp();
+  FrameVk::Destroy();
 
-  if (vkCreateInstance(&createInfo, nullptr, &m_vkInstance) != VK_SUCCESS) {
-    throw std::runtime_error("FAILED TO CREATE VK INSTANCE!");
-  }
+  s_commandPoolVk->CleanUp();
+  CommandPoolVk::Destroy();
+
+  s_renderWorkflows.clear();
+  FramebuffersVk::Destroy();
+
+  s_swapchainVk->CleanUp(device);
+  SwapchainVk::Destroy();
+
+  s_surfaceVk->CleanUp(instance);
+  SurfaceVk::Destroy();
+
+  s_deviceVk->CleanUp();
+  DeviceVk::Destroy();
 };
 
-std::vector<const char *> RendererVk::GetRequiredExtensions() {
-  uint32_t glfwExtensionCount = 0;
-  const char **glfwExtensions;
-  glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-
-  std::vector<const char *> extensions(glfwExtensions,
-                                       glfwExtensions + glfwExtensionCount);
-
-  if constexpr (s_enableValidationLayers) {
-    extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-  };
-
-  return extensions;
+//
+// ---------------------------------------------------------------------------
+// --- RENDER WORKFLOWS ------------------------------------------------------
+void RendererVk::CreateRenderWorkflows() {
+  BasicRenderWorkflowVk *basicRendererWorkflow = new BasicRenderWorkflowVk;
+  s_renderWorkflows.push_back(basicRendererWorkflow);
 };
 
-bool RendererVk::OnFrameBfrResize(FrameBfrResizeEvent &e) {
-  m_PresentVk.SetFrameBfrResized(true);
-  return true;
+RenderWorkflowVk *
+RendererVk::GetRenderWorkflow(const RenderWorkflowIndices index) {
+  return s_renderWorkflows[(int)index];
 };
 
-void RendererVk::DrawFrame() {
-  if (!m_vertexBufferVk) {
-    return;
-  };
+void RendererVk::VulkanInit() {
+  GLFWwindow *osWindow = static_cast<GLFWwindow *>(m_AppWin.GetOSWindow());
+  //
+  // CREATE INSTANCE, SET UP DEBUGGING LAYERS --------------------------------
+  s_deviceVk->CreateInstance({"Vulkan App", 1, 0, 0});
+  s_deviceVk->SetupDebugMessenger();
 
-  m_PresentVk.DrawFrame(
-      m_CmdPoolVk.GetCmdBfrs(),
+  const auto &instance = s_deviceVk->GetVkInstance();
 
-      // TODO: USE A LAMBDA
-      CmdPoolVk::RecordCmdBfrFtr{
-          m_GfxPipelineVk.GetRenderPass(), m_SwapChainVk.GetFrameBfrs(),
-          m_SwapChainVk.GetSwapChainExtent(), m_GfxPipelineVk.GetGfxPipeline(),
-          m_vertexBufferVk},
+  //
+  // CREATE WINDOW SURFACE ---------------------------------------------------
+  s_surfaceVk->CreateWindowSurface(instance, osWindow);
 
-      // TODO: USE A LAMBDA
-      SwapChainVk::RecreateSwapChainFtr{
-          m_SwapChainVk, m_LogiDeviceVk.GetLogiDevice(), m_AppWin});
-};
+  const auto &surface = s_surfaceVk->GetSurface();
 
-void RendererVk::CleanUp() {
-  auto &device = m_LogiDeviceVk.GetLogiDevice();
+  //
+  // CREATE PHYSICAL & LOGICAL DEVICE ----------------------------------------
+  s_deviceVk->PickPhysicalDevice(surface);
+  s_deviceVk->CreateLogicalDevice(surface);
 
-  vkDeviceWaitIdle(device);
-  m_vertexBufferVk->DestroyVulkanBuffer(device);
-  m_SwapChainVk.CleanUp();
-  m_PresentVk.CleanUp(device);
-  m_CmdPoolVk.CleanUp(device);
-  m_GfxPipelineVk.CleanUp(device);
-  m_WinSurfaceVk.CleanUp();
-  m_LogiDeviceVk.CleanUp();
-  m_ValLayersVk.CleanUp();
+  const auto &device = s_deviceVk->GetDevice();
+  const auto &swapchainSupportDetails =
+      s_deviceVk->GetSwapchainSupportDetails(surface);
+  const auto &queueFamilyIndices = s_deviceVk->GetQueueFamilyIndices(surface);
 
-  vkDestroyInstance(m_vkInstance, nullptr);
-  m_vkInstance = VK_NULL_HANDLE;
+  //
+  // CREATE SWAPCHAIN --------------------------------------------------------
+  s_swapchainVk->CreateSwapchain(device, swapchainSupportDetails, osWindow,
+                                 surface, queueFamilyIndices);
+  s_swapchainVk->CreateImageViews(device);
+
+  //
+  // RENDER READY ------------------------------------------------------------
+  s_commandPoolVk->CreateCommandPool();
+  s_frameVk->CreateRenderSyncObjects();
 };
 
 GFX_NAMESPACE_END

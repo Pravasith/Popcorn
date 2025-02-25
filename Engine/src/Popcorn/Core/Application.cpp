@@ -11,20 +11,23 @@ Time *Application::s_time = nullptr;
 Renderer *Application::s_Renderer = nullptr;
 DebugUIOverlay *Application::s_debugUIOverlay = nullptr;
 
-Application::Application() {
+Application::Application() : Subscriber("Application") {
   PC_PRINT("APPLICATION STARTED", TagType::Constr, "APP");
 };
 
 Application::~Application() {
-
+  Time::Destroy();
   // LAYERS ARE DELETED INTERNALLY IN THE LAYERSTACK DESTRUCTOR
   delete s_layerStack;
+  s_layerStack = nullptr;
 
   Renderer::Destroy();
   s_Renderer = nullptr;
 
-  Window::UnSubscribe(s_instance);
-  Window::Destroy();
+  // s_time->UnSubscribe(s_instance);
+  // s_window->UnSubscribe(s_instance);
+
+  Popcorn::Window::Destroy();
 
   PC_PRINT("APPLICATION STOPPED", TagType::Destr, "APP");
 };
@@ -35,15 +38,17 @@ Window &Application::GetAppWindow() const { return *s_window; }
 void Application::Start() {
   if (!s_instance) {
     // DONT MOVE THIS BLOCK
-    auto windowProps = Popcorn::Window::Props("Triangle App", 500, 500);
-    auto AppWin = Popcorn::Window::Create(windowProps);
+    auto windowProps = Window::Props("Triangle App", 500, 500);
+    auto AppWin = Window::Create(windowProps);
 
     s_window = AppWin;
     s_instance = new Application();
 
-    Window::Subscribe(s_instance);
+    s_window->Subscribe(s_instance);
 
     s_layerStack = new LayerStack();
+    s_time = Time::Create();
+    s_time->Subscribe(s_instance);
 
     // OVERLAYS - EXAMPLE
     // s_debugUIOverlay = new DebugUIOverlay();
@@ -55,7 +60,6 @@ void Application::Start() {
     // s_layerStack->PushLayer(s_renderLayer);
     // s_renderLayer->OnAttach();
 
-    s_time = Time::Get();
   } else {
     PC_WARN(
         "ATTEMPT TO CREATE APPLICATION CLASS, WHEN INSTANCE ALREADY EXISTS");
@@ -72,7 +76,6 @@ void Application::AddLayer(Layer *layer) {
 };
 
 void Application::Stop() {
-  // DESTROY WINDOW
   if (s_instance) {
     delete s_instance;
     s_instance = nullptr;
@@ -98,15 +101,23 @@ bool Application::OnWindowClose(WindowCloseEvent &e) const {
   return true;
 };
 
-bool Application::OnCPUClockTick(TimeEvent &e) const {
-  Window::OnUpdate();
+bool Application::OnUpdate(TimeEvent &e) {
+  // Window::OnUpdate(e);
+  // // RENDER LAYER UPDATES HERE
+  // s_layerStack->UpdateLayerStack();
+  // // s_Renderer->DrawFrame();
+  return true;
+};
+
+bool Application::OnClockTick(TimeEvent &e) {
+  Window::OnUpdate(e);
   // RENDER LAYER UPDATES HERE
   s_layerStack->UpdateLayerStack();
   // s_Renderer->DrawFrame();
   return true;
 };
 
-void Application::OnEvent(Event &e) const {
+void Application::OnEvent(Event &e) {
   EventDispatcher dispatcher{e};
 
   dispatcher.Dispatch<WindowResizeEvent>(
@@ -120,7 +131,7 @@ void Application::OnEvent(Event &e) const {
   dispatcher.Dispatch<WindowCloseEvent>(
       PC_BIND_EVENT_FUNC(WindowCloseEvent, OnWindowClose));
 
-  dispatcher.Dispatch<TimeEvent>(PC_BIND_EVENT_FUNC(TimeEvent, OnCPUClockTick));
+  dispatcher.Dispatch<TimeEvent>(PC_BIND_EVENT_FUNC(TimeEvent, OnClockTick));
 
   // auto layerStack = Application::GetLayerStack();
   // layerStack.IterateBackwards([&](Event &e) {

@@ -3,13 +3,13 @@
 #include "GlobalMacros.h"
 #include <cstdint>
 #include <optional>
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
-struct SwapChainSupportDetails {
+
+struct SwapchainSupportDetails {
   VkSurfaceCapabilitiesKHR capabilities;
   std::vector<VkSurfaceFormatKHR> formats;
   std::vector<VkPresentModeKHR> presentModes;
@@ -19,7 +19,7 @@ struct QueueFamilyIndices {
   std::optional<uint32_t> graphicsFamily;
   std::optional<uint32_t> presentFamily;
 
-  bool isComplete() const {
+  [[nodiscard]] inline bool isComplete() const {
     return graphicsFamily.has_value() && presentFamily.has_value();
   }
 };

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GlobalMacros.h"
-#include "PhysDeviceVk.h"
 #include "Popcorn/Core/Base.h"
 #include "VertexBuffer.h"
 #include <cstdint>
@@ -39,13 +38,13 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER-VK")
   };
 
-  void CreateVulkanBuffer(const VkDevice &, const PhysDeviceVk &);
+  // void CreateVulkanBuffer(const VkDevice &, const PhysDeviceVk &);
 
-  [[nodiscard]] inline const VkBuffer &GetVulkanVertexBuffer() const {
-    return vertexBuffer;
-  };
+  // [[nodiscard]] inline const VkBuffer &GetVulkanVertexBuffer() const {
+  //   return vertexBuffer;
+  // };
 
-  void DestroyVulkanBuffer(const VkDevice &device);
+  // void DestroyVulkanBuffer(const VkDevice &device);
 
   // COPY CONSTRUCTOR
   VertexBufferVk(const VertexBufferVk &other) = default;

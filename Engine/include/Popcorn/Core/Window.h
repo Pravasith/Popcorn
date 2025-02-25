@@ -2,6 +2,7 @@
 
 #include "GlobalMacros.h"
 #include "Popcorn/Events/Publisher.h"
+#include "Popcorn/Events/TimeEvent.h"
 #include <cstdint>
 #include <string>
 #include <utility>
@@ -30,7 +31,7 @@ public:
   static Window *Create(const Props &props = Props());
 
   // static void AddSubscriber(const Subscriber *);
-  static void OnUpdate();
+  static void OnUpdate(TimeEvent &);
   static void Destroy();
 
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR

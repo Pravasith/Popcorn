@@ -1,40 +1,46 @@
 #pragma once
 
 #include "GlobalMacros.h"
-#include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Window.h"
 #include "Popcorn/Events/WindowEvent.h"
-#include <variant>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 enum class RendererType {
-  OpenGL = shift_l(0),
-  Vulkan = shift_l(1),
-  // DirectX = shift_l(2),
-  // Metal = shift_l(3)
+  None = 0,
+  OpenGL = shift_l(1),
+  Vulkan = shift_l(2),
+  // DirectX = shift_l(3),
+  // Metal = shift_l(4)
 };
 
 class RendererOpenGL;
 class RendererVk;
 class VertexBuffer;
+class Scene;
+class Material;
 
 // SINGLETON
 class Renderer {
-
 public:
   template <RendererType T> static Renderer *Create(const Window &);
   static void Destroy();
 
-  // template <RendererType T>
   static Renderer &Get() { return *s_instance; };
 
-  [[nodiscard]] const static RendererType GetAPI() { return s_type; };
+  [[nodiscard]] const static RendererType GetAPI() {
+    if (s_type == RendererType::None) {
+      PC_WARN("Trying to access an undefined s_type!")
+    };
+
+    return s_type;
+  };
 
   // PASS IN SCENE & CAMERA ETC.
-  virtual void DrawFrame() = 0;
+  virtual void DrawFrame(const Scene &scene) = 0;
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) = 0;
+  virtual void PrepareMaterialForRender(Material *materialPtr) = 0;
 
   Renderer(const Renderer &) = delete;
   Renderer &operator=(const Renderer &) = delete;
@@ -42,15 +48,13 @@ public:
   Renderer(Renderer &&) = delete;
   Renderer &operator=(const Renderer &&) = delete;
 
+protected:
   Renderer(const Window &);
-
-  Renderer();
   virtual ~Renderer();
 
 private:
   static RendererType s_type;
   static Renderer *s_instance;
-  static VertexBuffer *s_vertexBuffer;
 
 protected:
   const Window &m_AppWin;

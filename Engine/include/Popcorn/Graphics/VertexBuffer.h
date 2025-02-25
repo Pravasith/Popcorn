@@ -90,19 +90,31 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER")
   };
 
+  virtual uint64_t GetSize() const = 0;
+  virtual uint64_t GetCount() const = 0;
+
+  virtual void Bind() = 0;
+  virtual void UnBind() = 0;
+
+  template <typename T> void PrintBuffer() { Buffer::Print<T>(m_buffer); };
+
   template <typename T> void Fill(std::initializer_list<T> list) {
     m_buffer.SetData(list);
   };
 
   static VertexBuffer *Create();
   inline static void Destroy(VertexBuffer *vBfr) {
+    if (!vBfr) {
+      PC_WARN("Attempt to delete a null vBfr")
+    };
+
     delete vBfr;
     vBfr = nullptr;
   };
 
   // COPY CONSTRUCTOR
   VertexBuffer(const VertexBuffer &other) {
-    PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Print,
+    PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Constr,
              "VERTEX-BUFFER(INHERITED)")
     m_buffer = other.m_buffer;
     m_layout = other.m_layout;
@@ -121,7 +133,7 @@ public:
 
   // MOVE CONSTRUCTOR
   VertexBuffer(VertexBuffer &&other) {
-    PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Print,
+    PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Constr,
              "VERTEX-BUFFER(INHERITED)")
     if (this == &other) {
       return;
@@ -145,14 +157,6 @@ public:
 
     return *this;
   };
-
-  virtual uint64_t GetSize() const = 0;
-  virtual uint64_t GetCount() const = 0;
-
-  virtual void Bind() = 0;
-  virtual void UnBind() = 0;
-
-  template <typename T> void PrintBuffer() { Buffer::Print<T>(m_buffer); };
 
 protected:
   Buffer m_buffer;

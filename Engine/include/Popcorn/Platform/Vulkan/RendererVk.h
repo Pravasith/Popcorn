@@ -1,18 +1,16 @@
 #pragma once
 
-#include "CmdPoolVk.h"
-#include "CommonVk.h"
-#include "GfxPipelineVk.h"
+#include "CommandPoolVk.h"
+#include "DeviceVk.h"
+#include "FrameVk.h"
+#include "FramebuffersVk.h"
 #include "GlobalMacros.h"
-#include "LogiDeviceVk.h"
-#include "PhysDeviceVk.h"
-#include "Popcorn/Core/Base.h"
-#include "PresentVk.h"
+#include "Popcorn/Core/Window.h"
+#include "Popcorn/Events/WindowEvent.h"
+#include "RenderWorkflowVk.h"
 #include "Renderer.h"
-#include "SwapChainVk.h"
-#include "ValidationLyrsVk.h"
-#include "VertexBufferVk.h"
-#include "WinSurfaceVk.h"
+#include "SurfaceVk.h"
+#include "SwapchainVk.h"
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -23,61 +21,69 @@ GFX_NAMESPACE_BEGIN
 class RendererVk : public Renderer {
 public:
   RendererVk(const Window &appWin);
-  ~RendererVk() override;
+  virtual ~RendererVk() override;
 
-  constexpr inline static bool AreValLayersEnabled() {
-    return s_enableValidationLayers;
-  };
-
-  virtual void DrawFrame() override;
+  // Can potentially take "void *frame" as a param
+  virtual void DrawFrame(const Scene &scene) override;
   virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) override;
+  virtual void PrepareMaterialForRender(Material *materialPtr) override;
 
-  inline void BindVertexBuffer(VertexBufferVk *vertexBufferVk) {
-    m_vertexBufferVk = vertexBufferVk;
-  };
+  // Sets up devices, configure swapchains, creates depth buffers
+  // also allocates command pools
+  void VulkanInit();
+  void CreateRenderWorkflows();
 
-  void InitVulkan();
+  void VulkanCleanUp();
+
+  static RenderWorkflowVk *GetRenderWorkflow(const RenderWorkflowIndices index);
+  void CreateBasicCommandBuffer();
 
 private:
-  void CleanUp();
-  void CreateInstance();
+  void RenderScene() {
 
-  std::vector<const char *> GetRequiredExtensions();
+    // --- RENDER COLORS ---------------------------------------------------
+    // BasicWorkflow::Render(Scene);
+    // // Implementation inside BasicWorkflow::Render
+    // auto regMaterials = Scene.GetRegisteredMaterials()
+    // for (auto &mat : regMaterials) {
+    //      for (auto &mesh : mat.GetMeshes()) {
+    //         // Renderpass
+    //         BasicPipelineVk.Get(mat.data, m_renderPass); // mat.data like
+    //         uniforms
+    //      };
+    // };
+
+    // --- RENDER SHADOWS --------------------------------------------------
+    // ShadowsWorkflow::Render(Scene);
+    // // Implementation inside ShadowsWorkflow::Render
+    // auto regMaterials = Scene.GetRegisteredMaterials()
+    // for (auto &mat : regMaterials) {
+    //      for (auto &mesh : mat.GetMeshes()) {
+    //         // Renderpass
+    //         ShadowPipelineVk.Get(mat.data, m_renderPass); // mat.data like
+    //         uniforms
+    //      };
+    // };
+  };
+
+  //
+  // -----------------------------------------------------------------------
+  // --- TODO: Potential methods -------------------------------------------
+  void RecordCmdBuffer(void *renderPass, void *pipeline) {};
+  void SubmitCmdBuffer(void *cmdBuffer) {};
 
 private:
-  [[nodiscard]] inline const VkSurfaceKHR &GetSurface() const {
-    if (!m_WinSurfaceVk.GetSurface()) {
-      PC_WARN("SURFACE NOT AVAILABLE");
-    };
-    return m_WinSurfaceVk.GetSurface();
-  };
+  static DeviceVk *s_deviceVk;
+  static SurfaceVk *s_surfaceVk;
+  static SwapchainVk *s_swapchainVk;
+  static FramebuffersVk *s_framebuffersVk;
+  static CommandPoolVk *s_commandPoolVk;
+  static FrameVk *s_frameVk;
 
-  [[nodiscard]] inline const VkPhysicalDevice &GetPhysDevice() const {
-    if (!m_PhysDeviceVk.GetPhysDevice()) {
-      PC_WARN("PHYS DEV NOT AVAILABLE");
-    };
-    return m_PhysDeviceVk.GetPhysDevice();
-  };
+  static std::vector<RenderWorkflowVk *> s_renderWorkflows;
 
-  VkInstance m_vkInstance;
-
-#ifdef NDEBUG
-  static constexpr bool s_enableValidationLayers = false;
-#else
-  static constexpr bool s_enableValidationLayers = true;
-#endif
-
-  ValidationLyrsVk m_ValLayersVk;
-  WinSurfaceVk m_WinSurfaceVk;
-  PhysDeviceVk m_PhysDeviceVk;
-  LogiDeviceVk m_LogiDeviceVk;
-  GfxPipelineVk m_GfxPipelineVk;
-  SwapChainVk m_SwapChainVk;
-  CmdPoolVk m_CmdPoolVk;
-  const QueueFamilyIndices &m_queueFamilyIndices;
-  PresentVk m_PresentVk;
-
-  VertexBufferVk *m_vertexBufferVk = nullptr;
+  VkCommandBuffer m_drawingCommandBuffer = VK_NULL_HANDLE;
 };
+
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

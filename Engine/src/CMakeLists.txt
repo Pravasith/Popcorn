@@ -23,6 +23,7 @@ add_library(
 set(EVENTS_IMPL_DIR Popcorn/Events)
 set(PLATFORM_IMPL_DIR Popcorn/Platform)
 set(GRAPHICS_IMPL_DIR Popcorn/Graphics)
+set(SCENE_IMPL_DIR Popcorn/Scene)
 
 # WINDOW LIB
 add_library(Window ${CORE_IMPL_DIR}/Window.cpp
@@ -38,19 +39,28 @@ add_library(
   # MAIN CLASS
   ${GRAPHICS_IMPL_DIR}/Renderer.cpp
   ${GRAPHICS_IMPL_DIR}/VertexBuffer.cpp
+  ${GRAPHICS_IMPL_DIR}/Mesh.cpp
+  ${GRAPHICS_IMPL_DIR}/Materials/Material.cpp
+  #
+  # SCENE CLASSES
+  # TODO: Separate the scene to a different library when time comes
+  ${SCENE_IMPL_DIR}/Scene.cpp
   #
   # OPENGL CLASSES
   ${PLATFORM_IMPL_DIR}/OpenGL/RendererOpenGL.cpp
   #
   # VULKAN CLASSES
   ${PLATFORM_IMPL_DIR}/Vulkan/RendererVk.cpp
-  ${PLATFORM_IMPL_DIR}/Vulkan/ValidationLyrsVk.cpp
-  ${PLATFORM_IMPL_DIR}/Vulkan/PhysDeviceVk.cpp
-  ${PLATFORM_IMPL_DIR}/Vulkan/LogiDeviceVk.cpp
-  ${PLATFORM_IMPL_DIR}/Vulkan/WinSurfaceVk.cpp
-  ${PLATFORM_IMPL_DIR}/Vulkan/SwapChainVk.cpp
-  ${PLATFORM_IMPL_DIR}/Vulkan/GfxPipelineVk.cpp
-  ${PLATFORM_IMPL_DIR}/Vulkan/ShaderVk.cpp
-  ${PLATFORM_IMPL_DIR}/Vulkan/CmdPoolVk.cpp
-  ${PLATFORM_IMPL_DIR}/Vulkan/PresentVk.cpp
-  ${PLATFORM_IMPL_DIR}/Vulkan/VertexBufferVk.cpp)
+  ${PLATFORM_IMPL_DIR}/Vulkan/DeviceVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/SurfaceVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/SwapchainVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/FramebuffersVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/VertexBufferVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/FrameVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/CommandPoolVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/Pipelines/GfxPipelineVk.cpp
+  #
+  # RENDER WORK FLOWS
+  ${PLATFORM_IMPL_DIR}/Vulkan/RenderWorkflows/BasicWorkflowVk.cpp)
+
+#

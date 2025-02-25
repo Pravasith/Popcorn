@@ -1,18 +1,19 @@
 #pragma once
 
 #include "Assert.h"
+#include "Event.h"
 #include "GlobalMacros.h"
 #include "LayerStack.h"
-#include "Popcorn/Events/Event.h"
-#include "Popcorn/Events/Subscriber.h"
-#include "Popcorn/Events/TimeEvent.h"
-#include "Popcorn/Events/WindowEvent.h"
-#include "Popcorn/Graphics/Renderer.h"
+#include "Renderer.h"
+#include "Subscriber.h"
 #include "Time.h"
+#include "TimeEvent.h"
 #include "Window.h"
+#include "WindowEvent.h"
 
 ENGINE_NAMESPACE_BEGIN
 using namespace Gfx;
+
 class DebugUIOverlay;
 
 // SINGLETON
@@ -30,9 +31,7 @@ public:
   LayerStack &GetLayerStack() const { return *s_layerStack; };
   static bool IsGameLoopRunning();
 
-  inline void SetRenderer(Renderer &renderer)
-  //
-  {
+  inline void SetRenderer(Renderer &renderer) {
     PC_ASSERT(!s_Renderer, "A renderer already exists!");
     s_Renderer = &renderer;
   };
@@ -47,12 +46,15 @@ public:
 
 private:
   Application();
-  ~Application();
+  virtual ~Application() override;
 
-  void OnEvent(Event &) const override;
+  virtual void OnEvent(Event &) override;
+  virtual bool OnUpdate(TimeEvent &) override;
+
+  bool OnClockTick(TimeEvent &);
+
   bool OnWindowResize(WindowResizeEvent &) const;
   bool OnWindowClose(WindowCloseEvent &) const;
-  bool OnCPUClockTick(TimeEvent &) const;
 
 private:
   static Application *s_instance;
