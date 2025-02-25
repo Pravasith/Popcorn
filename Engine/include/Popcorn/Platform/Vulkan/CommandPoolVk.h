@@ -52,7 +52,7 @@ public:
   };
 
   void CreateCommandPool();
-  void DestroyCommandPool();
+  void CleanUp();
 
 private:
 private:

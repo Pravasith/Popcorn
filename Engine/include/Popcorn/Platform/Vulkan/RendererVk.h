@@ -33,7 +33,7 @@ public:
   void VulkanInit();
   void CreateRenderWorkflows();
 
-  void VulkanDestroy();
+  void VulkanCleanUp();
 
   static RenderWorkflowVk *GetRenderWorkflow(const RenderWorkflowIndices index);
   void CreateBasicCommandBuffer();

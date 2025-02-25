@@ -9,7 +9,6 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 FrameVk *FrameVk::s_instance = nullptr;
-uint32_t FrameVk::s_swapchainImageIndex = 0;
 
 void FrameVk::CreateRenderSyncObjects() {
   auto *deviceVkStn = DeviceVk::Get();
@@ -36,6 +35,7 @@ void FrameVk::Draw(
     VkCommandBuffer &commandBuffer,
     const std::function<void(const uint32_t frameIndex)> &recordDrawCommands) {
   auto &device = DeviceVk::Get()->GetDevice();
+  uint32_t swapchainImageIndex;
 
   //
   // Note: Thread-blocking
@@ -48,11 +48,11 @@ void FrameVk::Draw(
   VkSemaphore frameRendered[] = {m_frameRenderedSemaphore};
 
   //
-  // Now we acquire a new image from the swapchain and signal m_imageAvailable
-  // semaphore once done
+  // Now we acquire a new image from the swapchain and signal
+  // m_imageAvailable semaphore once done
   AcquireNextSwapchainImage(
       // index is [0, MAX_FRAMES_IN_FLIGHT]
-      s_swapchainImageIndex,
+      swapchainImageIndex,
       // Semaphore: Signal when image is acquired & ready for render
       imageAvailable);
 
@@ -60,7 +60,7 @@ void FrameVk::Draw(
   // Reset command buffer & start recording commands to it (lambda called from
   // the RendererVk class)
   vkResetCommandBuffer(commandBuffer, 0);
-  recordDrawCommands(s_swapchainImageIndex);
+  recordDrawCommands(swapchainImageIndex);
 
   //
   // Submit the graphics queue with the command buffer (with recorded commands
@@ -71,7 +71,9 @@ void FrameVk::Draw(
       imageAvailable,
       // Semaphore: Signal when frame is rendered & ready to present to
       // the screen
-      frameRendered);
+      frameRendered,
+      // Fence: Release fence when operation is done
+      m_inFlightFence);
 
   //
   // Present the rendered image to the screen - by returning the image back to
@@ -80,7 +82,7 @@ void FrameVk::Draw(
       // Semaphore: Wait for the frame to be fully rendered before presenting
       frameRendered,
       // Image index
-      s_swapchainImageIndex);
+      swapchainImageIndex);
 };
 
 void FrameVk::PresentImageToSwapchain(VkSemaphore *signalSemaphores,
@@ -102,16 +104,28 @@ void FrameVk::PresentImageToSwapchain(VkSemaphore *signalSemaphores,
 
 void FrameVk::AcquireNextSwapchainImage(uint32_t &imageIndex,
                                         VkSemaphore *signalSemaphores) {
+
   auto &device = DeviceVk::Get()->GetDevice();
   auto &swapchain = SwapchainVk::Get()->GetVkSwapchain();
 
-  vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, *signalSemaphores,
-                        VK_NULL_HANDLE, &imageIndex);
+  VkResult result =
+      vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, *signalSemaphores,
+                            VK_NULL_HANDLE, &imageIndex);
+
+  if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
+    // Handle swapchain recreation here
+    PC_WARN("Swapchain out of date or suboptimal!");
+    return;
+  } else if (result != VK_SUCCESS) {
+    throw std::runtime_error("Failed to acquire swapchain image!");
+  }
 };
 
 void FrameVk::SubmitDrawCommands(const VkCommandBuffer &commandBuffer,
                                  VkSemaphore *waitSemaphores,
-                                 VkSemaphore *signalSemaphores) {
+                                 VkSemaphore *signalSemaphores,
+                                 VkFence &inFlightFence) {
+
   auto &graphicsQueue = DeviceVk::Get()->GetGraphicsQueue();
 
   VkSubmitInfo submitInfo{};
@@ -134,7 +148,7 @@ void FrameVk::SubmitDrawCommands(const VkCommandBuffer &commandBuffer,
   submitInfo.signalSemaphoreCount = 1;
   submitInfo.pSignalSemaphores = signalSemaphores;
 
-  if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, m_inFlightFence) !=
+  if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFence) !=
       VK_SUCCESS) {
     throw std::runtime_error("failed to submit draw command buffer!");
   }

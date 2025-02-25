@@ -1,6 +1,6 @@
-#include <Application.h>
 #include <Base.h>
 #include <Popcorn.h>
+#include <Popcorn/Core/Application.h>
 #include <Popcorn/Graphics/Materials/BasicMaterial.h>
 #include <Popcorn/Graphics/Mesh.h>
 #include <Popcorn/Graphics/Renderer.h>
@@ -12,6 +12,8 @@
 using namespace Popcorn;
 
 class GameLayer : public Layer {
+  class TriangleScene : public Scene {};
+
 public:
   GameLayer() { PC_PRINT("CREATED", TagType::Constr, "GAME-LAYER") };
   ~GameLayer() {
@@ -34,7 +36,6 @@ public:
       };
     };
 
-    class TriangleScene : public Scene {};
     auto *vertexBuffer = VertexBuffer::Create();
 
     vertexBuffer->Fill<Vertex>({
@@ -51,18 +52,17 @@ public:
         "shaders/tri_frag.spv",
     };
 
-    // NOTE: Shader files are loaded here -- expensive if not handled properly
+    // NOTE: Shader files are loaded here -- expensive if not handled
+    // properly
     MaterialData matData{(ShaderStages::VertexBit | ShaderStages::FragmentBit),
                          shaderFiles};
 
-    BasicMaterial triMat(matData);
-    // BasicMaterial triMat2(matData);
+    BasicMaterial *triMat = new BasicMaterial(matData);
 
     // Mesh triMesh{nullptr, triMat};
-    Mesh triMesh{vertexBuffer, triMat};
+    Mesh *triMesh = new Mesh{vertexBuffer, *triMat};
 
-    TriangleScene triScene{};
-    triScene.Add(&triMesh); // HERE IS THE MATERIAL READY STAGE
+    triScene.Add(triMesh); // HERE IS THE MATERIAL READY STAGE
 
     // AND THEN IN THE RENDER LOOP
     // Renderer.Render(triScene);
@@ -74,9 +74,12 @@ public:
   virtual void OnDetach() override {};
   virtual void OnUpdate() override {
     //
-    // Renderer::Get().DrawFrame();
+    Renderer::Get().DrawFrame(triScene);
   };
   virtual void OnEvent(Event &e) override {};
+
+private:
+  TriangleScene triScene{};
 };
 
 int main(int argc, char **argv) {
@@ -89,7 +92,7 @@ int main(int argc, char **argv) {
       *(Renderer::Create<RendererType::Vulkan>(app.GetAppWindow()));
   app.SetRenderer(renderer);
 
-  // CREATE A GAME LAYER
+  // // CREATE A GAME LAYER
   auto gameLayer = new GameLayer();
   Application::AddLayer(gameLayer);
 

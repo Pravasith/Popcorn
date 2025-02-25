@@ -24,7 +24,9 @@ Application::~Application() {
   Renderer::Destroy();
   s_Renderer = nullptr;
 
-  s_window->UnSubscribe(s_instance);
+  // s_time->UnSubscribe(s_instance);
+  // s_window->UnSubscribe(s_instance);
+
   Popcorn::Window::Destroy();
 
   PC_PRINT("APPLICATION STOPPED", TagType::Destr, "APP");

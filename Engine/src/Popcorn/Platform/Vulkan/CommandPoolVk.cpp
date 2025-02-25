@@ -28,7 +28,7 @@ void CommandPoolVk::CreateCommandPool() {
   }
 };
 
-void CommandPoolVk::DestroyCommandPool() {
+void CommandPoolVk::CleanUp() {
   auto *deviceVkStn = DeviceVk::Get();
   vkDestroyCommandPool(deviceVkStn->GetDevice(), m_commandPool, nullptr);
 };

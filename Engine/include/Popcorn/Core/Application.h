@@ -13,6 +13,7 @@
 
 ENGINE_NAMESPACE_BEGIN
 using namespace Gfx;
+
 class DebugUIOverlay;
 
 // SINGLETON
@@ -30,9 +31,7 @@ public:
   LayerStack &GetLayerStack() const { return *s_layerStack; };
   static bool IsGameLoopRunning();
 
-  inline void SetRenderer(Renderer &renderer)
-  //
-  {
+  inline void SetRenderer(Renderer &renderer) {
     PC_ASSERT(!s_Renderer, "A renderer already exists!");
     s_Renderer = &renderer;
   };

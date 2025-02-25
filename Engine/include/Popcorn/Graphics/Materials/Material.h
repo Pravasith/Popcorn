@@ -9,7 +9,6 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 class Mesh;
-class MaterialHandler;
 
 enum class MaterialTypes {
   BasicMat = 1,
@@ -67,8 +66,6 @@ protected:
   MaterialData &m_materialData;
   std::vector<Buffer> m_shaders;
   std::vector<const Mesh *> m_linkedMeshes;
-
-  static const MaterialHandler *s_materialHandler;
 };
 
 GFX_NAMESPACE_END

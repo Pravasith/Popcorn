@@ -7,10 +7,9 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-const MaterialHandler *Material::s_materialHandler = nullptr;
-
 void Material::LinkMesh(const Mesh *meshPtr) {
   m_linkedMeshes.push_back(meshPtr);
+  PC_WARN("Linking size " << m_linkedMeshes.size())
 };
 
 void Material::UnlinkMesh(const Mesh *meshPtr) {

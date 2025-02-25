@@ -34,26 +34,22 @@ public:
   Draw(VkCommandBuffer &commandBuffer,
        const std::function<void(const uint32_t frameIndex)> &recordCommands);
 
-private:
   void CreateRenderSyncObjects();
   void CleanUp();
+
+private:
   void AcquireNextSwapchainImage(uint32_t &imageIndex,
                                  VkSemaphore *signalSemaphores);
   void SubmitDrawCommands(const VkCommandBuffer &commandBuffer,
                           VkSemaphore *waitSemaphores,
-                          VkSemaphore *signalSemaphores);
+                          VkSemaphore *signalSemaphores,
+                          VkFence &inFlightFence);
   void PresentImageToSwapchain(VkSemaphore *signalSemaphores,
                                const uint32_t &imageIndex);
 
 private:
-  FrameVk() {
-    CreateRenderSyncObjects();
-    PC_PRINT("CREATED", TagType::Constr, "FrameVk")
-  };
-  ~FrameVk() {
-    CleanUp();
-    PC_PRINT("DESTROYED", TagType::Destr, "FrameVk")
-  };
+  FrameVk() { PC_PRINT("CREATED", TagType::Constr, "FrameVk") };
+  ~FrameVk() { PC_PRINT("DESTROYED", TagType::Destr, "FrameVk") };
 
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
   FrameVk(const FrameVk &) = delete;
@@ -65,7 +61,6 @@ private:
 
 private:
   static FrameVk *s_instance;
-  static uint32_t s_swapchainImageIndex;
 
   VkSemaphore m_imageAvailableSemaphore = VK_NULL_HANDLE;
   VkSemaphore m_frameRenderedSemaphore = VK_NULL_HANDLE;

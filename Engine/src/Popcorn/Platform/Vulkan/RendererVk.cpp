@@ -2,6 +2,7 @@
 #include "BasicWorkflowVk.h"
 #include "CommandPoolVk.h"
 #include "DeviceVk.h"
+#include "FrameVk.h"
 #include "FramebuffersVk.h"
 #include "Material.h"
 #include "Popcorn/Core/Base.h"
@@ -15,12 +16,12 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 // Singleton members
-DeviceVk *RendererVk::s_deviceVk = DeviceVk::Get();
-SurfaceVk *RendererVk::s_surfaceVk = SurfaceVk::Get();
-SwapchainVk *RendererVk::s_swapchainVk = SwapchainVk::Get();
-FramebuffersVk *RendererVk::s_framebuffersVk = FramebuffersVk::Get();
-CommandPoolVk *RendererVk::s_commandPoolVk = CommandPoolVk::Get();
-FrameVk *RendererVk::s_frameVk = FrameVk::Get();
+DeviceVk *RendererVk::s_deviceVk = nullptr;
+SurfaceVk *RendererVk::s_surfaceVk = nullptr;
+SwapchainVk *RendererVk::s_swapchainVk = nullptr;
+FramebuffersVk *RendererVk::s_framebuffersVk = nullptr;
+CommandPoolVk *RendererVk::s_commandPoolVk = nullptr;
+FrameVk *RendererVk::s_frameVk = nullptr;
 // Other members
 std::vector<RenderWorkflowVk *> RendererVk::s_renderWorkflows{};
 
@@ -38,10 +39,10 @@ void RendererVk::DrawFrame(const Scene &scene) {
                   [&](const uint32_t frameIndex) {
                     s_commandPoolVk->BeginCommandBuffer(m_drawingCommandBuffer);
                     // TODO: Write a loop for render workflows instead
-                    {
-                      basicRenderWorkflow->RecordRenderCommands(
-                          scene, m_drawingCommandBuffer, frameIndex);
-                    }
+                    // {
+                    basicRenderWorkflow->RecordRenderCommands(
+                        scene, m_drawingCommandBuffer, frameIndex);
+                    // }
                     s_commandPoolVk->EndCommandBuffer(m_drawingCommandBuffer);
                   });
 };
@@ -78,12 +79,17 @@ void RendererVk::CreateBasicCommandBuffer() {
 // --- PRIVATE METHODS -----------------------------------------------------
 
 RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
-  s_commandPoolVk->CreateCommandPool();
   PC_PRINT("CREATED", TagType::Constr, "RENDERER-VK");
+
+  s_deviceVk = DeviceVk::Get();
+  s_surfaceVk = SurfaceVk::Get();
+  s_swapchainVk = SwapchainVk::Get();
+  s_framebuffersVk = FramebuffersVk::Get();
+  s_commandPoolVk = CommandPoolVk::Get();
+  s_frameVk = FrameVk::Get();
 };
 
 RendererVk::~RendererVk() {
-  s_commandPoolVk->DestroyCommandPool();
 
   // Destroy render workflows
   for (auto *workflow : s_renderWorkflows) {
@@ -91,14 +97,27 @@ RendererVk::~RendererVk() {
   }
   s_renderWorkflows.clear();
 
-  VulkanDestroy();
+  VulkanCleanUp();
 
+  CommandPoolVk::Destroy();
+  FrameVk::Destroy();
   FramebuffersVk::Destroy();
   SwapchainVk::Destroy();
   SurfaceVk::Destroy();
   DeviceVk::Destroy();
 
   PC_PRINT("DESTROYED", TagType::Destr, "RENDERER-VULKAN");
+};
+
+void RendererVk::VulkanCleanUp() {
+  const auto &instance = s_deviceVk->GetVkInstance();
+  const auto &device = s_deviceVk->GetDevice();
+
+  s_commandPoolVk->CleanUp();
+  s_frameVk->CleanUp();
+  s_swapchainVk->CleanUp(device);
+  s_surfaceVk->CleanUp(instance);
+  s_deviceVk->CleanUp();
 };
 
 //
@@ -144,15 +163,11 @@ void RendererVk::VulkanInit() {
   s_swapchainVk->CreateSwapchain(device, swapchainSupportDetails, osWindow,
                                  surface, queueFamilyIndices);
   s_swapchainVk->CreateImageViews(device);
-};
 
-void RendererVk::VulkanDestroy() {
-  const auto &instance = s_deviceVk->GetVkInstance();
-  const auto &device = s_deviceVk->GetDevice();
-
-  s_swapchainVk->CleanUp(device);
-  s_surfaceVk->CleanUp(instance);
-  s_deviceVk->CleanUp();
+  //
+  // RENDER READY ------------------------------------------------------------
+  s_commandPoolVk->CreateCommandPool();
+  s_frameVk->CreateRenderSyncObjects();
 };
 
 GFX_NAMESPACE_END

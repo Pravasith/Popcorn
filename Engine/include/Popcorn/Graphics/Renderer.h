@@ -1,10 +1,8 @@
 #pragma once
 
 #include "GlobalMacros.h"
-#include "Material.h"
 #include "Popcorn/Core/Window.h"
 #include "Popcorn/Events/WindowEvent.h"
-#include "Scene.h"
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -20,14 +18,16 @@ enum class RendererType {
 class RendererOpenGL;
 class RendererVk;
 class VertexBuffer;
+class Scene;
+class Material;
 
 // SINGLETON
 class Renderer {
-
 public:
-  static Renderer &Get() { return *s_instance; };
   template <RendererType T> static Renderer *Create(const Window &);
   static void Destroy();
+
+  static Renderer &Get() { return *s_instance; };
 
   [[nodiscard]] const static RendererType GetAPI() {
     if (s_type == RendererType::None) {
