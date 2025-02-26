@@ -2,6 +2,8 @@
 
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include <cstdint>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -29,8 +31,8 @@ public:
   };
 
   void GetDefaultCommandBufferAllocInfo(VkCommandBufferAllocateInfo &allocInfo);
-  void AllocCommandBuffer(const VkCommandBufferAllocateInfo &allocInfo,
-                          VkCommandBuffer &commandBuffer);
+  void AllocCommandBuffers(const VkCommandBufferAllocateInfo &allocInfo,
+                           std::vector<VkCommandBuffer> &commandBuffers);
 
   void BeginCommandBuffer(const VkCommandBuffer &commandBuffer) {
     VkCommandBufferBeginInfo beginInfo{};

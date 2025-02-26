@@ -34,17 +34,18 @@ void RendererVk::DrawFrame(const Scene &scene) {
       reinterpret_cast<BasicRenderWorkflowVk *>(
           s_renderWorkflows[(int)RenderWorkflowIndices::Basic]);
 
-  s_frameVk->Draw(m_drawingCommandBuffer,
-                  // Record commands lambda
-                  [&](const uint32_t frameIndex) {
-                    s_commandPoolVk->BeginCommandBuffer(m_drawingCommandBuffer);
-                    // TODO: Write a loop for render workflows instead
-                    // {
-                    basicRenderWorkflow->RecordRenderCommands(
-                        scene, m_drawingCommandBuffer, frameIndex);
-                    // }
-                    s_commandPoolVk->EndCommandBuffer(m_drawingCommandBuffer);
-                  });
+  s_frameVk->Draw(
+      m_drawingCommandBuffers,
+      // Record draw commands lambda
+      [&](const uint32_t frameIndex,
+          VkCommandBuffer &currentFrameCommandBuffer) {
+        s_commandPoolVk->BeginCommandBuffer(currentFrameCommandBuffer);
+        // TODO: Write a loop for render workflows instead
+        basicRenderWorkflow->RecordRenderCommands(
+            // Records renderpasses & binds associated pipelines
+            scene, currentFrameCommandBuffer, frameIndex);
+        s_commandPoolVk->EndCommandBuffer(currentFrameCommandBuffer);
+      });
 };
 
 bool RendererVk::OnFrameBfrResize(FrameBfrResizeEvent &) { return true; };
@@ -66,12 +67,12 @@ void RendererVk::PrepareMaterialForRender(Material *materialPtr) {
   }
 };
 
-void RendererVk::CreateBasicCommandBuffer() {
+void RendererVk::CreateBasicCommandBuffers() {
   auto *commandPoolVkStn = CommandPoolVk::Get();
   VkCommandBufferAllocateInfo allocInfo{};
-
   commandPoolVkStn->GetDefaultCommandBufferAllocInfo(allocInfo);
-  commandPoolVkStn->AllocCommandBuffer(allocInfo, m_drawingCommandBuffer);
+  allocInfo.commandBufferCount = MAX_FRAMES_IN_FLIGHT;
+  commandPoolVkStn->AllocCommandBuffers(allocInfo, m_drawingCommandBuffers);
 }
 
 //

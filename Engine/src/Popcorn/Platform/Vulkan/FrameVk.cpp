@@ -1,6 +1,7 @@
 #include "FrameVk.h"
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
+#include "RendererVk.h"
 #include "SwapchainVk.h"
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
@@ -14,6 +15,12 @@ void FrameVk::CreateRenderSyncObjects() {
   auto *deviceVkStn = DeviceVk::Get();
   auto &device = deviceVkStn->GetDevice();
 
+  constexpr uint32_t maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
+
+  m_imageAvailableSemaphores.resize(maxFramesInFlight);
+  m_frameRenderedSemaphores.resize(maxFramesInFlight);
+  m_inFlightFences.resize(maxFramesInFlight);
+
   VkSemaphoreCreateInfo semaphoreInfo{};
   semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
@@ -21,31 +28,37 @@ void FrameVk::CreateRenderSyncObjects() {
   fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
   fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-  if (vkCreateSemaphore(device, &semaphoreInfo, nullptr,
-                        &m_imageAvailableSemaphore) != VK_SUCCESS ||
-      vkCreateSemaphore(device, &semaphoreInfo, nullptr,
-                        &m_frameRenderedSemaphore) != VK_SUCCESS ||
-      vkCreateFence(device, &fenceInfo, nullptr, &m_inFlightFence) !=
-          VK_SUCCESS) {
-    throw std::runtime_error("failed to create semaphores!");
+  for (int i = 0; i < maxFramesInFlight; ++i) {
+    if (vkCreateSemaphore(device, &semaphoreInfo, nullptr,
+                          &m_imageAvailableSemaphores[i]) != VK_SUCCESS ||
+        vkCreateSemaphore(device, &semaphoreInfo, nullptr,
+                          &m_frameRenderedSemaphores[i]) != VK_SUCCESS ||
+        vkCreateFence(device, &fenceInfo, nullptr, &m_inFlightFences[i]) !=
+            VK_SUCCESS) {
+      throw std::runtime_error("failed to create semaphores!");
+    }
   }
 };
 
 void FrameVk::Draw(
-    VkCommandBuffer &commandBuffer,
-    const std::function<void(const uint32_t frameIndex)> &recordDrawCommands) {
+    std::vector<VkCommandBuffer> &commandBuffers,
+    const std::function<void(const uint32_t frameIndex,
+                             VkCommandBuffer &currentFrameCommandBuffer)>
+        &recordDrawCommands) {
   auto &device = DeviceVk::Get()->GetDevice();
   uint32_t swapchainImageIndex;
 
   //
   // Note: Thread-blocking
+  // TODO: Multi-threaded in the future
   // Image is still in-flight(still in the rendering process)
-  vkWaitForFences(device, 1, &m_inFlightFence, VK_TRUE, UINT64_MAX);
+  vkWaitForFences(device, 1, &m_inFlightFences[m_currentFrame], VK_TRUE,
+                  UINT64_MAX);
   // Once done, we reset the fence to in-flight mode
-  vkResetFences(device, 1, &m_inFlightFence);
+  vkResetFences(device, 1, &m_inFlightFences[m_currentFrame]);
 
-  VkSemaphore imageAvailable[] = {m_imageAvailableSemaphore};
-  VkSemaphore frameRendered[] = {m_frameRenderedSemaphore};
+  VkSemaphore imageAvailable[] = {m_imageAvailableSemaphores[m_currentFrame]};
+  VkSemaphore frameRendered[] = {m_frameRenderedSemaphores[m_currentFrame]};
 
   //
   // Now we acquire a new image from the swapchain and signal
@@ -59,21 +72,21 @@ void FrameVk::Draw(
   //
   // Reset command buffer & start recording commands to it (lambda called from
   // the RendererVk class)
-  vkResetCommandBuffer(commandBuffer, 0);
-  recordDrawCommands(swapchainImageIndex);
+  vkResetCommandBuffer(commandBuffers[m_currentFrame], 0);
+  recordDrawCommands(swapchainImageIndex, commandBuffers[m_currentFrame]);
 
   //
   // Submit the graphics queue with the command buffer (with recorded commands
   // in it)
   SubmitDrawCommands(
-      commandBuffer,
+      commandBuffers[m_currentFrame],
       // Semaphore: Wait for the image to be available to paint/render
       imageAvailable,
       // Semaphore: Signal when frame is rendered & ready to present to
       // the screen
       frameRendered,
       // Fence: Release fence when operation is done
-      m_inFlightFence);
+      m_inFlightFences[m_currentFrame]);
 
   //
   // Present the rendered image to the screen - by returning the image back to
@@ -88,6 +101,8 @@ void FrameVk::Draw(
   // Wait until all the commandBuffers are executed before moving to the next
   // steps after the gameloop in the program (usually cleanup)
   vkDeviceWaitIdle(device);
+
+  m_currentFrame = (m_currentFrame + 1) % RendererVk::MAX_FRAMES_IN_FLIGHT;
 };
 
 void FrameVk::PresentImageToSwapchain(VkSemaphore *signalSemaphores,
@@ -162,9 +177,11 @@ void FrameVk::SubmitDrawCommands(const VkCommandBuffer &commandBuffer,
 void FrameVk::CleanUp() {
   auto &device = DeviceVk::Get()->GetDevice();
 
-  vkDestroySemaphore(device, m_imageAvailableSemaphore, nullptr);
-  vkDestroySemaphore(device, m_frameRenderedSemaphore, nullptr);
-  vkDestroyFence(device, m_inFlightFence, nullptr);
+  for (int i = 0; i < RendererVk::MAX_FRAMES_IN_FLIGHT; ++i) {
+    vkDestroySemaphore(device, m_imageAvailableSemaphores[i], nullptr);
+    vkDestroySemaphore(device, m_frameRenderedSemaphores[i], nullptr);
+    vkDestroyFence(device, m_inFlightFences[i], nullptr);
+  }
 };
 
 GFX_NAMESPACE_END

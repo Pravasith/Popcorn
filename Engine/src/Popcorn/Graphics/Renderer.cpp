@@ -69,14 +69,7 @@ void Renderer::Init(const Window &appWin) {
     RendererVk *vkRenderer = static_cast<RendererVk *>(s_instance);
     vkRenderer->VulkanInit();
     vkRenderer->CreateRenderWorkflows();
-    vkRenderer->CreateBasicCommandBuffer();
-
-    // TEMP FUNCTIONS
-    // CREATE ALL PIPELINES
-    // CREATE ALL RENDERPASSES
-    // vkRenderer->CreateTrianglePipeline();
-    // vkRenderer->CreateTriangleRenderPass();
-    //
+    vkRenderer->CreateBasicCommandBuffers();
 
   } else if (s_type == RendererType::OpenGL) {
     s_instance = new RendererOpenGL(appWin);

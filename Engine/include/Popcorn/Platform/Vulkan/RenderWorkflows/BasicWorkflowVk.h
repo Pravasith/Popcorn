@@ -41,10 +41,8 @@ public:
   virtual void RecordRenderCommands(const Scene &scene,
                                     const VkCommandBuffer &commandBuffer,
                                     const uint32_t imageIndex) override;
-
   virtual void CleanUp() override;
 
-private:
 private:
   RenderPassVk m_basicRenderPassVk;
   GfxPipelineVk m_colorPipelineVk;

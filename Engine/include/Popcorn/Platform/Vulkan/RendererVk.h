@@ -11,7 +11,9 @@
 #include "Renderer.h"
 #include "SurfaceVk.h"
 #include "SwapchainVk.h"
+#include <cstdint>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -36,7 +38,7 @@ public:
   void VulkanCleanUp();
 
   static RenderWorkflowVk *GetRenderWorkflow(const RenderWorkflowIndices index);
-  void CreateBasicCommandBuffer();
+  void CreateBasicCommandBuffers();
 
 private:
   void RenderScene() {
@@ -72,6 +74,9 @@ private:
   void RecordCmdBuffer(void *renderPass, void *pipeline) {};
   void SubmitCmdBuffer(void *cmdBuffer) {};
 
+public:
+  static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
+
 private:
   static DeviceVk *s_deviceVk;
   static SurfaceVk *s_surfaceVk;
@@ -82,7 +87,7 @@ private:
 
   static std::vector<RenderWorkflowVk *> s_renderWorkflows;
 
-  VkCommandBuffer m_drawingCommandBuffer = VK_NULL_HANDLE;
+  std::vector<VkCommandBuffer> m_drawingCommandBuffers;
 };
 
 GFX_NAMESPACE_END

@@ -5,7 +5,6 @@
 
 --- 18 Feb ------------------------------------
 
-:: Make Triangle again -
 :: Implement descriptor sets & index buffers
 :: Implement staging buffers
 :: Transform matrices & shader uniforms

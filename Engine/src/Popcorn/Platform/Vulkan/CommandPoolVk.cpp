@@ -3,7 +3,10 @@
 #include "CommonVk.h"
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
+#include "Popcorn/Core/Base.h"
+#include "RendererVk.h"
 #include "SurfaceVk.h"
+#include <cstdint>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -41,12 +44,18 @@ void CommandPoolVk::GetDefaultCommandBufferAllocInfo(
   allocInfo.commandBufferCount = 1;
 };
 
-void CommandPoolVk::AllocCommandBuffer(
+void CommandPoolVk::AllocCommandBuffers(
     const VkCommandBufferAllocateInfo &allocInfo,
-    VkCommandBuffer &commandBuffer) {
-  auto *deviceVkStn = DeviceVk::Get();
-  if (vkAllocateCommandBuffers(deviceVkStn->GetDevice(), &allocInfo,
-                               &commandBuffer) != VK_SUCCESS) {
+    std::vector<VkCommandBuffer> &commandBuffers) {
+  auto &device = DeviceVk::Get()->GetDevice();
+  if (allocInfo.commandBufferCount != RendererVk::MAX_FRAMES_IN_FLIGHT) {
+    throw std::runtime_error("allocInfo.commandBufferCount does not match "
+                             "RendererVk::MAX_FRAMES_IN_FLIGHT!");
+  }
+  commandBuffers.resize(allocInfo.commandBufferCount);
+
+  if (vkAllocateCommandBuffers(device, &allocInfo, commandBuffers.data()) !=
+      VK_SUCCESS) {
     throw std::runtime_error("failed to allocate command buffers!");
   }
 };
