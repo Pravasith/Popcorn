@@ -15,7 +15,7 @@ public:
 
   virtual void OnUpdate();
 
-  [[nodiscard]] const std::pair<uint32_t, uint32_t>
+  [[nodiscard]] inline const std::pair<uint32_t, uint32_t>
   GetFramebufferSize() const override {
     if (GetOSWindow() == nullptr) {
       throw std::runtime_error("OS WINDOW IS NULL");

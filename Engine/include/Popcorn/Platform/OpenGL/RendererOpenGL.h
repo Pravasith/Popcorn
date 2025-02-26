@@ -12,10 +12,9 @@ public:
   virtual ~RendererOpenGL() override;
 
   virtual void DrawFrame(const Scene &) override {};
-  virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) override {
-    return false;
+  virtual bool OnFrameBufferResize(FrameBfrResizeEvent &) override {
+    return true;
   };
-
   virtual void PrepareMaterialForRender(Material *materialPtr) override {};
 };
 GFX_NAMESPACE_END

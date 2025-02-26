@@ -33,22 +33,29 @@ public:
 
   void
   Draw(std::vector<VkCommandBuffer> &commandBuffers,
+       const VkRenderPass &renderPass,
        const std::function<void(const uint32_t frameIndex,
                                 VkCommandBuffer &currentFrameCommandBuffer)>
            &recordDrawCommands);
 
   void CreateRenderSyncObjects();
+  inline void SetFrameBufferResized(bool isFrameBufferResized) {
+    m_framebufferResized = isFrameBufferResized;
+  };
   void CleanUp();
 
 private:
-  void AcquireNextSwapchainImage(uint32_t &imageIndex,
-                                 VkSemaphore *signalSemaphores);
+  [[nodiscard]] bool
+  AcquireNextSwapchainImageIndex(uint32_t &imageIndex,
+                                 VkSemaphore *signalSemaphores,
+                                 const VkRenderPass &paintRenderPass);
   void SubmitDrawCommands(const VkCommandBuffer &commandBuffer,
                           VkSemaphore *waitSemaphores,
                           VkSemaphore *signalSemaphores,
                           VkFence &inFlightFence);
   void PresentImageToSwapchain(VkSemaphore *signalSemaphores,
-                               const uint32_t &imageIndex);
+                               const uint32_t &imageIndex,
+                               const VkRenderPass &paintRenderPass);
 
 private:
   FrameVk() { PC_PRINT("CREATED", TagType::Constr, "FrameVk") };
@@ -66,6 +73,7 @@ private:
   static FrameVk *s_instance;
 
   uint32_t m_currentFrame = 0;
+  bool m_framebufferResized = false;
 
   std::vector<VkSemaphore> m_imageAvailableSemaphores;
   std::vector<VkSemaphore> m_frameRenderedSemaphores;

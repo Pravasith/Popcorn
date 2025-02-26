@@ -42,6 +42,7 @@ void FrameVk::CreateRenderSyncObjects() {
 
 void FrameVk::Draw(
     std::vector<VkCommandBuffer> &commandBuffers,
+    const VkRenderPass &renderPass,
     const std::function<void(const uint32_t frameIndex,
                              VkCommandBuffer &currentFrameCommandBuffer)>
         &recordDrawCommands) {
@@ -54,20 +55,28 @@ void FrameVk::Draw(
   // Image is still in-flight(still in the rendering process)
   vkWaitForFences(device, 1, &m_inFlightFences[m_currentFrame], VK_TRUE,
                   UINT64_MAX);
-  // Once done, we reset the fence to in-flight mode
-  vkResetFences(device, 1, &m_inFlightFences[m_currentFrame]);
 
   VkSemaphore imageAvailable[] = {m_imageAvailableSemaphores[m_currentFrame]};
   VkSemaphore frameRendered[] = {m_frameRenderedSemaphores[m_currentFrame]};
 
   //
-  // Now we acquire a new image from the swapchain and signal
+  // Now we acquire a new image (it's index) from the swapchain and signal
   // m_imageAvailable semaphore once done
-  AcquireNextSwapchainImage(
-      // index is [0, MAX_FRAMES_IN_FLIGHT]
+  bool isImageAcquired = AcquireNextSwapchainImageIndex(
       swapchainImageIndex,
       // Semaphore: Signal when image is acquired & ready for render
-      imageAvailable);
+      imageAvailable,
+      // Final paint renderpass for swapchain recreation
+      renderPass);
+
+  //
+  // In case of resize (or invalid swapchain to be precise), we return and
+  // continue from the next frame
+  if (!isImageAcquired)
+    return;
+
+  // Once done, we reset the fence to in-flight mode
+  vkResetFences(device, 1, &m_inFlightFences[m_currentFrame]);
 
   //
   // Reset command buffer & start recording commands to it (lambda called from
@@ -95,7 +104,9 @@ void FrameVk::Draw(
       // Semaphore: Wait for the frame to be fully rendered before presenting
       frameRendered,
       // Image index
-      swapchainImageIndex);
+      swapchainImageIndex,
+      // Final paint renderpass for swapchain recreation
+      renderPass);
 
   //
   // Wait until all the commandBuffers are executed before moving to the next
@@ -106,7 +117,8 @@ void FrameVk::Draw(
 };
 
 void FrameVk::PresentImageToSwapchain(VkSemaphore *signalSemaphores,
-                                      const uint32_t &imageIndex) {
+                                      const uint32_t &imageIndex,
+                                      const VkRenderPass &paintRenderPass) {
   VkPresentInfoKHR presentInfo{};
   presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
@@ -119,12 +131,21 @@ void FrameVk::PresentImageToSwapchain(VkSemaphore *signalSemaphores,
   presentInfo.pImageIndices = &imageIndex;
   presentInfo.pResults = nullptr; // Optional
 
-  vkQueuePresentKHR(DeviceVk::Get()->GetPresentQueue(), &presentInfo);
+  VkResult result =
+      vkQueuePresentKHR(DeviceVk::Get()->GetPresentQueue(), &presentInfo);
+
+  if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
+      m_framebufferResized) {
+    m_framebufferResized = false;
+    SwapchainVk::Get()->RecreateSwapchain(paintRenderPass);
+  } else if (result != VK_SUCCESS) {
+    throw std::runtime_error("failed to present swap chain image!");
+  }
 };
 
-void FrameVk::AcquireNextSwapchainImage(uint32_t &imageIndex,
-                                        VkSemaphore *signalSemaphores) {
-
+bool FrameVk::AcquireNextSwapchainImageIndex(
+    uint32_t &imageIndex, VkSemaphore *signalSemaphores,
+    const VkRenderPass &paintRenderPass) {
   auto &device = DeviceVk::Get()->GetDevice();
   auto &swapchain = SwapchainVk::Get()->GetVkSwapchain();
 
@@ -132,20 +153,23 @@ void FrameVk::AcquireNextSwapchainImage(uint32_t &imageIndex,
       vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, *signalSemaphores,
                             VK_NULL_HANDLE, &imageIndex);
 
-  if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
-    // Handle swapchain recreation here
-    PC_WARN("Swapchain out of date or suboptimal!");
-    return;
-  } else if (result != VK_SUCCESS) {
-    throw std::runtime_error("Failed to acquire swapchain image!");
+  if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+    auto *swapchainVkStn = SwapchainVk::Get();
+
+    swapchainVkStn->RecreateSwapchain(paintRenderPass);
+
+    return false;
+  } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+    throw std::runtime_error("failed to acquire swap chain image!");
   }
+
+  return true;
 };
 
 void FrameVk::SubmitDrawCommands(const VkCommandBuffer &commandBuffer,
                                  VkSemaphore *waitSemaphores,
                                  VkSemaphore *signalSemaphores,
                                  VkFence &inFlightFence) {
-
   auto &graphicsQueue = DeviceVk::Get()->GetGraphicsQueue();
 
   VkSubmitInfo submitInfo{};

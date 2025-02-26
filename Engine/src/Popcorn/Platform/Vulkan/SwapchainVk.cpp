@@ -1,16 +1,34 @@
 #include "SwapchainVk.h"
+#include "DeviceVk.h"
+#include "FramebuffersVk.h"
+#include "Popcorn/Core/Base.h"
+#include "SurfaceVk.h"
 #include <algorithm>
 #include <limits>
+#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 SwapchainVk *SwapchainVk::s_instance = nullptr;
 
-void SwapchainVk::CreateSwapchain(
-    const VkDevice &device, const SwapchainSupportDetails &swapchainSupport,
-    GLFWwindow *window, const VkSurfaceKHR &surface,
-    const QueueFamilyIndices &indices) {
+void SwapchainVk::CreateSwapchain() {
+  if (m_appWin == nullptr) {
+    PC_ERROR("m_appWin is nullptr", "SwapchainVk")
+  };
+
+  GLFWwindow *window = (GLFWwindow *)m_appWin->GetOSWindow();
+
+  auto *swapchainVkStn = SwapchainVk::Get();
+  auto *deviceVkStn = DeviceVk::Get();
+
+  const auto &surface = SurfaceVk::Get()->GetSurface();
+  auto &device = deviceVkStn->GetDevice();
+
+  const auto &swapchainSupport =
+      deviceVkStn->GetSwapchainSupportDetails(surface);
+  const auto &indices = deviceVkStn->GetQueueFamilyIndices(surface);
+
   VkSurfaceFormatKHR surfaceFormat =
       ChooseSwapSurfaceFormat(swapchainSupport.formats);
   VkPresentModeKHR presentMode =
@@ -97,9 +115,22 @@ void SwapchainVk::CreateImageViews(const VkDevice &device) {
 };
 
 void SwapchainVk::CleanUp(const VkDevice &device) {
+  if (m_swapchainFramebuffers.size() == 0) {
+    PC_ERROR("Tried to clear m_swapchainFramebuffers but size is 0!",
+             "BasicWorkFlow")
+  };
+
+  auto *framebuffersVkStn = FramebuffersVk::Get();
+
+  // Cleanup framebuffers
+  for (auto &framebuffer : m_swapchainFramebuffers) {
+    framebuffersVkStn->DestroyVkFramebuffer(device, framebuffer);
+  };
+
   for (auto imageView : m_swapchainImageViews) {
     vkDestroyImageView(device, imageView, nullptr);
   }
+
   vkDestroySwapchainKHR(device, m_swapchain, nullptr);
 };
 
@@ -134,11 +165,13 @@ SwapchainVk::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities,
       std::numeric_limits<uint32_t>::max()) {
     return capabilities.currentExtent;
   } else {
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
 
-    VkExtent2D actualExtent = {static_cast<uint32_t>(width),
-                               static_cast<uint32_t>(height)};
+    if (m_appWin == nullptr) {
+      PC_ERROR("m_appWin is nullptr", "SwapchainVk")
+    };
+
+    VkExtent2D actualExtent{m_appWin->GetFramebufferSize().first,
+                            m_appWin->GetFramebufferSize().second};
 
     actualExtent.width =
         std::clamp(actualExtent.width, capabilities.minImageExtent.width,
@@ -150,6 +183,55 @@ SwapchainVk::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities,
     return actualExtent;
   }
 }
+
+void SwapchainVk::CreateSwapchainFramebuffers(const VkDevice &device,
+                                              const VkRenderPass &renderPass) {
+  auto *swapchainVkStn = SwapchainVk::Get();
+  auto *framebuffersVkStn = FramebuffersVk::Get();
+
+  auto &swapchainImgViews = swapchainVkStn->GetSwapchainImageViews();
+  auto &swapchainExtent = swapchainVkStn->GetSwapchainExtent();
+
+  m_swapchainFramebuffers.resize(swapchainImgViews.size());
+
+  for (size_t i = 0; i < swapchainImgViews.size(); ++i) {
+    VkImageView attachments[] = {swapchainImgViews[i]};
+
+    VkFramebufferCreateInfo createInfo{};
+    framebuffersVkStn->GetDefaultFramebufferState(createInfo);
+    createInfo.renderPass = renderPass;
+    createInfo.pAttachments = attachments;
+    createInfo.width = swapchainExtent.width;
+    createInfo.height = swapchainExtent.height;
+
+    // CREATE VK FRAMEBUFFER
+    framebuffersVkStn->CreateVkFramebuffer(device, createInfo,
+                                           m_swapchainFramebuffers[i]);
+  };
+};
+
+void SwapchainVk::RecreateSwapchain(const VkRenderPass &renderPass) {
+  auto &device = DeviceVk::Get()->GetDevice();
+
+  uint32_t width = m_appWin->GetFramebufferSize().first,
+           height = m_appWin->GetFramebufferSize().second;
+
+  //
+  // If the width or height is zero, wait in the loop until it's not
+  while (width == 0 || height == 0) {
+    width = m_appWin->GetFramebufferSize().first;
+    height = m_appWin->GetFramebufferSize().second;
+
+    glfwWaitEvents();
+  }
+
+  vkDeviceWaitIdle(device);
+  CleanUp(device);
+
+  CreateSwapchain();
+  CreateImageViews(device);
+  CreateSwapchainFramebuffers(device, renderPass);
+};
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

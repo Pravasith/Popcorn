@@ -34,6 +34,11 @@ public:
     CreateFramebuffers();
   };
 
+  virtual const VkRenderPass &GetRenderPass() const override {
+    return m_basicRenderPassVk.GetVkRenderPass();
+    ;
+  };
+
   virtual void CreateRenderPass() override;
   virtual void CreateVkPipeline(Material &) override;
   virtual void CreateFramebuffers() override;
@@ -46,8 +51,6 @@ public:
 private:
   RenderPassVk m_basicRenderPassVk;
   GfxPipelineVk m_colorPipelineVk;
-
-  std::vector<VkFramebuffer> m_swapchainFramebuffers;
 };
 
 GFX_NAMESPACE_END

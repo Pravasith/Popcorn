@@ -36,6 +36,8 @@ void RendererVk::DrawFrame(const Scene &scene) {
 
   s_frameVk->Draw(
       m_drawingCommandBuffers,
+      // Pass final paint renderpass for swapchain recreation
+      basicRenderWorkflow->GetRenderPass(),
       // Record draw commands lambda
       [&](const uint32_t frameIndex,
           VkCommandBuffer &currentFrameCommandBuffer) {
@@ -48,7 +50,10 @@ void RendererVk::DrawFrame(const Scene &scene) {
       });
 };
 
-bool RendererVk::OnFrameBfrResize(FrameBfrResizeEvent &) { return true; };
+bool RendererVk::OnFrameBufferResize(FrameBfrResizeEvent &) {
+  s_frameVk->SetFrameBufferResized(true);
+  return true;
+};
 
 void RendererVk::PrepareMaterialForRender(Material *materialPtr) {
   switch (materialPtr->GetMaterialType()) {
@@ -88,6 +93,8 @@ RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
   s_framebuffersVk = FramebuffersVk::Get();
   s_commandPoolVk = CommandPoolVk::Get();
   s_frameVk = FrameVk::Get();
+
+  s_swapchainVk->SetAppWindow(appWin);
 };
 
 RendererVk::~RendererVk() {
@@ -163,8 +170,7 @@ void RendererVk::VulkanInit() {
 
   //
   // CREATE SWAPCHAIN --------------------------------------------------------
-  s_swapchainVk->CreateSwapchain(device, swapchainSupportDetails, osWindow,
-                                 surface, queueFamilyIndices);
+  s_swapchainVk->CreateSwapchain();
   s_swapchainVk->CreateImageViews(device);
 
   //

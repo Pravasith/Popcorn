@@ -1,8 +1,8 @@
 #pragma once
 
-#include "CommonVk.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include "Popcorn/Core/Window.h"
 #include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -31,10 +31,10 @@ public:
     };
   };
 
-  void CreateSwapchain(const VkDevice &, const SwapchainSupportDetails &,
-                       GLFWwindow *, const VkSurfaceKHR &,
-                       const QueueFamilyIndices &);
+  inline void SetAppWindow(const Window &appWindow) { m_appWin = &appWindow; };
 
+  void CreateSwapchain();
+  void RecreateSwapchain(const VkRenderPass &renderPass);
   void CreateImageViews(const VkDevice &);
 
   [[nodiscard]] inline const VkSwapchainKHR &GetVkSwapchain() const {
@@ -53,6 +53,14 @@ public:
   GetSwapchainImageViews() const {
     return m_swapchainImageViews;
   };
+
+  [[nodiscard]] inline const std::vector<VkFramebuffer> &
+  GetSwapchainFramebuffers() const {
+    return m_swapchainFramebuffers;
+  };
+
+  void CreateSwapchainFramebuffers(const VkDevice &device,
+                                   const VkRenderPass &renderPass);
 
   void CleanUp(const VkDevice &);
 
@@ -81,12 +89,15 @@ private:
 private:
   static SwapchainVk *s_instance;
 
+  const Window *m_appWin = nullptr;
+
   VkSwapchainKHR m_swapchain;
-  std::vector<VkImage> m_swapchainImages;
   VkFormat m_swapchainImageFormat;
   VkExtent2D m_swapchainExtent;
 
+  std::vector<VkImage> m_swapchainImages;
   std::vector<VkImageView> m_swapchainImageViews;
+  std::vector<VkFramebuffer> m_swapchainFramebuffers;
 };
 
 GFX_NAMESPACE_END

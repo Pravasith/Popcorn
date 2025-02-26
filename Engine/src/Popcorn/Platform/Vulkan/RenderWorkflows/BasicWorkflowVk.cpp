@@ -5,7 +5,6 @@
 #include "GlobalMacros.h"
 #include "Material.h"
 #include "PipelineVk.h"
-#include "Popcorn/Core/Base.h"
 #include "RenderPassVk.h"
 #include "SwapchainVk.h"
 #include <cstdint>
@@ -118,51 +117,19 @@ void BasicRenderWorkflowVk::CreateRenderPass() {
 
   //
   // CREATE VULKAN RENDER PASS --------------------------------------
-  auto *deviceSingleton = DeviceVk::Get();
   m_basicRenderPassVk.Create(renderPass1CreateInfo,
-                             deviceSingleton->GetDevice());
+                             DeviceVk::Get()->GetDevice());
 };
 
 void BasicRenderWorkflowVk::CreateFramebuffers() {
-  auto *deviceVk = DeviceVk::Get();
-  auto *swapchainVkStn = SwapchainVk::Get();
-  auto *framebuffersVkStn = FramebuffersVk::Get();
-
-  auto &swapchainImgViews = swapchainVkStn->GetSwapchainImageViews();
-  auto &swapchainExtent = swapchainVkStn->GetSwapchainExtent();
-
-  VkFramebufferCreateInfo createInfo;
-
-  m_swapchainFramebuffers.resize(swapchainImgViews.size());
-
-  for (size_t i = 0; i < swapchainImgViews.size(); ++i) {
-    VkImageView attachments[] = {swapchainImgViews[i]};
-
-    framebuffersVkStn->GetDefaultFramebufferState(createInfo);
-    createInfo.renderPass = m_basicRenderPassVk.GetVkRenderPass();
-    createInfo.pAttachments = attachments;
-    createInfo.width = swapchainExtent.width;
-    createInfo.height = swapchainExtent.height;
-
-    // CREATE VK FRAMEBUFFER
-    framebuffersVkStn->CreateVkFramebuffer(deviceVk->GetDevice(), createInfo,
-                                           m_swapchainFramebuffers[i]);
-  };
+  SwapchainVk::Get()->CreateSwapchainFramebuffers(
+      DeviceVk::Get()->GetDevice(), m_basicRenderPassVk.GetVkRenderPass());
 };
 
 void BasicRenderWorkflowVk::CleanUp() {
-  if (m_swapchainFramebuffers.size() == 0) {
-    PC_ERROR("Tried to clear m_swapchainFramebuffers but size is 0!",
-             "BasicWorkFlow")
-  };
 
   auto &device = DeviceVk::Get()->GetDevice();
   auto *framebuffersVkStn = FramebuffersVk::Get();
-
-  // Cleanup framebuffers
-  for (auto &framebuffer : m_swapchainFramebuffers) {
-    framebuffersVkStn->DestroyVkFramebuffer(device, framebuffer);
-  };
 
   // Cleanup pipelines
   m_colorPipelineVk.Destroy(device);
@@ -183,8 +150,8 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
   //
   // BEGIN RENDER PASS ---------------------------------------------------------
   m_basicRenderPassVk.GetDefaultCmdBeginRenderPassInfo(
-      m_swapchainFramebuffers[imageIndex], swapchainVkStn->GetSwapchainExtent(),
-      renderPassCreateInfo);
+      swapchainVkStn->GetSwapchainFramebuffers()[imageIndex],
+      swapchainVkStn->GetSwapchainExtent(), renderPassCreateInfo);
   m_basicRenderPassVk.RecordBeginRenderPassCommand(commandBuffer,
                                                    renderPassCreateInfo);
 

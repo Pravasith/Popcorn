@@ -25,9 +25,8 @@ public:
   RendererVk(const Window &appWin);
   virtual ~RendererVk() override;
 
-  // Can potentially take "void *frame" as a param
   virtual void DrawFrame(const Scene &scene) override;
-  virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) override;
+  virtual bool OnFrameBufferResize(FrameBfrResizeEvent &) override;
   virtual void PrepareMaterialForRender(Material *materialPtr) override;
 
   // Sets up devices, configure swapchains, creates depth buffers
@@ -41,33 +40,6 @@ public:
   void CreateBasicCommandBuffers();
 
 private:
-  void RenderScene() {
-
-    // --- RENDER COLORS ---------------------------------------------------
-    // BasicWorkflow::Render(Scene);
-    // // Implementation inside BasicWorkflow::Render
-    // auto regMaterials = Scene.GetRegisteredMaterials()
-    // for (auto &mat : regMaterials) {
-    //      for (auto &mesh : mat.GetMeshes()) {
-    //         // Renderpass
-    //         BasicPipelineVk.Get(mat.data, m_renderPass); // mat.data like
-    //         uniforms
-    //      };
-    // };
-
-    // --- RENDER SHADOWS --------------------------------------------------
-    // ShadowsWorkflow::Render(Scene);
-    // // Implementation inside ShadowsWorkflow::Render
-    // auto regMaterials = Scene.GetRegisteredMaterials()
-    // for (auto &mat : regMaterials) {
-    //      for (auto &mesh : mat.GetMeshes()) {
-    //         // Renderpass
-    //         ShadowPipelineVk.Get(mat.data, m_renderPass); // mat.data like
-    //         uniforms
-    //      };
-    // };
-  };
-
   //
   // -----------------------------------------------------------------------
   // --- TODO: Potential methods -------------------------------------------
