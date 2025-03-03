@@ -16,16 +16,10 @@ public:
   // TODO: Add submeshes & multiple material support
   Mesh(VertexBuffer &geometry, Material &material)
       : m_vertexBuffer(geometry), m_material(material) {
-    // Add a mesh reference back to material
-    m_material.LinkMesh(this);
     PC_PRINT("CREATED", TagType::Constr, "MESH");
   };
 
-  ~Mesh() {
-    // Remove the mesh reference to material
-    m_material.UnlinkMesh(this);
-    PC_PRINT("DESTROYED", TagType::Destr, "MESH");
-  };
+  ~Mesh() { PC_PRINT("DESTROYED", TagType::Destr, "MESH"); };
 
   virtual void OnAttach(const SceneData &) override;
   virtual void OnUpdate(const SceneData &) override;

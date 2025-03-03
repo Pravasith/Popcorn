@@ -60,7 +60,7 @@ public:
     // Mesh triMesh{nullptr, triMat};
     triMesh = new Mesh{*vertexBuffer, *triMat};
 
-    // PIPELINE CREATION
+    // ADD MESH TO WORK FLOW -> CREATE PIPELINES
     triScene.Add(triMesh);
 
     // AND THEN IN THE RENDER LOOP

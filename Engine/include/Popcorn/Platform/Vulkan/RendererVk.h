@@ -28,6 +28,7 @@ public:
   virtual void DrawFrame(const Scene &scene) override;
   virtual bool OnFrameBufferResize(FrameBfrResizeEvent &) override;
   virtual void CreateMaterialPipeline(Material *materialPtr) override;
+  virtual void AddMeshToWorkflow(Mesh *meshPtr) override;
 
   // Sets up devices, configure swapchains, creates depth buffers
   // also allocates command pools

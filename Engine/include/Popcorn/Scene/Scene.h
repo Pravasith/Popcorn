@@ -2,6 +2,7 @@
 
 #include "GameObject.h"
 #include "GlobalMacros.h"
+#include "Renderer.h"
 #include <cstdint>
 #include <vector>
 
@@ -27,20 +28,12 @@ public:
   // Update nodes
   void OnUpdate();
 
-  void RegisterMaterial(Material *materialPtr);
-  void UnRegisterMaterial(Material *materialPtr);
-
-  [[nodiscard]] inline const std::vector<Material *> &
-  GetSceneMaterials() const {
-    return m_sceneMaterials;
-  };
-
 private:
   static uint32_t s_sceneId;
+  static Renderer *s_rendererStn;
 
   SceneData m_sceneData{}; // like ambient lights data, env map etc.
   std::vector<GameObject *> m_nodes;
-  std::vector<Material *> m_sceneMaterials;
 };
 
 GFX_NAMESPACE_END

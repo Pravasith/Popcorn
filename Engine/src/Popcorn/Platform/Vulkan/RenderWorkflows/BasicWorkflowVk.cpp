@@ -183,10 +183,6 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
                                                    renderPassCreateInfo);
 
   //
-  // BIND PIPELINE -------------------------------------------------------------
-  m_colorPipelineVk.RecordBindCmdPipelineCommand(commandBuffer);
-
-  //
   // SET VIEWPORT AND SCISSOR SIZE ---------------------------------------------
   VkViewport viewport{};
   VkRect2D scissor{};
@@ -197,11 +193,12 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
 
   //
   // DRAW COMMAND --------------------------------------------------------------
-  auto &sceneMaterials = scene.GetSceneMaterials();
+  for (auto &material : m_materials) {
+    // TODO: Choose pipeline according to material
+    // BIND PIPELINE -----------------------------------------------------------
+    m_colorPipelineVk.RecordBindCmdPipelineCommand(commandBuffer);
 
-  for (auto &material : sceneMaterials) {
-    auto &linkedMeshes = material->GetLinkedMeshes();
-    for (auto &linkedMesh : linkedMeshes) {
+    for (auto &mesh : m_meshes) {
       // TODO: inject vertex data instead of hardcoding
       vkCmdDraw(commandBuffer, 3, 1, 0, 0);
     }

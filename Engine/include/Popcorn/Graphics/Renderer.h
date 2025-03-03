@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GlobalMacros.h"
+#include "Mesh.h"
 #include "Popcorn/Core/Window.h"
 #include "Popcorn/Events/WindowEvent.h"
 
@@ -41,6 +42,7 @@ public:
   virtual void DrawFrame(const Scene &scene) = 0;
   virtual bool OnFrameBufferResize(FrameBfrResizeEvent &) = 0;
   virtual void CreateMaterialPipeline(Material *materialPtr) = 0;
+  virtual void AddMeshToWorkflow(Mesh *meshPtr) = 0;
 
   Renderer(const Renderer &) = delete;
   Renderer &operator=(const Renderer &) = delete;

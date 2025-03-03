@@ -16,6 +16,7 @@ public:
     return true;
   };
   virtual void CreateMaterialPipeline(Material *materialPtr) override {};
+  virtual void AddMeshToWorkflow(Mesh *meshPtr) override {};
 };
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

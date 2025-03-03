@@ -146,6 +146,24 @@ void RendererVk::CreateRenderWorkflows() {
   }
 };
 
+void RendererVk::AddMeshToWorkflow(Mesh *mesh) {
+  BasicRenderWorkflowVk *basicRenderWorkflow =
+      reinterpret_cast<BasicRenderWorkflowVk *>(
+          s_renderWorkflows[(int)RenderWorkflowIndices::Basic]);
+
+  if (mesh->GetMaterial().GetMaterialType() == MaterialTypes::BasicMat
+      // TODO: Add mesh to workflows according to mesh layout types &
+      // associated material types. Something like this --
+      // && (renderWorkflow.GetAcceptableMeshLayouts() |
+      //     mesh->GetVertexBuffer().GetLayout())
+  ) {
+    basicRenderWorkflow->AddMeshToWorkflow(mesh);
+  };
+
+  //
+  // TODO: Add meshes to other workflows according to their conditions
+};
+
 RenderWorkflowVk *
 RendererVk::GetRenderWorkflow(const RenderWorkflowIndices index) {
   return s_renderWorkflows[(int)index];
