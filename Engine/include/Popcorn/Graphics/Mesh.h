@@ -30,6 +30,9 @@ public:
   };
 
   [[nodiscard]] inline Material &GetMaterial() const { return m_material; };
+  [[nodiscard]] inline VertexBuffer &GetVertexBuffer() const {
+    return m_vertexBuffer;
+  };
 
 protected:
   VertexBuffer &m_vertexBuffer;

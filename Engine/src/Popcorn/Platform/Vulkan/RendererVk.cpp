@@ -151,12 +151,9 @@ void RendererVk::AddMeshToWorkflow(Mesh *mesh) {
       reinterpret_cast<BasicRenderWorkflowVk *>(
           s_renderWorkflows[(int)RenderWorkflowIndices::Basic]);
 
-  if (mesh->GetMaterial().GetMaterialType() == MaterialTypes::BasicMat
-      // TODO: Add mesh to workflows according to mesh layout types &
-      // associated material types. Something like this --
-      // && (renderWorkflow.GetAcceptableMeshLayouts() |
-      //     mesh->GetVertexBuffer().GetLayout())
-  ) {
+  if (mesh->GetMaterial().GetMaterialType() == MaterialTypes::BasicMat &&
+      mesh->GetVertexBuffer().GetLayout() ==
+          basicRenderWorkflow->GetBasicWorkflowVertexLayout()) {
     basicRenderWorkflow->AddMeshToWorkflow(mesh);
   };
 

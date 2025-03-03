@@ -5,14 +5,21 @@
 #include "GlobalMacros.h"
 #include "Material.h"
 #include "PipelineVk.h"
+#include "Popcorn/Core/Base.h"
 #include "RenderPassVk.h"
 #include "SwapchainVk.h"
-#include "VertexBufferVk.h"
+#include "VertexBuffer.h"
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
+
+VertexBuffer::Layout BasicRenderWorkflowVk::s_vertexBufferLayout{};
+
+#ifdef PC_DEBUG
+constexpr bool showDrawCommandCount = false;
+#endif
 
 void BasicRenderWorkflowVk::CreatePipeline(Material &material) {
   //
@@ -43,17 +50,21 @@ void BasicRenderWorkflowVk::CreatePipeline(Material &material) {
   PipelineUtils::GetDefaultVertexInputState(pipelineState.vertexInputState);
 
   // Vertex input descriptions
-  // VkVertexInputBindingDescription bindingDescription{};
-  // VertexBufferVk::GetDefaultVertexInputBindingDescription(bindingDescription,
-  //                                                         m_vertexLayout);
-  // bindingDescription.binding = 0;
-  // std::vector<VkVertexInputAttributeDescription> attrDescriptions;
-  // VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(attrDescriptions,
-  //                                                            m_vertexLayout);
+  VkVertexInputBindingDescription bindingDescription{};
+  VertexBufferVk::GetDefaultVertexInputBindingDescription(bindingDescription,
+                                                          s_vertexBufferLayout);
+  bindingDescription.binding = 0;
+  std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
+  VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
+      attributeDescriptions, s_vertexBufferLayout);
 
-  // auto bindingDescription = Vertex::getBindingDescription();
-  // auto attributeDescriptions = Vertex::getAttributeDescriptions();
-  // pipelineState.vertexInputState.vertexBindingDescriptionCount = 1;
+  pipelineState.vertexInputState.vertexBindingDescriptionCount = 1;
+  pipelineState.vertexInputState.vertexAttributeDescriptionCount =
+      static_cast<uint32_t>(attributeDescriptions.size());
+  pipelineState.vertexInputState.pVertexBindingDescriptions =
+      &bindingDescription;
+  pipelineState.vertexInputState.pVertexAttributeDescriptions =
+      attributeDescriptions.data();
 
   PipelineUtils::GetDefaultInputAssemblyState(pipelineState.inputAssemblyState);
   PipelineUtils::GetDefaultViewportState(pipelineState.viewportState);
@@ -190,6 +201,9 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
       viewport, scissor, swapchainVkStn->GetSwapchainExtent());
   vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
   vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+#ifdef PC_DEBUG
+  int drawCommandCount = 0;
+#endif
 
   //
   // DRAW COMMAND --------------------------------------------------------------
@@ -200,6 +214,11 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
 
     for (auto &mesh : m_meshes) {
       // TODO: inject vertex data instead of hardcoding
+#ifdef PC_DEBUG
+      if constexpr (showDrawCommandCount) {
+        ++drawCommandCount;
+      };
+#endif
       vkCmdDraw(commandBuffer, 3, 1, 0, 0);
     }
   }
@@ -207,7 +226,44 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
   //
   // END RENDER PASS -----------------------------------------------------------
   m_basicRenderPassVk.RecordEndRenderPassCommand(commandBuffer);
+
+#ifdef PC_DEBUG
+  if constexpr (showDrawCommandCount) {
+    PC_WARN("Draw command issued " << drawCommandCount << " times.")
+  };
+#endif
 };
+
+void BasicRenderWorkflowVk::AddMeshToWorkflow(Mesh *mesh) {
+  auto ptr = std::find(m_meshes.begin(), m_meshes.end(), mesh);
+
+  if (ptr != m_meshes.end()) {
+    PC_WARN("Mesh already exists in m_meshes!")
+    return;
+  };
+
+  if (mesh->GetVertexBuffer().GetLayout() != s_vertexBufferLayout) {
+    PC_ERROR(
+        "Mesh vertex layout doesn't match with BasicWorkflow vertex layout",
+        "BasicRenderWorkflow")
+    return;
+  };
+
+  auto &material = mesh->GetMaterial();
+
+  if (material.GetMaterialType() != MaterialTypes::BasicMat) {
+    PC_ERROR("Attempt to add a mesh to basicRenderWorkflow that is not "
+             "MaterialTypes::BasicMat",
+             "BasicRenderWorkflow");
+    return;
+  };
+
+  m_meshes.push_back(mesh);
+
+  // Each material can potentially have the same material type but different
+  // descriptor sets (shaders, textures ..etc)
+  RegisterMaterial(&material);
+}
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

@@ -61,6 +61,20 @@ public:
       countValue = 0;
     };
 
+    bool operator==(const Layout &other) const {
+      return strideValue == other.strideValue &&
+             countValue == other.countValue &&
+             attrTypesValue == other.attrTypesValue &&
+             attrOffsetsValue == other.attrOffsetsValue;
+    }
+
+    bool operator!=(const Layout &other) const {
+      return strideValue != other.strideValue ||
+             countValue != other.countValue ||
+             attrTypesValue != other.attrTypesValue ||
+             attrOffsetsValue != other.attrOffsetsValue;
+    }
+
     template <AttrTypes... E> void Set() {
       // Attr Types stored in a seq
       (attrTypesValue.push_back(E), ...);

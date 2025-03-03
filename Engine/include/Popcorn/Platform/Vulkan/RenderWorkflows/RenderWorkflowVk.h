@@ -43,9 +43,9 @@ public:
     throw std::runtime_error(
         "GetRenderPass is not defined in the inherited class");
   };
-  virtual void CleanUp() = 0;
 
-  virtual void CreatePipeline(Material &) {};
+  virtual void CreatePipeline(Material &) = 0;
+  virtual void CleanUp() = 0;
 
   //
   // WORKFLOW UTILS
@@ -53,29 +53,7 @@ public:
   virtual void CreateFramebuffers() {};
   virtual void CreateCommandBuffer() {};
 
-  void AddMeshToWorkflow(Mesh *mesh) {
-    auto ptr = std::find(m_meshes.begin(), m_meshes.end(), mesh);
-
-    if (ptr != m_meshes.end()) {
-      PC_WARN("Mesh already exists in m_meshes!")
-      return;
-    };
-
-    auto &material = mesh->GetMaterial();
-
-    if (material.GetMaterialType() != MaterialTypes::BasicMat) {
-      PC_ERROR("Attempt to add a mesh to basicRenderWorkflow that is not "
-               "MaterialTypes::BasicMat",
-               "BasicRenderWorkflow");
-      return;
-    };
-
-    m_meshes.push_back(mesh);
-
-    // Each material can potentially have the same material type but different
-    // descriptor sets (shaders, textures ..etc)
-    RegisterMaterial(&material);
-  };
+  virtual void AddMeshToWorkflow(Mesh *mesh) {};
 
   void RegisterMaterial(Material *materialPtr) {
     auto ptr = std::find(m_materials.begin(), m_materials.end(), materialPtr);

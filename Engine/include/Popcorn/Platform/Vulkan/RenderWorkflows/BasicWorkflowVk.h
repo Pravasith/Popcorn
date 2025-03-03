@@ -7,6 +7,7 @@
 #include "RenderPassVk.h"
 #include "RenderWorkflowVk.h"
 #include "Scene.h"
+#include "VertexBuffer.h"
 #include <vulkan/vulkan_core.h>
 
 // TODO: Redo this class. But only after a full working animated scene is
@@ -17,11 +18,18 @@ GFX_NAMESPACE_BEGIN
 class BasicRenderWorkflowVk : public RenderWorkflowVk {
 public:
   BasicRenderWorkflowVk() {
+    s_vertexBufferLayout.Set<VertexBuffer::AttrTypes::Float2,
+                             VertexBuffer::AttrTypes::Float3>();
     PC_PRINT("CREATED", TagType::Constr, "BasicWorkflowVk")
   };
   ~BasicRenderWorkflowVk() override {
     PC_PRINT("DESTROYED", TagType::Destr, "BasicWorkflowVk")
   };
+
+  [[nodiscard]] inline static const VertexBuffer::Layout &
+  GetBasicWorkflowVertexLayout() {
+    return s_vertexBufferLayout;
+  }
 
   virtual const VkRenderPass &GetRenderPass() const override {
     return m_basicRenderPassVk.GetVkRenderPass();
@@ -30,6 +38,7 @@ public:
   virtual void CreateRenderPass() override;
   virtual void CreatePipeline(Material &) override;
   virtual void CreateFramebuffers() override;
+  virtual void AddMeshToWorkflow(Mesh *mesh) override;
 
   virtual void RecordRenderCommands(const Scene &scene,
                                     const VkCommandBuffer &commandBuffer,
@@ -37,6 +46,8 @@ public:
   virtual void CleanUp() override;
 
 private:
+  static VertexBuffer::Layout s_vertexBufferLayout;
+
   RenderPassVk m_basicRenderPassVk;
   GfxPipelineVk m_colorPipelineVk;
 };
