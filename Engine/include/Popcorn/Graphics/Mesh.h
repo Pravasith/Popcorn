@@ -13,12 +13,14 @@ GFX_NAMESPACE_BEGIN
 class Mesh : public GameObject {
 public:
   // TODO: Handle the case of duplicating meshes & materials
-  Mesh(VertexBuffer *geometry, Material &material)
+  // TODO: Add submeshes & multiple material support
+  Mesh(VertexBuffer &geometry, Material &material)
       : m_vertexBuffer(geometry), m_material(material) {
     // Add a mesh reference back to material
     m_material.LinkMesh(this);
     PC_PRINT("CREATED", TagType::Constr, "MESH");
   };
+
   ~Mesh() {
     // Remove the mesh reference to material
     m_material.UnlinkMesh(this);
@@ -36,7 +38,7 @@ public:
   [[nodiscard]] inline Material &GetMaterial() const { return m_material; };
 
 protected:
-  VertexBuffer *m_vertexBuffer;
+  VertexBuffer &m_vertexBuffer;
   // TODO: Make this a Vector as required
   Material &m_material;
 };

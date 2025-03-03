@@ -55,16 +55,15 @@ bool RendererVk::OnFrameBufferResize(FrameBfrResizeEvent &) {
   return true;
 };
 
-void RendererVk::PrepareMaterialForRender(Material *materialPtr) {
+void RendererVk::CreateMaterialPipeline(Material *materialPtr) {
   switch (materialPtr->GetMaterialType()) {
   case MaterialTypes::BasicMat:
-    // Creates Vulkan Pipelines necessary for the basic materials
+    //
+    // TODO: Refactor for multiple workflow types
     {
-      PC_WARN(s_renderWorkflows.size());
-
       auto *basicRenderWorkflow =
           s_renderWorkflows[(int)RenderWorkflowIndices::Basic];
-      basicRenderWorkflow->CreateWorkflowResources(materialPtr);
+      basicRenderWorkflow->CreatePipeline(*materialPtr);
     }
     break;
   case MaterialTypes::PbrMat:
@@ -136,6 +135,15 @@ void RendererVk::VulkanCleanUp() {
 void RendererVk::CreateRenderWorkflows() {
   BasicRenderWorkflowVk *basicRendererWorkflow = new BasicRenderWorkflowVk;
   s_renderWorkflows.push_back(basicRendererWorkflow);
+
+  //
+  // CREATE WORKFLOW RESOURCES -----------------------------------------------
+  PC_WARN("Expensive initialization operation: Creating workflow Vulkan "
+          "resources! Should only be done once per workflow object init.")
+  for (auto &renderWorkflow : s_renderWorkflows) {
+    renderWorkflow->CreateRenderPass();
+    renderWorkflow->CreateFramebuffers();
+  }
 };
 
 RenderWorkflowVk *

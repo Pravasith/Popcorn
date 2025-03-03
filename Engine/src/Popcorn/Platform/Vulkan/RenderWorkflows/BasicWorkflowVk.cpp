@@ -7,13 +7,16 @@
 #include "PipelineVk.h"
 #include "RenderPassVk.h"
 #include "SwapchainVk.h"
+#include "VertexBufferVk.h"
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-void BasicRenderWorkflowVk::CreateVkPipeline(Material &material) {
+void BasicRenderWorkflowVk::CreatePipeline(Material &material) {
+  //
+  // --- MAIN PIPELINE ---------------------------------------------------
   auto *deviceVkStn = DeviceVk::Get();
   auto *swapchainVkStn = SwapchainVk::Get();
   auto &device = deviceVkStn->GetDevice();
@@ -31,25 +34,49 @@ void BasicRenderWorkflowVk::CreateVkPipeline(Material &material) {
   // SET SHADER STAGES
   m_colorPipelineVk.SetShaderStagesMask(static_cast<ShaderStages>(
       ShaderStages::VertexBit | ShaderStages::FragmentBit));
-  std::vector<VkPipelineShaderStageCreateInfo> shaderStages =
-      m_colorPipelineVk.CreateShaderStages(shaderModules);
+
+  m_colorPipelineVk.CreateShaderStageCreateInfos(shaderModules);
 
   // SET FIXED FUNCTION PIPELINE STATE & SET LAYOUT
   GfxPipelineState pipelineState{};
-  m_colorPipelineVk.GetDefaultPipelineState(pipelineState);
-  // m_basicGfxPipeline.GetDefaultPipelineLayoutCreateInfo(
-  //     createInfo.pipelineLayout); // Already in
-  //     GetDefaultPipelineCreateInfo()
-  m_colorPipelineVk.SetShaderStageCreateInfos(shaderStages);
-  m_colorPipelineVk.SetPipelineLayout(device, pipelineState.pipelineLayout);
+  PipelineUtils::GetDefaultDynamicState(pipelineState.dynamicState);
+  PipelineUtils::GetDefaultVertexInputState(pipelineState.vertexInputState);
 
-  // CREATE PIPELINE
+  // Vertex input descriptions
+  // VkVertexInputBindingDescription bindingDescription{};
+  // VertexBufferVk::GetDefaultVertexInputBindingDescription(bindingDescription,
+  //                                                         m_vertexLayout);
+  // bindingDescription.binding = 0;
+  // std::vector<VkVertexInputAttributeDescription> attrDescriptions;
+  // VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(attrDescriptions,
+  //                                                            m_vertexLayout);
+
+  // auto bindingDescription = Vertex::getBindingDescription();
+  // auto attributeDescriptions = Vertex::getAttributeDescriptions();
+  // pipelineState.vertexInputState.vertexBindingDescriptionCount = 1;
+
+  PipelineUtils::GetDefaultInputAssemblyState(pipelineState.inputAssemblyState);
+  PipelineUtils::GetDefaultViewportState(pipelineState.viewportState);
+  PipelineUtils::GetDefaultRasterizationState(pipelineState.rasterizationState);
+  PipelineUtils::GetDefaultMultisampleState(pipelineState.multisampleState);
+  PipelineUtils::GetDefaultDepthStencilState(pipelineState.depthStencilState);
+  PipelineUtils::GetDefaultColorBlendingState(pipelineState.colorBlendState);
+  PipelineUtils::GetDefaultPipelineLayoutCreateInfo(
+      pipelineState.pipelineLayout);
+
+  // CREATE PIPELINE LAYOUT
+  m_colorPipelineVk.CreatePipelineLayout(device, pipelineState.pipelineLayout);
+
+  // CREATE VULKAN PIPELINE
   m_colorPipelineVk.CreateVkPipeline(device, pipelineState,
                                      m_basicRenderPassVk.GetVkRenderPass());
 
   // DESTROY SHADER MODULES
   PC_DestroyShaderModule(device, vertShaderModule);
   PC_DestroyShaderModule(device, fragShaderModule);
+
+  //
+  // --- OTHER PIPELINE --------------------------------------------------
 };
 
 void BasicRenderWorkflowVk::CreateRenderPass() {
@@ -132,7 +159,7 @@ void BasicRenderWorkflowVk::CleanUp() {
   auto *framebuffersVkStn = FramebuffersVk::Get();
 
   // Cleanup pipelines
-  m_colorPipelineVk.Destroy(device);
+  m_colorPipelineVk.CleanUp(device);
 
   // Cleanup render passes
   m_basicRenderPassVk.Destroy(device);
@@ -163,7 +190,7 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
   // SET VIEWPORT AND SCISSOR SIZE ---------------------------------------------
   VkViewport viewport{};
   VkRect2D scissor{};
-  m_colorPipelineVk.GetDefaultViewportAndScissorState(
+  PipelineUtils::GetDefaultViewportAndScissorState(
       viewport, scissor, swapchainVkStn->GetSwapchainExtent());
   vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
   vkCmdSetScissor(commandBuffer, 0, 1, &scissor);

@@ -40,7 +40,7 @@ public:
   // PASS IN SCENE & CAMERA ETC.
   virtual void DrawFrame(const Scene &scene) = 0;
   virtual bool OnFrameBufferResize(FrameBfrResizeEvent &) = 0;
-  virtual void PrepareMaterialForRender(Material *materialPtr) = 0;
+  virtual void CreateMaterialPipeline(Material *materialPtr) = 0;
 
   Renderer(const Renderer &) = delete;
   Renderer &operator=(const Renderer &) = delete;

@@ -58,9 +58,10 @@ public:
     triMat = new BasicMaterial(matData);
 
     // Mesh triMesh{nullptr, triMat};
-    triMesh = new Mesh{vertexBuffer, *triMat};
+    triMesh = new Mesh{*vertexBuffer, *triMat};
 
-    triScene.Add(triMesh); // HERE IS THE MATERIAL READY STAGE
+    // PIPELINE CREATION
+    triScene.Add(triMesh);
 
     // AND THEN IN THE RENDER LOOP
     // Renderer.Render(triScene);

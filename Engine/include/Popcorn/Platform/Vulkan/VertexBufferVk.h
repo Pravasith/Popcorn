@@ -38,14 +38,24 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER-VK")
   };
 
-  // void CreateVulkanBuffer(const VkDevice &, const PhysDeviceVk &);
+  void CreateVulkanBuffer(const VkDevice &, const VkPhysicalDevice &);
 
-  // [[nodiscard]] inline const VkBuffer &GetVulkanVertexBuffer() const {
-  //   return vertexBuffer;
-  // };
+  [[nodiscard]] inline const VkBuffer &GetVulkanVertexBuffer() const {
+    return vertexBuffer;
+  };
 
-  // void DestroyVulkanBuffer(const VkDevice &device);
+  void DestroyVulkanBuffer(const VkDevice &device);
 
+  //
+  // --- UTILS -----------------------------------------------------------------
+  static void GetDefaultVertexInputBindingDescription(
+      VkVertexInputBindingDescription &bindingDescription,
+      const Layout &layout);
+
+  static void GetDefaultVertexInputAttributeDescriptions(
+      std::vector<VkVertexInputAttributeDescription> &, const Layout &);
+
+  //
   // COPY CONSTRUCTOR
   VertexBufferVk(const VertexBufferVk &other) = default;
   VertexBufferVk &operator=(const VertexBufferVk &other) = default;
@@ -53,11 +63,6 @@ public:
   // MOVE CONSTRUCTOR
   VertexBufferVk(VertexBufferVk &&other) = default;
   VertexBufferVk &operator=(VertexBufferVk &&other) = default;
-
-  [[nodiscard]] static VkVertexInputBindingDescription
-  GetBindingDescription(const Layout &);
-  [[nodiscard]] static std::vector<VkVertexInputAttributeDescription>
-  GetAttrDescriptions(const Layout &);
 
   virtual uint64_t GetSize() const override { return m_buffer.GetSize(); };
   virtual uint64_t GetCount() const override { return m_buffer.GetCount(); };

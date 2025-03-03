@@ -13,6 +13,7 @@ public:
   ~RenderPassVk() { PC_PRINT("DESTROYED", TagType::Destr, "RenderPassVk"); };
 
   [[nodiscard]] inline const VkRenderPass &GetVkRenderPass() const {
+    PC_VK_NULL_CHECK(m_renderPass)
     return m_renderPass;
   };
 

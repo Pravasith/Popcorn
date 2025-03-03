@@ -2,7 +2,6 @@
 #include "GlobalMacros.h"
 #include "Material.h"
 #include "Mesh.h"
-#include "Renderer.h"
 #include <algorithm>
 
 ENGINE_NAMESPACE_BEGIN
@@ -31,7 +30,13 @@ void Scene::Add(GameObject *node) {
   m_nodes.push_back(node);
 
   if (node->GetType() == GameObjectTypes::Mesh) {
-    RegisterMaterial(&static_cast<Mesh *>(node)->GetMaterial());
+    auto *materialPtr = &static_cast<Mesh *>(node)->GetMaterial();
+    RegisterMaterial(materialPtr);
+
+    //
+    // CREATE MATERIAL PIPELINES -------------------------------------------
+    auto &rendererStn = Renderer::Get();
+    rendererStn.CreateMaterialPipeline(materialPtr);
   };
 };
 
@@ -54,11 +59,6 @@ void Scene::RegisterMaterial(Material *materialPtr) {
   //
   // ADD TO MATERIAL LIBRARY ---------------------------------------------
   m_sceneMaterials.push_back(materialPtr);
-
-  //
-  // INIT MATERIAL PIPELINES ---------------------------------------------
-  auto &rendererStn = Renderer::Get();
-  rendererStn.PrepareMaterialForRender(materialPtr);
 }
 
 void Scene::UnRegisterMaterial(Material *materialPtr) {

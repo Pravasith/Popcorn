@@ -1,9 +1,13 @@
 #pragma once
 
 #include "GlobalMacros.h"
+#include "Mesh.h"
 #include "Popcorn/Core/Base.h"
 #include "Scene.h"
+#include "VertexBuffer.h"
+#include "VertexBufferVk.h"
 #include <stdexcept>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 // TODO: Redo this class. But only after a full working animated scene is
@@ -27,10 +31,6 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "RenderWorkflowVk")
   };
 
-  //
-  // PURE
-
-  virtual void CreateWorkflowResources(Material *materialPtr) = 0;
   virtual void RecordRenderCommands(const Scene &scene,
                                     const VkCommandBuffer &commandBuffer,
                                     const uint32_t imageIndex) = 0;
@@ -40,13 +40,18 @@ public:
   };
   virtual void CleanUp() = 0;
 
-private:
+  virtual void CreatePipeline(Material &) {};
+
+  void AddMesh(Mesh *mesh) { m_meshes.push_back(mesh); };
+
   //
   // WORKFLOW UTILS
   virtual void CreateRenderPass() {};
-  virtual void CreateVkPipeline(Material &) {};
   virtual void CreateFramebuffers() {};
   virtual void CreateCommandBuffer() {};
+
+protected:
+  std::vector<Mesh *> m_meshes;
 };
 
 GFX_NAMESPACE_END
