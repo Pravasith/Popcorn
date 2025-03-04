@@ -165,22 +165,6 @@ void BasicRenderWorkflowVk::CreateFramebuffers() {
       DeviceVk::Get()->GetDevice(), m_basicRenderPassVk.GetVkRenderPass());
 };
 
-void BasicRenderWorkflowVk::CleanUp() {
-  auto &device = DeviceVk::Get()->GetDevice();
-  auto *framebuffersVkStn = FramebuffersVk::Get();
-
-  // Cleanup vertex buffer memory
-  for (auto &mesh : m_meshes) {
-    static_cast<VertexBufferVk &>(mesh->GetVertexBuffer()).DestroyVkBuffer();
-  }
-
-  // Cleanup pipelines
-  m_colorPipelineVk.CleanUp(device);
-
-  // Cleanup render passes
-  m_basicRenderPassVk.Destroy(device);
-};
-
 void BasicRenderWorkflowVk::RecordRenderCommands(
     const Scene &scene, const VkCommandBuffer &commandBuffer,
     const uint32_t imageIndex) {
@@ -228,7 +212,9 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
       // TODO: Logic for multiple vertex buffers with VMA
       // BIND VERTEX BUFFERS ---------------------------------------------------
       static_cast<VertexBufferVk &>(mesh->GetVertexBuffer())
-          .RecordBindVkBuffersCommand(commandBuffer);
+          .RecordBindVkBuffersCommand(commandBuffer, m_vkVertexBuffers.data(),
+                                      m_vkBufferOffsets.data(),
+                                      m_vkVertexBuffers.size());
 
       vkCmdDraw(commandBuffer, mesh->GetVertexBuffer().GetCount(), 1, 0, 0);
     }
@@ -279,11 +265,40 @@ void BasicRenderWorkflowVk::AddMeshToWorkflow(Mesh *mesh) {
 void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
   // TODO: Handle multiple vertex buffers by changing offset for each
   // mesh/vertexBuffer
-  for (auto &mesh : m_meshes) {
+
+  m_vkVertexBuffers.resize(m_meshes.size());
+  m_vkBufferOffsets.resize(m_meshes.size());
+
+  VkDeviceSize currentOffset = 0;
+
+  for (int i = 0; i < m_meshes.size(); ++i) {
     VertexBufferVk &vertexBuffer =
-        reinterpret_cast<VertexBufferVk &>(mesh->GetVertexBuffer());
-    vertexBuffer.AllocateVkBuffer();
+        reinterpret_cast<VertexBufferVk &>(m_meshes[i]->GetVertexBuffer());
+    m_vkBufferOffsets[i] = currentOffset;
+    currentOffset += vertexBuffer.GetSize();
+
+    vertexBuffer.AllocateVkBuffers(m_vkVertexBuffers[i], m_vertexBufferMemory,
+                                   m_vkBufferOffsets[i]);
   }
+};
+
+void BasicRenderWorkflowVk::CleanUp() {
+  auto &device = DeviceVk::Get()->GetDevice();
+  auto *framebuffersVkStn = FramebuffersVk::Get();
+
+  // Cleanup vertex buffer memory
+  for (int i = 0; i < m_meshes.size(); ++i) {
+    VertexBufferVk &vertexBuffer =
+        reinterpret_cast<VertexBufferVk &>(m_meshes[i]->GetVertexBuffer());
+    vertexBuffer.DestroyVkBuffer(m_vkVertexBuffers[i]);
+  }
+  VertexBufferVk::FreeMemory(m_vertexBufferMemory);
+
+  // Cleanup pipelines
+  m_colorPipelineVk.CleanUp(device);
+
+  // Cleanup render passes
+  m_basicRenderPassVk.Destroy(device);
 };
 
 GFX_NAMESPACE_END

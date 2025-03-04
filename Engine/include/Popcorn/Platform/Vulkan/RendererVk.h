@@ -33,7 +33,11 @@ public:
   // Sets up devices, configure swapchains, creates depth buffers
   // also allocates command pools
   void VulkanInit();
+  // Creates render workflows
   void CreateRenderWorkflows();
+  // Loops through all meshes & creates a contiguous Vulkan buffer memory for
+  // each workflow -- each workflow has one VkBuffer & one VkDeviceMemory each
+  void AllocateVkBuffers();
 
   void VulkanCleanUp();
 

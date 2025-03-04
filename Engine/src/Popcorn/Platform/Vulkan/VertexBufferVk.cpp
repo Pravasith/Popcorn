@@ -2,6 +2,7 @@
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Buffer.h"
+#include <cstdint>
 #include <stdexcept>
 #include <vector>
 #include <vulkan/vulkan_core.h>
@@ -20,13 +21,15 @@ void VertexBufferVk::UnBind() {
 };
 
 void VertexBufferVk::RecordBindVkBuffersCommand(
-    const VkCommandBuffer &commandBuffer) {
-  VkBuffer vertexBuffers[] = {m_vkBuffer};
-  VkDeviceSize offsets[] = {0};
-  vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+    const VkCommandBuffer &commandBuffer, VkBuffer *vkVertexBuffers,
+    VkDeviceSize *offsets, const uint32_t vertexBuffersCount) {
+  vkCmdBindVertexBuffers(commandBuffer, 0, vertexBuffersCount, vkVertexBuffers,
+                         offsets);
 };
 
-void VertexBufferVk::AllocateVkBuffer() {
+void VertexBufferVk::AllocateVkBuffers(VkBuffer &vkVertexBuffer,
+                                       VkDeviceMemory &vkVertexBufferMemory,
+                                       VkDeviceSize offset) {
   auto *deviceVkStn = DeviceVk::Get();
   auto &device = deviceVkStn->GetDevice();
 
@@ -37,13 +40,15 @@ void VertexBufferVk::AllocateVkBuffer() {
   bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
   bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-  if (vkCreateBuffer(device, &bufferInfo, nullptr, &m_vkBuffer) != VK_SUCCESS) {
+  if (vkCreateBuffer(device, &bufferInfo, nullptr, &vkVertexBuffer) !=
+      VK_SUCCESS) {
     std::runtime_error("Error creating Vertex Buffer!");
   };
+
   //
-  // QUERY MEMORY REQIREMENTS USING device AND m_vkBuffer
+  // QUERY MEMORY REQIREMENTS USING device AND vkVertexBuffer
   VkMemoryRequirements memRequirements;
-  vkGetBufferMemoryRequirements(device, m_vkBuffer, &memRequirements);
+  vkGetBufferMemoryRequirements(device, vkVertexBuffer, &memRequirements);
 
   //
   // ALLOCATE MEMORY
@@ -55,7 +60,7 @@ void VertexBufferVk::AllocateVkBuffer() {
       memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                                           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-  if (vkAllocateMemory(device, &allocInfo, nullptr, &m_vertexBufferMemory) !=
+  if (vkAllocateMemory(device, &allocInfo, nullptr, &vkVertexBufferMemory) !=
       VK_SUCCESS) {
     throw std::runtime_error(
         "Failed to allocate GPU memory for the vertex buffer!");
@@ -63,20 +68,24 @@ void VertexBufferVk::AllocateVkBuffer() {
 
   //
   // BIND MEMORY TO THE BUFFER
-  vkBindBufferMemory(device, m_vkBuffer, m_vertexBufferMemory, 0);
+  vkBindBufferMemory(device, vkVertexBuffer, vkVertexBufferMemory, offset);
 
   //
   // FILL VERTEX BUFFER
   void *data;
-  vkMapMemory(device, m_vertexBufferMemory, 0, bufferInfo.size, 0, &data);
+  vkMapMemory(device, vkVertexBufferMemory, offset, bufferInfo.size, 0, &data);
   memcpy(data, m_buffer.GetData(), (size_t)bufferInfo.size);
-  vkUnmapMemory(device, m_vertexBufferMemory);
+  vkUnmapMemory(device, vkVertexBufferMemory);
 };
 
-void VertexBufferVk::DestroyVkBuffer() {
+void VertexBufferVk::DestroyVkBuffer(VkBuffer &vkVertexBuffer) {
   auto &device = DeviceVk::Get()->GetDevice();
-  vkDestroyBuffer(device, m_vkBuffer, nullptr);
-  vkFreeMemory(device, m_vertexBufferMemory, nullptr);
+  vkDestroyBuffer(device, vkVertexBuffer, nullptr);
+};
+
+void VertexBufferVk::FreeMemory(VkDeviceMemory &vkVertexBufferMemory) {
+  auto &device = DeviceVk::Get()->GetDevice();
+  vkFreeMemory(device, vkVertexBufferMemory, nullptr);
 };
 
 void VertexBufferVk::GetDefaultVertexInputBindingDescription(

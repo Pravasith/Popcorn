@@ -38,16 +38,20 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER-VK")
   };
 
-  [[nodiscard]] inline const VkBuffer &GetVkVertexBuffer() const {
-    return m_vkBuffer;
-  };
-
-  void AllocateVkBuffer();
-  void RecordBindVkBuffersCommand(const VkCommandBuffer &commandBuffer);
-  void DestroyVkBuffer();
+  void AllocateVkBuffers(VkBuffer &vkVertexBuffer,
+                         VkDeviceMemory &vkVertexBufferMemory,
+                         VkDeviceSize offset);
+  void DestroyVkBuffer(VkBuffer &vkVertexBuffer);
 
   //
   // --- UTILS -----------------------------------------------------------------
+  static void FreeMemory(VkDeviceMemory &vkVertexBufferMemory);
+
+  static void RecordBindVkBuffersCommand(const VkCommandBuffer &commandBuffer,
+                                         VkBuffer *vkVertexBuffers,
+                                         VkDeviceSize *offsets,
+                                         const uint32_t vertexBuffersCount);
+
   static void GetDefaultVertexInputBindingDescription(
       VkVertexInputBindingDescription &bindingDescription,
       const Layout &layout);
@@ -69,10 +73,6 @@ public:
 
   virtual void Bind() override;
   virtual void UnBind() override;
-
-private:
-  VkBuffer m_vkBuffer;
-  VkDeviceMemory m_vertexBufferMemory;
 };
 
 GFX_NAMESPACE_END

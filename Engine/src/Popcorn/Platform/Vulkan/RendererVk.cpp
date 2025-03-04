@@ -5,6 +5,7 @@
 #include "FrameVk.h"
 #include "FramebuffersVk.h"
 #include "Material.h"
+#include "Mesh.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
 #include "RenderWorkflowVk.h"
@@ -143,6 +144,12 @@ void RendererVk::CreateRenderWorkflows() {
   for (auto &renderWorkflow : s_renderWorkflows) {
     renderWorkflow->CreateRenderPass();
     renderWorkflow->CreateFramebuffers();
+  }
+};
+
+void RendererVk::AllocateVkBuffers() {
+  for (auto &renderWorkflow : s_renderWorkflows) {
+    renderWorkflow->AllocateVkVertexBuffers();
   }
 };
 

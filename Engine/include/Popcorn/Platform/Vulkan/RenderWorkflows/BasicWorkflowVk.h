@@ -48,6 +48,10 @@ public:
 private:
   static VertexBuffer::Layout s_vertexBufferLayout;
 
+  std::vector<VkBuffer> m_vkVertexBuffers;
+  std::vector<VkDeviceSize> m_vkBufferOffsets;
+  VkDeviceMemory m_vertexBufferMemory;
+
   RenderPassVk m_basicRenderPassVk;
   GfxPipelineVk m_colorPipelineVk;
 };
