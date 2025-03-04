@@ -51,6 +51,7 @@ public:
   // WORKFLOW UTILS
   virtual void CreateRenderPass() {};
   virtual void CreateFramebuffers() {};
+  virtual void AllocateVkVertexBuffers() {};
   virtual void CreateCommandBuffer() {};
 
   virtual void AddMeshToWorkflow(Mesh *mesh) {};

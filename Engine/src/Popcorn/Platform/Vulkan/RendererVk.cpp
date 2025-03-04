@@ -155,6 +155,7 @@ void RendererVk::AddMeshToWorkflow(Mesh *mesh) {
       mesh->GetVertexBuffer().GetLayout() ==
           basicRenderWorkflow->GetBasicWorkflowVertexLayout()) {
     basicRenderWorkflow->AddMeshToWorkflow(mesh);
+    basicRenderWorkflow->AllocateVkVertexBuffers();
   };
 
   //

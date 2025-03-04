@@ -34,7 +34,7 @@ public:
       };
     };
 
-    auto *vertexBuffer = VertexBuffer::Create();
+    vertexBuffer = VertexBuffer::Create();
 
     vertexBuffer->Fill<Vertex>({
         {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
@@ -67,7 +67,6 @@ public:
     // Renderer.Render(triScene);
 
     vertexBuffer->PrintBuffer<Vertex>();
-    VertexBuffer::Destroy(vertexBuffer);
   };
 
   virtual void OnDetach() override {
@@ -76,6 +75,8 @@ public:
 
     delete triMat;
     triMat = nullptr;
+
+    VertexBuffer::Destroy(vertexBuffer);
   };
 
   virtual void OnUpdate() override {
@@ -85,6 +86,7 @@ public:
   virtual void OnEvent(Event &e) override {};
 
 private:
+  VertexBuffer *vertexBuffer;
   TriangleScene triScene{};
   Mesh *triMesh;
   Material *triMat;

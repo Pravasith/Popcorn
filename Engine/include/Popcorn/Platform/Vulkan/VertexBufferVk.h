@@ -38,13 +38,13 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER-VK")
   };
 
-  void CreateVulkanBuffer(const VkDevice &, const VkPhysicalDevice &);
-
-  [[nodiscard]] inline const VkBuffer &GetVulkanVertexBuffer() const {
-    return vertexBuffer;
+  [[nodiscard]] inline const VkBuffer &GetVkVertexBuffer() const {
+    return m_vkBuffer;
   };
 
-  void DestroyVulkanBuffer(const VkDevice &device);
+  void AllocateVkBuffer();
+  void RecordBindVkBuffersCommand(const VkCommandBuffer &commandBuffer);
+  void DestroyVkBuffer();
 
   //
   // --- UTILS -----------------------------------------------------------------
@@ -71,8 +71,8 @@ public:
   virtual void UnBind() override;
 
 private:
-  VkBuffer vertexBuffer;
-  VkDeviceMemory vertexBufferMemory;
+  VkBuffer m_vkBuffer;
+  VkDeviceMemory m_vertexBufferMemory;
 };
 
 GFX_NAMESPACE_END

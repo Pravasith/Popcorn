@@ -3,13 +3,15 @@
 --- TASKS ------------------------------------------------------------------
 ----------------------------------------------------------------------------
 
---- 18 Feb ------------------------------------
+--- 18 Feb ------------------------------------ X
+--- 04 Mar ------------------------------------
 
 :: Implement descriptor sets & index buffers
 :: Implement staging buffers
 :: Transform matrices & shader uniforms
 :: Implement camera
 :: Textures & model loaders
+:: Add VMA (Vulkan Memory Allocator) library to the project
 
 :: Make all singletons stack allocated with static local variables
    BE CAREFUL ABOUT THIS ONE ^^

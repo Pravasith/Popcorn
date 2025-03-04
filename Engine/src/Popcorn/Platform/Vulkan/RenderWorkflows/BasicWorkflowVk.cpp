@@ -9,6 +9,7 @@
 #include "RenderPassVk.h"
 #include "SwapchainVk.h"
 #include "VertexBuffer.h"
+#include "VertexBufferVk.h"
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
 
@@ -165,9 +166,13 @@ void BasicRenderWorkflowVk::CreateFramebuffers() {
 };
 
 void BasicRenderWorkflowVk::CleanUp() {
-
   auto &device = DeviceVk::Get()->GetDevice();
   auto *framebuffersVkStn = FramebuffersVk::Get();
+
+  // Cleanup vertex buffer memory
+  for (auto &mesh : m_meshes) {
+    static_cast<VertexBufferVk &>(mesh->GetVertexBuffer()).DestroyVkBuffer();
+  }
 
   // Cleanup pipelines
   m_colorPipelineVk.CleanUp(device);
@@ -219,7 +224,13 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
         ++drawCommandCount;
       };
 #endif
-      vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+
+      // TODO: Logic for multiple vertex buffers with VMA
+      // BIND VERTEX BUFFERS ---------------------------------------------------
+      static_cast<VertexBufferVk &>(mesh->GetVertexBuffer())
+          .RecordBindVkBuffersCommand(commandBuffer);
+
+      vkCmdDraw(commandBuffer, mesh->GetVertexBuffer().GetCount(), 1, 0, 0);
     }
   }
 
@@ -264,6 +275,16 @@ void BasicRenderWorkflowVk::AddMeshToWorkflow(Mesh *mesh) {
   // descriptor sets (shaders, textures ..etc)
   RegisterMaterial(&material);
 }
+
+void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
+  // TODO: Handle multiple vertex buffers by changing offset for each
+  // mesh/vertexBuffer
+  for (auto &mesh : m_meshes) {
+    VertexBufferVk &vertexBuffer =
+        reinterpret_cast<VertexBufferVk &>(mesh->GetVertexBuffer());
+    vertexBuffer.AllocateVkBuffer();
+  }
+};
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

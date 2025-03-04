@@ -22,7 +22,7 @@ public:
                              VertexBuffer::AttrTypes::Float3>();
     PC_PRINT("CREATED", TagType::Constr, "BasicWorkflowVk")
   };
-  ~BasicRenderWorkflowVk() override {
+  virtual ~BasicRenderWorkflowVk() override {
     PC_PRINT("DESTROYED", TagType::Destr, "BasicWorkflowVk")
   };
 
@@ -31,15 +31,15 @@ public:
     return s_vertexBufferLayout;
   }
 
-  virtual const VkRenderPass &GetRenderPass() const override {
+  [[nodiscard]] virtual const VkRenderPass &GetRenderPass() const override {
     return m_basicRenderPassVk.GetVkRenderPass();
   };
 
   virtual void CreateRenderPass() override;
   virtual void CreatePipeline(Material &) override;
   virtual void CreateFramebuffers() override;
+  virtual void AllocateVkVertexBuffers() override;
   virtual void AddMeshToWorkflow(Mesh *mesh) override;
-
   virtual void RecordRenderCommands(const Scene &scene,
                                     const VkCommandBuffer &commandBuffer,
                                     const uint32_t imageIndex) override;

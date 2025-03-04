@@ -160,7 +160,6 @@ public:
 
 #ifdef PC_DEBUG
   template <typename T> inline static void Print(Buffer &buffer) {
-
     PC_PRINT("PRINT EVOKED", TagType::Print, "BUFFER")
 
     if (!buffer.m_data) {
