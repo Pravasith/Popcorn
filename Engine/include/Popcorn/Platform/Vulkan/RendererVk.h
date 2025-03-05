@@ -25,6 +25,7 @@ public:
   RendererVk(const Window &appWin);
   virtual ~RendererVk() override;
 
+  virtual void SceneReady() override;
   virtual void DrawFrame(const Scene &scene) override;
   virtual bool OnFrameBufferResize(FrameBfrResizeEvent &) override;
   virtual void CreateMaterialPipeline(Material *materialPtr) override;

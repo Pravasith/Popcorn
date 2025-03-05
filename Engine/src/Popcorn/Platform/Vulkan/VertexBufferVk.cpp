@@ -1,7 +1,7 @@
 #include "VertexBufferVk.h"
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
-#include "Popcorn/Core/Buffer.h"
+#include "Popcorn/Core/Helpers.h"
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
@@ -21,22 +21,22 @@ void VertexBufferVk::UnBind() {
 };
 
 void VertexBufferVk::RecordBindVkBuffersCommand(
-    const VkCommandBuffer &commandBuffer, VkBuffer *vkVertexBuffers,
+    const VkCommandBuffer &commandBuffer, VkBuffer *vkVertexBuffer,
     VkDeviceSize *offsets, const uint32_t vertexBuffersCount) {
-  vkCmdBindVertexBuffers(commandBuffer, 0, vertexBuffersCount, vkVertexBuffers,
+  vkCmdBindVertexBuffers(commandBuffer, 0, vertexBuffersCount, vkVertexBuffer,
                          offsets);
 };
 
-void VertexBufferVk::AllocateVkBuffers(VkBuffer &vkVertexBuffer,
-                                       VkDeviceMemory &vkVertexBufferMemory,
-                                       VkDeviceSize offset) {
+void VertexBufferVk::AllocateVkBuffer(VkBuffer &vkVertexBuffer,
+                                      VkDeviceMemory &vkVertexBufferMemory,
+                                      VkDeviceSize totalSize) {
   auto *deviceVkStn = DeviceVk::Get();
   auto &device = deviceVkStn->GetDevice();
 
   VkBufferCreateInfo bufferInfo{};
 
   bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-  bufferInfo.size = GetSize();
+  bufferInfo.size = totalSize;
   bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
   bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
@@ -68,23 +68,38 @@ void VertexBufferVk::AllocateVkBuffers(VkBuffer &vkVertexBuffer,
 
   //
   // BIND MEMORY TO THE BUFFER
-  vkBindBufferMemory(device, vkVertexBuffer, vkVertexBufferMemory, offset);
+  vkBindBufferMemory(device, vkVertexBuffer, vkVertexBufferMemory, 0);
+};
 
+void *VertexBufferVk::MapVkMemoryToCPU(VkDeviceMemory &vkVertexBufferMemory,
+                                       VkDeviceSize beginOffset,
+                                       VkDeviceSize endOffset) {
+  auto &device = DeviceVk::Get()->GetDevice();
   //
   // FILL VERTEX BUFFER
   void *data;
-  vkMapMemory(device, vkVertexBufferMemory, offset, bufferInfo.size, 0, &data);
-  memcpy(data, m_buffer.GetData(), (size_t)bufferInfo.size);
+  vkMapMemory(device, vkVertexBufferMemory, beginOffset, endOffset, 0, &data);
+
+  return data;
+};
+
+void VertexBufferVk::CopyToVkMemory(VkDeviceMemory &vkVertexBufferMemory,
+                                    byte_t *beginPtr, byte_t *endPtr,
+                                    VkDeviceSize totalSize) {
+  auto &device = DeviceVk::Get()->GetDevice();
+  memcpy(beginPtr, endPtr, (size_t)totalSize);
+};
+
+void VertexBufferVk::UnmapVkMemoryFromCPU(
+    VkDeviceMemory &vkVertexBufferMemory) {
+  auto &device = DeviceVk::Get()->GetDevice();
   vkUnmapMemory(device, vkVertexBufferMemory);
 };
 
-void VertexBufferVk::DestroyVkBuffer(VkBuffer &vkVertexBuffer) {
+void VertexBufferVk::DestroyVkBuffer(VkBuffer &vkVertexBuffer,
+                                     VkDeviceMemory &vkVertexBufferMemory) {
   auto &device = DeviceVk::Get()->GetDevice();
   vkDestroyBuffer(device, vkVertexBuffer, nullptr);
-};
-
-void VertexBufferVk::FreeMemory(VkDeviceMemory &vkVertexBufferMemory) {
-  auto &device = DeviceVk::Get()->GetDevice();
   vkFreeMemory(device, vkVertexBufferMemory, nullptr);
 };
 

@@ -69,7 +69,6 @@ void Renderer::Init(const Window &appWin) {
     vkRenderer->VulkanInit();
     vkRenderer->CreateRenderWorkflows();
     vkRenderer->CreateBasicCommandBuffers();
-    vkRenderer->AllocateVkBuffers();
 
   } else if (s_type == RendererType::OpenGL) {
     s_instance = new RendererOpenGL(appWin);

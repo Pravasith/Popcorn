@@ -2,6 +2,7 @@
 
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include "Popcorn/Core/Helpers.h"
 #include "VertexBuffer.h"
 #include <cstdint>
 #define GLFW_INCLUDE_VULKAN
@@ -38,17 +39,24 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER-VK")
   };
 
-  void AllocateVkBuffers(VkBuffer &vkVertexBuffer,
-                         VkDeviceMemory &vkVertexBufferMemory,
-                         VkDeviceSize offset);
-  void DestroyVkBuffer(VkBuffer &vkVertexBuffer);
-
   //
   // --- UTILS -----------------------------------------------------------------
-  static void FreeMemory(VkDeviceMemory &vkVertexBufferMemory);
+  static void AllocateVkBuffer(VkBuffer &vkVertexBuffer,
+                               VkDeviceMemory &vkVertexBufferMemory,
+                               VkDeviceSize totalSize);
+  static void DestroyVkBuffer(VkBuffer &vkVertexBuffer,
+                              VkDeviceMemory &vkVertexBufferMemory);
+
+  static void *MapVkMemoryToCPU(VkDeviceMemory &vkVertexBufferMemory,
+                                VkDeviceSize beginOffset,
+                                VkDeviceSize endOffset);
+  static void CopyToVkMemory(VkDeviceMemory &vkVertexBufferMemory,
+                             byte_t *beginPtr, byte_t *endPtr,
+                             VkDeviceSize totalSize);
+  static void UnmapVkMemoryFromCPU(VkDeviceMemory &vkVertexBufferMemory);
 
   static void RecordBindVkBuffersCommand(const VkCommandBuffer &commandBuffer,
-                                         VkBuffer *vkVertexBuffers,
+                                         VkBuffer *vkVertexBuffer,
                                          VkDeviceSize *offsets,
                                          const uint32_t vertexBuffersCount);
 

@@ -147,6 +147,8 @@ void RendererVk::CreateRenderWorkflows() {
   }
 };
 
+void RendererVk::SceneReady() { AllocateVkBuffers(); };
+
 void RendererVk::AllocateVkBuffers() {
   for (auto &renderWorkflow : s_renderWorkflows) {
     renderWorkflow->AllocateVkVertexBuffers();
@@ -162,7 +164,6 @@ void RendererVk::AddMeshToWorkflow(Mesh *mesh) {
       mesh->GetVertexBuffer().GetLayout() ==
           basicRenderWorkflow->GetBasicWorkflowVertexLayout()) {
     basicRenderWorkflow->AddMeshToWorkflow(mesh);
-    basicRenderWorkflow->AllocateVkVertexBuffers();
   };
 
   //

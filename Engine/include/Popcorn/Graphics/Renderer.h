@@ -39,6 +39,7 @@ public:
   };
 
   // PASS IN SCENE & CAMERA ETC.
+  virtual void SceneReady() = 0;
   virtual void DrawFrame(const Scene &scene) = 0;
   virtual bool OnFrameBufferResize(FrameBfrResizeEvent &) = 0;
   virtual void CreateMaterialPipeline(Material *materialPtr) = 0;

@@ -11,6 +11,7 @@ public:
   RendererOpenGL(const Window &appWin);
   virtual ~RendererOpenGL() override;
 
+  virtual void SceneReady() override {};
   virtual void DrawFrame(const Scene &) override {};
   virtual bool OnFrameBufferResize(FrameBfrResizeEvent &) override {
     return true;

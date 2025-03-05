@@ -39,7 +39,11 @@ public:
     vertexBuffer->Fill<Vertex>({
         {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
         {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-        {{0.0f, 0.5f}, {1.0f, 0.0f, 0.0f}},
+        {{-0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}},
+
+        {{-0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}},
+        {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+        {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
     });
 
     vertexBuffer->SetLayout<VertexBuffer::AttrTypes::Float2,
@@ -102,9 +106,12 @@ int main(int argc, char **argv) {
       *(Renderer::Create<RendererType::Vulkan>(app.GetAppWindow()));
   app.SetRenderer(renderer);
 
-  // // CREATE A GAME LAYER
+  // CREATE A GAME LAYER
   auto gameLayer = new GameLayer();
   Application::AddLayer(gameLayer);
+
+  // INDICATE SCENE READY
+  renderer.SceneReady();
 
   // GAME LOOP
   Popcorn::Application::StartGameLoop();

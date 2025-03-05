@@ -10,6 +10,7 @@
 #include "SwapchainVk.h"
 #include "VertexBuffer.h"
 #include "VertexBufferVk.h"
+#include <cstddef>
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
 
@@ -201,21 +202,21 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
     // BIND PIPELINE -----------------------------------------------------------
     m_colorPipelineVk.RecordBindCmdPipelineCommand(commandBuffer);
 
-    for (auto &mesh : m_meshes) {
-      // TODO: inject vertex data instead of hardcoding
 #ifdef PC_DEBUG
-      if constexpr (showDrawCommandCount) {
-        ++drawCommandCount;
-      };
+    if constexpr (showDrawCommandCount) {
+      ++drawCommandCount;
+    };
 #endif
 
-      // TODO: Logic for multiple vertex buffers with VMA
-      // BIND VERTEX BUFFERS ---------------------------------------------------
-      static_cast<VertexBufferVk &>(mesh->GetVertexBuffer())
-          .RecordBindVkBuffersCommand(commandBuffer, m_vkVertexBuffers.data(),
-                                      m_vkBufferOffsets.data(),
-                                      m_vkVertexBuffers.size());
+    VkBuffer vertexBuffers[] = {m_vkVertexBuffer};
 
+    // TODO: Logic for multiple vertex buffers with VMA
+    // BIND VERTEX BUFFERS ---------------------------------------------------
+    VertexBufferVk::RecordBindVkBuffersCommand(commandBuffer, vertexBuffers,
+                                               m_vkBufferOffsets.data(),
+                                               m_meshes.size());
+
+    for (auto &mesh : m_meshes) {
       vkCmdDraw(commandBuffer, mesh->GetVertexBuffer().GetCount(), 1, 0, 0);
     }
   }
@@ -263,23 +264,34 @@ void BasicRenderWorkflowVk::AddMeshToWorkflow(Mesh *mesh) {
 }
 
 void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
-  // TODO: Handle multiple vertex buffers by changing offset for each
-  // mesh/vertexBuffer
-
-  m_vkVertexBuffers.resize(m_meshes.size());
   m_vkBufferOffsets.resize(m_meshes.size());
 
   VkDeviceSize currentOffset = 0;
 
+  // Get the offsets of meshes & the total size of the buffers (a.k.a.
+  // currentOffset)
   for (int i = 0; i < m_meshes.size(); ++i) {
     VertexBufferVk &vertexBuffer =
         reinterpret_cast<VertexBufferVk &>(m_meshes[i]->GetVertexBuffer());
     m_vkBufferOffsets[i] = currentOffset;
     currentOffset += vertexBuffer.GetSize();
-
-    vertexBuffer.AllocateVkBuffers(m_vkVertexBuffers[i], m_vertexBufferMemory,
-                                   m_vkBufferOffsets[i]);
   }
+
+  VertexBufferVk::AllocateVkBuffer(m_vkVertexBuffer, m_vertexBufferMemory,
+                                   currentOffset);
+
+  void *data =
+      VertexBufferVk::MapVkMemoryToCPU(m_vertexBufferMemory, 0, currentOffset);
+
+  for (int i = 0; i < m_meshes.size(); ++i) {
+    auto &vertexBuffer =
+        static_cast<VertexBufferVk &>(m_meshes[i]->GetVertexBuffer());
+    VertexBufferVk::CopyToVkMemory(
+        m_vertexBufferMemory, (byte_t *)data + m_vkBufferOffsets[i],
+        vertexBuffer.GetBufferData(), vertexBuffer.GetSize());
+  }
+
+  VertexBufferVk::UnmapVkMemoryFromCPU(m_vertexBufferMemory);
 };
 
 void BasicRenderWorkflowVk::CleanUp() {
@@ -287,12 +299,8 @@ void BasicRenderWorkflowVk::CleanUp() {
   auto *framebuffersVkStn = FramebuffersVk::Get();
 
   // Cleanup vertex buffer memory
-  for (int i = 0; i < m_meshes.size(); ++i) {
-    VertexBufferVk &vertexBuffer =
-        reinterpret_cast<VertexBufferVk &>(m_meshes[i]->GetVertexBuffer());
-    vertexBuffer.DestroyVkBuffer(m_vkVertexBuffers[i]);
-  }
-  VertexBufferVk::FreeMemory(m_vertexBufferMemory);
+  VertexBufferVk::DestroyVkBuffer(m_vkVertexBuffer, m_vertexBufferMemory);
+  m_vkBufferOffsets.clear();
 
   // Cleanup pipelines
   m_colorPipelineVk.CleanUp(device);

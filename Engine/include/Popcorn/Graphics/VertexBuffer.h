@@ -4,6 +4,7 @@
 #include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
+#include "Popcorn/Core/Helpers.h"
 #include <cstdint>
 #include <cstring>
 #include <initializer_list>
@@ -95,6 +96,10 @@ public:
   [[nodiscard]] inline const Layout &GetLayout() const {
     PC_ASSERT(m_layout.countValue != 0, "Layout is empty!");
     return m_layout;
+  }
+
+  [[nodiscard]] inline byte_t *GetBufferData() const {
+    return m_buffer.GetData();
   }
 
   VertexBuffer() {
