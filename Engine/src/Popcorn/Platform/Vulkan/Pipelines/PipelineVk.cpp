@@ -1,5 +1,6 @@
 #include "PipelineVk.h"
 #include "GlobalMacros.h"
+#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -56,6 +57,11 @@ void PipelineUtils::GetDefaultMultisampleState(
 void PipelineUtils::GetDefaultDepthStencilState(
     VkPipelineDepthStencilStateCreateInfo &depthStencilState) {
   // TODO: Depth & stencil testing
+
+  depthStencilState.sType =
+      VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+  depthStencilState.depthTestEnable = VK_FALSE; // Disable depth testing
+  depthStencilState.depthWriteEnable = VK_FALSE;
 };
 
 void PipelineUtils::GetDefaultRasterizationState(
@@ -67,6 +73,7 @@ void PipelineUtils::GetDefaultRasterizationState(
   rasterizationState.polygonMode = VK_POLYGON_MODE_FILL;
   rasterizationState.lineWidth = 1.0f;
   rasterizationState.cullMode = VK_CULL_MODE_BACK_BIT;
+  // rasterizationState.cullMode = VK_CULL_MODE_NONE;
   rasterizationState.frontFace = VK_FRONT_FACE_CLOCKWISE;
 
   rasterizationState.depthBiasEnable = VK_FALSE;

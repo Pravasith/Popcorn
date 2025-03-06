@@ -6,12 +6,14 @@
 #include "Material.h"
 #include "PipelineVk.h"
 #include "Popcorn/Core/Base.h"
+#include "Popcorn/Core/Buffer.h"
+#include "Popcorn/Core/Helpers.h"
 #include "RenderPassVk.h"
 #include "SwapchainVk.h"
 #include "VertexBuffer.h"
 #include "VertexBufferVk.h"
-#include <cstddef>
 #include <cstdint>
+#include <glm/glm.hpp>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -56,6 +58,7 @@ void BasicRenderWorkflowVk::CreatePipeline(Material &material) {
   VertexBufferVk::GetDefaultVertexInputBindingDescription(bindingDescription,
                                                           s_vertexBufferLayout);
   bindingDescription.binding = 0;
+  PC_WARN("STRIDE: " << bindingDescription.stride)
   std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
   VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
       attributeDescriptions, s_vertexBufferLayout);
@@ -169,10 +172,7 @@ void BasicRenderWorkflowVk::CreateFramebuffers() {
 void BasicRenderWorkflowVk::RecordRenderCommands(
     const Scene &scene, const VkCommandBuffer &commandBuffer,
     const uint32_t imageIndex) {
-  // auto &renderPass = m_basicRenderPassVk.GetVkRenderPass();
-  // PC_VK_NULL_CHECK(renderPass);
   auto *swapchainVkStn = SwapchainVk::Get();
-
   VkRenderPassBeginInfo renderPassCreateInfo{};
 
   //
@@ -208,17 +208,43 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
     };
 #endif
 
-    VkBuffer vertexBuffers[] = {m_vkVertexBuffer};
-
     // TODO: Logic for multiple vertex buffers with VMA
     // BIND VERTEX BUFFERS ---------------------------------------------------
-    VertexBufferVk::RecordBindVkBuffersCommand(commandBuffer, vertexBuffers,
-                                               m_vkBufferOffsets.data(),
-                                               m_meshes.size());
 
-    for (auto &mesh : m_meshes) {
-      vkCmdDraw(commandBuffer, mesh->GetVertexBuffer().GetCount(), 1, 0, 0);
+    for (size_t i = 0; i < m_meshes.size(); ++i) {
+      // std::cout << "Drawing mesh " << i << " with offset "
+      //           << m_vkBufferOffsets[i] << "\n";
+
+      VkBuffer vertexBuffers[] = {m_vkVertexBuffer};
+      VkDeviceSize offsets[] = {m_vkBufferOffsets[i]};
+
+      VertexBufferVk::RecordBindVkBuffersCommand(commandBuffer, vertexBuffers,
+                                                 offsets, 1);
+
+      vkCmdDraw(commandBuffer, m_meshes[i]->GetVertexBuffer().GetCount(), 1, 0,
+                0);
     }
+
+    // struct Vertex {
+    //   glm::vec2 pos;
+    //   glm::vec3 color;
+    //   std::string Print() {
+    //     std::stringstream ss;
+    //     ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g
+    //        << ", " << color.b;
+    //
+    //     return ss.str();
+    //   };
+    // };
+
+    // void *data;
+    // auto &device = DeviceVk::Get()->GetDevice();
+    // vkMapMemory(device, m_vertexBufferMemory, 0, VK_WHOLE_SIZE, 0, &data);
+    // Vertex *vertices = static_cast<Vertex *>(data);
+    // for (size_t i = 0; i < 6; ++i) { // 6 vertices (2 meshes × 3 vertices)
+    //   std::cout << "Vertex " << i << ": " << vertices[i].Print() << "\n";
+    // }
+    // vkUnmapMemory(device, m_vertexBufferMemory);
   }
 
   //
@@ -283,12 +309,38 @@ void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
   void *data =
       VertexBufferVk::MapVkMemoryToCPU(m_vertexBufferMemory, 0, currentOffset);
 
+  struct Vertex {
+    glm::vec2 pos;
+    glm::vec3 color;
+    std::string Print() {
+      std::stringstream ss;
+      ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g << ", "
+         << color.b;
+
+      return ss.str();
+    };
+  };
+
   for (int i = 0; i < m_meshes.size(); ++i) {
     auto &vertexBuffer =
         static_cast<VertexBufferVk &>(m_meshes[i]->GetVertexBuffer());
-    VertexBufferVk::CopyToVkMemory(
-        m_vertexBufferMemory, (byte_t *)data + m_vkBufferOffsets[i],
-        vertexBuffer.GetBufferData(), vertexBuffer.GetSize());
+
+    vertexBuffer.PrintBuffer<Vertex>();
+    PC_WARN(vertexBuffer.GetSize())
+
+    VertexBufferVk::CopyToVkMemory(m_vertexBufferMemory,
+                                   // Dest ptr
+                                   (byte_t *)data + m_vkBufferOffsets[i],
+                                   // Src ptr
+                                   vertexBuffer.GetBufferData(),
+                                   // Size
+                                   vertexBuffer.GetSize());
+  }
+
+  auto &device = DeviceVk::Get()->GetDevice();
+  Vertex *vertices = static_cast<Vertex *>(data);
+  for (size_t i = 0; i < 6; ++i) { // 6 vertices (2 meshes × 3 vertices)
+    std::cout << "Vertex " << i << ": " << vertices[i].Print() << "\n";
   }
 
   VertexBufferVk::UnmapVkMemoryFromCPU(m_vertexBufferMemory);

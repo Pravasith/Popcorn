@@ -51,8 +51,8 @@ public:
                                 VkDeviceSize beginOffset,
                                 VkDeviceSize endOffset);
   static void CopyToVkMemory(VkDeviceMemory &vkVertexBufferMemory,
-                             byte_t *beginPtr, byte_t *endPtr,
-                             VkDeviceSize totalSize);
+                             byte_t *destPtr, byte_t *srcPtr,
+                             VkDeviceSize size);
   static void UnmapVkMemoryFromCPU(VkDeviceMemory &vkVertexBufferMemory);
 
   static void RecordBindVkBuffersCommand(const VkCommandBuffer &commandBuffer,

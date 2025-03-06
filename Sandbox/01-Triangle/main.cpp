@@ -35,12 +35,15 @@ public:
     };
 
     vertexBuffer = VertexBuffer::Create();
+    vertexBuffer2 = VertexBuffer::Create();
 
     vertexBuffer->Fill<Vertex>({
         {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
         {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
         {{-0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}},
+    });
 
+    vertexBuffer2->Fill<Vertex>({
         {{-0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}},
         {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
         {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
@@ -48,6 +51,8 @@ public:
 
     vertexBuffer->SetLayout<VertexBuffer::AttrTypes::Float2,
                             VertexBuffer::AttrTypes::Float3>();
+    vertexBuffer2->SetLayout<VertexBuffer::AttrTypes::Float2,
+                             VertexBuffer::AttrTypes::Float3>();
 
     std::vector shaderFiles{
         "shaders/tri_vert.spv",
@@ -63,24 +68,29 @@ public:
 
     // Mesh triMesh{nullptr, triMat};
     triMesh = new Mesh{*vertexBuffer, *triMat};
+    triMesh2 = new Mesh{*vertexBuffer2, *triMat};
 
     // ADD MESH TO WORK FLOW -> CREATE PIPELINES
     triScene.Add(triMesh);
+    triScene.Add(triMesh2);
 
     // AND THEN IN THE RENDER LOOP
     // Renderer.Render(triScene);
 
-    vertexBuffer->PrintBuffer<Vertex>();
+    // vertexBuffer->PrintBuffer<Vertex>();
   };
 
   virtual void OnDetach() override {
     delete triMesh;
     triMesh = nullptr;
+    delete triMesh2;
+    triMesh2 = nullptr;
 
     delete triMat;
     triMat = nullptr;
 
     VertexBuffer::Destroy(vertexBuffer);
+    VertexBuffer::Destroy(vertexBuffer2);
   };
 
   virtual void OnUpdate() override {
@@ -91,8 +101,10 @@ public:
 
 private:
   VertexBuffer *vertexBuffer;
+  VertexBuffer *vertexBuffer2;
   TriangleScene triScene{};
   Mesh *triMesh;
+  Mesh *triMesh2;
   Material *triMat;
 };
 

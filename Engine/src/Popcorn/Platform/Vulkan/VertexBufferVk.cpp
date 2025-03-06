@@ -84,10 +84,10 @@ void *VertexBufferVk::MapVkMemoryToCPU(VkDeviceMemory &vkVertexBufferMemory,
 };
 
 void VertexBufferVk::CopyToVkMemory(VkDeviceMemory &vkVertexBufferMemory,
-                                    byte_t *beginPtr, byte_t *endPtr,
-                                    VkDeviceSize totalSize) {
+                                    byte_t *destPtr, byte_t *srcPtr,
+                                    VkDeviceSize size) {
   auto &device = DeviceVk::Get()->GetDevice();
-  memcpy(beginPtr, endPtr, (size_t)totalSize);
+  memcpy(destPtr, srcPtr, (size_t)size);
 };
 
 void VertexBufferVk::UnmapVkMemoryFromCPU(
