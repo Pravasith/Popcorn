@@ -77,7 +77,9 @@ void RendererVk::CreateBasicCommandBuffers() {
   VkCommandBufferAllocateInfo allocInfo{};
   commandPoolVkStn->GetDefaultCommandBufferAllocInfo(allocInfo);
   allocInfo.commandBufferCount = MAX_FRAMES_IN_FLIGHT;
-  commandPoolVkStn->AllocCommandBuffers(allocInfo, m_drawingCommandBuffers);
+  m_drawingCommandBuffers.resize(allocInfo.commandBufferCount);
+  commandPoolVkStn->AllocCommandBuffers(allocInfo,
+                                        m_drawingCommandBuffers.data());
 }
 
 //

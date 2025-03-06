@@ -51,7 +51,7 @@ private:
   std::vector<VkDeviceSize> m_vkBufferOffsets;
 
   VkBuffer m_vkVertexBuffer;
-  VkDeviceMemory m_vertexBufferMemory;
+  VkDeviceMemory m_vkVertexBufferMemory;
 
   RenderPassVk m_basicRenderPassVk;
   GfxPipelineVk m_colorPipelineVk;

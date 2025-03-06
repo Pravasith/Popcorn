@@ -52,9 +52,11 @@ public:
   static void *MapVkMemoryToCPU(VkDeviceMemory &vkVertexBufferMemory,
                                 VkDeviceSize beginOffset,
                                 VkDeviceSize endOffset);
-  static void CopyToVkMemory(VkDeviceMemory &vkVertexBufferMemory,
-                             byte_t *destPtr, byte_t *srcPtr,
-                             VkDeviceSize size);
+  static void CopyBufferCPUToGPU(VkDeviceMemory &vkVertexBufferMemory,
+                                 byte_t *destPtr, byte_t *srcPtr,
+                                 VkDeviceSize size);
+  static void CopyBufferGPUToGPU(VkBuffer &srcBuffer, VkBuffer &dstBuffer,
+                                 VkDeviceSize size);
   static void UnmapVkMemoryFromCPU(VkDeviceMemory &vkVertexBufferMemory);
 
   static void RecordBindVkBuffersCommand(const VkCommandBuffer &commandBuffer,

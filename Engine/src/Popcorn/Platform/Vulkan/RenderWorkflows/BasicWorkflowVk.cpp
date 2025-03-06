@@ -281,28 +281,33 @@ void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
     currentOffset += vertexBuffer.GetSize();
   }
 
+  VkBuffer stagingVertexBuffer;
+  VkDeviceMemory stagingVertexBufferMemory;
+
+  // Allocate staging buffer
   VkBufferCreateInfo bufferInfo{};
   VertexBufferVk::GetDefaultVkBufferState(bufferInfo, currentOffset);
-
-  VertexBufferVk::AllocateVkBuffer(m_vkVertexBuffer, m_vertexBufferMemory,
-                                   bufferInfo,
+  bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+  VertexBufferVk::AllocateVkBuffer(stagingVertexBuffer,
+                                   stagingVertexBufferMemory, bufferInfo,
                                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                                        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-  void *data =
-      VertexBufferVk::MapVkMemoryToCPU(m_vertexBufferMemory, 0, currentOffset);
+  // struct Vertex {
+  //   glm::vec2 pos;
+  //   glm::vec3 color;
+  //   std::string Print() {
+  //     std::stringstream ss;
+  //     ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g <<
+  //     ", "
+  //        << color.b;
+  //
+  //     return ss.str();
+  //   };
+  // };
 
-  struct Vertex {
-    glm::vec2 pos;
-    glm::vec3 color;
-    std::string Print() {
-      std::stringstream ss;
-      ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g << ", "
-         << color.b;
-
-      return ss.str();
-    };
-  };
+  void *data = VertexBufferVk::MapVkMemoryToCPU(stagingVertexBufferMemory, 0,
+                                                currentOffset);
 
   for (int i = 0; i < m_meshes.size(); ++i) {
     auto &vertexBuffer =
@@ -311,22 +316,37 @@ void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
     // vertexBuffer.PrintBuffer<Vertex>();
     // PC_WARN(vertexBuffer.GetSize())
 
-    VertexBufferVk::CopyToVkMemory(m_vertexBufferMemory,
-                                   // Dest ptr
-                                   (byte_t *)data + m_vkBufferOffsets[i],
-                                   // Src ptr
-                                   vertexBuffer.GetBufferData(),
-                                   // Size
-                                   vertexBuffer.GetSize());
+    VertexBufferVk::CopyBufferCPUToGPU(stagingVertexBufferMemory,
+                                       // Dest ptr
+                                       (byte_t *)data + m_vkBufferOffsets[i],
+                                       // Src ptr
+                                       vertexBuffer.GetBufferData(),
+                                       // Size
+                                       vertexBuffer.GetSize());
   }
 
+  // Vertex *vertices = static_cast<Vertex *>(data);
+  // for (size_t i = 0; i < 6; ++i) { // 6 vertices (2 meshes × 3 vertices)
+  //   std::cout << "Vertex " << i << ": " << vertices[i].Print() << "\n";
+  // }
+
+  VertexBufferVk::UnmapVkMemoryFromCPU(stagingVertexBufferMemory);
+
+  //
+  // Allocate actual vertex buffer
+  bufferInfo.usage =
+      VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+  VertexBufferVk::AllocateVkBuffer(m_vkVertexBuffer, m_vkVertexBufferMemory,
+                                   bufferInfo,
+                                   VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+  VertexBufferVk::CopyBufferGPUToGPU(stagingVertexBuffer, m_vkVertexBuffer,
+                                     currentOffset);
+
+  // Cleanup staging buffers
   auto &device = DeviceVk::Get()->GetDevice();
-  Vertex *vertices = static_cast<Vertex *>(data);
-  for (size_t i = 0; i < 6; ++i) { // 6 vertices (2 meshes × 3 vertices)
-    std::cout << "Vertex " << i << ": " << vertices[i].Print() << "\n";
-  }
-
-  VertexBufferVk::UnmapVkMemoryFromCPU(m_vertexBufferMemory);
+  vkDestroyBuffer(device, stagingVertexBuffer, nullptr);
+  vkFreeMemory(device, stagingVertexBufferMemory, nullptr);
 };
 
 void BasicRenderWorkflowVk::CleanUp() {
@@ -334,7 +354,7 @@ void BasicRenderWorkflowVk::CleanUp() {
   auto *framebuffersVkStn = FramebuffersVk::Get();
 
   // Cleanup vertex buffer memory
-  VertexBufferVk::DestroyVkBuffer(m_vkVertexBuffer, m_vertexBufferMemory);
+  VertexBufferVk::DestroyVkBuffer(m_vkVertexBuffer, m_vkVertexBufferMemory);
   m_vkBufferOffsets.clear();
 
   // Cleanup pipelines

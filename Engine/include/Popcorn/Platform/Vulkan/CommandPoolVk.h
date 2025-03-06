@@ -2,7 +2,6 @@
 
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
-#include <cstdint>
 #include <vector>
 #include <vulkan/vulkan_core.h>
 
@@ -30,9 +29,14 @@ public:
     };
   };
 
+  [[nodiscard]] inline const VkCommandPool &GetVkCommandPool() const {
+    return m_commandPool;
+  };
+
   void GetDefaultCommandBufferAllocInfo(VkCommandBufferAllocateInfo &allocInfo);
+
   void AllocCommandBuffers(const VkCommandBufferAllocateInfo &allocInfo,
-                           std::vector<VkCommandBuffer> &commandBuffers);
+                           VkCommandBuffer *commandBuffers);
 
   void BeginCommandBuffer(const VkCommandBuffer &commandBuffer) {
     VkCommandBufferBeginInfo beginInfo{};
