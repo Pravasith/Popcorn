@@ -27,18 +27,21 @@ void VertexBufferVk::RecordBindVkBuffersCommand(
                          offsets);
 };
 
-void VertexBufferVk::AllocateVkBuffer(VkBuffer &vkVertexBuffer,
-                                      VkDeviceMemory &vkVertexBufferMemory,
-                                      VkDeviceSize totalSize) {
-  auto *deviceVkStn = DeviceVk::Get();
-  auto &device = deviceVkStn->GetDevice();
-
-  VkBufferCreateInfo bufferInfo{};
-
+void VertexBufferVk::GetDefaultVkBufferState(VkBufferCreateInfo &bufferInfo,
+                                             VkDeviceSize bufferSize) {
   bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-  bufferInfo.size = totalSize;
+  bufferInfo.size = bufferSize;
   bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
   bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+};
+
+void VertexBufferVk::AllocateVkBuffer(
+    VkBuffer &vkVertexBuffer, VkDeviceMemory &vkVertexBufferMemory,
+    const VkBufferCreateInfo &bufferInfo,
+    const VkMemoryPropertyFlags memoryPropertyFlags) {
+
+  auto *deviceVkStn = DeviceVk::Get();
+  auto &device = deviceVkStn->GetDevice();
 
   if (vkCreateBuffer(device, &bufferInfo, nullptr, &vkVertexBuffer) !=
       VK_SUCCESS) {
@@ -57,8 +60,7 @@ void VertexBufferVk::AllocateVkBuffer(VkBuffer &vkVertexBuffer,
   allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   allocInfo.allocationSize = memRequirements.size;
   allocInfo.memoryTypeIndex = deviceVkStn->FindMemoryType(
-      memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                                          VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+      memRequirements.memoryTypeBits, memoryPropertyFlags);
 
   if (vkAllocateMemory(device, &allocInfo, nullptr, &vkVertexBufferMemory) !=
       VK_SUCCESS) {

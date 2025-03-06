@@ -5,6 +5,7 @@
 #include "Popcorn/Core/Helpers.h"
 #include "VertexBuffer.h"
 #include <cstdint>
+#include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -43,7 +44,8 @@ public:
   // --- UTILS -----------------------------------------------------------------
   static void AllocateVkBuffer(VkBuffer &vkVertexBuffer,
                                VkDeviceMemory &vkVertexBufferMemory,
-                               VkDeviceSize totalSize);
+                               const VkBufferCreateInfo &bufferInfo,
+                               const VkMemoryPropertyFlags memoryPropertyFlags);
   static void DestroyVkBuffer(VkBuffer &vkVertexBuffer,
                               VkDeviceMemory &vkVertexBufferMemory);
 
@@ -59,6 +61,9 @@ public:
                                          VkBuffer *vkVertexBuffer,
                                          VkDeviceSize *offsets,
                                          const uint32_t vertexBuffersCount);
+
+  static void GetDefaultVkBufferState(VkBufferCreateInfo &bufferInfo,
+                                      VkDeviceSize bufferSize);
 
   static void GetDefaultVertexInputBindingDescription(
       VkVertexInputBindingDescription &bindingDescription,

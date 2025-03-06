@@ -58,7 +58,6 @@ void BasicRenderWorkflowVk::CreatePipeline(Material &material) {
   VertexBufferVk::GetDefaultVertexInputBindingDescription(bindingDescription,
                                                           s_vertexBufferLayout);
   bindingDescription.binding = 0;
-  PC_WARN("STRIDE: " << bindingDescription.stride)
   std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
   VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
       attributeDescriptions, s_vertexBufferLayout);
@@ -282,8 +281,13 @@ void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
     currentOffset += vertexBuffer.GetSize();
   }
 
+  VkBufferCreateInfo bufferInfo{};
+  VertexBufferVk::GetDefaultVkBufferState(bufferInfo, currentOffset);
+
   VertexBufferVk::AllocateVkBuffer(m_vkVertexBuffer, m_vertexBufferMemory,
-                                   currentOffset);
+                                   bufferInfo,
+                                   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
   void *data =
       VertexBufferVk::MapVkMemoryToCPU(m_vertexBufferMemory, 0, currentOffset);
@@ -304,8 +308,8 @@ void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
     auto &vertexBuffer =
         static_cast<VertexBufferVk &>(m_meshes[i]->GetVertexBuffer());
 
-    vertexBuffer.PrintBuffer<Vertex>();
-    PC_WARN(vertexBuffer.GetSize())
+    // vertexBuffer.PrintBuffer<Vertex>();
+    // PC_WARN(vertexBuffer.GetSize())
 
     VertexBufferVk::CopyToVkMemory(m_vertexBufferMemory,
                                    // Dest ptr
