@@ -38,15 +38,15 @@ public:
     vertexBuffer2 = VertexBuffer::Create();
 
     vertexBuffer->Fill<Vertex>({
-        {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
-        {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-        {{-0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}},
+        {{-.5f - .01f, -.5f - .01f}, {0.0f, 0.0f, 1.0f}},
+        {{0.5f - .01f, -.5f - .01f}, {0.0f, 1.0f, 0.0f}},
+        {{-.5f - .01f, 0.5f - .01f}, {1.0f, 0.0f, 0.0f}},
     });
 
     vertexBuffer2->Fill<Vertex>({
-        {{-0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}},
-        {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-        {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+        {{-0.5f + .01f, 0.5f + .01f}, {1.0f, 0.0f, 0.0f}},
+        {{0.5f + .01f, -0.5f + .01f}, {0.0f, 1.0f, 0.0f}},
+        {{0.5f + .01f, 0.5f + .01f}, {0.0f, 0.0f, 1.0f}},
     });
 
     vertexBuffer->SetLayout<VertexBuffer::AttrTypes::Float2,

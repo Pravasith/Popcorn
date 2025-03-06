@@ -224,27 +224,6 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
       vkCmdDraw(commandBuffer, m_meshes[i]->GetVertexBuffer().GetCount(), 1, 0,
                 0);
     }
-
-    // struct Vertex {
-    //   glm::vec2 pos;
-    //   glm::vec3 color;
-    //   std::string Print() {
-    //     std::stringstream ss;
-    //     ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g
-    //        << ", " << color.b;
-    //
-    //     return ss.str();
-    //   };
-    // };
-
-    // void *data;
-    // auto &device = DeviceVk::Get()->GetDevice();
-    // vkMapMemory(device, m_vertexBufferMemory, 0, VK_WHOLE_SIZE, 0, &data);
-    // Vertex *vertices = static_cast<Vertex *>(data);
-    // for (size_t i = 0; i < 6; ++i) { // 6 vertices (2 meshes × 3 vertices)
-    //   std::cout << "Vertex " << i << ": " << vertices[i].Print() << "\n";
-    // }
-    // vkUnmapMemory(device, m_vertexBufferMemory);
   }
 
   //
