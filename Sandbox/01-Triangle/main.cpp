@@ -37,6 +37,7 @@ public:
 
     vertexBuffer = VertexBuffer::Create();
     vertexBuffer2 = VertexBuffer::Create();
+    indexBuffer = new IndexBuffer<uint16_t>();
 
     vertexBuffer->Fill<Vertex>({
         {{-.5f, -.5f}, {.8f, .0f, .8f}},
@@ -53,7 +54,6 @@ public:
     });
 
     indexBuffer->Fill({3, 0, 1, 1, 2, 3});
-
     vertexBuffer->SetLayout<VertexBuffer::AttrTypes::Float2,
                             VertexBuffer::AttrTypes::Float3>();
     vertexBuffer2->SetLayout<VertexBuffer::AttrTypes::Float2,
@@ -88,11 +88,15 @@ public:
   virtual void OnDetach() override {
     delete triMesh;
     triMesh = nullptr;
+
     delete triMesh2;
     triMesh2 = nullptr;
 
     delete triMat;
     triMat = nullptr;
+
+    delete indexBuffer;
+    indexBuffer = nullptr;
 
     VertexBuffer::Destroy(vertexBuffer);
     VertexBuffer::Destroy(vertexBuffer2);
