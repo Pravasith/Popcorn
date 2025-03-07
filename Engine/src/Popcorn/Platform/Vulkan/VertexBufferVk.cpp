@@ -1,4 +1,5 @@
 #include "VertexBufferVk.h"
+#include "BufferObjects.h"
 #include "CommandPoolVk.h"
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
@@ -22,7 +23,8 @@ void VertexBufferVk::UnBind() {
 };
 
 void VertexBufferVk::GetDefaultVertexInputBindingDescription(
-    VkVertexInputBindingDescription &bindingDescription, const Layout &layout) {
+    VkVertexInputBindingDescription &bindingDescription,
+    const BufferDefs::Layout &layout) {
   bindingDescription.binding = 0;
   bindingDescription.stride = layout.strideValue;
   bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
@@ -30,7 +32,7 @@ void VertexBufferVk::GetDefaultVertexInputBindingDescription(
 
 void VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
     std::vector<VkVertexInputAttributeDescription> &attrDescriptions,
-    const Layout &layout) {
+    const BufferDefs::Layout &layout) {
   attrDescriptions.resize(layout.countValue);
 
   for (int i = 0; i < layout.countValue; ++i) {

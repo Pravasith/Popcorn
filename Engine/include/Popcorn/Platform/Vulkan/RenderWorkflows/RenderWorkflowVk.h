@@ -5,7 +5,7 @@
 #include "Mesh.h"
 #include "Popcorn/Core/Base.h"
 #include "Scene.h"
-#include "VertexBuffer.h"
+#include "BufferObjects.h"
 #include "VertexBufferVk.h"
 #include <algorithm>
 #include <stdexcept>

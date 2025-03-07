@@ -1,4 +1,5 @@
 #include "BasicWorkflowVk.h"
+#include "BufferObjects.h"
 #include "DeviceVk.h"
 #include "FramebuffersVk.h"
 #include "GfxPipelineVk.h"
@@ -10,7 +11,6 @@
 #include "Popcorn/Core/Helpers.h"
 #include "RenderPassVk.h"
 #include "SwapchainVk.h"
-#include "VertexBuffer.h"
 #include "VertexBufferVk.h"
 #include <cstdint>
 #include <glm/glm.hpp>
@@ -19,7 +19,7 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-VertexBuffer::Layout BasicRenderWorkflowVk::s_vertexBufferLayout{};
+BufferDefs::Layout BasicRenderWorkflowVk::s_vertexBufferLayout{};
 
 #ifdef PC_DEBUG
 constexpr bool showDrawCommandCount = false;

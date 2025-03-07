@@ -2,10 +2,10 @@
 #include <Material.h>
 #include <Popcorn.h>
 #include <Popcorn/Core/Application.h>
+#include <Popcorn/Graphics/BufferObjects.h>
 #include <Popcorn/Graphics/Materials/BasicMaterial.h>
 #include <Popcorn/Graphics/Mesh.h>
 #include <Popcorn/Graphics/Renderer.h>
-#include <Popcorn/Graphics/VertexBuffer.h>
 #include <Popcorn/Scene/Scene.h>
 #include <Sources.h>
 #include <cstdint>
@@ -54,10 +54,10 @@ public:
     });
 
     indexBuffer->Fill({3, 0, 1, 1, 2, 3});
-    vertexBuffer->SetLayout<VertexBuffer::AttrTypes::Float2,
-                            VertexBuffer::AttrTypes::Float3>();
-    vertexBuffer2->SetLayout<VertexBuffer::AttrTypes::Float2,
-                             VertexBuffer::AttrTypes::Float3>();
+    vertexBuffer->SetLayout<BufferDefs::AttrTypes::Float2,
+                            BufferDefs::AttrTypes::Float3>();
+    vertexBuffer2->SetLayout<BufferDefs::AttrTypes::Float2,
+                             BufferDefs::AttrTypes::Float3>();
 
     std::vector shaderFiles{
         "shaders/tri_vert.spv",

@@ -5,7 +5,7 @@
 #include "Material.h"
 #include "Popcorn/Core/Base.h"
 #include "Renderer.h"
-#include "VertexBuffer.h"
+#include "BufferObjects.h"
 #include <cstdint>
 
 ENGINE_NAMESPACE_BEGIN

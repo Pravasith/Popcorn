@@ -7,7 +7,7 @@
 #include "RenderPassVk.h"
 #include "RenderWorkflowVk.h"
 #include "Scene.h"
-#include "VertexBuffer.h"
+#include "BufferObjects.h"
 #include <vulkan/vulkan_core.h>
 
 // TODO: Redo this class. But only after a full working animated scene is
@@ -18,15 +18,15 @@ GFX_NAMESPACE_BEGIN
 class BasicRenderWorkflowVk : public RenderWorkflowVk {
 public:
   BasicRenderWorkflowVk() {
-    s_vertexBufferLayout.Set<VertexBuffer::AttrTypes::Float2,
-                             VertexBuffer::AttrTypes::Float3>();
+    s_vertexBufferLayout.Set<BufferDefs::AttrTypes::Float2,
+                             BufferDefs::AttrTypes::Float3>();
     PC_PRINT("CREATED", TagType::Constr, "BasicWorkflowVk")
   };
   virtual ~BasicRenderWorkflowVk() override {
     PC_PRINT("DESTROYED", TagType::Destr, "BasicWorkflowVk")
   };
 
-  [[nodiscard]] inline static const VertexBuffer::Layout &
+  [[nodiscard]] inline static const BufferDefs::Layout &
   GetBasicWorkflowVertexLayout() {
     return s_vertexBufferLayout;
   }
@@ -47,7 +47,7 @@ public:
   virtual void CleanUp() override;
 
 private:
-  static VertexBuffer::Layout s_vertexBufferLayout;
+  static BufferDefs::Layout s_vertexBufferLayout;
 
   std::vector<VkDeviceSize> m_vertexBufferOffsets;
   std::vector<VkDeviceSize> m_indexBufferOffsets;
