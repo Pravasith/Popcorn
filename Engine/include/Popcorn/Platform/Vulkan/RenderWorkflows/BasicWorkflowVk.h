@@ -7,6 +7,7 @@
 #include "RenderPassVk.h"
 #include "RenderWorkflowVk.h"
 #include "Scene.h"
+#include "VertexBuffer.h"
 #include <vulkan/vulkan_core.h>
 
 // TODO: Redo this class. But only after a full working animated scene is
@@ -17,39 +18,48 @@ GFX_NAMESPACE_BEGIN
 class BasicRenderWorkflowVk : public RenderWorkflowVk {
 public:
   BasicRenderWorkflowVk() {
-    // auto *commandBufferVkStn = CommandPoolVk::Get();
-    // commandBufferVkStn->CreateCommandPool();
+    s_vertexBufferLayout.Set<VertexBuffer::AttrTypes::Float2,
+                             VertexBuffer::AttrTypes::Float3>();
     PC_PRINT("CREATED", TagType::Constr, "BasicWorkflowVk")
   };
-  ~BasicRenderWorkflowVk() override {
+  virtual ~BasicRenderWorkflowVk() override {
     PC_PRINT("DESTROYED", TagType::Destr, "BasicWorkflowVk")
   };
 
-  virtual void CreateWorkflowResources(Material *materialPtr) override {
-    PC_WARN("Expensive initialization operation: Creating workflow Vulkan "
-            "resources! Should only be done once per workflow object init.")
+  [[nodiscard]] inline static const VertexBuffer::Layout &
+  GetBasicWorkflowVertexLayout() {
+    return s_vertexBufferLayout;
+  }
 
-    CreateRenderPass();
-    CreateVkPipeline(*materialPtr);
-    CreateFramebuffers();
+  [[nodiscard]] virtual const VkRenderPass &GetRenderPass() const override {
+    return m_basicRenderPassVk.GetVkRenderPass();
   };
 
   virtual void CreateRenderPass() override;
-  virtual void CreateVkPipeline(Material &) override;
+  virtual void CreatePipeline(Material &) override;
   virtual void CreateFramebuffers() override;
-
+  virtual void AllocateVkVertexBuffers() override;
+  virtual void AllocateVkIndexBuffers() override;
+  virtual void AddMeshToWorkflow(Mesh *mesh) override;
   virtual void RecordRenderCommands(const Scene &scene,
                                     const VkCommandBuffer &commandBuffer,
                                     const uint32_t imageIndex) override;
-
   virtual void CleanUp() override;
 
 private:
-private:
+  static VertexBuffer::Layout s_vertexBufferLayout;
+
+  std::vector<VkDeviceSize> m_vertexBufferOffsets;
+  std::vector<VkDeviceSize> m_indexBufferOffsets;
+
+  VkBuffer m_vkVertexBuffer;
+  VkDeviceMemory m_vkVertexBufferMemory;
+
+  VkBuffer m_vkIndexBuffer;
+  VkDeviceMemory m_vkIndexBufferMemory;
+
   RenderPassVk m_basicRenderPassVk;
   GfxPipelineVk m_colorPipelineVk;
-
-  std::vector<VkFramebuffer> m_swapchainFramebuffers;
 };
 
 GFX_NAMESPACE_END

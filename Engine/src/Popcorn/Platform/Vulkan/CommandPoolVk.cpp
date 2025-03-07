@@ -3,6 +3,7 @@
 #include "CommonVk.h"
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
+#include "RendererVk.h"
 #include "SurfaceVk.h"
 #include <vulkan/vulkan_core.h>
 
@@ -41,12 +42,17 @@ void CommandPoolVk::GetDefaultCommandBufferAllocInfo(
   allocInfo.commandBufferCount = 1;
 };
 
-void CommandPoolVk::AllocCommandBuffer(
+void CommandPoolVk::AllocCommandBuffers(
     const VkCommandBufferAllocateInfo &allocInfo,
-    VkCommandBuffer &commandBuffer) {
-  auto *deviceVkStn = DeviceVk::Get();
-  if (vkAllocateCommandBuffers(deviceVkStn->GetDevice(), &allocInfo,
-                               &commandBuffer) != VK_SUCCESS) {
+    VkCommandBuffer *commandBuffers) {
+  auto &device = DeviceVk::Get()->GetDevice();
+  if (allocInfo.commandBufferCount != RendererVk::MAX_FRAMES_IN_FLIGHT) {
+    PC_WARN("allocInfo.commandBufferCount does not match "
+            "RendererVk::MAX_FRAMES_IN_FLIGHT!");
+  }
+
+  if (vkAllocateCommandBuffers(device, &allocInfo, commandBuffers) !=
+      VK_SUCCESS) {
     throw std::runtime_error("failed to allocate command buffers!");
   }
 };

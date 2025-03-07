@@ -8,6 +8,7 @@
 #include <Popcorn/Graphics/VertexBuffer.h>
 #include <Popcorn/Scene/Scene.h>
 #include <Sources.h>
+#include <cstdint>
 #include <glm/glm.hpp>
 
 using namespace Popcorn;
@@ -34,16 +35,29 @@ public:
       };
     };
 
-    auto *vertexBuffer = VertexBuffer::Create();
+    vertexBuffer = VertexBuffer::Create();
+    vertexBuffer2 = VertexBuffer::Create();
+    indexBuffer = new IndexBuffer<uint16_t>();
 
     vertexBuffer->Fill<Vertex>({
-        {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
-        {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-        {{0.0f, 0.5f}, {1.0f, 0.0f, 0.0f}},
+        {{-.5f, -.5f}, {.8f, .0f, .8f}},
+        {{.0f, -.5f}, {.8f, .8f, .0f}},
+        {{.0f, .0f}, {.0f, .8f, .8f}},
+        {{-.5f, .0f}, {.8f, .0f, .8f}},
     });
 
+    vertexBuffer2->Fill<Vertex>({
+        {{.0f, .0f}, {.8f, .0f, .8f}},
+        {{.5f, .0f}, {.8f, .8f, .0f}},
+        {{.5f, .5f}, {.0f, .8f, .8f}},
+        {{.0f, .5f}, {.8f, .0f, .8f}},
+    });
+
+    indexBuffer->Fill({3, 0, 1, 1, 2, 3});
     vertexBuffer->SetLayout<VertexBuffer::AttrTypes::Float2,
                             VertexBuffer::AttrTypes::Float3>();
+    vertexBuffer2->SetLayout<VertexBuffer::AttrTypes::Float2,
+                             VertexBuffer::AttrTypes::Float3>();
 
     std::vector shaderFiles{
         "shaders/tri_vert.spv",
@@ -58,23 +72,31 @@ public:
     triMat = new BasicMaterial(matData);
 
     // Mesh triMesh{nullptr, triMat};
-    triMesh = new Mesh{vertexBuffer, *triMat};
+    triMesh = new Mesh{*vertexBuffer, indexBuffer, *triMat};
+    triMesh2 = new Mesh{*vertexBuffer2, indexBuffer, *triMat};
 
-    triScene.Add(triMesh); // HERE IS THE MATERIAL READY STAGE
+    // ADD MESH TO WORK FLOW -> CREATE PIPELINES
+    triScene.Add(triMesh);
+    triScene.Add(triMesh2);
 
-    // AND THEN IN THE RENDER LOOP
-    // Renderer.Render(triScene);
-
-    vertexBuffer->PrintBuffer<Vertex>();
-    VertexBuffer::Destroy(vertexBuffer);
+    // vertexBuffer->PrintBuffer<Vertex>();
   };
 
   virtual void OnDetach() override {
     delete triMesh;
     triMesh = nullptr;
 
+    delete triMesh2;
+    triMesh2 = nullptr;
+
     delete triMat;
     triMat = nullptr;
+
+    delete indexBuffer;
+    indexBuffer = nullptr;
+
+    VertexBuffer::Destroy(vertexBuffer);
+    VertexBuffer::Destroy(vertexBuffer2);
   };
 
   virtual void OnUpdate() override {
@@ -84,8 +106,14 @@ public:
   virtual void OnEvent(Event &e) override {};
 
 private:
+  VertexBuffer *vertexBuffer;
+  VertexBuffer *vertexBuffer2;
+
+  IndexBuffer<uint16_t> *indexBuffer;
+
   TriangleScene triScene{};
   Mesh *triMesh;
+  Mesh *triMesh2;
   Material *triMat;
 };
 
@@ -99,9 +127,12 @@ int main(int argc, char **argv) {
       *(Renderer::Create<RendererType::Vulkan>(app.GetAppWindow()));
   app.SetRenderer(renderer);
 
-  // // CREATE A GAME LAYER
+  // CREATE A GAME LAYER
   auto gameLayer = new GameLayer();
   Application::AddLayer(gameLayer);
+
+  // INDICATE SCENE READY
+  renderer.SceneReady();
 
   // GAME LOOP
   Popcorn::Application::StartGameLoop();

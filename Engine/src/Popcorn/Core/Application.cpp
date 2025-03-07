@@ -124,8 +124,8 @@ void Application::OnEvent(Event &e) {
       PC_BIND_EVENT_FUNC(WindowResizeEvent, OnWindowResize));
 
   if (s_Renderer) {
-    dispatcher.Dispatch<FrameBfrResizeEvent>(
-        PC_BIND_EVENT_FUNC(FrameBfrResizeEvent, s_Renderer->OnFrameBfrResize));
+    dispatcher.Dispatch<FrameBfrResizeEvent>(PC_BIND_EVENT_FUNC(
+        FrameBfrResizeEvent, s_Renderer->OnFrameBufferResize));
   }
 
   dispatcher.Dispatch<WindowCloseEvent>(

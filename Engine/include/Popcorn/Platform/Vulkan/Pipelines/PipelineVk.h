@@ -105,17 +105,11 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "PipelineVk");
   };
 
-  using PiplelineStateType = DerivePipelineCreateInfoType<T>::type;
+  using PipelineStateType = DerivePipelineCreateInfoType<T>::type;
 
   [[nodiscard]] inline const VkPipeline GetVkPipeline() const {
     return m_pipeline;
   };
-
-  virtual void GetDefaultPipelineState(PiplelineStateType &pipelineState) = 0;
-  virtual void CreateVkPipeline(const VkDevice &device,
-                                const PiplelineStateType &pipelineCreateInfo,
-                                const VkRenderPass &renderPass) = 0;
-  virtual void Destroy(const VkDevice &) = 0;
 
   // Shaders
   void SetShaderStagesMask(int enabledShaderStagesMask) {
@@ -145,25 +139,24 @@ public:
     m_enabledShaderStagesMask = enabledShaderStagesMask;
   };
 
-  virtual std::vector<VkPipelineShaderStageCreateInfo>
-  CreateShaderStages(std::forward_list<VkShaderModule> &shaderModules) = 0;
+  virtual void CreateShaderStageCreateInfos(
+      std::forward_list<VkShaderModule> &shaderModules) = 0;
 
-  virtual void SetShaderStageCreateInfos(
-      std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos) {
-    m_shaderStageCreateInfos = shaderStageCreateInfos;
-  };
-
-  // Layout
   //
-  virtual void GetDefaultPipelineLayoutCreateInfo(
-      VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo) const = 0;
+  // --- PIPELINES ------------------------------------------------------------
+  virtual void CreateVkPipeline(const VkDevice &device,
+                                const PipelineStateType &pipelineCreateInfo,
+                                const VkRenderPass &renderPass) = 0;
+  virtual void CleanUp(const VkDevice &) = 0;
 
-  virtual void SetPipelineLayout(
+  //
+  // --- LAYOUTS --------------------------------------------------------------
+  virtual void CreatePipelineLayout(
       const VkDevice &device,
       const VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo) = 0;
   virtual void DestroyPipelineLayout(const VkDevice &device) = 0;
 
-  void RecordBindCmdPipelineCommand(const VkCommandBuffer &cmdBfr) {
+  inline void RecordBindCmdPipelineCommand(const VkCommandBuffer &cmdBfr) {
     PC_VK_NULL_CHECK(cmdBfr)
     PC_VK_NULL_CHECK(m_pipeline)
 
@@ -178,6 +171,44 @@ protected:
   VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
   int m_enabledShaderStagesMask = ShaderStages::None;
   std::vector<VkPipelineShaderStageCreateInfo> m_shaderStageCreateInfos;
+};
+
+class PipelineUtils {
+public:
+  static void
+  GetDefaultDynamicState(VkPipelineDynamicStateCreateInfo &dynamicState);
+
+  static void GetDefaultVertexInputState(
+      VkPipelineVertexInputStateCreateInfo &vertexInputState);
+
+  static void GetDefaultInputAssemblyState(
+      VkPipelineInputAssemblyStateCreateInfo &inputAssemblyState);
+
+  static void
+  GetDefaultViewportState(VkPipelineViewportStateCreateInfo &viewportState);
+
+  static void GetDefaultRasterizationState(
+      VkPipelineRasterizationStateCreateInfo &rasterizationState);
+
+  static void GetDefaultMultisampleState(
+      VkPipelineMultisampleStateCreateInfo &multisampleState);
+
+  static void GetDefaultDepthStencilState(
+      VkPipelineDepthStencilStateCreateInfo &depthStencilState);
+
+  static void
+  GetDefaultViewportAndScissorState(VkViewport &viewport, VkRect2D &scissor,
+                                    const VkExtent2D &swapchainExtent);
+
+  static void GetDefaultColorBlendingState(
+      VkPipelineColorBlendStateCreateInfo &colorBlendState);
+
+  static void GetDefaultPipelineLayoutCreateInfo(
+      VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo);
+
+private:
+  static std::vector<VkDynamicState> s_dynamicStatesDefault;
+  static VkPipelineColorBlendAttachmentState s_colorBlendAttachmentDefault;
 };
 
 GFX_NAMESPACE_END

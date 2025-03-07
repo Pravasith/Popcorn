@@ -4,6 +4,7 @@
 #include "Popcorn/Core/Base.h"
 #include <cstdint>
 #include <functional>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -31,21 +32,30 @@ public:
   };
 
   void
-  Draw(VkCommandBuffer &commandBuffer,
-       const std::function<void(const uint32_t frameIndex)> &recordCommands);
+  Draw(std::vector<VkCommandBuffer> &commandBuffers,
+       const VkRenderPass &renderPass,
+       const std::function<void(const uint32_t frameIndex,
+                                VkCommandBuffer &currentFrameCommandBuffer)>
+           &recordDrawCommands);
 
   void CreateRenderSyncObjects();
+  inline void SetFrameBufferResized(bool isFrameBufferResized) {
+    m_framebufferResized = isFrameBufferResized;
+  };
   void CleanUp();
 
 private:
-  void AcquireNextSwapchainImage(uint32_t &imageIndex,
-                                 VkSemaphore *signalSemaphores);
+  [[nodiscard]] bool
+  AcquireNextSwapchainImageIndex(uint32_t &imageIndex,
+                                 VkSemaphore *signalSemaphores,
+                                 const VkRenderPass &paintRenderPass);
   void SubmitDrawCommands(const VkCommandBuffer &commandBuffer,
                           VkSemaphore *waitSemaphores,
                           VkSemaphore *signalSemaphores,
                           VkFence &inFlightFence);
   void PresentImageToSwapchain(VkSemaphore *signalSemaphores,
-                               const uint32_t &imageIndex);
+                               const uint32_t &imageIndex,
+                               const VkRenderPass &paintRenderPass);
 
 private:
   FrameVk() { PC_PRINT("CREATED", TagType::Constr, "FrameVk") };
@@ -62,9 +72,12 @@ private:
 private:
   static FrameVk *s_instance;
 
-  VkSemaphore m_imageAvailableSemaphore = VK_NULL_HANDLE;
-  VkSemaphore m_frameRenderedSemaphore = VK_NULL_HANDLE;
-  VkFence m_inFlightFence = VK_NULL_HANDLE;
+  uint32_t m_currentFrame = 0;
+  bool m_framebufferResized = false;
+
+  std::vector<VkSemaphore> m_imageAvailableSemaphores;
+  std::vector<VkSemaphore> m_frameRenderedSemaphores;
+  std::vector<VkFence> m_inFlightFences;
 };
 
 GFX_NAMESPACE_END

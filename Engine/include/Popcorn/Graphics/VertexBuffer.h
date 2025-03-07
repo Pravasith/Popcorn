@@ -4,9 +4,11 @@
 #include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
+#include "Popcorn/Core/Helpers.h"
 #include <cstdint>
 #include <cstring>
 #include <initializer_list>
+#include <type_traits>
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
@@ -61,6 +63,20 @@ public:
       countValue = 0;
     };
 
+    bool operator==(const Layout &other) const {
+      return strideValue == other.strideValue &&
+             countValue == other.countValue &&
+             attrTypesValue == other.attrTypesValue &&
+             attrOffsetsValue == other.attrOffsetsValue;
+    }
+
+    bool operator!=(const Layout &other) const {
+      return strideValue != other.strideValue ||
+             countValue != other.countValue ||
+             attrTypesValue != other.attrTypesValue ||
+             attrOffsetsValue != other.attrOffsetsValue;
+    }
+
     template <AttrTypes... E> void Set() {
       // Attr Types stored in a seq
       (attrTypesValue.push_back(E), ...);
@@ -81,6 +97,10 @@ public:
   [[nodiscard]] inline const Layout &GetLayout() const {
     PC_ASSERT(m_layout.countValue != 0, "Layout is empty!");
     return m_layout;
+  }
+
+  [[nodiscard]] inline byte_t *GetBufferData() const {
+    return m_buffer.GetData();
   }
 
   VertexBuffer() {
@@ -161,6 +181,66 @@ public:
 protected:
   Buffer m_buffer;
   Layout m_layout;
+};
+
+template <typename T>
+concept Is_Uint16_Or_Uint32_t =
+    std::is_same_v<T, uint16_t> || std::is_same_v<T, uint32_t>;
+
+template <Is_Uint16_Or_Uint32_t T> class IndexBuffer {
+public:
+  IndexBuffer() { PC_PRINT("CREATED", TagType::Constr, "IndexBuffer") };
+  ~IndexBuffer() { PC_PRINT("DESTROYED", TagType::Destr, "IndexBuffer") };
+
+  const T GetSize() const { return m_buffer.GetSize(); };
+  const T GetCount() const { return m_buffer.GetCount(); };
+
+  void Fill(std::initializer_list<T> elements) { m_buffer.SetData(elements); };
+
+  [[nodiscard]] inline byte_t *GetBufferData() const {
+    return m_buffer.GetData();
+  }
+
+  // COPY CONSTRUCTOR
+  IndexBuffer(const IndexBuffer &other) {
+    PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Constr, "INDEX-BUFFER")
+    m_buffer = other.m_buffer;
+  };
+  virtual IndexBuffer &operator=(const IndexBuffer &other) {
+    PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print, "INDEX-BUFFER")
+
+    if (this == &other)
+      return *this;
+
+    m_buffer = other.m_buffer;
+    return *this;
+  };
+
+  // MOVE CONSTRUCTOR
+  IndexBuffer(IndexBuffer &&other) {
+    PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Constr, "INDEX-BUFFER")
+    if (this == &other) {
+      return;
+    };
+
+    m_buffer = std::move(other.m_buffer);
+    // other.m_layout.Reset();
+  };
+  virtual IndexBuffer &operator=(IndexBuffer &&other) {
+    PC_PRINT("MOVE ASSIGNMENT EVOKED", TagType::Print, "INDEX-BUFFER")
+
+    if (this == &other) {
+      return *this;
+    };
+
+    m_buffer = std::move(other.m_buffer);
+    // other.m_layout.Reset();
+
+    return *this;
+  };
+
+private:
+  Buffer m_buffer;
 };
 
 GFX_NAMESPACE_END

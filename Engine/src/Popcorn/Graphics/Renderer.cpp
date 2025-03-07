@@ -2,7 +2,6 @@
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
-#include "Popcorn/Events/WindowEvent.h"
 #include "RendererOpenGL.h"
 #include "RendererVk.h"
 #include <glm/glm.hpp>
@@ -69,14 +68,7 @@ void Renderer::Init(const Window &appWin) {
     RendererVk *vkRenderer = static_cast<RendererVk *>(s_instance);
     vkRenderer->VulkanInit();
     vkRenderer->CreateRenderWorkflows();
-    vkRenderer->CreateBasicCommandBuffer();
-
-    // TEMP FUNCTIONS
-    // CREATE ALL PIPELINES
-    // CREATE ALL RENDERPASSES
-    // vkRenderer->CreateTrianglePipeline();
-    // vkRenderer->CreateTriangleRenderPass();
-    //
+    vkRenderer->CreateBasicCommandBuffers();
 
   } else if (s_type == RendererType::OpenGL) {
     s_instance = new RendererOpenGL(appWin);
@@ -84,16 +76,6 @@ void Renderer::Init(const Window &appWin) {
     PC_STATIC_ASSERT(true, "UNSUPPORTED RENDERER TYPE");
   }
 };
-
-bool Renderer::OnFrameBfrResize(FrameBfrResizeEvent &e) {
-  if (s_type == RendererType::Vulkan) {
-    return static_cast<RendererVk *>(s_instance)->OnFrameBfrResize(e);
-  } else {
-    // std::get<RendererOpenGL *>(s_renderer)->OnEvent();
-  }
-
-  return true;
-}
 
 void Renderer::Destroy() {
   // VertexBuffer::Destroy(s_vertexBuffer);

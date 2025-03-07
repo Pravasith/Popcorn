@@ -1,7 +1,14 @@
 #include "VertexBufferVk.h"
+#include "CommandPoolVk.h"
+#include "DeviceVk.h"
 #include "GlobalMacros.h"
+#include "Popcorn/Core/Helpers.h"
+#include <cstdint>
 #include <stdexcept>
 #include <vector>
+#include <vulkan/vulkan_core.h>
+
+#include <glm/glm.hpp>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -14,75 +21,16 @@ void VertexBufferVk::UnBind() {
 
 };
 
-// void VertexBufferVk::CreateVulkanBuffer(const VkDevice &device,
-//                                         const PhysDeviceVk &physDeviceVk) {
-//   VkBufferCreateInfo bfrInfo{};
-//
-//   bfrInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-//   bfrInfo.size = GetSize();
-//   bfrInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-//   bfrInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-//
-//   if (vkCreateBuffer(device, &bfrInfo, nullptr, &vertexBuffer) != VK_SUCCESS)
-//   {
-//     std::runtime_error("Error creating Vertex Buffer!");
-//   };
-//
-//   //
-//   ---------------------------------------------------------------------------
-//   // QUERY REQUIREMENTS, AND ALLOCATE VRAM MEMORY
-//   ------------------------------
-//   //
-//   ---------------------------------------------------------------------------
-//
-//   // QUERY MEMORY REQIREMENTS USING device AND vertexBuffer
-//   VkMemoryRequirements memRequirements;
-//   vkGetBufferMemoryRequirements(device, vertexBuffer, &memRequirements);
-//
-//   // ALLOCATE MEMORY
-//   VkMemoryAllocateInfo allocInfo{};
-//   allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-//   allocInfo.allocationSize = memRequirements.size;
-//   allocInfo.memoryTypeIndex = physDeviceVk.FindGPUMemoryType(
-//       memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-//                                           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-//
-//   if (vkAllocateMemory(device, &allocInfo, nullptr, &vertexBufferMemory) !=
-//       VK_SUCCESS) {
-//     throw std::runtime_error(
-//         "Failed to allocate GPU memory for the vertex buffer!");
-//   };
-//
-//   // BIND MEMORY TO THE BUFFER
-//   vkBindBufferMemory(device, vertexBuffer, vertexBufferMemory, 0);
-//
-//   // FILL VERTEX BUFFER
-//   void *data;
-//   vkMapMemory(device, vertexBufferMemory, 0, bfrInfo.size, 0, &data);
-//   memcpy(data, m_buffer.GetData(), (size_t)bfrInfo.size);
-//   vkUnmapMemory(device, vertexBufferMemory);
-//
-//   // BIND VERTEX BUFFER
-// };
-
-// void VertexBufferVk::DestroyVulkanBuffer(const VkDevice &device) {
-//   vkDestroyBuffer(device, vertexBuffer, nullptr);
-//   vkFreeMemory(device, vertexBufferMemory, nullptr);
-// };
-
-VkVertexInputBindingDescription
-VertexBufferVk::GetBindingDescription(const VertexBuffer::Layout &layout) {
-  VkVertexInputBindingDescription bindingDescription{};
+void VertexBufferVk::GetDefaultVertexInputBindingDescription(
+    VkVertexInputBindingDescription &bindingDescription, const Layout &layout) {
   bindingDescription.binding = 0;
   bindingDescription.stride = layout.strideValue;
   bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-  return bindingDescription;
 };
 
-std::vector<VkVertexInputAttributeDescription>
-VertexBufferVk::GetAttrDescriptions(const VertexBuffer::Layout &layout) {
-  std::vector<VkVertexInputAttributeDescription> attrDescriptions;
+void VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
+    std::vector<VkVertexInputAttributeDescription> &attrDescriptions,
+    const Layout &layout) {
   attrDescriptions.resize(layout.countValue);
 
   for (int i = 0; i < layout.countValue; ++i) {
@@ -92,8 +40,165 @@ VertexBufferVk::GetAttrDescriptions(const VertexBuffer::Layout &layout) {
         MapAttrTypeToVulkanType(layout.attrTypesValue[i]);
     attrDescriptions[i].offset = layout.attrOffsetsValue[i];
   };
+};
 
-  return attrDescriptions;
+//
+//
+// --- VULKAN BUFFER MEMORY UTILS -------------------------------------------
+// --------------------------------------------------------------------------
+
+void BufferVkUtils::RecordBindVkVertexBuffersCommand(
+    const VkCommandBuffer &commandBuffer, VkBuffer *vkBuffer,
+    VkDeviceSize *offsets, const uint32_t buffersCount) {
+  vkCmdBindVertexBuffers(commandBuffer, 0, buffersCount, vkBuffer, offsets);
+};
+
+// template <>
+// void BufferVkUtils::RecordBindVkIndexBufferCommand<uint16_t>(
+//     const VkCommandBuffer &commandBuffer, VkBuffer *vkIndexBuffer,
+//     VkDeviceSize offset) {
+//   // constexpr VkIndexType bufferType =
+//   //     std::is_same_v<uint16_t, T> ? VK_INDEX_TYPE_UINT16 :
+//   //     VK_INDEX_TYPE_UINT32;
+//   // vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0, bufferType);
+//   vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0,
+//   VK_INDEX_TYPE_UINT16);
+// };
+//
+// template <>
+// void BufferVkUtils::RecordBindVkIndexBufferCommand<uint32_t>(
+//     const VkCommandBuffer &commandBuffer, VkBuffer *vkIndexBuffer,
+//     VkDeviceSize offset) {
+//   // constexpr VkIndexType bufferType =
+//   //     std::is_same_v<uint16_t, T> ? VK_INDEX_TYPE_UINT16 :
+//   //     VK_INDEX_TYPE_UINT32;
+//   // vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0, bufferType);
+//   vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0,
+//   VK_INDEX_TYPE_UINT32);
+// };
+
+void BufferVkUtils::GetDefaultVkBufferState(VkBufferCreateInfo &bufferInfo,
+                                            VkDeviceSize bufferSize) {
+  bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+  bufferInfo.size = bufferSize;
+  bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+  bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+};
+
+void BufferVkUtils::AllocateVkBuffer(
+    VkBuffer &vkBuffer, VkDeviceMemory &vkBufferMemory,
+    const VkBufferCreateInfo &bufferInfo,
+    const VkMemoryPropertyFlags memoryPropertyFlags) {
+
+  auto *deviceVkStn = DeviceVk::Get();
+  auto &device = deviceVkStn->GetDevice();
+
+  if (vkCreateBuffer(device, &bufferInfo, nullptr, &vkBuffer) != VK_SUCCESS) {
+    std::runtime_error("Error creating  Buffer!");
+  };
+
+  //
+  // QUERY MEMORY REQIREMENTS USING device AND vkBuffer
+  VkMemoryRequirements memRequirements;
+  vkGetBufferMemoryRequirements(device, vkBuffer, &memRequirements);
+
+  //
+  // ALLOCATE MEMORY
+  // TODO: Use VMA to allocate memory
+  VkMemoryAllocateInfo allocInfo{};
+  allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+  allocInfo.allocationSize = memRequirements.size;
+  allocInfo.memoryTypeIndex = deviceVkStn->FindMemoryType(
+      memRequirements.memoryTypeBits, memoryPropertyFlags);
+
+  if (vkAllocateMemory(device, &allocInfo, nullptr, &vkBufferMemory) !=
+      VK_SUCCESS) {
+    throw std::runtime_error(
+        "Failed to allocate memory for the vertex buffer!");
+  };
+
+  //
+  // BIND MEMORY TO THE BUFFER
+  vkBindBufferMemory(device, vkBuffer, vkBufferMemory, 0);
+};
+
+void *BufferVkUtils::MapVkMemoryToCPU(VkDeviceMemory &vkBufferMemory,
+                                      VkDeviceSize beginOffset,
+                                      VkDeviceSize endOffset) {
+  auto &device = DeviceVk::Get()->GetDevice();
+
+  //
+  // FILL VERTEX BUFFER
+  void *data;
+  vkMapMemory(device, vkBufferMemory, beginOffset, endOffset, 0, &data);
+
+  return data;
+};
+
+void BufferVkUtils::CopyBufferCPUToGPU(VkDeviceMemory &vkBufferMemory,
+                                       byte_t *destPtr, byte_t *srcPtr,
+                                       VkDeviceSize size) {
+  auto &device = DeviceVk::Get()->GetDevice();
+  memcpy(destPtr, srcPtr, (size_t)size);
+};
+
+void BufferVkUtils::CopyBufferGPUToGPU(VkBuffer &srcBuffer, VkBuffer &dstBuffer,
+                                       VkDeviceSize size) {
+  auto &device = DeviceVk::Get()->GetDevice();
+  auto *commandPoolVkStn = CommandPoolVk::Get();
+
+  VkCommandBufferAllocateInfo allocInfo{};
+  commandPoolVkStn->GetDefaultCommandBufferAllocInfo(allocInfo);
+
+  VkCommandBuffer commandBuffer;
+  commandPoolVkStn->AllocCommandBuffers(allocInfo, &commandBuffer);
+
+  VkCommandBufferBeginInfo beginInfo{};
+  beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+  //
+  // Record command buffer
+  {
+    vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+    VkBufferCopy copyRegion{};
+    copyRegion.srcOffset = 0; // Optional
+    copyRegion.dstOffset = 0; // Optional
+    copyRegion.size = size;
+    vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+    vkEndCommandBuffer(commandBuffer);
+  }
+
+  //
+  // Submit command buffer
+  {
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
+    auto &graphicsQueue = DeviceVk::Get()->GetGraphicsQueue();
+
+    vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(graphicsQueue);
+  }
+
+  vkFreeCommandBuffers(device, commandPoolVkStn->GetVkCommandPool(), 1,
+                       &commandBuffer);
+};
+
+void BufferVkUtils::UnmapVkMemoryFromCPU(VkDeviceMemory &vkBufferMemory) {
+  auto &device = DeviceVk::Get()->GetDevice();
+  vkUnmapMemory(device, vkBufferMemory);
+};
+
+void BufferVkUtils::DestroyVkBuffer(VkBuffer &vkBuffer,
+                                    VkDeviceMemory &vkBufferMemory) {
+  auto &device = DeviceVk::Get()->GetDevice();
+  vkDestroyBuffer(device, vkBuffer, nullptr);
+  vkFreeMemory(device, vkBufferMemory, nullptr);
 };
 
 GFX_NAMESPACE_END

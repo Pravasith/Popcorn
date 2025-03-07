@@ -53,6 +53,7 @@ public:
     PC_PRINT("DATA SET(INIT-LIST)", TagType::Print, "BUFFER")
 
     const uint64_t size = sizeof(T) * list.size();
+    PC_WARN(size << " SIZE")
     AllocBytes(size);
 
     m_count = list.size();
@@ -160,7 +161,6 @@ public:
 
 #ifdef PC_DEBUG
   template <typename T> inline static void Print(Buffer &buffer) {
-
     PC_PRINT("PRINT EVOKED", TagType::Print, "BUFFER")
 
     if (!buffer.m_data) {

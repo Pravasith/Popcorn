@@ -2,6 +2,7 @@
 
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -28,9 +29,14 @@ public:
     };
   };
 
+  [[nodiscard]] inline const VkCommandPool &GetVkCommandPool() const {
+    return m_commandPool;
+  };
+
   void GetDefaultCommandBufferAllocInfo(VkCommandBufferAllocateInfo &allocInfo);
-  void AllocCommandBuffer(const VkCommandBufferAllocateInfo &allocInfo,
-                          VkCommandBuffer &commandBuffer);
+
+  void AllocCommandBuffers(const VkCommandBufferAllocateInfo &allocInfo,
+                           VkCommandBuffer *commandBuffers);
 
   void BeginCommandBuffer(const VkCommandBuffer &commandBuffer) {
     VkCommandBufferBeginInfo beginInfo{};

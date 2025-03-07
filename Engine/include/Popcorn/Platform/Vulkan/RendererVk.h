@@ -11,7 +11,9 @@
 #include "Renderer.h"
 #include "SurfaceVk.h"
 #include "SwapchainVk.h"
+#include <cstdint>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -23,54 +25,35 @@ public:
   RendererVk(const Window &appWin);
   virtual ~RendererVk() override;
 
-  // Can potentially take "void *frame" as a param
+  virtual void SceneReady() override;
   virtual void DrawFrame(const Scene &scene) override;
-  virtual bool OnFrameBfrResize(FrameBfrResizeEvent &) override;
-  virtual void PrepareMaterialForRender(Material *materialPtr) override;
+  virtual bool OnFrameBufferResize(FrameBfrResizeEvent &) override;
+  virtual void CreateMaterialPipeline(Material *materialPtr) override;
+  virtual void AddMeshToWorkflow(Mesh *meshPtr) override;
 
   // Sets up devices, configure swapchains, creates depth buffers
   // also allocates command pools
   void VulkanInit();
+  // Creates render workflows
   void CreateRenderWorkflows();
+  // Loops through all meshes & creates a contiguous Vulkan buffer memory for
+  // each workflow -- each workflow has one VkBuffer & one VkDeviceMemory each
+  void AllocateVkBuffers();
 
   void VulkanCleanUp();
 
   static RenderWorkflowVk *GetRenderWorkflow(const RenderWorkflowIndices index);
-  void CreateBasicCommandBuffer();
+  void CreateBasicCommandBuffers();
 
 private:
-  void RenderScene() {
-
-    // --- RENDER COLORS ---------------------------------------------------
-    // BasicWorkflow::Render(Scene);
-    // // Implementation inside BasicWorkflow::Render
-    // auto regMaterials = Scene.GetRegisteredMaterials()
-    // for (auto &mat : regMaterials) {
-    //      for (auto &mesh : mat.GetMeshes()) {
-    //         // Renderpass
-    //         BasicPipelineVk.Get(mat.data, m_renderPass); // mat.data like
-    //         uniforms
-    //      };
-    // };
-
-    // --- RENDER SHADOWS --------------------------------------------------
-    // ShadowsWorkflow::Render(Scene);
-    // // Implementation inside ShadowsWorkflow::Render
-    // auto regMaterials = Scene.GetRegisteredMaterials()
-    // for (auto &mat : regMaterials) {
-    //      for (auto &mesh : mat.GetMeshes()) {
-    //         // Renderpass
-    //         ShadowPipelineVk.Get(mat.data, m_renderPass); // mat.data like
-    //         uniforms
-    //      };
-    // };
-  };
-
   //
   // -----------------------------------------------------------------------
   // --- TODO: Potential methods -------------------------------------------
   void RecordCmdBuffer(void *renderPass, void *pipeline) {};
   void SubmitCmdBuffer(void *cmdBuffer) {};
+
+public:
+  static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
 private:
   static DeviceVk *s_deviceVk;
@@ -82,7 +65,7 @@ private:
 
   static std::vector<RenderWorkflowVk *> s_renderWorkflows;
 
-  VkCommandBuffer m_drawingCommandBuffer = VK_NULL_HANDLE;
+  std::vector<VkCommandBuffer> m_drawingCommandBuffers;
 };
 
 GFX_NAMESPACE_END

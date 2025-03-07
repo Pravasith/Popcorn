@@ -49,12 +49,6 @@ public:
   virtual ~Material() { PC_PRINT("DESTROYED", TagType::Destr, "Material.h"); };
 
   [[nodiscard]] inline std::vector<Buffer> &GetShaders() { return m_shaders; };
-  [[nodiscard]] inline std::vector<const Mesh *> &GetLinkedMeshes() {
-    return m_linkedMeshes;
-  };
-
-  void LinkMesh(const Mesh *meshPtr);
-  void UnlinkMesh(const Mesh *meshPtr);
 
   virtual const MaterialTypes GetMaterialType() const = 0;
   virtual void Bind() = 0;
@@ -65,7 +59,6 @@ private:
 protected:
   MaterialData &m_materialData;
   std::vector<Buffer> m_shaders;
-  std::vector<const Mesh *> m_linkedMeshes;
 };
 
 GFX_NAMESPACE_END

@@ -44,6 +44,11 @@ public:
     return m_vkInstance;
   };
 
+  [[nodiscard]] inline const VkPhysicalDevice &GetPhysicalDevice() const {
+    PC_VK_NULL_CHECK(m_physicalDevice)
+    return m_physicalDevice;
+  };
+
   [[nodiscard]] inline const VkDevice &GetDevice() const {
     PC_VK_NULL_CHECK(m_device)
     return m_device;
@@ -73,6 +78,8 @@ public:
   void SetupDebugMessenger();
   void PickPhysicalDevice(const VkSurfaceKHR &surface);
   void CreateLogicalDevice(const VkSurfaceKHR &surface);
+  uint32_t FindMemoryType(uint32_t typeFilter,
+                          VkMemoryPropertyFlags properties);
 
   void CleanUp();
 
