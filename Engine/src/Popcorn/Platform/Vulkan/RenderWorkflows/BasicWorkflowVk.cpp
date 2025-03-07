@@ -224,8 +224,15 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
       BufferVkUtils::RecordBindVkIndexBufferCommand<uint16_t>(
           commandBuffer, &m_vkIndexBuffer, m_indexBufferOffsets[i]);
 
-      vkCmdDraw(commandBuffer, m_meshes[i]->GetVertexBuffer().GetCount(), 1, 0,
-                0);
+      // vkCmdDraw(commandBuffer, m_meshes[i]->GetVertexBuffer().GetCount(), 1,
+      // 0, 0);
+
+      vkCmdDrawIndexed(commandBuffer, m_meshes[i]->GetIndexBuffer().GetCount(),
+                       1, 0,
+                       // m_vertexBufferOffsets[i],
+                       0,
+                       //
+                       0);
     }
   }
 
@@ -372,7 +379,7 @@ void BasicRenderWorkflowVk::AllocateVkIndexBuffers() {
   // currentOffset)
   for (int i = 0; i < m_meshes.size(); ++i) {
     IndexBuffer<uint16_t> &indexBuffer = m_meshes[i]->GetIndexBuffer();
-    m_vertexBufferOffsets[i] = currentOffset;
+    m_indexBufferOffsets[i] = currentOffset;
     currentOffset += indexBuffer.GetSize();
   }
 

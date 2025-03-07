@@ -154,6 +154,7 @@ void RendererVk::SceneReady() { AllocateVkBuffers(); };
 void RendererVk::AllocateVkBuffers() {
   for (auto &renderWorkflow : s_renderWorkflows) {
     renderWorkflow->AllocateVkVertexBuffers();
+    renderWorkflow->AllocateVkIndexBuffers();
   }
 };
 

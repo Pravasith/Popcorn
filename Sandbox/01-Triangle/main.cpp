@@ -79,9 +79,6 @@ public:
     triScene.Add(triMesh);
     triScene.Add(triMesh2);
 
-    // AND THEN IN THE RENDER LOOP
-    // Renderer.Render(triScene);
-
     // vertexBuffer->PrintBuffer<Vertex>();
   };
 

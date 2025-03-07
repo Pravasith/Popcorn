@@ -5,7 +5,6 @@
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
 #include "Popcorn/Core/Helpers.h"
-#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <initializer_list>

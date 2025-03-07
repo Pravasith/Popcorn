@@ -53,27 +53,29 @@ void BufferVkUtils::RecordBindVkVertexBuffersCommand(
   vkCmdBindVertexBuffers(commandBuffer, 0, buffersCount, vkBuffer, offsets);
 };
 
-template <>
-void BufferVkUtils::RecordBindVkIndexBufferCommand<uint16_t>(
-    const VkCommandBuffer &commandBuffer, VkBuffer *vkIndexBuffer,
-    VkDeviceSize offset) {
-  // constexpr VkIndexType bufferType =
-  //     std::is_same_v<uint16_t, T> ? VK_INDEX_TYPE_UINT16 :
-  //     VK_INDEX_TYPE_UINT32;
-  // vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0, bufferType);
-  vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0, VK_INDEX_TYPE_UINT16);
-};
-
-template <>
-void BufferVkUtils::RecordBindVkIndexBufferCommand<uint32_t>(
-    const VkCommandBuffer &commandBuffer, VkBuffer *vkIndexBuffer,
-    VkDeviceSize offset) {
-  // constexpr VkIndexType bufferType =
-  //     std::is_same_v<uint16_t, T> ? VK_INDEX_TYPE_UINT16 :
-  //     VK_INDEX_TYPE_UINT32;
-  // vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0, bufferType);
-  vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0, VK_INDEX_TYPE_UINT32);
-};
+// template <>
+// void BufferVkUtils::RecordBindVkIndexBufferCommand<uint16_t>(
+//     const VkCommandBuffer &commandBuffer, VkBuffer *vkIndexBuffer,
+//     VkDeviceSize offset) {
+//   // constexpr VkIndexType bufferType =
+//   //     std::is_same_v<uint16_t, T> ? VK_INDEX_TYPE_UINT16 :
+//   //     VK_INDEX_TYPE_UINT32;
+//   // vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0, bufferType);
+//   vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0,
+//   VK_INDEX_TYPE_UINT16);
+// };
+//
+// template <>
+// void BufferVkUtils::RecordBindVkIndexBufferCommand<uint32_t>(
+//     const VkCommandBuffer &commandBuffer, VkBuffer *vkIndexBuffer,
+//     VkDeviceSize offset) {
+//   // constexpr VkIndexType bufferType =
+//   //     std::is_same_v<uint16_t, T> ? VK_INDEX_TYPE_UINT16 :
+//   //     VK_INDEX_TYPE_UINT32;
+//   // vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0, bufferType);
+//   vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0,
+//   VK_INDEX_TYPE_UINT32);
+// };
 
 void BufferVkUtils::GetDefaultVkBufferState(VkBufferCreateInfo &bufferInfo,
                                             VkDeviceSize bufferSize) {

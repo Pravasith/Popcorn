@@ -72,6 +72,8 @@ public:
 
 class BufferVkUtils {
 public:
+  static void GetDefaultVkBufferState(VkBufferCreateInfo &bufferInfo,
+                                      VkDeviceSize bufferSize);
   static void AllocateVkBuffer(VkBuffer &vkBuffer,
                                VkDeviceMemory &vkBufferMemory,
                                const VkBufferCreateInfo &bufferInfo,
@@ -89,6 +91,8 @@ public:
                                  VkDeviceSize size);
   static void UnmapVkMemoryFromCPU(VkDeviceMemory &vkBufferMemory);
 
+  //
+  // --- Record commands ---------------------------------------------------
   static void RecordBindVkVertexBuffersCommand(
       const VkCommandBuffer &commandBuffer, VkBuffer *vkVertexBuffers,
       VkDeviceSize *offsets, const uint32_t buffersCount);
@@ -96,10 +100,12 @@ public:
   template <Is_Uint16_Or_Uint32_t T>
   static void
   RecordBindVkIndexBufferCommand(const VkCommandBuffer &commandBuffer,
-                                 VkBuffer *vkIndexBuffer, VkDeviceSize offset);
-
-  static void GetDefaultVkBufferState(VkBufferCreateInfo &bufferInfo,
-                                      VkDeviceSize bufferSize);
+                                 VkBuffer *vkIndexBuffer, VkDeviceSize offset) {
+    constexpr VkIndexType bufferType = std::is_same_v<uint16_t, T>
+                                           ? VK_INDEX_TYPE_UINT16
+                                           : VK_INDEX_TYPE_UINT32;
+    vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0, bufferType);
+  };
 };
 
 GFX_NAMESPACE_END

@@ -7,7 +7,6 @@
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include <cstdint>
-#include <stdexcept>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
