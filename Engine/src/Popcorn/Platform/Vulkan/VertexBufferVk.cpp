@@ -21,38 +21,84 @@ void VertexBufferVk::UnBind() {
 
 };
 
-void VertexBufferVk::RecordBindVkBuffersCommand(
-    const VkCommandBuffer &commandBuffer, VkBuffer *vkVertexBuffer,
-    VkDeviceSize *offsets, const uint32_t vertexBuffersCount) {
-  vkCmdBindVertexBuffers(commandBuffer, 0, vertexBuffersCount, vkVertexBuffer,
-                         offsets);
+void VertexBufferVk::GetDefaultVertexInputBindingDescription(
+    VkVertexInputBindingDescription &bindingDescription, const Layout &layout) {
+  bindingDescription.binding = 0;
+  bindingDescription.stride = layout.strideValue;
+  bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 };
 
-void VertexBufferVk::GetDefaultVkBufferState(VkBufferCreateInfo &bufferInfo,
-                                             VkDeviceSize bufferSize) {
+void VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
+    std::vector<VkVertexInputAttributeDescription> &attrDescriptions,
+    const Layout &layout) {
+  attrDescriptions.resize(layout.countValue);
+
+  for (int i = 0; i < layout.countValue; ++i) {
+    attrDescriptions[i].binding = 0;
+    attrDescriptions[i].location = i;
+    attrDescriptions[i].format =
+        MapAttrTypeToVulkanType(layout.attrTypesValue[i]);
+    attrDescriptions[i].offset = layout.attrOffsetsValue[i];
+  };
+};
+
+//
+//
+// --- VULKAN BUFFER MEMORY UTILS -------------------------------------------
+// --------------------------------------------------------------------------
+
+void BufferVkUtils::RecordBindVkVertexBuffersCommand(
+    const VkCommandBuffer &commandBuffer, VkBuffer *vkBuffer,
+    VkDeviceSize *offsets, const uint32_t buffersCount) {
+  vkCmdBindVertexBuffers(commandBuffer, 0, buffersCount, vkBuffer, offsets);
+};
+
+template <>
+void BufferVkUtils::RecordBindVkIndexBufferCommand<uint16_t>(
+    const VkCommandBuffer &commandBuffer, VkBuffer *vkIndexBuffer,
+    VkDeviceSize offset) {
+  // constexpr VkIndexType bufferType =
+  //     std::is_same_v<uint16_t, T> ? VK_INDEX_TYPE_UINT16 :
+  //     VK_INDEX_TYPE_UINT32;
+  // vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0, bufferType);
+  vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0, VK_INDEX_TYPE_UINT16);
+};
+
+template <>
+void BufferVkUtils::RecordBindVkIndexBufferCommand<uint32_t>(
+    const VkCommandBuffer &commandBuffer, VkBuffer *vkIndexBuffer,
+    VkDeviceSize offset) {
+  // constexpr VkIndexType bufferType =
+  //     std::is_same_v<uint16_t, T> ? VK_INDEX_TYPE_UINT16 :
+  //     VK_INDEX_TYPE_UINT32;
+  // vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0, bufferType);
+  vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0, VK_INDEX_TYPE_UINT32);
+};
+
+void BufferVkUtils::GetDefaultVkBufferState(VkBufferCreateInfo &bufferInfo,
+                                            VkDeviceSize bufferSize) {
   bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
   bufferInfo.size = bufferSize;
   bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
   bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 };
 
-void VertexBufferVk::AllocateVkBuffer(
-    VkBuffer &vkVertexBuffer, VkDeviceMemory &vkVertexBufferMemory,
+void BufferVkUtils::AllocateVkBuffer(
+    VkBuffer &vkBuffer, VkDeviceMemory &vkBufferMemory,
     const VkBufferCreateInfo &bufferInfo,
     const VkMemoryPropertyFlags memoryPropertyFlags) {
 
   auto *deviceVkStn = DeviceVk::Get();
   auto &device = deviceVkStn->GetDevice();
 
-  if (vkCreateBuffer(device, &bufferInfo, nullptr, &vkVertexBuffer) !=
-      VK_SUCCESS) {
-    std::runtime_error("Error creating Vertex Buffer!");
+  if (vkCreateBuffer(device, &bufferInfo, nullptr, &vkBuffer) != VK_SUCCESS) {
+    std::runtime_error("Error creating  Buffer!");
   };
 
   //
-  // QUERY MEMORY REQIREMENTS USING device AND vkVertexBuffer
+  // QUERY MEMORY REQIREMENTS USING device AND vkBuffer
   VkMemoryRequirements memRequirements;
-  vkGetBufferMemoryRequirements(device, vkVertexBuffer, &memRequirements);
+  vkGetBufferMemoryRequirements(device, vkBuffer, &memRequirements);
 
   //
   // ALLOCATE MEMORY
@@ -63,7 +109,7 @@ void VertexBufferVk::AllocateVkBuffer(
   allocInfo.memoryTypeIndex = deviceVkStn->FindMemoryType(
       memRequirements.memoryTypeBits, memoryPropertyFlags);
 
-  if (vkAllocateMemory(device, &allocInfo, nullptr, &vkVertexBufferMemory) !=
+  if (vkAllocateMemory(device, &allocInfo, nullptr, &vkBufferMemory) !=
       VK_SUCCESS) {
     throw std::runtime_error(
         "Failed to allocate memory for the vertex buffer!");
@@ -71,31 +117,31 @@ void VertexBufferVk::AllocateVkBuffer(
 
   //
   // BIND MEMORY TO THE BUFFER
-  vkBindBufferMemory(device, vkVertexBuffer, vkVertexBufferMemory, 0);
+  vkBindBufferMemory(device, vkBuffer, vkBufferMemory, 0);
 };
 
-void *VertexBufferVk::MapVkMemoryToCPU(VkDeviceMemory &vkVertexBufferMemory,
-                                       VkDeviceSize beginOffset,
-                                       VkDeviceSize endOffset) {
+void *BufferVkUtils::MapVkMemoryToCPU(VkDeviceMemory &vkBufferMemory,
+                                      VkDeviceSize beginOffset,
+                                      VkDeviceSize endOffset) {
   auto &device = DeviceVk::Get()->GetDevice();
+
   //
   // FILL VERTEX BUFFER
   void *data;
-  vkMapMemory(device, vkVertexBufferMemory, beginOffset, endOffset, 0, &data);
+  vkMapMemory(device, vkBufferMemory, beginOffset, endOffset, 0, &data);
 
   return data;
 };
 
-void VertexBufferVk::CopyBufferCPUToGPU(VkDeviceMemory &vkVertexBufferMemory,
-                                        byte_t *destPtr, byte_t *srcPtr,
-                                        VkDeviceSize size) {
+void BufferVkUtils::CopyBufferCPUToGPU(VkDeviceMemory &vkBufferMemory,
+                                       byte_t *destPtr, byte_t *srcPtr,
+                                       VkDeviceSize size) {
   auto &device = DeviceVk::Get()->GetDevice();
   memcpy(destPtr, srcPtr, (size_t)size);
 };
 
-void VertexBufferVk::CopyBufferGPUToGPU(VkBuffer &srcBuffer,
-                                        VkBuffer &dstBuffer,
-                                        VkDeviceSize size) {
+void BufferVkUtils::CopyBufferGPUToGPU(VkBuffer &srcBuffer, VkBuffer &dstBuffer,
+                                       VkDeviceSize size) {
   auto &device = DeviceVk::Get()->GetDevice();
   auto *commandPoolVkStn = CommandPoolVk::Get();
 
@@ -141,38 +187,16 @@ void VertexBufferVk::CopyBufferGPUToGPU(VkBuffer &srcBuffer,
                        &commandBuffer);
 };
 
-void VertexBufferVk::UnmapVkMemoryFromCPU(
-    VkDeviceMemory &vkVertexBufferMemory) {
+void BufferVkUtils::UnmapVkMemoryFromCPU(VkDeviceMemory &vkBufferMemory) {
   auto &device = DeviceVk::Get()->GetDevice();
-  vkUnmapMemory(device, vkVertexBufferMemory);
+  vkUnmapMemory(device, vkBufferMemory);
 };
 
-void VertexBufferVk::DestroyVkBuffer(VkBuffer &vkVertexBuffer,
-                                     VkDeviceMemory &vkVertexBufferMemory) {
+void BufferVkUtils::DestroyVkBuffer(VkBuffer &vkBuffer,
+                                    VkDeviceMemory &vkBufferMemory) {
   auto &device = DeviceVk::Get()->GetDevice();
-  vkDestroyBuffer(device, vkVertexBuffer, nullptr);
-  vkFreeMemory(device, vkVertexBufferMemory, nullptr);
-};
-
-void VertexBufferVk::GetDefaultVertexInputBindingDescription(
-    VkVertexInputBindingDescription &bindingDescription, const Layout &layout) {
-  bindingDescription.binding = 0;
-  bindingDescription.stride = layout.strideValue;
-  bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-};
-
-void VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
-    std::vector<VkVertexInputAttributeDescription> &attrDescriptions,
-    const Layout &layout) {
-  attrDescriptions.resize(layout.countValue);
-
-  for (int i = 0; i < layout.countValue; ++i) {
-    attrDescriptions[i].binding = 0;
-    attrDescriptions[i].location = i;
-    attrDescriptions[i].format =
-        MapAttrTypeToVulkanType(layout.attrTypesValue[i]);
-    attrDescriptions[i].offset = layout.attrOffsetsValue[i];
-  };
+  vkDestroyBuffer(device, vkBuffer, nullptr);
+  vkFreeMemory(device, vkBufferMemory, nullptr);
 };
 
 GFX_NAMESPACE_END

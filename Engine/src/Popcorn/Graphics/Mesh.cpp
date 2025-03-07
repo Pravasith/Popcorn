@@ -1,25 +1,24 @@
 #include "Mesh.h"
 #include "Material.h"
+#include "Popcorn/Core/Base.h"
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-// Fires when the mesh is added to a Scene
-void Mesh::OnAttach(const SceneData &) {
-  // auto *sceneManagerStn = SceneManager::Get();
-  // sceneManagerStn->RegisterMaterial(&m_material);
+void Mesh::ValidateMembersWithSpec(const Spec &spec) {
+#ifdef PC_DEBUG
+  if (spec.enableIndexBuffers && m_indexBuffer == nullptr) {
+    PC_ERROR("Index buffer is enabled but it's empty", "Mesh")
+  };
+#endif
 };
+
+// Fires when the mesh is added to a Scene
+void Mesh::OnAttach(const SceneData &) {};
 
 void Mesh::OnUpdate(const SceneData &) {};
 
-void Mesh::OnRender(const SceneData &) {
-  // if (m_material == nullptr) {
-  //   PC_WARN("m_material is nullptr");
-  //   return;
-  // }
-
-  // FIND MATERIALS & RENDER THEM WITH THE RENDERPASS INFORMATION
-};
+void Mesh::OnRender(const SceneData &) {};
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

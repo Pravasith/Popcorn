@@ -41,32 +41,7 @@ public:
   };
 
   //
-  // --- UTILS -----------------------------------------------------------------
-  static void AllocateVkBuffer(VkBuffer &vkVertexBuffer,
-                               VkDeviceMemory &vkVertexBufferMemory,
-                               const VkBufferCreateInfo &bufferInfo,
-                               const VkMemoryPropertyFlags memoryPropertyFlags);
-  static void DestroyVkBuffer(VkBuffer &vkVertexBuffer,
-                              VkDeviceMemory &vkVertexBufferMemory);
-
-  static void *MapVkMemoryToCPU(VkDeviceMemory &vkVertexBufferMemory,
-                                VkDeviceSize beginOffset,
-                                VkDeviceSize endOffset);
-  static void CopyBufferCPUToGPU(VkDeviceMemory &vkVertexBufferMemory,
-                                 byte_t *destPtr, byte_t *srcPtr,
-                                 VkDeviceSize size);
-  static void CopyBufferGPUToGPU(VkBuffer &srcBuffer, VkBuffer &dstBuffer,
-                                 VkDeviceSize size);
-  static void UnmapVkMemoryFromCPU(VkDeviceMemory &vkVertexBufferMemory);
-
-  static void RecordBindVkBuffersCommand(const VkCommandBuffer &commandBuffer,
-                                         VkBuffer *vkVertexBuffer,
-                                         VkDeviceSize *offsets,
-                                         const uint32_t vertexBuffersCount);
-
-  static void GetDefaultVkBufferState(VkBufferCreateInfo &bufferInfo,
-                                      VkDeviceSize bufferSize);
-
+  // --- UTILS --------------------------------------------------------------
   static void GetDefaultVertexInputBindingDescription(
       VkVertexInputBindingDescription &bindingDescription,
       const Layout &layout);
@@ -88,6 +63,43 @@ public:
 
   virtual void Bind() override;
   virtual void UnBind() override;
+};
+
+//
+//
+// --- VULKAN BUFFER MEMORY UTILS -------------------------------------------
+// --------------------------------------------------------------------------
+
+class BufferVkUtils {
+public:
+  static void AllocateVkBuffer(VkBuffer &vkBuffer,
+                               VkDeviceMemory &vkBufferMemory,
+                               const VkBufferCreateInfo &bufferInfo,
+                               const VkMemoryPropertyFlags memoryPropertyFlags);
+  static void DestroyVkBuffer(VkBuffer &vkBuffer,
+                              VkDeviceMemory &vkBufferMemory);
+
+  static void *MapVkMemoryToCPU(VkDeviceMemory &vkBufferMemory,
+                                VkDeviceSize beginOffset,
+                                VkDeviceSize endOffset);
+  static void CopyBufferCPUToGPU(VkDeviceMemory &vkBufferMemory,
+                                 byte_t *destPtr, byte_t *srcPtr,
+                                 VkDeviceSize size);
+  static void CopyBufferGPUToGPU(VkBuffer &srcBuffer, VkBuffer &dstBuffer,
+                                 VkDeviceSize size);
+  static void UnmapVkMemoryFromCPU(VkDeviceMemory &vkBufferMemory);
+
+  static void RecordBindVkVertexBuffersCommand(
+      const VkCommandBuffer &commandBuffer, VkBuffer *vkVertexBuffers,
+      VkDeviceSize *offsets, const uint32_t buffersCount);
+
+  template <Is_Uint16_Or_Uint32_t T>
+  static void
+  RecordBindVkIndexBufferCommand(const VkCommandBuffer &commandBuffer,
+                                 VkBuffer *vkIndexBuffer, VkDeviceSize offset);
+
+  static void GetDefaultVkBufferState(VkBufferCreateInfo &bufferInfo,
+                                      VkDeviceSize bufferSize);
 };
 
 GFX_NAMESPACE_END

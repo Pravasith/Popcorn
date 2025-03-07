@@ -39,6 +39,7 @@ public:
   virtual void CreatePipeline(Material &) override;
   virtual void CreateFramebuffers() override;
   virtual void AllocateVkVertexBuffers() override;
+  virtual void AllocateVkIndexBuffers() override;
   virtual void AddMeshToWorkflow(Mesh *mesh) override;
   virtual void RecordRenderCommands(const Scene &scene,
                                     const VkCommandBuffer &commandBuffer,
@@ -48,10 +49,14 @@ public:
 private:
   static VertexBuffer::Layout s_vertexBufferLayout;
 
-  std::vector<VkDeviceSize> m_vkBufferOffsets;
+  std::vector<VkDeviceSize> m_vertexBufferOffsets;
+  std::vector<VkDeviceSize> m_indexBufferOffsets;
 
   VkBuffer m_vkVertexBuffer;
   VkDeviceMemory m_vkVertexBufferMemory;
+
+  VkBuffer m_vkIndexBuffer;
+  VkDeviceMemory m_vkIndexBufferMemory;
 
   RenderPassVk m_basicRenderPassVk;
   GfxPipelineVk m_colorPipelineVk;

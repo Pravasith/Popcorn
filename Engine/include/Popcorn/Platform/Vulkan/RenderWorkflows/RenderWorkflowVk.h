@@ -52,6 +52,7 @@ public:
   virtual void CreateRenderPass() {};
   virtual void CreateFramebuffers() {};
   virtual void AllocateVkVertexBuffers() {};
+  virtual void AllocateVkIndexBuffers() {};
   virtual void CreateCommandBuffer() {};
 
   virtual void AddMeshToWorkflow(Mesh *mesh) {};

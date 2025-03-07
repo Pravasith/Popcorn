@@ -215,10 +215,14 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
       //           << m_vkBufferOffsets[i] << "\n";
 
       VkBuffer vertexBuffers[] = {m_vkVertexBuffer};
-      VkDeviceSize offsets[] = {m_vkBufferOffsets[i]};
+      VkDeviceSize offsets[] = {m_vertexBufferOffsets[i]};
 
-      VertexBufferVk::RecordBindVkBuffersCommand(commandBuffer, vertexBuffers,
-                                                 offsets, 1);
+      BufferVkUtils::RecordBindVkVertexBuffersCommand(
+          commandBuffer, vertexBuffers, offsets, 1);
+
+      // TODO: Change it to variant logic
+      BufferVkUtils::RecordBindVkIndexBufferCommand<uint16_t>(
+          commandBuffer, &m_vkIndexBuffer, m_indexBufferOffsets[i]);
 
       vkCmdDraw(commandBuffer, m_meshes[i]->GetVertexBuffer().GetCount(), 1, 0,
                 0);
@@ -267,8 +271,12 @@ void BasicRenderWorkflowVk::AddMeshToWorkflow(Mesh *mesh) {
   RegisterMaterial(&material);
 }
 
+//
+// --------------------------------------------------------------------------
+// --- VERTEX BUFFER ALLOCATION ---------------------------------------------
+//
 void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
-  m_vkBufferOffsets.resize(m_meshes.size());
+  m_vertexBufferOffsets.resize(m_meshes.size());
 
   VkDeviceSize currentOffset = 0;
 
@@ -277,7 +285,7 @@ void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
   for (int i = 0; i < m_meshes.size(); ++i) {
     VertexBufferVk &vertexBuffer =
         reinterpret_cast<VertexBufferVk &>(m_meshes[i]->GetVertexBuffer());
-    m_vkBufferOffsets[i] = currentOffset;
+    m_vertexBufferOffsets[i] = currentOffset;
     currentOffset += vertexBuffer.GetSize();
   }
 
@@ -286,12 +294,12 @@ void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
 
   // Allocate staging buffer
   VkBufferCreateInfo bufferInfo{};
-  VertexBufferVk::GetDefaultVkBufferState(bufferInfo, currentOffset);
+  BufferVkUtils::GetDefaultVkBufferState(bufferInfo, currentOffset);
   bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-  VertexBufferVk::AllocateVkBuffer(stagingVertexBuffer,
-                                   stagingVertexBufferMemory, bufferInfo,
-                                   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                                       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+  BufferVkUtils::AllocateVkBuffer(stagingVertexBuffer,
+                                  stagingVertexBufferMemory, bufferInfo,
+                                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
   // struct Vertex {
   //   glm::vec2 pos;
@@ -306,23 +314,23 @@ void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
   //   };
   // };
 
-  void *data = VertexBufferVk::MapVkMemoryToCPU(stagingVertexBufferMemory, 0,
-                                                currentOffset);
+  void *data = BufferVkUtils::MapVkMemoryToCPU(stagingVertexBufferMemory, 0,
+                                               currentOffset);
 
   for (int i = 0; i < m_meshes.size(); ++i) {
-    auto &vertexBuffer =
+    VertexBufferVk &vertexBuffer =
         static_cast<VertexBufferVk &>(m_meshes[i]->GetVertexBuffer());
 
     // vertexBuffer.PrintBuffer<Vertex>();
     // PC_WARN(vertexBuffer.GetSize())
 
-    VertexBufferVk::CopyBufferCPUToGPU(stagingVertexBufferMemory,
-                                       // Dest ptr
-                                       (byte_t *)data + m_vkBufferOffsets[i],
-                                       // Src ptr
-                                       vertexBuffer.GetBufferData(),
-                                       // Size
-                                       vertexBuffer.GetSize());
+    BufferVkUtils::CopyBufferCPUToGPU(stagingVertexBufferMemory,
+                                      // Dest ptr
+                                      (byte_t *)data + m_vertexBufferOffsets[i],
+                                      // Src ptr
+                                      vertexBuffer.GetBufferData(),
+                                      // Size
+                                      vertexBuffer.GetSize());
   }
 
   // Vertex *vertices = static_cast<Vertex *>(data);
@@ -330,18 +338,20 @@ void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
   //   std::cout << "Vertex " << i << ": " << vertices[i].Print() << "\n";
   // }
 
-  VertexBufferVk::UnmapVkMemoryFromCPU(stagingVertexBufferMemory);
+  BufferVkUtils::UnmapVkMemoryFromCPU(stagingVertexBufferMemory);
 
   //
   // Allocate actual vertex buffer
   bufferInfo.usage =
       VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-  VertexBufferVk::AllocateVkBuffer(m_vkVertexBuffer, m_vkVertexBufferMemory,
-                                   bufferInfo,
-                                   VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+  BufferVkUtils::AllocateVkBuffer(m_vkVertexBuffer, m_vkVertexBufferMemory,
+                                  bufferInfo,
+                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-  VertexBufferVk::CopyBufferGPUToGPU(stagingVertexBuffer, m_vkVertexBuffer,
-                                     currentOffset);
+  //
+  // Copy staging buffer data to local buffers
+  BufferVkUtils::CopyBufferGPUToGPU(stagingVertexBuffer, m_vkVertexBuffer,
+                                    currentOffset);
 
   // Cleanup staging buffers
   auto &device = DeviceVk::Get()->GetDevice();
@@ -349,13 +359,90 @@ void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
   vkFreeMemory(device, stagingVertexBufferMemory, nullptr);
 };
 
+//
+// --------------------------------------------------------------------------
+// --- INDEX BUFFER ALLOCATION ----------------------------------------------
+//
+void BasicRenderWorkflowVk::AllocateVkIndexBuffers() {
+  m_indexBufferOffsets.resize(m_meshes.size());
+
+  VkDeviceSize currentOffset = 0;
+
+  // Get the offsets of meshes & the total size of the buffers (a.k.a.
+  // currentOffset)
+  for (int i = 0; i < m_meshes.size(); ++i) {
+    IndexBuffer<uint16_t> &indexBuffer = m_meshes[i]->GetIndexBuffer();
+    m_vertexBufferOffsets[i] = currentOffset;
+    currentOffset += indexBuffer.GetSize();
+  }
+
+  VkBuffer stagingIndexBuffer;
+  VkDeviceMemory stagingIndexBufferMemory;
+
+  // Allocate staging buffer
+  VkBufferCreateInfo bufferInfo{};
+  BufferVkUtils::GetDefaultVkBufferState(bufferInfo, currentOffset);
+  bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+  BufferVkUtils::AllocateVkBuffer(stagingIndexBuffer, stagingIndexBufferMemory,
+                                  bufferInfo,
+                                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+  void *data = BufferVkUtils::MapVkMemoryToCPU(stagingIndexBufferMemory, 0,
+                                               currentOffset);
+
+  for (int i = 0; i < m_meshes.size(); ++i) {
+    IndexBuffer<uint16_t> &indexBuffer = m_meshes[i]->GetIndexBuffer();
+
+    // vertexBuffer.PrintBuffer<Index>();
+    // PC_WARN(vertexBuffer.GetSize())
+
+    BufferVkUtils::CopyBufferCPUToGPU(stagingIndexBufferMemory,
+                                      // Dest ptr
+                                      (byte_t *)data + m_indexBufferOffsets[i],
+                                      // Src ptr
+                                      indexBuffer.GetBufferData(),
+                                      // Size
+                                      indexBuffer.GetSize());
+  }
+
+  // Index *vertices = static_cast<Index *>(data);
+  // for (size_t i = 0; i < 6; ++i) { // 6 vertices (2 meshes × 3 vertices)
+  //   std::cout << "Index " << i << ": " << vertices[i].Print() << "\n";
+  // }
+
+  BufferVkUtils::UnmapVkMemoryFromCPU(stagingIndexBufferMemory);
+
+  //
+  // Allocate actual index buffer
+  bufferInfo.usage =
+      VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+  BufferVkUtils::AllocateVkBuffer(m_vkIndexBuffer, m_vkIndexBufferMemory,
+                                  bufferInfo,
+                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+  //
+  // Copy staging buffer data to local buffers
+  BufferVkUtils::CopyBufferGPUToGPU(stagingIndexBuffer, m_vkIndexBuffer,
+                                    currentOffset);
+
+  // Cleanup staging buffers
+  auto &device = DeviceVk::Get()->GetDevice();
+  vkDestroyBuffer(device, stagingIndexBuffer, nullptr);
+  vkFreeMemory(device, stagingIndexBufferMemory, nullptr);
+};
+
 void BasicRenderWorkflowVk::CleanUp() {
   auto &device = DeviceVk::Get()->GetDevice();
   auto *framebuffersVkStn = FramebuffersVk::Get();
 
+  // Cleanup index buffer memory
+  BufferVkUtils::DestroyVkBuffer(m_vkIndexBuffer, m_vkIndexBufferMemory);
+  m_indexBufferOffsets.clear();
+
   // Cleanup vertex buffer memory
-  VertexBufferVk::DestroyVkBuffer(m_vkVertexBuffer, m_vkVertexBufferMemory);
-  m_vkBufferOffsets.clear();
+  BufferVkUtils::DestroyVkBuffer(m_vkVertexBuffer, m_vkVertexBufferMemory);
+  m_vertexBufferOffsets.clear();
 
   // Cleanup pipelines
   m_colorPipelineVk.CleanUp(device);

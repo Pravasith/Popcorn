@@ -8,6 +8,7 @@
 #include <Popcorn/Graphics/VertexBuffer.h>
 #include <Popcorn/Scene/Scene.h>
 #include <Sources.h>
+#include <cstdint>
 #include <glm/glm.hpp>
 
 using namespace Popcorn;
@@ -38,16 +39,20 @@ public:
     vertexBuffer2 = VertexBuffer::Create();
 
     vertexBuffer->Fill<Vertex>({
-        {{-.5f - .01f, -.5f - .01f}, {0.0f, 0.0f, 1.0f}},
-        {{0.5f - .01f, -.5f - .01f}, {0.0f, 1.0f, 0.0f}},
-        {{-.5f - .01f, 0.5f - .01f}, {1.0f, 0.0f, 0.0f}},
+        {{-.5f, -.5f}, {.8f, .0f, .8f}},
+        {{.0f, -.5f}, {.8f, .8f, .0f}},
+        {{.0f, .0f}, {.0f, .8f, .8f}},
+        {{-.5f, .0f}, {.8f, .0f, .8f}},
     });
 
     vertexBuffer2->Fill<Vertex>({
-        {{-0.5f + .01f, 0.5f + .01f}, {1.0f, 0.0f, 0.0f}},
-        {{0.5f + .01f, -0.5f + .01f}, {0.0f, 1.0f, 0.0f}},
-        {{0.5f + .01f, 0.5f + .01f}, {0.0f, 0.0f, 1.0f}},
+        {{.0f, .0f}, {.8f, .0f, .8f}},
+        {{.5f, .0f}, {.8f, .8f, .0f}},
+        {{.5f, .5f}, {.0f, .8f, .8f}},
+        {{.0f, .5f}, {.8f, .0f, .8f}},
     });
+
+    indexBuffer->Fill({3, 0, 1, 1, 2, 3});
 
     vertexBuffer->SetLayout<VertexBuffer::AttrTypes::Float2,
                             VertexBuffer::AttrTypes::Float3>();
@@ -67,8 +72,8 @@ public:
     triMat = new BasicMaterial(matData);
 
     // Mesh triMesh{nullptr, triMat};
-    triMesh = new Mesh{*vertexBuffer, *triMat};
-    triMesh2 = new Mesh{*vertexBuffer2, *triMat};
+    triMesh = new Mesh{*vertexBuffer, indexBuffer, *triMat};
+    triMesh2 = new Mesh{*vertexBuffer2, indexBuffer, *triMat};
 
     // ADD MESH TO WORK FLOW -> CREATE PIPELINES
     triScene.Add(triMesh);
@@ -102,6 +107,9 @@ public:
 private:
   VertexBuffer *vertexBuffer;
   VertexBuffer *vertexBuffer2;
+
+  IndexBuffer<uint16_t> *indexBuffer;
+
   TriangleScene triScene{};
   Mesh *triMesh;
   Mesh *triMesh2;
