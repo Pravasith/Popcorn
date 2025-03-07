@@ -104,6 +104,13 @@ BUFFER_DEFS_NAMESPACE_END
 //
 class VertexBuffer {
 public:
+  VertexBuffer() {
+    PC_PRINT("CREATED(DEFAULT)", TagType::Constr, "VERTEX-BUFFER");
+  };
+  virtual ~VertexBuffer() {
+    PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER")
+  };
+
   template <BufferDefs::AttrTypes... E> inline void SetLayout() {
     m_layout.Set<E...>();
   };
@@ -116,13 +123,6 @@ public:
   [[nodiscard]] inline byte_t *GetBufferData() const {
     return m_buffer.GetData();
   }
-
-  VertexBuffer() {
-    PC_PRINT("CREATED(DEFAULT)", TagType::Constr, "VERTEX-BUFFER");
-  };
-  virtual ~VertexBuffer() {
-    PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER")
-  };
 
   virtual uint64_t GetSize() const = 0;
   virtual uint64_t GetCount() const = 0;
@@ -274,6 +274,23 @@ class UniformBuffer {
 public:
   UniformBuffer() { PC_PRINT("CREATED", TagType::Constr, "UniformBuffer") };
   ~UniformBuffer() { PC_PRINT("DESTROYED", TagType::Destr, "UniformBuffer") };
+
+  template <BufferDefs::AttrTypes... E> inline void SetLayout() {
+    m_layout.Set<E...>();
+  };
+
+  [[nodiscard]] inline const BufferDefs::Layout &GetLayout() const {
+    PC_ASSERT(m_layout.countValue != 0, "BufferDefs::Layout is empty!");
+    return m_layout;
+  }
+
+  [[nodiscard]] inline byte_t *GetBufferData() const {
+    return m_buffer.GetData();
+  }
+
+private:
+  Buffer m_buffer;
+  BufferDefs::Layout m_layout;
 };
 
 GFX_NAMESPACE_END

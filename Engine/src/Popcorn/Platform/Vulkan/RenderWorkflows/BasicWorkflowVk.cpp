@@ -1,5 +1,6 @@
 #include "BasicWorkflowVk.h"
 #include "BufferObjects.h"
+#include "BufferObjectsVk.h"
 #include "DeviceVk.h"
 #include "FramebuffersVk.h"
 #include "GfxPipelineVk.h"
@@ -8,10 +9,8 @@
 #include "PipelineVk.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
-#include "Popcorn/Core/Helpers.h"
 #include "RenderPassVk.h"
 #include "SwapchainVk.h"
-#include "VertexBufferVk.h"
 #include <cstdint>
 #include <glm/glm.hpp>
 #include <vulkan/vulkan_core.h>
