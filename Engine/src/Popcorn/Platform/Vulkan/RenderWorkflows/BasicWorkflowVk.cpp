@@ -146,7 +146,7 @@ void BasicRenderWorkflowVk::CreateRenderPass() {
   //
   // CREATE RENDER PASS INFO ----------------------------------------
   VkRenderPassCreateInfo renderPass1CreateInfo{};
-  RenderPassVk::SetDefaultRenderPassCreateInfo(renderPass1CreateInfo);
+  RenderPassVk::GetDefaultRenderPassCreateInfo(renderPass1CreateInfo);
 
   // Dependencies -- For making the renderpass to wait on the color output
   // pipeline stage triggered by "swapchain image available" semaphore
@@ -171,15 +171,15 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
     const Scene &scene, const VkCommandBuffer &commandBuffer,
     const uint32_t imageIndex) {
   auto *swapchainVkStn = SwapchainVk::Get();
-  VkRenderPassBeginInfo renderPassCreateInfo{};
 
   //
   // BEGIN RENDER PASS ---------------------------------------------------------
+  VkRenderPassBeginInfo renderPassBeginCreateInfo{};
   m_basicRenderPassVk.GetDefaultCmdBeginRenderPassInfo(
       swapchainVkStn->GetSwapchainFramebuffers()[imageIndex],
-      swapchainVkStn->GetSwapchainExtent(), renderPassCreateInfo);
+      swapchainVkStn->GetSwapchainExtent(), renderPassBeginCreateInfo);
   m_basicRenderPassVk.RecordBeginRenderPassCommand(commandBuffer,
-                                                   renderPassCreateInfo);
+                                                   renderPassBeginCreateInfo);
 
   //
   // SET VIEWPORT AND SCISSOR SIZE ---------------------------------------------

@@ -20,7 +20,6 @@ GFX_NAMESPACE_BEGIN
 // ---------------------------------------------------------------------------
 // --- BUFFER ATTRIBUTE DEFINITIONS ------------------------------------------
 //
-
 BUFFER_DEFS_NAMESPACE_BEGIN
 // clang-format off
 enum class AttrTypes {
@@ -269,7 +268,6 @@ private:
 // ---------------------------------------------------------------------------
 // --- UNIFORM BUFFER --------------------------------------------------------
 //
-
 class UniformBuffer {
 public:
   UniformBuffer() { PC_PRINT("CREATED", TagType::Constr, "UniformBuffer") };
@@ -277,6 +275,10 @@ public:
 
   template <BufferDefs::AttrTypes... E> inline void SetLayout() {
     m_layout.Set<E...>();
+  };
+
+  template <typename T> void Fill(std::initializer_list<T> list) {
+    m_buffer.SetData(list);
   };
 
   [[nodiscard]] inline const BufferDefs::Layout &GetLayout() const {

@@ -9,6 +9,7 @@
 #include <Popcorn/Scene/Scene.h>
 #include <Sources.h>
 #include <cstdint>
+#include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 
 using namespace Popcorn;
@@ -38,6 +39,20 @@ public:
     vertexBuffer = VertexBuffer::Create();
     vertexBuffer2 = VertexBuffer::Create();
     indexBuffer = new IndexBuffer<uint16_t>();
+    uniformBuffer = new UniformBuffer();
+
+    // Model view projection matrix
+    uniformBuffer
+        ->SetLayout<BufferDefs::AttrTypes::Mat4, BufferDefs::AttrTypes::Mat4,
+                    BufferDefs::AttrTypes::Mat4>();
+
+    struct MVP {
+      glm::mat4 model;
+      glm::mat4 view;
+      glm::mat4 proj;
+    };
+
+    // uniformBuffer->Fill();
 
     vertexBuffer->Fill<Vertex>({
         {{-.5f, -.5f}, {.8f, .0f, .8f}},
@@ -110,6 +125,7 @@ private:
   VertexBuffer *vertexBuffer2;
 
   IndexBuffer<uint16_t> *indexBuffer;
+  UniformBuffer *uniformBuffer;
 
   TriangleScene triScene{};
   Mesh *triMesh;

@@ -86,7 +86,7 @@ public:
   };
 
   static void
-  SetDefaultRenderPassCreateInfo(VkRenderPassCreateInfo &renderPassInfo) {
+  GetDefaultRenderPassCreateInfo(VkRenderPassCreateInfo &renderPassInfo) {
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     renderPassInfo.attachmentCount = 1;
     renderPassInfo.pAttachments = VK_NULL_HANDLE;
