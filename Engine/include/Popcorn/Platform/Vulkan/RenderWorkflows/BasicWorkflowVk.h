@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BufferObjects.h"
 #include "GfxPipelineVk.h"
 #include "GlobalMacros.h"
 #include "Material.h"
@@ -7,7 +8,6 @@
 #include "RenderPassVk.h"
 #include "RenderWorkflowVk.h"
 #include "Scene.h"
-#include "BufferObjects.h"
 #include <vulkan/vulkan_core.h>
 
 // TODO: Redo this class. But only after a full working animated scene is
@@ -18,8 +18,8 @@ GFX_NAMESPACE_BEGIN
 class BasicRenderWorkflowVk : public RenderWorkflowVk {
 public:
   BasicRenderWorkflowVk() {
-    s_vertexBufferLayout.Set<BufferDefs::AttrTypes::Float2,
-                             BufferDefs::AttrTypes::Float3>();
+    s_vertexBufferLayout
+        .Set<BufferDefs::AttrTypes::Float2, BufferDefs::AttrTypes::Float3>();
     PC_PRINT("CREATED", TagType::Constr, "BasicWorkflowVk")
   };
   virtual ~BasicRenderWorkflowVk() override {
@@ -36,6 +36,7 @@ public:
   };
 
   virtual void CreateRenderPass() override;
+  virtual void CreateDescriptorSetLayouts() override;
   virtual void CreatePipeline(Material &) override;
   virtual void CreateFramebuffers() override;
   virtual void AllocateVkVertexBuffers() override;

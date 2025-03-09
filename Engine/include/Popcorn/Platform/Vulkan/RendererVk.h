@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CommandPoolVk.h"
+#include "DescriptorsVk.h"
 #include "DeviceVk.h"
 #include "FrameVk.h"
 #include "FramebuffersVk.h"
@@ -64,6 +65,7 @@ private:
   static FrameVk *s_frameVk;
 
   static std::vector<RenderWorkflowVk *> s_renderWorkflows;
+  static DescriptorSetLayoutsVk *s_descriptorSetLayoutsVk;
 
   std::vector<VkCommandBuffer> m_drawingCommandBuffers;
 };

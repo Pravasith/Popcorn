@@ -52,6 +52,7 @@ public:
   virtual void AllocateVkVertexBuffers() {};
   virtual void AllocateVkIndexBuffers() {};
   virtual void CreateCommandBuffer() {};
+  virtual void CreateDescriptorSetLayouts() {};
 
   virtual void AddMeshToWorkflow(Mesh *mesh) {};
 

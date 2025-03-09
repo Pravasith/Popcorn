@@ -1,6 +1,7 @@
 #include "RendererVk.h"
 #include "BasicWorkflowVk.h"
 #include "CommandPoolVk.h"
+#include "DescriptorsVk.h"
 #include "DeviceVk.h"
 #include "FrameVk.h"
 #include "FramebuffersVk.h"
@@ -23,7 +24,10 @@ SwapchainVk *RendererVk::s_swapchainVk = nullptr;
 FramebuffersVk *RendererVk::s_framebuffersVk = nullptr;
 CommandPoolVk *RendererVk::s_commandPoolVk = nullptr;
 FrameVk *RendererVk::s_frameVk = nullptr;
+
+DescriptorSetLayoutsVk *RendererVk::s_descriptorSetLayoutsVk = nullptr;
 // Other members
+
 std::vector<RenderWorkflowVk *> RendererVk::s_renderWorkflows{};
 
 //
@@ -107,6 +111,8 @@ RendererVk::~RendererVk() {
 void RendererVk::VulkanCleanUp() {
   auto &instance = s_deviceVk->GetVkInstance();
   auto &device = s_deviceVk->GetDevice();
+
+  DescriptorSetLayoutsVk::Destroy();
 
   for (auto *workflow : s_renderWorkflows) {
     workflow->CleanUp();
