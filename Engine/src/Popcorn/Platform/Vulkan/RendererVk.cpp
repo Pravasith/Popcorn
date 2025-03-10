@@ -33,6 +33,12 @@ std::vector<RenderWorkflowVk *> RendererVk::s_renderWorkflows{};
 //
 // -------------------------------------------------------------------------
 // --- PUBLIC METHODS ------------------------------------------------------
+void RendererVk::UpdateFrameData() {
+  BasicRenderWorkflowVk *basicRenderWorkflow =
+      reinterpret_cast<BasicRenderWorkflowVk *>(
+          s_renderWorkflows[(int)RenderWorkflowIndices::Basic]);
+  // s_frameVk
+};
 
 void RendererVk::DrawFrame(const Scene &scene) {
   BasicRenderWorkflowVk *basicRenderWorkflow =
@@ -41,16 +47,34 @@ void RendererVk::DrawFrame(const Scene &scene) {
 
   s_frameVk->Draw(
       m_drawingCommandBuffers,
+
       // Pass final paint renderpass for swapchain recreation
+      // TODO: Isolate this renderpass (move it outside basicWorkflow)
       basicRenderWorkflow->GetRenderPass(),
+
+      // Update scene data lambda
+      [&](const uint32_t currentFrame) {
+        // TODO: Write a loop for render workflows instead
+        basicRenderWorkflow->ProcessSceneUpdates(currentFrame);
+      },
+
       // Record draw commands lambda
-      [&](const uint32_t frameIndex,
+      [&](const uint32_t
+              frameIndex, // frameIndex is not the same as current frame
           VkCommandBuffer &currentFrameCommandBuffer) {
         s_commandPoolVk->BeginCommandBuffer(currentFrameCommandBuffer);
+        //
+        // -----------------------------------------------------------------
+        // --- RECORD ALL COMMAND BUFFERS HERE -----------------------------
+
         // TODO: Write a loop for render workflows instead
         basicRenderWorkflow->RecordRenderCommands(
             // Records renderpasses & binds associated pipelines
-            scene, currentFrameCommandBuffer, frameIndex);
+            currentFrameCommandBuffer, frameIndex);
+
+        // --- RECORD ALL COMMAND BUFFERS HERE -----------------------------
+        // -----------------------------------------------------------------
+        //
         s_commandPoolVk->EndCommandBuffer(currentFrameCommandBuffer);
       });
 };
@@ -58,22 +82,6 @@ void RendererVk::DrawFrame(const Scene &scene) {
 bool RendererVk::OnFrameBufferResize(FrameBfrResizeEvent &) {
   s_frameVk->SetFrameBufferResized(true);
   return true;
-};
-
-void RendererVk::CreateMaterialPipeline(Material *materialPtr) {
-  switch (materialPtr->GetMaterialType()) {
-  case MaterialTypes::BasicMat:
-    //
-    // TODO: Refactor for multiple workflow types
-    {
-      auto *basicRenderWorkflow =
-          s_renderWorkflows[(int)RenderWorkflowIndices::Basic];
-      basicRenderWorkflow->CreatePipeline(*materialPtr);
-    }
-    break;
-  case MaterialTypes::PbrMat:
-    break;
-  }
 };
 
 void RendererVk::CreateBasicCommandBuffers() {
@@ -155,13 +163,22 @@ void RendererVk::CreateRenderWorkflows() {
   }
 };
 
-void RendererVk::SceneReady() { AllocateVkBuffers(); };
+void RendererVk::SceneReady() {
+  // Sort materials, allocate descriptor sets, vk buffers, index buffers &
+  // create pipelines
 
-void RendererVk::AllocateVkBuffers() {
   for (auto &renderWorkflow : s_renderWorkflows) {
+    // Loops through all meshes & creates a contiguous Vulkan buffer memory for
+    // each workflow -- each workflow has one VkBuffer & one VkDeviceMemory each
     renderWorkflow->AllocateVkVertexBuffers();
     renderWorkflow->AllocateVkIndexBuffers();
+    // renderWorkflow->AllocateDescriptorSets();
+    renderWorkflow->CreatePipelines();
   }
+
+  // //
+  // // CREATE MATERIAL PIPELINES -------------------------------------------
+  // CreatePipeline(*materialPtr);
 };
 
 void RendererVk::AddMeshToWorkflow(Mesh *mesh) {

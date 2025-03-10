@@ -1,13 +1,15 @@
 #pragma once
 
 #include "BufferObjects.h"
+#include "DescriptorsVk.h"
 #include "GfxPipelineVk.h"
 #include "GlobalMacros.h"
 #include "Material.h"
 #include "Popcorn/Core/Base.h"
 #include "RenderPassVk.h"
 #include "RenderWorkflowVk.h"
-#include "Scene.h"
+#include <glm/glm.hpp>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 // TODO: Redo this class. But only after a full working animated scene is
@@ -20,6 +22,7 @@ public:
   BasicRenderWorkflowVk() {
     s_vertexBufferLayout
         .Set<BufferDefs::AttrTypes::Float2, BufferDefs::AttrTypes::Float3>();
+    s_descriptorSetLayoutsVk = DescriptorSetLayoutsVk::Get();
     PC_PRINT("CREATED", TagType::Constr, "BasicWorkflowVk")
   };
   virtual ~BasicRenderWorkflowVk() override {
@@ -35,23 +38,33 @@ public:
     return m_basicRenderPassVk.GetVkRenderPass();
   };
 
+  virtual void AddMeshToWorkflow(Mesh *mesh) override;
+
+  virtual void RecordRenderCommands(const VkCommandBuffer &commandBuffer,
+                                    const uint32_t imageIndex) override;
+  virtual void ProcessSceneUpdates(const uint32_t currentFrame) override;
+
   virtual void CreateRenderPass() override;
-  virtual void CreateDescriptorSetLayouts() override;
-  virtual void CreatePipeline(Material &) override;
+  virtual void CreatePipelines() override;
   virtual void CreateFramebuffers() override;
   virtual void AllocateVkVertexBuffers() override;
   virtual void AllocateVkIndexBuffers() override;
-  virtual void AddMeshToWorkflow(Mesh *mesh) override;
-  virtual void RecordRenderCommands(const Scene &scene,
-                                    const VkCommandBuffer &commandBuffer,
-                                    const uint32_t imageIndex) override;
+  virtual void AllocateVkUniformBuffers() override;
+  virtual void CreateDescriptorSetLayouts() override;
+
   virtual void CleanUp() override;
 
 private:
   static BufferDefs::Layout s_vertexBufferLayout;
+  // TODO: Move to global resources (and index into it whenever needed)
+  static DescriptorSetLayoutsVk *s_descriptorSetLayoutsVk;
+
+  RenderPassVk m_basicRenderPassVk;
+  GfxPipelineVk m_colorPipelineVk;
 
   std::vector<VkDeviceSize> m_vertexBufferOffsets;
   std::vector<VkDeviceSize> m_indexBufferOffsets;
+  std::vector<VkDeviceSize> m_uniformBufferOffsets;
 
   VkBuffer m_vkVertexBuffer;
   VkDeviceMemory m_vkVertexBufferMemory;
@@ -59,8 +72,11 @@ private:
   VkBuffer m_vkIndexBuffer;
   VkDeviceMemory m_vkIndexBufferMemory;
 
-  RenderPassVk m_basicRenderPassVk;
-  GfxPipelineVk m_colorPipelineVk;
+  VkDescriptorSetLayout m_colorPipelineDSetLayout;
+
+  std::vector<VkBuffer> m_uniformBuffers;
+  std::vector<VkDeviceMemory> m_uniformBuffersMemory;
+  std::vector<void *> m_uniformBuffersMapped;
 };
 
 GFX_NAMESPACE_END

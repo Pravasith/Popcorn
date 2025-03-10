@@ -33,7 +33,7 @@ public:
   // Destroy cache after descriptor sets & pipelines are created & no longer
   // required
   void CleanUp() {
-    auto &device = m_deviceVk->GetDevice();
+    auto &device = DeviceVk::Get()->GetDevice();
 
     for (auto &[_, layout] : m_layoutCache) {
       vkDestroyDescriptorSetLayout(device, layout, nullptr);
@@ -42,7 +42,7 @@ public:
     m_layoutCache.clear();
   };
 
-  VkDescriptorSetLayout &
+  [[nodiscard]] VkDescriptorSetLayout &
   GetLayout(const std::vector<VkDescriptorSetLayoutBinding> &bindings);
 
   //
@@ -52,7 +52,6 @@ public:
 
 private:
   DescriptorSetLayoutsVk() {
-    m_deviceVk = DeviceVk::Get();
     PC_PRINT("CREATED", TagType::Constr, "DescriptorSetLayoutsVk")
   };
   ~DescriptorSetLayoutsVk() {
@@ -64,7 +63,6 @@ private:
 
 private:
   static DescriptorSetLayoutsVk *s_instance;
-  DeviceVk *m_deviceVk;
 
   std::unordered_map<size_t, VkDescriptorSetLayout> m_layoutCache;
 };

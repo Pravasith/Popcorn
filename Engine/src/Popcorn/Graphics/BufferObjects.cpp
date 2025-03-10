@@ -21,5 +21,14 @@ VertexBuffer *VertexBuffer::Create() {
   };
 };
 
+void VertexBuffer::Destroy(VertexBuffer *vertexBuffer) {
+  if (!vertexBuffer) {
+    PC_WARN("Attempt to delete a null vBfr")
+  };
+
+  delete vertexBuffer;
+  vertexBuffer = nullptr;
+};
+
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

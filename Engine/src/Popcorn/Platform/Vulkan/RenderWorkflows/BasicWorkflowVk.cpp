@@ -10,22 +10,31 @@
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
 #include "RenderPassVk.h"
+#include "RendererVk.h"
 #include "SwapchainVk.h"
+#include <cstddef>
 #include <cstdint>
 #include <glm/glm.hpp>
 #include <vector>
 #include <vulkan/vulkan_core.h>
+#define GLM_FORCE_RADIANS
+#include <chrono>
+#include <glm/gtc/matrix_transform.hpp>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 BufferDefs::Layout BasicRenderWorkflowVk::s_vertexBufferLayout{};
+DescriptorSetLayoutsVk *BasicRenderWorkflowVk::s_descriptorSetLayoutsVk =
+    nullptr;
 
 #ifdef PC_DEBUG
 constexpr bool showDrawCommandCount = false;
 #endif
 
 void BasicRenderWorkflowVk::CreateDescriptorSetLayouts() {
+  // This is a global binding at the moment (UBO for MVP transform matrix)
+  // Loop through material types & make different layouts
   std::vector<VkDescriptorSetLayoutBinding> bindings;
 
   VkDescriptorSetLayoutBinding uboLayoutBinding{};
@@ -34,9 +43,14 @@ void BasicRenderWorkflowVk::CreateDescriptorSetLayouts() {
   uboLayoutBinding.descriptorCount = 1;
   uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
   uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
+
+  bindings.emplace_back(uboLayoutBinding);
+
+  m_colorPipelineDSetLayout = s_descriptorSetLayoutsVk->GetLayout(bindings);
 };
 
-void BasicRenderWorkflowVk::CreatePipeline(Material &material) {
+void BasicRenderWorkflowVk::CreatePipelines() {
+
   //
   // --- MAIN PIPELINE ---------------------------------------------------
   auto *deviceVkStn = DeviceVk::Get();
@@ -44,8 +58,12 @@ void BasicRenderWorkflowVk::CreatePipeline(Material &material) {
   auto &device = deviceVkStn->GetDevice();
   const auto &swapchainExtent = swapchainVkStn->GetSwapchainExtent();
 
-  Buffer vertShaderBuffer = std::move(material.GetShaders()[0]);
-  Buffer fragShaderBuffer = std::move(material.GetShaders()[1]);
+  // TODO: Material specific pipelines; loop over materials to create unique
+  // pipelines. Unique material properties as hash -- pipeline layout
+  auto &material = m_materials[0];
+
+  Buffer vertShaderBuffer = std::move(material->GetShaders()[0]);
+  Buffer fragShaderBuffer = std::move(material->GetShaders()[1]);
 
   auto vertShaderModule = PC_CreateShaderModule(device, vertShaderBuffer);
   auto fragShaderModule = PC_CreateShaderModule(device, fragShaderBuffer);
@@ -89,6 +107,9 @@ void BasicRenderWorkflowVk::CreatePipeline(Material &material) {
   PipelineUtils::GetDefaultColorBlendingState(pipelineState.colorBlendState);
   PipelineUtils::GetDefaultPipelineLayoutCreateInfo(
       pipelineState.pipelineLayout);
+
+  pipelineState.pipelineLayout.setLayoutCount = 1;
+  pipelineState.pipelineLayout.pSetLayouts = &m_colorPipelineDSetLayout;
 
   // CREATE PIPELINE LAYOUT
   m_colorPipelineVk.CreatePipelineLayout(device, pipelineState.pipelineLayout);
@@ -180,8 +201,7 @@ void BasicRenderWorkflowVk::CreateFramebuffers() {
 };
 
 void BasicRenderWorkflowVk::RecordRenderCommands(
-    const Scene &scene, const VkCommandBuffer &commandBuffer,
-    const uint32_t imageIndex) {
+    const VkCommandBuffer &commandBuffer, const uint32_t imageIndex) {
   auto *swapchainVkStn = SwapchainVk::Get();
 
   //
@@ -450,9 +470,96 @@ void BasicRenderWorkflowVk::AllocateVkIndexBuffers() {
   vkFreeMemory(device, stagingIndexBufferMemory, nullptr);
 };
 
+//
+// --------------------------------------------------------------------------
+// --- UNIFORM BUFFERS ALLOCATION -------------------------------------------
+//
+void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
+  constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
+  m_uniformBuffers.resize(maxFramesInFlight);
+  m_uniformBuffersMemory.resize(maxFramesInFlight);
+  m_uniformBuffersMapped.resize(maxFramesInFlight);
+
+  // TODO: Move this to Camera
+  struct GlobalUniform {
+    glm::mat4 view;
+    glm::mat4 proj;
+  };
+
+  const VkExtent2D &swapchainExtent = SwapchainVk::Get()->GetSwapchainExtent();
+
+  UniformBuffer viewProjUBO;
+  viewProjUBO
+      .SetLayout<BufferDefs::AttrTypes::Mat4, BufferDefs::AttrTypes::Mat4>();
+
+  viewProjUBO.Fill(
+      {// View matrix
+       glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+                   glm::vec3(0.0f, 0.0f, 1.0f)),
+       // Projection Matrix
+       glm::perspective(glm::radians(45.0f),
+                        swapchainExtent.width / (float)swapchainExtent.height,
+                        0.1f, 10.0f)});
+
+  VkDeviceSize viewProjUBOSize = viewProjUBO.GetSize();
+  //
+  // View & Projection Matrices -------------------------------------------
+  m_uniformBufferOffsets.push_back(0);
+
+  VkDeviceSize currentOffset = 0 + viewProjUBOSize;
+
+  // Get the offsets of meshes & the total size of the buffers (a.k.a.
+  // currentOffset)
+  for (int j = 0; j < m_meshes.size(); ++j) {
+    UniformBuffer uniformBuffer = m_meshes[j]->GetUniformBuffer();
+    m_uniformBufferOffsets.push_back(currentOffset);
+    currentOffset += uniformBuffer.GetSize();
+  }
+
+  for (size_t i = 0; i < maxFramesInFlight; ++i) {
+    VkBufferCreateInfo bufferInfo{};
+
+    BufferVkUtils::GetDefaultVkBufferState(bufferInfo, currentOffset);
+    bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+
+    BufferVkUtils::AllocateVkBuffer(m_uniformBuffers[i],
+                                    m_uniformBuffersMemory[i], bufferInfo,
+                                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+    m_uniformBuffersMapped[i] = BufferVkUtils::MapVkMemoryToCPU(
+        m_uniformBuffersMemory[i], 0, currentOffset);
+  };
+};
+
+//
+// --------------------------------------------------------------------------
+// --- UPDATE UNIFORMS & PUSH CONSTANTS HERE --------------------------------
+//
+void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
+  static auto startTime = std::chrono::high_resolution_clock::now();
+  auto currentTime = std::chrono::high_resolution_clock::now();
+
+  float time = std::chrono::duration<float, std::chrono::seconds::period>(
+                   currentTime - startTime)
+                   .count();
+};
+
+//
+// --------------------------------------------------------------------------
+// --- CLEANUP --------------------------------------------------------------
+//
 void BasicRenderWorkflowVk::CleanUp() {
   auto &device = DeviceVk::Get()->GetDevice();
   auto *framebuffersVkStn = FramebuffersVk::Get();
+
+  constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
+
+  // Cleanup uniform buffer memory
+  for (size_t i = 0; i < maxFramesInFlight; i++) {
+    vkDestroyBuffer(device, m_uniformBuffers[i], nullptr);
+    vkFreeMemory(device, m_uniformBuffersMemory[i], nullptr);
+  }
 
   // Cleanup index buffer memory
   BufferVkUtils::DestroyVkBuffer(m_vkIndexBuffer, m_vkIndexBufferMemory);

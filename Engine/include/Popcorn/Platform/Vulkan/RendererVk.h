@@ -27,9 +27,9 @@ public:
   virtual ~RendererVk() override;
 
   virtual void SceneReady() override;
+  virtual void UpdateFrameData() override;
   virtual void DrawFrame(const Scene &scene) override;
   virtual bool OnFrameBufferResize(FrameBfrResizeEvent &) override;
-  virtual void CreateMaterialPipeline(Material *materialPtr) override;
   virtual void AddMeshToWorkflow(Mesh *meshPtr) override;
 
   // Sets up devices, configure swapchains, creates depth buffers
@@ -37,9 +37,6 @@ public:
   void VulkanInit();
   // Creates render workflows
   void CreateRenderWorkflows();
-  // Loops through all meshes & creates a contiguous Vulkan buffer memory for
-  // each workflow -- each workflow has one VkBuffer & one VkDeviceMemory each
-  void AllocateVkBuffers();
 
   void VulkanCleanUp();
 

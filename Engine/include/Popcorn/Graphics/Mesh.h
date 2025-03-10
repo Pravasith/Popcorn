@@ -1,20 +1,29 @@
 #pragma once
 
+#include "BufferObjects.h"
 #include "GameObject.h"
 #include "GlobalMacros.h"
 #include "Material.h"
 #include "Popcorn/Core/Base.h"
 #include "Renderer.h"
-#include "BufferObjects.h"
 #include <cstdint>
+#include <glm/fwd.hpp>
+#include <glm/glm.hpp>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 class Mesh : public GameObject {
 public:
+  struct Uniforms {
+    glm::mat4 modelMatrix; // Model matrix
+  };
+
   struct Spec {
     bool enableIndexBuffers = false;
+
+    // Uniforms
+    glm::mat4 modelMatrix;
   };
 
   // TODO: Handle the case of duplicating meshes & materials
@@ -27,6 +36,10 @@ public:
     if (indexBuffer != nullptr) {
       m_spec.enableIndexBuffers = true;
     };
+
+    // m_spec.modelMatrix = blah blah ...
+    m_uniformBuffer->SetLayout<BufferDefs::AttrTypes::Mat4>();
+    // m_uniformBuffer->Fill(m_spec.modelMatrix);
 
     PC_PRINT("CREATED", TagType::Constr, "MESH");
   };
@@ -51,6 +64,7 @@ public:
   [[nodiscard]] inline VertexBuffer &GetVertexBuffer() const {
     return m_vertexBuffer;
   };
+
   // TODO: Change this to variant return type
   [[nodiscard]] inline IndexBuffer<uint16_t> &GetIndexBuffer() const {
     if (m_indexBuffer == nullptr) {
@@ -59,9 +73,15 @@ public:
     return *m_indexBuffer;
   };
 
+  [[nodiscard]] inline UniformBuffer &GetUniformBuffer() const {
+    return *m_uniformBuffer;
+  };
+
 protected:
   VertexBuffer &m_vertexBuffer;
   IndexBuffer<uint16_t> *m_indexBuffer = nullptr;
+  UniformBuffer *m_uniformBuffer = nullptr;
+
   // TODO: Make this a Vector as required
   Material &m_material;
   Spec m_spec;

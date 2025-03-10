@@ -42,7 +42,8 @@ void FrameVk::CreateRenderSyncObjects() {
 
 void FrameVk::Draw(
     std::vector<VkCommandBuffer> &commandBuffers,
-    const VkRenderPass &renderPass,
+    const VkRenderPass &finalPaintRenderPass,
+    const std::function<void(const uint32_t currentFrame)> &updateSceneData,
     const std::function<void(const uint32_t frameIndex,
                              VkCommandBuffer &currentFrameCommandBuffer)>
         &recordDrawCommands) {
@@ -67,7 +68,7 @@ void FrameVk::Draw(
       // Semaphore: Signal when image is acquired & ready for render
       imageAvailable,
       // Final paint renderpass for swapchain recreation
-      renderPass);
+      finalPaintRenderPass);
 
   //
   // In case of resize (or invalid swapchain to be precise), we return and
@@ -77,6 +78,10 @@ void FrameVk::Draw(
 
   // Once done, we reset the fence to in-flight mode
   vkResetFences(device, 1, &m_inFlightFences[m_currentFrame]);
+
+  //
+  // Update Uniforms & push constants
+  updateSceneData(m_currentFrame);
 
   //
   // Reset command buffer & start recording commands to it (lambda called from
@@ -106,7 +111,7 @@ void FrameVk::Draw(
       // Image index
       swapchainImageIndex,
       // Final paint renderpass for swapchain recreation
-      renderPass);
+      finalPaintRenderPass);
 
   //
   // Wait until all the commandBuffers are executed before moving to the next

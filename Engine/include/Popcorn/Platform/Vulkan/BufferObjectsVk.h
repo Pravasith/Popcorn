@@ -1,9 +1,9 @@
 #pragma once
 
+#include "BufferObjects.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
-#include "BufferObjects.h"
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
@@ -47,7 +47,8 @@ public:
       const BufferDefs::Layout &layout);
 
   static void GetDefaultVertexInputAttributeDescriptions(
-      std::vector<VkVertexInputAttributeDescription> &, const BufferDefs::Layout &);
+      std::vector<VkVertexInputAttributeDescription> &,
+      const BufferDefs::Layout &);
 
   //
   // COPY CONSTRUCTOR

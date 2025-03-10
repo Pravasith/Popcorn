@@ -36,23 +36,21 @@ public:
       };
     };
 
-    vertexBuffer = VertexBuffer::Create();
-    vertexBuffer2 = VertexBuffer::Create();
-    indexBuffer = new IndexBuffer<uint16_t>();
-    uniformBuffer = new UniformBuffer();
-
-    // Model view projection matrix
-    uniformBuffer
-        ->SetLayout<BufferDefs::AttrTypes::Mat4, BufferDefs::AttrTypes::Mat4,
-                    BufferDefs::AttrTypes::Mat4>();
-
-    struct MVP {
+    struct ModelMatrix {
       glm::mat4 model;
-      glm::mat4 view;
-      glm::mat4 proj;
     };
 
-    // uniformBuffer->Fill();
+    vertexBuffer = VertexBuffer::Create();
+    vertexBuffer2 = VertexBuffer::Create();
+
+    indexBuffer = new IndexBuffer<uint16_t>();
+
+    uniformBuffer = new UniformBuffer();
+
+    // Model matrix
+    uniformBuffer->SetLayout<BufferDefs::AttrTypes::Mat4>();
+
+    // uniformBuffer->Fill<ModelMatrix>();
 
     vertexBuffer->Fill<Vertex>({
         {{-.5f, -.5f}, {.8f, .0f, .8f}},
@@ -107,6 +105,12 @@ public:
     delete triMat;
     triMat = nullptr;
 
+    delete uniformBuffer;
+    uniformBuffer = nullptr;
+
+    delete uniformBuffer2;
+    uniformBuffer2 = nullptr;
+
     delete indexBuffer;
     indexBuffer = nullptr;
 
@@ -115,9 +119,14 @@ public:
   };
 
   virtual void OnUpdate() override {
+    // Update uniforms here
+  };
+
+  virtual void OnRender() override {
     //
     Renderer::Get().DrawFrame(triScene);
   };
+
   virtual void OnEvent(Event &e) override {};
 
 private:
@@ -125,7 +134,9 @@ private:
   VertexBuffer *vertexBuffer2;
 
   IndexBuffer<uint16_t> *indexBuffer;
+
   UniformBuffer *uniformBuffer;
+  UniformBuffer *uniformBuffer2;
 
   TriangleScene triScene{};
   Mesh *triMesh;

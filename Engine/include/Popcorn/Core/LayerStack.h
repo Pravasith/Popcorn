@@ -2,6 +2,7 @@
 
 #include "GlobalMacros.h"
 #include "Layer.h"
+#include "TimeEvent.h"
 #include <cstdint>
 #include <vector>
 
@@ -30,10 +31,16 @@ public:
     }
   };
 
-  // TODO: REFACTOR WHEN DEALING WITH TIME
-  void UpdateLayerStack() {
+  // TODO: Refactor when dealing with time
+  void UpdateLayers(TimeEvent &e) {
     for (Layer *l : m_layer_stack) {
-      l->OnUpdate();
+      l->OnUpdate(e);
+    }
+  };
+
+  void RenderLayers() {
+    for (Layer *l : m_layer_stack) {
+      l->OnRender();
     }
   };
 

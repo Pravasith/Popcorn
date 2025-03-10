@@ -136,14 +136,7 @@ public:
   };
 
   static VertexBuffer *Create();
-  inline static void Destroy(VertexBuffer *vBfr) {
-    if (!vBfr) {
-      PC_WARN("Attempt to delete a null vBfr")
-    };
-
-    delete vBfr;
-    vBfr = nullptr;
-  };
+  static void Destroy(VertexBuffer *);
 
   // COPY CONSTRUCTOR
   VertexBuffer(const VertexBuffer &other) {
@@ -211,8 +204,8 @@ public:
   IndexBuffer() { PC_PRINT("CREATED", TagType::Constr, "IndexBuffer") };
   ~IndexBuffer() { PC_PRINT("DESTROYED", TagType::Destr, "IndexBuffer") };
 
-  const T GetSize() const { return m_buffer.GetSize(); };
-  const T GetCount() const { return m_buffer.GetCount(); };
+  const uint64_t GetSize() const { return m_buffer.GetSize(); };
+  const uint64_t GetCount() const { return m_buffer.GetCount(); };
 
   void Fill(std::initializer_list<T> elements) { m_buffer.SetData(elements); };
 
@@ -280,6 +273,9 @@ public:
   template <typename T> void Fill(std::initializer_list<T> list) {
     m_buffer.SetData(list);
   };
+
+  const uint64_t GetSize() const { return m_buffer.GetSize(); };
+  const uint64_t GetCount() const { return m_buffer.GetCount(); };
 
   [[nodiscard]] inline const BufferDefs::Layout &GetLayout() const {
     PC_ASSERT(m_layout.countValue != 0, "BufferDefs::Layout is empty!");

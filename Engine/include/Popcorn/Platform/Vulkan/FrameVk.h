@@ -33,7 +33,8 @@ public:
 
   void
   Draw(std::vector<VkCommandBuffer> &commandBuffers,
-       const VkRenderPass &renderPass,
+       const VkRenderPass &finalPaintRenderPass,
+       const std::function<void(const uint32_t currentFrame)> &updateSceneData,
        const std::function<void(const uint32_t frameIndex,
                                 VkCommandBuffer &currentFrameCommandBuffer)>
            &recordDrawCommands);
