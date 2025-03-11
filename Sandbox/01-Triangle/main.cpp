@@ -8,6 +8,7 @@
 #include <Popcorn/Graphics/Renderer.h>
 #include <Popcorn/Scene/Scene.h>
 #include <Sources.h>
+#include <TimeEvent.h>
 #include <cstdint>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
@@ -45,13 +46,6 @@ public:
 
     indexBuffer = new IndexBuffer<uint16_t>();
 
-    uniformBuffer = new UniformBuffer();
-
-    // Model matrix
-    uniformBuffer->SetLayout<BufferDefs::AttrTypes::Mat4>();
-
-    // uniformBuffer->Fill<ModelMatrix>();
-
     vertexBuffer->Fill<Vertex>({
         {{-.5f, -.5f}, {.8f, .0f, .8f}},
         {{.0f, -.5f}, {.8f, .8f, .0f}},
@@ -88,6 +82,9 @@ public:
     triMesh = new Mesh{*vertexBuffer, indexBuffer, *triMat};
     triMesh2 = new Mesh{*vertexBuffer2, indexBuffer, *triMat};
 
+    triMesh->SetPosition({.0f, .1f, .0f});
+    triMesh2->SetPosition({.0f, -.1f, .0f});
+
     // ADD MESH TO WORK FLOW -> CREATE PIPELINES
     triScene.Add(triMesh);
     triScene.Add(triMesh2);
@@ -105,12 +102,6 @@ public:
     delete triMat;
     triMat = nullptr;
 
-    delete uniformBuffer;
-    uniformBuffer = nullptr;
-
-    delete uniformBuffer2;
-    uniformBuffer2 = nullptr;
-
     delete indexBuffer;
     indexBuffer = nullptr;
 
@@ -118,8 +109,10 @@ public:
     VertexBuffer::Destroy(vertexBuffer2);
   };
 
-  virtual void OnUpdate() override {
+  virtual void OnUpdate(TimeEvent &e) override {
     // Update uniforms here
+    triMesh.RotateY(90.f);
+    triMesh2.RotateY(90.f);
   };
 
   virtual void OnRender() override {
@@ -134,9 +127,6 @@ private:
   VertexBuffer *vertexBuffer2;
 
   IndexBuffer<uint16_t> *indexBuffer;
-
-  UniformBuffer *uniformBuffer;
-  UniformBuffer *uniformBuffer2;
 
   TriangleScene triScene{};
   Mesh *triMesh;

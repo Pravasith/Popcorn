@@ -14,11 +14,11 @@ void Mesh::ValidateMembersWithSpec(const Spec &spec) {
 };
 
 // Fires when the mesh is added to a Scene
-void Mesh::OnAttach(const SceneData &) {};
+void Mesh::OnAttach() {};
 
-void Mesh::OnUpdate(const SceneData &) {};
+void Mesh::OnUpdate() {};
 
-void Mesh::OnRender(const SceneData &) {};
+void Mesh::OnRender() {};
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

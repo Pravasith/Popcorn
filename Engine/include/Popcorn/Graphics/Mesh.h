@@ -52,9 +52,9 @@ public:
 
   void ValidateMembersWithSpec(const Spec &spec);
 
-  virtual void OnAttach(const SceneData &) override;
-  virtual void OnUpdate(const SceneData &) override;
-  virtual void OnRender(const SceneData &) override;
+  virtual void OnAttach() override;
+  virtual void OnUpdate() override;
+  virtual void OnRender() override;
 
   virtual constexpr GameObjectTypes GetType() const override {
     return GameObjectTypes::Mesh;

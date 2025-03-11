@@ -12,7 +12,7 @@ public:
   virtual void OnAttach();
   virtual void OnDetach();
 
-  virtual void OnEvent(Event &e);
+  virtual bool OnEvent(Event &e);
   virtual void OnUpdate(TimeEvent &e) = 0;
   virtual void OnRender();
 };

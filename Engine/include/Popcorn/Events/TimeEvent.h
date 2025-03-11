@@ -7,26 +7,23 @@
 ENGINE_NAMESPACE_BEGIN
 class TimeEvent : public Event {
 public:
-  TimeEvent()
-      : m_now(0.0f),
-        // Assumption: First frame took 16.66 ms
-        m_delta(16.66f), m_elapsed(0.0f) {};
+  TimeEvent(double elapsed, double delta)
+      : m_elapsed(elapsed), m_delta(delta) {};
 
-  // Always in MS
-  [[nodiscard]] float GetNowMS() const { return m_now; };
-  [[nodiscard]] float GetDeltaMS() const { return m_delta; };
-  [[nodiscard]] float GetElapsedMS() const { return m_elapsed; };
+  // Always in Seconds
+  [[nodiscard]] double GetDelta() const { return m_delta; };
+  // Always in Seconds
+  [[nodiscard]] double GetElapsed() const { return m_elapsed; };
 
   EVENT_CATEGORY_OVERRIDE_METHODS(TimeEvent);
   EVENT_TYPE_OVERRIDE_METHODS(KeyReleased);
 
   void PrintDebugData() const override {
-    PC_PRINT(GetDeltaMS(), TagType::Print, "TIME-EVENT");
+    PC_PRINT(GetDelta(), TagType::Print, "TIME-EVENT");
   };
 
 private:
-  float m_now;
-  float m_delta;
-  float m_elapsed;
+  double m_elapsed = 0.;
+  double m_delta = 0.01666;
 };
 ENGINE_NAMESPACE_END
