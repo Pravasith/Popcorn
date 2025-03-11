@@ -38,7 +38,7 @@ void Time::Start() {
 
 void Time::Stop() {
   m_elapsed = 0;
-  m_delta = 0.0166;
+  m_delta = 0.01666;
 
   m_isGameLoopRunning = false;
 };

@@ -111,8 +111,11 @@ public:
 
   virtual void OnUpdate(TimeEvent &e) override {
     // Update uniforms here
-    triMesh.RotateY(90.f);
-    triMesh2.RotateY(90.f);
+    triMesh->RotateY(90.f * e.GetElapsedS());
+    triMesh2->RotateY(90.f * e.GetElapsedS());
+
+    // TODO: Refactor these so user doesn't have to call update
+    triScene.Update();
   };
 
   virtual void OnRender() override {
@@ -120,7 +123,7 @@ public:
     Renderer::Get().DrawFrame(triScene);
   };
 
-  virtual void OnEvent(Event &e) override {};
+  virtual bool OnEvent(Event &e) override { return false; };
 
 private:
   VertexBuffer *vertexBuffer;
@@ -148,6 +151,7 @@ int main(int argc, char **argv) {
   auto gameLayer = new GameLayer();
   Application::AddLayer(gameLayer);
 
+  // TODO: Refactor these so user doesn't have to call SceneReady
   // INDICATE SCENE READY
   renderer.SceneReady();
 

@@ -172,7 +172,7 @@ void RendererVk::SceneReady() {
     // each workflow -- each workflow has one VkBuffer & one VkDeviceMemory each
     renderWorkflow->AllocateVkVertexBuffers();
     renderWorkflow->AllocateVkIndexBuffers();
-    // renderWorkflow->AllocateDescriptorSets();
+    renderWorkflow->AllocateVkUniformBuffers();
     renderWorkflow->CreatePipelines();
   }
 

@@ -50,7 +50,6 @@ private:
 
   virtual void OnEvent(Event &) override;
   virtual bool OnUpdate(TimeEvent &) override;
-  virtual void OnRender();
 
   bool OnClockTick(TimeEvent &);
 

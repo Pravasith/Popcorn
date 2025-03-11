@@ -9,17 +9,18 @@
 #include "PipelineVk.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
+#include "Popcorn/Core/Helpers.h"
 #include "RenderPassVk.h"
 #include "RendererVk.h"
 #include "SwapchainVk.h"
 #include <cstddef>
 #include <cstdint>
+#define GLM_FORCE_RADIANS
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_transform.hpp>
 #include <glm/glm.hpp>
 #include <vector>
 #include <vulkan/vulkan_core.h>
-#define GLM_FORCE_RADIANS
-#include <chrono>
-#include <glm/gtc/matrix_transform.hpp>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -488,20 +489,23 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
 
   const VkExtent2D &swapchainExtent = SwapchainVk::Get()->GetSwapchainExtent();
 
-  UniformBuffer viewProjUBO;
-  viewProjUBO
+  m_viewProjUBO
       .SetLayout<BufferDefs::AttrTypes::Mat4, BufferDefs::AttrTypes::Mat4>();
 
-  viewProjUBO.Fill(
-      {// View matrix
-       glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-                   glm::vec3(0.0f, 0.0f, 1.0f)),
-       // Projection Matrix
-       glm::perspective(glm::radians(45.0f),
-                        swapchainExtent.width / (float)swapchainExtent.height,
-                        0.1f, 10.0f)});
+  // View matrix
+  auto view =
+      glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+                  glm::vec3(0.0f, 0.0f, 1.0f));
 
-  VkDeviceSize viewProjUBOSize = viewProjUBO.GetSize();
+  // Projection Matrix
+  auto proj = glm::perspective(
+      glm::radians(45.0f),
+      swapchainExtent.width / (float)swapchainExtent.height, 0.1f, 10.0f);
+  proj[1][1] *= -1;
+
+  m_viewProjUBO.Fill({view, proj});
+
+  VkDeviceSize viewProjUBOSize = m_viewProjUBO.GetSize();
   //
   // View & Projection Matrices -------------------------------------------
   m_uniformBufferOffsets.push_back(0);
@@ -537,12 +541,22 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
 // --- UPDATE UNIFORMS & PUSH CONSTANTS HERE --------------------------------
 //
 void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
-  static auto startTime = std::chrono::high_resolution_clock::now();
-  auto currentTime = std::chrono::high_resolution_clock::now();
+  // Copy view project matrix first
+  BufferVkUtils::CopyBufferCPUToGPU(
+      m_uniformBuffersMemory[currentFrame],
+      (byte_t *)m_uniformBuffersMapped[currentFrame],
+      m_viewProjUBO.GetBufferData(), m_viewProjUBO.GetSize());
 
-  float time = std::chrono::duration<float, std::chrono::seconds::period>(
-                   currentTime - startTime)
-                   .count();
+  // Then copy each mesh model matrix
+  for (auto &mesh : m_meshes) {
+    auto &meshModelMatUBO = mesh->GetUniformBuffer();
+
+    BufferVkUtils::CopyBufferCPUToGPU(
+        m_uniformBuffersMemory[currentFrame],
+        (byte_t *)m_uniformBuffersMapped[currentFrame] +
+            meshModelMatUBO.GetSize(),
+        meshModelMatUBO.GetBufferData(), meshModelMatUBO.GetSize());
+  }
 };
 
 //

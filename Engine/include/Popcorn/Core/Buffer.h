@@ -56,9 +56,9 @@ public:
     PC_WARN(size << " SIZE")
     AllocBytes(size);
 
+    memcpy(m_data, list.begin(), size);
     m_count = list.size();
     m_size = size;
-    memcpy(m_data, list.begin(), size);
   };
 
   [[nodiscard]] inline byte_t *GetData() const {

@@ -8,6 +8,8 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+DescriptorSetLayoutsVk *DescriptorSetLayoutsVk::s_instance = nullptr;
+
 size_t DescriptorSetLayoutsVk::HashLayoutBindings(
     const std::vector<VkDescriptorSetLayoutBinding> &bindings) {
   size_t hash = 0;

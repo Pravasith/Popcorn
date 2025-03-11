@@ -45,6 +45,7 @@ add_library(
   # SCENE CLASSES
   # TODO: Separate the scene to a different library when time comes
   ${SCENE_IMPL_DIR}/Scene.cpp
+  ${SCENE_IMPL_DIR}/GameObject.cpp
   #
   # OPENGL CLASSES
   ${PLATFORM_IMPL_DIR}/OpenGL/RendererOpenGL.cpp
@@ -58,6 +59,7 @@ add_library(
   ${PLATFORM_IMPL_DIR}/Vulkan/BufferObjectsVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/FrameVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/CommandPoolVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/DescriptorsVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/Pipelines/GfxPipelineVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/Pipelines/PipelineVk.cpp
   #

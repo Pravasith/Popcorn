@@ -34,6 +34,8 @@ public:
   virtual void OnUpdate() = 0;
   virtual void OnRender() = 0;
 
+  [[nodiscard]] const glm::mat4 &GetMatrix() const { return m_matrix; };
+
   inline void SetPosition(glm::vec3 pos) {
     m_position = pos;
     UpdateMatrix();
@@ -46,7 +48,7 @@ public:
 
   void UpdateMatrix();
 
-private:
+protected:
   glm::vec3 m_position;
   glm::vec3 m_rotationEuler;
 

@@ -16,7 +16,10 @@ void Mesh::ValidateMembersWithSpec(const Spec &spec) {
 // Fires when the mesh is added to a Scene
 void Mesh::OnAttach() {};
 
-void Mesh::OnUpdate() {};
+void Mesh::OnUpdate() {
+  // Resets buffer data and fills again
+  m_uniformBuffer.Fill({m_matrix});
+};
 
 void Mesh::OnRender() {};
 

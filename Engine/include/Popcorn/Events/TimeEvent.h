@@ -11,15 +11,16 @@ public:
       : m_elapsed(elapsed), m_delta(delta) {};
 
   // Always in Seconds
-  [[nodiscard]] double GetDelta() const { return m_delta; };
+  [[nodiscard]] double GetDeltaS() const { return m_delta; };
   // Always in Seconds
-  [[nodiscard]] double GetElapsed() const { return m_elapsed; };
+  [[nodiscard]] double GetElapsedS() const { return m_elapsed; };
 
   EVENT_CATEGORY_OVERRIDE_METHODS(TimeEvent);
   EVENT_TYPE_OVERRIDE_METHODS(KeyReleased);
 
   void PrintDebugData() const override {
-    PC_PRINT(GetDelta(), TagType::Print, "TIME-EVENT");
+    PC_PRINT("Delta: " << GetDeltaS() << "S", TagType::Print, "TIME-EVENT");
+    PC_PRINT("Elapsed: " << GetElapsedS() << "S", TagType::Print, "TIME-EVENT");
   };
 
 private:

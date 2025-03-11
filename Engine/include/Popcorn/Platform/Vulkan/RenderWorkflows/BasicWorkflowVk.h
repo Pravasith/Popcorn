@@ -77,6 +77,9 @@ private:
   std::vector<VkBuffer> m_uniformBuffers;
   std::vector<VkDeviceMemory> m_uniformBuffersMemory;
   std::vector<void *> m_uniformBuffersMapped;
+
+  // TODO: Make this a global
+  UniformBuffer m_viewProjUBO;
 };
 
 GFX_NAMESPACE_END
