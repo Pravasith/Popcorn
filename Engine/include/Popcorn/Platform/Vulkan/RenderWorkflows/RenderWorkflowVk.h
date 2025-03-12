@@ -55,6 +55,8 @@ public:
   virtual void AllocateVkUniformBuffers() {};
   virtual void CreateCommandBuffer() {};
   virtual void CreateDescriptorSetLayouts() {};
+  virtual void CreateDescriptorPool() {};
+  virtual void CreateDescriptorSets() {};
 
   virtual void AddMeshToWorkflow(Mesh *mesh) {};
 

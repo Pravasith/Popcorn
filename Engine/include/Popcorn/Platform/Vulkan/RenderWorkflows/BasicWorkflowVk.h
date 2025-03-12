@@ -1,7 +1,6 @@
 #pragma once
 
 #include "BufferObjects.h"
-#include "DescriptorsVk.h"
 #include "GfxPipelineVk.h"
 #include "GlobalMacros.h"
 #include "Material.h"
@@ -22,7 +21,6 @@ public:
   BasicRenderWorkflowVk() {
     s_vertexBufferLayout
         .Set<BufferDefs::AttrTypes::Float2, BufferDefs::AttrTypes::Float3>();
-    s_descriptorSetLayoutsVk = DescriptorSetLayoutsVk::Get();
     PC_PRINT("CREATED", TagType::Constr, "BasicWorkflowVk")
   };
   virtual ~BasicRenderWorkflowVk() override {
@@ -51,13 +49,13 @@ public:
   virtual void AllocateVkIndexBuffers() override;
   virtual void AllocateVkUniformBuffers() override;
   virtual void CreateDescriptorSetLayouts() override;
+  virtual void CreateDescriptorPool() override;
+  virtual void CreateDescriptorSets() override;
 
   virtual void CleanUp() override;
 
 private:
   static BufferDefs::Layout s_vertexBufferLayout;
-  // TODO: Move to global resources (and index into it whenever needed)
-  static DescriptorSetLayoutsVk *s_descriptorSetLayoutsVk;
 
   RenderPassVk m_basicRenderPassVk;
   GfxPipelineVk m_colorPipelineVk;
@@ -72,7 +70,9 @@ private:
   VkBuffer m_vkIndexBuffer;
   VkDeviceMemory m_vkIndexBufferMemory;
 
-  VkDescriptorSetLayout m_colorPipelineDSetLayout;
+  // TODO: Move to global resources (and index into it whenever needed)
+  VkDescriptorSetLayout m_globalUBOsDSetLayout;
+  VkDescriptorSetLayout m_localUBOsDSetLayout;
 
   std::vector<VkBuffer> m_uniformBuffers;
   std::vector<VkDeviceMemory> m_uniformBuffersMemory;
@@ -80,6 +80,8 @@ private:
 
   // TODO: Make this a global
   UniformBuffer m_viewProjUBO;
+
+  VkDescriptorPool m_descriptorPool;
 };
 
 GFX_NAMESPACE_END

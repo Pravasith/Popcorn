@@ -1,6 +1,5 @@
 #pragma once
 
-#include "DeviceVk.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include <unordered_map>
@@ -10,6 +9,11 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+//
+//
+// -------------------------------------------------------------------------
+// --- DESCRIPTOR SET LAYOUTS ----------------------------------------------
+//
 class DescriptorSetLayoutsVk {
 public:
   [[nodiscard]] inline static DescriptorSetLayoutsVk *Get() {
@@ -30,22 +34,13 @@ public:
     };
   };
 
-  // Destroy cache after descriptor sets & pipelines are created & no longer
-  // required
-  void CleanUp() {
-    auto &device = DeviceVk::Get()->GetDevice();
-
-    for (auto &[_, layout] : m_layoutCache) {
-      vkDestroyDescriptorSetLayout(device, layout, nullptr);
-    }
-
-    m_layoutCache.clear();
-  };
-
   [[nodiscard]] VkDescriptorSetLayout &
   GetLayout(const std::vector<VkDescriptorSetLayoutBinding> &bindings);
 
-  //
+  // Destroy cache after descriptor sets & pipelines are created & no longer
+  // required
+  void CleanUp();
+
   // --- UTILS -----------------------------------------------------------------
   [[nodiscard]] static VkDescriptorSetLayout CreateDescriptorSetLayout(
       const std::vector<VkDescriptorSetLayoutBinding> &bindings);
@@ -67,13 +62,47 @@ private:
   std::unordered_map<size_t, VkDescriptorSetLayout> m_layoutCache;
 };
 
+//
+//
+// -------------------------------------------------------------------------
+// --- DESCRIPTOR POOL -----------------------------------------------------
+//
 class DescriptorPoolVk {
 public:
+  // --- UTILS -----------------------------------------------------------------
+  static void CreateDescriptorPool(const VkDescriptorPoolCreateInfo &poolInfo,
+                                   VkDescriptorPool &pool);
+  static void DestroyDescriptorPool(VkDescriptorPool &pool);
+
+  static void
+  GetDefaultDescriptorPoolState(VkDescriptorPoolCreateInfo &poolInfo,
+                                uint32_t maxDSets,
+                                std::vector<VkDescriptorPoolSize> poolSizes);
+
+private:
   DescriptorPoolVk() {
     PC_PRINT("CREATED", TagType::Constr, "DescriptorPoolVk")
   };
   ~DescriptorPoolVk() {
     PC_PRINT("DESTROYED", TagType::Destr, "DescriptorPoolVk")
+  };
+};
+
+//
+//
+// -------------------------------------------------------------------------
+// --- DESCRIPTOR SETS -----------------------------------------------------
+//
+class DescriptorSetsVk {
+public:
+  static void AllocateDescriptorSet(VkDescriptorSetAllocateInfo &allocInfo);
+
+private:
+  DescriptorSetsVk() {
+    PC_PRINT("CREATED", TagType::Constr, "DescriptorSetsVk")
+  };
+  ~DescriptorSetsVk() {
+    PC_PRINT("DESTROYED", TagType::Destr, "DescriptorSetsVk")
   };
 };
 

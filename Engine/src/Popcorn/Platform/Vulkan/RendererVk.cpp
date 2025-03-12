@@ -13,6 +13,7 @@
 #include "SurfaceVk.h"
 #include "SwapchainVk.h"
 #include <cstring>
+#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -107,6 +108,7 @@ RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
   s_framebuffersVk = FramebuffersVk::Get();
   s_commandPoolVk = CommandPoolVk::Get();
   s_frameVk = FrameVk::Get();
+  s_descriptorSetLayoutsVk = DescriptorSetLayoutsVk::Get();
 
   s_swapchainVk->SetAppWindow(appWin);
 };
@@ -120,12 +122,14 @@ void RendererVk::VulkanCleanUp() {
   auto &instance = s_deviceVk->GetVkInstance();
   auto &device = s_deviceVk->GetDevice();
 
+  s_descriptorSetLayoutsVk->CleanUp();
   DescriptorSetLayoutsVk::Destroy();
 
   for (auto *workflow : s_renderWorkflows) {
     workflow->CleanUp();
     delete workflow;
   }
+  s_renderWorkflows.clear();
 
   s_frameVk->CleanUp();
   FrameVk::Destroy();
@@ -133,11 +137,10 @@ void RendererVk::VulkanCleanUp() {
   s_commandPoolVk->CleanUp();
   CommandPoolVk::Destroy();
 
-  s_renderWorkflows.clear();
-  FramebuffersVk::Destroy();
-
   s_swapchainVk->CleanUp(device);
   SwapchainVk::Destroy();
+
+  FramebuffersVk::Destroy();
 
   s_surfaceVk->CleanUp(instance);
   SurfaceVk::Destroy();
@@ -163,22 +166,20 @@ void RendererVk::CreateRenderWorkflows() {
   }
 };
 
+// Sort materials, allocate descriptor sets, vk buffers, index buffers &
+// create pipelines
 void RendererVk::SceneReady() {
-  // Sort materials, allocate descriptor sets, vk buffers, index buffers &
-  // create pipelines
-
   for (auto &renderWorkflow : s_renderWorkflows) {
     // Loops through all meshes & creates a contiguous Vulkan buffer memory for
     // each workflow -- each workflow has one VkBuffer & one VkDeviceMemory each
     renderWorkflow->AllocateVkVertexBuffers();
     renderWorkflow->AllocateVkIndexBuffers();
     renderWorkflow->AllocateVkUniformBuffers();
+    renderWorkflow->CreateDescriptorSetLayouts();
+    renderWorkflow->CreateDescriptorPool();
+    renderWorkflow->CreateDescriptorSets();
     renderWorkflow->CreatePipelines();
   }
-
-  // //
-  // // CREATE MATERIAL PIPELINES -------------------------------------------
-  // CreatePipeline(*materialPtr);
 };
 
 void RendererVk::AddMeshToWorkflow(Mesh *mesh) {

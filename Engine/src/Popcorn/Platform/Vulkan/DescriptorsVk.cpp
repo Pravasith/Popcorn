@@ -1,5 +1,7 @@
 #include "DescriptorsVk.h"
+#include "DeviceVk.h"
 #include "GlobalMacros.h"
+#include "RendererVk.h"
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -8,6 +10,11 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+//
+//
+// -------------------------------------------------------------------------
+// --- DESCRIPTOR SET LAYOUTS ----------------------------------------------
+//
 DescriptorSetLayoutsVk *DescriptorSetLayoutsVk::s_instance = nullptr;
 
 size_t DescriptorSetLayoutsVk::HashLayoutBindings(
@@ -61,6 +68,51 @@ VkDescriptorSetLayout &DescriptorSetLayoutsVk::GetLayout(
 
   return m_layoutCache[bindingsHash];
 };
+
+void DescriptorSetLayoutsVk::CleanUp() {
+  auto &device = DeviceVk::Get()->GetDevice();
+
+  for (auto &[_, layout] : m_layoutCache) {
+    vkDestroyDescriptorSetLayout(device, layout, nullptr);
+  }
+
+  m_layoutCache.clear();
+}
+
+//
+//
+// -------------------------------------------------------------------------
+// --- DESCRIPTOR POOL -----------------------------------------------------
+//
+void DescriptorPoolVk::GetDefaultDescriptorPoolState(
+    VkDescriptorPoolCreateInfo &poolInfo, uint32_t maxDSets,
+    std::vector<VkDescriptorPoolSize> poolSizes) {
+
+  poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+  poolInfo.poolSizeCount = poolSizes.size();
+  poolInfo.pPoolSizes = poolSizes.data();
+  poolInfo.maxSets = maxDSets;
+  poolInfo.flags = 0;
+};
+
+void DescriptorPoolVk::CreateDescriptorPool(
+    const VkDescriptorPoolCreateInfo &poolInfo, VkDescriptorPool &pool) {
+
+  auto &device = DeviceVk::Get()->GetDevice();
+  if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &pool) != VK_SUCCESS) {
+    throw std::runtime_error("failed to create descriptor pool!");
+  }
+}
+
+void DescriptorPoolVk::DestroyDescriptorPool(VkDescriptorPool &pool) {
+  vkDestroyDescriptorPool(DeviceVk::Get()->GetDevice(), pool, nullptr);
+};
+
+//
+//
+// -------------------------------------------------------------------------
+// --- DESCRIPTOR SETS -----------------------------------------------------
+//
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

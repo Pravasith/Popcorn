@@ -44,7 +44,7 @@ public:
     vertexBuffer = VertexBuffer::Create();
     vertexBuffer2 = VertexBuffer::Create();
 
-    indexBuffer = new IndexBuffer<uint16_t>();
+    indexBuffer = new IndexBuffer<uint16_t>(); // this is okay
 
     vertexBuffer->Fill<Vertex>({
         {{-.5f, -.5f}, {.8f, .0f, .8f}},

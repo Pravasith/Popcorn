@@ -1,6 +1,7 @@
 #include "BasicWorkflowVk.h"
 #include "BufferObjects.h"
 #include "BufferObjectsVk.h"
+#include "DescriptorsVk.h"
 #include "DeviceVk.h"
 #include "FramebuffersVk.h"
 #include "GfxPipelineVk.h"
@@ -26,29 +27,10 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 BufferDefs::Layout BasicRenderWorkflowVk::s_vertexBufferLayout{};
-DescriptorSetLayoutsVk *BasicRenderWorkflowVk::s_descriptorSetLayoutsVk =
-    nullptr;
 
 #ifdef PC_DEBUG
 constexpr bool showDrawCommandCount = false;
 #endif
-
-void BasicRenderWorkflowVk::CreateDescriptorSetLayouts() {
-  // This is a global binding at the moment (UBO for MVP transform matrix)
-  // Loop through material types & make different layouts
-  std::vector<VkDescriptorSetLayoutBinding> bindings;
-
-  VkDescriptorSetLayoutBinding uboLayoutBinding{};
-  uboLayoutBinding.binding = 0;
-  uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-  uboLayoutBinding.descriptorCount = 1;
-  uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-  uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
-
-  bindings.emplace_back(uboLayoutBinding);
-
-  m_colorPipelineDSetLayout = s_descriptorSetLayoutsVk->GetLayout(bindings);
-};
 
 void BasicRenderWorkflowVk::CreatePipelines() {
 
@@ -109,8 +91,10 @@ void BasicRenderWorkflowVk::CreatePipelines() {
   PipelineUtils::GetDefaultPipelineLayoutCreateInfo(
       pipelineState.pipelineLayout);
 
-  pipelineState.pipelineLayout.setLayoutCount = 1;
-  pipelineState.pipelineLayout.pSetLayouts = &m_colorPipelineDSetLayout;
+  std::array<VkDescriptorSetLayout, 2> dSetLayouts = {m_globalUBOsDSetLayout,
+                                                      m_localUBOsDSetLayout};
+  pipelineState.pipelineLayout.setLayoutCount = dSetLayouts.size();
+  pipelineState.pipelineLayout.pSetLayouts = dSetLayouts.data();
 
   // CREATE PIPELINE LAYOUT
   m_colorPipelineVk.CreatePipelineLayout(device, pipelineState.pipelineLayout);
@@ -538,7 +522,59 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
 
 //
 // --------------------------------------------------------------------------
+// --- DESCRIPTOR POOL & SETS -----------------------------------------------
+//
+
+void BasicRenderWorkflowVk::CreateDescriptorSetLayouts() {
+  DescriptorSetLayoutsVk *dSetLayoutsVkStn = DescriptorSetLayoutsVk::Get();
+
+  // This is a global binding at the moment (UBO for MVP transform matrix)
+  // Loop through material types & make different layouts
+  std::vector<VkDescriptorSetLayoutBinding> globalBindings;
+  std::vector<VkDescriptorSetLayoutBinding> localBindings;
+
+  VkDescriptorSetLayoutBinding globalProjViewMatUBO{};
+  globalProjViewMatUBO.binding = 0;
+  globalProjViewMatUBO.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  globalProjViewMatUBO.descriptorCount = 1;
+  globalProjViewMatUBO.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+  globalProjViewMatUBO.pImmutableSamplers = nullptr; // Optional
+
+  globalBindings.emplace_back(globalProjViewMatUBO);
+  m_globalUBOsDSetLayout = dSetLayoutsVkStn->GetLayout(globalBindings);
+
+  VkDescriptorSetLayoutBinding localPerObjectModelMatUBO{};
+  localPerObjectModelMatUBO.binding = 0;
+  localPerObjectModelMatUBO.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  localPerObjectModelMatUBO.descriptorCount = 1;
+  localPerObjectModelMatUBO.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+  localPerObjectModelMatUBO.pImmutableSamplers = nullptr; // Optional
+
+  localBindings.emplace_back(localPerObjectModelMatUBO);
+  m_localUBOsDSetLayout = dSetLayoutsVkStn->GetLayout(localBindings);
+};
+
+void BasicRenderWorkflowVk::CreateDescriptorPool() {
+  constexpr uint32_t maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
+  uint32_t maxDSets = (2 * maxFramesInFlight); // 1 global + 1 per-object
+
+  std::vector<VkDescriptorPoolSize> poolSizes = {
+      {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, maxDSets},
+  };
+
+  VkDescriptorPoolCreateInfo poolInfo{};
+  DescriptorPoolVk::GetDefaultDescriptorPoolState(poolInfo, maxDSets,
+                                                  poolSizes);
+  DescriptorPoolVk::CreateDescriptorPool(poolInfo, m_descriptorPool);
+};
+
+void BasicRenderWorkflowVk::CreateDescriptorSets() {};
+
+//
+//
+// --------------------------------------------------------------------------
 // --- UPDATE UNIFORMS & PUSH CONSTANTS HERE --------------------------------
+// --- RUNS EVERY FRAME -----------------------------------------------------
 //
 void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
   // Copy view project matrix first
