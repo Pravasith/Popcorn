@@ -86,10 +86,10 @@ void DescriptorSetLayoutsVk::CleanUp() {
 //
 void DescriptorPoolVk::GetDefaultDescriptorPoolState(
     VkDescriptorPoolCreateInfo &poolInfo, uint32_t maxDSets,
-    std::vector<VkDescriptorPoolSize> poolSizes) {
+    std::vector<VkDescriptorPoolSize> &poolSizes) {
 
   poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-  poolInfo.poolSizeCount = poolSizes.size();
+  poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
   poolInfo.pPoolSizes = poolSizes.data();
   poolInfo.maxSets = maxDSets;
   poolInfo.flags = 0;

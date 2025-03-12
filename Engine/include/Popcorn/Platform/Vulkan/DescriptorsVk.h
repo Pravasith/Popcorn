@@ -78,7 +78,7 @@ public:
   static void
   GetDefaultDescriptorPoolState(VkDescriptorPoolCreateInfo &poolInfo,
                                 uint32_t maxDSets,
-                                std::vector<VkDescriptorPoolSize> poolSizes);
+                                std::vector<VkDescriptorPoolSize> &poolSizes);
 
 private:
   DescriptorPoolVk() {

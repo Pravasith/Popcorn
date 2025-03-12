@@ -33,7 +33,6 @@ public:
     if (indexBuffer != nullptr) {
       m_spec.enableIndexBuffers = true;
     };
-
     m_uniformBuffer.SetLayout<BufferDefs::AttrTypes::Mat4>();
     m_uniformBuffer.Fill({m_matrix});
 
@@ -57,6 +56,7 @@ public:
   };
 
   [[nodiscard]] inline Material &GetMaterial() const { return m_material; };
+
   [[nodiscard]] inline VertexBuffer &GetVertexBuffer() const {
     return m_vertexBuffer;
   };
