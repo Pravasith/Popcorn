@@ -40,8 +40,9 @@ public:
         "GetRenderPass is not defined in the inherited class");
   };
 
-  virtual void RecordRenderCommands(const VkCommandBuffer &commandBuffer,
-                                    const uint32_t imageIndex) = 0;
+  virtual void
+  RecordRenderCommands(const uint32_t frameIndex, const uint32_t currentFrame,
+                       VkCommandBuffer &currentFrameCommandBuffer) = 0;
   virtual void ProcessSceneUpdates(const uint32_t currentFrame) = 0;
   virtual void CreatePipelines() = 0;
   virtual void CleanUp() = 0;

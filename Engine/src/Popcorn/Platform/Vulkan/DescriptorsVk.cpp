@@ -113,6 +113,30 @@ void DescriptorPoolVk::DestroyDescriptorPool(VkDescriptorPool &pool) {
 // -------------------------------------------------------------------------
 // --- DESCRIPTOR SETS -----------------------------------------------------
 //
+void DescriptorSetsVk::AllocateDescriptorSets(
+    const VkDescriptorSetAllocateInfo &allocInfo,
+    std::vector<VkDescriptorSet> &descriptorSets) {
+  auto &device = DeviceVk::Get()->GetDevice();
+  constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
+  descriptorSets.resize(maxFramesInFlight);
+
+  if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) !=
+      VK_SUCCESS) {
+    throw std::runtime_error("failed to allocate global descriptor sets!");
+  }
+};
+
+void DescriptorSetsVk::GetDefaultDescriptorSetAllocateState(
+    const VkDescriptorSetLayout &layout, const VkDescriptorPool &pool,
+    VkDescriptorSetAllocateInfo &allocInfo) {
+  constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
+
+  std::vector<VkDescriptorSetLayout> layouts(maxFramesInFlight, layout);
+  allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+  allocInfo.descriptorPool = pool;
+  allocInfo.descriptorSetCount = static_cast<uint32_t>(maxFramesInFlight);
+  allocInfo.pSetLayouts = layouts.data();
+};
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

@@ -186,7 +186,8 @@ void BasicRenderWorkflowVk::CreateFramebuffers() {
 };
 
 void BasicRenderWorkflowVk::RecordRenderCommands(
-    const VkCommandBuffer &commandBuffer, const uint32_t imageIndex) {
+    const uint32_t imageIndex, const uint32_t currentFrame,
+    VkCommandBuffer &commandBuffer) {
   auto *swapchainVkStn = SwapchainVk::Get();
 
   //
@@ -224,7 +225,10 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
 #endif
 
     // TODO: Logic for multiple vertex buffers with VMA
-    // BIND VERTEX BUFFERS ---------------------------------------------------
+
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            m_colorPipelineVk.GetVkPipelineLayout(), 0, 1,
+                            &m_globalDescriptorSets[currentFrame], 0, nullptr);
 
     for (size_t i = 0; i < m_meshes.size(); ++i) {
       // std::cout << "Drawing mesh " << i << " with offset "
@@ -239,6 +243,12 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
       // TODO: Change it to variant logic
       BufferVkUtils::RecordBindVkIndexBufferCommand<uint16_t>(
           commandBuffer, &m_vkIndexBuffer, m_indexBufferOffsets[i]);
+
+      uint32_t dynamicOffset = i * m_meshes[i]->GetUniformBuffer().GetSize();
+      vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                              m_colorPipelineVk.GetVkPipelineLayout(), 1, 1,
+                              &m_localDescriptorSets[currentFrame], 1,
+                              &dynamicOffset);
 
       // vkCmdDraw(commandBuffer, m_meshes[i]->GetVertexBuffer().GetCount(), 1,
       // 0, 0);
@@ -568,7 +578,70 @@ void BasicRenderWorkflowVk::CreateDescriptorPool() {
   DescriptorPoolVk::CreateDescriptorPool(poolInfo, m_descriptorPool);
 };
 
-void BasicRenderWorkflowVk::CreateDescriptorSets() {};
+void BasicRenderWorkflowVk::CreateDescriptorSets() {
+  VkDescriptorSetAllocateInfo globalDSetsAllocInfo{};
+  DescriptorSetsVk::GetDefaultDescriptorSetAllocateState(
+      m_globalUBOsDSetLayout, m_descriptorPool, globalDSetsAllocInfo);
+
+  DescriptorSetsVk::AllocateDescriptorSets(globalDSetsAllocInfo,
+                                           m_globalDescriptorSets);
+
+  VkDescriptorSetAllocateInfo localDSetsAllocInfo{};
+  DescriptorSetsVk::GetDefaultDescriptorSetAllocateState(
+      m_localUBOsDSetLayout, m_descriptorPool, localDSetsAllocInfo);
+
+  DescriptorSetsVk::AllocateDescriptorSets(localDSetsAllocInfo,
+                                           m_localDescriptorSets);
+
+  constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
+  auto &device = DeviceVk::Get()->GetDevice();
+
+  // Update Descriptor Sets
+  for (size_t i = 0; i < maxFramesInFlight; ++i) {
+
+    //
+    // Global buffers --------------------------------------------------
+    VkDescriptorBufferInfo globalbufferInfo{};
+    globalbufferInfo.buffer = m_uniformBuffers[i];
+    globalbufferInfo.offset = 0;
+    globalbufferInfo.range = m_viewProjUBO.GetSize();
+
+    VkWriteDescriptorSet globalDtrWrite{};
+    globalDtrWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    globalDtrWrite.dstSet = m_globalDescriptorSets[i];
+    globalDtrWrite.dstBinding = 0;
+    globalDtrWrite.dstArrayElement = 0;
+    globalDtrWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    globalDtrWrite.descriptorCount = 1;
+    globalDtrWrite.pBufferInfo = &globalbufferInfo;
+    globalDtrWrite.pImageInfo = nullptr;       // Optional
+    globalDtrWrite.pTexelBufferView = nullptr; // Optional
+
+    vkUpdateDescriptorSets(device, 1, &globalDtrWrite, 0, nullptr);
+
+    //
+    // Local buffers ----------------------------------------------------
+    if (m_meshes.begin() != m_meshes.end()) {
+      VkDescriptorBufferInfo localbufferInfo{};
+      localbufferInfo.buffer = m_uniformBuffers[i];
+      localbufferInfo.offset = 0;
+      localbufferInfo.range = m_meshes[0]->GetUniformBuffer().GetSize();
+
+      VkWriteDescriptorSet localDtrWrite{};
+      localDtrWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+      localDtrWrite.dstSet = m_localDescriptorSets[i];
+      localDtrWrite.dstBinding = 0;
+      localDtrWrite.dstArrayElement = 0;
+      localDtrWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+      localDtrWrite.descriptorCount = 1;
+      localDtrWrite.pBufferInfo = &localbufferInfo;
+      localDtrWrite.pImageInfo = nullptr;       // Optional
+      localDtrWrite.pTexelBufferView = nullptr; // Optional
+
+      vkUpdateDescriptorSets(device, 1, &localDtrWrite, 0, nullptr);
+    }
+  }
+};
 
 //
 //

@@ -2,6 +2,7 @@
 
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include <cstdint>
 #include <unordered_map>
 #include <vector>
 #include <vulkan/vulkan_core.h>
@@ -95,7 +96,13 @@ private:
 //
 class DescriptorSetsVk {
 public:
-  static void AllocateDescriptorSet(VkDescriptorSetAllocateInfo &allocInfo);
+  static void
+  AllocateDescriptorSets(const VkDescriptorSetAllocateInfo &allocInfo,
+                         std::vector<VkDescriptorSet> &descriptorSets);
+  static void
+  GetDefaultDescriptorSetAllocateState(const VkDescriptorSetLayout &layout,
+                                       const VkDescriptorPool &pool,
+                                       VkDescriptorSetAllocateInfo &allocInfo);
 
 private:
   DescriptorSetsVk() {

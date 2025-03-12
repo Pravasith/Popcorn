@@ -12,6 +12,7 @@
 #include "RenderWorkflowVk.h"
 #include "SurfaceVk.h"
 #include "SwapchainVk.h"
+#include <cstdint>
 #include <cstring>
 #include <vulkan/vulkan_core.h>
 
@@ -60,8 +61,7 @@ void RendererVk::DrawFrame(const Scene &scene) {
       },
 
       // Record draw commands lambda
-      [&](const uint32_t
-              frameIndex, // frameIndex is not the same as current frame
+      [&](const uint32_t frameIndex, const uint32_t currentFrame,
           VkCommandBuffer &currentFrameCommandBuffer) {
         s_commandPoolVk->BeginCommandBuffer(currentFrameCommandBuffer);
         //
@@ -69,9 +69,8 @@ void RendererVk::DrawFrame(const Scene &scene) {
         // --- RECORD ALL COMMAND BUFFERS HERE -----------------------------
 
         // TODO: Write a loop for render workflows instead
-        basicRenderWorkflow->RecordRenderCommands(
-            // Records renderpasses & binds associated pipelines
-            currentFrameCommandBuffer, frameIndex);
+        basicRenderWorkflow->RecordRenderCommands(frameIndex, currentFrame,
+                                                  currentFrameCommandBuffer);
 
         // --- RECORD ALL COMMAND BUFFERS HERE -----------------------------
         // -----------------------------------------------------------------

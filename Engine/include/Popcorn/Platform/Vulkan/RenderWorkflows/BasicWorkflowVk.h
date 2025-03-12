@@ -38,8 +38,9 @@ public:
 
   virtual void AddMeshToWorkflow(Mesh *mesh) override;
 
-  virtual void RecordRenderCommands(const VkCommandBuffer &commandBuffer,
-                                    const uint32_t imageIndex) override;
+  virtual void
+  RecordRenderCommands(const uint32_t frameIndex, const uint32_t currentFrame,
+                       VkCommandBuffer &currentFrameCommandBuffer) override;
   virtual void ProcessSceneUpdates(const uint32_t currentFrame) override;
 
   virtual void CreateRenderPass() override;
@@ -70,10 +71,6 @@ private:
   VkBuffer m_vkIndexBuffer;
   VkDeviceMemory m_vkIndexBufferMemory;
 
-  // TODO: Move to global resources (and index into it whenever needed)
-  VkDescriptorSetLayout m_globalUBOsDSetLayout;
-  VkDescriptorSetLayout m_localUBOsDSetLayout;
-
   std::vector<VkBuffer> m_uniformBuffers;
   std::vector<VkDeviceMemory> m_uniformBuffersMemory;
   std::vector<void *> m_uniformBuffersMapped;
@@ -81,7 +78,14 @@ private:
   // TODO: Make this a global
   UniformBuffer m_viewProjUBO;
 
+  // TODO: Move to global resources (and index into it whenever needed)
   VkDescriptorPool m_descriptorPool;
+
+  VkDescriptorSetLayout m_globalUBOsDSetLayout;
+  VkDescriptorSetLayout m_localUBOsDSetLayout;
+
+  std::vector<VkDescriptorSet> m_globalDescriptorSets;
+  std::vector<VkDescriptorSet> m_localDescriptorSets;
 };
 
 GFX_NAMESPACE_END
