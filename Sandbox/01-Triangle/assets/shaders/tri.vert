@@ -15,6 +15,7 @@ layout(location = 0) out vec3 fragColor;
 
 void main() {
     mat4 model = mat4(1.0);
+
     gl_Position = projViewUbo.proj * projViewUbo.view * model
         * vec4(inPosition, 0.0, 1.0);
     fragColor = inColor;
