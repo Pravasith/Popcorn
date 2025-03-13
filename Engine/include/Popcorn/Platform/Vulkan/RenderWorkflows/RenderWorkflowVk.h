@@ -71,7 +71,7 @@ public:
 
     //
     // ADD TO MATERIAL LIBRARY ---------------------------------------------
-    m_materials.push_back(materialPtr);
+    m_materials.emplace_back(materialPtr);
   }
 
   void UnRegisterMaterial(Material *materialPtr) {

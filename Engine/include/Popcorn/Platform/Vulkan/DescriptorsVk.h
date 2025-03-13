@@ -72,7 +72,7 @@ class DescriptorPoolVk {
 public:
   // --- UTILS -----------------------------------------------------------------
   static void CreateDescriptorPool(const VkDescriptorPoolCreateInfo &poolInfo,
-                                   VkDescriptorPool &pool);
+                                   VkDescriptorPool *pool);
   static void DestroyDescriptorPool(VkDescriptorPool &pool);
 
   static void
@@ -99,10 +99,9 @@ public:
   static void
   AllocateDescriptorSets(const VkDescriptorSetAllocateInfo &allocInfo,
                          std::vector<VkDescriptorSet> &descriptorSets);
-  static void
-  GetDefaultDescriptorSetAllocateState(const VkDescriptorSetLayout &layout,
-                                       const VkDescriptorPool &pool,
-                                       VkDescriptorSetAllocateInfo &allocInfo);
+  static void GetDefaultDescriptorSetAllocateState(
+      const std::vector<VkDescriptorSetLayout> &dSetLayouts,
+      const VkDescriptorPool &pool, VkDescriptorSetAllocateInfo &allocInfo);
 
 private:
   DescriptorSetsVk() {

@@ -79,7 +79,7 @@ private:
   UniformBuffer m_viewProjUBO;
 
   // TODO: Move to global resources (and index into it whenever needed)
-  VkDescriptorPool m_descriptorPool;
+  VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
 
   VkDescriptorSetLayout m_globalUBOsDSetLayout;
   VkDescriptorSetLayout m_localUBOsDSetLayout;

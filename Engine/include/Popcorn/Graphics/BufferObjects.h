@@ -286,6 +286,47 @@ public:
     return m_buffer.GetData();
   }
 
+  // COPY CONSTRUCTOR
+  UniformBuffer(const UniformBuffer &other) {
+    PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Constr, "UNIFORM-BUFFER")
+    m_buffer = other.m_buffer;
+    m_layout = other.m_layout;
+  };
+
+  virtual UniformBuffer &operator=(const UniformBuffer &other) {
+    PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print, "UNIFORM-BUFFER")
+
+    if (this == &other)
+      return *this;
+
+    m_buffer = other.m_buffer;
+    m_layout = other.m_layout;
+    return *this;
+  };
+
+  // MOVE CONSTRUCTOR
+  UniformBuffer(UniformBuffer &&other) {
+    PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Constr, "UNIFORM-BUFFER")
+    if (this == &other) {
+      return;
+    };
+
+    m_buffer = std::move(other.m_buffer);
+    m_layout = other.m_layout;
+  };
+  virtual UniformBuffer &operator=(UniformBuffer &&other) {
+    PC_PRINT("MOVE ASSIGNMENT EVOKED", TagType::Print, "UNIFORM-BUFFER")
+
+    if (this == &other) {
+      return *this;
+    };
+
+    m_buffer = std::move(other.m_buffer);
+    m_layout = other.m_layout;
+
+    return *this;
+  };
+
 private:
   Buffer m_buffer;
   BufferDefs::Layout m_layout;

@@ -297,7 +297,7 @@ void BasicRenderWorkflowVk::AddMeshToWorkflow(Mesh *mesh) {
     return;
   };
 
-  m_meshes.push_back(mesh);
+  m_meshes.emplace_back(mesh);
 
   // Each material can potentially have the same material type but different
   // descriptor sets (shaders, textures ..etc)
@@ -470,7 +470,9 @@ void BasicRenderWorkflowVk::AllocateVkIndexBuffers() {
 // --- UNIFORM BUFFERS ALLOCATION -------------------------------------------
 //
 void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
+  const VkExtent2D &swapchainExtent = SwapchainVk::Get()->GetSwapchainExtent();
   constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
+
   m_uniformBuffers.resize(maxFramesInFlight);
   m_uniformBuffersMemory.resize(maxFramesInFlight);
   m_uniformBuffersMapped.resize(maxFramesInFlight);
@@ -480,8 +482,6 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
     glm::mat4 view;
     glm::mat4 proj;
   };
-
-  const VkExtent2D &swapchainExtent = SwapchainVk::Get()->GetSwapchainExtent();
 
   m_viewProjUBO
       .SetLayout<BufferDefs::AttrTypes::Mat4, BufferDefs::AttrTypes::Mat4>();
@@ -509,7 +509,7 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
   // Get the offsets of meshes & the total size of the buffers (a.k.a.
   // currentOffset)
   for (int j = 0; j < m_meshes.size(); ++j) {
-    UniformBuffer uniformBuffer = m_meshes[j]->GetUniformBuffer();
+    const UniformBuffer &uniformBuffer = m_meshes[j]->GetUniformBuffer();
     m_uniformBufferOffsets.push_back(currentOffset);
     currentOffset += uniformBuffer.GetSize();
   }
@@ -555,7 +555,8 @@ void BasicRenderWorkflowVk::CreateDescriptorSetLayouts() {
 
   VkDescriptorSetLayoutBinding localPerObjectModelMatUBO{};
   localPerObjectModelMatUBO.binding = 0;
-  localPerObjectModelMatUBO.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  localPerObjectModelMatUBO.descriptorType =
+      VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
   localPerObjectModelMatUBO.descriptorCount = 1;
   localPerObjectModelMatUBO.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
   localPerObjectModelMatUBO.pImmutableSamplers = nullptr; // Optional
@@ -566,37 +567,63 @@ void BasicRenderWorkflowVk::CreateDescriptorSetLayouts() {
 
 void BasicRenderWorkflowVk::CreateDescriptorPool() {
   constexpr uint32_t maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
-  uint32_t maxDSets = (2 * maxFramesInFlight); // 1 global + 1 per-object
+  uint32_t maxDSets = 2 * maxFramesInFlight; // 1 global + 1 per-object
 
   std::vector<VkDescriptorPoolSize> poolSizes = {
-      {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, maxDSets},
+      {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, maxFramesInFlight},
+      {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, maxFramesInFlight},
   };
 
   VkDescriptorPoolCreateInfo poolInfo{};
   DescriptorPoolVk::GetDefaultDescriptorPoolState(poolInfo, maxDSets,
                                                   poolSizes);
-  DescriptorPoolVk::CreateDescriptorPool(poolInfo, m_descriptorPool);
+  DescriptorPoolVk::CreateDescriptorPool(poolInfo, &m_descriptorPool);
 };
 
 void BasicRenderWorkflowVk::CreateDescriptorSets() {
+  constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
+  auto &device = DeviceVk::Get()->GetDevice();
+
+  if (m_descriptorPool == VK_NULL_HANDLE) {
+    throw std::runtime_error("Descriptor pool is not initialized!");
+  }
+
+  //
+  // --- ALLOCATE DESCRIPTOR SETS --------------------------------------
+  //
+  // Global layouts ----------------------------------------------------
+  if (m_globalUBOsDSetLayout == VK_NULL_HANDLE) {
+    throw std::runtime_error(
+        "Global UBO descriptor set layout is not initialized!");
+  }
   VkDescriptorSetAllocateInfo globalDSetsAllocInfo{};
+  auto allFramesGlobalLayouts =
+      std::vector(maxFramesInFlight, m_globalUBOsDSetLayout);
+
+  PC_WARN("BEFORE: " << allFramesGlobalLayouts[0])
   DescriptorSetsVk::GetDefaultDescriptorSetAllocateState(
-      m_globalUBOsDSetLayout, m_descriptorPool, globalDSetsAllocInfo);
+      allFramesGlobalLayouts, m_descriptorPool, globalDSetsAllocInfo);
+  PC_WARN("AFTER: " << *globalDSetsAllocInfo.pSetLayouts)
 
   DescriptorSetsVk::AllocateDescriptorSets(globalDSetsAllocInfo,
                                            m_globalDescriptorSets);
 
+  //
+  // local layouts -----------------------------------------------------
+  if (m_localUBOsDSetLayout == VK_NULL_HANDLE) {
+    throw std::runtime_error(
+        "Local UBO descriptor set layout is not initialized!");
+  }
   VkDescriptorSetAllocateInfo localDSetsAllocInfo{};
+  auto allFramesLocalLayouts =
+      std::vector(maxFramesInFlight, m_localUBOsDSetLayout);
   DescriptorSetsVk::GetDefaultDescriptorSetAllocateState(
-      m_localUBOsDSetLayout, m_descriptorPool, localDSetsAllocInfo);
-
+      allFramesLocalLayouts, m_descriptorPool, localDSetsAllocInfo);
   DescriptorSetsVk::AllocateDescriptorSets(localDSetsAllocInfo,
                                            m_localDescriptorSets);
 
-  constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
-  auto &device = DeviceVk::Get()->GetDevice();
-
-  // Update Descriptor Sets
+  //
+  // --- UPDATE DESCRIPTOR SETS ----------------------------------------
   for (size_t i = 0; i < maxFramesInFlight; ++i) {
 
     //
@@ -632,7 +659,7 @@ void BasicRenderWorkflowVk::CreateDescriptorSets() {
       localDtrWrite.dstSet = m_localDescriptorSets[i];
       localDtrWrite.dstBinding = 0;
       localDtrWrite.dstArrayElement = 0;
-      localDtrWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+      localDtrWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
       localDtrWrite.descriptorCount = 1;
       localDtrWrite.pBufferInfo = &localbufferInfo;
       localDtrWrite.pImageInfo = nullptr;       // Optional
@@ -663,7 +690,7 @@ void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
     BufferVkUtils::CopyBufferCPUToGPU(
         m_uniformBuffersMemory[currentFrame],
         (byte_t *)m_uniformBuffersMapped[currentFrame] +
-            meshModelMatUBO.GetSize(),
+            m_viewProjUBO.GetSize(),
         meshModelMatUBO.GetBufferData(), meshModelMatUBO.GetSize());
   }
 };
@@ -683,6 +710,8 @@ void BasicRenderWorkflowVk::CleanUp() {
     vkDestroyBuffer(device, m_uniformBuffers[i], nullptr);
     vkFreeMemory(device, m_uniformBuffersMemory[i], nullptr);
   }
+
+  DescriptorPoolVk::DestroyDescriptorPool(m_descriptorPool);
 
   // Cleanup index buffer memory
   BufferVkUtils::DestroyVkBuffer(m_vkIndexBuffer, m_vkIndexBufferMemory);

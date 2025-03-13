@@ -37,14 +37,14 @@ public:
       };
     };
 
-    struct ModelMatrix {
-      glm::mat4 model;
-    };
-
     vertexBuffer = VertexBuffer::Create();
     vertexBuffer2 = VertexBuffer::Create();
 
     indexBuffer = new IndexBuffer<uint16_t>(); // this is okay
+    vertexBuffer->SetLayout<BufferDefs::AttrTypes::Float2,
+                            BufferDefs::AttrTypes::Float3>();
+    vertexBuffer2->SetLayout<BufferDefs::AttrTypes::Float2,
+                             BufferDefs::AttrTypes::Float3>();
 
     vertexBuffer->Fill<Vertex>({
         {{-.5f, -.5f}, {.8f, .0f, .8f}},
@@ -61,10 +61,6 @@ public:
     });
 
     indexBuffer->Fill({3, 0, 1, 1, 2, 3});
-    vertexBuffer->SetLayout<BufferDefs::AttrTypes::Float2,
-                            BufferDefs::AttrTypes::Float3>();
-    vertexBuffer2->SetLayout<BufferDefs::AttrTypes::Float2,
-                             BufferDefs::AttrTypes::Float3>();
 
     std::vector shaderFiles{
         "shaders/tri_vert.spv",
