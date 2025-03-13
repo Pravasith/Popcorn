@@ -46,21 +46,45 @@ public:
     vertexBuffer2->SetLayout<BufferDefs::AttrTypes::Float2,
                              BufferDefs::AttrTypes::Float3>();
 
-    vertexBuffer->Fill<Vertex>({
-        {{-.5f, -.5f}, {.8f, .0f, .8f}},
-        {{.0f, -.5f}, {.8f, .8f, .0f}},
-        {{.0f, .0f}, {.0f, .8f, .8f}},
-        {{-.5f, .0f}, {.8f, .0f, .8f}},
-    });
+    // vertexBuffer->Fill<Vertex>({
+    //     {{-.5f, -.5f}, {.8f, .0f, .8f}},
+    //     {{.0f, -.5f}, {.8f, .8f, .0f}},
+    //     {{.0f, .0f}, {.0f, .8f, .8f}},
+    //     {{-.5f, .0f}, {.8f, .0f, .8f}},
+    // });
+    // vertexBuffer2->Fill<Vertex>({
+    //     {{.0f, .0f}, {.8f, .0f, .8f}},
+    //     {{.5f, .0f}, {.8f, .8f, .0f}},
+    //     {{.5f, .5f}, {.0f, .8f, .8f}},
+    //     {{.0f, .5f}, {.8f, .0f, .8f}},
+    // });
 
-    vertexBuffer2->Fill<Vertex>({
-        {{.0f, .0f}, {.8f, .0f, .8f}},
-        {{.5f, .0f}, {.8f, .8f, .0f}},
-        {{.5f, .5f}, {.0f, .8f, .8f}},
-        {{.0f, .5f}, {.8f, .0f, .8f}},
-    });
+    // vertexBuffer->Fill<Vertex>({
+    //     {{-.5f, -.5f}, {.8f, .0f, .8f}},
+    //     {{.5f, -.5f}, {.8f, .8f, .0f}},
+    //     {{.5f, .5f}, {.0f, .8f, .8f}},
+    //     {{-.5f, .5f}, {.8f, .0f, .8f}},
+    // });
+    //
+    // vertexBuffer2->Fill<Vertex>({
+    //     {{-.5f, -.5f}, {.8f, .0f, .8f}},
+    //     {{.5f, -.5f}, {.8f, .8f, .0f}},
+    //     {{.5f, .5f}, {.0f, .8f, .8f}},
+    //     {{-.5f, .5f}, {.8f, .0f, .8f}},
+    // });
+    //
+    // indexBuffer->Fill({3, 0, 1, 1, 2, 3});
 
-    indexBuffer->Fill({3, 0, 1, 1, 2, 3});
+    vertexBuffer->Fill<Vertex>({{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+                                {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+                                {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+                                {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}});
+    vertexBuffer2->Fill<Vertex>({{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+                                 {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+                                 {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+                                 {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}});
+
+    indexBuffer->Fill({0, 1, 2, 2, 3, 0});
 
     std::vector shaderFiles{
         "shaders/tri_vert.spv",
@@ -78,12 +102,12 @@ public:
     triMesh = new Mesh{*vertexBuffer, indexBuffer, *triMat};
     triMesh2 = new Mesh{*vertexBuffer2, indexBuffer, *triMat};
 
-    triMesh->SetPosition({.0f, .1f, .0f});
-    triMesh2->SetPosition({.0f, -.1f, .0f});
+    // triMesh->SetPosition({.0f, .1f, .0f});
+    // triMesh2->SetPosition({.0f, -.1f, .0f});
 
     // ADD MESH TO WORK FLOW -> CREATE PIPELINES
     triScene.Add(triMesh);
-    triScene.Add(triMesh2);
+    // triScene.Add(triMesh2);
 
     // vertexBuffer->PrintBuffer<Vertex>();
   };
@@ -107,11 +131,11 @@ public:
 
   virtual void OnUpdate(TimeEvent &e) override {
     // Update uniforms here
-    triMesh->RotateY(90.f * e.GetElapsedS());
-    triMesh2->RotateY(90.f * e.GetElapsedS());
+    // triMesh->RotateY(90.f * e.GetElapsedS());
+    // triMesh2->RotateY(90.f * e.GetElapsedS());
 
     // TODO: Refactor these so user doesn't have to call update
-    triScene.Update();
+    // triScene.Update();
   };
 
   virtual void OnRender() override {

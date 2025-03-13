@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -35,6 +36,15 @@ public:
     };
     m_uniformBuffer.SetLayout<BufferDefs::AttrTypes::Mat4>();
     m_uniformBuffer.Fill({m_matrix});
+
+    const float *data = glm::value_ptr(m_matrix);
+    std::cout << "Model Matrix:\n";
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        std::cout << data[i + j * 4] << " ";
+      }
+      std::cout << "\n";
+    }
 
     PC_PRINT("CREATED", TagType::Constr, "MESH");
   };

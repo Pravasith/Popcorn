@@ -491,6 +491,7 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
       glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
                   glm::vec3(0.0f, 0.0f, 1.0f));
 
+  PC_WARN(swapchainExtent.width << " " << swapchainExtent.height)
   // Projection Matrix
   auto proj = glm::perspective(
       glm::radians(45.0f),
@@ -684,13 +685,13 @@ void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
       m_viewProjUBO.GetBufferData(), m_viewProjUBO.GetSize());
 
   // Then copy each mesh model matrix
-  for (auto &mesh : m_meshes) {
-    auto &meshModelMatUBO = mesh->GetUniformBuffer();
+  for (size_t i = 0; i < m_meshes.size(); ++i) {
+    auto &meshModelMatUBO = m_meshes[i]->GetUniformBuffer();
 
     BufferVkUtils::CopyBufferCPUToGPU(
         m_uniformBuffersMemory[currentFrame],
         (byte_t *)m_uniformBuffersMapped[currentFrame] +
-            m_viewProjUBO.GetSize(),
+            m_viewProjUBO.GetSize() + (i * meshModelMatUBO.GetSize()),
         meshModelMatUBO.GetBufferData(), meshModelMatUBO.GetSize());
   }
 };

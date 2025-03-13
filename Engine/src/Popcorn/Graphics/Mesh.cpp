@@ -17,7 +17,6 @@ void Mesh::ValidateMembersWithSpec(const Spec &spec) {
 void Mesh::OnAttach() {};
 
 void Mesh::OnUpdate() {
-  PC_WARN("Uniform buffer updated")
   // Resets buffer data and fills again
   m_uniformBuffer.Fill({m_matrix});
 };

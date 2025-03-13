@@ -4,6 +4,7 @@
 #include "Popcorn/Core/Base.h"
 #include <cmath>
 #include <cstdint>
+#include <glm/ext/matrix_transform.hpp>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 
@@ -36,23 +37,30 @@ public:
 
   [[nodiscard]] const glm::mat4 &GetMatrix() const { return m_matrix; };
 
-  inline void SetPosition(glm::vec3 pos) {
-    m_position = pos;
-    UpdateMatrix();
-  };
-
-  inline void RotateY(float degrees) {
-    m_rotationEuler.y += glm::radians(degrees);
-    UpdateMatrix();
-  };
+  // inline void SetPosition(glm::vec3 pos) {
+  //   m_position = pos;
+  //   UpdateMatrix();
+  // };
+  //
+  // inline void RotateY(float degrees) {
+  //   m_rotationEuler.y += glm::radians(degrees);
+  //   UpdateMatrix();
+  // };
 
   void UpdateMatrix();
 
 protected:
-  glm::vec3 m_position;
-  glm::vec3 m_rotationEuler;
+  // glm::vec3 m_position;
+  // glm::vec3 m_rotationEuler;
 
-  glm::mat4 m_matrix{1.0f}; // Center of the screen
+  glm::mat4 m_matrix = glm::mat4(1.0f);
+
+  // glm::mat4 m_matrix =
+  //     glm::rotate(glm::mat4(1.0f),
+  //                 glm::radians(35.0f), // Tilt angle (experiment with
+  //                 35°-45°) glm::vec3(1.0f, -1.0f, 0.0f) // Rotate around
+  //                 diagonal axis
+  //     );
 };
 
 GFX_NAMESPACE_END
