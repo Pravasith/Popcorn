@@ -17,6 +17,7 @@
 #include "SwapchainVk.h"
 #include <cstddef>
 #include <cstdint>
+#include <iostream>
 #define GLM_FORCE_RADIANS
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -231,6 +232,9 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
                             m_colorPipelineVk.GetVkPipelineLayout(), 0, 1,
                             &m_globalDescriptorSets[currentFrame], 0, nullptr);
 
+    // Calculate base offset for model matrices (aligned viewProj size)
+    uint32_t baseOffset = static_cast<uint32_t>(m_viewProjAlignedSize);
+
     for (size_t i = 0; i < m_meshes.size(); ++i) {
       // std::cout << "Drawing mesh " << i << " with offset "
       //           << m_vkBufferOffsets[i] << "\n";
@@ -245,11 +249,34 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
       BufferVkUtils::RecordBindVkIndexBufferCommand<uint16_t>(
           commandBuffer, &m_vkIndexBuffer, m_indexBufferOffsets[i]);
 
-      uint32_t dynamicOffset = i * m_meshes[i]->GetUniformBuffer().GetSize();
+      VkPhysicalDeviceProperties deviceProperties;
+      vkGetPhysicalDeviceProperties(DeviceVk::Get()->GetPhysicalDevice(),
+                                    &deviceProperties);
+      uint32_t alignment =
+          deviceProperties.limits.minUniformBufferOffsetAlignment;
+
+      // Calculate aligned base offset
+      uint32_t alignedBaseOffset =
+          (m_viewProjAlignedSize + alignment - 1) & ~(alignment - 1);
+
+      // uint32_t dynamicOffset =
+      //     baseOffset + (i * Mesh::GetAlignedUniformBufferLayoutStride());
+      uint32_t dynamicOffset =
+          alignedBaseOffset + (i * Mesh::GetAlignedUniformBufferLayoutStride());
+
+      uint32_t alignedDynamicOffset =
+          (dynamicOffset + alignment - 1) & ~(alignment - 1);
+
+      std::cout << "Base offset at " << i << " " << baseOffset << "\n";
+      std::cout << "Dynamic offset at " << i << " " << dynamicOffset << "\n";
+
+      std::cout << "Binding UBO with dynamic offset: " << dynamicOffset
+                << std::endl;
+
       vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                               m_colorPipelineVk.GetVkPipelineLayout(), 1, 1,
                               &m_localDescriptorSets[currentFrame], 1,
-                              &dynamicOffset);
+                              &alignedDynamicOffset);
 
       // vkCmdDraw(commandBuffer, m_meshes[i]->GetVertexBuffer().GetCount(), 1,
       // 0, 0);
@@ -496,34 +523,58 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
   m_viewProjUBO.Fill({view, proj});
 
   const VmaAllocator &allocator = MemoryAllocatorVk::Get()->GetVMAAllocator();
-  VkDeviceSize totalSize =
-      m_viewProjUBO.GetSize() +
-      m_meshes.size() * Mesh::GetUniformBufferLayout().strideValue;
 
-  PC_WARN("EXPECTED SIZE: " << sizeof(glm::mat4) << ". SIZE: "
-                            << Mesh::GetUniformBufferLayout().strideValue)
+  VkDeviceSize meshUBOSize = Mesh::GetUniformBufferLayout().strideValue;
+  PC_WARN("EXPECTED SIZE: " << sizeof(glm::mat4) << ". SIZE: " << meshUBOSize)
 
-  VkBufferCreateInfo bufferInfo = {.sType =
-                                       VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-                                   .size = totalSize,
-                                   .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                                   .sharingMode = VK_SHARING_MODE_EXCLUSIVE};
+  VkBufferCreateInfo globalBufferInfo = {
+      .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+      .size = m_viewProjUBO.GetSize(),
+      .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+      .sharingMode = VK_SHARING_MODE_EXCLUSIVE};
+
+  VkBufferCreateInfo localBufferInfo = {
+      .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+      .size = meshUBOSize * m_meshes.size(),
+      .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+      .sharingMode = VK_SHARING_MODE_EXCLUSIVE};
 
   VmaAllocationCreateInfo allocInfo{};
   allocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
-  allocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT |
-                    VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+  allocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
+  allocInfo.memoryTypeBits = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 
-  m_uniformBuffers.resize(maxFramesInFlight);
-  m_uniformAllocations.resize(maxFramesInFlight);
-  m_uniformAllocationInfos.resize(maxFramesInFlight);
-  m_uniformBuffersMapped.resize(maxFramesInFlight);
+  m_globalUniformBuffers.resize(maxFramesInFlight);
+  m_globalUniformAllocations.resize(maxFramesInFlight);
+  m_globalUniformAllocationInfos.resize(maxFramesInFlight);
+  m_globalMappedUniforms.resize(maxFramesInFlight);
+
+  m_localUniformBuffers.resize(maxFramesInFlight);
+  m_localUniformAllocations.resize(maxFramesInFlight);
+  m_localUniformAllocationInfos.resize(maxFramesInFlight);
+  m_localMappedUniforms.resize(maxFramesInFlight);
 
   for (size_t i = 0; i < maxFramesInFlight; ++i) {
-    vmaCreateBuffer(allocator, &bufferInfo, &allocInfo, &m_uniformBuffers[i],
-                    &m_uniformAllocations[i], &m_uniformAllocationInfos[i]);
-    m_uniformBuffersMapped[i] = m_uniformAllocationInfos[i].pMappedData;
-  };
+    // GLOBAL UBOS
+    VkResult globalResult = vmaCreateBuffer(
+        allocator, &globalBufferInfo, &allocInfo, &m_globalUniformBuffers[i],
+        &m_globalUniformAllocations[i], &m_globalUniformAllocationInfos[i]);
+    if (globalResult != VK_SUCCESS) {
+      std::cerr << "Failed to create global uniform buffer for frame " << i
+                << std::endl;
+    }
+    m_globalMappedUniforms[i] = m_globalUniformAllocationInfos[i].pMappedData;
+
+    // LOCAL UBOS
+    VkResult localResult = vmaCreateBuffer(
+        allocator, &localBufferInfo, &allocInfo, &m_localUniformBuffers[i],
+        &m_localUniformAllocations[i], &m_localUniformAllocationInfos[i]);
+    if (localResult != VK_SUCCESS) {
+      std::cerr << "Failed to create local uniform buffer for frame " << i
+                << std::endl;
+    }
+    m_localMappedUniforms[i] = m_localUniformAllocationInfos[i].pMappedData;
+  }
 };
 
 //
@@ -548,6 +599,10 @@ void BasicRenderWorkflowVk::CreateDescriptorSetLayouts() {
 
   globalBindings.emplace_back(globalProjViewMatUBO);
   m_globalUBOsDSetLayout = dSetLayoutsVkStn->GetLayout(globalBindings);
+  if (m_globalUBOsDSetLayout == VK_NULL_HANDLE) {
+    std::cerr << "Failed to create global descriptor set layout!" << std::endl;
+    return;
+  }
 
   VkDescriptorSetLayoutBinding localPerObjectModelMatUBO{};
   localPerObjectModelMatUBO.binding = 0;
@@ -559,6 +614,10 @@ void BasicRenderWorkflowVk::CreateDescriptorSetLayouts() {
 
   localBindings.emplace_back(localPerObjectModelMatUBO);
   m_localUBOsDSetLayout = dSetLayoutsVkStn->GetLayout(localBindings);
+  if (m_localUBOsDSetLayout == VK_NULL_HANDLE) {
+    std::cerr << "Failed to create local descriptor set layout!" << std::endl;
+    return;
+  }
 };
 
 void BasicRenderWorkflowVk::CreateDescriptorPool() {
@@ -617,11 +676,10 @@ void BasicRenderWorkflowVk::CreateDescriptorSets() {
   //
   // --- UPDATE DESCRIPTOR SETS ----------------------------------------
   for (size_t i = 0; i < maxFramesInFlight; ++i) {
-
     //
     // Global buffers --------------------------------------------------
     VkDescriptorBufferInfo globalbufferInfo{};
-    globalbufferInfo.buffer = m_uniformBuffers[i];
+    globalbufferInfo.buffer = m_globalUniformBuffers[i];
     globalbufferInfo.offset = 0;
     globalbufferInfo.range = m_viewProjUBO.GetSize();
 
@@ -641,7 +699,7 @@ void BasicRenderWorkflowVk::CreateDescriptorSets() {
     //
     // Local buffers ----------------------------------------------------
     VkDescriptorBufferInfo localbufferInfo{};
-    localbufferInfo.buffer = m_uniformBuffers[i];
+    localbufferInfo.buffer = m_localUniformBuffers[i];
     localbufferInfo.offset = 0;
     localbufferInfo.range = Mesh::GetUniformBufferLayout().strideValue;
 
@@ -656,6 +714,13 @@ void BasicRenderWorkflowVk::CreateDescriptorSets() {
     localDtrWrite.pImageInfo = nullptr;       // Optional
     localDtrWrite.pTexelBufferView = nullptr; // Optional
 
+    // Create dynamic offsets array (for each object)
+    // std::vector<uint32_t> dynamicOffsets(maxFramesInFlight,
+    //                                      0); // Example, adjust accordingly
+    // localDtrWrite.p= dynamicOffsets.data();
+    // localDtrWrite.dynamicOffsetCount =
+    //     static_cast<uint32_t>(dynamicOffsets.size())
+
     vkUpdateDescriptorSets(device, 1, &localDtrWrite, 0, nullptr);
   }
 };
@@ -666,20 +731,109 @@ void BasicRenderWorkflowVk::CreateDescriptorSets() {
 // --- UPDATE UNIFORMS & PUSH CONSTANTS HERE --------------------------------
 // --- RUNS EVERY FRAME -----------------------------------------------------
 //
+// void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame)
+// {
+//
+//   // Copy view project matrix first
+//   BufferVkUtils::CopyBufferCPUToGPU(
+//       (byte_t *)m_uniformBuffersMapped[currentFrame],
+//       m_viewProjUBO.GetBufferData(), m_viewProjUBO.GetSize());
+//
+//   // Then copy each mesh model matrix
+//   for (size_t i = 0; i < m_meshes.size(); ++i) {
+//     auto &meshModelMatUBO = m_meshes[i]->GetUniformBuffer();
+//
+//     std::cout
+//         << "BEFORE COPY -----------------------------------------------\n";
+//     std::cout << "Copying Model Matrix to GPU for Mesh " << i << " at offset
+//     "
+//               << (m_viewProjAlignedSize +
+//                   (i * Mesh::GetAlignedUniformBufferLayoutStride()))
+//               << "\n";
+//
+//     std::cout << "Copying Model Matrix to GPU for Mesh " << i << ":\n";
+//     glm::mat4 modelMat =
+//         *reinterpret_cast<glm::mat4 *>(meshModelMatUBO.GetBufferData());
+//     for (int row = 0; row < 4; ++row) {
+//       for (int col = 0; col < 4; ++col) {
+//         std::cout << modelMat[row][col] << " ";
+//       }
+//       std::cout << "\n";
+//     }
+//
+//     if (!m_uniformBuffersMapped[currentFrame]) {
+//       std::cerr << "Uniform buffer is not mapped!" << std::endl;
+//     }
+//
+//     byte_t *destination = (byte_t *)m_uniformBuffersMapped[currentFrame] +
+//                           m_viewProjAlignedSize +
+//                           (i * Mesh::GetAlignedUniformBufferLayoutStride());
+//
+//     BufferVkUtils::CopyBufferCPUToGPU(
+//         (byte_t *)m_uniformBuffersMapped[currentFrame] +
+//             // m_viewProjUBO.GetSize() +
+//             m_viewProjAlignedSize +
+//             // (i * meshModelMatUBO.GetSize()),
+//             (i * Mesh::GetAlignedUniformBufferLayoutStride()),
+//         meshModelMatUBO.GetBufferData(), meshModelMatUBO.GetSize());
+//   }
+//
+//   std::cout << "AFTER COPY
+//   -----------------------------------------------\n";
+//   // Debug: Print the entire uniform buffer
+//   glm::mat4 *gpuData =
+//       static_cast<glm::mat4 *>(m_uniformBuffersMapped[currentFrame]);
+//   std::cout << "GPU Uniform Buffer:\n";
+//   for (size_t i = 0; i < m_meshes.size() + 1; ++i) { // +1 for viewProj
+//     std::cout << "Matrix " << i << ":\n";
+//     for (int row = 0; row < 4; ++row) {
+//       for (int col = 0; col < 4; ++col) {
+//         std::cout << gpuData[i][row][col] << " ";
+//       }
+//       std::cout << "\n";
+//     }
+//   }
+// };
+
 void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
+
   // Copy view project matrix first
   BufferVkUtils::CopyBufferCPUToGPU(
-      (byte_t *)m_uniformBuffersMapped[currentFrame],
+      (byte_t *)m_globalMappedUniforms[currentFrame],
       m_viewProjUBO.GetBufferData(), m_viewProjUBO.GetSize());
 
   // Then copy each mesh model matrix
   for (size_t i = 0; i < m_meshes.size(); ++i) {
     auto &meshModelMatUBO = m_meshes[i]->GetUniformBuffer();
 
+    glm::mat4 modelMat =
+        *reinterpret_cast<glm::mat4 *>(meshModelMatUBO.GetBufferData());
+    for (int row = 0; row < 4; ++row) {
+      for (int col = 0; col < 4; ++col) {
+        std::cout << modelMat[row][col] << " ";
+      }
+      std::cout << "\n";
+    }
+
     BufferVkUtils::CopyBufferCPUToGPU(
-        (byte_t *)m_uniformBuffersMapped[currentFrame] +
-            m_viewProjUBO.GetSize() + (i * meshModelMatUBO.GetSize()),
+        (byte_t *)m_localMappedUniforms[currentFrame] + m_viewProjAlignedSize +
+            (i * Mesh::GetAlignedUniformBufferLayoutStride()),
         meshModelMatUBO.GetBufferData(), meshModelMatUBO.GetSize());
+  }
+
+  std::cout << "AFTER COPY -----------------------------------------------\n";
+  // Debug: Print the entire uniform buffer
+  glm::mat4 *gpuData =
+      static_cast<glm::mat4 *>(m_localMappedUniforms[currentFrame]);
+  std::cout << "GPU Uniform Buffer (ViewProj + Mesh Model Matrices):\n";
+  for (size_t i = 0; i < m_meshes.size() + 1; ++i) { // +1 for viewProj
+    std::cout << "Matrix " << i << ":\n";
+    for (int row = 0; row < 4; ++row) {
+      for (int col = 0; col < 4; ++col) {
+        std::cout << gpuData[i][row][col] << " ";
+      }
+      std::cout << "\n";
+    }
   }
 };
 
@@ -696,7 +850,10 @@ void BasicRenderWorkflowVk::CleanUp() {
 
   // Cleanup uniform buffer memory
   for (size_t i = 0; i < maxFramesInFlight; ++i) {
-    vmaDestroyBuffer(allocator, m_uniformBuffers[i], m_uniformAllocations[i]);
+    vmaDestroyBuffer(allocator, m_globalUniformBuffers[i],
+                     m_globalUniformAllocations[i]);
+    vmaDestroyBuffer(allocator, m_localUniformBuffers[i],
+                     m_localUniformAllocations[i]);
   }
 
   DescriptorPoolVk::DestroyDescriptorPool(m_descriptorPool);

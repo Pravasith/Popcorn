@@ -54,13 +54,6 @@ protected:
   // glm::vec3 m_rotationEuler;
 
   glm::mat4 m_matrix = glm::mat4(1.0f);
-
-  // glm::mat4 m_matrix =
-  //     glm::rotate(glm::mat4(1.0f),
-  //                 glm::radians(35.0f), // Tilt angle (experiment with
-  //                 35°-45°) glm::vec3(1.0f, -1.0f, 0.0f) // Rotate around
-  //                 diagonal axis
-  //     );
 };
 
 GFX_NAMESPACE_END

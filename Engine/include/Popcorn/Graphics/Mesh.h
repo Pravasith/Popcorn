@@ -38,6 +38,7 @@ public:
     s_uniformBufferLayout.Set<BufferDefs::AttrTypes::Mat4>();
     m_uniformBuffer.SetLayout<BufferDefs::AttrTypes::Mat4>();
     m_uniformBuffer.Fill({m_matrix});
+    SetAlignedUniformBufferLayoutStride();
 
     const float *data = glm::value_ptr(m_matrix);
     std::cout << "Model Matrix:\n";
@@ -89,12 +90,19 @@ public:
     return s_uniformBufferLayout;
   };
 
+  static const uint32_t GetAlignedUniformBufferLayoutStride() {
+    return s_uniformBufferLayoutAlignedStride;
+  };
+
+  static void SetAlignedUniformBufferLayoutStride();
+
 protected:
   VertexBuffer &m_vertexBuffer;
   IndexBuffer<uint16_t> *m_indexBuffer = nullptr;
   UniformBuffer m_uniformBuffer;
 
   static BufferDefs::Layout s_uniformBufferLayout;
+  static uint32_t s_uniformBufferLayoutAlignedStride;
 
   // TODO: Make this a Vector as required
   Material &m_material;

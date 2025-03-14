@@ -7,6 +7,7 @@
 #include "Popcorn/Core/Base.h"
 #include "RenderPassVk.h"
 #include "RenderWorkflowVk.h"
+#include <cstdint>
 #include <glm/glm.hpp>
 #include <vector>
 #include <vulkan/vulkan_core.h>
@@ -70,13 +71,19 @@ private:
   VkBuffer m_vkIndexBuffer;
   VkDeviceMemory m_vkIndexBufferMemory;
 
-  std::vector<VkBuffer> m_uniformBuffers;
-  std::vector<VmaAllocation> m_uniformAllocations;
-  std::vector<VmaAllocationInfo> m_uniformAllocationInfos;
-  std::vector<void *> m_uniformBuffersMapped;
+  std::vector<VkBuffer> m_globalUniformBuffers;
+  std::vector<VmaAllocation> m_globalUniformAllocations;
+  std::vector<VmaAllocationInfo> m_globalUniformAllocationInfos;
+  std::vector<void *> m_globalMappedUniforms;
+
+  std::vector<VkBuffer> m_localUniformBuffers;
+  std::vector<VmaAllocation> m_localUniformAllocations;
+  std::vector<VmaAllocationInfo> m_localUniformAllocationInfos;
+  std::vector<void *> m_localMappedUniforms;
 
   // TODO: Make this a global
   UniformBuffer m_viewProjUBO;
+  uint32_t m_viewProjAlignedSize;
 
   // TODO: Move to global resources (and index into it whenever needed)
   VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
