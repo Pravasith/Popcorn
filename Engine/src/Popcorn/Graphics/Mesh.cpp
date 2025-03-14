@@ -5,6 +5,8 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+BufferDefs::Layout Mesh::s_uniformBufferLayout = BufferDefs::Layout();
+
 void Mesh::ValidateMembersWithSpec(const Spec &spec) {
 #ifdef PC_DEBUG
   if (spec.enableIndexBuffers && m_indexBuffer == nullptr) {

@@ -34,6 +34,8 @@ public:
     if (indexBuffer != nullptr) {
       m_spec.enableIndexBuffers = true;
     };
+
+    s_uniformBufferLayout.Set<BufferDefs::AttrTypes::Mat4>();
     m_uniformBuffer.SetLayout<BufferDefs::AttrTypes::Mat4>();
     m_uniformBuffer.Fill({m_matrix});
 
@@ -83,10 +85,16 @@ public:
     return m_uniformBuffer;
   };
 
+  static const BufferDefs::Layout &GetUniformBufferLayout() {
+    return s_uniformBufferLayout;
+  };
+
 protected:
   VertexBuffer &m_vertexBuffer;
   IndexBuffer<uint16_t> *m_indexBuffer = nullptr;
   UniformBuffer m_uniformBuffer;
+
+  static BufferDefs::Layout s_uniformBufferLayout;
 
   // TODO: Make this a Vector as required
   Material &m_material;

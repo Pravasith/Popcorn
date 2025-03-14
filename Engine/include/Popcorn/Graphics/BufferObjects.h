@@ -261,6 +261,7 @@ private:
 // ---------------------------------------------------------------------------
 // --- UNIFORM BUFFER --------------------------------------------------------
 //
+
 class UniformBuffer {
 public:
   UniformBuffer() { PC_PRINT("CREATED", TagType::Constr, "UniformBuffer") };

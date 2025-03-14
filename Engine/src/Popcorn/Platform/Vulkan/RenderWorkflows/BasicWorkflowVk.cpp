@@ -7,6 +7,7 @@
 #include "GfxPipelineVk.h"
 #include "GlobalMacros.h"
 #include "Material.h"
+#include "MemoryAllocatorVk.h"
 #include "PipelineVk.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
@@ -357,13 +358,13 @@ void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
     // vertexBuffer.PrintBuffer<Vertex>();
     // PC_WARN(vertexBuffer.GetSize())
 
-    BufferVkUtils::CopyBufferCPUToGPU(stagingVertexBufferMemory,
-                                      // Dest ptr
-                                      (byte_t *)data + m_vertexBufferOffsets[i],
-                                      // Src ptr
-                                      vertexBuffer.GetBufferData(),
-                                      // Size
-                                      vertexBuffer.GetSize());
+    BufferVkUtils::CopyBufferCPUToGPU(
+        // Dest ptr
+        (byte_t *)data + m_vertexBufferOffsets[i],
+        // Src ptr
+        vertexBuffer.GetBufferData(),
+        // Size
+        vertexBuffer.GetSize());
   }
 
   // Vertex *vertices = static_cast<Vertex *>(data);
@@ -430,13 +431,13 @@ void BasicRenderWorkflowVk::AllocateVkIndexBuffers() {
     // vertexBuffer.PrintBuffer<Index>();
     // PC_WARN(vertexBuffer.GetSize())
 
-    BufferVkUtils::CopyBufferCPUToGPU(stagingIndexBufferMemory,
-                                      // Dest ptr
-                                      (byte_t *)data + m_indexBufferOffsets[i],
-                                      // Src ptr
-                                      indexBuffer.GetBufferData(),
-                                      // Size
-                                      indexBuffer.GetSize());
+    BufferVkUtils::CopyBufferCPUToGPU(
+        // Dest ptr
+        (byte_t *)data + m_indexBufferOffsets[i],
+        // Src ptr
+        indexBuffer.GetBufferData(),
+        // Size
+        indexBuffer.GetSize());
   }
 
   // Index *vertices = static_cast<Index *>(data);
@@ -473,10 +474,6 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
   const VkExtent2D &swapchainExtent = SwapchainVk::Get()->GetSwapchainExtent();
   constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
 
-  m_uniformBuffers.resize(maxFramesInFlight);
-  m_uniformBuffersMemory.resize(maxFramesInFlight);
-  m_uniformBuffersMapped.resize(maxFramesInFlight);
-
   // TODO: Move this to Camera
   struct GlobalUniform {
     glm::mat4 view;
@@ -490,8 +487,6 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
   auto view =
       glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
                   glm::vec3(0.0f, 0.0f, 1.0f));
-
-  PC_WARN(swapchainExtent.width << " " << swapchainExtent.height)
   // Projection Matrix
   auto proj = glm::perspective(
       glm::radians(45.0f),
@@ -500,34 +495,34 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
 
   m_viewProjUBO.Fill({view, proj});
 
-  VkDeviceSize viewProjUBOSize = m_viewProjUBO.GetSize();
-  //
-  // View & Projection Matrices -------------------------------------------
-  m_uniformBufferOffsets.push_back(0);
+  const VmaAllocator &allocator = MemoryAllocatorVk::Get()->GetVMAAllocator();
+  VkDeviceSize totalSize =
+      m_viewProjUBO.GetSize() +
+      m_meshes.size() * Mesh::GetUniformBufferLayout().strideValue;
 
-  VkDeviceSize currentOffset = 0 + viewProjUBOSize;
+  PC_WARN("EXPECTED SIZE: " << sizeof(glm::mat4) << ". SIZE: "
+                            << Mesh::GetUniformBufferLayout().strideValue)
 
-  // Get the offsets of meshes & the total size of the buffers (a.k.a.
-  // currentOffset)
-  for (int j = 0; j < m_meshes.size(); ++j) {
-    const UniformBuffer &uniformBuffer = m_meshes[j]->GetUniformBuffer();
-    m_uniformBufferOffsets.push_back(currentOffset);
-    currentOffset += uniformBuffer.GetSize();
-  }
+  VkBufferCreateInfo bufferInfo = {.sType =
+                                       VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+                                   .size = totalSize,
+                                   .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                   .sharingMode = VK_SHARING_MODE_EXCLUSIVE};
+
+  VmaAllocationCreateInfo allocInfo{};
+  allocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+  allocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT |
+                    VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+
+  m_uniformBuffers.resize(maxFramesInFlight);
+  m_uniformAllocations.resize(maxFramesInFlight);
+  m_uniformAllocationInfos.resize(maxFramesInFlight);
+  m_uniformBuffersMapped.resize(maxFramesInFlight);
 
   for (size_t i = 0; i < maxFramesInFlight; ++i) {
-    VkBufferCreateInfo bufferInfo{};
-
-    BufferVkUtils::GetDefaultVkBufferState(bufferInfo, currentOffset);
-    bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-
-    BufferVkUtils::AllocateVkBuffer(m_uniformBuffers[i],
-                                    m_uniformBuffersMemory[i], bufferInfo,
-                                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                                        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-    m_uniformBuffersMapped[i] = BufferVkUtils::MapVkMemoryToCPU(
-        m_uniformBuffersMemory[i], 0, currentOffset);
+    vmaCreateBuffer(allocator, &bufferInfo, &allocInfo, &m_uniformBuffers[i],
+                    &m_uniformAllocations[i], &m_uniformAllocationInfos[i]);
+    m_uniformBuffersMapped[i] = m_uniformAllocationInfos[i].pMappedData;
   };
 };
 
@@ -600,12 +595,8 @@ void BasicRenderWorkflowVk::CreateDescriptorSets() {
   VkDescriptorSetAllocateInfo globalDSetsAllocInfo{};
   auto allFramesGlobalLayouts =
       std::vector(maxFramesInFlight, m_globalUBOsDSetLayout);
-
-  PC_WARN("BEFORE: " << allFramesGlobalLayouts[0])
   DescriptorSetsVk::GetDefaultDescriptorSetAllocateState(
       allFramesGlobalLayouts, m_descriptorPool, globalDSetsAllocInfo);
-  PC_WARN("AFTER: " << *globalDSetsAllocInfo.pSetLayouts)
-
   DescriptorSetsVk::AllocateDescriptorSets(globalDSetsAllocInfo,
                                            m_globalDescriptorSets);
 
@@ -649,25 +640,23 @@ void BasicRenderWorkflowVk::CreateDescriptorSets() {
 
     //
     // Local buffers ----------------------------------------------------
-    if (m_meshes.begin() != m_meshes.end()) {
-      VkDescriptorBufferInfo localbufferInfo{};
-      localbufferInfo.buffer = m_uniformBuffers[i];
-      localbufferInfo.offset = 0;
-      localbufferInfo.range = m_meshes[0]->GetUniformBuffer().GetSize();
+    VkDescriptorBufferInfo localbufferInfo{};
+    localbufferInfo.buffer = m_uniformBuffers[i];
+    localbufferInfo.offset = 0;
+    localbufferInfo.range = Mesh::GetUniformBufferLayout().strideValue;
 
-      VkWriteDescriptorSet localDtrWrite{};
-      localDtrWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-      localDtrWrite.dstSet = m_localDescriptorSets[i];
-      localDtrWrite.dstBinding = 0;
-      localDtrWrite.dstArrayElement = 0;
-      localDtrWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-      localDtrWrite.descriptorCount = 1;
-      localDtrWrite.pBufferInfo = &localbufferInfo;
-      localDtrWrite.pImageInfo = nullptr;       // Optional
-      localDtrWrite.pTexelBufferView = nullptr; // Optional
+    VkWriteDescriptorSet localDtrWrite{};
+    localDtrWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    localDtrWrite.dstSet = m_localDescriptorSets[i];
+    localDtrWrite.dstBinding = 0;
+    localDtrWrite.dstArrayElement = 0;
+    localDtrWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    localDtrWrite.descriptorCount = 1;
+    localDtrWrite.pBufferInfo = &localbufferInfo;
+    localDtrWrite.pImageInfo = nullptr;       // Optional
+    localDtrWrite.pTexelBufferView = nullptr; // Optional
 
-      vkUpdateDescriptorSets(device, 1, &localDtrWrite, 0, nullptr);
-    }
+    vkUpdateDescriptorSets(device, 1, &localDtrWrite, 0, nullptr);
   }
 };
 
@@ -680,7 +669,6 @@ void BasicRenderWorkflowVk::CreateDescriptorSets() {
 void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
   // Copy view project matrix first
   BufferVkUtils::CopyBufferCPUToGPU(
-      m_uniformBuffersMemory[currentFrame],
       (byte_t *)m_uniformBuffersMapped[currentFrame],
       m_viewProjUBO.GetBufferData(), m_viewProjUBO.GetSize());
 
@@ -689,7 +677,6 @@ void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
     auto &meshModelMatUBO = m_meshes[i]->GetUniformBuffer();
 
     BufferVkUtils::CopyBufferCPUToGPU(
-        m_uniformBuffersMemory[currentFrame],
         (byte_t *)m_uniformBuffersMapped[currentFrame] +
             m_viewProjUBO.GetSize() + (i * meshModelMatUBO.GetSize()),
         meshModelMatUBO.GetBufferData(), meshModelMatUBO.GetSize());
@@ -703,13 +690,13 @@ void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
 void BasicRenderWorkflowVk::CleanUp() {
   auto &device = DeviceVk::Get()->GetDevice();
   auto *framebuffersVkStn = FramebuffersVk::Get();
+  const auto &allocator = MemoryAllocatorVk::Get()->GetVMAAllocator();
 
   constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
 
   // Cleanup uniform buffer memory
-  for (size_t i = 0; i < maxFramesInFlight; i++) {
-    vkDestroyBuffer(device, m_uniformBuffers[i], nullptr);
-    vkFreeMemory(device, m_uniformBuffersMemory[i], nullptr);
+  for (size_t i = 0; i < maxFramesInFlight; ++i) {
+    vmaDestroyBuffer(allocator, m_uniformBuffers[i], m_uniformAllocations[i]);
   }
 
   DescriptorPoolVk::DestroyDescriptorPool(m_descriptorPool);

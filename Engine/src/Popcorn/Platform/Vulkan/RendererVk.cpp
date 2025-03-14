@@ -125,10 +125,6 @@ void RendererVk::VulkanCleanUp() {
   auto &instance = s_deviceVk->GetVkInstance();
   auto &device = s_deviceVk->GetDevice();
 
-  s_memoryAllocatorVk->CleanUp();
-  MemoryAllocatorVk::Destroy();
-  s_memoryAllocatorVk = nullptr;
-
   // TOOD: move to workflows
   s_descriptorSetLayoutsVk->CleanUp();
   DescriptorSetLayoutsVk::Destroy();
@@ -139,6 +135,10 @@ void RendererVk::VulkanCleanUp() {
     delete workflow;
   }
   s_renderWorkflows.clear();
+
+  s_memoryAllocatorVk->CleanUp();
+  MemoryAllocatorVk::Destroy();
+  s_memoryAllocatorVk = nullptr;
 
   s_frameVk->CleanUp();
   FrameVk::Destroy();

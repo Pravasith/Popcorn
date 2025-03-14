@@ -85,8 +85,7 @@ public:
   static void *MapVkMemoryToCPU(VkDeviceMemory &vkBufferMemory,
                                 VkDeviceSize beginOffset,
                                 VkDeviceSize endOffset);
-  static void CopyBufferCPUToGPU(VkDeviceMemory &vkBufferMemory,
-                                 byte_t *destPtr, byte_t *srcPtr,
+  static void CopyBufferCPUToGPU(byte_t *destPtr, byte_t *srcPtr,
                                  VkDeviceSize size);
   static void CopyBufferGPUToGPU(VkBuffer &srcBuffer, VkBuffer &dstBuffer,
                                  VkDeviceSize size);

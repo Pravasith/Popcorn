@@ -63,7 +63,6 @@ private:
 
   std::vector<VkDeviceSize> m_vertexBufferOffsets;
   std::vector<VkDeviceSize> m_indexBufferOffsets;
-  std::vector<VkDeviceSize> m_uniformBufferOffsets;
 
   VkBuffer m_vkVertexBuffer;
   VkDeviceMemory m_vkVertexBufferMemory;
@@ -72,7 +71,8 @@ private:
   VkDeviceMemory m_vkIndexBufferMemory;
 
   std::vector<VkBuffer> m_uniformBuffers;
-  std::vector<VkDeviceMemory> m_uniformBuffersMemory;
+  std::vector<VmaAllocation> m_uniformAllocations;
+  std::vector<VmaAllocationInfo> m_uniformAllocationInfos;
   std::vector<void *> m_uniformBuffersMapped;
 
   // TODO: Make this a global
