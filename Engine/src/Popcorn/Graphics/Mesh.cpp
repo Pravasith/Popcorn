@@ -32,6 +32,7 @@ void Mesh::OnAttach() {};
 
 void Mesh::OnUpdate() {
   // Resets buffer data and fills again
+
   m_uniformBuffer.Fill({m_matrix});
 };
 
