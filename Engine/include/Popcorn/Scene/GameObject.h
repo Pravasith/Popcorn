@@ -57,6 +57,31 @@ public:
 
   const glm::mat4 &GetMatrix() const { return m_matrix; }
 
+  inline void RotateAroundWorldXAxis(float radians) {
+
+    // Step 1: Calculate the current position relative to the world origin
+    glm::vec3 positionRelativeToOrigin = m_position;
+
+    // Step 2: Apply the world Y-axis rotation to the position
+    glm::mat4 rotationMatrix =
+        glm::rotate(glm::mat4(1.0f), radians, glm::vec3(1.0f, 0.0f, 0.0f));
+
+    // Rotate the position (ignoring the rotation of the object itself)
+    positionRelativeToOrigin =
+        glm::vec3(rotationMatrix * glm::vec4(positionRelativeToOrigin, 1.0f));
+
+    // Step 3: Update the object's position to the new rotated position
+    m_position = positionRelativeToOrigin;
+
+    // Step 4: Update the orientation (rotation) of the object
+    // We also need to apply the world Y-axis rotation to the object's rotation
+    m_rotationMatrix = rotationMatrix * m_rotationMatrix;
+
+    // Step 5: Recalculate the matrix based on the new position and updated
+    // rotation
+    UpdatePositionMatrix();
+  };
+
   inline void RotateAroundWorldYAxis(float radians) {
 
     // Step 1: Calculate the current position relative to the world origin
@@ -65,6 +90,31 @@ public:
     // Step 2: Apply the world Y-axis rotation to the position
     glm::mat4 rotationMatrix =
         glm::rotate(glm::mat4(1.0f), radians, glm::vec3(0.0f, 1.0f, 0.0f));
+
+    // Rotate the position (ignoring the rotation of the object itself)
+    positionRelativeToOrigin =
+        glm::vec3(rotationMatrix * glm::vec4(positionRelativeToOrigin, 1.0f));
+
+    // Step 3: Update the object's position to the new rotated position
+    m_position = positionRelativeToOrigin;
+
+    // Step 4: Update the orientation (rotation) of the object
+    // We also need to apply the world Y-axis rotation to the object's rotation
+    m_rotationMatrix = rotationMatrix * m_rotationMatrix;
+
+    // Step 5: Recalculate the matrix based on the new position and updated
+    // rotation
+    UpdatePositionMatrix();
+  };
+
+  inline void RotateAroundWorldZAxis(float radians) {
+
+    // Step 1: Calculate the current position relative to the world origin
+    glm::vec3 positionRelativeToOrigin = m_position;
+
+    // Step 2: Apply the world Y-axis rotation to the position
+    glm::mat4 rotationMatrix =
+        glm::rotate(glm::mat4(1.0f), radians, glm::vec3(0.0f, 0.0f, 1.0f));
 
     // Rotate the position (ignoring the rotation of the object itself)
     positionRelativeToOrigin =
