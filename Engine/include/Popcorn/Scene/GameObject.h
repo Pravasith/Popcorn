@@ -37,21 +37,31 @@ public:
 
   [[nodiscard]] const glm::mat4 &GetMatrix() const { return m_matrix; };
 
-  // inline void SetPosition(glm::vec3 pos) {
-  //   m_position = pos;
-  //   UpdateMatrix();
-  // };
-  //
-  // inline void RotateY(float degrees) {
-  //   m_rotationEuler.y += glm::radians(degrees);
-  //   UpdateMatrix();
-  // };
+  inline void SetPosition(glm::vec3 pos) {
+    m_position = pos;
+    UpdateMatrix();
+  };
+
+  inline void RotateX(float radians) {
+    m_rotationEuler.x += radians;
+    UpdateMatrix();
+  };
+
+  inline void RotateY(float radians) {
+    m_rotationEuler.y += radians;
+    UpdateMatrix();
+  };
+
+  inline void RotateZ(float radians) {
+    m_rotationEuler.z += radians;
+    UpdateMatrix();
+  };
 
   void UpdateMatrix();
 
 protected:
-  // glm::vec3 m_position;
-  // glm::vec3 m_rotationEuler;
+  glm::vec3 m_position;
+  glm::vec3 m_rotationEuler;
 
   glm::mat4 m_matrix = glm::mat4(1.0f);
 };

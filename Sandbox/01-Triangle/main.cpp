@@ -37,48 +37,19 @@ public:
       };
     };
 
-    vertexBuffer = VertexBuffer::Create();
+    vertexBuffer1 = VertexBuffer::Create();
     vertexBuffer2 = VertexBuffer::Create();
 
     indexBuffer = new IndexBuffer<uint16_t>(); // this is okay
-    vertexBuffer->SetLayout<BufferDefs::AttrTypes::Float2,
-                            BufferDefs::AttrTypes::Float3>();
+    vertexBuffer1->SetLayout<BufferDefs::AttrTypes::Float2,
+                             BufferDefs::AttrTypes::Float3>();
     vertexBuffer2->SetLayout<BufferDefs::AttrTypes::Float2,
                              BufferDefs::AttrTypes::Float3>();
 
-    // vertexBuffer->Fill<Vertex>({
-    //     {{-.5f, -.5f}, {.8f, .0f, .8f}},
-    //     {{.0f, -.5f}, {.8f, .8f, .0f}},
-    //     {{.0f, .0f}, {.0f, .8f, .8f}},
-    //     {{-.5f, .0f}, {.8f, .0f, .8f}},
-    // });
-    // vertexBuffer2->Fill<Vertex>({
-    //     {{.0f, .0f}, {.8f, .0f, .8f}},
-    //     {{.5f, .0f}, {.8f, .8f, .0f}},
-    //     {{.5f, .5f}, {.0f, .8f, .8f}},
-    //     {{.0f, .5f}, {.8f, .0f, .8f}},
-    // });
-
-    // vertexBuffer->Fill<Vertex>({
-    //     {{-.5f, -.5f}, {.8f, .0f, .8f}},
-    //     {{.5f, -.5f}, {.8f, .8f, .0f}},
-    //     {{.5f, .5f}, {.0f, .8f, .8f}},
-    //     {{-.5f, .5f}, {.8f, .0f, .8f}},
-    // });
-    //
-    // vertexBuffer2->Fill<Vertex>({
-    //     {{-.5f, -.5f}, {.8f, .0f, .8f}},
-    //     {{.5f, -.5f}, {.8f, .8f, .0f}},
-    //     {{.5f, .5f}, {.0f, .8f, .8f}},
-    //     {{-.5f, .5f}, {.8f, .0f, .8f}},
-    // });
-    //
-    // indexBuffer->Fill({3, 0, 1, 1, 2, 3});
-
-    vertexBuffer->Fill<Vertex>({{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-                                {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-                                {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-                                {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}});
+    vertexBuffer1->Fill<Vertex>({{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+                                 {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+                                 {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+                                 {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}});
     vertexBuffer2->Fill<Vertex>({{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
                                  {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
                                  {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
@@ -99,22 +70,22 @@ public:
     triMat = new BasicMaterial(matData);
 
     // Mesh triMesh{nullptr, triMat};
-    triMesh = new Mesh{*vertexBuffer, indexBuffer, *triMat};
+    triMesh1 = new Mesh{*vertexBuffer1, indexBuffer, *triMat};
     triMesh2 = new Mesh{*vertexBuffer2, indexBuffer, *triMat};
 
-    // triMesh->SetPosition({.0f, .1f, .0f});
-    // triMesh2->SetPosition({.0f, -.1f, .0f});
+    triMesh1->SetPosition({.0f, .0f, .5f});
+    triMesh2->SetPosition({.0f, .0f, -.5f});
 
     // ADD MESH TO WORK FLOW -> CREATE PIPELINES
-    triScene.Add(triMesh);
-    // triScene.Add(triMesh2);
+    triScene.Add(triMesh2);
+    triScene.Add(triMesh1);
 
     // vertexBuffer->PrintBuffer<Vertex>();
   };
 
   virtual void OnDetach() override {
-    delete triMesh;
-    triMesh = nullptr;
+    delete triMesh1;
+    triMesh1 = nullptr;
 
     delete triMesh2;
     triMesh2 = nullptr;
@@ -125,17 +96,17 @@ public:
     delete indexBuffer;
     indexBuffer = nullptr;
 
-    VertexBuffer::Destroy(vertexBuffer);
+    VertexBuffer::Destroy(vertexBuffer1);
     VertexBuffer::Destroy(vertexBuffer2);
   };
 
   virtual void OnUpdate(TimeEvent &e) override {
     // Update uniforms here
-    // triMesh->RotateY(90.f * e.GetElapsedS());
-    // triMesh2->RotateY(90.f * e.GetElapsedS());
+    triMesh1->RotateY(glm::radians(90.f) * e.GetDeltaS());
+    triMesh2->RotateY(glm::radians(90.f) * e.GetDeltaS());
 
     // TODO: Refactor these so user doesn't have to call update
-    // triScene.Update();
+    triScene.Update();
     // e.PrintDebugData();
   };
 
@@ -147,14 +118,24 @@ public:
   virtual bool OnEvent(Event &e) override { return false; };
 
 private:
-  VertexBuffer *vertexBuffer;
+  VertexBuffer *vertexBuffer1;
   VertexBuffer *vertexBuffer2;
+  VertexBuffer *vertexBuffer3;
+  VertexBuffer *vertexBuffer4;
+  VertexBuffer *vertexBuffer5;
+  VertexBuffer *vertexBuffer6;
 
   IndexBuffer<uint16_t> *indexBuffer;
 
   TriangleScene triScene{};
-  Mesh *triMesh;
+
+  Mesh *triMesh1;
   Mesh *triMesh2;
+  Mesh *triMesh3;
+  Mesh *triMesh4;
+  Mesh *triMesh5;
+  Mesh *triMesh6;
+
   Material *triMat;
 };
 
