@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Popcorn/Core/Base.h"
+#include <cstdint>
 #include <string>
 #include <vector>
 #define GLFW_INCLUDE_VULKAN
@@ -124,6 +125,9 @@ private:
   SwapchainSupportDetails
   QuerySwapchainSupport(const VkPhysicalDevice &device,
                         const VkSurfaceKHR &surface) const;
+
+public:
+  static constexpr uint32_t VULKAN_API_VERSION = VK_API_VERSION_1_2;
 
 private:
   DeviceVk() { PC_PRINT("CREATED", TagType::Constr, "DeviceVk.h") };

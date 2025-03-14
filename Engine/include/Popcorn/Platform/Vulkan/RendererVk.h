@@ -6,6 +6,7 @@
 #include "FrameVk.h"
 #include "FramebuffersVk.h"
 #include "GlobalMacros.h"
+#include "MemoryAllocatorVk.h"
 #include "Popcorn/Core/Window.h"
 #include "Popcorn/Events/WindowEvent.h"
 #include "RenderWorkflowVk.h"
@@ -60,6 +61,7 @@ private:
   static FramebuffersVk *s_framebuffersVk;
   static CommandPoolVk *s_commandPoolVk;
   static FrameVk *s_frameVk;
+  static MemoryAllocatorVk *s_memoryAllocatorVk;
 
   static std::vector<RenderWorkflowVk *> s_renderWorkflows;
   static DescriptorSetLayoutsVk *s_descriptorSetLayoutsVk;

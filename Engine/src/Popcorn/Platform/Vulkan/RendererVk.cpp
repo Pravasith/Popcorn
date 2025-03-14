@@ -6,6 +6,7 @@
 #include "FrameVk.h"
 #include "FramebuffersVk.h"
 #include "Material.h"
+#include "MemoryAllocatorVk.h"
 #include "Mesh.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
@@ -26,6 +27,7 @@ SwapchainVk *RendererVk::s_swapchainVk = nullptr;
 FramebuffersVk *RendererVk::s_framebuffersVk = nullptr;
 CommandPoolVk *RendererVk::s_commandPoolVk = nullptr;
 FrameVk *RendererVk::s_frameVk = nullptr;
+MemoryAllocatorVk *RendererVk::s_memoryAllocatorVk = nullptr;
 
 DescriptorSetLayoutsVk *RendererVk::s_descriptorSetLayoutsVk = nullptr;
 // Other members
@@ -107,7 +109,9 @@ RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
   s_framebuffersVk = FramebuffersVk::Get();
   s_commandPoolVk = CommandPoolVk::Get();
   s_frameVk = FrameVk::Get();
+  // TOOD: move to workflows
   s_descriptorSetLayoutsVk = DescriptorSetLayoutsVk::Get();
+  s_memoryAllocatorVk = MemoryAllocatorVk::Get();
 
   s_swapchainVk->SetAppWindow(appWin);
 };
@@ -121,8 +125,14 @@ void RendererVk::VulkanCleanUp() {
   auto &instance = s_deviceVk->GetVkInstance();
   auto &device = s_deviceVk->GetDevice();
 
+  s_memoryAllocatorVk->CleanUp();
+  MemoryAllocatorVk::Destroy();
+  s_memoryAllocatorVk = nullptr;
+
+  // TOOD: move to workflows
   s_descriptorSetLayoutsVk->CleanUp();
   DescriptorSetLayoutsVk::Destroy();
+  s_descriptorSetLayoutsVk = nullptr;
 
   for (auto *workflow : s_renderWorkflows) {
     workflow->CleanUp();
@@ -132,20 +142,25 @@ void RendererVk::VulkanCleanUp() {
 
   s_frameVk->CleanUp();
   FrameVk::Destroy();
+  s_frameVk = nullptr;
 
   s_commandPoolVk->CleanUp();
   CommandPoolVk::Destroy();
+  s_commandPoolVk = nullptr;
 
   s_swapchainVk->CleanUp(device);
   SwapchainVk::Destroy();
+  s_swapchainVk = nullptr;
 
   FramebuffersVk::Destroy();
 
   s_surfaceVk->CleanUp(instance);
   SurfaceVk::Destroy();
+  s_surfaceVk = nullptr;
 
   s_deviceVk->CleanUp();
   DeviceVk::Destroy();
+  s_deviceVk = nullptr;
 };
 
 //
@@ -168,6 +183,9 @@ void RendererVk::CreateRenderWorkflows() {
 // Sort materials, allocate descriptor sets, vk buffers, index buffers &
 // create pipelines
 void RendererVk::SceneReady() {
+  // Create VMA Allocator
+  s_memoryAllocatorVk->CreateVMAAllocator();
+
   for (auto &renderWorkflow : s_renderWorkflows) {
     // Loops through all meshes & creates a contiguous Vulkan buffer memory for
     // each workflow -- each workflow has one VkBuffer & one VkDeviceMemory each

@@ -31,7 +31,8 @@ public:
       delete s_instance;
       s_instance = nullptr;
     } else {
-      PC_WARN("Trying to destroy a non-existant instance of MaterialHandler")
+      PC_WARN(
+          "Trying to destroy a non-existant instance of DescriptorSetLayoutsVk")
     };
   };
 
@@ -42,10 +43,6 @@ public:
   // required
   void CleanUp();
 
-  // --- UTILS -----------------------------------------------------------------
-  [[nodiscard]] static VkDescriptorSetLayout CreateDescriptorSetLayout(
-      const std::vector<VkDescriptorSetLayoutBinding> &bindings);
-
 private:
   DescriptorSetLayoutsVk() {
     PC_PRINT("CREATED", TagType::Constr, "DescriptorSetLayoutsVk")
@@ -53,6 +50,10 @@ private:
   ~DescriptorSetLayoutsVk() {
     PC_PRINT("DESTROYED", TagType::Destr, "DescriptorSetLayoutsVk")
   };
+
+  // --- UTILS -----------------------------------------------------------------
+  [[nodiscard]] static VkDescriptorSetLayout CreateDescriptorSetLayout(
+      const std::vector<VkDescriptorSetLayoutBinding> &bindings);
 
   static size_t
   HashLayoutBindings(const std::vector<VkDescriptorSetLayoutBinding> &bindings);

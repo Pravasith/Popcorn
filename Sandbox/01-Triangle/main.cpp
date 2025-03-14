@@ -136,6 +136,7 @@ public:
 
     // TODO: Refactor these so user doesn't have to call update
     // triScene.Update();
+    e.PrintDebugData();
   };
 
   virtual void OnRender() override {

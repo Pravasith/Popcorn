@@ -62,6 +62,7 @@ add_library(
   ${PLATFORM_IMPL_DIR}/Vulkan/DescriptorsVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/Pipelines/GfxPipelineVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/Pipelines/PipelineVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/MemoryAllocatorVk.cpp
   #
   # RENDER WORK FLOWS
   ${PLATFORM_IMPL_DIR}/Vulkan/RenderWorkflows/BasicWorkflowVk.cpp)
