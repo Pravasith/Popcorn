@@ -1,8 +1,8 @@
-#include "VertexBuffer.h"
+#include "BufferObjects.h"
+#include "BufferObjectsVk.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include "Renderer.h"
-#include "VertexBufferVk.h"
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -19,6 +19,15 @@ VertexBuffer *VertexBuffer::Create() {
     PC_ERROR("WRONG RENDERER API", "RENDERER-API")
     return nullptr;
   };
+};
+
+void VertexBuffer::Destroy(VertexBuffer *vertexBuffer) {
+  if (!vertexBuffer) {
+    PC_WARN("Attempt to delete a null vBfr")
+  };
+
+  delete vertexBuffer;
+  vertexBuffer = nullptr;
 };
 
 GFX_NAMESPACE_END

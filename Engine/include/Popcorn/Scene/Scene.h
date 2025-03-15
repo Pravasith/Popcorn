@@ -26,7 +26,7 @@ public:
   void Add(GameObject *node);
 
   // Update nodes
-  void OnUpdate();
+  void Update();
 
 private:
   static uint32_t s_sceneId;

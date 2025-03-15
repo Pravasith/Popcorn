@@ -16,10 +16,12 @@ public:
   DebugUIOverlay();
   ~DebugUIOverlay();
 
-  void OnAttach() override;
-  void OnDetach() override;
-  void OnUpdate() override;
-  void OnEvent(Event &e) override;
+  virtual void OnAttach() override;
+  virtual void OnDetach() override;
+
+  virtual bool OnEvent(Event &e) override;
+  virtual void OnUpdate(TimeEvent &e) override;
+  virtual void OnRender() override {};
 
   // Imgui impl. methods
   static VkPhysicalDevice SetupVulkan_SelectPhysicalDevice();

@@ -38,13 +38,14 @@ add_library(
   #
   # MAIN CLASS
   ${GRAPHICS_IMPL_DIR}/Renderer.cpp
-  ${GRAPHICS_IMPL_DIR}/VertexBuffer.cpp
+  ${GRAPHICS_IMPL_DIR}/BufferObjects.cpp
   ${GRAPHICS_IMPL_DIR}/Mesh.cpp
   ${GRAPHICS_IMPL_DIR}/Materials/Material.cpp
   #
   # SCENE CLASSES
   # TODO: Separate the scene to a different library when time comes
   ${SCENE_IMPL_DIR}/Scene.cpp
+  ${SCENE_IMPL_DIR}/GameObject.cpp
   #
   # OPENGL CLASSES
   ${PLATFORM_IMPL_DIR}/OpenGL/RendererOpenGL.cpp
@@ -55,11 +56,13 @@ add_library(
   ${PLATFORM_IMPL_DIR}/Vulkan/SurfaceVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/SwapchainVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/FramebuffersVk.cpp
-  ${PLATFORM_IMPL_DIR}/Vulkan/VertexBufferVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/BufferObjectsVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/FrameVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/CommandPoolVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/DescriptorsVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/Pipelines/GfxPipelineVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/Pipelines/PipelineVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/MemoryAllocatorVk.cpp
   #
   # RENDER WORK FLOWS
   ${PLATFORM_IMPL_DIR}/Vulkan/RenderWorkflows/BasicWorkflowVk.cpp)

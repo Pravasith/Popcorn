@@ -13,3 +13,5 @@ add_library(
   # BACKENDS
   ${PLATFORM_AGNOSTIC_DIR}/imgui/backends/imgui_impl_opengl3.cpp
   ${PLATFORM_AGNOSTIC_DIR}/imgui/backends/imgui_impl_glfw.cpp)
+
+add_library(vma ${PLATFORM_AGNOSTIC_DIR}/vma/vk_mem_alloc.cpp)

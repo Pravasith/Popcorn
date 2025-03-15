@@ -15,7 +15,7 @@ public:
   Time operator()(const Time &&) = delete;
 
   [[nodiscard]] inline bool IsGameLoopRunning() const {
-    return m_is_game_loop_running;
+    return m_isGameLoopRunning;
   };
 
   [[nodiscard]] inline static Time *Create() {
@@ -41,20 +41,19 @@ public:
 
 private:
   Time()
-      : Publisher("Time"), m_now(0.0),
+      : Publisher("Time"), m_elapsed(0.0),
         // Assumption: First frame took 16.66 ms
-        m_delta(16.66), m_elapsed(0.0), m_is_game_loop_running(true) {
+        m_delta(0.01666), m_isGameLoopRunning(true) {
           PC_PRINT("CREATED", TagType::Constr, "TIME")
         };
   ~Time() { PC_PRINT("DESTROYED", TagType::Destr, "TIME") };
 
   static Time *s_instance;
 
-  double m_now;
-  double m_delta;
   double m_elapsed;
+  double m_delta;
 
-  bool m_is_game_loop_running;
+  bool m_isGameLoopRunning;
 };
 
 ENGINE_NAMESPACE_END

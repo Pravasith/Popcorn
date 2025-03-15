@@ -44,7 +44,7 @@ void DeviceVk::CreateInstance(const specs &appSpecs = specs{"Vulkan App", 1, 0,
                       appSpecs.appVersionPatch);
   appInfo.pEngineName = "Popcorn Engine";
   appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-  appInfo.apiVersion = VK_API_VERSION_1_0;
+  appInfo.apiVersion = VULKAN_API_VERSION;
 
   VkInstanceCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;

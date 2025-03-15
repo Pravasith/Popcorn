@@ -1,9 +1,9 @@
 #pragma once
 
+#include "BufferObjects.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
-#include "VertexBuffer.h"
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
@@ -15,19 +15,19 @@ GFX_NAMESPACE_BEGIN
 class VertexBufferVk : public VertexBuffer {
 public:
   // clang-format off
-  static constexpr VkFormat MapAttrTypeToVulkanType(AttrTypes attrType) {
+  static constexpr VkFormat MapAttrTypeToVulkanType(BufferDefs::AttrTypes attrType) {
     switch (attrType) {
-      case AttrTypes::Float:  return VK_FORMAT_R32_SFLOAT;
-      case AttrTypes::Float2: return VK_FORMAT_R32G32_SFLOAT;
-      case AttrTypes::Float3: return VK_FORMAT_R32G32B32_SFLOAT;
-      case AttrTypes::Float4: return VK_FORMAT_R32G32B32A32_SFLOAT;
-      case AttrTypes::Mat3:   return VK_FORMAT_R32G32B32_SFLOAT;  // Typically 3xvec3
-      case AttrTypes::Mat4:   return VK_FORMAT_R32G32B32A32_SFLOAT; // Typically 4xvec4
-      case AttrTypes::Int:    return VK_FORMAT_R32_SINT;
-      case AttrTypes::Int2:   return VK_FORMAT_R32G32_SINT;
-      case AttrTypes::Int3:   return VK_FORMAT_R32G32B32_SINT;
-      case AttrTypes::Int4:   return VK_FORMAT_R32G32B32A32_SINT;
-      case AttrTypes::Bool:   return VK_FORMAT_R8_UINT;
+      case BufferDefs::AttrTypes::Float:  return VK_FORMAT_R32_SFLOAT;
+      case BufferDefs::AttrTypes::Float2: return VK_FORMAT_R32G32_SFLOAT;
+      case BufferDefs::AttrTypes::Float3: return VK_FORMAT_R32G32B32_SFLOAT;
+      case BufferDefs::AttrTypes::Float4: return VK_FORMAT_R32G32B32A32_SFLOAT;
+      case BufferDefs::AttrTypes::Mat3:   return VK_FORMAT_R32G32B32_SFLOAT;  // Typically 3xvec3
+      case BufferDefs::AttrTypes::Mat4:   return VK_FORMAT_R32G32B32A32_SFLOAT; // Typically 4xvec4
+      case BufferDefs::AttrTypes::Int:    return VK_FORMAT_R32_SINT;
+      case BufferDefs::AttrTypes::Int2:   return VK_FORMAT_R32G32_SINT;
+      case BufferDefs::AttrTypes::Int3:   return VK_FORMAT_R32G32B32_SINT;
+      case BufferDefs::AttrTypes::Int4:   return VK_FORMAT_R32G32B32A32_SINT;
+      case BufferDefs::AttrTypes::Bool:   return VK_FORMAT_R8_UINT;
       default:
         PC_ASSERT(false, "Unknown AttrType");
         return VK_FORMAT_R8_UINT;
@@ -44,10 +44,11 @@ public:
   // --- UTILS --------------------------------------------------------------
   static void GetDefaultVertexInputBindingDescription(
       VkVertexInputBindingDescription &bindingDescription,
-      const Layout &layout);
+      const BufferDefs::Layout &layout);
 
   static void GetDefaultVertexInputAttributeDescriptions(
-      std::vector<VkVertexInputAttributeDescription> &, const Layout &);
+      std::vector<VkVertexInputAttributeDescription> &,
+      const BufferDefs::Layout &);
 
   //
   // COPY CONSTRUCTOR
@@ -84,8 +85,7 @@ public:
   static void *MapVkMemoryToCPU(VkDeviceMemory &vkBufferMemory,
                                 VkDeviceSize beginOffset,
                                 VkDeviceSize endOffset);
-  static void CopyBufferCPUToGPU(VkDeviceMemory &vkBufferMemory,
-                                 byte_t *destPtr, byte_t *srcPtr,
+  static void CopyBufferCPUToGPU(byte_t *destPtr, byte_t *srcPtr,
                                  VkDeviceSize size);
   static void CopyBufferGPUToGPU(VkBuffer &srcBuffer, VkBuffer &dstBuffer,
                                  VkDeviceSize size);

@@ -27,7 +27,7 @@ Scene::~Scene() {
 
 // Adds a node
 void Scene::Add(GameObject *node) {
-  node->OnAttach(m_sceneData);
+  node->OnAttach();
   m_nodes.push_back(node);
 
   if (node->GetType() == GameObjectTypes::Mesh) {
@@ -37,10 +37,10 @@ void Scene::Add(GameObject *node) {
 };
 
 // Update nodes
-void Scene::OnUpdate() {
+void Scene::Update() {
   // Updates m_sceneData{}; // like ambient lights data, env map etc.
   for (auto &node : m_nodes) {
-    node->OnUpdate(m_sceneData);
+    node->OnUpdate();
   }
 };
 

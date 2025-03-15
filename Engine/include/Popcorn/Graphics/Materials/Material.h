@@ -35,8 +35,8 @@ enum ShaderStages {
 struct MaterialData {
   int enabledShadersMask = 0;
   std::vector<const char *> shaderFiles{};
-  // std::vector<PCImage> textures; // albedo, normals, roughness ..etc
   // UniformData uniformData;   // color, metalness, roughness ..etc
+  // std::vector<PCImage> textures; // albedo, normals, roughness ..etc
   // RenderStates renderStates; // blending, depth testing  ..etc
 };
 
@@ -46,6 +46,7 @@ public:
     PC_PRINT("CREATED", TagType::Constr, "Material.h");
     LoadShaders();
   };
+
   virtual ~Material() { PC_PRINT("DESTROYED", TagType::Destr, "Material.h"); };
 
   [[nodiscard]] inline std::vector<Buffer> &GetShaders() { return m_shaders; };

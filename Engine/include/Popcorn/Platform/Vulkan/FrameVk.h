@@ -33,10 +33,11 @@ public:
 
   void
   Draw(std::vector<VkCommandBuffer> &commandBuffers,
-       const VkRenderPass &renderPass,
-       const std::function<void(const uint32_t frameIndex,
-                                VkCommandBuffer &currentFrameCommandBuffer)>
-           &recordDrawCommands);
+       const VkRenderPass &finalPaintRenderPass,
+       const std::function<void(const uint32_t currentFrame)> &updateSceneData,
+       const std::function<void(
+           const uint32_t frameIndex, const uint32_t currentFrame,
+           VkCommandBuffer &currentFrameCommandBuffer)> &recordDrawCommands);
 
   void CreateRenderSyncObjects();
   inline void SetFrameBufferResized(bool isFrameBufferResized) {

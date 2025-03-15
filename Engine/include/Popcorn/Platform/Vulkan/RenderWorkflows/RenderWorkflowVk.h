@@ -5,9 +5,8 @@
 #include "Mesh.h"
 #include "Popcorn/Core/Base.h"
 #include "Scene.h"
-#include "VertexBuffer.h"
-#include "VertexBufferVk.h"
 #include <algorithm>
+#include <cstdint>
 #include <stdexcept>
 #include <vector>
 #include <vulkan/vulkan_core.h>
@@ -36,15 +35,16 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "RenderWorkflowVk")
   };
 
-  virtual void RecordRenderCommands(const Scene &scene,
-                                    const VkCommandBuffer &commandBuffer,
-                                    const uint32_t imageIndex) = 0;
   virtual const VkRenderPass &GetRenderPass() const {
     throw std::runtime_error(
         "GetRenderPass is not defined in the inherited class");
   };
 
-  virtual void CreatePipeline(Material &) = 0;
+  virtual void
+  RecordRenderCommands(const uint32_t frameIndex, const uint32_t currentFrame,
+                       VkCommandBuffer &currentFrameCommandBuffer) = 0;
+  virtual void ProcessSceneUpdates(const uint32_t currentFrame) = 0;
+  virtual void CreatePipelines() = 0;
   virtual void CleanUp() = 0;
 
   //
@@ -53,7 +53,11 @@ public:
   virtual void CreateFramebuffers() {};
   virtual void AllocateVkVertexBuffers() {};
   virtual void AllocateVkIndexBuffers() {};
+  virtual void AllocateVkUniformBuffers() {};
   virtual void CreateCommandBuffer() {};
+  virtual void CreateDescriptorSetLayouts() {};
+  virtual void CreateDescriptorPool() {};
+  virtual void CreateDescriptorSets() {};
 
   virtual void AddMeshToWorkflow(Mesh *mesh) {};
 
@@ -67,10 +71,7 @@ public:
 
     //
     // ADD TO MATERIAL LIBRARY ---------------------------------------------
-    m_materials.push_back(materialPtr);
-    //
-    // CREATE MATERIAL PIPELINES -------------------------------------------
-    CreatePipeline(*materialPtr);
+    m_materials.emplace_back(materialPtr);
   }
 
   void UnRegisterMaterial(Material *materialPtr) {

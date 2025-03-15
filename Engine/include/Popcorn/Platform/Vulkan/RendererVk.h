@@ -1,10 +1,12 @@
 #pragma once
 
 #include "CommandPoolVk.h"
+#include "DescriptorsVk.h"
 #include "DeviceVk.h"
 #include "FrameVk.h"
 #include "FramebuffersVk.h"
 #include "GlobalMacros.h"
+#include "MemoryAllocatorVk.h"
 #include "Popcorn/Core/Window.h"
 #include "Popcorn/Events/WindowEvent.h"
 #include "RenderWorkflowVk.h"
@@ -26,9 +28,9 @@ public:
   virtual ~RendererVk() override;
 
   virtual void SceneReady() override;
+  virtual void UpdateFrameData() override;
   virtual void DrawFrame(const Scene &scene) override;
   virtual bool OnFrameBufferResize(FrameBfrResizeEvent &) override;
-  virtual void CreateMaterialPipeline(Material *materialPtr) override;
   virtual void AddMeshToWorkflow(Mesh *meshPtr) override;
 
   // Sets up devices, configure swapchains, creates depth buffers
@@ -36,9 +38,6 @@ public:
   void VulkanInit();
   // Creates render workflows
   void CreateRenderWorkflows();
-  // Loops through all meshes & creates a contiguous Vulkan buffer memory for
-  // each workflow -- each workflow has one VkBuffer & one VkDeviceMemory each
-  void AllocateVkBuffers();
 
   void VulkanCleanUp();
 
@@ -62,8 +61,10 @@ private:
   static FramebuffersVk *s_framebuffersVk;
   static CommandPoolVk *s_commandPoolVk;
   static FrameVk *s_frameVk;
+  static MemoryAllocatorVk *s_memoryAllocatorVk;
 
   static std::vector<RenderWorkflowVk *> s_renderWorkflows;
+  static DescriptorSetLayoutsVk *s_descriptorSetLayoutsVk;
 
   std::vector<VkCommandBuffer> m_drawingCommandBuffers;
 };

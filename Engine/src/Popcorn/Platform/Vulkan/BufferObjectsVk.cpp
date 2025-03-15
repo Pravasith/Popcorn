@@ -1,4 +1,5 @@
-#include "VertexBufferVk.h"
+#include "BufferObjectsVk.h"
+#include "BufferObjects.h"
 #include "CommandPoolVk.h"
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
@@ -22,7 +23,8 @@ void VertexBufferVk::UnBind() {
 };
 
 void VertexBufferVk::GetDefaultVertexInputBindingDescription(
-    VkVertexInputBindingDescription &bindingDescription, const Layout &layout) {
+    VkVertexInputBindingDescription &bindingDescription,
+    const BufferDefs::Layout &layout) {
   bindingDescription.binding = 0;
   bindingDescription.stride = layout.strideValue;
   bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
@@ -30,7 +32,7 @@ void VertexBufferVk::GetDefaultVertexInputBindingDescription(
 
 void VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
     std::vector<VkVertexInputAttributeDescription> &attrDescriptions,
-    const Layout &layout) {
+    const BufferDefs::Layout &layout) {
   attrDescriptions.resize(layout.countValue);
 
   for (int i = 0; i < layout.countValue; ++i) {
@@ -52,30 +54,6 @@ void BufferVkUtils::RecordBindVkVertexBuffersCommand(
     VkDeviceSize *offsets, const uint32_t buffersCount) {
   vkCmdBindVertexBuffers(commandBuffer, 0, buffersCount, vkBuffer, offsets);
 };
-
-// template <>
-// void BufferVkUtils::RecordBindVkIndexBufferCommand<uint16_t>(
-//     const VkCommandBuffer &commandBuffer, VkBuffer *vkIndexBuffer,
-//     VkDeviceSize offset) {
-//   // constexpr VkIndexType bufferType =
-//   //     std::is_same_v<uint16_t, T> ? VK_INDEX_TYPE_UINT16 :
-//   //     VK_INDEX_TYPE_UINT32;
-//   // vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0, bufferType);
-//   vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0,
-//   VK_INDEX_TYPE_UINT16);
-// };
-//
-// template <>
-// void BufferVkUtils::RecordBindVkIndexBufferCommand<uint32_t>(
-//     const VkCommandBuffer &commandBuffer, VkBuffer *vkIndexBuffer,
-//     VkDeviceSize offset) {
-//   // constexpr VkIndexType bufferType =
-//   //     std::is_same_v<uint16_t, T> ? VK_INDEX_TYPE_UINT16 :
-//   //     VK_INDEX_TYPE_UINT32;
-//   // vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0, bufferType);
-//   vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0,
-//   VK_INDEX_TYPE_UINT32);
-// };
 
 void BufferVkUtils::GetDefaultVkBufferState(VkBufferCreateInfo &bufferInfo,
                                             VkDeviceSize bufferSize) {
@@ -135,10 +113,8 @@ void *BufferVkUtils::MapVkMemoryToCPU(VkDeviceMemory &vkBufferMemory,
   return data;
 };
 
-void BufferVkUtils::CopyBufferCPUToGPU(VkDeviceMemory &vkBufferMemory,
-                                       byte_t *destPtr, byte_t *srcPtr,
+void BufferVkUtils::CopyBufferCPUToGPU(byte_t *destPtr, byte_t *srcPtr,
                                        VkDeviceSize size) {
-  auto &device = DeviceVk::Get()->GetDevice();
   memcpy(destPtr, srcPtr, (size_t)size);
 };
 

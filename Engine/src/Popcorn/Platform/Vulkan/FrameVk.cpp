@@ -42,10 +42,11 @@ void FrameVk::CreateRenderSyncObjects() {
 
 void FrameVk::Draw(
     std::vector<VkCommandBuffer> &commandBuffers,
-    const VkRenderPass &renderPass,
-    const std::function<void(const uint32_t frameIndex,
-                             VkCommandBuffer &currentFrameCommandBuffer)>
-        &recordDrawCommands) {
+    const VkRenderPass &finalPaintRenderPass,
+    const std::function<void(const uint32_t currentFrame)> &updateSceneData,
+    const std::function<
+        void(const uint32_t frameIndex, const uint32_t currentFrame,
+             VkCommandBuffer &currentFrameCommandBuffer)> &recordDrawCommands) {
   auto &device = DeviceVk::Get()->GetDevice();
   uint32_t swapchainImageIndex;
 
@@ -67,7 +68,7 @@ void FrameVk::Draw(
       // Semaphore: Signal when image is acquired & ready for render
       imageAvailable,
       // Final paint renderpass for swapchain recreation
-      renderPass);
+      finalPaintRenderPass);
 
   //
   // In case of resize (or invalid swapchain to be precise), we return and
@@ -79,10 +80,15 @@ void FrameVk::Draw(
   vkResetFences(device, 1, &m_inFlightFences[m_currentFrame]);
 
   //
+  // Update Uniforms & push constants
+  updateSceneData(m_currentFrame);
+
+  //
   // Reset command buffer & start recording commands to it (lambda called from
   // the RendererVk class)
   vkResetCommandBuffer(commandBuffers[m_currentFrame], 0);
-  recordDrawCommands(swapchainImageIndex, commandBuffers[m_currentFrame]);
+  recordDrawCommands(swapchainImageIndex, m_currentFrame,
+                     commandBuffers[m_currentFrame]);
 
   //
   // Submit the graphics queue with the command buffer (with recorded commands
@@ -106,7 +112,7 @@ void FrameVk::Draw(
       // Image index
       swapchainImageIndex,
       // Final paint renderpass for swapchain recreation
-      renderPass);
+      finalPaintRenderPass);
 
   //
   // Wait until all the commandBuffers are executed before moving to the next

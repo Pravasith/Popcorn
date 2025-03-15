@@ -5,5 +5,7 @@
 ENGINE_NAMESPACE_BEGIN
 void Layer::OnAttach() {};
 void Layer::OnDetach() {};
-void Layer::OnEvent(Event &) {};
+bool Layer::OnEvent(Event &) { return false; };
+void Layer::OnRender() {};
+
 ENGINE_NAMESPACE_END

@@ -111,6 +111,10 @@ public:
     return m_pipeline;
   };
 
+  [[nodiscard]] inline const VkPipelineLayout GetVkPipelineLayout() const {
+    return m_pipelineLayout;
+  };
+
   // Shaders
   void SetShaderStagesMask(int enabledShaderStagesMask) {
     // Error check

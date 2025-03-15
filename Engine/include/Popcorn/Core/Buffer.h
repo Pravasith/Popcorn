@@ -50,15 +50,15 @@ public:
   };
 
   template <typename T> void SetData(std::initializer_list<T> list) {
-    PC_PRINT("DATA SET(INIT-LIST)", TagType::Print, "BUFFER")
+    // PC_PRINT("DATA SET(INIT-LIST)", TagType::Print, "BUFFER")
 
     const uint64_t size = sizeof(T) * list.size();
-    PC_WARN(size << " SIZE")
+    // PC_WARN(size << " SIZE")
     AllocBytes(size);
 
+    memcpy(m_data, list.begin(), size);
     m_count = list.size();
     m_size = size;
-    memcpy(m_data, list.begin(), size);
   };
 
   [[nodiscard]] inline byte_t *GetData() const {
