@@ -356,19 +356,6 @@ void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
                                   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                                       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-  // struct Vertex {
-  //   glm::vec2 pos;
-  //   glm::vec3 color;
-  //   std::string Print() {
-  //     std::stringstream ss;
-  //     ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g <<
-  //     ", "
-  //        << color.b;
-  //
-  //     return ss.str();
-  //   };
-  // };
-
   void *data = BufferVkUtils::MapVkMemoryToCPU(stagingVertexBufferMemory, 0,
                                                currentOffset);
 

@@ -21,7 +21,7 @@ class BasicRenderWorkflowVk : public RenderWorkflowVk {
 public:
   BasicRenderWorkflowVk() {
     s_vertexBufferLayout
-        .Set<BufferDefs::AttrTypes::Float2, BufferDefs::AttrTypes::Float3>();
+        .Set<BufferDefs::AttrTypes::Float3, BufferDefs::AttrTypes::Float3>();
     PC_PRINT("CREATED", TagType::Constr, "BasicWorkflowVk")
   };
   virtual ~BasicRenderWorkflowVk() override {

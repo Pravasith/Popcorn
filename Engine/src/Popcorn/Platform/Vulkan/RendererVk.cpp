@@ -203,15 +203,7 @@ void RendererVk::AddMeshToWorkflow(Mesh *mesh) {
   BasicRenderWorkflowVk *basicRenderWorkflow =
       reinterpret_cast<BasicRenderWorkflowVk *>(
           s_renderWorkflows[(int)RenderWorkflowIndices::Basic]);
-
-  if (mesh->GetMaterial().GetMaterialType() == MaterialTypes::BasicMat &&
-      mesh->GetVertexBuffer().GetLayout() ==
-          basicRenderWorkflow->GetBasicWorkflowVertexLayout()) {
-    basicRenderWorkflow->AddMeshToWorkflow(mesh);
-  };
-
-  //
-  // TODO: Add meshes to other workflows according to their conditions
+  basicRenderWorkflow->AddMeshToWorkflow(mesh);
 };
 
 RenderWorkflowVk *

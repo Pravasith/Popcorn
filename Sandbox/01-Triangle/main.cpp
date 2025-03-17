@@ -25,7 +25,7 @@ public:
 
   virtual void OnAttach() override {
     struct Vertex {
-      glm::vec2 pos;
+      glm::vec3 pos;
       glm::vec3 color;
       std::string Print() {
         std::stringstream ss;
@@ -39,14 +39,14 @@ public:
     vertexBuffer = VertexBuffer::Create();
     indexBuffer = new IndexBuffer<uint16_t>();
 
-    vertexBuffer->SetLayout<BufferDefs::AttrTypes::Float2,
+    vertexBuffer->SetLayout<BufferDefs::AttrTypes::Float3,
                             BufferDefs::AttrTypes::Float3>();
 
     // Single quad data (shared by all cube faces)
-    vertexBuffer->Fill<Vertex>({{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-                                {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-                                {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-                                {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}});
+    vertexBuffer->Fill<Vertex>({{{-0.5f, -0.5f, .0f}, {1.0f, 0.0f, 0.0f}},
+                                {{0.5f, -0.5f, .0f}, {0.0f, 1.0f, 0.0f}},
+                                {{0.5f, 0.5f, .0f}, {0.0f, 0.0f, 1.0f}},
+                                {{-0.5f, 0.5f, .0f}, {1.0f, 1.0f, 1.0f}}});
 
     indexBuffer->Fill({0, 1, 2, 2, 3, 0});
 
@@ -56,55 +56,16 @@ public:
                          shaderFiles};
     triMat = new BasicMaterial(matData);
 
-    // Cube face positions and rotations
-    const std::vector<glm::vec3> facePositions = {
-        {0.0f, 0.0f, 0.5f},  // Front
-        {0.0f, 0.0f, -0.5f}, // Back
-        {-0.5f, 0.0f, 0.0f}, // Left
-        {0.5f, 0.0f, 0.0f},  // Right
-        {0.0f, 0.5f, 0.0f},  // Top
-        {0.0f, -0.5f, 0.0f}  // Bottom
-    };
+    mesh = new Mesh{*vertexBuffer, indexBuffer, *triMat};
 
-    const std::vector<std::pair<char, float>> faceRotations = {
-        {'Y', 0.0f},                 // Front
-        {'Y', glm::radians(180.0f)}, // Back
-        {'Y', glm::radians(-90.0f)}, // Left
-        {'Y', glm::radians(90.0f)},  // Right
-        {'X', glm::radians(-90.0f)}, // Top
-        {'X', glm::radians(90.0f)}   // Bottom
-    };
+    auto worldCenter = glm::mat4(1.f);
 
-    // Create cube faces with proper rotations
-    for (size_t i = 0; i < 6; ++i) {
-      Mesh *face = new Mesh{*vertexBuffer, indexBuffer, *triMat};
-      face->SetPosition(facePositions[i]);
+    mesh->SetPosition({.0f, .0f, 1.f});
 
-      // Apply rotation based on axis before translation
-      if (faceRotations[i].first == 'X') {
-        face->RotateX(faceRotations[i].second);
-      } else {
-        face->RotateY(faceRotations[i].second);
-      }
-
-      cubeMeshes.push_back(face);
-    }
-
-    // Add to scene in the correct order (no depth buffering)
-    triScene.Add(cubeMeshes[0]); // Front
-    triScene.Add(cubeMeshes[1]); // Back
-    triScene.Add(cubeMeshes[2]); // Left
-    triScene.Add(cubeMeshes[3]); // Right
-    triScene.Add(cubeMeshes[4]); // Top
-    triScene.Add(cubeMeshes[5]); // Bottom
+    triScene.Add(mesh);
   };
 
   virtual void OnDetach() override {
-    // Cleanup all meshes
-    for (auto mesh : cubeMeshes) {
-      delete mesh;
-    }
-    cubeMeshes.clear();
 
     delete triMat;
     triMat = nullptr;
@@ -113,14 +74,11 @@ public:
     indexBuffer = nullptr;
 
     VertexBuffer::Destroy(vertexBuffer);
+    delete mesh;
   };
 
   virtual void OnUpdate(TimeEvent &e) override {
-    // Rotate all cube faces
-    // cubeMeshes[0]->RotateY(glm::radians(90.f) * e.GetDeltaS());
-    for (auto &mesh : cubeMeshes) {
-      mesh->RotateAroundWorldYAxis(glm::radians(90.f) * e.GetDeltaS());
-    }
+    mesh->RotateZ(glm::radians(90.f) * e.GetDeltaS());
     triScene.Update();
   };
 
@@ -132,7 +90,7 @@ private:
   VertexBuffer *vertexBuffer;
   IndexBuffer<uint16_t> *indexBuffer;
   TriangleScene triScene;
-  std::vector<Mesh *> cubeMeshes;
+  Mesh *mesh;
   Material *triMat;
 };
 
