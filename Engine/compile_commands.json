@@ -55,13 +55,13 @@
 },
 {
   "directory": "/home/prav/personal/Popcorn/Engine/build/linux/third-party",
-  "command": "/usr/bin/c++  -I/home/prav/personal/Popcorn/Engine/third-party/platform-agnostic/vma -g -std=c++20 -Winvalid-pch -x c++-header -include /home/prav/personal/Popcorn/Engine/build/linux/third-party/CMakeFiles/vma.dir/cmake_pch.hxx -o CMakeFiles/vma.dir/cmake_pch.hxx.gch -c /home/prav/personal/Popcorn/Engine/build/linux/third-party/CMakeFiles/vma.dir/cmake_pch.hxx.cxx",
+  "command": "/usr/bin/c++  -I/home/prav/personal/Popcorn/Engine/third-party/platform-agnostic/vma -isystem /home/prav/personal/Popcorn/Engine/third-party/platform-agnostic/vulkan-headers/include -g -std=c++20 -Winvalid-pch -x c++-header -include /home/prav/personal/Popcorn/Engine/build/linux/third-party/CMakeFiles/vma.dir/cmake_pch.hxx -o CMakeFiles/vma.dir/cmake_pch.hxx.gch -c /home/prav/personal/Popcorn/Engine/build/linux/third-party/CMakeFiles/vma.dir/cmake_pch.hxx.cxx",
   "file": "/home/prav/personal/Popcorn/Engine/build/linux/third-party/CMakeFiles/vma.dir/cmake_pch.hxx.cxx",
   "output": "third-party/CMakeFiles/vma.dir/cmake_pch.hxx.gch"
 },
 {
   "directory": "/home/prav/personal/Popcorn/Engine/build/linux/third-party",
-  "command": "/usr/bin/c++  -I/home/prav/personal/Popcorn/Engine/third-party/platform-agnostic/vma -g -std=c++20 -Winvalid-pch -include /home/prav/personal/Popcorn/Engine/build/linux/third-party/CMakeFiles/vma.dir/cmake_pch.hxx -o CMakeFiles/vma.dir/platform-agnostic/vma/vk_mem_alloc.cpp.o -c /home/prav/personal/Popcorn/Engine/third-party/platform-agnostic/vma/vk_mem_alloc.cpp",
+  "command": "/usr/bin/c++  -I/home/prav/personal/Popcorn/Engine/third-party/platform-agnostic/vma -isystem /home/prav/personal/Popcorn/Engine/third-party/platform-agnostic/vulkan-headers/include -g -std=c++20 -Winvalid-pch -include /home/prav/personal/Popcorn/Engine/build/linux/third-party/CMakeFiles/vma.dir/cmake_pch.hxx -o CMakeFiles/vma.dir/platform-agnostic/vma/vk_mem_alloc.cpp.o -c /home/prav/personal/Popcorn/Engine/third-party/platform-agnostic/vma/vk_mem_alloc.cpp",
   "file": "/home/prav/personal/Popcorn/Engine/third-party/platform-agnostic/vma/vk_mem_alloc.cpp",
   "output": "third-party/CMakeFiles/vma.dir/platform-agnostic/vma/vk_mem_alloc.cpp.o"
 },

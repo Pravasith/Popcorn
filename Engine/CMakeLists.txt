@@ -181,6 +181,7 @@ elseif(BUILD_FOR_MACOS)
   target_compile_definitions(Popcorn PUBLIC "PC_OS_MAC")
 endif()
 
+target_link_libraries(vma PUBLIC Vulkan::Headers Vulkan::Loader)
 target_link_libraries(Graphics PRIVATE Vulkan::Headers Vulkan::Loader glfw vma)
 target_link_libraries(Graphics PUBLIC glm::glm)
 
