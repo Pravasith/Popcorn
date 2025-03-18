@@ -17,7 +17,7 @@ GFX_NAMESPACE_BEGIN
 class Mesh : public GameObject {
 public:
   struct Uniforms {
-    glm::mat4 modelMatrix; // Model matrix
+    alignas(16) glm::mat4 modelMatrix; // Model matrix
   };
 
   struct Spec {
@@ -35,10 +35,12 @@ public:
       m_spec.enableIndexBuffers = true;
     };
 
-    s_uniformBufferLayout.Set<BufferDefs::AttrTypes::Mat4>();
-    m_uniformBuffer.SetLayout<BufferDefs::AttrTypes::Mat4>();
-    m_uniformBuffer.Fill({m_matrix});
-    SetAlignedUniformBufferLayoutStride();
+    // s_uniformBufferLayout.Set<BufferDefs::AttrTypes::Mat4>();
+    // m_uniformBuffer.SetLayout<BufferDefs::AttrTypes::Mat4>();
+    // m_uniformBuffer.Fill({m_matrix});
+    // SetAlignedUniformBufferLayoutStride();
+
+    m_uniformBuffer.modelMatrix = m_matrix;
 
     const float *data = glm::value_ptr(m_matrix);
     std::cout << "Model Matrix:\n";
@@ -82,27 +84,12 @@ public:
     return *m_indexBuffer;
   };
 
-  [[nodiscard]] inline const UniformBuffer &GetUniformBuffer() const {
-    return m_uniformBuffer;
-  };
-
-  static const BufferDefs::Layout &GetUniformBufferLayout() {
-    return s_uniformBufferLayout;
-  };
-
-  static const uint32_t GetAlignedUniformBufferLayoutStride() {
-    return s_uniformBufferLayoutAlignedStride;
-  };
-
-  static void SetAlignedUniformBufferLayoutStride();
+  [[nodiscard]] inline Uniforms &GetUniformBuffer() { return m_uniformBuffer; };
 
 protected:
   VertexBuffer &m_vertexBuffer;
   IndexBuffer<uint16_t> *m_indexBuffer = nullptr;
-  UniformBuffer m_uniformBuffer;
-
-  static BufferDefs::Layout s_uniformBufferLayout;
-  static uint32_t s_uniformBufferLayoutAlignedStride;
+  Uniforms m_uniformBuffer;
 
   // TODO: Make this a Vector as required
   Material &m_material;

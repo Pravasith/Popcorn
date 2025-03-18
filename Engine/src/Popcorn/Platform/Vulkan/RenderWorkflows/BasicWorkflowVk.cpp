@@ -250,7 +250,7 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
       vkGetPhysicalDeviceProperties(DeviceVk::Get()->GetPhysicalDevice(),
                                     &deviceProperties);
 
-      uint32_t dynamicOffset = i * Mesh::GetUniformBufferLayout().strideValue;
+      uint32_t dynamicOffset = i * sizeof(Mesh::Uniforms);
 
       vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                               m_colorPipelineVk.GetVkPipelineLayout(), 1, 1,
@@ -473,29 +473,24 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
   //   glm::mat4 proj;
   // };
 
-  m_viewProjUBO
-      .SetLayout<BufferDefs::AttrTypes::Mat4, BufferDefs::AttrTypes::Mat4>();
-
   // View matrix
-  auto view =
+  m_viewProjUBO.view =
       glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
                   glm::vec3(0.0f, 1.0f, 0.0f));
   // Projection Matrix
-  auto proj = glm::perspective(
+  m_viewProjUBO.proj = glm::perspective(
       glm::radians(45.0f),
       swapchainExtent.width / (float)swapchainExtent.height, 0.1f, 10.0f);
-  proj[1][1] *= -1;
-
-  m_viewProjUBO.Fill({view, proj});
+  m_viewProjUBO.proj[1][1] *= -1;
 
   const VmaAllocator &allocator = MemoryAllocatorVk::Get()->GetVMAAllocator();
 
-  VkDeviceSize meshUBOSize = Mesh::GetUniformBufferLayout().strideValue;
+  VkDeviceSize meshUBOSize = sizeof(Mesh::Uniforms);
   PC_WARN("EXPECTED SIZE: " << sizeof(glm::mat4) << ". SIZE: " << meshUBOSize)
 
   VkBufferCreateInfo globalBufferInfo = {
       .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-      .size = m_viewProjUBO.GetSize(),
+      .size = sizeof(m_viewProjUBO),
       .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
       .sharingMode = VK_SHARING_MODE_EXCLUSIVE};
 
@@ -508,7 +503,10 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
   VmaAllocationCreateInfo allocInfo{};
   allocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
   allocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
-  allocInfo.memoryTypeBits = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+  allocInfo.memoryTypeBits = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+  allocInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 
   m_globalUniformBuffers.resize(maxFramesInFlight);
   m_globalUniformAllocations.resize(maxFramesInFlight);
@@ -647,7 +645,7 @@ void BasicRenderWorkflowVk::CreateDescriptorSets() {
     VkDescriptorBufferInfo globalbufferInfo{};
     globalbufferInfo.buffer = m_globalUniformBuffers[i];
     globalbufferInfo.offset = 0;
-    globalbufferInfo.range = m_viewProjUBO.GetSize();
+    globalbufferInfo.range = sizeof(m_viewProjUBO);
 
     VkWriteDescriptorSet globalDtrWrite{};
     globalDtrWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -667,7 +665,7 @@ void BasicRenderWorkflowVk::CreateDescriptorSets() {
     VkDescriptorBufferInfo localbufferInfo{};
     localbufferInfo.buffer = m_localUniformBuffers[i];
     localbufferInfo.offset = 0;
-    localbufferInfo.range = Mesh::GetUniformBufferLayout().strideValue;
+    localbufferInfo.range = sizeof(Mesh::Uniforms);
 
     VkWriteDescriptorSet localDtrWrite{};
     localDtrWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -695,8 +693,8 @@ void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
 
   // Copy view project matrix first
   BufferVkUtils::CopyBufferCPUToGPU(
-      (byte_t *)m_globalMappedUniforms[currentFrame],
-      m_viewProjUBO.GetBufferData(), m_viewProjUBO.GetSize());
+      (byte_t *)m_globalMappedUniforms[currentFrame], &m_viewProjUBO,
+      sizeof(m_viewProjUBO));
 
   // Then copy each mesh model matrix
   for (size_t i = 0; i < m_meshes.size(); ++i) {
@@ -713,9 +711,8 @@ void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
 
     BufferVkUtils::CopyBufferCPUToGPU(
         (byte_t *)m_localMappedUniforms[currentFrame] +
-            (i * Mesh::GetUniformBufferLayout().strideValue),
-        meshModelMatUBO.GetBufferData(),
-        Mesh::GetUniformBufferLayout().strideValue);
+            (i * sizeof(meshModelMatUBO)),
+        &meshModelMatUBO, sizeof(meshModelMatUBO));
   }
 
   // std::cout << "AFTER COPY
