@@ -58,9 +58,8 @@ public:
 
     mesh = new Mesh{*vertexBuffer, indexBuffer, *triMat};
 
-    auto worldCenter = glm::mat4(1.f);
-
-    mesh->SetPosition({.0f, .0f, 1.f});
+    mesh->SetPosition({.0f, 1.f, 0.f});
+    mesh->RotateX(glm::radians(-90.f));
 
     triScene.Add(mesh);
   };

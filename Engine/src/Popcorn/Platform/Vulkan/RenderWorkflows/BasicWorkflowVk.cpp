@@ -232,9 +232,6 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
                             m_colorPipelineVk.GetVkPipelineLayout(), 0, 1,
                             &m_globalDescriptorSets[currentFrame], 0, nullptr);
 
-    // Calculate base offset for model matrices (aligned viewProj size)
-    uint32_t baseOffset = static_cast<uint32_t>(m_viewProjAlignedSize);
-
     for (size_t i = 0; i < m_meshes.size(); ++i) {
       // std::cout << "Drawing mesh " << i << " with offset "
       //           << m_vkBufferOffsets[i] << "\n";
@@ -252,25 +249,13 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
       VkPhysicalDeviceProperties deviceProperties;
       vkGetPhysicalDeviceProperties(DeviceVk::Get()->GetPhysicalDevice(),
                                     &deviceProperties);
-      uint32_t alignment =
-          deviceProperties.limits.minUniformBufferOffsetAlignment;
 
-      // Calculate aligned base offset
-      uint32_t alignedBaseOffset =
-          (m_viewProjAlignedSize + alignment - 1) & ~(alignment - 1);
-
-      // uint32_t dynamicOffset =
-      //     baseOffset + (i * Mesh::GetAlignedUniformBufferLayoutStride());
-      uint32_t dynamicOffset =
-          alignedBaseOffset + (i * Mesh::GetAlignedUniformBufferLayoutStride());
-
-      uint32_t alignedDynamicOffset =
-          (dynamicOffset + alignment - 1) & ~(alignment - 1);
+      uint32_t dynamicOffset = i * Mesh::GetUniformBufferLayout().strideValue;
 
       vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                               m_colorPipelineVk.GetVkPipelineLayout(), 1, 1,
                               &m_localDescriptorSets[currentFrame], 1,
-                              &alignedDynamicOffset);
+                              &dynamicOffset);
 
       // vkCmdDraw(commandBuffer, m_meshes[i]->GetVertexBuffer().GetCount(), 1,
       // 0, 0);
@@ -483,10 +468,10 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
   constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
 
   // TODO: Move this to Camera
-  struct GlobalUniform {
-    glm::mat4 view;
-    glm::mat4 proj;
-  };
+  // struct GlobalUniform {
+  //   glm::mat4 view;
+  //   glm::mat4 proj;
+  // };
 
   m_viewProjUBO
       .SetLayout<BufferDefs::AttrTypes::Mat4, BufferDefs::AttrTypes::Mat4>();
@@ -494,7 +479,7 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
   // View matrix
   auto view =
       glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-                  glm::vec3(0.0f, 0.0f, 1.0f));
+                  glm::vec3(0.0f, 1.0f, 0.0f));
   // Projection Matrix
   auto proj = glm::perspective(
       glm::radians(45.0f),
@@ -727,9 +712,10 @@ void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
     // }
 
     BufferVkUtils::CopyBufferCPUToGPU(
-        (byte_t *)m_localMappedUniforms[currentFrame] + m_viewProjAlignedSize +
-            (i * Mesh::GetAlignedUniformBufferLayoutStride()),
-        meshModelMatUBO.GetBufferData(), meshModelMatUBO.GetSize());
+        (byte_t *)m_localMappedUniforms[currentFrame] +
+            (i * Mesh::GetUniformBufferLayout().strideValue),
+        meshModelMatUBO.GetBufferData(),
+        Mesh::GetUniformBufferLayout().strideValue);
   }
 
   // std::cout << "AFTER COPY

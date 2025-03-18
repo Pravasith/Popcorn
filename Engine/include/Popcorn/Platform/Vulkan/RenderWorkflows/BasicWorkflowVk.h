@@ -83,7 +83,6 @@ private:
 
   // TODO: Make this a global
   UniformBuffer m_viewProjUBO;
-  uint32_t m_viewProjAlignedSize;
 
   // TODO: Move to global resources (and index into it whenever needed)
   VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
