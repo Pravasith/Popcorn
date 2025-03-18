@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "Base.h"
 #include "GlobalMacros.h"
+#include "TimeEvent.h"
 #include <iostream>
 
 ENGINE_NAMESPACE_BEGIN
@@ -179,7 +180,7 @@ void DebugUIOverlay::OnDetach() {
   CleanupVulkan();
 }
 
-void DebugUIOverlay::OnUpdate() {
+void DebugUIOverlay::OnUpdate(TimeEvent &e) {
   // PC_PRINT("UPDATE", TagType::Print, "DebugUIOverlay")
   // Our state
   bool show_demo_window = true;
@@ -231,9 +232,10 @@ void DebugUIOverlay::OnUpdate() {
     FramePresent(wd);
 }
 
-void DebugUIOverlay::OnEvent(Event &e) {
+bool DebugUIOverlay::OnEvent(Event &e) {
   // TODO: ADD EVENTS
   std::cout << e.GetEventTypeName() << '\n';
+  return true;
 }
 
 // -----------------------------------------------------------------------------

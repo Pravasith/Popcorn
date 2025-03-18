@@ -1,18 +1,25 @@
 #pragma once
 
+#include "BufferObjects.h"
 #include "GameObject.h"
 #include "GlobalMacros.h"
 #include "Material.h"
 #include "Popcorn/Core/Base.h"
 #include "Renderer.h"
-#include "VertexBuffer.h"
 #include <cstdint>
+#include <glm/fwd.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 class Mesh : public GameObject {
 public:
+  struct Uniforms {
+    glm::mat4 modelMatrix; // Model matrix
+  };
+
   struct Spec {
     bool enableIndexBuffers = false;
   };
@@ -22,11 +29,25 @@ public:
   // TODO: Make m_indexBuffer a variant
   Mesh(VertexBuffer &geometry, IndexBuffer<uint16_t> *indexBuffer,
        Material &material)
-      : m_vertexBuffer(geometry), m_indexBuffer(indexBuffer),
+      : m_vertexBuffer(geometry), m_indexBuffer(indexBuffer), m_uniformBuffer(),
         m_material(material) {
     if (indexBuffer != nullptr) {
       m_spec.enableIndexBuffers = true;
     };
+
+    s_uniformBufferLayout.Set<BufferDefs::AttrTypes::Mat4>();
+    m_uniformBuffer.SetLayout<BufferDefs::AttrTypes::Mat4>();
+    m_uniformBuffer.Fill({m_matrix});
+    SetAlignedUniformBufferLayoutStride();
+
+    const float *data = glm::value_ptr(m_matrix);
+    std::cout << "Model Matrix:\n";
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        std::cout << data[i + j * 4] << " ";
+      }
+      std::cout << "\n";
+    }
 
     PC_PRINT("CREATED", TagType::Constr, "MESH");
   };
@@ -39,18 +60,20 @@ public:
 
   void ValidateMembersWithSpec(const Spec &spec);
 
-  virtual void OnAttach(const SceneData &) override;
-  virtual void OnUpdate(const SceneData &) override;
-  virtual void OnRender(const SceneData &) override;
+  virtual void OnAttach() override;
+  virtual void OnUpdate() override;
+  virtual void OnRender() override;
 
   virtual constexpr GameObjectTypes GetType() const override {
     return GameObjectTypes::Mesh;
   };
 
   [[nodiscard]] inline Material &GetMaterial() const { return m_material; };
+
   [[nodiscard]] inline VertexBuffer &GetVertexBuffer() const {
     return m_vertexBuffer;
   };
+
   // TODO: Change this to variant return type
   [[nodiscard]] inline IndexBuffer<uint16_t> &GetIndexBuffer() const {
     if (m_indexBuffer == nullptr) {
@@ -59,9 +82,28 @@ public:
     return *m_indexBuffer;
   };
 
+  [[nodiscard]] inline const UniformBuffer &GetUniformBuffer() const {
+    return m_uniformBuffer;
+  };
+
+  static const BufferDefs::Layout &GetUniformBufferLayout() {
+    return s_uniformBufferLayout;
+  };
+
+  static const uint32_t GetAlignedUniformBufferLayoutStride() {
+    return s_uniformBufferLayoutAlignedStride;
+  };
+
+  static void SetAlignedUniformBufferLayoutStride();
+
 protected:
   VertexBuffer &m_vertexBuffer;
   IndexBuffer<uint16_t> *m_indexBuffer = nullptr;
+  UniformBuffer m_uniformBuffer;
+
+  static BufferDefs::Layout s_uniformBufferLayout;
+  static uint32_t s_uniformBufferLayoutAlignedStride;
+
   // TODO: Make this a Vector as required
   Material &m_material;
   Spec m_spec;

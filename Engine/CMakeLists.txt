@@ -83,6 +83,12 @@ target_include_directories(
   PRIVATE $<INSTALL_INTERFACE:include>)
 
 target_include_directories(
+  vma
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic/vma>
+  PRIVATE $<INSTALL_INTERFACE:include>)
+
+target_include_directories(
   ImGui
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic>
@@ -93,6 +99,8 @@ target_include_directories(
 # PRECOMPILE
 target_precompile_headers(
   glad PUBLIC ${PLATFORM_AGNOSTIC_VENDOR_DIR}/glad/include/glad/glad.h)
+target_precompile_headers(vma PUBLIC
+                          ${PLATFORM_AGNOSTIC_VENDOR_DIR}/vma/vk_mem_alloc.h)
 
 target_include_directories(
   Window
@@ -173,7 +181,8 @@ elseif(BUILD_FOR_MACOS)
   target_compile_definitions(Popcorn PUBLIC "PC_OS_MAC")
 endif()
 
-target_link_libraries(Graphics PRIVATE Vulkan::Headers Vulkan::Loader glfw)
+target_link_libraries(vma PUBLIC Vulkan::Headers Vulkan::Loader)
+target_link_libraries(Graphics PRIVATE Vulkan::Headers Vulkan::Loader glfw vma)
 target_link_libraries(Graphics PUBLIC glm::glm)
 
 target_link_libraries(Window PRIVATE glad glfw)
@@ -225,7 +234,13 @@ endif()
 install(DIRECTORY include/ DESTINATION include)
 
 install(
-  TARGETS Popcorn Window Graphics ImGui glad Events
+  TARGETS Popcorn
+          Window
+          Graphics
+          ImGui
+          glad
+          Events
+          vma
   EXPORT PopcornTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

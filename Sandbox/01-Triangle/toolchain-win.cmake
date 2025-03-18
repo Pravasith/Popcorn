@@ -18,7 +18,8 @@ set(CMAKE_FIND_ROOT_PATH
     "${PC_HOME}/dist/windows/third-party/glfw"
     "${PC_HOME}/dist/windows/third-party/vulkan-loader"
     "${PC_HOME}/dist/windows/third-party/vulkan-headers"
-    "${PC_HOME}/dist/windows/third-party/glm")
+    "${PC_HOME}/dist/windows/third-party/glm"
+    "${PC_HOME}/dist/windows/third-party/vma")
 
 # adjust the default behavior of the FIND_XXX() commands: search programs in the
 # host environment

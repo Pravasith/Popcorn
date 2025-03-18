@@ -1,31 +1,41 @@
 #include "BasicWorkflowVk.h"
+#include "BufferObjects.h"
+#include "BufferObjectsVk.h"
+#include "DescriptorsVk.h"
 #include "DeviceVk.h"
 #include "FramebuffersVk.h"
 #include "GfxPipelineVk.h"
 #include "GlobalMacros.h"
 #include "Material.h"
+#include "MemoryAllocatorVk.h"
 #include "PipelineVk.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
 #include "Popcorn/Core/Helpers.h"
 #include "RenderPassVk.h"
+#include "RendererVk.h"
 #include "SwapchainVk.h"
-#include "VertexBuffer.h"
-#include "VertexBufferVk.h"
+#include <cstddef>
 #include <cstdint>
+#include <iostream>
+#define GLM_FORCE_RADIANS
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_transform.hpp>
 #include <glm/glm.hpp>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-VertexBuffer::Layout BasicRenderWorkflowVk::s_vertexBufferLayout{};
+BufferDefs::Layout BasicRenderWorkflowVk::s_vertexBufferLayout{};
 
 #ifdef PC_DEBUG
 constexpr bool showDrawCommandCount = false;
 #endif
 
-void BasicRenderWorkflowVk::CreatePipeline(Material &material) {
+void BasicRenderWorkflowVk::CreatePipelines() {
+
   //
   // --- MAIN PIPELINE ---------------------------------------------------
   auto *deviceVkStn = DeviceVk::Get();
@@ -33,8 +43,12 @@ void BasicRenderWorkflowVk::CreatePipeline(Material &material) {
   auto &device = deviceVkStn->GetDevice();
   const auto &swapchainExtent = swapchainVkStn->GetSwapchainExtent();
 
-  Buffer vertShaderBuffer = std::move(material.GetShaders()[0]);
-  Buffer fragShaderBuffer = std::move(material.GetShaders()[1]);
+  // TODO: Material specific pipelines; loop over materials to create unique
+  // pipelines. Unique material properties as hash -- pipeline layout
+  auto &material = m_materials[0];
+
+  Buffer vertShaderBuffer = std::move(material->GetShaders()[0]);
+  Buffer fragShaderBuffer = std::move(material->GetShaders()[1]);
 
   auto vertShaderModule = PC_CreateShaderModule(device, vertShaderBuffer);
   auto fragShaderModule = PC_CreateShaderModule(device, fragShaderBuffer);
@@ -78,6 +92,11 @@ void BasicRenderWorkflowVk::CreatePipeline(Material &material) {
   PipelineUtils::GetDefaultColorBlendingState(pipelineState.colorBlendState);
   PipelineUtils::GetDefaultPipelineLayoutCreateInfo(
       pipelineState.pipelineLayout);
+
+  std::array<VkDescriptorSetLayout, 2> dSetLayouts = {m_globalUBOsDSetLayout,
+                                                      m_localUBOsDSetLayout};
+  pipelineState.pipelineLayout.setLayoutCount = dSetLayouts.size();
+  pipelineState.pipelineLayout.pSetLayouts = dSetLayouts.data();
 
   // CREATE PIPELINE LAYOUT
   m_colorPipelineVk.CreatePipelineLayout(device, pipelineState.pipelineLayout);
@@ -147,7 +166,7 @@ void BasicRenderWorkflowVk::CreateRenderPass() {
   //
   // CREATE RENDER PASS INFO ----------------------------------------
   VkRenderPassCreateInfo renderPass1CreateInfo{};
-  RenderPassVk::SetDefaultRenderPassCreateInfo(renderPass1CreateInfo);
+  RenderPassVk::GetDefaultRenderPassCreateInfo(renderPass1CreateInfo);
 
   // Dependencies -- For making the renderpass to wait on the color output
   // pipeline stage triggered by "swapchain image available" semaphore
@@ -169,18 +188,18 @@ void BasicRenderWorkflowVk::CreateFramebuffers() {
 };
 
 void BasicRenderWorkflowVk::RecordRenderCommands(
-    const Scene &scene, const VkCommandBuffer &commandBuffer,
-    const uint32_t imageIndex) {
+    const uint32_t imageIndex, const uint32_t currentFrame,
+    VkCommandBuffer &commandBuffer) {
   auto *swapchainVkStn = SwapchainVk::Get();
-  VkRenderPassBeginInfo renderPassCreateInfo{};
 
   //
   // BEGIN RENDER PASS ---------------------------------------------------------
+  VkRenderPassBeginInfo renderPassBeginCreateInfo{};
   m_basicRenderPassVk.GetDefaultCmdBeginRenderPassInfo(
       swapchainVkStn->GetSwapchainFramebuffers()[imageIndex],
-      swapchainVkStn->GetSwapchainExtent(), renderPassCreateInfo);
+      swapchainVkStn->GetSwapchainExtent(), renderPassBeginCreateInfo);
   m_basicRenderPassVk.RecordBeginRenderPassCommand(commandBuffer,
-                                                   renderPassCreateInfo);
+                                                   renderPassBeginCreateInfo);
 
   //
   // SET VIEWPORT AND SCISSOR SIZE ---------------------------------------------
@@ -208,7 +227,10 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
 #endif
 
     // TODO: Logic for multiple vertex buffers with VMA
-    // BIND VERTEX BUFFERS ---------------------------------------------------
+
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            m_colorPipelineVk.GetVkPipelineLayout(), 0, 1,
+                            &m_globalDescriptorSets[currentFrame], 0, nullptr);
 
     for (size_t i = 0; i < m_meshes.size(); ++i) {
       // std::cout << "Drawing mesh " << i << " with offset "
@@ -223,6 +245,17 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
       // TODO: Change it to variant logic
       BufferVkUtils::RecordBindVkIndexBufferCommand<uint16_t>(
           commandBuffer, &m_vkIndexBuffer, m_indexBufferOffsets[i]);
+
+      VkPhysicalDeviceProperties deviceProperties;
+      vkGetPhysicalDeviceProperties(DeviceVk::Get()->GetPhysicalDevice(),
+                                    &deviceProperties);
+
+      uint32_t dynamicOffset = i * Mesh::GetUniformBufferLayout().strideValue;
+
+      vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                              m_colorPipelineVk.GetVkPipelineLayout(), 1, 1,
+                              &m_localDescriptorSets[currentFrame], 1,
+                              &dynamicOffset);
 
       // vkCmdDraw(commandBuffer, m_meshes[i]->GetVertexBuffer().GetCount(), 1,
       // 0, 0);
@@ -271,7 +304,7 @@ void BasicRenderWorkflowVk::AddMeshToWorkflow(Mesh *mesh) {
     return;
   };
 
-  m_meshes.push_back(mesh);
+  m_meshes.emplace_back(mesh);
 
   // Each material can potentially have the same material type but different
   // descriptor sets (shaders, textures ..etc)
@@ -308,19 +341,6 @@ void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
                                   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                                       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-  // struct Vertex {
-  //   glm::vec2 pos;
-  //   glm::vec3 color;
-  //   std::string Print() {
-  //     std::stringstream ss;
-  //     ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g <<
-  //     ", "
-  //        << color.b;
-  //
-  //     return ss.str();
-  //   };
-  // };
-
   void *data = BufferVkUtils::MapVkMemoryToCPU(stagingVertexBufferMemory, 0,
                                                currentOffset);
 
@@ -331,13 +351,13 @@ void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
     // vertexBuffer.PrintBuffer<Vertex>();
     // PC_WARN(vertexBuffer.GetSize())
 
-    BufferVkUtils::CopyBufferCPUToGPU(stagingVertexBufferMemory,
-                                      // Dest ptr
-                                      (byte_t *)data + m_vertexBufferOffsets[i],
-                                      // Src ptr
-                                      vertexBuffer.GetBufferData(),
-                                      // Size
-                                      vertexBuffer.GetSize());
+    BufferVkUtils::CopyBufferCPUToGPU(
+        // Dest ptr
+        (byte_t *)data + m_vertexBufferOffsets[i],
+        // Src ptr
+        vertexBuffer.GetBufferData(),
+        // Size
+        vertexBuffer.GetSize());
   }
 
   // Vertex *vertices = static_cast<Vertex *>(data);
@@ -404,13 +424,13 @@ void BasicRenderWorkflowVk::AllocateVkIndexBuffers() {
     // vertexBuffer.PrintBuffer<Index>();
     // PC_WARN(vertexBuffer.GetSize())
 
-    BufferVkUtils::CopyBufferCPUToGPU(stagingIndexBufferMemory,
-                                      // Dest ptr
-                                      (byte_t *)data + m_indexBufferOffsets[i],
-                                      // Src ptr
-                                      indexBuffer.GetBufferData(),
-                                      // Size
-                                      indexBuffer.GetSize());
+    BufferVkUtils::CopyBufferCPUToGPU(
+        // Dest ptr
+        (byte_t *)data + m_indexBufferOffsets[i],
+        // Src ptr
+        indexBuffer.GetBufferData(),
+        // Size
+        indexBuffer.GetSize());
   }
 
   // Index *vertices = static_cast<Index *>(data);
@@ -439,9 +459,302 @@ void BasicRenderWorkflowVk::AllocateVkIndexBuffers() {
   vkFreeMemory(device, stagingIndexBufferMemory, nullptr);
 };
 
+//
+// --------------------------------------------------------------------------
+// --- UNIFORM BUFFERS ALLOCATION -------------------------------------------
+//
+void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
+  const VkExtent2D &swapchainExtent = SwapchainVk::Get()->GetSwapchainExtent();
+  constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
+
+  // TODO: Move this to Camera
+  // struct GlobalUniform {
+  //   glm::mat4 view;
+  //   glm::mat4 proj;
+  // };
+
+  m_viewProjUBO
+      .SetLayout<BufferDefs::AttrTypes::Mat4, BufferDefs::AttrTypes::Mat4>();
+
+  // View matrix
+  auto view =
+      glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+                  glm::vec3(0.0f, 1.0f, 0.0f));
+  // Projection Matrix
+  auto proj = glm::perspective(
+      glm::radians(45.0f),
+      swapchainExtent.width / (float)swapchainExtent.height, 0.1f, 10.0f);
+  proj[1][1] *= -1;
+
+  m_viewProjUBO.Fill({view, proj});
+
+  const VmaAllocator &allocator = MemoryAllocatorVk::Get()->GetVMAAllocator();
+
+  VkDeviceSize meshUBOSize = Mesh::GetUniformBufferLayout().strideValue;
+  PC_WARN("EXPECTED SIZE: " << sizeof(glm::mat4) << ". SIZE: " << meshUBOSize)
+
+  VkBufferCreateInfo globalBufferInfo = {
+      .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+      .size = m_viewProjUBO.GetSize(),
+      .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+      .sharingMode = VK_SHARING_MODE_EXCLUSIVE};
+
+  VkBufferCreateInfo localBufferInfo = {
+      .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+      .size = meshUBOSize * m_meshes.size(),
+      .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+      .sharingMode = VK_SHARING_MODE_EXCLUSIVE};
+
+  VmaAllocationCreateInfo allocInfo{};
+  allocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+  allocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
+  allocInfo.memoryTypeBits = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+
+  m_globalUniformBuffers.resize(maxFramesInFlight);
+  m_globalUniformAllocations.resize(maxFramesInFlight);
+  m_globalUniformAllocationInfos.resize(maxFramesInFlight);
+  m_globalMappedUniforms.resize(maxFramesInFlight);
+
+  m_localUniformBuffers.resize(maxFramesInFlight);
+  m_localUniformAllocations.resize(maxFramesInFlight);
+  m_localUniformAllocationInfos.resize(maxFramesInFlight);
+  m_localMappedUniforms.resize(maxFramesInFlight);
+
+  for (size_t i = 0; i < maxFramesInFlight; ++i) {
+    // GLOBAL UBOS
+    VkResult globalResult = vmaCreateBuffer(
+        allocator, &globalBufferInfo, &allocInfo, &m_globalUniformBuffers[i],
+        &m_globalUniformAllocations[i], &m_globalUniformAllocationInfos[i]);
+    if (globalResult != VK_SUCCESS) {
+      std::cerr << "Failed to create global uniform buffer for frame " << i
+                << std::endl;
+    }
+    m_globalMappedUniforms[i] = m_globalUniformAllocationInfos[i].pMappedData;
+
+    // LOCAL UBOS
+    VkResult localResult = vmaCreateBuffer(
+        allocator, &localBufferInfo, &allocInfo, &m_localUniformBuffers[i],
+        &m_localUniformAllocations[i], &m_localUniformAllocationInfos[i]);
+    if (localResult != VK_SUCCESS) {
+      std::cerr << "Failed to create local uniform buffer for frame " << i
+                << std::endl;
+    }
+    m_localMappedUniforms[i] = m_localUniformAllocationInfos[i].pMappedData;
+  }
+};
+
+//
+// --------------------------------------------------------------------------
+// --- DESCRIPTOR POOL & SETS -----------------------------------------------
+//
+
+void BasicRenderWorkflowVk::CreateDescriptorSetLayouts() {
+  DescriptorSetLayoutsVk *dSetLayoutsVkStn = DescriptorSetLayoutsVk::Get();
+
+  // This is a global binding at the moment (UBO for MVP transform matrix)
+  // Loop through material types & make different layouts
+  std::vector<VkDescriptorSetLayoutBinding> globalBindings;
+  std::vector<VkDescriptorSetLayoutBinding> localBindings;
+
+  VkDescriptorSetLayoutBinding globalProjViewMatUBO{};
+  globalProjViewMatUBO.binding = 0;
+  globalProjViewMatUBO.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  globalProjViewMatUBO.descriptorCount = 1;
+  globalProjViewMatUBO.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+  globalProjViewMatUBO.pImmutableSamplers = nullptr; // Optional
+
+  globalBindings.emplace_back(globalProjViewMatUBO);
+  m_globalUBOsDSetLayout = dSetLayoutsVkStn->GetLayout(globalBindings);
+  if (m_globalUBOsDSetLayout == VK_NULL_HANDLE) {
+    std::cerr << "Failed to create global descriptor set layout!" << std::endl;
+    return;
+  }
+
+  VkDescriptorSetLayoutBinding localPerObjectModelMatUBO{};
+  localPerObjectModelMatUBO.binding = 0;
+  localPerObjectModelMatUBO.descriptorType =
+      VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+  localPerObjectModelMatUBO.descriptorCount = 1;
+  localPerObjectModelMatUBO.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+  localPerObjectModelMatUBO.pImmutableSamplers = nullptr; // Optional
+
+  localBindings.emplace_back(localPerObjectModelMatUBO);
+  m_localUBOsDSetLayout = dSetLayoutsVkStn->GetLayout(localBindings);
+  if (m_localUBOsDSetLayout == VK_NULL_HANDLE) {
+    std::cerr << "Failed to create local descriptor set layout!" << std::endl;
+    return;
+  }
+};
+
+void BasicRenderWorkflowVk::CreateDescriptorPool() {
+  constexpr uint32_t maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
+  uint32_t maxDSets = 2 * maxFramesInFlight; // 1 global + 1 per-object
+
+  std::vector<VkDescriptorPoolSize> poolSizes = {
+      {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, maxFramesInFlight},
+      {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, maxFramesInFlight},
+  };
+
+  VkDescriptorPoolCreateInfo poolInfo{};
+  DescriptorPoolVk::GetDefaultDescriptorPoolState(poolInfo, maxDSets,
+                                                  poolSizes);
+  DescriptorPoolVk::CreateDescriptorPool(poolInfo, &m_descriptorPool);
+};
+
+void BasicRenderWorkflowVk::CreateDescriptorSets() {
+  constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
+  auto &device = DeviceVk::Get()->GetDevice();
+
+  if (m_descriptorPool == VK_NULL_HANDLE) {
+    throw std::runtime_error("Descriptor pool is not initialized!");
+  }
+
+  //
+  // --- ALLOCATE DESCRIPTOR SETS --------------------------------------
+  //
+  // Global layouts ----------------------------------------------------
+  if (m_globalUBOsDSetLayout == VK_NULL_HANDLE) {
+    throw std::runtime_error(
+        "Global UBO descriptor set layout is not initialized!");
+  }
+  VkDescriptorSetAllocateInfo globalDSetsAllocInfo{};
+  auto allFramesGlobalLayouts =
+      std::vector(maxFramesInFlight, m_globalUBOsDSetLayout);
+  DescriptorSetsVk::GetDefaultDescriptorSetAllocateState(
+      allFramesGlobalLayouts, m_descriptorPool, globalDSetsAllocInfo);
+  DescriptorSetsVk::AllocateDescriptorSets(globalDSetsAllocInfo,
+                                           m_globalDescriptorSets);
+
+  //
+  // local layouts -----------------------------------------------------
+  if (m_localUBOsDSetLayout == VK_NULL_HANDLE) {
+    throw std::runtime_error(
+        "Local UBO descriptor set layout is not initialized!");
+  }
+  VkDescriptorSetAllocateInfo localDSetsAllocInfo{};
+  auto allFramesLocalLayouts =
+      std::vector(maxFramesInFlight, m_localUBOsDSetLayout);
+  DescriptorSetsVk::GetDefaultDescriptorSetAllocateState(
+      allFramesLocalLayouts, m_descriptorPool, localDSetsAllocInfo);
+  DescriptorSetsVk::AllocateDescriptorSets(localDSetsAllocInfo,
+                                           m_localDescriptorSets);
+
+  //
+  // --- UPDATE DESCRIPTOR SETS ----------------------------------------
+  for (size_t i = 0; i < maxFramesInFlight; ++i) {
+    //
+    // Global buffers --------------------------------------------------
+    VkDescriptorBufferInfo globalbufferInfo{};
+    globalbufferInfo.buffer = m_globalUniformBuffers[i];
+    globalbufferInfo.offset = 0;
+    globalbufferInfo.range = m_viewProjUBO.GetSize();
+
+    VkWriteDescriptorSet globalDtrWrite{};
+    globalDtrWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    globalDtrWrite.dstSet = m_globalDescriptorSets[i];
+    globalDtrWrite.dstBinding = 0;
+    globalDtrWrite.dstArrayElement = 0;
+    globalDtrWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    globalDtrWrite.descriptorCount = 1;
+    globalDtrWrite.pBufferInfo = &globalbufferInfo;
+    globalDtrWrite.pImageInfo = nullptr;       // Optional
+    globalDtrWrite.pTexelBufferView = nullptr; // Optional
+
+    vkUpdateDescriptorSets(device, 1, &globalDtrWrite, 0, nullptr);
+
+    //
+    // Local buffers ----------------------------------------------------
+    VkDescriptorBufferInfo localbufferInfo{};
+    localbufferInfo.buffer = m_localUniformBuffers[i];
+    localbufferInfo.offset = 0;
+    localbufferInfo.range = Mesh::GetUniformBufferLayout().strideValue;
+
+    VkWriteDescriptorSet localDtrWrite{};
+    localDtrWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    localDtrWrite.dstSet = m_localDescriptorSets[i];
+    localDtrWrite.dstBinding = 0;
+    localDtrWrite.dstArrayElement = 0;
+    localDtrWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    localDtrWrite.descriptorCount = 1;
+    localDtrWrite.pBufferInfo = &localbufferInfo;
+    localDtrWrite.pImageInfo = nullptr;       // Optional
+    localDtrWrite.pTexelBufferView = nullptr; // Optional
+
+    vkUpdateDescriptorSets(device, 1, &localDtrWrite, 0, nullptr);
+  }
+};
+
+//
+//
+// --------------------------------------------------------------------------
+// --- UPDATE UNIFORMS & PUSH CONSTANTS HERE --------------------------------
+// --- RUNS EVERY FRAME -----------------------------------------------------
+//
+
+void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
+
+  // Copy view project matrix first
+  BufferVkUtils::CopyBufferCPUToGPU(
+      (byte_t *)m_globalMappedUniforms[currentFrame],
+      m_viewProjUBO.GetBufferData(), m_viewProjUBO.GetSize());
+
+  // Then copy each mesh model matrix
+  for (size_t i = 0; i < m_meshes.size(); ++i) {
+    auto &meshModelMatUBO = m_meshes[i]->GetUniformBuffer();
+
+    // glm::mat4 modelMat =
+    //     *reinterpret_cast<glm::mat4 *>(meshModelMatUBO.GetBufferData());
+    // for (int row = 0; row < 4; ++row) {
+    //   for (int col = 0; col < 4; ++col) {
+    //     std::cout << modelMat[row][col] << " ";
+    //   }
+    //   std::cout << "\n";
+    // }
+
+    BufferVkUtils::CopyBufferCPUToGPU(
+        (byte_t *)m_localMappedUniforms[currentFrame] +
+            (i * Mesh::GetUniformBufferLayout().strideValue),
+        meshModelMatUBO.GetBufferData(),
+        Mesh::GetUniformBufferLayout().strideValue);
+  }
+
+  // std::cout << "AFTER COPY
+  // -----------------------------------------------\n";
+  // // Debug: Print the entire uniform buffer
+  // glm::mat4 *gpuData =
+  //     static_cast<glm::mat4 *>(m_localMappedUniforms[currentFrame]);
+  // std::cout << "GPU Uniform Buffer (ViewProj + Mesh Model Matrices):\n";
+  // for (size_t i = 0; i < m_meshes.size() + 1; ++i) { // +1 for viewProj
+  //   std::cout << "Matrix " << i << ":\n";
+  //   for (int row = 0; row < 4; ++row) {
+  //     for (int col = 0; col < 4; ++col) {
+  //       std::cout << gpuData[i][row][col] << " ";
+  //     }
+  //     std::cout << "\n";
+  //   }
+  // }
+};
+
+//
+// --------------------------------------------------------------------------
+// --- CLEANUP --------------------------------------------------------------
+//
 void BasicRenderWorkflowVk::CleanUp() {
   auto &device = DeviceVk::Get()->GetDevice();
   auto *framebuffersVkStn = FramebuffersVk::Get();
+  const auto &allocator = MemoryAllocatorVk::Get()->GetVMAAllocator();
+
+  constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
+
+  // Cleanup uniform buffer memory
+  for (size_t i = 0; i < maxFramesInFlight; ++i) {
+    vmaDestroyBuffer(allocator, m_globalUniformBuffers[i],
+                     m_globalUniformAllocations[i]);
+    vmaDestroyBuffer(allocator, m_localUniformBuffers[i],
+                     m_localUniformAllocations[i]);
+  }
+
+  DescriptorPoolVk::DestroyDescriptorPool(m_descriptorPool);
 
   // Cleanup index buffer memory
   BufferVkUtils::DestroyVkBuffer(m_vkIndexBuffer, m_vkIndexBufferMemory);

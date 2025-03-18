@@ -20,7 +20,8 @@ set(CMAKE_FIND_ROOT_PATH
     #
     # VENDOR LIBS -- PL AGNOSTIC
     ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vulkan-headers
-    ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glm)
+    ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/glm
+    ${PLATFORM_AGNOSTIC_VENDOR_BINARIES_DIR}/vma)
 
 # adjust the default behavior of the FIND_XXX() commands: search programs in the
 # host environment

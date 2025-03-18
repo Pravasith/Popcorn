@@ -1,14 +1,20 @@
 #version 450
 
-layout(location = 0) in vec2 inPos;
-layout(location = 1) in vec3 inColor;
+layout(set = 0, binding = 0) uniform ProjView {
+    mat4 view;
+    mat4 proj;
+} projViewUbo;
 
+layout(set = 1, binding = 0) uniform ModelView {
+    mat4 model;
+} modelUbo;
+
+layout(location = 0) in vec3 inPosition;
+layout(location = 1) in vec3 inColor;
 layout(location = 0) out vec3 fragColor;
 
 void main() {
-    vec2 position = inPos;
-    vec3 colors = inColor;
-
-    gl_Position = vec4(position, 0., 1.);
-    fragColor = colors;
+    gl_Position = projViewUbo.proj * projViewUbo.view * modelUbo.model
+        * vec4(inPosition, 1.0);
+    fragColor = inColor;
 }
