@@ -503,10 +503,6 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
   VmaAllocationCreateInfo allocInfo{};
   allocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
   allocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
-  allocInfo.memoryTypeBits = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-  allocInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 
   m_globalUniformBuffers.resize(maxFramesInFlight);
   m_globalUniformAllocations.resize(maxFramesInFlight);
