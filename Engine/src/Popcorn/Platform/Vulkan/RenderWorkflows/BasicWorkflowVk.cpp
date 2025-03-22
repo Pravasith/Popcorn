@@ -686,7 +686,6 @@ void BasicRenderWorkflowVk::CreateDescriptorSets() {
 //
 
 void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
-
   // Copy view project matrix first
   BufferVkUtils::CopyBufferCPUToGPU(
       (byte_t *)m_globalMappedUniforms[currentFrame], &m_viewProjUBO,
@@ -696,36 +695,11 @@ void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
   for (size_t i = 0; i < m_meshes.size(); ++i) {
     auto &meshModelMatUBO = m_meshes[i]->GetUniformBuffer();
 
-    // glm::mat4 modelMat =
-    //     *reinterpret_cast<glm::mat4 *>(meshModelMatUBO.GetBufferData());
-    // for (int row = 0; row < 4; ++row) {
-    //   for (int col = 0; col < 4; ++col) {
-    //     std::cout << modelMat[row][col] << " ";
-    //   }
-    //   std::cout << "\n";
-    // }
-
     BufferVkUtils::CopyBufferCPUToGPU(
         (byte_t *)m_localMappedUniforms[currentFrame] +
             (i * sizeof(meshModelMatUBO)),
         &meshModelMatUBO, sizeof(meshModelMatUBO));
   }
-
-  // std::cout << "AFTER COPY
-  // -----------------------------------------------\n";
-  // // Debug: Print the entire uniform buffer
-  // glm::mat4 *gpuData =
-  //     static_cast<glm::mat4 *>(m_localMappedUniforms[currentFrame]);
-  // std::cout << "GPU Uniform Buffer (ViewProj + Mesh Model Matrices):\n";
-  // for (size_t i = 0; i < m_meshes.size() + 1; ++i) { // +1 for viewProj
-  //   std::cout << "Matrix " << i << ":\n";
-  //   for (int row = 0; row < 4; ++row) {
-  //     for (int col = 0; col < 4; ++col) {
-  //       std::cout << gpuData[i][row][col] << " ";
-  //     }
-  //     std::cout << "\n";
-  //   }
-  // }
 };
 
 //

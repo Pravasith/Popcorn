@@ -7,6 +7,9 @@ read -p "Are you compiling for Linux or Windows? (Enter 'L' for Linux or 'W' for
 platform=$(echo "$platform" | tr '[:upper:]' '[:lower:]')
 src_dir="$PWD"
 
+assets_dir="$src_dir/assets"
+shaders_dir="$src_dir/assets/shaders"
+
 
 # Check the user input and print a message accordingly
 if [ "$platform" = "l" ]; then
@@ -49,6 +52,13 @@ if [ "$platform" = "l" ]; then
     echo $PWD
     cd $src_dir
 
+    echo "Compiling shaders..."
+
+    # Compile shaders
+    ./scripts/compile-shaders.sh
+
+    echo -e "\033[32mProgram compiled successfully for linux\033[0m"
+
 elif [ "$platform" = "w" ]; then
     echo "You are compiling for Windows."
 
@@ -89,6 +99,14 @@ elif [ "$platform" = "w" ]; then
 
     echo $PWD
     cd $src_dir
+
+    echo "Compiling shaders..."
+
+    # Compile shaders
+    ./scripts/compile-shaders.sh
+
+
+    echo -e "\033[32mProgram compiled successfully for windows\033[0m"
 
 else
     echo "Invalid input. Please enter 'L' for Linux or 'W' for Windows."
