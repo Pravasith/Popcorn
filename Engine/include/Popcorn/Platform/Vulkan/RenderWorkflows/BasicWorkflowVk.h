@@ -19,6 +19,12 @@ GFX_NAMESPACE_BEGIN
 
 class BasicRenderWorkflowVk : public RenderWorkflowVk {
 public:
+  struct Uniforms {
+    alignas(16) glm::mat4 view;
+    alignas(16) glm::mat4 proj;
+  };
+
+public:
   BasicRenderWorkflowVk() {
     s_vertexBufferLayout
         .Set<BufferDefs::AttrTypes::Float3, BufferDefs::AttrTypes::Float3>();
@@ -82,7 +88,7 @@ private:
   std::vector<void *> m_localMappedUniforms;
 
   // TODO: Make this a global
-  UniformBuffer m_viewProjUBO;
+  Uniforms m_viewProjUBO;
 
   // TODO: Move to global resources (and index into it whenever needed)
   VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;

@@ -17,6 +17,9 @@ Engine/common_logs.txt
 *.o
 *.obj
 
+# Compressed files
+*.tar.xz
+
 # Precompiled Headers
 *.gch
 *.pch

@@ -262,76 +262,77 @@ private:
 // --- UNIFORM BUFFER --------------------------------------------------------
 //
 
-class UniformBuffer {
-public:
-  UniformBuffer() { PC_PRINT("CREATED", TagType::Constr, "UniformBuffer") };
-  ~UniformBuffer() { PC_PRINT("DESTROYED", TagType::Destr, "UniformBuffer") };
-
-  template <BufferDefs::AttrTypes... E> inline void SetLayout() {
-    m_layout.Set<E...>();
-  };
-
-  template <typename T> void Fill(std::initializer_list<T> list) {
-    m_buffer.SetData(list);
-  };
-
-  const uint64_t GetSize() const { return m_buffer.GetSize(); };
-  const uint64_t GetCount() const { return m_buffer.GetCount(); };
-
-  [[nodiscard]] inline const BufferDefs::Layout &GetLayout() const {
-    PC_ASSERT(m_layout.countValue != 0, "BufferDefs::Layout is empty!");
-    return m_layout;
-  }
-
-  [[nodiscard]] inline byte_t *GetBufferData() const {
-    return m_buffer.GetData();
-  }
-
-  // COPY CONSTRUCTOR
-  UniformBuffer(const UniformBuffer &other) {
-    PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Constr, "UNIFORM-BUFFER")
-    m_buffer = other.m_buffer;
-    m_layout = other.m_layout;
-  };
-
-  virtual UniformBuffer &operator=(const UniformBuffer &other) {
-    PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print, "UNIFORM-BUFFER")
-
-    if (this == &other)
-      return *this;
-
-    m_buffer = other.m_buffer;
-    m_layout = other.m_layout;
-    return *this;
-  };
-
-  // MOVE CONSTRUCTOR
-  UniformBuffer(UniformBuffer &&other) {
-    PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Constr, "UNIFORM-BUFFER")
-    if (this == &other) {
-      return;
-    };
-
-    m_buffer = std::move(other.m_buffer);
-    m_layout = other.m_layout;
-  };
-  virtual UniformBuffer &operator=(UniformBuffer &&other) {
-    PC_PRINT("MOVE ASSIGNMENT EVOKED", TagType::Print, "UNIFORM-BUFFER")
-
-    if (this == &other) {
-      return *this;
-    };
-
-    m_buffer = std::move(other.m_buffer);
-    m_layout = other.m_layout;
-
-    return *this;
-  };
-
-private:
-  Buffer m_buffer;
-  BufferDefs::Layout m_layout;
-};
+// class UniformBuffer {
+// public:
+//   UniformBuffer() { PC_PRINT("CREATED", TagType::Constr, "UniformBuffer") };
+//   ~UniformBuffer() { PC_PRINT("DESTROYED", TagType::Destr, "UniformBuffer")
+//   };
+//
+//   template <BufferDefs::AttrTypes... E> inline void SetLayout() {
+//     m_layout.Set<E...>();
+//   };
+//
+//   template <typename T> void Fill(std::initializer_list<T> list) {
+//     m_buffer.SetData(list);
+//   };
+//
+//   const uint64_t GetSize() const { return m_buffer.GetSize(); };
+//   const uint64_t GetCount() const { return m_buffer.GetCount(); };
+//
+//   [[nodiscard]] inline const BufferDefs::Layout &GetLayout() const {
+//     PC_ASSERT(m_layout.countValue != 0, "BufferDefs::Layout is empty!");
+//     return m_layout;
+//   }
+//
+//   [[nodiscard]] inline byte_t *GetBufferData() const {
+//     return m_buffer.GetData();
+//   }
+//
+//   // COPY CONSTRUCTOR
+//   UniformBuffer(const UniformBuffer &other) {
+//     PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Constr, "UNIFORM-BUFFER")
+//     m_buffer = other.m_buffer;
+//     m_layout = other.m_layout;
+//   };
+//
+//   virtual UniformBuffer &operator=(const UniformBuffer &other) {
+//     PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print, "UNIFORM-BUFFER")
+//
+//     if (this == &other)
+//       return *this;
+//
+//     m_buffer = other.m_buffer;
+//     m_layout = other.m_layout;
+//     return *this;
+//   };
+//
+//   // MOVE CONSTRUCTOR
+//   UniformBuffer(UniformBuffer &&other) {
+//     PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Constr, "UNIFORM-BUFFER")
+//     if (this == &other) {
+//       return;
+//     };
+//
+//     m_buffer = std::move(other.m_buffer);
+//     m_layout = other.m_layout;
+//   };
+//   virtual UniformBuffer &operator=(UniformBuffer &&other) {
+//     PC_PRINT("MOVE ASSIGNMENT EVOKED", TagType::Print, "UNIFORM-BUFFER")
+//
+//     if (this == &other) {
+//       return *this;
+//     };
+//
+//     m_buffer = std::move(other.m_buffer);
+//     m_layout = other.m_layout;
+//
+//     return *this;
+//   };
+//
+// private:
+//   Buffer m_buffer;
+//   BufferDefs::Layout m_layout;
+// };
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
