@@ -3,6 +3,9 @@
 #define ENGINE_NAMESPACE_BEGIN namespace Popcorn {
 #define ENGINE_NAMESPACE_END }
 
+#define CTX_NAMESPACE_BEGIN namespace Context {
+#define CTX_NAMESPACE_END }
+
 #define GFX_NAMESPACE_BEGIN namespace Gfx {
 #define GFX_NAMESPACE_END }
 

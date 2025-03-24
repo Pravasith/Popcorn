@@ -8,7 +8,7 @@ Application *Application::s_instance = nullptr;
 LayerStack *Application::s_layerStack = nullptr;
 Window *Application::s_window = nullptr;
 Time *Application::s_time = nullptr;
-Renderer *Application::s_Renderer = nullptr;
+Renderer *Application::s_renderer = nullptr;
 DebugUIOverlay *Application::s_debugUIOverlay = nullptr;
 
 Application::Application() : Subscriber("Application") {
@@ -22,7 +22,7 @@ Application::~Application() {
   s_layerStack = nullptr;
 
   Renderer::Destroy();
-  s_Renderer = nullptr;
+  s_renderer = nullptr;
 
   // s_time->UnSubscribe(s_instance);
   // s_window->UnSubscribe(s_instance);
@@ -124,9 +124,9 @@ void Application::OnEvent(Event &e) {
   dispatcher.Dispatch<WindowResizeEvent>(
       PC_BIND_EVENT_FUNC(WindowResizeEvent, OnWindowResize));
 
-  if (s_Renderer) {
+  if (s_renderer) {
     dispatcher.Dispatch<FrameBfrResizeEvent>(PC_BIND_EVENT_FUNC(
-        FrameBfrResizeEvent, s_Renderer->OnFrameBufferResize));
+        FrameBfrResizeEvent, s_renderer->OnFrameBufferResize));
   }
 
   dispatcher.Dispatch<WindowCloseEvent>(
@@ -147,6 +147,14 @@ void Application::OnEvent(Event &e) {
   if (e.BelongsToCategory(EventCategory::KeyboardEvent)) {
     // e.PrintDebugData();
   };
+};
+
+void Application::ProcessScenes() {
+  // Assigns meshes to Render Workflows
+  s_renderer->ProcessScenes();
+
+  // Creates Vulkan resources
+  s_renderer->CreateResources();
 };
 
 ENGINE_NAMESPACE_END

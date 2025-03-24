@@ -46,11 +46,6 @@ void CommandPoolVk::AllocCommandBuffers(
     const VkCommandBufferAllocateInfo &allocInfo,
     VkCommandBuffer *commandBuffers) {
   auto &device = DeviceVk::Get()->GetDevice();
-  if (allocInfo.commandBufferCount != RendererVk::MAX_FRAMES_IN_FLIGHT) {
-    PC_WARN("allocInfo.commandBufferCount does not match "
-            "RendererVk::MAX_FRAMES_IN_FLIGHT!");
-  }
-
   if (vkAllocateCommandBuffers(device, &allocInfo, commandBuffers) !=
       VK_SUCCESS) {
     throw std::runtime_error("failed to allocate command buffers!");

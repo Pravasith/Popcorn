@@ -33,38 +33,6 @@ void Renderer::Init(const Window &appWin) {
   if (s_type == RendererType::Vulkan) {
     s_instance = new RendererVk(appWin);
 
-    // // ----------------------------------------------------------
-    // // Vertex buffer --------------------------------------------
-    // // ----------------------------------------------------------
-    // struct Vertex {
-    //   glm::vec2 pos;
-    //   glm::vec3 color;
-    //   std::string Print() {
-    //     std::stringstream ss;
-    //     ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g
-    //        << ", " << color.b;
-    //
-    //     return ss.str();
-    //   };
-    // };
-    //
-    // s_vertexBuffer = VertexBuffer::Create();
-    // s_vertexBuffer->Fill<Vertex>({
-    //     {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
-    //     {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-    //     {{0.0f, 0.5f}, {1.0f, 0.0f, 0.0f}},
-    // });
-    //
-    // s_vertexBuffer->SetLayout<VertexBuffer::AttrTypes::Float2,
-    //                           VertexBuffer::AttrTypes::Float3>();
-    //
-    // // vkRenderer->BindVertexBuffer(static_cast<VertexBufferVk
-    // *>(s_vertexBuffer));
-    // s_vertexBuffer->PrintBuffer<Vertex>();
-    // ----------------------------------------------------------
-    // Vertex buffer --------------------------------------------
-    // ----------------------------------------------------------
-
     RendererVk *vkRenderer = static_cast<RendererVk *>(s_instance);
     vkRenderer->VulkanInit();
     vkRenderer->CreateRenderWorkflows();

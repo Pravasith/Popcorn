@@ -37,12 +37,6 @@ std::vector<RenderWorkflowVk *> RendererVk::s_renderWorkflows{};
 //
 // -------------------------------------------------------------------------
 // --- PUBLIC METHODS ------------------------------------------------------
-void RendererVk::UpdateFrameData() {
-  BasicRenderWorkflowVk *basicRenderWorkflow =
-      reinterpret_cast<BasicRenderWorkflowVk *>(
-          s_renderWorkflows[(int)RenderWorkflowIndices::Basic]);
-  // s_frameVk
-};
 
 void RendererVk::DrawFrame(const Scene &scene) {
   BasicRenderWorkflowVk *basicRenderWorkflow =
@@ -182,7 +176,7 @@ void RendererVk::CreateRenderWorkflows() {
 
 // Sort materials, allocate descriptor sets, vk buffers, index buffers &
 // create pipelines
-void RendererVk::SceneReady() {
+void RendererVk::CreateResources() {
   // Create VMA Allocator
   s_memoryAllocatorVk->CreateVMAAllocator();
 
@@ -245,6 +239,17 @@ void RendererVk::VulkanInit() {
   // RENDER READY ------------------------------------------------------------
   s_commandPoolVk->CreateCommandPool();
   s_frameVk->CreateRenderSyncObjects();
+};
+
+void RendererVk::ProcessScenes() {
+  for (auto &scene : m_sceneLibrary.GetScenes()) {
+    for (auto &node : scene->GetNodes()) {
+      if (node->GetType() == GameObjectTypes::Mesh) {
+        auto *meshPtr = (Mesh *)node;
+        AddMeshToWorkflow(meshPtr);
+      };
+    };
+  };
 };
 
 GFX_NAMESPACE_END

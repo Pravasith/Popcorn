@@ -27,8 +27,8 @@ public:
   RendererVk(const Window &appWin);
   virtual ~RendererVk() override;
 
-  virtual void SceneReady() override;
-  virtual void UpdateFrameData() override;
+  virtual void ProcessScenes() override;
+  virtual void CreateResources() override;
   virtual void DrawFrame(const Scene &scene) override;
   virtual bool OnFrameBufferResize(FrameBfrResizeEvent &) override;
   virtual void AddMeshToWorkflow(Mesh *meshPtr) override;

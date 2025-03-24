@@ -2,7 +2,6 @@
 
 #include "GameObject.h"
 #include "GlobalMacros.h"
-#include "Renderer.h"
 #include <cstdint>
 #include <vector>
 
@@ -23,14 +22,14 @@ public:
   };
 
   // Adds a node
-  void Add(GameObject *node);
+  void AddNode(GameObject *node);
+  void RemoveNode(GameObject *node);
 
   // Update nodes
   void Update();
 
 private:
   static uint32_t s_sceneId;
-  static Renderer *s_rendererStn;
 
   SceneData m_sceneData{}; // like ambient lights data, env map etc.
   std::vector<GameObject *> m_nodes;

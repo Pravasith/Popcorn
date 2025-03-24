@@ -486,7 +486,8 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
   const VmaAllocator &allocator = MemoryAllocatorVk::Get()->GetVMAAllocator();
 
   VkDeviceSize meshUBOSize = sizeof(Mesh::Uniforms);
-  PC_WARN("EXPECTED SIZE: " << sizeof(glm::mat4) << ". SIZE: " << meshUBOSize)
+  // PC_WARN("EXPECTED SIZE: " << sizeof(glm::mat4) << ". SIZE: " <<
+  // meshUBOSize)
 
   VkBufferCreateInfo globalBufferInfo = {
       .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
