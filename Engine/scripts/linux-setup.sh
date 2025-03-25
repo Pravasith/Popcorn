@@ -196,6 +196,35 @@ echo "Installing ImGui complete"
 # -----------------------------------------------------------------------
 
 #
+#
+#
+
+# -----------------------------------------------------------------------
+# SUBMODULE INSTALL - TINYGLTF --- START
+# -----------------------------------------------------------------------
+
+echo "Installing tinyGltf..."
+tiny_gltf_sm_dir="$submodules_dir/tiny-gltf"
+tiny_gltf_sm_backends_dir="$tiny_gltf_sm_dir/backends"
+
+tiny_gltf_vendor_platform_agnostic_dir="$vendor_platform_agnostic_dir/tiny-gltf"
+mkdir -p "$tiny_gltf_vendor_platform_agnostic_dir"
+
+# COPY TINYGLTF FILES FROM SUBMODULES TO VENDOR
+#
+# LINUX & WINDOWS
+# -----------------------------------------------------------------------
+cp -a "$tiny_gltf_sm_dir/."  \
+      "$tiny_gltf_vendor_platform_agnostic_dir"
+
+
+echo "Installing tinyGltf complete"
+
+# -----------------------------------------------------------------------
+# SUBMODULE INSTALL - TINYGLTF --- END
+# -----------------------------------------------------------------------
+
+#
 
 # -----------------------------------------------------------------------
 # SUBMODULE INSTALL - VULKAN-HEADERS --- BEGIN

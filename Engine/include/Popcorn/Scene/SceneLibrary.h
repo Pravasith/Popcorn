@@ -1,3 +1,5 @@
+#pragma once
+
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
