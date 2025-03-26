@@ -13,8 +13,6 @@ GFX_NAMESPACE_BEGIN
 enum class Pipelines { Base = 0, Deferred };
 
 class PipelineFactoryVk {
-
-public:
 public:
   [[nodiscard]] inline static PipelineFactoryVk *Get() {
     if (s_instance) {
@@ -30,7 +28,7 @@ public:
       delete s_instance;
       s_instance = nullptr;
     } else {
-      PC_WARN("Trying to destroy a non-existant instance of MaterialHandler")
+      PC_WARN("Trying to destroy a non-existant instance of PipelineFactoryVk")
     };
   };
 
@@ -61,6 +59,7 @@ private:
   PipelineFactoryVk() {
     PC_PRINT("CREATED", TagType::Constr, "PipelineFactoryVk.h")
   };
+
   ~PipelineFactoryVk() {
     PC_PRINT("DESTROYED", TagType::Destr, "PipelineFactoryVk.h")
   };

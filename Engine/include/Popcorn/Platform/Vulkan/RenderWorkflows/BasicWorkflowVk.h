@@ -25,9 +25,17 @@ public:
   };
 
 public:
+  // FOR EACH MATERIAL TYPE
+  struct VulkanMaterialResources {
+    // For Global UBOs -- Layouts, Sets & Memory
+    std::vector<VkDescriptorSetLayout> descriptorSetLayouts;
+  };
+
+public:
   BasicRenderWorkflowVk() {
     s_vertexBufferLayout
         .Set<BufferDefs::AttrTypes::Float3, BufferDefs::AttrTypes::Float3>();
+
     PC_PRINT("CREATED", TagType::Constr, "BasicWorkflowVk")
   };
   virtual ~BasicRenderWorkflowVk() override {
@@ -98,6 +106,8 @@ private:
 
   std::vector<VkDescriptorSet> m_globalDescriptorSets;
   std::vector<VkDescriptorSet> m_localDescriptorSets;
+
+  VulkanMaterialResources m_basicMaterialResources;
 };
 
 GFX_NAMESPACE_END

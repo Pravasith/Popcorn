@@ -69,6 +69,9 @@ void PipelineFactoryVk::CreateBasePipeline(
   PipelineUtils::GetDefaultPipelineLayoutCreateInfo(
       pipelineState.pipelineLayout);
 
+  // DESCRIPTOR SETS
+  // TODO: Use Descriptors::GetLayouts<MaterialTypes::Basic>()
+
   pipelineState.pipelineLayout.setLayoutCount = descriptorSetLayouts.size();
   pipelineState.pipelineLayout.pSetLayouts = descriptorSetLayouts.data();
 

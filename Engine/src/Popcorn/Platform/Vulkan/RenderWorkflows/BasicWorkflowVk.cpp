@@ -18,7 +18,7 @@
 #include <cstdint>
 #include <iostream>
 #define GLM_FORCE_RADIANS
-#include "tiny_gltf.h"
+// #include "tiny_gltf.h"
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/glm.hpp>
@@ -42,11 +42,18 @@ void BasicRenderWorkflowVk::CreatePipelines() {
   // with meshes & materials
   //
   // TODO: Make descriptor sets & resources accordingly
-  // TODO: Refactor this to make a pipeline with G-buffer
-
+  //  1. Global Descriptors - UBO - DSetLayout 0
+  //      - View & proj (mat4)s
+  //  2. Mesh specific Descriptors - Dynamic UBO - DSetLayout 1
+  //      - Model matrix (mat4)
+  //  3. Material specific Descriptors - UBO - DSetLayout 2
+  //      - Albedo (vec4)
+  //      - Roughness (float)
+  //      - Metalness (float)
   std::vector<VkDescriptorSetLayout> setLayouts = {m_globalUBOsDSetLayout,
                                                    m_localUBOsDSetLayout};
 
+  // TODO: Refactor this to make a pipeline with G-buffer
   // CreateBasePipeline(); // From Pipeline factory
 };
 
@@ -152,7 +159,7 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
 
   //
   // DRAW COMMAND --------------------------------------------------------------
-  for (auto &material : m_materials) {
+  for (auto &material : m_basicMaterials) {
     // TODO: Choose pipeline according to material
     // BIND PIPELINE -----------------------------------------------------------
     m_colorPipelineVk.RecordBindCmdPipelineCommand(commandBuffer);
@@ -232,20 +239,14 @@ void BasicRenderWorkflowVk::AddMeshToWorkflow(Mesh *mesh) {
     return;
   };
 
-  auto &material = mesh->GetMaterial();
-
-  if (material.GetMaterialType() != MaterialTypes::BasicMat) {
-    PC_ERROR("Attempt to add a mesh to basicRenderWorkflow that is not "
-             "MaterialTypes::BasicMat",
-             "BasicRenderWorkflow");
-    return;
-  };
-
   m_meshes.emplace_back(mesh);
+  auto &materials = mesh->GetMaterialsByType<MaterialTypes::BasicMat>();
 
   // Each material can potentially have the same material type but different
   // descriptor sets (shaders, textures ..etc)
-  RegisterMaterial(&material);
+  for (auto &material : materials) {
+    RegisterMaterial(material);
+  }
 }
 
 //

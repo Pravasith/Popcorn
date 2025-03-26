@@ -6,17 +6,13 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-class BasicMaterial : public Material {
+class BasicMaterial : public Material<MaterialTypes::BasicMat> {
 public:
   BasicMaterial(MaterialData &matData) : Material(matData) {
     PC_PRINT("CREATED", TagType::Constr, "BasicMaterial.h");
   };
   virtual ~BasicMaterial() override {
     PC_PRINT("DESTROYED", TagType::Destr, "BasicMaterial.h");
-  };
-
-  virtual const MaterialTypes GetMaterialType() const override {
-    return MaterialTypes::BasicMat;
   };
 
   virtual void Bind() override {

@@ -36,7 +36,7 @@ public:
       delete s_instance;
       s_instance = nullptr;
     } else {
-      PC_WARN("Trying to destroy a non-existant instance of MaterialHandler")
+      PC_WARN("Trying to destroy a non-existant instance of DeviceVk")
     };
   };
 

@@ -21,7 +21,6 @@ class RendererOpenGL;
 class RendererVk;
 class VertexBuffer;
 class Scene;
-class Material;
 
 // SINGLETON
 class Renderer {
