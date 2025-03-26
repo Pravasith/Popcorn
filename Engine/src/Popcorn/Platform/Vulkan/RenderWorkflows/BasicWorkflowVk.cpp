@@ -1,19 +1,16 @@
 #include "BasicWorkflowVk.h"
 #include "BufferObjects.h"
 #include "BufferObjectsVk.h"
+#include "ContextVk.h"
 #include "DescriptorsVk.h"
-#include "DeviceVk.h"
-#include "FramebuffersVk.h"
 #include "GfxPipelineVk.h"
 #include "GlobalMacros.h"
 #include "Material.h"
-#include "MemoryAllocatorVk.h"
 #include "PipelineVk.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
 #include "RenderPassVk.h"
 #include "RendererVk.h"
-#include "SwapchainVk.h"
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
@@ -35,6 +32,7 @@ constexpr bool showDrawCommandCount = false;
 #endif
 
 void BasicRenderWorkflowVk::CreatePipelines() {
+
   // CREATE BASE PIPELINE
   // TODO: Create pipeline abstraction in the factory
   //
@@ -42,16 +40,6 @@ void BasicRenderWorkflowVk::CreatePipelines() {
   // with meshes & materials
   //
   // TODO: Make descriptor sets & resources accordingly
-  //  1. Global Descriptors - UBO - DSetLayout 0
-  //      - View & proj (mat4)s
-  //  2. Mesh specific Descriptors - Dynamic UBO - DSetLayout 1
-  //      - Model matrix (mat4)
-  //  3. Material specific Descriptors - UBO - DSetLayout 2
-  //      - Albedo (vec4)
-  //      - Roughness (float)
-  //      - Metalness (float)
-  std::vector<VkDescriptorSetLayout> setLayouts = {m_globalUBOsDSetLayout,
-                                                   m_localUBOsDSetLayout};
 
   // TODO: Refactor this to make a pipeline with G-buffer
   // CreateBasePipeline(); // From Pipeline factory
@@ -123,12 +111,12 @@ void BasicRenderWorkflowVk::CreateRenderPass() {
   //
   // CREATE VULKAN RENDER PASS --------------------------------------
   m_basicRenderPassVk.Create(renderPass1CreateInfo,
-                             DeviceVk::Get()->GetDevice());
+                             ContextVk::Device()->GetDevice());
 };
 
 void BasicRenderWorkflowVk::CreateFramebuffers() {
   SwapchainVk::Get()->CreateSwapchainFramebuffers(
-      DeviceVk::Get()->GetDevice(), m_basicRenderPassVk.GetVkRenderPass());
+      ContextVk::Device()->GetDevice(), m_basicRenderPassVk.GetVkRenderPass());
 };
 
 void BasicRenderWorkflowVk::RecordRenderCommands(
@@ -191,7 +179,7 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
           commandBuffer, &m_vkIndexBuffer, m_indexBufferOffsets[i]);
 
       VkPhysicalDeviceProperties deviceProperties;
-      vkGetPhysicalDeviceProperties(DeviceVk::Get()->GetPhysicalDevice(),
+      vkGetPhysicalDeviceProperties(ContextVk::Device()->GetPhysicalDevice(),
                                     &deviceProperties);
 
       uint32_t dynamicOffset = i * sizeof(Mesh::Uniforms);
@@ -319,7 +307,7 @@ void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
                                     currentOffset);
 
   // Cleanup staging buffers
-  auto &device = DeviceVk::Get()->GetDevice();
+  auto &device = ContextVk::Device()->GetDevice();
   vkDestroyBuffer(device, stagingVertexBuffer, nullptr);
   vkFreeMemory(device, stagingVertexBufferMemory, nullptr);
 };
@@ -392,7 +380,7 @@ void BasicRenderWorkflowVk::AllocateVkIndexBuffers() {
                                     currentOffset);
 
   // Cleanup staging buffers
-  auto &device = DeviceVk::Get()->GetDevice();
+  auto &device = ContextVk::Device()->GetDevice();
   vkDestroyBuffer(device, stagingIndexBuffer, nullptr);
   vkFreeMemory(device, stagingIndexBufferMemory, nullptr);
 };
@@ -482,41 +470,8 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
 //
 
 void BasicRenderWorkflowVk::CreateDescriptorSetLayouts() {
-  DescriptorSetLayoutsVk *dSetLayoutsVkStn = DescriptorSetLayoutsVk::Get();
-
-  // This is a global binding at the moment (UBO for MVP transform matrix)
-  // Loop through material types & make different layouts
-  std::vector<VkDescriptorSetLayoutBinding> globalBindings;
-  std::vector<VkDescriptorSetLayoutBinding> localBindings;
-
-  VkDescriptorSetLayoutBinding globalProjViewMatUBO{};
-  globalProjViewMatUBO.binding = 0;
-  globalProjViewMatUBO.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-  globalProjViewMatUBO.descriptorCount = 1;
-  globalProjViewMatUBO.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-  globalProjViewMatUBO.pImmutableSamplers = nullptr; // Optional
-
-  globalBindings.emplace_back(globalProjViewMatUBO);
-  m_globalUBOsDSetLayout = dSetLayoutsVkStn->GetLayout(globalBindings);
-  if (m_globalUBOsDSetLayout == VK_NULL_HANDLE) {
-    std::cerr << "Failed to create global descriptor set layout!" << std::endl;
-    return;
-  }
-
-  VkDescriptorSetLayoutBinding localPerObjectModelMatUBO{};
-  localPerObjectModelMatUBO.binding = 0;
-  localPerObjectModelMatUBO.descriptorType =
-      VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-  localPerObjectModelMatUBO.descriptorCount = 1;
-  localPerObjectModelMatUBO.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-  localPerObjectModelMatUBO.pImmutableSamplers = nullptr; // Optional
-
-  localBindings.emplace_back(localPerObjectModelMatUBO);
-  m_localUBOsDSetLayout = dSetLayoutsVkStn->GetLayout(localBindings);
-  if (m_localUBOsDSetLayout == VK_NULL_HANDLE) {
-    std::cerr << "Failed to create local descriptor set layout!" << std::endl;
-    return;
-  }
+  ContextVk::DescriptorFactory()->CreateDescriptorSetLayouts<Pipelines::Base>();
+  // ContextVk::DescriptorFactory()->CreateDescriptorSetLayouts<Pipelines::Deferred>();
 };
 
 void BasicRenderWorkflowVk::CreateDescriptorPool() {
@@ -536,7 +491,7 @@ void BasicRenderWorkflowVk::CreateDescriptorPool() {
 
 void BasicRenderWorkflowVk::CreateDescriptorSets() {
   constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
-  auto &device = DeviceVk::Get()->GetDevice();
+  auto &device = ContextVk::Device()->GetDevice();
 
   if (m_descriptorPool == VK_NULL_HANDLE) {
     throw std::runtime_error("Descriptor pool is not initialized!");
@@ -646,7 +601,7 @@ void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
 // --- CLEANUP --------------------------------------------------------------
 //
 void BasicRenderWorkflowVk::CleanUp() {
-  auto &device = DeviceVk::Get()->GetDevice();
+  auto &device = ContextVk::Device()->GetDevice();
   auto *framebuffersVkStn = FramebuffersVk::Get();
   const auto &allocator = MemoryAllocatorVk::Get()->GetVMAAllocator();
 

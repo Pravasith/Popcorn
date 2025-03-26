@@ -9,7 +9,7 @@ CTX_NAMESPACE_BEGIN
 static Renderer *s_renderer = nullptr;
 static Application *s_application = nullptr;
 
-static void Begin() {
+static void BeginContext() {
   Application::Start();
   s_application = &Application::Get();
   s_renderer =
@@ -24,7 +24,7 @@ static void RunGame() {
   s_application->StartGameLoop();
 };
 
-static void End() {
+static void EndContext() {
   s_renderer = nullptr;
   Application::Stop();
 }

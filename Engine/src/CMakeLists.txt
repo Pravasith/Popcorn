@@ -59,7 +59,7 @@ add_library(
   ${PLATFORM_IMPL_DIR}/Vulkan/BufferObjectsVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/FrameVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/CommandPoolVk.cpp
-  ${PLATFORM_IMPL_DIR}/Vulkan/DescriptorsVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/Descriptors/DescriptorsVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/Pipelines/GfxPipelineVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/Pipelines/PipelineVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/MemoryAllocatorVk.cpp

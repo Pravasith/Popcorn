@@ -133,6 +133,7 @@ target_include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/OpenGL>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Pipelines>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Descriptors>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/RenderWorkflows>
     #
     # Tiny-gltf
@@ -145,6 +146,7 @@ target_include_directories(
             $<INSTALL_INTERFACE:include/Popcorn/Platform/OpenGL>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Pipelines>
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Descriptors>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/RenderWorkflows>
 )
 

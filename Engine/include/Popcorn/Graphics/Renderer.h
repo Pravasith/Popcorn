@@ -27,7 +27,6 @@ class Renderer {
 public:
   template <RendererType T> static Renderer *Create(const Window &);
   static void Destroy();
-
   static Renderer &Get() { return *s_instance; };
 
   [[nodiscard]] const static RendererType GetAPI() {

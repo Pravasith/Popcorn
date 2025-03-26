@@ -3,24 +3,25 @@
 #include "GlobalMacros.h"
 #include "PipelineFactoryVk.h"
 #include "Popcorn/Core/Base.h"
+#include <unordered_map>
+#include <vector>
+#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 class DescriptorFactoryVk {
-
 public:
-  template <Pipelines T> constexpr void GetPipelineLayout() {
-    if constexpr (T == Pipelines::Base) {
-      //  1. Global Descriptors - UBO - DSetLayout 0
-      //      - View & proj (mat4)s
-      //  2. Mesh specific Descriptors - Dynamic UBO - DSetLayout 1
-      //      - Model matrix (mat4)
-      //  3. Material specific Descriptors - UBO - DSetLayout 2
-      //      - Albedo (vec4)
-      //      - Roughness (float)
-      //      - Metalness (float)
-    }
+  // Create DescriptorSet Layout
+  // Create Vk memory and set offsets
+  // Create VMA crap
+  // Create DescriptorSets
+
+  template <Pipelines T> void CreateDescriptorSetLayouts();
+  template <Pipelines T>
+  [[nodiscard]] const std::vector<VkDescriptorSetLayout> &
+  GetDescriptorSetLayouts() const {
+    return m_descriptorLayoutMap.at(T);
   };
 
 public:
@@ -43,6 +44,7 @@ public:
     };
   };
 
+private:
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
   DescriptorFactoryVk(const DescriptorFactoryVk &) = delete;
   DescriptorFactoryVk &operator=(const DescriptorFactoryVk &) = delete;
@@ -61,6 +63,8 @@ private:
 
 private:
   static DescriptorFactoryVk *s_instance;
+  std::unordered_map<Pipelines, std::vector<VkDescriptorSetLayout>>
+      m_descriptorLayoutMap;
 };
 
 GFX_NAMESPACE_END

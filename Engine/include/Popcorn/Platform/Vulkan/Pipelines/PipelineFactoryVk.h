@@ -5,7 +5,6 @@
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include "RenderPassVk.h"
-#include <stdexcept>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -40,19 +39,17 @@ public:
   PipelineFactoryVk(PipelineFactoryVk &&) = delete;
   PipelineFactoryVk &operator=(PipelineFactoryVk &&) = delete;
 
-  void CreateBasePipeline(const BufferDefs::Layout &vertexBufferLayout,
-                          const RenderPassVk &basicRenderPass,
-                          std::vector<VkDescriptorSetLayout> &setLayouts);
+  template <Pipelines T>
+  void CreatePipeline(const BufferDefs::Layout &vertexBufferLayout,
+                      const RenderPassVk &basicRenderPass);
 
-  [[nodiscard]] const GfxPipelineVk &GetPipeline(Pipelines pipeline) const {
-    switch (pipeline) {
-    case Popcorn::Gfx::Pipelines::Base:
+  template <Pipelines T>
+  [[nodiscard]] constexpr const GfxPipelineVk &GetPipeline() const {
+    if constexpr (T == Pipelines::Base) {
       return m_basePipeline;
-    case Popcorn::Gfx::Pipelines::Deferred:
+    } else if constexpr (T == Pipelines::Deferred) {
       return m_deferredPipeline;
-    };
-
-    throw std::runtime_error("pipeline not found");
+    }
   };
 
 private:

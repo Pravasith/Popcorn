@@ -69,6 +69,15 @@ VkDescriptorSetLayout &DescriptorSetLayoutsVk::GetLayout(
   return m_layoutCache[bindingsHash];
 };
 
+void DescriptorSetLayoutsVk::GetDefaultDescriptorSetLayoutBindingState(
+    VkDescriptorSetLayoutBinding &layoutBinding) {
+  layoutBinding.binding = 0;
+  layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  layoutBinding.descriptorCount = 1;
+  layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+  layoutBinding.pImmutableSamplers = nullptr; // Optional
+};
+
 void DescriptorSetLayoutsVk::CleanUp() {
   auto &device = DeviceVk::Get()->GetDevice();
 
@@ -114,7 +123,6 @@ void DescriptorPoolVk::DestroyDescriptorPool(VkDescriptorPool &pool) {
 void DescriptorSetsVk::AllocateDescriptorSets(
     const VkDescriptorSetAllocateInfo &allocInfo,
     std::vector<VkDescriptorSet> &descriptorSets) {
-  PC_WARN("AFTER AFTER: " << *allocInfo.pSetLayouts)
 
   auto &device = DeviceVk::Get()->GetDevice();
   constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
