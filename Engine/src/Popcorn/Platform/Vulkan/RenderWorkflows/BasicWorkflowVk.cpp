@@ -54,7 +54,7 @@ void BasicRenderWorkflowVk::CreateRenderPass() {
   VkAttachmentDescription colorAttachment{};
   RenderPassVk::GetDefaultAttachmentDescription(colorAttachment);
 
-  auto *swapchainVk = SwapchainVk::Get();
+  auto *swapchainVk = ContextVk::Swapchain();
   colorAttachment.format = swapchainVk->GetSwapchainImageFormat();
 
   std::vector<VkAttachmentDescription> attachments{}; // size 0
@@ -115,14 +115,14 @@ void BasicRenderWorkflowVk::CreateRenderPass() {
 };
 
 void BasicRenderWorkflowVk::CreateFramebuffers() {
-  SwapchainVk::Get()->CreateSwapchainFramebuffers(
+  ContextVk::Swapchain()->CreateSwapchainFramebuffers(
       ContextVk::Device()->GetDevice(), m_basicRenderPassVk.GetVkRenderPass());
 };
 
 void BasicRenderWorkflowVk::RecordRenderCommands(
     const uint32_t imageIndex, const uint32_t currentFrame,
     VkCommandBuffer &commandBuffer) {
-  auto *swapchainVkStn = SwapchainVk::Get();
+  auto *swapchainVkStn = ContextVk::Swapchain();
 
   //
   // BEGIN RENDER PASS ---------------------------------------------------------
@@ -390,7 +390,8 @@ void BasicRenderWorkflowVk::AllocateVkIndexBuffers() {
 // --- UNIFORM BUFFERS ALLOCATION -------------------------------------------
 //
 void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
-  const VkExtent2D &swapchainExtent = SwapchainVk::Get()->GetSwapchainExtent();
+  const VkExtent2D &swapchainExtent =
+      ContextVk::Swapchain()->GetSwapchainExtent();
   constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
 
   // TODO: Move this to Camera

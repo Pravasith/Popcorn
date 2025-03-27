@@ -137,8 +137,8 @@ void RendererVk::CreateResources() {
                                                   // 2. Mesh
                                                   // 3. Mesh material
     renderWorkflow->CreateDescriptorSetLayouts(); // Done
-    renderWorkflow->CreateDescriptorPool();       // In Factory
-    renderWorkflow->CreateDescriptorSets();       // In Factory
+    renderWorkflow->CreateDescriptorPool();       // Move to factory
+    renderWorkflow->CreateDescriptorSets();       // Move to factory
     renderWorkflow->CreatePipelines();            // ALMOST DONE
   }
 };
