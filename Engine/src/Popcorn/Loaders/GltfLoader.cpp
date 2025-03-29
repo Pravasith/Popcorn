@@ -1,6 +1,10 @@
 #include "Popcorn/Loaders/GltfLoader.h"
+#include "Assert.h"
 #include "Base.h"
+#include "BufferObjects.h"
 #include "GlobalMacros.h"
+#include "Helpers.h"
+#include <cstring>
 #include <glm/gtc/type_ptr.hpp>
 
 ENGINE_NAMESPACE_BEGIN
@@ -30,9 +34,9 @@ bool GltfLoader::LoadFromFile(const std::string &filename,
   return ret;
 };
 
-std::vector<GltfMeshType>
+std::vector<GltfMesh>
 GltfLoader::ExtractGltfMeshes(const tinygltf::Model &model) {
-  std::vector<GltfMeshType> meshes;
+  std::vector<GltfMesh> meshes;
 
   for (const auto &node : model.nodes) {
     ProcessGLTFNode(model, node, glm::mat4(1.0f), meshes);
@@ -44,7 +48,7 @@ GltfLoader::ExtractGltfMeshes(const tinygltf::Model &model) {
 void GltfLoader::ProcessGLTFNode(const tinygltf::Model &model,
                                  const tinygltf::Node &node,
                                  const glm::mat4 &parentMatrix,
-                                 std::vector<GltfMeshType> &meshes) {
+                                 std::vector<GltfMesh> &meshes) {
   // Calculate current node's transformation matrix
   glm::mat4 nodeMatrix = glm::mat4(1.0f);
 
@@ -78,7 +82,7 @@ void GltfLoader::ProcessGLTFNode(const tinygltf::Model &model,
     const auto &mesh = model.meshes[node.mesh];
 
     for (const auto &primitive : mesh.primitives) {
-      GltfMeshType extractedMesh;
+      GltfMesh extractedMesh;
       extractedMesh.modelMatrix = worldMatrix;
 
       // Extract vertex data
@@ -105,56 +109,128 @@ void GltfLoader::ProcessGLTFNode(const tinygltf::Model &model,
 
 void GltfLoader::ExtractVertexData(const tinygltf::Model &model,
                                    const tinygltf::Primitive &primitive,
-                                   GltfMeshType &outMesh) {
-  // Position attribute is required
+                                   GltfMesh &outMesh) {
+  const byte_t *posData = nullptr;
+  const byte_t *normData = nullptr;
+  const byte_t *uvData = nullptr;
+
+  size_t posStride = 0;
+  size_t normStride = 0;
+  size_t uvStride = 0;
+
+  size_t posByteSize = 0;
+  size_t normByteSize = 0;
+  size_t uvByteSize = 0;
+
+  size_t vertexCount = 0;
+
+  //
+  // --- POSITION ------------------------------------------------------
+  PC_ASSERT(primitive.attributes.count("POSITION"),
+            "Mesh primitive missing POSITION attribute");
+
   const auto &posAccessor =
       model.accessors[primitive.attributes.at("POSITION")];
   const auto &posView = model.bufferViews[posAccessor.bufferView];
   const auto &posBuffer = model.buffers[posView.buffer];
-  const float *posData = reinterpret_cast<const float *>(
-      &posBuffer.data[posAccessor.byteOffset + posView.byteOffset]);
 
-  // Normals (optional)
-  const float *normData = nullptr;
-  if (primitive.attributes.find("NORMAL") != primitive.attributes.end()) {
+  posData = reinterpret_cast<const byte_t *>(
+      posBuffer.data.data() + posAccessor.byteOffset + posView.byteOffset);
+  posStride = posView.byteStride ? posView.byteStride : 3 * sizeof(float);
+
+  posByteSize = tinygltf::GetComponentSizeInBytes(posAccessor.componentType) *
+                tinygltf::GetNumComponentsInType(posAccessor.type);
+
+  //
+  // --- NORMAL --------------------------------------------------------
+  if (!primitive.attributes.count("NORMAL")) {
+    PC_WARN("Warning: Mesh missing NORMALs. Flat shading will be used.")
+    normByteSize = 3 * sizeof(float);
+  } else {
     const auto &normAccessor =
         model.accessors[primitive.attributes.at("NORMAL")];
-    const auto &normView = model.bufferViews[normAccessor.bufferView];
+    const auto &normView =
+        model.bufferViews[normAccessor.bufferView]; // normView is HERE
     const auto &normBuffer = model.buffers[normView.buffer];
-    normData = reinterpret_cast<const float *>(
-        &normBuffer.data[normAccessor.byteOffset + normView.byteOffset]);
-  }
 
-  // TexCoords (optional)
-  const float *texData = nullptr;
-  if (primitive.attributes.find("TEXCOORD_0") != primitive.attributes.end()) {
-    const auto &texAccessor =
+    normData = reinterpret_cast<const byte_t *>(
+        normBuffer.data.data() + normAccessor.byteOffset + normView.byteOffset);
+    normStride = normView.byteStride ? normView.byteStride : 3 * sizeof(float);
+    normByteSize =
+        (normData)
+            ? tinygltf::GetComponentSizeInBytes(normAccessor.componentType) *
+                  tinygltf::GetNumComponentsInType(normAccessor.type)
+            : 3 * sizeof(float); // Default normal size
+  };
+
+  //
+  // --- TEXCOORD_0 ----------------------------------------------------
+  if (!primitive.attributes.count("TEXCOORD_0")) {
+    PC_WARN("Warning: Mesh missing TEXCOORD_0. Default UVs will be used.")
+    uvByteSize = 2 * sizeof(float);
+  } else {
+    const auto &uvAccessor =
         model.accessors[primitive.attributes.at("TEXCOORD_0")];
-    const auto &texView = model.bufferViews[texAccessor.bufferView];
-    const auto &texBuffer = model.buffers[texView.buffer];
-    texData = reinterpret_cast<const float *>(
-        &texBuffer.data[texAccessor.byteOffset + texView.byteOffset]);
+    const auto &uvView =
+        model.bufferViews[uvAccessor.bufferView]; // uvView is HERE
+    const auto &uvBuffer = model.buffers[uvView.buffer];
+
+    uvData = reinterpret_cast<const byte_t *>(
+        uvBuffer.data.data() + uvAccessor.byteOffset + uvView.byteOffset);
+    uvStride = uvView.byteStride ? uvView.byteStride : 2 * sizeof(float);
+    uvByteSize =
+        (uvData) ? tinygltf::GetComponentSizeInBytes(uvAccessor.componentType) *
+                       tinygltf::GetNumComponentsInType(uvAccessor.type)
+                 : 2 * sizeof(float); // Default UV size
   }
 
-  // Combine all vertex attributes into a single interleaved buffer
-  size_t vertexCount = posAccessor.count;
-  outMesh.vertices.reserve(vertexCount * 8); // pos(3) + norm(3) + tex(2)
+  //
+  // --- INTERLEAVE  ---------------------------------------------------
+  vertexCount = posAccessor.count;
+  size_t totalAttrByteSize = (posByteSize + normByteSize + uvByteSize);
+
+  VertexBuffer *vertices;
+  //
+  // DON'T FORGET TO DESTROY
+  // DON'T FORGET TO DESTROY
+  vertices = VertexBuffer::Create();
+  vertices->Allocate(vertexCount * totalAttrByteSize);
+  // DON'T FORGET TO DESTROY
+  // DON'T FORGET TO DESTROY
+  //
+  //
 
   for (size_t i = 0; i < vertexCount; ++i) {
-    // Position
-    outMesh.vertices.push_back(posData[i * 3 + 0]);
-    outMesh.vertices.push_back(posData[i * 3 + 1]);
-    outMesh.vertices.push_back(posData[i * 3 + 2]);
+    auto verticesBuffer = vertices->GetBufferData() + i * totalAttrByteSize;
+    size_t cpyOffset = 0;
 
-    // Normal
-    outMesh.vertices.push_back(normData ? normData[i * 3 + 0] : 0.0f);
-    outMesh.vertices.push_back(normData ? normData[i * 3 + 1] : 1.0f);
-    outMesh.vertices.push_back(normData ? normData[i * 3 + 2] : 0.0f);
+    const byte_t *pos =
+        reinterpret_cast<const byte_t *>(posData + i * posStride);
+    memcpy(verticesBuffer + cpyOffset, pos, posByteSize);
+    cpyOffset += posByteSize;
 
-    // TexCoord
-    outMesh.vertices.push_back(texData ? texData[i * 2 + 0] : 0.0f);
-    outMesh.vertices.push_back(texData ? texData[i * 2 + 1] : 0.0f);
+    if (normData) {
+      const byte_t *norm =
+          reinterpret_cast<const byte_t *>(normData + i * normStride);
+      memcpy(verticesBuffer + cpyOffset, norm, normByteSize);
+      cpyOffset += normByteSize;
+    } else {
+      const float defaultNormal[3] = {0, 0, 0};
+      memcpy(verticesBuffer + cpyOffset, defaultNormal, normByteSize);
+    }
+
+    if (uvData) {
+      const byte_t *uv =
+          reinterpret_cast<const byte_t *>(uvData + i * uvStride);
+      memcpy(verticesBuffer + cpyOffset, uv, uvByteSize);
+      cpyOffset += uvByteSize;
+    } else {
+      const float defaultUV[2] = {0, 0};
+      memcpy(verticesBuffer + cpyOffset, defaultUV, uvByteSize);
+    }
   }
+
+  outMesh.vertices = vertices;
 }
 
 GFX_NAMESPACE_END
