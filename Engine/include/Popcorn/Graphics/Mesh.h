@@ -27,23 +27,27 @@ public:
   // TODO: Handle the case of duplicating meshes & materials
   // TODO: Add submeshes & multiple material support
   // TODO: Make m_indexBuffer a variant
-  Mesh(VertexBuffer &geometry, IndexBuffer<uint16_t> *indexBuffer)
-      : m_vertexBuffer(geometry), m_indexBuffer(indexBuffer),
+  Mesh(VertexBuffer *vertexBuffer, IndexBuffer<uint16_t> *indexBuffer)
+      : m_vertexBuffer(vertexBuffer), m_indexBuffer(indexBuffer),
         m_uniformBuffer() {
     if (indexBuffer != nullptr) {
       m_spec.enableIndexBuffers = true;
     };
 
     m_uniformBuffer.modelMatrix = m_matrix;
-
     PC_PRINT("CREATED", TagType::Constr, "MESH");
   };
-  ~Mesh() { PC_PRINT("DESTROYED", TagType::Destr, "MESH"); };
+  ~Mesh() {
+    // TODO: Add clean up logic
+    PC_PRINT("DESTROYED", TagType::Destr, "MESH");
+  };
 
   void Set(const Spec &spec) {
     ValidateMembersWithSpec(spec);
     m_spec.enableIndexBuffers = spec.enableIndexBuffers;
   };
+
+  void SetModelMatrix(glm::mat4 modelMatrix) { m_matrix = modelMatrix; };
 
   void ValidateMembersWithSpec(const Spec &spec);
 
@@ -79,7 +83,7 @@ public:
   }
 
   [[nodiscard]] inline VertexBuffer &GetVertexBuffer() const {
-    return m_vertexBuffer;
+    return *m_vertexBuffer;
   };
 
   // TODO: Change this to variant return type
@@ -93,7 +97,7 @@ public:
   [[nodiscard]] inline Uniforms &GetUniformBuffer() { return m_uniformBuffer; };
 
 protected:
-  VertexBuffer &m_vertexBuffer;
+  VertexBuffer *m_vertexBuffer;
   IndexBuffer<uint16_t> *m_indexBuffer = nullptr;
   Uniforms m_uniformBuffer;
 

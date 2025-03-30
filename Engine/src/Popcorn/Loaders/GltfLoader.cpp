@@ -34,9 +34,9 @@ bool GltfLoader::LoadFromFile(const std::string &filename,
   return ret;
 };
 
-std::vector<GltfMesh>
+std::vector<Mesh *>
 GltfLoader::ExtractGltfMeshes(const tinygltf::Model &model) {
-  std::vector<GltfMesh> meshes;
+  std::vector<Mesh *> meshes;
 
   for (const auto &node : model.nodes) {
     ProcessGLTFNode(model, node, glm::mat4(1.0f), meshes);
@@ -48,7 +48,7 @@ GltfLoader::ExtractGltfMeshes(const tinygltf::Model &model) {
 void GltfLoader::ProcessGLTFNode(const tinygltf::Model &model,
                                  const tinygltf::Node &node,
                                  const glm::mat4 &parentMatrix,
-                                 std::vector<GltfMesh> &meshes) {
+                                 std::vector<Mesh *> &meshes) {
   // Calculate current node's transformation matrix
   glm::mat4 nodeMatrix = glm::mat4(1.0f);
 
@@ -79,14 +79,20 @@ void GltfLoader::ProcessGLTFNode(const tinygltf::Model &model,
 
   // Process mesh if this node has one
   if (node.mesh >= 0 && node.mesh < model.meshes.size()) {
-    const auto &mesh = model.meshes[node.mesh];
+    const auto &gltfMesh = model.meshes[node.mesh];
+    Mesh *mesh;
+    mesh->SetModelMatrix(worldMatrix);
 
-    for (const auto &primitive : mesh.primitives) {
-      GltfMesh extractedMesh;
-      extractedMesh.modelMatrix = worldMatrix;
+    VertexBuffer *vertexBuffer;
+    IndexBuffer<uint16_t> *indexBuffer;
+    Mesh::Uniforms uniform;
+
+    for (const auto &primitive : gltfMesh.primitives) {
 
       // Extract vertex data
-      ExtractVertexData(model, primitive, extractedMesh);
+      // TODO: for tomorrow: transfer the vertexbuffer ownership to Mesh &
+      // handle cleanup logic in the Mesh
+      vertexBuffer = ExtractVertexBuffer(model, primitive);
 
       // Extract index data
       // extractIndexData(model, primitive, extractedMesh);
@@ -97,7 +103,7 @@ void GltfLoader::ProcessGLTFNode(const tinygltf::Model &model,
       //                       extractedMesh.material);
       // }
 
-      meshes.push_back(extractedMesh);
+      meshes.push_back(mesh);
     }
   }
 
@@ -107,9 +113,9 @@ void GltfLoader::ProcessGLTFNode(const tinygltf::Model &model,
   }
 }
 
-void GltfLoader::ExtractVertexData(const tinygltf::Model &model,
-                                   const tinygltf::Primitive &primitive,
-                                   GltfMesh &outMesh) {
+VertexBuffer *
+GltfLoader::ExtractVertexBuffer(const tinygltf::Model &model,
+                                const tinygltf::Primitive &primitive) {
   const byte_t *posData = nullptr;
   const byte_t *normData = nullptr;
   const byte_t *uvData = nullptr;
@@ -189,16 +195,10 @@ void GltfLoader::ExtractVertexData(const tinygltf::Model &model,
   vertexCount = posAccessor.count;
   size_t totalAttrByteSize = (posByteSize + normByteSize + uvByteSize);
 
+  // Destroyed when mesh is destroyed
   VertexBuffer *vertices;
-  //
-  // DON'T FORGET TO DESTROY
-  // DON'T FORGET TO DESTROY
   vertices = VertexBuffer::Create();
   vertices->Allocate(vertexCount * totalAttrByteSize);
-  // DON'T FORGET TO DESTROY
-  // DON'T FORGET TO DESTROY
-  //
-  //
 
   for (size_t i = 0; i < vertexCount; ++i) {
     auto verticesBuffer = vertices->GetBufferData() + i * totalAttrByteSize;
@@ -230,7 +230,7 @@ void GltfLoader::ExtractVertexData(const tinygltf::Model &model,
     }
   }
 
-  outMesh.vertices = vertices;
+  return vertices;
 }
 
 GFX_NAMESPACE_END

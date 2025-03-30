@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Mesh.h"
 #ifndef TINYGLTF_IMPLEMENTATION
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
@@ -27,25 +28,28 @@ struct GltfMaterial {
   glm::vec4 baseColorFactor = glm::vec4(1.0f);
 };
 
-struct GltfMesh {
-  VertexBuffer *vertices;
-  IndexBuffer<uint16_t> *indices;
-  glm::mat4 modelMatrix = glm::mat4(1.0f);
-  GltfMaterial *material;
-};
-
 class GltfLoader {
 public:
+  // File -> tinygltf Model
   static bool LoadFromFile(const std::string &filename, tinygltf::Model &model);
-  static std::vector<GltfMesh> ExtractGltfMeshes(const tinygltf::Model &model);
+
+  // tinygltf Model -> Meshes (vector)
+  [[nodiscard]] static std::vector<Mesh *>
+  ExtractGltfMeshes(const tinygltf::Model &model);
+
+private:
+  //
+  // --- UTILS -----------------------------------------------------------------
+
+  //
+  // Converts tinygltf meshes to Mesh* vector
   static void ProcessGLTFNode(const tinygltf::Model &model,
                               const tinygltf::Node &node,
                               const glm::mat4 &parentMatrix,
-                              std::vector<GltfMesh> &meshes);
-
-  static void ExtractVertexData(const tinygltf::Model &model,
-                                const tinygltf::Primitive &primitive,
-                                GltfMesh &outMesh);
+                              std::vector<Mesh *> &meshes);
+  [[nodiscard]] static VertexBuffer *
+  ExtractVertexBuffer(const tinygltf::Model &model,
+                      const tinygltf::Primitive &primitive);
 };
 
 GFX_NAMESPACE_END

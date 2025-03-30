@@ -4,6 +4,7 @@
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
 #include <algorithm>
+#include <glm/glm.hpp>
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
@@ -34,11 +35,19 @@ enum ShaderStages {
 };
 
 struct MaterialData {
+  //
   int enabledShadersMask = 0;
   std::vector<const char *> shaderFiles{};
-  // UniformData uniformData;   // color, metalness, roughness ..etc
-  // std::vector<PCImage> textures; // albedo, normals, roughness ..etc
-  // RenderStates renderStates; // blending, depth testing  ..etc
+
+  //
+  bool doubleSided = false;
+  // bool hasBaseColorTexture = false;
+  // bool hasNormalTexture = false;
+  // bool hasMetallicRoughnessTexture = false;
+  float metallicFactor = 1.0f;
+  float roughnessFactor = 1.0f;
+  float alphaCutoff = 0.5f;
+  glm::vec4 baseColorFactor = glm::vec4(1.0f);
 };
 
 template <MaterialTypes T> class Material {
