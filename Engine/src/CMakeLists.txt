@@ -1,5 +1,6 @@
 set(CORE_IMPL_DIR Popcorn/Core)
 set(LAYERS_IMPL_DIR Popcorn/Layers)
+set(LOADERS_IMPL_DIR Popcorn/Loaders)
 
 # POPCORN LIB
 add_library(
@@ -13,6 +14,9 @@ add_library(
   ${CORE_IMPL_DIR}/Layer.cpp
   ${CORE_IMPL_DIR}/LayerStack.cpp
   ${LAYERS_IMPL_DIR}/DebugUIOverlay.cpp
+  #
+  # LOADERS
+  ${LOADERS_IMPL_DIR}/GltfLoader.cpp
   #
   # TIME
   ${CORE_IMPL_DIR}/Time.cpp)

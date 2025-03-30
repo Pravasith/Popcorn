@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Mesh.h"
+#include <cstdint>
 #ifndef TINYGLTF_IMPLEMENTATION
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
@@ -50,6 +51,9 @@ private:
   [[nodiscard]] static VertexBuffer *
   ExtractVertexBuffer(const tinygltf::Model &model,
                       const tinygltf::Primitive &primitive);
+  [[nodiscard]] static IndexBuffer<uint16_t> *
+  ExtractIndexBuffer(const tinygltf::Model &model,
+                     const tinygltf::Primitive &primitive);
 };
 
 GFX_NAMESPACE_END

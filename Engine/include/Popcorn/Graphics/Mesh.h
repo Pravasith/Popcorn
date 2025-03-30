@@ -39,6 +39,14 @@ public:
   };
   ~Mesh() {
     // TODO: Add clean up logic
+    delete m_vertexBuffer;
+    m_vertexBuffer = nullptr;
+
+    delete m_indexBuffer;
+    m_indexBuffer = nullptr;
+
+    m_basicMaterials.clear();
+
     PC_PRINT("DESTROYED", TagType::Destr, "MESH");
   };
 

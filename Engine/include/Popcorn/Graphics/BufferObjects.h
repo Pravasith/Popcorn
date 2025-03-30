@@ -209,6 +209,8 @@ public:
   const uint64_t GetSize() const { return m_buffer.GetSize(); };
   const uint64_t GetCount() const { return m_buffer.GetCount(); };
 
+  void Allocate(uint64_t size) { m_buffer.Resize(size); };
+
   void Fill(std::initializer_list<T> elements) { m_buffer.SetData(elements); };
 
   [[nodiscard]] inline byte_t *GetBufferData() const {
