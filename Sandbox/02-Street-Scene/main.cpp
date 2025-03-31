@@ -61,11 +61,13 @@ public:
     mesh->SetPosition({.0f, 1.f, 0.f});
     mesh->RotateX(glm::radians(-90.f));
 
-    triScene.Add(mesh);
+    triScene.AddNode(mesh);
+
+    auto &renderer = Popcorn::Context::GetRenderer();
+    renderer.AddScene(&triScene);
   };
 
   virtual void OnDetach() override {
-
     delete triMat;
     triMat = nullptr;
 
@@ -94,19 +96,13 @@ private:
 };
 
 int main(int argc, char **argv) {
-  Popcorn::Application::Start();
-  auto &app = Application::Get();
-
-  auto &renderer =
-      *(Renderer::Create<RendererType::Vulkan>(app.GetAppWindow()));
-  app.SetRenderer(renderer);
+  Popcorn::Context::Begin();
 
   auto gameLayer = new GameLayer();
   Application::AddLayer(gameLayer);
 
-  renderer.SceneReady();
-  Popcorn::Application::StartGameLoop();
-  Popcorn::Application::Stop();
+  Popcorn::Context::RunGame();
 
+  Popcorn::Context::End();
   return 0;
 }

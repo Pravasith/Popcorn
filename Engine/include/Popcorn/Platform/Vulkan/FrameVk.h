@@ -31,13 +31,15 @@ public:
     };
   };
 
-  void
-  Draw(std::vector<VkCommandBuffer> &commandBuffers,
-       const VkRenderPass &finalPaintRenderPass,
-       const std::function<void(const uint32_t currentFrame)> &updateSceneData,
-       const std::function<void(
-           const uint32_t frameIndex, const uint32_t currentFrame,
-           VkCommandBuffer &currentFrameCommandBuffer)> &recordDrawCommands);
+  void Draw(
+      std::vector<VkCommandBuffer> &commandBuffers,
+      const VkRenderPass &finalPaintRenderPass,
+      const std::function<void(const uint32_t currentFrame)> &updateSceneData,
+      // Record Draw commands specifying the swapchain imageIndex/frameIndex(can
+      // be different from currentFrame), and the currentFrame
+      const std::function<void(
+          const uint32_t frameIndex, const uint32_t currentFrame,
+          VkCommandBuffer &currentFrameCommandBuffer)> &recordDrawCommands);
 
   void CreateRenderSyncObjects();
   inline void SetFrameBufferResized(bool isFrameBufferResized) {

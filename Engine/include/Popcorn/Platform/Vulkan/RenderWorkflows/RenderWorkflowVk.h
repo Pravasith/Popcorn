@@ -3,9 +3,8 @@
 #include "GlobalMacros.h"
 #include "Material.h"
 #include "Mesh.h"
+#include "PipelineFactoryVk.h"
 #include "Popcorn/Core/Base.h"
-#include "Scene.h"
-#include <algorithm>
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
@@ -16,8 +15,6 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-class Material;
-
 enum class RenderWorkflowIndices {
   Basic = 0,   // Basic colors
   Shadows = 1, // Simple hard shadows
@@ -26,12 +23,15 @@ enum class RenderWorkflowIndices {
 class RenderWorkflowVk {
 public:
   RenderWorkflowVk() {
+    m_pipelineFactory = PipelineFactoryVk::Get();
     PC_PRINT("CREATED", TagType::Constr, "RenderWorkflowVk")
   };
   virtual ~RenderWorkflowVk() {
     m_meshes.clear();
-    m_materials.clear();
+    m_basicMaterials.clear();
 
+    PipelineFactoryVk::Destroy();
+    m_pipelineFactory = nullptr;
     PC_PRINT("DESTROYED", TagType::Destr, "RenderWorkflowVk")
   };
 
@@ -61,33 +61,21 @@ public:
 
   virtual void AddMeshToWorkflow(Mesh *mesh) {};
 
-  void RegisterMaterial(Material *materialPtr) {
-    auto ptr = std::find(m_materials.begin(), m_materials.end(), materialPtr);
-
-    if (ptr != m_materials.end()) {
-      PC_WARN("Material already exists in the material library!")
-      return;
-    };
-
-    //
-    // ADD TO MATERIAL LIBRARY ---------------------------------------------
-    m_materials.emplace_back(materialPtr);
+  template <MaterialTypes T> void RegisterMaterial(Material<T> *materialPtr) {
+    PC_AddMaterialByType(materialPtr, m_basicMaterials);
   }
 
-  void UnRegisterMaterial(Material *materialPtr) {
-    auto ptr = std::find(m_materials.begin(), m_materials.end(), materialPtr);
-
-    if (ptr == m_materials.end()) {
-      PC_WARN("Material doesn't exist in the material library!")
-      return;
-    };
-
-    m_materials.erase(ptr);
+  template <MaterialTypes T> void UnRegisterMaterial(Material<T> *materialPtr) {
+    PC_RemoveMaterialByType(materialPtr, m_basicMaterials);
   }
 
 protected:
   std::vector<Mesh *> m_meshes;
-  std::vector<Material *> m_materials;
+
+  // All different kinds of meshes
+  std::vector<Material<MaterialTypes::BasicMat> *> m_basicMaterials;
+
+  PipelineFactoryVk *m_pipelineFactory;
 };
 
 GFX_NAMESPACE_END

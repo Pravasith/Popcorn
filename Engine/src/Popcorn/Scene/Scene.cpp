@@ -1,21 +1,21 @@
 #include "Scene.h"
+#include "GameObject.h"
 #include "GlobalMacros.h"
 #include "Material.h"
 #include "Mesh.h"
 #include "Renderer.h"
+#include <algorithm>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 uint32_t Scene::s_sceneId = 0;
-Renderer *Scene::s_rendererStn = nullptr;
 
 Scene::Scene() {
   PC_PRINT("CREATED with id: " << m_sceneData.sceneId, TagType::Constr,
            "Scene");
   ++s_sceneId;
   m_sceneData.sceneId = s_sceneId;
-  s_rendererStn = &Renderer::Get();
 };
 
 Scene::~Scene() {
@@ -26,13 +26,15 @@ Scene::~Scene() {
 };
 
 // Adds a node
-void Scene::Add(GameObject *node) {
+void Scene::AddNode(GameObject *node) {
   node->OnAttach();
   m_nodes.push_back(node);
+};
 
-  if (node->GetType() == GameObjectTypes::Mesh) {
-    auto *meshPtr = (Mesh *)node;
-    s_rendererStn->AddMeshToWorkflow(meshPtr);
+void Scene::RemoveNode(GameObject *node) {
+  auto it = std::find(m_nodes.begin(), m_nodes.end(), node);
+  if (it != m_nodes.end()) {
+    m_nodes.erase(it);
   };
 };
 

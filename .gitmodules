@@ -13,3 +13,6 @@
 [submodule "submodules/glm"]
 	path = Engine/submodules/glm
 	url = git@github.com:g-truc/glm.git
+[submodule "Engine/submodules/tiny-gltf"]
+	path = Engine/submodules/tiny-gltf
+	url = https://github.com/syoyo/tinygltf

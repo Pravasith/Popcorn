@@ -5,11 +5,11 @@
 #include "GlobalMacros.h"
 #include "Material.h"
 #include "Popcorn/Core/Base.h"
-#include "Renderer.h"
 #include <cstdint>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <vector>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -27,38 +27,35 @@ public:
   // TODO: Handle the case of duplicating meshes & materials
   // TODO: Add submeshes & multiple material support
   // TODO: Make m_indexBuffer a variant
-  Mesh(VertexBuffer &geometry, IndexBuffer<uint16_t> *indexBuffer,
-       Material &material)
-      : m_vertexBuffer(geometry), m_indexBuffer(indexBuffer), m_uniformBuffer(),
-        m_material(material) {
+  Mesh(VertexBuffer *vertexBuffer, IndexBuffer<uint16_t> *indexBuffer)
+      : m_vertexBuffer(vertexBuffer), m_indexBuffer(indexBuffer),
+        m_uniformBuffer() {
     if (indexBuffer != nullptr) {
       m_spec.enableIndexBuffers = true;
     };
 
-    // s_uniformBufferLayout.Set<BufferDefs::AttrTypes::Mat4>();
-    // m_uniformBuffer.SetLayout<BufferDefs::AttrTypes::Mat4>();
-    // m_uniformBuffer.Fill({m_matrix});
-    // SetAlignedUniformBufferLayoutStride();
-
     m_uniformBuffer.modelMatrix = m_matrix;
-
-    const float *data = glm::value_ptr(m_matrix);
-    std::cout << "Model Matrix:\n";
-    for (int i = 0; i < 4; i++) {
-      for (int j = 0; j < 4; j++) {
-        std::cout << data[i + j * 4] << " ";
-      }
-      std::cout << "\n";
-    }
-
     PC_PRINT("CREATED", TagType::Constr, "MESH");
   };
-  ~Mesh() { PC_PRINT("DESTROYED", TagType::Destr, "MESH"); };
+  ~Mesh() {
+    // TODO: Add clean up logic
+    delete m_vertexBuffer;
+    m_vertexBuffer = nullptr;
+
+    delete m_indexBuffer;
+    m_indexBuffer = nullptr;
+
+    m_basicMaterials.clear();
+
+    PC_PRINT("DESTROYED", TagType::Destr, "MESH");
+  };
 
   void Set(const Spec &spec) {
     ValidateMembersWithSpec(spec);
     m_spec.enableIndexBuffers = spec.enableIndexBuffers;
   };
+
+  void SetModelMatrix(glm::mat4 modelMatrix) { m_matrix = modelMatrix; };
 
   void ValidateMembersWithSpec(const Spec &spec);
 
@@ -70,10 +67,31 @@ public:
     return GameObjectTypes::Mesh;
   };
 
-  [[nodiscard]] inline Material &GetMaterial() const { return m_material; };
+  template <MaterialTypes T>
+  [[nodiscard]] inline std::vector<Material<T> *> &GetMaterialsByType() {
+    if constexpr (T == MaterialTypes::BasicMat) {
+      return m_basicMaterials;
+    }
+
+    // TODO: Add other materials
+    else if constexpr (T == MaterialTypes::PbrMat) {
+      return {};
+    } else {
+      PC_ERROR("Material type not found!", "Mesh")
+      return {};
+    }
+  };
+
+  template <MaterialTypes T> void AttachMaterial(Material<T> *materialPtr) {
+    PC_AddMaterialByType(materialPtr, m_basicMaterials);
+  }
+
+  template <MaterialTypes T> void DetachMaterial(Material<T> *materialPtr) {
+    PC_RemoveMaterialByType(materialPtr, m_basicMaterials);
+  }
 
   [[nodiscard]] inline VertexBuffer &GetVertexBuffer() const {
-    return m_vertexBuffer;
+    return *m_vertexBuffer;
   };
 
   // TODO: Change this to variant return type
@@ -87,12 +105,13 @@ public:
   [[nodiscard]] inline Uniforms &GetUniformBuffer() { return m_uniformBuffer; };
 
 protected:
-  VertexBuffer &m_vertexBuffer;
+  VertexBuffer *m_vertexBuffer;
   IndexBuffer<uint16_t> *m_indexBuffer = nullptr;
   Uniforms m_uniformBuffer;
 
-  // TODO: Make this a Vector as required
-  Material &m_material;
+  // TODO: Add other materials
+  std::vector<Material<MaterialTypes::BasicMat> *> m_basicMaterials;
+
   Spec m_spec;
 };
 

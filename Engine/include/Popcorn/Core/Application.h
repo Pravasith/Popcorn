@@ -25,6 +25,7 @@ public:
   static void Stop();
 
   static void StartGameLoop();
+  static void ProcessScenes();
   static void AddLayer(Layer *);
 
   Window &GetAppWindow() const;
@@ -32,8 +33,8 @@ public:
   static bool IsGameLoopRunning();
 
   inline void SetRenderer(Renderer &renderer) {
-    PC_ASSERT(!s_Renderer, "A renderer already exists!");
-    s_Renderer = &renderer;
+    PC_ASSERT(!s_renderer, "A renderer already exists!");
+    s_renderer = &renderer;
   };
 
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
@@ -61,7 +62,7 @@ private:
   static LayerStack *s_layerStack;
   static Window *s_window;
   static Time *s_time;
-  static Renderer *s_Renderer;
+  static Renderer *s_renderer;
   static DebugUIOverlay *s_debugUIOverlay;
 };
 ENGINE_NAMESPACE_END

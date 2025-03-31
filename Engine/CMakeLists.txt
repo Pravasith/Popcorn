@@ -31,6 +31,10 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   # include(${CMAKE_TOOLCHAIN_FILE})
 endif()
 
+set(PROJECT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(POPCORN_INCLUDE_DIR ${PROJECT_INCLUDE_DIR}/Popcorn)
+set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/third-party/platform-agnostic)
+
 # -----------------------------------------------------------------------
 # STATIC BUILD SETTINGS
 # -----------------------------------------------------------------------
@@ -73,52 +77,48 @@ find_package(glm CONFIG REQUIRED)
 # -----------------------------------------------------------------------
 # TARGETS
 # -----------------------------------------------------------------------
-# COMMON INCLUDE DIRS
-include_directories(include)
 
+# GLAD
 target_include_directories(
   glad
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic/glad/include>
+  PUBLIC $<BUILD_INTERFACE:${THIRD_PARTY_DIR}/glad/include>
   PRIVATE $<INSTALL_INTERFACE:include>)
+target_precompile_headers(glad PUBLIC
+                          ${THIRD_PARTY_DIR}/glad/include/glad/glad.h)
 
+# VMA
 target_include_directories(
   vma
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic/vma>
+  PUBLIC $<BUILD_INTERFACE:${THIRD_PARTY_DIR}/vma>
   PRIVATE $<INSTALL_INTERFACE:include>)
+target_precompile_headers(vma PUBLIC ${THIRD_PARTY_DIR}/vma/vk_mem_alloc.h)
 
+# ImGui
 target_include_directories(
   ImGui
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic>
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic/imgui>
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic/backends>
+  PUBLIC $<BUILD_INTERFACE:${THIRD_PARTY_DIR}>
+         $<BUILD_INTERFACE:${THIRD_PARTY_DIR}/imgui>
+         $<BUILD_INTERFACE:${THIRD_PARTY_DIR}/backends>
   PRIVATE $<INSTALL_INTERFACE:include>)
 
-# PRECOMPILE
-target_precompile_headers(
-  glad PUBLIC ${PLATFORM_AGNOSTIC_VENDOR_DIR}/glad/include/glad/glad.h)
-target_precompile_headers(vma PUBLIC
-                          ${PLATFORM_AGNOSTIC_VENDOR_DIR}/vma/vk_mem_alloc.h)
-
+# Window
 target_include_directories(
   Window
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Agnostic>
+  PUBLIC $<BUILD_INTERFACE:${PROJECT_INCLUDE_DIR}>
+         $<BUILD_INTERFACE:${POPCORN_INCLUDE_DIR}/Core>
+         $<BUILD_INTERFACE:${POPCORN_INCLUDE_DIR}/Platform>
+         $<BUILD_INTERFACE:${POPCORN_INCLUDE_DIR}/Platform/Agnostic>
   INTERFACE $<INSTALL_INTERFACE:include>
             $<INSTALL_INTERFACE:include/Popcorn/Core>
             $<INSTALL_INTERFACE:include/Popcorn/Platform>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Agnostic>)
 
+# Events
 target_include_directories(
   Events
-  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Input>
-         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Events>
+  PUBLIC $<BUILD_INTERFACE:${PROJECT_INCLUDE_DIR}>
+         $<BUILD_INTERFACE:${POPCORN_INCLUDE_DIR}/Input>
+         $<BUILD_INTERFACE:${POPCORN_INCLUDE_DIR}/Events>
   INTERFACE $<INSTALL_INTERFACE:include>
             $<INSTALL_INTERFACE:include/Popcorn/Input>
             $<INSTALL_INTERFACE:include/Popcorn/Events>)
@@ -133,7 +133,12 @@ target_include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/OpenGL>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Pipelines>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Descriptors>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/RenderWorkflows>
+    #
+    # Tiny-gltf
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic>
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic/tiny-gltf>
   INTERFACE $<INSTALL_INTERFACE:include>
             $<INSTALL_INTERFACE:include/Popcorn/Graphics>
             $<INSTALL_INTERFACE:include/Popcorn/Graphics/Materials>
@@ -141,6 +146,7 @@ target_include_directories(
             $<INSTALL_INTERFACE:include/Popcorn/Platform/OpenGL>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Pipelines>
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Descriptors>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/RenderWorkflows>
 )
 
@@ -148,6 +154,7 @@ target_include_directories(
   Popcorn
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Loaders>
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Layers>
   INTERFACE $<INSTALL_INTERFACE:include>
             $<INSTALL_INTERFACE:include/Popcorn/Core>

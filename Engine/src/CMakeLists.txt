@@ -1,5 +1,6 @@
 set(CORE_IMPL_DIR Popcorn/Core)
 set(LAYERS_IMPL_DIR Popcorn/Layers)
+set(LOADERS_IMPL_DIR Popcorn/Loaders)
 
 # POPCORN LIB
 add_library(
@@ -13,6 +14,9 @@ add_library(
   ${CORE_IMPL_DIR}/Layer.cpp
   ${CORE_IMPL_DIR}/LayerStack.cpp
   ${LAYERS_IMPL_DIR}/DebugUIOverlay.cpp
+  #
+  # LOADERS
+  ${LOADERS_IMPL_DIR}/GltfLoader.cpp
   #
   # TIME
   ${CORE_IMPL_DIR}/Time.cpp)
@@ -59,7 +63,7 @@ add_library(
   ${PLATFORM_IMPL_DIR}/Vulkan/BufferObjectsVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/FrameVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/CommandPoolVk.cpp
-  ${PLATFORM_IMPL_DIR}/Vulkan/DescriptorsVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/Descriptors/DescriptorsVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/Pipelines/GfxPipelineVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/Pipelines/PipelineVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/MemoryAllocatorVk.cpp

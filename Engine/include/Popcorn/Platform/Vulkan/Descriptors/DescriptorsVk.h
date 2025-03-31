@@ -43,6 +43,10 @@ public:
   // required
   void CleanUp();
 
+  // --- UTILS -----------------------------------------------------------------
+  static void GetDefaultDescriptorSetLayoutBindingState(
+      VkDescriptorSetLayoutBinding &binding);
+
 private:
   DescriptorSetLayoutsVk() {
     PC_PRINT("CREATED", TagType::Constr, "DescriptorSetLayoutsVk")

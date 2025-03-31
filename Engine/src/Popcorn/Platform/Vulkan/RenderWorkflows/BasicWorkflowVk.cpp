@@ -1,24 +1,21 @@
 #include "BasicWorkflowVk.h"
 #include "BufferObjects.h"
 #include "BufferObjectsVk.h"
+#include "ContextVk.h"
 #include "DescriptorsVk.h"
-#include "DeviceVk.h"
-#include "FramebuffersVk.h"
 #include "GfxPipelineVk.h"
 #include "GlobalMacros.h"
 #include "Material.h"
-#include "MemoryAllocatorVk.h"
 #include "PipelineVk.h"
 #include "Popcorn/Core/Base.h"
-#include "Popcorn/Core/Buffer.h"
 #include "Popcorn/Core/Helpers.h"
 #include "RenderPassVk.h"
 #include "RendererVk.h"
-#include "SwapchainVk.h"
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
 #define GLM_FORCE_RADIANS
+// #include "tiny_gltf.h"
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/glm.hpp>
@@ -36,81 +33,16 @@ constexpr bool showDrawCommandCount = false;
 
 void BasicRenderWorkflowVk::CreatePipelines() {
 
+  // CREATE BASE PIPELINE
+  // TODO: Create pipeline abstraction in the factory
   //
-  // --- MAIN PIPELINE ---------------------------------------------------
-  auto *deviceVkStn = DeviceVk::Get();
-  auto *swapchainVkStn = SwapchainVk::Get();
-  auto &device = deviceVkStn->GetDevice();
-  const auto &swapchainExtent = swapchainVkStn->GetSwapchainExtent();
-
-  // TODO: Material specific pipelines; loop over materials to create unique
-  // pipelines. Unique material properties as hash -- pipeline layout
-  auto &material = m_materials[0];
-
-  Buffer vertShaderBuffer = std::move(material->GetShaders()[0]);
-  Buffer fragShaderBuffer = std::move(material->GetShaders()[1]);
-
-  auto vertShaderModule = PC_CreateShaderModule(device, vertShaderBuffer);
-  auto fragShaderModule = PC_CreateShaderModule(device, fragShaderBuffer);
-
-  std::forward_list<VkShaderModule> shaderModules = {vertShaderModule,
-                                                     fragShaderModule};
-
-  // SET SHADER STAGES
-  m_colorPipelineVk.SetShaderStagesMask(static_cast<ShaderStages>(
-      ShaderStages::VertexBit | ShaderStages::FragmentBit));
-
-  m_colorPipelineVk.CreateShaderStageCreateInfos(shaderModules);
-
-  // SET FIXED FUNCTION PIPELINE STATE & SET LAYOUT
-  GfxPipelineState pipelineState{};
-  PipelineUtils::GetDefaultDynamicState(pipelineState.dynamicState);
-  PipelineUtils::GetDefaultVertexInputState(pipelineState.vertexInputState);
-
-  // Vertex input descriptions
-  VkVertexInputBindingDescription bindingDescription{};
-  VertexBufferVk::GetDefaultVertexInputBindingDescription(bindingDescription,
-                                                          s_vertexBufferLayout);
-  bindingDescription.binding = 0;
-  std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
-  VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
-      attributeDescriptions, s_vertexBufferLayout);
-
-  pipelineState.vertexInputState.vertexBindingDescriptionCount = 1;
-  pipelineState.vertexInputState.vertexAttributeDescriptionCount =
-      static_cast<uint32_t>(attributeDescriptions.size());
-  pipelineState.vertexInputState.pVertexBindingDescriptions =
-      &bindingDescription;
-  pipelineState.vertexInputState.pVertexAttributeDescriptions =
-      attributeDescriptions.data();
-
-  PipelineUtils::GetDefaultInputAssemblyState(pipelineState.inputAssemblyState);
-  PipelineUtils::GetDefaultViewportState(pipelineState.viewportState);
-  PipelineUtils::GetDefaultRasterizationState(pipelineState.rasterizationState);
-  PipelineUtils::GetDefaultMultisampleState(pipelineState.multisampleState);
-  PipelineUtils::GetDefaultDepthStencilState(pipelineState.depthStencilState);
-  PipelineUtils::GetDefaultColorBlendingState(pipelineState.colorBlendState);
-  PipelineUtils::GetDefaultPipelineLayoutCreateInfo(
-      pipelineState.pipelineLayout);
-
-  std::array<VkDescriptorSetLayout, 2> dSetLayouts = {m_globalUBOsDSetLayout,
-                                                      m_localUBOsDSetLayout};
-  pipelineState.pipelineLayout.setLayoutCount = dSetLayouts.size();
-  pipelineState.pipelineLayout.pSetLayouts = dSetLayouts.data();
-
-  // CREATE PIPELINE LAYOUT
-  m_colorPipelineVk.CreatePipelineLayout(device, pipelineState.pipelineLayout);
-
-  // CREATE VULKAN PIPELINE
-  m_colorPipelineVk.CreateVkPipeline(device, pipelineState,
-                                     m_basicRenderPassVk.GetVkRenderPass());
-
-  // DESTROY SHADER MODULES
-  PC_DestroyShaderModule(device, vertShaderModule);
-  PC_DestroyShaderModule(device, fragShaderModule);
-
+  // TODO: Add tinyGltf and convert a test scene from blender to Popcorn scene
+  // with meshes & materials
   //
-  // --- OTHER PIPELINE --------------------------------------------------
+  // TODO: Make descriptor sets & resources accordingly
+
+  // TODO: Refactor this to make a pipeline with G-buffer
+  // CreateBasePipeline(); // From Pipeline factory
 };
 
 void BasicRenderWorkflowVk::CreateRenderPass() {
@@ -122,7 +54,7 @@ void BasicRenderWorkflowVk::CreateRenderPass() {
   VkAttachmentDescription colorAttachment{};
   RenderPassVk::GetDefaultAttachmentDescription(colorAttachment);
 
-  auto *swapchainVk = SwapchainVk::Get();
+  auto *swapchainVk = ContextVk::Swapchain();
   colorAttachment.format = swapchainVk->GetSwapchainImageFormat();
 
   std::vector<VkAttachmentDescription> attachments{}; // size 0
@@ -179,18 +111,18 @@ void BasicRenderWorkflowVk::CreateRenderPass() {
   //
   // CREATE VULKAN RENDER PASS --------------------------------------
   m_basicRenderPassVk.Create(renderPass1CreateInfo,
-                             DeviceVk::Get()->GetDevice());
+                             ContextVk::Device()->GetDevice());
 };
 
 void BasicRenderWorkflowVk::CreateFramebuffers() {
-  SwapchainVk::Get()->CreateSwapchainFramebuffers(
-      DeviceVk::Get()->GetDevice(), m_basicRenderPassVk.GetVkRenderPass());
+  ContextVk::Swapchain()->CreateSwapchainFramebuffers(
+      ContextVk::Device()->GetDevice(), m_basicRenderPassVk.GetVkRenderPass());
 };
 
 void BasicRenderWorkflowVk::RecordRenderCommands(
     const uint32_t imageIndex, const uint32_t currentFrame,
     VkCommandBuffer &commandBuffer) {
-  auto *swapchainVkStn = SwapchainVk::Get();
+  auto *swapchainVkStn = ContextVk::Swapchain();
 
   //
   // BEGIN RENDER PASS ---------------------------------------------------------
@@ -215,7 +147,7 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
 
   //
   // DRAW COMMAND --------------------------------------------------------------
-  for (auto &material : m_materials) {
+  for (auto &material : m_basicMaterials) {
     // TODO: Choose pipeline according to material
     // BIND PIPELINE -----------------------------------------------------------
     m_colorPipelineVk.RecordBindCmdPipelineCommand(commandBuffer);
@@ -247,7 +179,7 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
           commandBuffer, &m_vkIndexBuffer, m_indexBufferOffsets[i]);
 
       VkPhysicalDeviceProperties deviceProperties;
-      vkGetPhysicalDeviceProperties(DeviceVk::Get()->GetPhysicalDevice(),
+      vkGetPhysicalDeviceProperties(ContextVk::Device()->GetPhysicalDevice(),
                                     &deviceProperties);
 
       uint32_t dynamicOffset = i * sizeof(Mesh::Uniforms);
@@ -295,20 +227,14 @@ void BasicRenderWorkflowVk::AddMeshToWorkflow(Mesh *mesh) {
     return;
   };
 
-  auto &material = mesh->GetMaterial();
-
-  if (material.GetMaterialType() != MaterialTypes::BasicMat) {
-    PC_ERROR("Attempt to add a mesh to basicRenderWorkflow that is not "
-             "MaterialTypes::BasicMat",
-             "BasicRenderWorkflow");
-    return;
-  };
-
   m_meshes.emplace_back(mesh);
+  auto &materials = mesh->GetMaterialsByType<MaterialTypes::BasicMat>();
 
   // Each material can potentially have the same material type but different
   // descriptor sets (shaders, textures ..etc)
-  RegisterMaterial(&material);
+  for (auto &material : materials) {
+    RegisterMaterial(material);
+  }
 }
 
 //
@@ -381,7 +307,7 @@ void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
                                     currentOffset);
 
   // Cleanup staging buffers
-  auto &device = DeviceVk::Get()->GetDevice();
+  auto &device = ContextVk::Device()->GetDevice();
   vkDestroyBuffer(device, stagingVertexBuffer, nullptr);
   vkFreeMemory(device, stagingVertexBufferMemory, nullptr);
 };
@@ -454,7 +380,7 @@ void BasicRenderWorkflowVk::AllocateVkIndexBuffers() {
                                     currentOffset);
 
   // Cleanup staging buffers
-  auto &device = DeviceVk::Get()->GetDevice();
+  auto &device = ContextVk::Device()->GetDevice();
   vkDestroyBuffer(device, stagingIndexBuffer, nullptr);
   vkFreeMemory(device, stagingIndexBufferMemory, nullptr);
 };
@@ -464,7 +390,8 @@ void BasicRenderWorkflowVk::AllocateVkIndexBuffers() {
 // --- UNIFORM BUFFERS ALLOCATION -------------------------------------------
 //
 void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
-  const VkExtent2D &swapchainExtent = SwapchainVk::Get()->GetSwapchainExtent();
+  const VkExtent2D &swapchainExtent =
+      ContextVk::Swapchain()->GetSwapchainExtent();
   constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
 
   // TODO: Move this to Camera
@@ -486,7 +413,8 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
   const VmaAllocator &allocator = MemoryAllocatorVk::Get()->GetVMAAllocator();
 
   VkDeviceSize meshUBOSize = sizeof(Mesh::Uniforms);
-  PC_WARN("EXPECTED SIZE: " << sizeof(glm::mat4) << ". SIZE: " << meshUBOSize)
+  // PC_WARN("EXPECTED SIZE: " << sizeof(glm::mat4) << ". SIZE: " <<
+  // meshUBOSize)
 
   VkBufferCreateInfo globalBufferInfo = {
       .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
@@ -543,41 +471,8 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
 //
 
 void BasicRenderWorkflowVk::CreateDescriptorSetLayouts() {
-  DescriptorSetLayoutsVk *dSetLayoutsVkStn = DescriptorSetLayoutsVk::Get();
-
-  // This is a global binding at the moment (UBO for MVP transform matrix)
-  // Loop through material types & make different layouts
-  std::vector<VkDescriptorSetLayoutBinding> globalBindings;
-  std::vector<VkDescriptorSetLayoutBinding> localBindings;
-
-  VkDescriptorSetLayoutBinding globalProjViewMatUBO{};
-  globalProjViewMatUBO.binding = 0;
-  globalProjViewMatUBO.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-  globalProjViewMatUBO.descriptorCount = 1;
-  globalProjViewMatUBO.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-  globalProjViewMatUBO.pImmutableSamplers = nullptr; // Optional
-
-  globalBindings.emplace_back(globalProjViewMatUBO);
-  m_globalUBOsDSetLayout = dSetLayoutsVkStn->GetLayout(globalBindings);
-  if (m_globalUBOsDSetLayout == VK_NULL_HANDLE) {
-    std::cerr << "Failed to create global descriptor set layout!" << std::endl;
-    return;
-  }
-
-  VkDescriptorSetLayoutBinding localPerObjectModelMatUBO{};
-  localPerObjectModelMatUBO.binding = 0;
-  localPerObjectModelMatUBO.descriptorType =
-      VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-  localPerObjectModelMatUBO.descriptorCount = 1;
-  localPerObjectModelMatUBO.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-  localPerObjectModelMatUBO.pImmutableSamplers = nullptr; // Optional
-
-  localBindings.emplace_back(localPerObjectModelMatUBO);
-  m_localUBOsDSetLayout = dSetLayoutsVkStn->GetLayout(localBindings);
-  if (m_localUBOsDSetLayout == VK_NULL_HANDLE) {
-    std::cerr << "Failed to create local descriptor set layout!" << std::endl;
-    return;
-  }
+  ContextVk::DescriptorFactory()->CreateDescriptorSetLayouts<Pipelines::Base>();
+  // ContextVk::DescriptorFactory()->CreateDescriptorSetLayouts<Pipelines::Deferred>();
 };
 
 void BasicRenderWorkflowVk::CreateDescriptorPool() {
@@ -597,7 +492,7 @@ void BasicRenderWorkflowVk::CreateDescriptorPool() {
 
 void BasicRenderWorkflowVk::CreateDescriptorSets() {
   constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
-  auto &device = DeviceVk::Get()->GetDevice();
+  auto &device = ContextVk::Device()->GetDevice();
 
   if (m_descriptorPool == VK_NULL_HANDLE) {
     throw std::runtime_error("Descriptor pool is not initialized!");
@@ -707,7 +602,7 @@ void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
 // --- CLEANUP --------------------------------------------------------------
 //
 void BasicRenderWorkflowVk::CleanUp() {
-  auto &device = DeviceVk::Get()->GetDevice();
+  auto &device = ContextVk::Device()->GetDevice();
   auto *framebuffersVkStn = FramebuffersVk::Get();
   const auto &allocator = MemoryAllocatorVk::Get()->GetVMAAllocator();
 

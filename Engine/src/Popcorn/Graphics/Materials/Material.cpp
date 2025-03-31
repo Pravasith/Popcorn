@@ -5,7 +5,7 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-void Material::LoadShaders() {
+template <> void Material<MaterialTypes::BasicMat>::LoadShaders() {
   PC_WARN("BUFFER: Shader files are loaded here -- expensive if not handled "
           "properly")
   m_shaders.reserve(m_materialData.shaderFiles.size());

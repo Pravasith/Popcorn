@@ -138,6 +138,8 @@ public:
   static VertexBuffer *Create();
   static void Destroy(VertexBuffer *);
 
+  void Allocate(uint64_t size) { m_buffer.Resize(size); };
+
   // COPY CONSTRUCTOR
   VertexBuffer(const VertexBuffer &other) {
     PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Constr,
@@ -206,6 +208,8 @@ public:
 
   const uint64_t GetSize() const { return m_buffer.GetSize(); };
   const uint64_t GetCount() const { return m_buffer.GetCount(); };
+
+  void Allocate(uint64_t size) { m_buffer.Resize(size); };
 
   void Fill(std::initializer_list<T> elements) { m_buffer.SetData(elements); };
 
