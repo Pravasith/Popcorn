@@ -19,6 +19,7 @@ private:
   virtual void SetType(MaterialTypes matType) override {
     m_type = MaterialTypes::BasicMat;
   };
+
   // FOR VULKAN -- Create basic material's descriptor set layout
   // Each type of material can only have one DSet layout(mostly)
 };

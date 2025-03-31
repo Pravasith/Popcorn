@@ -46,6 +46,7 @@ public:
 
   void SetParent(GameObject *gameObj) {
     PC_ASSERT(!m_parent, "Game object already has a parent!");
+    m_parent = gameObj;
   };
 
   void AddChild(GameObject *gameObj) {
