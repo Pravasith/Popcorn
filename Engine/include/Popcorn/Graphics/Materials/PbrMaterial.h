@@ -6,19 +6,20 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-class BasicMaterial : public Material {
+class PbrMaterial : public Material {
 public:
-  BasicMaterial() { PC_PRINT("CREATED", TagType::Constr, "BasicMaterial.h"); };
-  virtual ~BasicMaterial() override {
-    PC_PRINT("DESTROYED", TagType::Destr, "BasicMaterial.h");
+  PbrMaterial() { PC_PRINT("CREATED", TagType::Constr, "PbrMaterial.h"); };
+  virtual ~PbrMaterial() override {
+    PC_PRINT("DESTROYED", TagType::Destr, "PbrMaterial.h");
   };
 
   virtual void SetData(const MaterialData &materialData) override {};
 
 private:
   virtual void SetType(MaterialTypes matType) override {
-    m_type = MaterialTypes::BasicMat;
+    m_type = MaterialTypes::PbrMat;
   };
+
   // FOR VULKAN -- Create basic material's descriptor set layout
   // Each type of material can only have one DSet layout(mostly)
 };

@@ -3,7 +3,6 @@
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
-#include <algorithm>
 #include <glm/glm.hpp>
 #include <vector>
 
@@ -35,106 +34,68 @@ enum ShaderStages {
 };
 
 struct MaterialData {
-  //
   int enabledShadersMask = 0;
   std::vector<const char *> shaderFiles{};
-
-  //
   bool doubleSided = false;
-  // bool hasBaseColorTexture = false;
-  // bool hasNormalTexture = false;
-  // bool hasMetallicRoughnessTexture = false;
-  float metallicFactor = 1.0f;
-  float roughnessFactor = 1.0f;
-  float alphaCutoff = 0.5f;
+
+protected:
+  MaterialData();
+  ~MaterialData();
+};
+
+struct BasicMaterialData : public MaterialData {
   glm::vec4 baseColorFactor = glm::vec4(1.0f);
 };
 
-template <MaterialTypes T> class Material {
-public:
-  static constexpr MaterialTypes materialType_value = T;
+struct PbrMaterialData : public MaterialData {
+  glm::vec4 baseColorFactor = glm::vec4(1.0f);
+  float metallicFactor = 1.0f;
+  float roughnessFactor = 1.0f;
+  float alphaCutoff = 0.5f;
+  bool hasBaseColorTexture = false;
+  bool hasNormalTexture = false;
+  bool hasMetallicRoughnessTexture = false;
+};
 
-  Material(MaterialData &matData) : m_materialData(matData) {
+class Material {
+public:
+  Material() {
     PC_PRINT("CREATED", TagType::Constr, "Material.h");
     LoadShaders();
   };
-
   virtual ~Material() { PC_PRINT("DESTROYED", TagType::Destr, "Material.h"); };
 
-  [[nodiscard]] inline std::vector<Buffer> &GetShaders() { return m_shaders; };
-  virtual void Bind() = 0;
+  [[nodiscard]] inline const std::vector<Buffer> &GetShaders() const {
+    return m_shaders;
+  };
+  [[nodiscard]] const MaterialTypes &GetType() {
+    if (m_type != MaterialTypes::BasicMat | m_type != MaterialTypes::PbrMat) {
+      PC_ERROR("Material type not set!", "Material")
+    };
+
+    return m_type;
+  };
+
+  void LoadShaders();
+  virtual void SetData(const MaterialData &materialData) = 0;
 
 private:
-  void LoadShaders();
+  virtual void SetType(MaterialTypes matType) = 0;
 
 protected:
-  MaterialData &m_materialData;
+  MaterialData *m_materialData;
+  MaterialTypes m_type;
   std::vector<Buffer> m_shaders;
 };
 
 //
 //
 // ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-// --- UTIL FUNCTIONS ---------------------------------------------------------
-
-template <MaterialTypes T>
-void PC_ValidateAndAddMaterial(Material<T> *materialPtr,
-                               std::vector<Material<T> *> &materials) {
-  auto ptr = std::find(materials.begin(), materials.end(), materialPtr);
-
-  if (ptr != materials.end()) {
-    PC_WARN("Material already exists in the material library!")
-    return;
-  };
-
-  materials.emplace_back(materialPtr);
-};
-
-template <MaterialTypes T>
-void PC_ValidateAndRemoveMaterial(Material<T> *materialPtr,
-                                  std::vector<Material<T> *> &materials) {
-  auto ptr = std::find(materials.begin(), materials.end(), materialPtr);
-
-  if (ptr == materials.end()) {
-    PC_WARN("Material not found!")
-    return;
-  };
-
-  materials.erase(ptr);
-};
-
-template <MaterialTypes T>
-void PC_AddMaterialByType(Material<T> *materialPtr,
-                          std::vector<Material<T> *> &materials) {
-  switch (materialPtr->GetMaterialType()) {
-  case Popcorn::Gfx::MaterialTypes::BasicMat: {
-    PC_ValidateAndAddMaterial(materialPtr, materials);
-    break;
-  }
-  case Popcorn::Gfx::MaterialTypes::PbrMat: {
-    break;
-  }
-  default:
-    PC_WARN("material type not found") { break; }
-  }
-}
-
-template <MaterialTypes T>
-void PC_RemoveMaterialByType(Material<T> *materialPtr,
-                             std::vector<Material<T> *> &materials) {
-  switch (materialPtr->GetMaterialType()) {
-  case Popcorn::Gfx::MaterialTypes::BasicMat: {
-    PC_ValidateAndRemoveMaterial(materialPtr, materials);
-    break;
-  }
-  case Popcorn::Gfx::MaterialTypes::PbrMat: {
-    break;
-  }
-  default:
-    PC_WARN("material type not found") { break; }
-  }
-}
+// --- UTIL FUNCTIONS (GLOBAL) ------------------------------------------------
+void PC_ValidateAndAddMaterial(Material *materialPtr,
+                               std::vector<Material *> &materials);
+void PC_ValidateAndRemoveMaterial(Material *materialPtr,
+                                  std::vector<Material *> &materials);
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

@@ -20,8 +20,8 @@ public:
   };
 
   // Adds a node
-  void AddNode(GameObject *node);
-  void RemoveNode(GameObject *node);
+  void AddGameObject(GameObject *node);
+  void RemoveGameObject(GameObject *node);
 
   // Update nodes
   void Update();

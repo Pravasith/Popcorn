@@ -61,6 +61,38 @@ public:
 
   virtual void AddMeshToWorkflow(Mesh *mesh) {};
 
+  // UTILS
+  template <MaterialTypes T> void AddMaterialByType(Material<T> *materialPtr) {
+    switch (materialPtr->GetMaterialType()) {
+    case Popcorn::Gfx::MaterialTypes::BasicMat: {
+      PC_ValidateAndAddMaterial(materialPtr, m_basicMaterials);
+      break;
+    }
+    case Popcorn::Gfx::MaterialTypes::PbrMat: {
+      PC_ValidateAndAddMaterial(materialPtr, m_pbrMaterials);
+      break;
+    }
+    default:
+      PC_WARN("material type not found") { break; }
+    }
+  }
+
+  template <MaterialTypes T>
+  void RemoveMaterialByType(Material<T> *materialPtr) {
+    switch (materialPtr->GetMaterialType()) {
+    case Popcorn::Gfx::MaterialTypes::BasicMat: {
+      PC_ValidateAndRemoveMaterial(materialPtr, m_basicMaterials);
+      break;
+    }
+    case Popcorn::Gfx::MaterialTypes::PbrMat: {
+      PC_ValidateAndRemoveMaterial(materialPtr, m_pbrMaterials);
+      break;
+    }
+    default:
+      PC_WARN("material type not found") { break; }
+    }
+  }
+
   template <MaterialTypes T> void RegisterMaterial(Material<T> *materialPtr) {
     PC_AddMaterialByType(materialPtr, m_basicMaterials);
   }
@@ -72,8 +104,8 @@ public:
 protected:
   std::vector<Mesh *> m_meshes;
 
-  // All different kinds of meshes
   std::vector<Material<MaterialTypes::BasicMat> *> m_basicMaterials;
+  std::vector<Material<MaterialTypes::PbrMat> *> m_pbrMaterials;
 
   PipelineFactoryVk *m_pipelineFactory;
 };

@@ -4,6 +4,7 @@
 #include "BufferObjects.h"
 #include "GlobalMacros.h"
 #include "Helpers.h"
+#include "Material.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -77,7 +78,7 @@ void GltfLoader::ProcessGLTFNode(const tinygltf::Model &model,
     }
   }
 
-  glm::mat4 worldMatrix = parentMatrix * nodeMatrix;
+  // glm::mat4 worldMatrix = parentMatrix * nodeMatrix;
 
   // Process mesh if this node has one
   if (node.mesh >= 0 && node.mesh < model.meshes.size()) {
@@ -85,25 +86,31 @@ void GltfLoader::ProcessGLTFNode(const tinygltf::Model &model,
 
     // gltfMesh.primitives are submeshes
     for (const auto &primitive : gltfMesh.primitives) {
+      Mesh *mesh;
       VertexBuffer *vertexBuffer;
       IndexBuffer<uint16_t> *indexBuffer;
-      Mesh::Uniforms uniform;
+      Mesh::Uniforms meshUniform;
+      Material *material;
+      MaterialData *materialData;
 
-      // Extract vertex data
+      // Extract vertex buffer
       // TODO: for tomorrow: transfer the vertexbuffer ownership to Mesh &
       // handle cleanup logic in the Mesh
       vertexBuffer = ExtractVertexBuffer(model, primitive);
 
-      // Extract index data
+      // Extract index buffer
       indexBuffer = ExtractIndexBuffer(model, primitive);
 
-      // Extract material
-      // if (primitive.material >= 0) {
-      //   extractMaterialData(model, model.materials[primitive.material],
-      //                       extractedMesh.material);
-      // }
-      Mesh *mesh = new Mesh(vertexBuffer, indexBuffer);
-      mesh->SetModelMatrix(worldMatrix);
+      // Extract material data
+      if (primitive.material >= 0) {
+        ExtractMaterialData(model, model.materials[primitive.material],
+                            materialData);
+        // Set material
+      }
+
+      mesh = new Mesh(vertexBuffer, indexBuffer, material);
+      // TODO: Set this correctly
+      mesh->SetMatrix(nodeMatrix);
 
       meshes.push_back(mesh);
     }
@@ -111,9 +118,40 @@ void GltfLoader::ProcessGLTFNode(const tinygltf::Model &model,
 
   // Process child nodes
   for (int child : node.children) {
-    ProcessGLTFNode(model, model.nodes[child], worldMatrix, meshes);
+    // TODO: Set matrix properly
+    // ProcessGLTFNode(model, model.nodes[child], worldMatrix, meshes);
   }
 }
+
+void GltfLoader::ExtractMaterialData(const tinygltf::Model &model,
+                                     const tinygltf::Material &material,
+                                     MaterialData *materialData) {
+  // Valora is a sick name for a videogame character
+  // Base color factor
+  const auto &pbrMetallicRoughness = material.pbrMetallicRoughness;
+
+  // Determine if the material is PBR-based
+  bool isPBR = pbrMetallicRoughness.metallicFactor > 0.0f ||
+               pbrMetallicRoughness.roughnessFactor > 0.0f ||
+               material.normalTexture.index != -1 ||
+               material.occlusionTexture.index != -1;
+
+  // struct BasicMaterialData : public MaterialData {
+  //   glm::vec4 baseColorFactor = glm::vec4(1.0f);
+  // };
+
+  // struct PbrMaterialData : public MaterialData {
+  //   bool hasBaseColorTexture = false;
+  //   bool hasNormalTexture = false;
+  //   bool hasMetallicRoughnessTexture = false;
+  //   float metallicFactor = 1.0f;
+  //   float roughnessFactor = 1.0f;
+  //   float alphaCutoff = 0.5f;
+  //   glm::vec4 baseColorFactor = glm::vec4(1.0f);
+  // };
+
+  // Reinterpret cast for MaterialData accordingly based on material's values
+};
 
 VertexBuffer *
 GltfLoader::ExtractVertexBuffer(const tinygltf::Model &model,

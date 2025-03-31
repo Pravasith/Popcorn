@@ -26,12 +26,15 @@ Scene::~Scene() {
 };
 
 // Adds a node
-void Scene::AddNode(GameObject *node) {
-  node->OnAttach();
-  m_nodes.push_back(node);
+void Scene::AddGameObject(GameObject *node) {
+  auto it = std::find(m_nodes.begin(), m_nodes.end(), node);
+  if (it == m_nodes.end()) {
+    m_nodes.push_back(node);
+    node->OnAttach();
+  };
 };
 
-void Scene::RemoveNode(GameObject *node) {
+void Scene::RemoveGameObject(GameObject *node) {
   auto it = std::find(m_nodes.begin(), m_nodes.end(), node);
   if (it != m_nodes.end()) {
     m_nodes.erase(it);

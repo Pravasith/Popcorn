@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Material.h"
 #include "Mesh.h"
 #include <cstdint>
 #ifndef TINYGLTF_IMPLEMENTATION
@@ -39,11 +40,13 @@ public:
   ExtractGltfMeshes(const tinygltf::Model &model);
 
 private:
+  // GltfLoader() { PC_PRINT("CREATED", TagType::Constr, "GltfLoader.h"); };
+  // ~GltfLoader() { PC_PRINT("DESTROYED", TagType::Destr, "GltfLoader.h"); };
   //
   // --- UTILS -----------------------------------------------------------------
 
-  //
   // Converts tinygltf meshes to Mesh* vector
+  // Important: The ownership of meshes array belongs to the caller
   static void ProcessGLTFNode(const tinygltf::Model &model,
                               const tinygltf::Node &node,
                               const glm::mat4 &parentMatrix,
@@ -54,6 +57,9 @@ private:
   [[nodiscard]] static IndexBuffer<uint16_t> *
   ExtractIndexBuffer(const tinygltf::Model &model,
                      const tinygltf::Primitive &primitive);
+  static void ExtractMaterialData(const tinygltf::Model &model,
+                                  const tinygltf::Material &tinygltfMaterial,
+                                  MaterialData *materialData);
 };
 
 GFX_NAMESPACE_END

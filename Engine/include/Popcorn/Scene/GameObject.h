@@ -2,6 +2,7 @@
 
 #include "GlobalMacros.h"
 #include "MathConstants.h"
+#include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
 #include <cmath>
 #include <cstdint>
@@ -27,6 +28,13 @@ class GameObject {
 public:
   GameObject() { PC_PRINT("CREATED", TagType::Constr, "GameObject"); };
   virtual ~GameObject() {
+    // Recursively deletes sub-children
+    for (auto &child : m_children) {
+      child->m_parent = nullptr;
+      delete child;
+      child = nullptr;
+    }
+
     PC_PRINT("DESTROYED", TagType::Destr, "GameObject");
   };
 
@@ -35,6 +43,32 @@ public:
   virtual void OnAttach() = 0;
   virtual void OnUpdate() = 0;
   virtual void OnRender() = 0;
+
+  void SetParent(GameObject *gameObj) {
+    PC_ASSERT(!m_parent, "Game object already has a parent!");
+  };
+
+  void AddChild(GameObject *gameObj) {
+    if (std::find(m_children.begin(), m_children.end(), gameObj) !=
+        m_children.end()) {
+      PC_WARN("GameObject " << gameObj << "already added as a child")
+    } else {
+      gameObj->m_parent = this;
+      m_children.push_back(gameObj);
+    };
+  };
+
+  void DeleteChild(GameObject *gameObj) {
+    auto it = std::find(m_children.begin(), m_children.end(), gameObj);
+    if (it != m_children.end()) {
+      gameObj->m_parent = nullptr;
+      m_children.erase(it);
+      delete gameObj;
+      gameObj = nullptr;
+    } else {
+      PC_WARN("GameObject " << gameObj << "not found, hence not deleted")
+    };
+  };
 
   inline void RotateX(float radians) {
     m_rotationEuler.x += radians;
@@ -57,6 +91,7 @@ public:
   }
 
   const glm::mat4 &GetMatrix() const { return m_matrix; }
+  void SetMatrix(glm::mat4 matrix) { m_matrix = matrix; };
 
 private:
   void UpdatePositionMatrix() {
@@ -73,6 +108,9 @@ private:
   }
 
 protected:
+  GameObject *m_parent = nullptr;
+  std::vector<GameObject *> m_children;
+
   glm::vec3 m_position = {0, 0, 0};
   glm::vec3 m_rotationEuler = {0, 0, 0};
   glm::mat4 m_translationMatrix = PC_IDENTITY_MAT4;

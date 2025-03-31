@@ -228,11 +228,16 @@ void BasicRenderWorkflowVk::AddMeshToWorkflow(Mesh *mesh) {
   };
 
   m_meshes.emplace_back(mesh);
-  auto &materials = mesh->GetMaterialsByType<MaterialTypes::BasicMat>();
+  auto &basicMaterials = mesh->GetMaterialsByType<MaterialTypes::BasicMat>();
+  auto &pbrMaterials = mesh->GetMaterialsByType<MaterialTypes::PbrMat>();
 
   // Each material can potentially have the same material type but different
   // descriptor sets (shaders, textures ..etc)
-  for (auto &material : materials) {
+  for (auto &material : basicMaterials) {
+    RegisterMaterial(material);
+  }
+
+  for (auto &material : pbrMaterials) {
     RegisterMaterial(material);
   }
 }
