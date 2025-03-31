@@ -48,7 +48,7 @@ To create a application/game with Popcorn engine, simply copy any example sandbo
 The API for usage looks like this (in this example, we are making a simple rotating cube) -
 You can create `Layer`s and use the useful methods like `OnEvent()`, `OnUpdate()` and `OnRender()` methods
 
-```
+```cpp
 using namespace Popcorn;
 
 class GameLayer : public Layer {
