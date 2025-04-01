@@ -2,6 +2,7 @@
 #include "Assert.h"
 #include "Base.h"
 #include "BufferObjects.h"
+#include "GameObject.h"
 #include "GlobalMacros.h"
 #include "Helpers.h"
 #include "Material.h"
@@ -37,15 +38,11 @@ bool GltfLoader::LoadFromFile(const std::string &filename,
   return ret;
 };
 
-std::vector<Mesh *>
-GltfLoader::ExtractGltfMeshes(const tinygltf::Model &model) {
-  std::vector<Mesh *> meshes;
-
+void GltfLoader::ExtractGltfMeshes(const tinygltf::Model &model,
+                                   std::vector<Mesh> &meshes) {
   for (const auto &node : model.nodes) {
-    ProcessGLTFNodeTree(model, node, glm::mat4(1.0f), meshes);
+    ProcessGLTFNodeTree(model, node, meshes);
   }
-
-  return meshes;
 };
 
 void GltfLoader::CalculateNodeMatrix(const tinygltf::Node &node,
@@ -76,55 +73,47 @@ void GltfLoader::CalculateNodeMatrix(const tinygltf::Node &node,
   }
 };
 
-void GltfLoader::ProcessGLTFNodeTree(const tinygltf::Model &model,
-                                     const tinygltf::Node &parentNode,
-                                     std::vector<Mesh *> &meshes) {
+void GltfLoader::ConvertToGameObjectSubtree(const tinygltf::Model &model,
+                                            const tinygltf::Node &gltfObjNode,
+                                            GameObject &gameObjNode) {
   // glm::mat4 worldMatrix = parentMatrix * nodeMatrix;
+  glm::mat4 modelMatrix(1.0f);
+  CalculateNodeMatrix(gltfObjNode, modelMatrix);
+  gameObjNode.SetMatrix(modelMatrix);
 
   // Process mesh if this node is one
-  if (parentNode.mesh >= 0 && parentNode.mesh < model.meshes.size()) {
-    const auto &gltfMesh = model.meshes[parentNode.mesh];
-    std::vector<Mesh *> submeshes;
+  if (gltfObjNode.mesh >= 0 && gltfObjNode.mesh < model.meshes.size()) {
+    const auto &gltfMesh = model.meshes[gltfObjNode.mesh];
+    Mesh mesh;
 
     // gltfMesh.primitives are submeshes
     for (const auto &primitive : gltfMesh.primitives) {
-      Mesh *mesh;
-      VertexBuffer *vertexBuffer;
-      IndexBuffer<uint16_t> *indexBuffer;
-      Mesh::Uniforms meshUniform;
-      Material *material;
-      MaterialData *materialData;
+      VertexBuffer *vbo;
+      IndexBuffer<uint16_t> *ibo;
+      MaterialData *matData;
+      Material *mat;
 
       // Extract vertex buffer
-      // TODO: for tomorrow: transfer the vertexbuffer ownership to Mesh &
-      // handle cleanup logic in the Mesh
-      vertexBuffer = ExtractVertexBuffer(model, primitive);
+      vbo = ExtractVertexBuffer(model, primitive);
 
       // Extract index buffer
-      indexBuffer = ExtractIndexBuffer(model, primitive);
+      ibo = ExtractIndexBuffer(model, primitive);
 
       // Extract material data
       if (primitive.material >= 0) {
         ExtractMaterialData(model, model.materials[primitive.material],
-                            materialData);
-        // Set material
+                            matData);
+        // TODO: Create material
       }
 
-      mesh = new Mesh(vertexBuffer, indexBuffer, material);
-      // TODO: Set this correctly
-
-      glm::mat4 meshMatrix(1.0f);
-      CalculateNodeMatrix(parentNode, meshMatrix);
-      mesh->SetMatrix(meshMatrix);
-
-      meshChildren.push_back(mesh);
+      mesh.AddSubmesh(vbo, ibo, mat);
     }
+
+    gameObjNode = std::move(mesh);
   }
 
-  // Process child parentNodes
-  for (int child : parentNode.children) {
-    // TODO: Set matrix properly
-    // ProcessGLTFNode(model, model.nodes[child], worldMatrix, meshes);
+  for (int child : gltfObjNode.children) {
+    ConvertToGameObjectSubtree(model, model.nodes[child], gameObjNode);
   }
 }
 

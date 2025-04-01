@@ -2,7 +2,6 @@
 
 #include "GlobalMacros.h"
 #include "MathConstants.h"
-#include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
 #include <cmath>
 #include <cstdint>
@@ -26,17 +25,59 @@ enum class GameObjectTypes {
 
 class GameObject {
 public:
-  GameObject() { PC_PRINT("CREATED", TagType::Constr, "GameObject"); };
+  GameObject() { PC_PRINT("CREATED", TagType::Constr, "GameObject"); }
   virtual ~GameObject() {
-    // Recursively deletes sub-children
-    for (auto &child : m_children) {
+
+    // Safely delete children
+    for (auto child : m_children) {
       child->m_parent = nullptr;
-      delete child;
-      child = nullptr;
+      delete child; // Calls child's destructor, ensuring it cleans itself up
     }
+    m_children.clear(); // Avoids dangling pointers
 
     PC_PRINT("DESTROYED", TagType::Destr, "GameObject");
-  };
+  }
+
+  // Prevent accidental copies (dangerous due to raw pointers)
+  GameObject(const GameObject &) = delete;
+  GameObject &operator=(const GameObject &) = delete;
+
+  // MOVE CONSTRUCTOR
+  GameObject(GameObject &&other) noexcept {
+    m_parent = other.m_parent;
+    m_children = std::move(other.m_children);
+    m_position = other.m_position;
+    m_rotationEuler = other.m_rotationEuler;
+    m_translationMatrix = other.m_translationMatrix;
+    m_rotationMatrix = other.m_rotationMatrix;
+    m_localMatrix = other.m_localMatrix;
+    m_worldMatrix = other.m_worldMatrix;
+
+    other.m_parent = nullptr;
+    other.m_children.clear();
+  }
+
+  // COPY CONSTRUCTOR
+  GameObject &operator=(GameObject &&other) noexcept {
+    if (this != &other) {
+      for (auto child : m_children)
+        delete child;
+      m_children.clear();
+
+      m_parent = other.m_parent;
+      m_children = std::move(other.m_children);
+      m_position = other.m_position;
+      m_rotationEuler = other.m_rotationEuler;
+      m_translationMatrix = other.m_translationMatrix;
+      m_rotationMatrix = other.m_rotationMatrix;
+      m_localMatrix = other.m_localMatrix;
+      m_worldMatrix = other.m_worldMatrix;
+
+      other.m_parent = nullptr;
+      other.m_children.clear();
+    }
+    return *this;
+  }
 
   virtual constexpr GameObjectTypes GetType() const = 0;
 
@@ -44,60 +85,29 @@ public:
   virtual void OnUpdate() = 0;
   virtual void OnRender() = 0;
 
-  void SetParent(GameObject *gameObj) {
-    PC_ASSERT(!m_parent, "Game object already has a parent!");
-    m_parent = gameObj;
-  };
+  void SetParent(GameObject *gameObj);
+  void AddChild(GameObject *gameObj);
+  void DeleteChild(GameObject *gameObj);
 
-  void AddChild(GameObject *gameObj) {
-    if (std::find(m_children.begin(), m_children.end(), gameObj) !=
-        m_children.end()) {
-      PC_WARN("GameObject " << gameObj << "already added as a child")
-    } else {
-      gameObj->m_parent = this;
-      m_children.push_back(gameObj);
-    };
-  };
+  void SetPosition(glm::vec3 pos);
 
-  void DeleteChild(GameObject *gameObj) {
-    auto it = std::find(m_children.begin(), m_children.end(), gameObj);
-    if (it != m_children.end()) {
-      gameObj->m_parent = nullptr;
-      m_children.erase(it);
-      delete gameObj;
-      gameObj = nullptr;
-    } else {
-      PC_WARN("GameObject " << gameObj << "not found, hence not deleted")
-    };
-  };
+  void RotateX(float radians);
+  void RotateY(float radians);
+  void RotateZ(float radians);
 
-  inline void RotateX(float radians) {
-    m_rotationEuler.x += radians;
-    UpdateRotationMatrix();
+  [[nodiscard]] const glm::mat4 &GetLocalMatrix() const {
+    return m_localMatrix;
   }
 
-  inline void RotateY(float radians) {
-    m_rotationEuler.y += radians;
-    UpdateRotationMatrix();
+  void SetLocalMatrix(glm::mat4 mat) {
+    m_localMatrix = mat;
+    UpdateChildren();
   }
-
-  inline void RotateZ(float radians) {
-    m_rotationEuler.z += radians;
-    UpdateRotationMatrix();
-  }
-
-  inline void SetPosition(glm::vec3 pos) {
-    m_position = pos;
-    UpdatePositionMatrix();
-  }
-
-  const glm::mat4 &GetMatrix() const { return m_matrix; }
-  void SetMatrix(glm::mat4 matrix) { m_matrix = matrix; };
 
 private:
   void UpdatePositionMatrix() {
     m_translationMatrix = glm::translate(PC_IDENTITY_MAT4, m_position);
-    m_matrix = m_translationMatrix * m_rotationMatrix;
+    m_localMatrix = m_translationMatrix * m_rotationMatrix;
   }
 
   void UpdateRotationMatrix() {
@@ -105,7 +115,16 @@ private:
         glm::rotate(PC_IDENTITY_MAT4, m_rotationEuler.x, {1, 0, 0}) *
         glm::rotate(PC_IDENTITY_MAT4, m_rotationEuler.y, {0, 1, 0}) *
         glm::rotate(PC_IDENTITY_MAT4, m_rotationEuler.z, {0, 0, 1});
-    m_matrix = m_rotationMatrix * m_translationMatrix;
+    m_localMatrix = m_rotationMatrix * m_translationMatrix;
+  }
+
+  void UpdateChildren() {
+    for (auto *child : m_children) {
+      if (child) {
+        child->m_worldMatrixNeedsUpdate = true;
+        child->UpdateChildren();
+      }
+    }
   }
 
 protected:
@@ -116,7 +135,11 @@ protected:
   glm::vec3 m_rotationEuler = {0, 0, 0};
   glm::mat4 m_translationMatrix = PC_IDENTITY_MAT4;
   glm::mat4 m_rotationMatrix = PC_IDENTITY_MAT4;
-  glm::mat4 m_matrix = PC_IDENTITY_MAT4;
+
+  glm::mat4 m_localMatrix = PC_IDENTITY_MAT4;
+  glm::mat4 m_worldMatrix = PC_IDENTITY_MAT4;
+
+  mutable bool m_worldMatrixNeedsUpdate = false;
 };
 
 GFX_NAMESPACE_END

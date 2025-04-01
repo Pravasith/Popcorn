@@ -36,8 +36,8 @@ public:
   static bool LoadFromFile(const std::string &filename, tinygltf::Model &model);
 
   // tinygltf Model -> Meshes (vector)
-  [[nodiscard]] static std::vector<Mesh *>
-  ExtractGltfMeshes(const tinygltf::Model &model);
+  static void ExtractGltfMeshes(const tinygltf::Model &model,
+                                std::vector<Mesh> &meshes);
 
 private:
   // GltfLoader() { PC_PRINT("CREATED", TagType::Constr, "GltfLoader.h"); };
@@ -49,7 +49,10 @@ private:
   // Important: The ownership of meshes array belongs to the caller
   static void ProcessGLTFNodeTree(const tinygltf::Model &model,
                                   const tinygltf::Node &parentNode,
-                                  std::vector<Mesh *> &meshes);
+                                  std::vector<Mesh> &meshes);
+  static void ConvertToGameObjectSubtree(const tinygltf::Model &model,
+                                         const tinygltf::Node &gltfObjNode,
+                                         GameObject &gameObjNode);
   [[nodiscard]] static VertexBuffer *
   ExtractVertexBuffer(const tinygltf::Model &model,
                       const tinygltf::Primitive &primitive);
