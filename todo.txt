@@ -1,20 +1,18 @@
 
 
+
 --- TASKS ------------------------------------------------------------------
 ----------------------------------------------------------------------------
 
 --- 18 Feb ------------------------------------ X
 --- 04 Mar ------------------------------------
 
-:: Implement descriptor sets
-:: Transform matrices, UBOs
-:: Check that Time class works correctly
-:: Shader uniforms
-:: Implement camera
-:: Textures & model loaders
+:: Parent child conversion gltf models -> popcorn models
+:: Material extraction
+:: Refactor Renderflow (Vertex & index memories, descriptors)
+:: Show blender scene in Popcorn
 
 :: Make a central DB for all Vulkan resources
-:: Add VMA (Vulkan Memory Allocator) library to the project
 
 
 :: Make all singletons stack allocated with static local variables

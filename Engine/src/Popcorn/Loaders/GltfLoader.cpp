@@ -42,47 +42,49 @@ GltfLoader::ExtractGltfMeshes(const tinygltf::Model &model) {
   std::vector<Mesh *> meshes;
 
   for (const auto &node : model.nodes) {
-    ProcessGLTFNode(model, node, glm::mat4(1.0f), meshes);
+    ProcessGLTFNodeTree(model, node, glm::mat4(1.0f), meshes);
   }
 
   return meshes;
 };
 
-void GltfLoader::ProcessGLTFNode(const tinygltf::Model &model,
-                                 const tinygltf::Node &node,
-                                 const glm::mat4 &parentMatrix,
-                                 std::vector<Mesh *> &meshes) {
-  // Calculate current node's transformation matrix
-  glm::mat4 nodeMatrix = glm::mat4(1.0f);
+void GltfLoader::CalculateNodeMatrix(const tinygltf::Node &node,
+                                     glm::mat4 &outMatrix) {
+  outMatrix = glm::mat4(1.0f);
 
   if (!node.matrix.empty()) {
     // Node has an explicit matrix
-    nodeMatrix = glm::make_mat4(node.matrix.data());
+    outMatrix = glm::make_mat4(node.matrix.data());
   } else {
     // Apply TRS components
     if (!node.translation.empty()) {
-      nodeMatrix = glm::translate(nodeMatrix, glm::vec3(node.translation[0],
-                                                        node.translation[1],
-                                                        node.translation[2]));
+      outMatrix = glm::translate(outMatrix, glm::vec3(node.translation[0],
+                                                      node.translation[1],
+                                                      node.translation[2]));
     }
 
     if (!node.rotation.empty()) {
       glm::quat q(node.rotation[3], node.rotation[0], node.rotation[1],
                   node.rotation[2]);
-      nodeMatrix *= glm::mat4_cast(q);
+      outMatrix *= glm::mat4_cast(q);
     }
 
     if (!node.scale.empty()) {
-      nodeMatrix = glm::scale(
-          nodeMatrix, glm::vec3(node.scale[0], node.scale[1], node.scale[2]));
+      outMatrix = glm::scale(
+          outMatrix, glm::vec3(node.scale[0], node.scale[1], node.scale[2]));
     }
   }
+};
 
+void GltfLoader::ProcessGLTFNodeTree(const tinygltf::Model &model,
+                                     const tinygltf::Node &parentNode,
+                                     std::vector<Mesh *> &meshes) {
   // glm::mat4 worldMatrix = parentMatrix * nodeMatrix;
 
-  // Process mesh if this node has one
-  if (node.mesh >= 0 && node.mesh < model.meshes.size()) {
-    const auto &gltfMesh = model.meshes[node.mesh];
+  // Process mesh if this node is one
+  if (parentNode.mesh >= 0 && parentNode.mesh < model.meshes.size()) {
+    const auto &gltfMesh = model.meshes[parentNode.mesh];
+    std::vector<Mesh *> submeshes;
 
     // gltfMesh.primitives are submeshes
     for (const auto &primitive : gltfMesh.primitives) {
@@ -110,14 +112,17 @@ void GltfLoader::ProcessGLTFNode(const tinygltf::Model &model,
 
       mesh = new Mesh(vertexBuffer, indexBuffer, material);
       // TODO: Set this correctly
-      mesh->SetMatrix(nodeMatrix);
 
-      meshes.push_back(mesh);
+      glm::mat4 meshMatrix(1.0f);
+      CalculateNodeMatrix(parentNode, meshMatrix);
+      mesh->SetMatrix(meshMatrix);
+
+      meshChildren.push_back(mesh);
     }
   }
 
-  // Process child nodes
-  for (int child : node.children) {
+  // Process child parentNodes
+  for (int child : parentNode.children) {
     // TODO: Set matrix properly
     // ProcessGLTFNode(model, model.nodes[child], worldMatrix, meshes);
   }
@@ -126,7 +131,9 @@ void GltfLoader::ProcessGLTFNode(const tinygltf::Model &model,
 void GltfLoader::ExtractMaterialData(const tinygltf::Model &model,
                                      const tinygltf::Material &material,
                                      MaterialData *materialData) {
-  // Valora is a sick name for a videogame character
+  //
+  // Random thought: Valora is a sick name for a videogame character
+  //
   // Base color factor
   const auto &pbrMetallicRoughness = material.pbrMetallicRoughness;
 

@@ -47,10 +47,9 @@ private:
 
   // Converts tinygltf meshes to Mesh* vector
   // Important: The ownership of meshes array belongs to the caller
-  static void ProcessGLTFNode(const tinygltf::Model &model,
-                              const tinygltf::Node &node,
-                              const glm::mat4 &parentMatrix,
-                              std::vector<Mesh *> &meshes);
+  static void ProcessGLTFNodeTree(const tinygltf::Model &model,
+                                  const tinygltf::Node &parentNode,
+                                  std::vector<Mesh *> &meshes);
   [[nodiscard]] static VertexBuffer *
   ExtractVertexBuffer(const tinygltf::Model &model,
                       const tinygltf::Primitive &primitive);
@@ -60,6 +59,8 @@ private:
   static void ExtractMaterialData(const tinygltf::Model &model,
                                   const tinygltf::Material &tinygltfMaterial,
                                   MaterialData *materialData);
+  static void CalculateNodeMatrix(const tinygltf::Node &node,
+                                  glm::mat4 &outMatrix);
 };
 
 GFX_NAMESPACE_END
