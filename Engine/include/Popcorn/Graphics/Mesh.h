@@ -4,6 +4,7 @@
 #include "GameObject.h"
 #include "GlobalMacros.h"
 #include "Material.h"
+#include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
 #include <cstdint>
 #include <glm/fwd.hpp>
@@ -19,63 +20,66 @@ GFX_NAMESPACE_BEGIN
 
 class Submesh {
 public:
-  Submesh(VertexBuffer *vertexBuffer, IndexBuffer<uint16_t> *indexBuffer,
-          Material *material)
-      : m_vertexBuffer(vertexBuffer), m_indexBuffer(indexBuffer),
-        m_material(material) {
+  Submesh(VertexBuffer *vbo, IndexBuffer<uint16_t> *ibo, Material *mat)
+      : m_vertexBuffer(vbo), m_indexBuffer(ibo), m_material(mat) {
     PC_PRINT("CREATED", TagType::Constr, "Submesh");
-    m_id = PC_GetHashedSubmeshId(vertexBuffer, indexBuffer, material);
-  };
+    m_id = PC_GetHashedSubmeshId(vbo, ibo, mat);
+  }
   ~Submesh() {
-    if (m_vertexBuffer == nullptr || m_indexBuffer == nullptr ||
-        m_material == nullptr) {
-      PC_WARN("Either of the following are nullptr and so memory not deleted")
-      PC_PRINT("DESTROYED", TagType::Destr, "Submesh");
+    Cleanup();
+    PC_PRINT("DESTROYED", TagType::Destr, "Submesh");
+  }
 
-      return;
-    };
+  // DELETE COPY CONSTRUCTOR AND ASSIGNMENT
+  // Because this class deletes vbo, ibo, and mat data, disabling copy avoids
+  // dangling pointers
+  Submesh(const Submesh &) = delete;
+  Submesh &operator=(const Submesh &) = delete;
 
-    delete m_vertexBuffer;
-    m_vertexBuffer = nullptr;
+  //
+  // --- MOVE CONSTRUCTOR -----------------------------------------------------
+  Submesh(Submesh &&other) noexcept
+      : m_vertexBuffer(other.m_vertexBuffer),
+        m_indexBuffer(other.m_indexBuffer), m_material(other.m_material),
+        m_id(other.m_id) {
+    other.m_vertexBuffer = nullptr;
+    other.m_indexBuffer = nullptr;
+    other.m_material = nullptr;
+  }
 
-    delete m_indexBuffer;
-    m_indexBuffer = nullptr;
+  //
+  // --- MOVE ASSIGNMENT ------------------------------------------------------
+  Submesh &operator=(Submesh &&other) noexcept {
+    if (this != &other) {
+      Cleanup();
 
-    delete m_material;
-    m_material = nullptr;
+      m_vertexBuffer = other.m_vertexBuffer;
+      m_indexBuffer = other.m_indexBuffer;
+      m_material = other.m_material;
+      m_id = other.m_id;
 
-    PC_PRINT("DESTROYED", TagType::Destr, "MESH");
-  };
+      other.m_vertexBuffer = nullptr;
+      other.m_indexBuffer = nullptr;
+      other.m_material = nullptr;
+    }
+    return *this;
+  }
 
-  [[nodiscard]] inline const Material &GetMaterial() const {
-    if (m_material == nullptr) {
-      PC_ERROR("Trying to get a null m_material", "Mesh");
-    };
-    return *m_material;
-  };
-
-  [[nodiscard]] inline VertexBuffer &GetVertexBuffer() const {
-    if (m_vertexBuffer == nullptr) {
-      PC_ERROR("Trying to get a null m_vertexBuffer", "Mesh");
-    };
-    return *m_vertexBuffer;
-  };
-
-  // TODO: Change this to variant return type
-  [[nodiscard]] inline IndexBuffer<uint16_t> &GetIndexBuffer() const {
-    if (m_indexBuffer == nullptr) {
-      PC_ERROR("Trying to get a null m_indexBuffer", "Mesh");
-    };
-    return *m_indexBuffer;
-  };
-
-  [[nodiscard]] inline const uint32_t GetId() const { return m_id; };
+  [[nodiscard]] uint32_t GetId() const { return m_id; }
 
 private:
+  void Cleanup() {
+    if (m_vertexBuffer)
+      delete m_vertexBuffer;
+    if (m_indexBuffer)
+      delete m_indexBuffer;
+    if (m_material)
+      delete m_material;
+  }
+
   VertexBuffer *m_vertexBuffer = nullptr;
   IndexBuffer<uint16_t> *m_indexBuffer = nullptr;
   Material *m_material = nullptr;
-
   uint32_t m_id = 0;
 };
 
@@ -91,7 +95,7 @@ public:
     m_uniformBuffer.modelMatrix = m_matrix;
     PC_PRINT("CREATED", TagType::Constr, "MESH");
   };
-  ~Mesh() { PC_PRINT("DESTROYED", TagType::Destr, "MESH"); };
+  virtual ~Mesh() { PC_PRINT("DESTROYED", TagType::Destr, "MESH"); };
 
   virtual void OnAttach() override;
   virtual void OnUpdate() override;
@@ -103,17 +107,17 @@ public:
 
   [[nodiscard]] inline Uniforms &GetUniformBuffer() { return m_uniformBuffer; };
 
-  void AddSubmesh(VertexBuffer *vertexBuffer,
-                  IndexBuffer<uint16_t> *indexBuffer, Material *material) {
+  void AddSubmesh(VertexBuffer *vbo, IndexBuffer<uint16_t> *ibo,
+                  Material *mat) {
+    PC_ASSERT(vbo && ibo && mat, "Submesh parameter(s) nullptr");
+
     for (auto &submesh : m_submeshes) {
-      if (submesh.GetId() ==
-          PC_GetHashedSubmeshId(vertexBuffer, indexBuffer, material)) {
+      if (submesh.GetId() == PC_GetHashedSubmeshId(vbo, ibo, mat)) {
         PC_WARN("Identical submesh already exists in Mesh")
         return;
       };
     }
-
-    m_submeshes.emplace_back(vertexBuffer, indexBuffer, material);
+    m_submeshes.emplace_back(vbo, ibo, mat);
   };
 
 protected:
