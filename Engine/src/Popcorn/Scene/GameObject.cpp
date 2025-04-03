@@ -9,12 +9,16 @@ GFX_NAMESPACE_BEGIN
 
 constexpr glm::mat4 IDENTITY_MAT4 = glm::mat4(1.0);
 
+// Keeps transform
 void GameObject::SetParent(GameObject *gameObj) {
   if (m_parent) {
     PC_ERROR("GameObject already has a parent!", "GameObject");
     return;
   }
+
   m_parent = gameObj;
+  m_worldMatrixNeedsUpdate = true;
+  UpdateChildren();
 }
 
 void GameObject::AddChild(GameObject *gameObj) {
@@ -24,6 +28,9 @@ void GameObject::AddChild(GameObject *gameObj) {
     return;
   }
   gameObj->m_parent = this;
+  gameObj->m_worldMatrixNeedsUpdate = true;
+  gameObj->UpdateChildren();
+
   m_children.push_back(gameObj);
 }
 
@@ -31,7 +38,7 @@ void GameObject::DeleteChild(GameObject *gameObj) {
   auto it = std::find(m_children.begin(), m_children.end(), gameObj);
   if (it != m_children.end()) {
     gameObj->m_parent = nullptr;
-    delete *it;
+    delete *it; // Deletes gameObj->m_children[] too (recursively)
     m_children.erase(it);
   } else {
     PC_WARN("GameObject not found, hence not deleted");

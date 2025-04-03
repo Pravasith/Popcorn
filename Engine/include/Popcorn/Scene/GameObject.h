@@ -118,7 +118,10 @@ public:
     return m_localMatrix;
   }
   [[nodiscard]] const glm::mat4 &GetWorldMatrix() {
-    UpdateWorldMatrix();
+    if (m_worldMatrixNeedsUpdate) {
+      UpdateWorldMatrix(); // Recursive -- internally calls child's
+                           // GetWorldMatrix()
+    };
     return m_worldMatrix;
   }
 
@@ -134,10 +137,6 @@ private:
   };
 
   void UpdateWorldMatrix() {
-    if (!m_worldMatrixNeedsUpdate) {
-      return;
-    };
-
     if (m_parent) {
       m_worldMatrix = m_parent->GetWorldMatrix() * m_localMatrix;
     } else {
