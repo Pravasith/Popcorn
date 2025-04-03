@@ -97,6 +97,7 @@ public:
   virtual void OnRender() = 0;
 
   void SetParent(GameObject *gameObj);
+  void RemoveParent();
   void AddChild(GameObject *gameObj);
   void DeleteChild(GameObject *gameObj);
 

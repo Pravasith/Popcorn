@@ -21,6 +21,14 @@ void GameObject::SetParent(GameObject *gameObj) {
   UpdateChildren();
 }
 
+void GameObject::RemoveParent() {
+  if (m_parent != nullptr) {
+    m_parent = nullptr;
+    m_worldMatrixNeedsUpdate = true;
+    UpdateChildren();
+  };
+};
+
 void GameObject::AddChild(GameObject *gameObj) {
   if (std::find(m_children.begin(), m_children.end(), gameObj) !=
       m_children.end()) {
