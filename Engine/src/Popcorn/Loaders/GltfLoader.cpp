@@ -113,7 +113,7 @@ void GltfLoader::ConvertToGameObjectSubtree(const tinygltf::Model &model,
   }
 
   for (int child : gltfObjNode.children) {
-    ConvertToGameObjectSubtree(model, model.nodes[child], gameObjNode);
+    // ConvertToGameObjectSubtree(model, model.nodes[child], gameObjNode);
   }
 }
 

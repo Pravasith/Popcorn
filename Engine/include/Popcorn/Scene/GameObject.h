@@ -8,6 +8,7 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -23,11 +24,21 @@ enum class GameObjectTypes {
   // Camera,
 };
 
+enum class Axes { X = 1, Y, Z };
+enum class EulerOrder {
+  XYZ = 1,
+  XZY,
+  YXZ,
+  YZX,
+  ZXY,
+  ZYX,
+};
+enum class Transforms { Translate = 1, Rotate, Scale, Shear, Reflect };
+
 class GameObject {
 public:
   GameObject() { PC_PRINT("CREATED", TagType::Constr, "GameObject"); }
   virtual ~GameObject() {
-
     // Safely delete children
     for (auto child : m_children) {
       child->m_parent = nullptr;
@@ -57,7 +68,7 @@ public:
     other.m_children.clear();
   }
 
-  // COPY CONSTRUCTOR
+  // MOVE ASSIGNMENT
   GameObject &operator=(GameObject &&other) noexcept {
     if (this != &other) {
       for (auto child : m_children)
@@ -89,34 +100,53 @@ public:
   void AddChild(GameObject *gameObj);
   void DeleteChild(GameObject *gameObj);
 
+  // Translation
+  void Translate(float signedDistance, Axes axis);
   void SetPosition(glm::vec3 pos);
 
-  void RotateX(float radians);
-  void RotateY(float radians);
-  void RotateZ(float radians);
+  // Rotation
+  void SetEulerOrder(EulerOrder order) { m_eulerOrder = order; };
+  void RotateEuler(float radians, Axes axis);
+  void SetRotationEuler(glm::vec3 rotationEuler);
+
+  // Scale
+  template <Axes T> void Scale(float scalarValue);
+  void Scale(float scalarValue);
+  void SetScale(glm::vec3 scale);
 
   [[nodiscard]] const glm::mat4 &GetLocalMatrix() const {
     return m_localMatrix;
   }
-
-  void SetLocalMatrix(glm::mat4 mat) {
-    m_localMatrix = mat;
-    UpdateChildren();
+  [[nodiscard]] const glm::mat4 &GetWorldMatrix() {
+    UpdateWorldMatrix();
+    return m_worldMatrix;
   }
 
 private:
-  void UpdatePositionMatrix() {
-    m_translationMatrix = glm::translate(PC_IDENTITY_MAT4, m_position);
-    m_localMatrix = m_translationMatrix * m_rotationMatrix;
-  }
+  void UpdatePositionMatrix();
+  void UpdateRotationMatrix();
+  void UpdateScaleMatrix();
 
-  void UpdateRotationMatrix() {
-    m_rotationMatrix =
-        glm::rotate(PC_IDENTITY_MAT4, m_rotationEuler.x, {1, 0, 0}) *
-        glm::rotate(PC_IDENTITY_MAT4, m_rotationEuler.y, {0, 1, 0}) *
-        glm::rotate(PC_IDENTITY_MAT4, m_rotationEuler.z, {0, 0, 1});
-    m_localMatrix = m_rotationMatrix * m_translationMatrix;
-  }
+  void UpdateLocalMatrix() {
+    m_localMatrix = m_translationMatrix * m_rotationMatrix * m_scaleMatrix;
+    m_worldMatrixNeedsUpdate = true;
+    UpdateChildren();
+  };
+
+  void UpdateWorldMatrix() {
+    if (!m_worldMatrixNeedsUpdate) {
+      return;
+    };
+
+    if (m_parent) {
+      m_worldMatrix = m_parent->GetWorldMatrix() * m_localMatrix;
+    } else {
+      m_worldMatrix =
+          m_localMatrix; // Root object uses local matrix as world matrix
+    }
+
+    m_worldMatrixNeedsUpdate = false;
+  };
 
   void UpdateChildren() {
     for (auto *child : m_children) {
@@ -131,15 +161,20 @@ protected:
   GameObject *m_parent = nullptr;
   std::vector<GameObject *> m_children;
 
+  EulerOrder m_eulerOrder = EulerOrder::XYZ;
+
   glm::vec3 m_position = {0, 0, 0};
   glm::vec3 m_rotationEuler = {0, 0, 0};
+  glm::vec3 m_scale = {1, 1, 1};
+
   glm::mat4 m_translationMatrix = PC_IDENTITY_MAT4;
   glm::mat4 m_rotationMatrix = PC_IDENTITY_MAT4;
+  glm::mat4 m_scaleMatrix = PC_IDENTITY_MAT4;
 
-  glm::mat4 m_localMatrix = PC_IDENTITY_MAT4;
-  glm::mat4 m_worldMatrix = PC_IDENTITY_MAT4;
+  glm::mat4 m_localMatrix = PC_IDENTITY_MAT4; // Local -> Parent
+  glm::mat4 m_worldMatrix = PC_IDENTITY_MAT4; // Local -> World
 
-  mutable bool m_worldMatrixNeedsUpdate = false;
+  bool m_worldMatrixNeedsUpdate = false;
 };
 
 GFX_NAMESPACE_END

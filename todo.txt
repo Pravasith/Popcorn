@@ -7,10 +7,15 @@
 --- 18 Feb ------------------------------------ X
 --- 04 Mar ------------------------------------
 
-:: Parent child conversion gltf models -> popcorn models
-:: Material extraction
-:: Refactor Renderflow (Vertex & index memories, descriptors)
-:: Show blender scene in Popcorn
+:: Finish learning matrices & 3d rotations on gamemath.com - today
+:: Parent child conversion gltf models -> popcorn models - tomorrow
+:: Material extraction - define simple properties only - also tomorrow
+:: Refactor Renderflow (Vertex & index memories, descriptors) - friday
+:: Show blender scene in Popcorn - friday
+
+// USE IN VIDEO
+// https://x.com/gunsnrosesgirl3/status/1907830742106755259
+//
 
 :: Make a central DB for all Vulkan resources
 
