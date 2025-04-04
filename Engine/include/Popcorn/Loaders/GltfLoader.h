@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GameObject.h"
 #include "Material.h"
 #include "Mesh.h"
 #include <cstdint>
@@ -36,8 +37,8 @@ public:
   static bool LoadFromFile(const std::string &filename, tinygltf::Model &model);
 
   // tinygltf Model -> Meshes (vector)
-  static void ExtractGltfMeshes(const tinygltf::Model &model,
-                                std::vector<Mesh> &meshes);
+  static void ExtractModelData(const tinygltf::Model &model,
+                               std::vector<GameObject *> &gameObjects);
 
 private:
   // GltfLoader() { PC_PRINT("CREATED", TagType::Constr, "GltfLoader.h"); };
@@ -47,12 +48,16 @@ private:
 
   // Converts tinygltf meshes to Mesh* vector
   // Important: The ownership of meshes array belongs to the caller
-  static void ProcessGLTFNodeTree(const tinygltf::Model &model,
-                                  const tinygltf::Node &parentNode,
-                                  std::vector<Mesh> &meshes);
-  static void ConvertToGameObjectSubtree(const tinygltf::Model &model,
-                                         const tinygltf::Node &gltfObjNode,
-                                         GameObject &gameObjNode);
+  static GameObject *
+  ConvertGltfNodeToGameObject(const tinygltf::Model &model,
+                              const tinygltf::Node &gltfNode);
+  static GameObject *ProcessNodeByType(const tinygltf::Model &model,
+
+                                       const tinygltf::Node &node);
+
+  static void ExtractMeshData(const tinygltf::Model &model,
+                              const tinygltf::Node &gltfNode, Mesh &mesh);
+
   [[nodiscard]] static VertexBuffer *
   ExtractVertexBuffer(const tinygltf::Model &model,
                       const tinygltf::Primitive &primitive);
@@ -62,8 +67,8 @@ private:
   static void ExtractMaterialData(const tinygltf::Model &model,
                                   const tinygltf::Material &tinygltfMaterial,
                                   MaterialData *materialData);
-  static void CalculateNodeMatrix(const tinygltf::Node &node,
-                                  glm::mat4 &outMatrix);
+  static void SetTransformData(const tinygltf::Node &node,
+                               GameObject &gameObject);
 };
 
 GFX_NAMESPACE_END

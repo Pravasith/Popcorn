@@ -58,21 +58,18 @@ void GameObject::DeleteChild(GameObject *gameObj) {
 // -----------------------------------------------------------------
 // --- ROTATION ----------------------------------------------------
 
-void GameObject::RotateEuler(float radians, Axes a) {
-  switch (a) {
-  case Axes::X:
-    m_rotationEuler.x += radians;
-    break;
-  case Axes::Y:
-    m_rotationEuler.y += radians;
-    break;
-  case Axes::Z:
-    m_rotationEuler.z += radians;
-    break;
-  default:
-    PC_WARN("Wrong axes")
-    break;
-  }
+template <> void GameObject::RotateEuler<Axes::X>(float radians) {
+  m_rotationEuler.x += radians;
+  UpdateRotationMatrix();
+}
+
+template <> void GameObject::RotateEuler<Axes::Y>(float radians) {
+  m_rotationEuler.y += radians;
+  UpdateRotationMatrix();
+}
+
+template <> void GameObject::RotateEuler<Axes::Z>(float radians) {
+  m_rotationEuler.z += radians;
   UpdateRotationMatrix();
 }
 

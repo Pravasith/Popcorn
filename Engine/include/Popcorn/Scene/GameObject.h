@@ -20,7 +20,8 @@ struct SceneData {
 };
 
 enum class GameObjectTypes {
-  Mesh = 1,
+  None = 0,
+  Mesh,
   // Camera,
 };
 
@@ -90,7 +91,9 @@ public:
     return *this;
   }
 
-  virtual constexpr GameObjectTypes GetType() const = 0;
+  virtual constexpr GameObjectTypes GetType() const {
+    return GameObjectTypes::None;
+  };
 
   virtual void OnAttach() = 0;
   virtual void OnUpdate() = 0;
@@ -107,7 +110,7 @@ public:
 
   // Rotation
   void SetEulerOrder(EulerOrder order) { m_eulerOrder = order; };
-  void RotateEuler(float radians, Axes axis);
+  template <Axes T> void RotateEuler(float radians);
   void SetRotationEuler(glm::vec3 rotationEuler);
 
   // Scale
@@ -118,6 +121,13 @@ public:
   [[nodiscard]] const glm::mat4 &GetLocalMatrix() const {
     return m_localMatrix;
   }
+
+  void SetLocalMatrix(const glm::mat4 &mat) {
+    m_localMatrix = mat;
+    m_worldMatrixNeedsUpdate = true;
+    UpdateChildren();
+  };
+
   [[nodiscard]] const glm::mat4 &GetWorldMatrix() {
     if (m_worldMatrixNeedsUpdate) {
       UpdateWorldMatrix(); // Recursive -- internally calls child's

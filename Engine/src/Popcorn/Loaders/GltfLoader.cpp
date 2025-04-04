@@ -6,6 +6,7 @@
 #include "GlobalMacros.h"
 #include "Helpers.h"
 #include "Material.h"
+#include "Mesh.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -38,83 +39,134 @@ bool GltfLoader::LoadFromFile(const std::string &filename,
   return ret;
 };
 
-void GltfLoader::ExtractGltfMeshes(const tinygltf::Model &model,
-                                   std::vector<Mesh> &meshes) {
-  for (const auto &node : model.nodes) {
-    ProcessGLTFNodeTree(model, node, meshes);
+void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
+                                 const tinygltf::Node &gltfNode, Mesh &mesh) {
+  // MESH TYPE
+  const auto &gltfMesh = model.meshes[gltfNode.mesh];
+
+  // gltfMesh.primitives are submeshes
+  for (const auto &primitive : gltfMesh.primitives) {
+    VertexBuffer *vbo;
+    IndexBuffer<uint16_t> *ibo;
+    MaterialData *matData;
+    Material *mat;
+
+    // Extract vertex buffer
+    vbo = ExtractVertexBuffer(model, primitive);
+
+    // Extract index buffer
+    ibo = ExtractIndexBuffer(model, primitive);
+
+    // Extract material data
+    if (primitive.material >= 0) {
+      ExtractMaterialData(model, model.materials[primitive.material], matData);
+      // TODO: Create material
+    }
+
+    mesh.AddSubmesh(vbo, ibo, mat);
   }
 };
 
-void GltfLoader::CalculateNodeMatrix(const tinygltf::Node &node,
-                                     glm::mat4 &outMatrix) {
-  outMatrix = glm::mat4(1.0f);
+void GltfLoader::ExtractModelData(const tinygltf::Model &model,
+                                  std::vector<GameObject *> &gameObjects) {
+  for (const auto &node : model.nodes) {
+    GameObject *gameObject = ConvertGltfNodeToGameObject(model, node);
+    gameObjects.push_back(gameObject);
+  }
+};
 
-  if (!node.matrix.empty()) {
-    // Node has an explicit matrix
-    outMatrix = glm::make_mat4(node.matrix.data());
+GameObject *GltfLoader::ProcessNodeByType(const tinygltf::Model &model,
+                                          const tinygltf::Node &node) {
+  if (node.mesh >= 0 && node.mesh < model.meshes.size()) {
+    Mesh *mesh = new Mesh();
+    ExtractMeshData(model, node, *mesh);
+    return mesh;
+  } else if (node.camera >= 0) {
+    // Camera node
+    // TYPE = Camera
+  } else if (node.extensions.find("KHR_lights_punctual") !=
+             node.extensions.end()) {
+    // Light node (requires KHR_lights_punctual extension)
+    // TYPE = Light
+  } else if (
+      // Is Node referenced in any skin.joints array (typically write a function
+      // to resolve the bool)
+      false) {
+    // Bone/Joint node (part of skeletal hierarchy)
+    // TYPE = Bone
+    // TYPE = Joint
+  } else if (node.extensions.find("EXT_mesh_gpu_instancing") !=
+             node.extensions.end()) {
+    // GPU-instanced mesh node
+    // TYPE = Mesh but instanced
+  } else if (!node.translation.empty() || !node.rotation.empty() ||
+             !node.scale.empty() || !node.matrix.empty()) {
+    // Transform (empty) node (only affects hierarchy)
+    // TYPE = Transform (Empty)
+  } else if (!node.extensions.empty()) {
+    // Node with unspecified extensions (vendor-specific)
+    // NO TYPE -- HANDLE THIS
   } else {
-    // Apply TRS components
+    // Undefined node (no properties, rare but valid)
+    // NO TYPE -- HANDLE THIS
+  }
+};
+
+// TODO: Decompose matrix to TRS for animations
+void GltfLoader::SetTransformData(const tinygltf::Node &node,
+                                  GameObject &gameObject) {
+  auto outMatrix = glm::mat4(1.0f);
+
+  // Node has an explicit transformation matrix, set it directly.
+  if (!node.matrix.empty()) {
+    // TODO: Warning --- in this cases (usually on shear/uneven scale
+    // operations, Blender exports a nodeMatrix instead of transformations.
+    // Handle this later by decomposition. Or just don't use such objects for
+    // animations.
+    outMatrix = glm::make_mat4(node.matrix.data());
+    gameObject.SetLocalMatrix(outMatrix);
+  } else {
+    // Apply TRS components separately
+    glm::vec3 translation(0.0f);
+    glm::vec3 scale(1.0f);
+    glm::vec3 eulerAngles(0.0f); // Euler angles in radians
+
     if (!node.translation.empty()) {
-      outMatrix = glm::translate(outMatrix, glm::vec3(node.translation[0],
-                                                      node.translation[1],
-                                                      node.translation[2]));
+      translation = glm::vec3(node.translation[0], node.translation[1],
+                              node.translation[2]);
     }
 
     if (!node.rotation.empty()) {
-      glm::quat q(node.rotation[3], node.rotation[0], node.rotation[1],
-                  node.rotation[2]);
-      outMatrix *= glm::mat4_cast(q);
+      glm::quat rotationQuat(node.rotation[3], node.rotation[0],
+                             node.rotation[1], node.rotation[2]);
+      eulerAngles =
+          glm::eulerAngles(rotationQuat); // Convert quaternion to Euler angles
     }
 
     if (!node.scale.empty()) {
-      outMatrix = glm::scale(
-          outMatrix, glm::vec3(node.scale[0], node.scale[1], node.scale[2]));
-    }
-  }
-};
-
-void GltfLoader::ConvertToGameObjectSubtree(const tinygltf::Model &model,
-                                            const tinygltf::Node &gltfObjNode,
-                                            GameObject &gameObjNode) {
-  // glm::mat4 worldMatrix = parentMatrix * nodeMatrix;
-  glm::mat4 modelMatrix(1.0f);
-  CalculateNodeMatrix(gltfObjNode, modelMatrix);
-  gameObjNode.SetMatrix(modelMatrix);
-
-  // Process mesh if this node is one
-  if (gltfObjNode.mesh >= 0 && gltfObjNode.mesh < model.meshes.size()) {
-    const auto &gltfMesh = model.meshes[gltfObjNode.mesh];
-    Mesh mesh;
-
-    // gltfMesh.primitives are submeshes
-    for (const auto &primitive : gltfMesh.primitives) {
-      VertexBuffer *vbo;
-      IndexBuffer<uint16_t> *ibo;
-      MaterialData *matData;
-      Material *mat;
-
-      // Extract vertex buffer
-      vbo = ExtractVertexBuffer(model, primitive);
-
-      // Extract index buffer
-      ibo = ExtractIndexBuffer(model, primitive);
-
-      // Extract material data
-      if (primitive.material >= 0) {
-        ExtractMaterialData(model, model.materials[primitive.material],
-                            matData);
-        // TODO: Create material
-      }
-
-      mesh.AddSubmesh(vbo, ibo, mat);
+      scale = glm::vec3(node.scale[0], node.scale[1], node.scale[2]);
     }
 
-    gameObjNode = std::move(mesh);
+    // Store TRS in the GameObject --- internally constructs a localMatrix
+    gameObject.SetPosition(translation);
+    gameObject.SetRotationEuler(eulerAngles);
+    gameObject.SetScale(scale);
+  }
+}
+
+GameObject *
+GltfLoader::ConvertGltfNodeToGameObject(const tinygltf::Model &model,
+                                        const tinygltf::Node &gltfNode) {
+  GameObject *gameObject = ProcessNodeByType(model, gltfNode);
+  SetTransformData(gltfNode, *gameObject);
+
+  for (int child : gltfNode.children) {
+    GameObject *childGameObj =
+        ConvertGltfNodeToGameObject(model, model.nodes[child]);
+    gameObject->AddChild(childGameObj);
   }
 
-  for (int child : gltfObjNode.children) {
-    // ConvertToGameObjectSubtree(model, model.nodes[child], gameObjNode);
-  }
+  return gameObject;
 }
 
 void GltfLoader::ExtractMaterialData(const tinygltf::Model &model,
