@@ -22,7 +22,8 @@ struct SceneData {
 enum class GameObjectTypes {
   None = 0,
   Mesh,
-  // Camera,
+  Camera,
+  Empty,
 };
 
 enum class Axes { X = 1, Y, Z };
@@ -91,9 +92,7 @@ public:
     return *this;
   }
 
-  virtual constexpr GameObjectTypes GetType() const {
-    return GameObjectTypes::None;
-  };
+  virtual constexpr GameObjectTypes GetType() const = 0;
 
   virtual void OnAttach() = 0;
   virtual void OnUpdate() = 0;

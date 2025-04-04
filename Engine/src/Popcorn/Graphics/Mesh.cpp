@@ -20,8 +20,7 @@ void Mesh::OnAttach() {};
 
 void Mesh::OnUpdate() {
   // Resets buffer data and fills again
-
-  m_uniformBuffer.modelMatrix = m_matrix;
+  m_uniformBuffer.modelMatrix = GetWorldMatrix();
 };
 
 void Mesh::OnRender() {};

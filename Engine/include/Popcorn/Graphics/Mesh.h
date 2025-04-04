@@ -92,7 +92,7 @@ public:
   // TODO: Handle the case of duplicating meshes & materials
   // TODO: Make m_indexBuffer a variant
   Mesh() {
-    m_uniformBuffer.modelMatrix = m_matrix;
+    m_uniformBuffer.modelMatrix = m_worldMatrix;
     PC_PRINT("CREATED", TagType::Constr, "MESH");
   };
   virtual ~Mesh() { PC_PRINT("DESTROYED", TagType::Destr, "MESH"); };

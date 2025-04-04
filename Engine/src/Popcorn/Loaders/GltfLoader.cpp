@@ -2,6 +2,8 @@
 #include "Assert.h"
 #include "Base.h"
 #include "BufferObjects.h"
+#include "Camera.h"
+#include "Empty.h"
 #include "GameObject.h"
 #include "GlobalMacros.h"
 #include "Helpers.h"
@@ -75,40 +77,42 @@ void GltfLoader::ExtractModelData(const tinygltf::Model &model,
   }
 };
 
-GameObject *GltfLoader::ProcessNodeByType(const tinygltf::Model &model,
-                                          const tinygltf::Node &node) {
+GameObject *GltfLoader::CreateGameObjectByType(const tinygltf::Model &model,
+                                               const tinygltf::Node &node) {
   if (node.mesh >= 0 && node.mesh < model.meshes.size()) {
     Mesh *mesh = new Mesh();
     ExtractMeshData(model, node, *mesh);
     return mesh;
   } else if (node.camera >= 0) {
-    // Camera node
-    // TYPE = Camera
-  } else if (node.extensions.find("KHR_lights_punctual") !=
-             node.extensions.end()) {
-    // Light node (requires KHR_lights_punctual extension)
-    // TYPE = Light
-  } else if (
-      // Is Node referenced in any skin.joints array (typically write a function
-      // to resolve the bool)
-      false) {
-    // Bone/Joint node (part of skeletal hierarchy)
-    // TYPE = Bone
-    // TYPE = Joint
-  } else if (node.extensions.find("EXT_mesh_gpu_instancing") !=
-             node.extensions.end()) {
-    // GPU-instanced mesh node
-    // TYPE = Mesh but instanced
-  } else if (!node.translation.empty() || !node.rotation.empty() ||
-             !node.scale.empty() || !node.matrix.empty()) {
-    // Transform (empty) node (only affects hierarchy)
-    // TYPE = Transform (Empty)
-  } else if (!node.extensions.empty()) {
-    // Node with unspecified extensions (vendor-specific)
-    // NO TYPE -- HANDLE THIS
+    Camera *camera = new Camera();
+    return camera;
+    // } else if (node.extensions.find("KHR_lights_punctual") !=
+    //            node.extensions.end()) {
+    //   // Light node (requires KHR_lights_punctual extension)
+    //   // TYPE = Light
+    // } else if (
+    //     // Is Node referenced in any skin.joints array (typically write a
+    //     function
+    //     // to resolve the bool)
+    //     false) {
+    //   // Bone/Joint node (part of skeletal hierarchy)
+    //   // TYPE = Bone
+    //   // TYPE = Joint
+    // } else if (node.extensions.find("EXT_mesh_gpu_instancing") !=
+    //            node.extensions.end()) {
+    //   // GPU-instanced mesh node
+    //   // TYPE = Mesh but instanced
+    // } else if (!node.translation.empty() || !node.rotation.empty() ||
+    //            !node.scale.empty() || !node.matrix.empty()) {
+    //   // Transform (empty) node (only affects hierarchy)
+    //   // TYPE = Transform (Empty)
+    // } else if (!node.extensions.empty()) {
+    //   // Node with unspecified extensions (vendor-specific)
+    //   // NO TYPE -- HANDLE THIS
   } else {
     // Undefined node (no properties, rare but valid)
     // NO TYPE -- HANDLE THIS
+    return new Empty();
   }
 };
 
@@ -157,7 +161,7 @@ void GltfLoader::SetTransformData(const tinygltf::Node &node,
 GameObject *
 GltfLoader::ConvertGltfNodeToGameObject(const tinygltf::Model &model,
                                         const tinygltf::Node &gltfNode) {
-  GameObject *gameObject = ProcessNodeByType(model, gltfNode);
+  GameObject *gameObject = CreateGameObjectByType(model, gltfNode);
   SetTransformData(gltfNode, *gameObject);
 
   for (int child : gltfNode.children) {
@@ -169,37 +173,55 @@ GltfLoader::ConvertGltfNodeToGameObject(const tinygltf::Model &model,
   return gameObject;
 }
 
-void GltfLoader::ExtractMaterialData(const tinygltf::Model &model,
-                                     const tinygltf::Material &material,
-                                     MaterialData *materialData) {
+//
+// Random thought: Valora is a sick name for a videogame character
+//
+//
+MaterialData
+GltfLoader::ExtractMaterialData(const tinygltf::Model &model,
+                                const tinygltf::Material &material) {
+  // const auto &pbr = material.pbrMetallicRoughness;
   //
-  // Random thought: Valora is a sick name for a videogame character
+  // // Determine material type
+  // bool isPBR = pbr.metallicFactor > 0.0f || pbr.roughnessFactor > 0.0f ||
+  //              material.normalTexture.index != -1 ||
+  //              material.occlusionTexture.index != -1;
   //
-  // Base color factor
-  const auto &pbrMetallicRoughness = material.pbrMetallicRoughness;
-
-  // Determine if the material is PBR-based
-  bool isPBR = pbrMetallicRoughness.metallicFactor > 0.0f ||
-               pbrMetallicRoughness.roughnessFactor > 0.0f ||
-               material.normalTexture.index != -1 ||
-               material.occlusionTexture.index != -1;
-
-  // struct BasicMaterialData : public MaterialData {
-  //   glm::vec4 baseColorFactor = glm::vec4(1.0f);
+  // // Common properties
+  // auto fillBaseData = [](MaterialData *data, const tinygltf::Material &mat) {
+  //   data->doubleSided = mat.doubleSided;
+  //   // Add shader files based on material type
+  //   data->shaderFiles =
+  //       isPBR ? std::vector<const char *>{"pbr.vert", "pbr.frag"}
+  //             : std::vector<const char *>{"basic.vert", "basic.frag"};
   // };
-
-  // struct PbrMaterialData : public MaterialData {
-  //   bool hasBaseColorTexture = false;
-  //   bool hasNormalTexture = false;
-  //   bool hasMetallicRoughnessTexture = false;
-  //   float metallicFactor = 1.0f;
-  //   float roughnessFactor = 1.0f;
-  //   float alphaCutoff = 0.5f;
-  //   glm::vec4 baseColorFactor = glm::vec4(1.0f);
-  // };
-
-  // Reinterpret cast for MaterialData accordingly based on material's values
-};
+  //
+  // // Create appropriate material type
+  // if (isPBR) {
+  //   PbrMaterialData *pbrData = new PbrMaterialData();
+  //   fillBaseData(pbrData, material);
+  //
+  //   pbrData->baseColorFactor =
+  //       glm::vec4(pbr.baseColorFactor[0], pbr.baseColorFactor[1],
+  //                 pbr.baseColorFactor[2], pbr.baseColorFactor[3]);
+  //   pbrData->metallicFactor = pbr.metallicFactor;
+  //   pbrData->roughnessFactor = pbr.roughnessFactor;
+  //   pbrData->hasNormalTexture = material.normalTexture.index != -1;
+  //   pbrData->hasMetallicRoughnessTexture =
+  //       pbr.metallicRoughnessTexture.index != -1;
+  //
+  //   return pbrData;
+  // } else {
+  //   BasicMaterialData *basicData = new BasicMaterialData();
+  //   fillBaseData(basicData, material);
+  //
+  //   basicData->baseColorFactor =
+  //       glm::vec4(pbr.baseColorFactor[0], pbr.baseColorFactor[1],
+  //                 pbr.baseColorFactor[2], pbr.baseColorFactor[3]);
+  //
+  //   return basicData;
+  // }
+}
 
 VertexBuffer *
 GltfLoader::ExtractVertexBuffer(const tinygltf::Model &model,

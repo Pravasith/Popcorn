@@ -36,39 +36,37 @@ public:
   // File -> tinygltf Model
   static bool LoadFromFile(const std::string &filename, tinygltf::Model &model);
 
-  // tinygltf Model -> Meshes (vector)
+  // tinygltf Model -> GameObjects
   static void ExtractModelData(const tinygltf::Model &model,
                                std::vector<GameObject *> &gameObjects);
 
 private:
-  // GltfLoader() { PC_PRINT("CREATED", TagType::Constr, "GltfLoader.h"); };
-  // ~GltfLoader() { PC_PRINT("DESTROYED", TagType::Destr, "GltfLoader.h"); };
+  GltfLoader() { PC_PRINT("CREATED", TagType::Constr, "GltfLoader.h"); };
+  ~GltfLoader() { PC_PRINT("DESTROYED", TagType::Destr, "GltfLoader.h"); };
+
   //
   // --- UTILS -----------------------------------------------------------------
-
-  // Converts tinygltf meshes to Mesh* vector
-  // Important: The ownership of meshes array belongs to the caller
   static GameObject *
   ConvertGltfNodeToGameObject(const tinygltf::Model &model,
                               const tinygltf::Node &gltfNode);
-  static GameObject *ProcessNodeByType(const tinygltf::Model &model,
+  static GameObject *CreateGameObjectByType(const tinygltf::Model &model,
+                                            const tinygltf::Node &node);
+  static void SetTransformData(const tinygltf::Node &node,
+                               GameObject &gameObject);
 
-                                       const tinygltf::Node &node);
-
+  //
+  // --- MESH UTILS ------------------------------------------------------------
   static void ExtractMeshData(const tinygltf::Model &model,
                               const tinygltf::Node &gltfNode, Mesh &mesh);
-
   [[nodiscard]] static VertexBuffer *
   ExtractVertexBuffer(const tinygltf::Model &model,
                       const tinygltf::Primitive &primitive);
   [[nodiscard]] static IndexBuffer<uint16_t> *
   ExtractIndexBuffer(const tinygltf::Model &model,
                      const tinygltf::Primitive &primitive);
-  static void ExtractMaterialData(const tinygltf::Model &model,
-                                  const tinygltf::Material &tinygltfMaterial,
-                                  MaterialData *materialData);
-  static void SetTransformData(const tinygltf::Node &node,
-                               GameObject &gameObject);
+  [[nodiscard]] static MaterialData
+  ExtractMaterialData(const tinygltf::Model &model,
+                      const tinygltf::Material &material);
 };
 
 GFX_NAMESPACE_END
