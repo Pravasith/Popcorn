@@ -4,11 +4,11 @@
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
 #include "Popcorn/Core/Helpers.h"
+#include "Shader.h"
 #include <forward_list>
 #include <vector>
 #include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
-#include "Material.h"
 #include <GLFW/glfw3.h>
 
 ENGINE_NAMESPACE_BEGIN

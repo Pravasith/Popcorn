@@ -55,6 +55,7 @@ public:
   VertexBufferVk(const VertexBufferVk &other) = default;
   VertexBufferVk &operator=(const VertexBufferVk &other) = default;
 
+  //
   // MOVE CONSTRUCTOR
   VertexBufferVk(VertexBufferVk &&other) = default;
   VertexBufferVk &operator=(VertexBufferVk &&other) = default;

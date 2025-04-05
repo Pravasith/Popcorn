@@ -12,11 +12,15 @@ GFX_NAMESPACE_BEGIN
 //
 // --------------------------------------------------------------------------
 // ----- GENERAL RESOURCES --------------------------------------------------
-enum class ShaderFiles { VertShaderTriangle = 1, FragShaderTriangle };
+enum class ShaderFiles {
+  // Basic Material - Shader
+  BasicMatVert = 1,
+  BasicMatFrag
+};
 
 static std::unordered_map<ShaderFiles, const char *> PC_SHADER_SOURCE_MAP = {
-    {ShaderFiles::VertShaderTriangle, "shaders/tri_vert.spv"},
-    {ShaderFiles::FragShaderTriangle, "shaders/tri_frag.spv"},
+    {ShaderFiles::BasicMatVert, "shaders/basicMat_vert.spv"},
+    {ShaderFiles::BasicMatFrag, "shaders/basicMat_frag.spv"},
 };
 // ----- GENERAL RESOURCES --------------------------------------------------
 // --------------------------------------------------------------------------

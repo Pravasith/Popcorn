@@ -1,43 +1,33 @@
 #include "Material.h"
 #include "GlobalMacros.h"
-#include "Shader.h"
+#include "Renderer.h"
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-void Material::LoadShaders() {
-  PC_WARN("BUFFER: Shader files are loaded here -- expensive if not handled "
-          "properly")
-  m_shaders.reserve(m_materialData->shaderFiles.size());
+template <MaterialTypes T>
+MaterialHandler *Material<T>::s_materialHandler = nullptr;
 
-  for (auto &filename : m_materialData->shaderFiles) {
-    m_shaders.emplace_back(Shader::ReadSpvFile(filename));
+template <MaterialTypes T> void Material<T>::CreateRenderResources() {
+  if (Renderer::GetAPI() == RendererType::Vulkan) {
+    s_materialHandler->CreateVulkanResources();
+  } else {
+    // s_materialHandler->CreateOpenGlResources();
   };
 };
 
-void PC_ValidateAndAddMaterial(Material *materialPtr,
-                               std::vector<Material *> &materials) {
-  auto ptr = std::find(materials.begin(), materials.end(), materialPtr);
+// void Material::LoadShaders() {
+//   PC_WARN("BUFFER: Shader files are loaded here -- expensive if not handled "
+//           "properly")
+//   m_shaders.reserve(m_materialData->shaderFiles.size());
+//
+//   for (auto &filename : m_materialData->shaderFiles) {
+//     m_shaders.emplace_back(Shader::ReadSpvFile(filename));
+//   };
+// };
 
-  if (ptr != materials.end()) {
-    PC_WARN("Material already exists in the material library!")
-    return;
-  };
-
-  materials.emplace_back(materialPtr);
-};
-
-void PC_ValidateAndRemoveMaterial(Material *materialPtr,
-                                  std::vector<Material *> &materials) {
-  auto ptr = std::find(materials.begin(), materials.end(), materialPtr);
-
-  if (ptr == materials.end()) {
-    PC_WARN("Material not found!")
-    return;
-  };
-
-  materials.erase(ptr);
-};
+template class Material<MaterialTypes::BasicMat>;
+template class Material<MaterialTypes::PbrMat>;
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

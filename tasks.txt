@@ -1,16 +1,12 @@
 
-
-
 --- TASKS ------------------------------------------------------------------
 ----------------------------------------------------------------------------
 
 --- 18 Feb ------------------------------------ X
 --- 04 Mar ------------------------------------
 
-:: Finish learning matrices & 3d rotations on gamemath.com - today
-:: Parent child conversion gltf models -> popcorn models - tomorrow
-:: Material extraction - define simple properties only - also tomorrow
-:: Refactor Renderflow (Vertex & index memories, descriptors) - friday
+:: Material extraction - define simple properties only - today
+:: Refactor Renderflow (Vertex & index memories, descriptors) - saturday
 :: Show blender scene in Popcorn - friday
 
 // USE IN VIDEO

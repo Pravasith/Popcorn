@@ -3,7 +3,6 @@
 #include "CommandPoolVk.h"
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
-#include "Popcorn/Core/Helpers.h"
 #include <cstdint>
 #include <stdexcept>
 #include <vector>

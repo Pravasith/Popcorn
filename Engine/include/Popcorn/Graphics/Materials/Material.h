@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GlobalMacros.h"
+#include "MaterialHandler.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
 #include <glm/glm.hpp>
@@ -17,37 +18,20 @@ enum class MaterialTypes {
   // Add more
 };
 
-enum ShaderStages {
-  None = 0,
-  //
-  // Graphics types
-  VertexBit = 1,
-  TesselationBit = shift_l(1),
-  GeometryBit = shift_l(2),
-  FragmentBit = shift_l(3),
-  //
-  // Compute types
-  ComputeBit = shift_l(4)
-  //
-  // Ray tracing types
-  // TODO: Fill it out when time comes
-};
-
-struct MaterialData {
+template <MaterialTypes T> struct MaterialData {
   int enabledShadersMask = 0;
   std::vector<const char *> shaderFiles{};
   bool doubleSided = false;
 
-protected:
   MaterialData();
-  ~MaterialData();
+  virtual ~MaterialData() = 0;
 };
 
-struct BasicMaterialData : public MaterialData {
+struct BasicMaterialData : public MaterialData<MaterialTypes::BasicMat> {
   glm::vec4 baseColorFactor = glm::vec4(1.0f);
 };
 
-struct PbrMaterialData : public MaterialData {
+struct PbrMaterialData : public MaterialData<MaterialTypes::PbrMat> {
   glm::vec4 baseColorFactor = glm::vec4(1.0f);
   float metallicFactor = 1.0f;
   float roughnessFactor = 1.0f;
@@ -57,45 +41,71 @@ struct PbrMaterialData : public MaterialData {
   bool hasMetallicRoughnessTexture = false;
 };
 
-class Material {
+template <MaterialTypes T> struct DeriveMaterialDataType;
+template <> struct DeriveMaterialDataType<MaterialTypes::BasicMat> {
+  using type = BasicMaterialData;
+};
+template <> struct DeriveMaterialDataType<MaterialTypes::PbrMat> {
+  using type = PbrMaterialData;
+};
+
+template <MaterialTypes T> class Material {
 public:
   Material() {
     PC_PRINT("CREATED", TagType::Constr, "Material.h");
-    LoadShaders();
+    s_materialHandler = MaterialHandler::Get();
   };
   virtual ~Material() { PC_PRINT("DESTROYED", TagType::Destr, "Material.h"); };
 
   [[nodiscard]] inline const std::vector<Buffer> &GetShaders() const {
     return m_shaders;
   };
-  [[nodiscard]] const MaterialTypes &GetType() {
-    if (m_type != MaterialTypes::BasicMat | m_type != MaterialTypes::PbrMat) {
-      PC_ERROR("Material type not set!", "Material")
-    };
 
-    return m_type;
+  // Shaders, uniform data (roughness, metallic etc)
+  void SetData(const DeriveMaterialDataType<T> &materialData) {
+    m_data = materialData;
   };
 
-  void LoadShaders();
-  virtual void SetData(const MaterialData &materialData) = 0;
+private:
+  void CreateRenderResources();
 
 private:
-  virtual void SetType(MaterialTypes matType) = 0;
-
 protected:
-  MaterialData *m_materialData;
-  MaterialTypes m_type;
   std::vector<Buffer> m_shaders;
+  DeriveMaterialDataType<T> m_data;
+
+  static MaterialHandler *s_materialHandler;
 };
 
 //
 //
 // ----------------------------------------------------------------------------
 // --- UTIL FUNCTIONS (GLOBAL) ------------------------------------------------
-void PC_ValidateAndAddMaterial(Material *materialPtr,
-                               std::vector<Material *> &materials);
-void PC_ValidateAndRemoveMaterial(Material *materialPtr,
-                                  std::vector<Material *> &materials);
+template <MaterialTypes T>
+void PC_ValidateAndAddMaterial(Material<T> *materialPtr,
+                               std::vector<Material<T> *> &materials) {
+  auto ptr = std::find(materials.begin(), materials.end(), materialPtr);
+
+  if (ptr != materials.end()) {
+    PC_WARN("Material already exists in the material library!")
+    return;
+  };
+
+  materials.emplace_back(materialPtr);
+};
+
+template <MaterialTypes T>
+void PC_ValidateAndRemoveMaterial(Material<T> *materialPtr,
+                                  std::vector<Material<T> *> &materials) {
+  auto ptr = std::find(materials.begin(), materials.end(), materialPtr);
+
+  if (ptr == materials.end()) {
+    PC_WARN("Material not found!")
+    return;
+  };
+
+  materials.erase(ptr);
+};
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
