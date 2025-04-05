@@ -18,9 +18,9 @@ GFX_NAMESPACE_BEGIN
                                              IndexBuffer<uint16_t> *indexBuffer,
                                              Material *material);
 
-class Submesh {
+template <MaterialTypes T> class Submesh {
 public:
-  Submesh(VertexBuffer *vbo, IndexBuffer<uint16_t> *ibo, Material *mat)
+  Submesh(VertexBuffer *vbo, IndexBuffer<uint16_t> *ibo, Material<T> *mat)
       : m_vertexBuffer(vbo), m_indexBuffer(ibo), m_material(mat) {
     PC_PRINT("CREATED", TagType::Constr, "Submesh");
     m_id = PC_GetHashedSubmeshId(vbo, ibo, mat);
@@ -79,7 +79,7 @@ private:
 
   VertexBuffer *m_vertexBuffer = nullptr;
   IndexBuffer<uint16_t> *m_indexBuffer = nullptr;
-  Material *m_material = nullptr;
+  Material<T> *m_material = nullptr;
   uint32_t m_id = 0;
 };
 
@@ -107,8 +107,9 @@ public:
 
   [[nodiscard]] inline Uniforms &GetUniformBuffer() { return m_uniformBuffer; };
 
+  template <MaterialTypes T>
   void AddSubmesh(VertexBuffer *vbo, IndexBuffer<uint16_t> *ibo,
-                  Material *mat) {
+                  Material<T> *mat) {
     PC_ASSERT(vbo && ibo && mat, "Submesh parameter(s) nullptr");
 
     for (auto &submesh : m_submeshes) {
@@ -117,6 +118,7 @@ public:
         return;
       };
     }
+
     m_submeshes.emplace_back(vbo, ibo, mat);
   };
 

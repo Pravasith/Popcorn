@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GlobalMacros.h"
-#include "MaterialHandler.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
 #include <glm/glm.hpp>
@@ -51,10 +50,7 @@ template <> struct DeriveMaterialDataType<MaterialTypes::PbrMat> {
 
 template <MaterialTypes T> class Material {
 public:
-  Material() {
-    PC_PRINT("CREATED", TagType::Constr, "Material.h");
-    s_materialHandler = MaterialHandler::Get();
-  };
+  Material() { PC_PRINT("CREATED", TagType::Constr, "Material.h"); };
   virtual ~Material() { PC_PRINT("DESTROYED", TagType::Destr, "Material.h"); };
 
   [[nodiscard]] inline const std::vector<Buffer> &GetShaders() const {
@@ -66,15 +62,9 @@ public:
     m_data = materialData;
   };
 
-private:
-  void CreateRenderResources();
-
-private:
 protected:
   std::vector<Buffer> m_shaders;
   DeriveMaterialDataType<T> m_data;
-
-  static MaterialHandler *s_materialHandler;
 };
 
 //
