@@ -115,9 +115,12 @@ public:
   };
   virtual ~Mesh() { PC_PRINT("DESTROYED", TagType::Destr, "MESH"); };
 
-  virtual void OnAttach() override;
-  virtual void OnUpdate() override;
-  virtual void OnRender() override;
+  // virtual void OnAttach() override {};
+  virtual void OnUpdate() override {
+    // Resets buffer data and fills again
+    m_uniformBuffer.modelMatrix = GetWorldMatrix();
+  };
+  // virtual void OnRender() override {};
 
   virtual constexpr GameObjectTypes GetType() const override {
     return GameObjectTypes::Mesh;

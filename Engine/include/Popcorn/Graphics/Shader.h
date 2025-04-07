@@ -3,7 +3,9 @@
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
+#include "Sources.h"
 #include <fstream>
+#include <unordered_map>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -50,10 +52,6 @@ public:
     return spv;
   };
 
-  // [[nodiscard]] static Buffer LoadByteCode(ShaderFiles shaderName) {
-  //   return ReadSpvFile(PC_SHADER_SOURCE_MAP[shaderName]);
-  // };
-
   template <typename T> inline static void Print(Buffer &buffer) {
     Buffer::Print<T>(buffer);
   };
@@ -80,7 +78,14 @@ public:
   };
 
   void LoadShaders();
-  void GetShader();
+  template <ShaderFiles T> Buffer &GetShader() {
+    auto it = m_shaders.find(T);
+    if (it != m_shaders.end()) {
+      return it->second; // "Value" in hash map (std::pair)
+    } else {
+      throw std::runtime_error("Shader not found!");
+    }
+  }
 
 private:
   ShaderLibrary() { PC_PRINT("CREATED", TagType::Constr, "ShaderLibrary.h") };
@@ -96,6 +101,7 @@ private:
 
 private:
   static ShaderLibrary *s_instance;
+  std::unordered_map<ShaderFiles, Buffer> m_shaders;
 };
 
 GFX_NAMESPACE_END

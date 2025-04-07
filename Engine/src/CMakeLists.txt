@@ -45,6 +45,7 @@ add_library(
   ${GRAPHICS_IMPL_DIR}/BufferObjects.cpp
   ${GRAPHICS_IMPL_DIR}/Mesh.cpp
   ${GRAPHICS_IMPL_DIR}/Materials/Material.cpp
+  ${GRAPHICS_IMPL_DIR}/Shader.cpp
   #
   # SCENE CLASSES
   # TODO: Separate the scene to a different library when time comes

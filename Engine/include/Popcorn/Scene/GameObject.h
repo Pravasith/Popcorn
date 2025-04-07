@@ -94,9 +94,9 @@ public:
 
   virtual constexpr GameObjectTypes GetType() const = 0;
 
-  virtual void OnAttach() = 0;
-  virtual void OnUpdate() = 0;
-  virtual void OnRender() = 0;
+  virtual void OnAttach() {};
+  virtual void OnUpdate() {};
+  virtual void OnRender() {};
 
   void SetParent(GameObject *gameObj);
   void RemoveParent();
