@@ -156,6 +156,16 @@ RendererVk::GetRenderWorkflow(const RenderWorkflowIndices index) {
 };
 
 void RendererVk::ProcessScenes() {
+  // Attach meshes to Workflows (ptrs)
+  // Segregate by materials
+  // Create Vulkan:
+  //      - Vertex buffer memory
+  //      - Index buffer memory
+  //      - Descriptor sets (for every frame)
+  //            - Camera UBO
+  //            - Per mesh UBO (world matrix)
+  //            - Per material UBO (tbd)
+
   for (auto &scene : m_sceneLibrary.GetScenes()) {
     for (auto &node : scene->GetNodes()) {
       if (node->GetType() == GameObjectTypes::Mesh) {

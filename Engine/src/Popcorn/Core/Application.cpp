@@ -149,7 +149,7 @@ void Application::OnEvent(Event &e) {
   };
 };
 
-void Application::ProcessScenes() {
+void Application::CreateSceneRenderResources() {
   // Assigns meshes to Render Workflows
   s_renderer->ProcessScenes();
 

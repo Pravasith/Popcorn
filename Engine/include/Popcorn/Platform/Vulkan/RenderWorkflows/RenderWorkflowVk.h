@@ -6,7 +6,6 @@
 #include "PipelineFactoryVk.h"
 #include "Popcorn/Core/Base.h"
 #include <cstdint>
-#include <stdexcept>
 #include <vector>
 #include <vulkan/vulkan_core.h>
 
@@ -15,9 +14,9 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-enum class RenderWorkflowIndices {
-  Basic = 0,   // Basic colors
-  Shadows = 1, // Simple hard shadows
+enum class RenderFlows {
+  Basic = 0, // Basic colors
+  Lights,
 };
 
 class RenderWorkflowVk {
@@ -29,16 +28,14 @@ public:
   virtual ~RenderWorkflowVk() {
     m_meshes.clear();
     m_basicMaterials.clear();
+    m_pbrMaterials.clear();
 
     PipelineFactoryVk::Destroy();
     m_pipelineFactory = nullptr;
     PC_PRINT("DESTROYED", TagType::Destr, "RenderWorkflowVk")
   };
 
-  virtual const VkRenderPass &GetRenderPass() const {
-    throw std::runtime_error(
-        "GetRenderPass is not defined in the inherited class");
-  };
+  virtual const VkRenderPass &GetRenderPass() const = 0;
 
   virtual void
   RecordRenderCommands(const uint32_t frameIndex, const uint32_t currentFrame,

@@ -3,6 +3,7 @@
 #include "GlobalMacros.h"
 #include "Material.h"
 #include "Mesh.h"
+#include "Popcorn/Core/Base.h"
 #include "Renderer.h"
 #include <algorithm>
 
@@ -31,6 +32,8 @@ void Scene::AddGameObject(GameObject *node) {
   if (it == m_nodes.end()) {
     m_nodes.push_back(node);
     node->OnAttach();
+  } else {
+    PC_WARN("GameObject " << node << " already added")
   };
 };
 
@@ -38,6 +41,8 @@ void Scene::RemoveGameObject(GameObject *node) {
   auto it = std::find(m_nodes.begin(), m_nodes.end(), node);
   if (it != m_nodes.end()) {
     m_nodes.erase(it);
+  } else {
+    PC_WARN("GameObject " << node << " not found in the scene library")
   };
 };
 

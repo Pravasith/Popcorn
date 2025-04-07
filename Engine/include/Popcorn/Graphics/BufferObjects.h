@@ -78,19 +78,34 @@ struct Layout {
            attrOffsetsValue != other.attrOffsetsValue;
   }
 
+  // template <AttrTypes... E> void Set() {
+  //   // Attr Types stored in a seq
+  //   (attrTypesValue.push_back(E), ...);
+  //
+  //   // Attr Offsets stored in a seq (Inital value 0 already exists in the
+  //   // array, and we pop the last element offset).
+  //   (attrOffsetsValue.push_back(GetAttrTypeSize(E)), ...);
+  //   attrOffsetsValue.pop_back();
+  //
+  //   // Stride & count values
+  //   strideValue = (... + GetAttrTypeSize(E));
+  //   countValue = sizeof...(E);
+  // };
+
   template <AttrTypes... E> void Set() {
-    // Attr Types stored in a seq
-    (attrTypesValue.push_back(E), ...);
+    Reset();
 
-    // Attr Offsets stored in a seq (Inital value 0 already exists in the
-    // array, and we pop the last element offset).
-    (attrOffsetsValue.push_back(GetAttrTypeSize(E)), ...);
-    attrOffsetsValue.pop_back();
+    attrTypesValue = {E...};
+    uint32_t offset = 0;
 
-    // Stride & count values
-    strideValue = (... + GetAttrTypeSize(E));
+    for (auto type : attrTypesValue) {
+      attrOffsetsValue.push_back(offset);
+      offset += GetAttrTypeSize(type);
+    }
+
+    strideValue = offset;
     countValue = sizeof...(E);
-  };
+  }
 };
 
 BUFFER_DEFS_NAMESPACE_END

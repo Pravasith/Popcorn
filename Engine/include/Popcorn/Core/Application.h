@@ -25,7 +25,7 @@ public:
   static void Stop();
 
   static void StartGameLoop();
-  static void ProcessScenes();
+  static void CreateSceneRenderResources();
   static void AddLayer(Layer *);
 
   Window &GetAppWindow() const;

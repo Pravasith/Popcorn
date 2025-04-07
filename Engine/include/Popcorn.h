@@ -19,7 +19,7 @@ static void BeginContext() {
 
 static void RunGame() {
   // Prepares scenes, creates Vulkan resources
-  s_application->ProcessScenes();
+  s_application->CreateSceneRenderResources(); // Create Vulkan Resources
   // Starts game loop
   s_application->StartGameLoop();
 };
