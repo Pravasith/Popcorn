@@ -78,7 +78,8 @@ public:
   };
 
   void LoadShaders();
-  template <ShaderFiles T> Buffer &GetShader() {
+
+  template <ShaderFiles T> Buffer &GetInbuiltShader() {
     auto it = m_shaders.find(T);
     if (it != m_shaders.end()) {
       return it->second; // "Value" in hash map (std::pair)

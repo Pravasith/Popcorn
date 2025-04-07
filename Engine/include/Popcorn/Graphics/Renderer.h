@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GfxContext.h"
 #include "GlobalMacros.h"
 #include "Mesh.h"
 #include "Popcorn/Core/Window.h"
@@ -57,17 +58,17 @@ protected:
   Renderer(const Window &);
   virtual ~Renderer();
 
+private:
+  static void Init(const Window &);
+
+protected:
   SceneLibrary m_sceneLibrary;
+  const Window &m_AppWin;
 
 private:
   static RendererType s_type;
   static Renderer *s_instance;
-
-protected:
-  const Window &m_AppWin;
-
-private:
-  static void Init(const Window &);
+  static GfxContext *s_gfxContext;
 };
 
 template <RendererType T> Renderer *Renderer::Create(const Window &appWin) {

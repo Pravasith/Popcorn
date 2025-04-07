@@ -19,7 +19,6 @@ enum class MaterialTypes {
 
 template <MaterialTypes T> struct MaterialData {
   int enabledShadersMask = 0;
-  std::vector<const char *> shaderFiles{};
   bool doubleSided = false;
 
   MaterialData();
@@ -53,18 +52,21 @@ public:
   Material() { PC_PRINT("CREATED", TagType::Constr, "Material.h"); };
   virtual ~Material() { PC_PRINT("DESTROYED", TagType::Destr, "Material.h"); };
 
-  [[nodiscard]] inline const std::vector<Buffer> &GetShaders() const {
-    return m_shaders;
+  static constexpr MaterialTypes type_value = T;
+
+  [[nodiscard]] inline const Buffer &GetShader() const { return m_shader; };
+  void SetShader(Buffer &&spirVShaderCode) {
+    m_shader = std::move(spirVShaderCode);
   };
 
   // Shaders, uniform data (roughness, metallic etc)
-  void SetData(const DeriveMaterialDataType<T> &materialData) {
+  void SetData(const DeriveMaterialDataType<T>::type &materialData) {
     m_data = materialData;
   };
 
 protected:
-  std::vector<Buffer> m_shaders;
-  DeriveMaterialDataType<T> m_data;
+  Buffer m_shader;
+  DeriveMaterialDataType<T>::type m_data;
 };
 
 //

@@ -5,10 +5,13 @@
 #include "Camera.h"
 #include "Empty.h"
 #include "GameObject.h"
+#include "GfxContext.h"
 #include "GlobalMacros.h"
 #include "Helpers.h"
 #include "Material.h"
 #include "Mesh.h"
+#include "Shader.h"
+#include "Sources.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -17,6 +20,13 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+//
+//
+//
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// --- PUBLIC METHODS ----------------------------------------------------------
+//
 bool GltfLoader::LoadFromFile(const std::string &filename,
                               tinygltf::Model &model) {
   tinygltf::TinyGLTF loader;
@@ -41,34 +51,6 @@ bool GltfLoader::LoadFromFile(const std::string &filename,
   return ret;
 };
 
-void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
-                                 const tinygltf::Node &gltfNode, Mesh &mesh) {
-  // MESH TYPE
-  const auto &gltfMesh = model.meshes[gltfNode.mesh];
-
-  // gltfMesh.primitives are submeshes
-  for (const auto &primitive : gltfMesh.primitives) {
-    VertexBuffer *vbo;
-    IndexBuffer<uint16_t> *ibo;
-    MaterialData *matData;
-    Material *mat;
-
-    // Extract vertex buffer
-    vbo = ExtractVertexBuffer(model, primitive);
-
-    // Extract index buffer
-    ibo = ExtractIndexBuffer(model, primitive);
-
-    // Extract material data
-    if (primitive.material >= 0) {
-      ExtractMaterialData(model, model.materials[primitive.material], matData);
-      // TODO: Create material
-    }
-
-    mesh.AddSubmesh(vbo, ibo, mat);
-  }
-};
-
 void GltfLoader::ExtractModelData(const tinygltf::Model &model,
                                   std::vector<GameObject *> &gameObjects) {
   for (const auto &node : model.nodes) {
@@ -76,6 +58,72 @@ void GltfLoader::ExtractModelData(const tinygltf::Model &model,
     gameObjects.push_back(gameObject);
   }
 };
+
+//
+//
+//
+//
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// --- CONVERSION UTILS --------------------------------------------------------
+//
+GameObject *
+GltfLoader::ConvertGltfNodeToGameObject(const tinygltf::Model &model,
+                                        const tinygltf::Node &gltfNode) {
+  GameObject *gameObject = CreateGameObjectByType(model, gltfNode);
+  SetTransformData(gltfNode, *gameObject);
+
+  for (int child : gltfNode.children) {
+    GameObject *childGameObj =
+        ConvertGltfNodeToGameObject(model, model.nodes[child]);
+    gameObject->AddChild(childGameObj);
+  }
+
+  return gameObject;
+}
+
+void GltfLoader::SetTransformData(const tinygltf::Node &node,
+                                  GameObject &gameObject) {
+
+  // TODO: Decompose matrix to TRS for animations
+  auto outMatrix = glm::mat4(1.0f);
+
+  // Node has an explicit transformation matrix, set it directly.
+  if (!node.matrix.empty()) {
+    // TODO: Warning --- in this cases (usually on shear/uneven scale
+    // operations, Blender exports a nodeMatrix instead of transformations.
+    // Handle this later by decomposition. Or just don't use such objects for
+    // animations.
+    outMatrix = glm::make_mat4(node.matrix.data());
+    gameObject.SetLocalMatrix(outMatrix);
+  } else {
+    // Apply TRS components separately
+    glm::vec3 translation(0.0f);
+    glm::vec3 scale(1.0f);
+    glm::vec3 eulerAngles(0.0f); // Euler angles in radians
+
+    if (!node.translation.empty()) {
+      translation = glm::vec3(node.translation[0], node.translation[1],
+                              node.translation[2]);
+    }
+
+    if (!node.rotation.empty()) {
+      glm::quat rotationQuat(node.rotation[3], node.rotation[0],
+                             node.rotation[1], node.rotation[2]);
+      eulerAngles =
+          glm::eulerAngles(rotationQuat); // Convert quaternion to Euler angles
+    }
+
+    if (!node.scale.empty()) {
+      scale = glm::vec3(node.scale[0], node.scale[1], node.scale[2]);
+    }
+
+    // Store TRS in the GameObject --- internally constructs a localMatrix
+    gameObject.SetPosition(translation);
+    gameObject.SetRotationEuler(eulerAngles);
+    gameObject.SetScale(scale);
+  }
+}
 
 GameObject *GltfLoader::CreateGameObjectByType(const tinygltf::Model &model,
                                                const tinygltf::Node &node) {
@@ -116,112 +164,141 @@ GameObject *GltfLoader::CreateGameObjectByType(const tinygltf::Model &model,
   }
 };
 
-// TODO: Decompose matrix to TRS for animations
-void GltfLoader::SetTransformData(const tinygltf::Node &node,
-                                  GameObject &gameObject) {
-  auto outMatrix = glm::mat4(1.0f);
+//
+//
+//
+//
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// --- MESH UTILS --------------------------------------------------------------
+//
+void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
+                                 const tinygltf::Node &gltfNode, Mesh &mesh) {
+  // MESH TYPE
+  const auto &gltfMesh = model.meshes[gltfNode.mesh];
 
-  // Node has an explicit transformation matrix, set it directly.
-  if (!node.matrix.empty()) {
-    // TODO: Warning --- in this cases (usually on shear/uneven scale
-    // operations, Blender exports a nodeMatrix instead of transformations.
-    // Handle this later by decomposition. Or just don't use such objects for
-    // animations.
-    outMatrix = glm::make_mat4(node.matrix.data());
-    gameObject.SetLocalMatrix(outMatrix);
-  } else {
-    // Apply TRS components separately
-    glm::vec3 translation(0.0f);
-    glm::vec3 scale(1.0f);
-    glm::vec3 eulerAngles(0.0f); // Euler angles in radians
+  // gltfMesh.primitives are submeshes
+  for (const auto &primitive : gltfMesh.primitives) {
+    VertexBuffer *vbo;
+    IndexBuffer<uint16_t> *ibo;
 
-    if (!node.translation.empty()) {
-      translation = glm::vec3(node.translation[0], node.translation[1],
-                              node.translation[2]);
-    }
+    // Extract vertex buffer
+    vbo = ExtractVertexBuffer(model, primitive);
 
-    if (!node.rotation.empty()) {
-      glm::quat rotationQuat(node.rotation[3], node.rotation[0],
-                             node.rotation[1], node.rotation[2]);
-      eulerAngles =
-          glm::eulerAngles(rotationQuat); // Convert quaternion to Euler angles
-    }
+    // Extract index buffer
+    ibo = ExtractIndexBuffer(model, primitive);
 
-    if (!node.scale.empty()) {
-      scale = glm::vec3(node.scale[0], node.scale[1], node.scale[2]);
-    }
+    // Extract material data
+    if (primitive.material >= 0) {
+      auto &gltfMaterial = model.materials[primitive.material];
+      MaterialTypes matType = GetGltfMaterialType(gltfMaterial);
 
-    // Store TRS in the GameObject --- internally constructs a localMatrix
-    gameObject.SetPosition(translation);
-    gameObject.SetRotationEuler(eulerAngles);
-    gameObject.SetScale(scale);
+      switch (matType) {
+      case MaterialTypes::PbrMat: {
+        PbrMaterialData materialData =
+            ExtractMaterialData<MaterialTypes::PbrMat>(model, gltfMaterial);
+        Material<MaterialTypes::PbrMat> *mat =
+            new Material<MaterialTypes::PbrMat>();
+        // Setting spir-v shader code
+        mat->SetShader(
+            std::move(GfxContext::ShaderLib()
+                          ->GetInbuiltShader<ShaderFiles::PbrMat_Vert>()));
+        mesh.AddSubmesh(vbo, ibo, mat);
+        break;
+      }
+      case MaterialTypes::BasicMat: {
+        Material<MaterialTypes::BasicMat> *mat =
+            new Material<MaterialTypes::BasicMat>();
+        mat->SetData(
+            ExtractMaterialData<MaterialTypes::BasicMat>(model, gltfMaterial));
+        mesh.AddSubmesh(vbo, ibo, mat);
+        break;
+      }
+      default:
+        PC_ERROR("Wrong material type!", "GltfLoader")
+      }
+    } else {
+      // Fallback to basic material
+      Material<MaterialTypes::BasicMat> *mat =
+          new Material<MaterialTypes::BasicMat>();
+      mesh.AddSubmesh(vbo, ibo, mat);
+    };
   }
+};
+
+//
+//
+//
+//
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// --- MATERIAL UTILS ----------------------------------------------------------
+//
+template <MaterialTypes T>
+DeriveMaterialDataType<T>::type
+GltfLoader::ExtractMaterialData(const tinygltf::Model &model,
+                                const tinygltf::Material &material) {
+  typename DeriveMaterialDataType<T>::type materialData;
+  const auto &gltfMatData = material.pbrMetallicRoughness;
+
+  materialData.doubleSided = false;
+  materialData.enabledShadersMask =
+      ShaderStages::VertexBit | ShaderStages::FragmentBit;
+
+  if constexpr (T == MaterialTypes::PbrMat) {
+    // Add shader byte code
+    materialData.baseColorFactor = glm::vec4(
+        gltfMatData.baseColorFactor[0], gltfMatData.baseColorFactor[1],
+        gltfMatData.baseColorFactor[2], gltfMatData.baseColorFactor[3]);
+    materialData.metallicFactor = gltfMatData.metallicFactor;
+    materialData.roughnessFactor = gltfMatData.roughnessFactor;
+    materialData.hasNormalTexture = material.normalTexture.index != -1;
+    materialData.hasMetallicRoughnessTexture =
+        gltfMatData.metallicRoughnessTexture.index != -1;
+  } else {
+    // DEFAULTS TO BASIC MATERIAL
+    // Add shader byte code
+    materialData.baseColorFactor = glm::vec4(
+        gltfMatData.baseColorFactor[0], gltfMatData.baseColorFactor[1],
+        gltfMatData.baseColorFactor[2], gltfMatData.baseColorFactor[3]);
+  }
+
+  // // Add shader files based on material type
+  // data->shaderFiles =
+  //     isPBR ? std::vector<const char *>{"pbr.vert", "pbr.frag"}
+  //           : std::vector<const char *>{"basic.vert", "basic.frag"};
+  //
+  return materialData;
 }
 
-GameObject *
-GltfLoader::ConvertGltfNodeToGameObject(const tinygltf::Model &model,
-                                        const tinygltf::Node &gltfNode) {
-  GameObject *gameObject = CreateGameObjectByType(model, gltfNode);
-  SetTransformData(gltfNode, *gameObject);
+MaterialTypes
+GltfLoader::GetGltfMaterialType(const tinygltf::Material &material) {
+  const auto &pbr = material.pbrMetallicRoughness;
 
-  for (int child : gltfNode.children) {
-    GameObject *childGameObj =
-        ConvertGltfNodeToGameObject(model, model.nodes[child]);
-    gameObject->AddChild(childGameObj);
-  }
+  // Determine material type
+  bool isPBR = pbr.metallicFactor > 0.0f || pbr.roughnessFactor > 0.0f ||
+               material.normalTexture.index != -1 ||
+               material.occlusionTexture.index != -1;
 
-  return gameObject;
+  if (isPBR) {
+    return MaterialTypes::PbrMat;
+  } else {
+    return MaterialTypes::BasicMat;
+  };
 }
 
 //
 // Random thought: Valora is a sick name for a videogame character
 //
+
 //
-MaterialData
-GltfLoader::ExtractMaterialData(const tinygltf::Model &model,
-                                const tinygltf::Material &material) {
-  // const auto &pbr = material.pbrMetallicRoughness;
-  //
-  // // Determine material type
-  // bool isPBR = pbr.metallicFactor > 0.0f || pbr.roughnessFactor > 0.0f ||
-  //              material.normalTexture.index != -1 ||
-  //              material.occlusionTexture.index != -1;
-  //
-  // // Common properties
-  // auto fillBaseData = [](MaterialData *data, const tinygltf::Material &mat) {
-  //   data->doubleSided = mat.doubleSided;
-  //   // Add shader files based on material type
-  //   data->shaderFiles =
-  //       isPBR ? std::vector<const char *>{"pbr.vert", "pbr.frag"}
-  //             : std::vector<const char *>{"basic.vert", "basic.frag"};
-  // };
-  //
-  // // Create appropriate material type
-  // if (isPBR) {
-  //   PbrMaterialData *pbrData = new PbrMaterialData();
-  //   fillBaseData(pbrData, material);
-  //
-  //   pbrData->baseColorFactor =
-  //       glm::vec4(pbr.baseColorFactor[0], pbr.baseColorFactor[1],
-  //                 pbr.baseColorFactor[2], pbr.baseColorFactor[3]);
-  //   pbrData->metallicFactor = pbr.metallicFactor;
-  //   pbrData->roughnessFactor = pbr.roughnessFactor;
-  //   pbrData->hasNormalTexture = material.normalTexture.index != -1;
-  //   pbrData->hasMetallicRoughnessTexture =
-  //       pbr.metallicRoughnessTexture.index != -1;
-  //
-  //   return pbrData;
-  // } else {
-  //   BasicMaterialData *basicData = new BasicMaterialData();
-  //   fillBaseData(basicData, material);
-  //
-  //   basicData->baseColorFactor =
-  //       glm::vec4(pbr.baseColorFactor[0], pbr.baseColorFactor[1],
-  //                 pbr.baseColorFactor[2], pbr.baseColorFactor[3]);
-  //
-  //   return basicData;
-  // }
-}
+//
+//
+//
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// --- PRIMITIVE UTILS ---------------------------------------------------------
+//
 
 VertexBuffer *
 GltfLoader::ExtractVertexBuffer(const tinygltf::Model &model,

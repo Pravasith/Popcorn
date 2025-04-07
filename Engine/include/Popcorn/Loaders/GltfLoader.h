@@ -64,9 +64,16 @@ private:
   [[nodiscard]] static IndexBuffer<uint16_t> *
   ExtractIndexBuffer(const tinygltf::Model &model,
                      const tinygltf::Primitive &primitive);
-  [[nodiscard]] static MaterialData
+
+  //
+  // --- MATERIAL UTILS --------------------------------------------------------
+  template <MaterialTypes T>
+  [[nodiscard]] static DeriveMaterialDataType<T>::type
   ExtractMaterialData(const tinygltf::Model &model,
                       const tinygltf::Material &material);
+
+  [[nodiscard]] static MaterialTypes
+  GetGltfMaterialType(const tinygltf::Material &material);
 };
 
 GFX_NAMESPACE_END
