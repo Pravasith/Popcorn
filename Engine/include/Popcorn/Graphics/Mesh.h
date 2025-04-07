@@ -14,10 +14,28 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+//
+// ----------------------------------------------------------------------------
+// --- UTILS ------------------------------------------------------------------
+template <MaterialTypes T>
 [[nodiscard]] uint32_t PC_GetHashedSubmeshId(VertexBuffer *vertexBuffer,
                                              IndexBuffer<uint16_t> *indexBuffer,
-                                             Material *material);
+                                             Material<T> *material) {
+  uintptr_t vAddr = reinterpret_cast<uintptr_t>(vertexBuffer);
+  uintptr_t iAddr = reinterpret_cast<uintptr_t>(indexBuffer);
+  uintptr_t mAddr = reinterpret_cast<uintptr_t>(material);
 
+  return static_cast<uint32_t>((vAddr ^ (iAddr >> 3) ^ (mAddr >> 6)) *
+                               2654435761u); // Knuth's golden ratio
+}
+
+//
+//
+//
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// --- SUBMESH ----------------------------------------------------------------
+//
 template <MaterialTypes T> class Submesh {
 public:
   Submesh(VertexBuffer *vbo, IndexBuffer<uint16_t> *ibo, Material<T> *mat)
@@ -112,19 +130,35 @@ public:
                   Material<T> *mat) {
     PC_ASSERT(vbo && ibo && mat, "Submesh parameter(s) nullptr");
 
-    for (auto &submesh : m_submeshes) {
-      if (submesh.GetId() == PC_GetHashedSubmeshId(vbo, ibo, mat)) {
-        PC_WARN("Identical submesh already exists in Mesh")
-        return;
-      };
-    }
+    if constexpr (T == MaterialTypes::BasicMat) {
+      for (auto &submesh : m_basicSubmeshes) {
+        if (submesh.GetId() == PC_GetHashedSubmeshId(vbo, ibo, mat)) {
+          PC_WARN("Identical submesh already exists in Mesh")
+          return;
+        };
+      }
 
-    m_submeshes.emplace_back(vbo, ibo, mat);
+      m_basicSubmeshes.emplace_back(vbo, ibo, mat);
+    } else if constexpr (T == MaterialTypes::PbrMat) {
+      for (auto &submesh : m_pbrSubmeshes) {
+        if (submesh.GetId() == PC_GetHashedSubmeshId(vbo, ibo, mat)) {
+          PC_WARN("Identical submesh already exists in Mesh")
+          return;
+        };
+      }
+
+      m_pbrSubmeshes.emplace_back(vbo, ibo, mat);
+    } else {
+      // Rest material types...
+    }
   };
 
 protected:
   Uniforms m_uniformBuffer;
-  std::vector<Submesh> m_submeshes;
+
+  //
+  std::vector<Submesh<MaterialTypes::BasicMat>> m_basicSubmeshes;
+  std::vector<Submesh<MaterialTypes::PbrMat>> m_pbrSubmeshes;
 };
 
 GFX_NAMESPACE_END
