@@ -195,14 +195,16 @@ void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
 
       switch (matType) {
       case MaterialTypes::PbrMat: {
-        PbrMaterialData materialData =
-            ExtractMaterialData<MaterialTypes::PbrMat>(model, gltfMaterial);
         Material<MaterialTypes::PbrMat> *mat =
             new Material<MaterialTypes::PbrMat>();
-        // Setting spir-v shader code
-        mat->SetShader(
-            std::move(GfxContext::ShaderLib()
-                          ->GetInbuiltShader<ShaderFiles::PbrMat_Vert>()));
+        mat->SetData(
+            ExtractMaterialData<MaterialTypes::PbrMat>(model, gltfMaterial));
+        mat->SetShader(ShaderStages::VertexBit,
+                       GfxContext::Shaders()
+                           ->GetInbuiltShader<ShaderFiles::PbrMat_Vert>());
+        mat->SetShader(ShaderStages::FragmentBit,
+                       GfxContext::Shaders()
+                           ->GetInbuiltShader<ShaderFiles::PbrMat_Frag>());
         mesh.AddSubmesh(vbo, ibo, mat);
         break;
       }
@@ -211,6 +213,12 @@ void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
             new Material<MaterialTypes::BasicMat>();
         mat->SetData(
             ExtractMaterialData<MaterialTypes::BasicMat>(model, gltfMaterial));
+        mat->SetShader(ShaderStages::VertexBit,
+                       GfxContext::Shaders()
+                           ->GetInbuiltShader<ShaderFiles::BasicMat_Vert>());
+        mat->SetShader(ShaderStages::FragmentBit,
+                       GfxContext::Shaders()
+                           ->GetInbuiltShader<ShaderFiles::BasicMat_Frag>());
         mesh.AddSubmesh(vbo, ibo, mat);
         break;
       }
@@ -242,6 +250,8 @@ GltfLoader::ExtractMaterialData(const tinygltf::Model &model,
   const auto &gltfMatData = material.pbrMetallicRoughness;
 
   materialData.doubleSided = false;
+
+  // Shaders mask
   materialData.enabledShadersMask =
       ShaderStages::VertexBit | ShaderStages::FragmentBit;
 

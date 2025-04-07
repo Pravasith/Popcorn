@@ -3,7 +3,9 @@
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
+#include "Shader.h"
 #include <glm/glm.hpp>
+#include <unordered_map>
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
@@ -54,9 +56,13 @@ public:
 
   static constexpr MaterialTypes type_value = T;
 
-  [[nodiscard]] inline const Buffer &GetShader() const { return m_shader; };
-  void SetShader(Buffer &&spirVShaderCode) {
-    m_shader = std::move(spirVShaderCode);
+  [[nodiscard]] inline const std::unordered_map<ShaderStages, Buffer &> &
+  GetShaderMap() const {
+    return m_shaderByteCodeMap;
+  };
+
+  void SetShader(ShaderStages stage, Buffer &spirVShaderCode) {
+    m_shaderByteCodeMap[stage] = spirVShaderCode;
   };
 
   // Shaders, uniform data (roughness, metallic etc)
@@ -65,7 +71,7 @@ public:
   };
 
 protected:
-  Buffer m_shader;
+  std::unordered_map<ShaderStages, Buffer &> m_shaderByteCodeMap;
   DeriveMaterialDataType<T>::type m_data;
 };
 

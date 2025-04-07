@@ -27,7 +27,7 @@ public:
     };
   };
 
-  static ShaderLibrary *ShaderLib() {
+  static ShaderLibrary *Shaders() {
     if (!s_shaderLibrary) {
       throw std::runtime_error("ShaderLibrary is null");
     }

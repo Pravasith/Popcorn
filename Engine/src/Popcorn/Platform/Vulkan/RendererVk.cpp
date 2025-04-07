@@ -100,7 +100,7 @@ void RendererVk::CreateVulkanContext() {
 
 void RendererVk::DestroyVulkanContext() {
   s_vulkanContext->VulkanCleanUp();
-  s_vulkanContext->Destroy();
+  ContextVk::Destroy();
   s_vulkanContext = nullptr;
 };
 
