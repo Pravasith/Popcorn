@@ -5,8 +5,8 @@
 #include "GlobalMacros.h"
 #include "Material.h"
 #include "Popcorn/Core/Base.h"
+#include "RenderFlowVk.h"
 #include "RenderPassVk.h"
-#include "RenderWorkflowVk.h"
 #include <cstdint>
 #include <glm/glm.hpp>
 #include <vector>
@@ -17,7 +17,7 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-class BasicRenderWorkflowVk : public RenderWorkflowVk {
+class BasicRenderFlowVk : public RenderFlowVk {
 public:
   struct Uniforms {
     alignas(16) glm::mat4 view;
@@ -25,13 +25,13 @@ public:
   };
 
 public:
-  BasicRenderWorkflowVk() {
+  BasicRenderFlowVk() {
     s_vertexBufferLayout
         .Set<BufferDefs::AttrTypes::Float3, BufferDefs::AttrTypes::Float3>();
 
     PC_PRINT("CREATED", TagType::Constr, "BasicWorkflowVk")
   };
-  virtual ~BasicRenderWorkflowVk() override {
+  virtual ~BasicRenderFlowVk() override {
     PC_PRINT("DESTROYED", TagType::Destr, "BasicWorkflowVk")
   };
 

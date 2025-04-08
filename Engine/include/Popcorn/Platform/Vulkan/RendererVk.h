@@ -4,7 +4,7 @@
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Window.h"
 #include "Popcorn/Events/WindowEvent.h"
-#include "RenderWorkflowVk.h"
+#include "RenderFlows/RenderFlowVk.h"
 #include "Renderer.h"
 #include <cstdint>
 #include <vector>
@@ -20,20 +20,20 @@ public:
   RendererVk(const Window &appWin);
   virtual ~RendererVk() override;
 
-  virtual void ProcessScenes() override;
-  virtual void CreateResources() override;
+  virtual void CreateRenderFlows() override;
+  virtual void AssignSceneObjectsToRenderFlows() override;
+  virtual void CreateRenderFlowResources() override;
+
   virtual void DrawFrame(const Scene &scene) override;
+
   virtual bool OnFrameBufferResize(FrameBfrResizeEvent &) override;
-  virtual void AddMeshToWorkflow(Mesh *meshPtr) override;
 
   // Sets up devices, configure swapchains, creates depth buffers
   // also allocates command pools
   void CreateVulkanContext();
   void DestroyVulkanContext();
-  // Creates render workflows
-  void CreateRenderWorkflows();
 
-  static RenderWorkflowVk *GetRenderWorkflow(const RenderWorkflowIndices index);
+  static RenderFlowVk *GetRenderFlow(const RenderFlows index);
   void CreateBasicCommandBuffers();
 
 private:
@@ -48,7 +48,7 @@ public:
 
 private:
   static ContextVk *s_vulkanContext;
-  static std::vector<RenderWorkflowVk *> s_renderWorkflows;
+  static std::vector<RenderFlowVk *> s_renderWorkflows;
   std::vector<VkCommandBuffer> m_drawingCommandBuffers;
 };
 

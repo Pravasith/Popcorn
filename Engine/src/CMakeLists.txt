@@ -70,6 +70,6 @@ add_library(
   ${PLATFORM_IMPL_DIR}/Vulkan/MemoryAllocatorVk.cpp
   #
   # RENDER WORK FLOWS
-  ${PLATFORM_IMPL_DIR}/Vulkan/RenderWorkflows/BasicWorkflowVk.cpp)
+  ${PLATFORM_IMPL_DIR}/Vulkan/RenderFlows/BasicRenderFlowVk.cpp)
 
 #

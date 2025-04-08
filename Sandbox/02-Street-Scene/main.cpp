@@ -64,7 +64,7 @@ public:
     triScene.AddNode(mesh);
 
     auto &renderer = Popcorn::Context::GetRenderer();
-    renderer.AddScene(&triScene);
+    renderer.AddSceneToStage(&triScene);
   };
 
   virtual void OnDetach() override {
@@ -100,8 +100,9 @@ int main(int argc, char **argv) {
 
   auto gameLayer = new GameLayer();
   Application::AddLayer(gameLayer);
+  // Adds scene on attach
 
-  Popcorn::Context::RunGame();
+  Popcorn::Context::StartGame();
 
   Popcorn::Context::End();
   return 0;

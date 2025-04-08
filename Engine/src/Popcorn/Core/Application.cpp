@@ -149,12 +149,11 @@ void Application::OnEvent(Event &e) {
   };
 };
 
-void Application::CreateSceneRenderResources() {
-  // Assigns meshes to Render Workflows
-  s_renderer->ProcessScenes();
-
-  // Creates Vulkan resources
-  s_renderer->CreateResources();
+void Application::ProcessScenes() {
+  // Assigns game objects to workflows
+  s_renderer->CreateRenderFlows();
+  s_renderer->AssignScenesToRenderFlows();
+  s_renderer->CreateRenderFlowResources();
 };
 
 ENGINE_NAMESPACE_END

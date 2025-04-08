@@ -134,7 +134,7 @@ target_include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Pipelines>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Descriptors>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/RenderWorkflows>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/RenderFlows>
     #
     # Tiny-gltf
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic>
@@ -147,8 +147,7 @@ target_include_directories(
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Pipelines>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Descriptors>
-            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/RenderWorkflows>
-)
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/RenderFlows>)
 
 target_include_directories(
   Popcorn

@@ -1,12 +1,11 @@
 #include "RendererVk.h"
-#include "BasicWorkflowVk.h"
 #include "CommandPoolVk.h"
 #include "ContextVk.h"
 #include "Material.h"
 #include "Mesh.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
-#include "RenderWorkflowVk.h"
+#include "RenderFlows/BasicRenderFlowVk.h"
 #include <cstring>
 #include <vulkan/vulkan_core.h>
 
@@ -14,28 +13,27 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 ContextVk *RendererVk::s_vulkanContext = nullptr;
-std::vector<RenderWorkflowVk *> RendererVk::s_renderWorkflows{};
+std::vector<RenderFlowVk *> RendererVk::s_renderWorkflows{};
 
 //
 // -------------------------------------------------------------------------
 // --- PUBLIC METHODS ------------------------------------------------------
 
 void RendererVk::DrawFrame(const Scene &scene) {
-  BasicRenderWorkflowVk *basicRenderWorkflow =
-      reinterpret_cast<BasicRenderWorkflowVk *>(
-          s_renderWorkflows[(int)RenderWorkflowIndices::Basic]);
+  BasicRenderFlowVk *basicRenderFlow = reinterpret_cast<BasicRenderFlowVk *>(
+      s_renderWorkflows[(int)RenderFlows::Basic]);
 
   ContextVk::Frame()->Draw(
       m_drawingCommandBuffers,
 
       // Pass final paint renderpass for swapchain recreation
       // TODO: Isolate this renderpass (move it outside basicWorkflow)
-      basicRenderWorkflow->GetRenderPass(),
+      basicRenderFlow->GetRenderPass(),
 
       // Update scene data lambda
       [&](const uint32_t currentFrame) {
         // TODO: Write a loop for render workflows instead
-        basicRenderWorkflow->ProcessSceneUpdates(currentFrame);
+        basicRenderFlow->ProcessSceneUpdates(currentFrame);
       },
 
       // Record draw commands lambda
@@ -47,8 +45,8 @@ void RendererVk::DrawFrame(const Scene &scene) {
         // --- RECORD ALL COMMAND BUFFERS HERE -----------------------------
 
         // TODO: Write a loop for render workflows instead
-        basicRenderWorkflow->RecordRenderCommands(frameIndex, currentFrame,
-                                                  currentFrameCommandBuffer);
+        basicRenderFlow->RecordRenderCommands(frameIndex, currentFrame,
+                                              currentFrameCommandBuffer);
 
         // --- RECORD ALL COMMAND BUFFERS HERE -----------------------------
         // -----------------------------------------------------------------
@@ -107,8 +105,8 @@ void RendererVk::DestroyVulkanContext() {
 //
 // ---------------------------------------------------------------------------
 // --- RENDER WORKFLOWS ------------------------------------------------------
-void RendererVk::CreateRenderWorkflows() {
-  BasicRenderWorkflowVk *basicRendererWorkflow = new BasicRenderWorkflowVk;
+void RendererVk::CreateRenderFlows() {
+  BasicRenderFlowVk *basicRendererWorkflow = new BasicRenderFlowVk;
   s_renderWorkflows.push_back(basicRendererWorkflow);
 
   //
@@ -123,7 +121,7 @@ void RendererVk::CreateRenderWorkflows() {
 
 // Sort materials, allocate descriptor sets, vk buffers, index buffers &
 // create pipelines
-void RendererVk::CreateResources() {
+void RendererVk::CreateRenderFlowResources() {
   // Create VMA Allocator
   ContextVk::MemoryAllocator()->CreateVMAAllocator();
 
@@ -143,37 +141,30 @@ void RendererVk::CreateResources() {
   }
 };
 
-void RendererVk::AddMeshToWorkflow(Mesh *mesh) {
-  BasicRenderWorkflowVk *basicRenderWorkflow =
-      reinterpret_cast<BasicRenderWorkflowVk *>(
-          s_renderWorkflows[(int)RenderWorkflowIndices::Basic]);
-  basicRenderWorkflow->AddMeshToWorkflow(mesh);
-};
-
-RenderWorkflowVk *
-RendererVk::GetRenderWorkflow(const RenderWorkflowIndices index) {
-  return s_renderWorkflows[(int)index];
-};
-
-void RendererVk::ProcessScenes() {
-  // Attach meshes to Workflows (ptrs)
-  // Segregate by materials
-  // Create Vulkan:
+void RendererVk::AssignSceneObjectsToRenderFlows() {
+  // Attach Meshes to Workflows (ptrs)
+  // Segregate to submesh types
+  // Create Vulkan resources:
   //      - Vertex buffer memory
   //      - Index buffer memory
   //      - Descriptor sets (for every frame)
   //            - Camera UBO
   //            - Per mesh UBO (world matrix)
   //            - Per material UBO (tbd)
-
   for (auto &scene : m_sceneLibrary.GetScenes()) {
     for (auto &node : scene->GetNodes()) {
-      if (node->GetType() == GameObjectTypes::Mesh) {
-        auto *meshPtr = (Mesh *)node;
-        AddMeshToWorkflow(meshPtr);
-      };
+      // Recurse
+      // ProcessGameObjectNode(node);
     };
   };
+
+  // BasicRenderFlowVk *basicRenderFlow = reinterpret_cast<BasicRenderFlowVk *>(
+  //     s_renderWorkflows[(int)RenderFlows::Basic]);
+  // basicRenderFlow->AddMeshToWorkflow(mesh);
+};
+
+RenderFlowVk *RendererVk::GetRenderFlow(const RenderFlows index) {
+  return s_renderWorkflows[(int)index];
 };
 
 GFX_NAMESPACE_END

@@ -1,4 +1,4 @@
-#include "BasicWorkflowVk.h"
+#include "RenderFlows/BasicRenderFlowVk.h"
 #include "BufferObjects.h"
 #include "BufferObjectsVk.h"
 #include "ContextVk.h"
@@ -25,13 +25,13 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-BufferDefs::Layout BasicRenderWorkflowVk::s_vertexBufferLayout{};
+BufferDefs::Layout BasicRenderFlowVk::s_vertexBufferLayout{};
 
 #ifdef PC_DEBUG
 constexpr bool showDrawCommandCount = false;
 #endif
 
-void BasicRenderWorkflowVk::CreatePipelines() {
+void BasicRenderFlowVk::CreatePipelines() {
 
   // CREATE BASE PIPELINE
   // TODO: Create pipeline abstraction in the factory
@@ -45,7 +45,7 @@ void BasicRenderWorkflowVk::CreatePipelines() {
   // CreateBasePipeline(); // From Pipeline factory
 };
 
-void BasicRenderWorkflowVk::CreateRenderPass() {
+void BasicRenderFlowVk::CreateRenderPass() {
   //
   // ----------------------------------------------------------------
   // --- Basic RenderPass -------------------------------------------
@@ -114,14 +114,14 @@ void BasicRenderWorkflowVk::CreateRenderPass() {
                              ContextVk::Device()->GetDevice());
 };
 
-void BasicRenderWorkflowVk::CreateFramebuffers() {
+void BasicRenderFlowVk::CreateFramebuffers() {
   ContextVk::Swapchain()->CreateSwapchainFramebuffers(
       ContextVk::Device()->GetDevice(), m_basicRenderPassVk.GetVkRenderPass());
 };
 
-void BasicRenderWorkflowVk::RecordRenderCommands(
-    const uint32_t imageIndex, const uint32_t currentFrame,
-    VkCommandBuffer &commandBuffer) {
+void BasicRenderFlowVk::RecordRenderCommands(const uint32_t imageIndex,
+                                             const uint32_t currentFrame,
+                                             VkCommandBuffer &commandBuffer) {
   auto *swapchainVkStn = ContextVk::Swapchain();
 
   //
@@ -212,7 +212,7 @@ void BasicRenderWorkflowVk::RecordRenderCommands(
 #endif
 };
 
-void BasicRenderWorkflowVk::AddMeshToWorkflow(Mesh *mesh) {
+void BasicRenderFlowVk::AddMeshToWorkflow(Mesh *mesh) {
   auto ptr = std::find(m_meshes.begin(), m_meshes.end(), mesh);
 
   if (ptr != m_meshes.end()) {
@@ -223,7 +223,7 @@ void BasicRenderWorkflowVk::AddMeshToWorkflow(Mesh *mesh) {
   if (mesh->GetVertexBuffer().GetLayout() != s_vertexBufferLayout) {
     PC_ERROR(
         "Mesh vertex layout doesn't match with BasicWorkflow vertex layout",
-        "BasicRenderWorkflow")
+        "BasicRenderFlow")
     return;
   };
 
@@ -246,7 +246,7 @@ void BasicRenderWorkflowVk::AddMeshToWorkflow(Mesh *mesh) {
 // --------------------------------------------------------------------------
 // --- VERTEX BUFFER ALLOCATION ---------------------------------------------
 //
-void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
+void BasicRenderFlowVk::AllocateVkVertexBuffers() {
   m_vertexBufferOffsets.resize(m_meshes.size());
 
   VkDeviceSize currentOffset = 0;
@@ -321,7 +321,7 @@ void BasicRenderWorkflowVk::AllocateVkVertexBuffers() {
 // --------------------------------------------------------------------------
 // --- INDEX BUFFER ALLOCATION ----------------------------------------------
 //
-void BasicRenderWorkflowVk::AllocateVkIndexBuffers() {
+void BasicRenderFlowVk::AllocateVkIndexBuffers() {
   m_indexBufferOffsets.resize(m_meshes.size());
 
   VkDeviceSize currentOffset = 0;
@@ -394,7 +394,7 @@ void BasicRenderWorkflowVk::AllocateVkIndexBuffers() {
 // --------------------------------------------------------------------------
 // --- UNIFORM BUFFERS ALLOCATION -------------------------------------------
 //
-void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
+void BasicRenderFlowVk::AllocateVkUniformBuffers() {
   const VkExtent2D &swapchainExtent =
       ContextVk::Swapchain()->GetSwapchainExtent();
   constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
@@ -475,12 +475,12 @@ void BasicRenderWorkflowVk::AllocateVkUniformBuffers() {
 // --- DESCRIPTOR POOL & SETS -----------------------------------------------
 //
 
-void BasicRenderWorkflowVk::CreateDescriptorSetLayouts() {
+void BasicRenderFlowVk::CreateDescriptorSetLayouts() {
   ContextVk::DescriptorFactory()->CreateDescriptorSetLayouts<Pipelines::Base>();
   // ContextVk::DescriptorFactory()->CreateDescriptorSetLayouts<Pipelines::Deferred>();
 };
 
-void BasicRenderWorkflowVk::CreateDescriptorPool() {
+void BasicRenderFlowVk::CreateDescriptorPool() {
   constexpr uint32_t maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
   uint32_t maxDSets = 2 * maxFramesInFlight; // 1 global + 1 per-object
 
@@ -495,7 +495,7 @@ void BasicRenderWorkflowVk::CreateDescriptorPool() {
   DescriptorPoolVk::CreateDescriptorPool(poolInfo, &m_descriptorPool);
 };
 
-void BasicRenderWorkflowVk::CreateDescriptorSets() {
+void BasicRenderFlowVk::CreateDescriptorSets() {
   constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
   auto &device = ContextVk::Device()->GetDevice();
 
@@ -585,7 +585,7 @@ void BasicRenderWorkflowVk::CreateDescriptorSets() {
 // --- RUNS EVERY FRAME -----------------------------------------------------
 //
 
-void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
+void BasicRenderFlowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
   // Copy view project matrix first
   BufferVkUtils::CopyBufferCPUToGPU(
       (byte_t *)m_globalMappedUniforms[currentFrame], &m_viewProjUBO,
@@ -606,7 +606,7 @@ void BasicRenderWorkflowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
 // --------------------------------------------------------------------------
 // --- CLEANUP --------------------------------------------------------------
 //
-void BasicRenderWorkflowVk::CleanUp() {
+void BasicRenderFlowVk::CleanUp() {
   auto &device = ContextVk::Device()->GetDevice();
   auto *framebuffersVkStn = FramebuffersVk::Get();
   const auto &allocator = MemoryAllocatorVk::Get()->GetVMAAllocator();

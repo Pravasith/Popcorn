@@ -41,16 +41,18 @@ public:
   void AddScene(Scene *scene) { m_sceneLibrary.Add(scene); };
   void RemoveScene(Scene *scene) { m_sceneLibrary.Remove(scene); };
 
-  // PASS IN SCENE & CAMERA ETC.
-  virtual void ProcessScenes() = 0;
-  virtual void CreateResources() = 0;
-  virtual void DrawFrame(const Scene &scene) = 0;
-  virtual bool OnFrameBufferResize(FrameBfrResizeEvent &) = 0;
-  virtual void AddMeshToWorkflow(Mesh *meshPtr) = 0;
+  virtual void CreateRenderFlows() = 0;
+  virtual void AssignSceneObjectsToRenderFlows() = 0;
+  virtual void CreateRenderFlowResources() = 0;
 
+  virtual void DrawFrame(const Scene &scene) = 0;
+
+  // Utils
+  virtual bool OnFrameBufferResize(FrameBfrResizeEvent &) = 0;
+
+  // DELETE COPY & MOVE OPERATIONS
   Renderer(const Renderer &) = delete;
   Renderer &operator=(const Renderer &) = delete;
-
   Renderer(Renderer &&) = delete;
   Renderer &operator=(const Renderer &&) = delete;
 

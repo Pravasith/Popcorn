@@ -17,11 +17,9 @@ static void BeginContext() {
   s_application->SetRenderer(*s_renderer);
 }
 
-static void RunGame() {
-  // Prepares scenes, creates Vulkan resources
-  s_application->CreateSceneRenderResources(); // Create Vulkan Resources
-  // Starts game loop
-  s_application->StartGameLoop();
+static void StartGame() {
+  s_application->ProcessScenes(); // Loads models, converts to game objects
+  s_application->StartGameLoop(); // Starts game loop
 };
 
 static void EndContext() {

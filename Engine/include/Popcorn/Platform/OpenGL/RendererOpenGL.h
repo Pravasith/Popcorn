@@ -11,13 +11,15 @@ public:
   RendererOpenGL(const Window &appWin);
   virtual ~RendererOpenGL() override;
 
-  virtual void ProcessScenes() override {};
-  virtual void CreateResources() override {};
+  virtual void CreateRenderFlows() override {};
+  virtual void AssignSceneObjectsToRenderFlows() override {};
+  virtual void CreateRenderFlowResources() override {};
+
   virtual void DrawFrame(const Scene &) override {};
+
   virtual bool OnFrameBufferResize(FrameBfrResizeEvent &) override {
     return true;
   };
-  virtual void AddMeshToWorkflow(Mesh *meshPtr) override {};
 };
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
