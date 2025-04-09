@@ -5,8 +5,7 @@
 --- 18 Feb ------------------------------------ X
 --- 04 Mar ------------------------------------
 
-:: Material extraction - define simple properties only - today
-:: Refactor Renderflow (Vertex & index memories, descriptors) - saturday
+:: Refactor Renderflow (Vertex & index memories, descriptors) - Today & tomorrow
 :: Show blender scene in Popcorn - friday
 
 // USE IN VIDEO

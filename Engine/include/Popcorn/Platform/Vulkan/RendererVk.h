@@ -21,6 +21,7 @@ public:
   RendererVk(const Window &appWin);
   virtual ~RendererVk() override;
 
+  // Before GameLoop
   virtual void CreateRenderFlows() override;
   virtual void AssignSceneObjectsToRenderFlows() override;
   virtual void CreateRenderFlowResources() override;
@@ -53,9 +54,6 @@ private:
   static ContextVk *s_vulkanContext;
   static std::vector<RenderFlowVk *> s_renderFlows;
   std::vector<VkCommandBuffer> m_drawingCommandBuffers;
-
-  std::vector<Submesh<MaterialTypes::BasicMat> *> m_basicSubmeshes;
-  std::vector<Submesh<MaterialTypes::PbrMat> *> m_pbrSubmeshes;
 };
 
 GFX_NAMESPACE_END

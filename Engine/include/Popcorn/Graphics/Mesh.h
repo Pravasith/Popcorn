@@ -48,6 +48,9 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "Submesh");
   }
 
+
+  static constexpr MaterialTypes type_value = T;
+
   // DELETE COPY CONSTRUCTOR AND ASSIGNMENT
   // Because this class deletes vbo, ibo, and mat data, disabling copy avoids
   // dangling pointers
@@ -129,7 +132,7 @@ public:
   [[nodiscard]] inline Uniforms &GetUniformBuffer() { return m_uniformBuffer; };
 
   template <MaterialTypes T>
-  void AddSubmesh(VertexBuffer *vbo, IndexBuffer<uint16_t> *ibo,
+  void AddSubmesh(VertexBuffer *vbo, IndexBuffer<uint32_t> *ibo,
                   Material<T> *mat) {
     PC_ASSERT(vbo && ibo && mat, "Submesh parameter(s) nullptr");
 
@@ -172,6 +175,36 @@ protected:
   //
   std::vector<Submesh<MaterialTypes::BasicMat>> m_basicSubmeshes;
   std::vector<Submesh<MaterialTypes::PbrMat>> m_pbrSubmeshes;
+};
+
+//
+//
+// ----------------------------------------------------------------------------
+// --- UTIL FUNCTIONS (GLOBAL) ------------------------------------------------
+template <MaterialTypes T>
+void PC_ValidateAndAddSubmesh(Submesh<T> *submesh,
+                              std::vector<Submesh<T> *> &submeshes) {
+  auto ptr = std::find(submeshes.begin(), submeshes.end(), submesh);
+
+  if (ptr != submeshes.end()) {
+    PC_WARN("Submesh already exists in the submesh library!")
+    return;
+  };
+
+  submeshes.emplace_back(submesh);
+};
+
+template <MaterialTypes T>
+void PC_ValidateAndRemoveSubmesh(Submesh<T> *submesh,
+                                  std::vector<Submesh<T> *> &submeshes) {
+  auto ptr = std::find(submeshes.begin(), submeshes.end(), submesh);
+
+  if (ptr == submeshes.end()) {
+    PC_WARN("Submesh not found!")
+    return;
+  };
+
+  submeshes.erase(ptr);
 };
 
 GFX_NAMESPACE_END

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "BufferObjects.h"
+#include "Camera.h"
 #include "GfxPipelineVk.h"
 #include "GlobalMacros.h"
-#include "Material.h"
 #include "Popcorn/Core/Base.h"
 #include "RenderFlowVk.h"
 #include "RenderPassVk.h"
@@ -47,6 +47,7 @@ public:
   virtual void
   RecordRenderCommands(const uint32_t frameIndex, const uint32_t currentFrame,
                        VkCommandBuffer &currentFrameCommandBuffer) override;
+
   virtual void ProcessSceneUpdates(const uint32_t currentFrame) override;
 
   virtual void CreateRenderPass() override;
@@ -62,6 +63,13 @@ public:
   virtual void CleanUp() override;
 
 private:
+  //
+  // NEW --------------------------------------------------------------------
+  Camera *camera;
+
+  //
+  // OLD --------------------------------------------------------------------
+
   static BufferDefs::Layout s_vertexBufferLayout;
 
   RenderPassVk m_basicRenderPassVk;

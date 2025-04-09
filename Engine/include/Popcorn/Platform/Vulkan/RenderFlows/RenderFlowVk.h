@@ -1,7 +1,8 @@
 #pragma once
 
-#include "GameObject.h"
 #include "GlobalMacros.h"
+#include "Material.h"
+#include "Mesh.h"
 #include "PipelineFactoryVk.h"
 #include "Popcorn/Core/Base.h"
 #include <cstdint>
@@ -30,12 +31,6 @@ public:
   };
 
   //
-  // PUBLIC -----------------------------------------------------------------
-  void ProcessGameObjectNode(GameObject *gameObject) {
-
-  };
-
-  //
   // PURE -------------------------------------------------------------------
   virtual const VkRenderPass &GetRenderPass() const = 0;
 
@@ -58,51 +53,27 @@ public:
   virtual void CreateDescriptorPool() {};
   virtual void CreateDescriptorSets() {};
 
-  // UTILS
-  // template <MaterialTypes T> void AddMaterialByType(Material<T> *materialPtr)
-  // {
-  //   switch (materialPtr->GetMaterialType()) {
-  //   case Popcorn::Gfx::MaterialTypes::BasicMat: {
-  //     PC_ValidateAndAddMaterial(materialPtr, m_basicMaterials);
-  //     break;
-  //   }
-  //   case Popcorn::Gfx::MaterialTypes::PbrMat: {
-  //     PC_ValidateAndAddMaterial(materialPtr, m_pbrMaterials);
-  //     break;
-  //   }
-  //   default:
-  //     PC_WARN("material type not found") { break; }
-  //   }
-  // }
-  //
-  // template <MaterialTypes T>
-  // void RemoveMaterialByType(Material<T> *materialPtr) {
-  //   switch (materialPtr->GetMaterialType()) {
-  //   case Popcorn::Gfx::MaterialTypes::BasicMat: {
-  //     PC_ValidateAndRemoveMaterial(materialPtr, m_basicMaterials);
-  //     break;
-  //   }
-  //   case Popcorn::Gfx::MaterialTypes::PbrMat: {
-  //     PC_ValidateAndRemoveMaterial(materialPtr, m_pbrMaterials);
-  //     break;
-  //   }
-  //   default:
-  //     PC_WARN("material type not found") { break; }
-  //   }
-  // }
-
-  // template <MaterialTypes T> void RegisterMaterial(Material<T> *materialPtr)
-  // {
-  //   PC_AddMaterialByType(materialPtr, m_basicMaterials);
-  // }
-  //
-  // template <MaterialTypes T> void UnRegisterMaterial(Material<T>
-  // *materialPtr) {
-  //   PC_RemoveMaterialByType(materialPtr, m_basicMaterials);
-  // }
+  template <MaterialTypes T> static void AddSubmesh(Submesh<T> *submesh) {
+    if constexpr (T == MaterialTypes::BasicMat) {
+      PC_ValidateAndAddSubmesh(submesh, s_basicSubmeshes);
+    } else if constexpr (T == MaterialTypes::PbrMat) {
+      PC_ValidateAndAddSubmesh(submesh, s_basicSubmeshes);
+    }
+  };
+  template <MaterialTypes T> static void RemoveSubmesh(Submesh<T> *submesh) {
+    if constexpr (T == MaterialTypes::BasicMat) {
+      PC_ValidateAndRemoveSubmesh(submesh, s_basicSubmeshes);
+    } else if constexpr (T == MaterialTypes::PbrMat) {
+      PC_ValidateAndRemoveSubmesh(submesh, s_pbrSubmeshes);
+    }
+  };
 
 protected:
   PipelineFactoryVk *m_pipelineFactory;
+
+  // Submeshes for batching (sorta)
+  static std::vector<Submesh<MaterialTypes::BasicMat> *> s_basicSubmeshes;
+  static std::vector<Submesh<MaterialTypes::PbrMat> *> s_pbrSubmeshes;
 };
 
 GFX_NAMESPACE_END

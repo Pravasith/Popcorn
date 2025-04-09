@@ -133,6 +133,7 @@ GameObject *GltfLoader::CreateGameObjectByType(const tinygltf::Model &model,
     return mesh;
   } else if (node.camera >= 0) {
     Camera *camera = new Camera();
+    // TODO: Handle camera later
     return camera;
     // } else if (node.extensions.find("KHR_lights_punctual") !=
     //            node.extensions.end()) {
@@ -180,7 +181,7 @@ void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
   // gltfMesh.primitives are submeshes
   for (const auto &primitive : gltfMesh.primitives) {
     VertexBuffer *vbo;
-    IndexBuffer<uint16_t> *ibo;
+    IndexBuffer<uint32_t> *ibo;
 
     // Extract vertex buffer
     vbo = ExtractVertexBuffer(model, primitive);

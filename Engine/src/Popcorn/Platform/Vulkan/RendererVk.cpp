@@ -6,6 +6,7 @@
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
 #include "RenderFlows/BasicRenderFlowVk.h"
+#include "RenderFlows/RenderFlowVk.h"
 #include <cstring>
 #include <vulkan/vulkan_core.h>
 
@@ -114,33 +115,44 @@ void RendererVk::CreateRenderFlows() {
   PC_WARN("Expensive initialization operation: Creating workflow Vulkan "
           "resources! Should only be done once per workflow object init.")
 
-  for (auto &renderWorkflow : s_renderFlows) {
+  for (auto &renderFlow : s_renderFlows) {
+    // TODO: CreateAttachments()
     // Creates RenderPass info (deferred, lighting, postfx)
-    renderWorkflow->CreateRenderPass();
+    renderFlow->CreateRenderPass();
     // Creates FrameBuffers (defferedFBfr, lightingFBfr, postfxFBfr)
-    renderWorkflow->CreateFramebuffers();
+    renderFlow->CreateFramebuffers();
   }
 };
 
 // Sort materials, allocate descriptor sets, vk buffers, index buffers &
 // create pipelines
 void RendererVk::CreateRenderFlowResources() {
+  //
   // Create VMA Allocator
   ContextVk::MemoryAllocator()->CreateVMAAllocator();
 
-  for (auto &renderWorkflow : s_renderFlows) {
+  //
+  // Allocate all resources
+
+  for (auto &renderFlow : s_renderFlows) {
     // Loops through all meshes & creates a contiguous Vulkan buffer memory for
     // each workflow -- each workflow has one VkBuffer & one VkDeviceMemory each
-    renderWorkflow->AllocateVkVertexBuffers();    // VMA - Extract from meshes
-    renderWorkflow->AllocateVkIndexBuffers();     // VMA - Extract from meshes
-    renderWorkflow->AllocateVkUniformBuffers();   // VMA - Extract from -
-                                                  // 1. Camera
-                                                  // 2. Mesh
-                                                  // 3. Mesh material
-    renderWorkflow->CreateDescriptorSetLayouts(); // Done
-    renderWorkflow->CreateDescriptorPool();       // Move to factory
-    renderWorkflow->CreateDescriptorSets();       // Move to factory
-    renderWorkflow->CreatePipelines();            // ALMOST DONE
+    // -----------
+    // TODO: Following 3 are not renderflow specific - create them in
+    // RenderFlowVk as common resources
+    // name it something like -- CreateModelData
+    renderFlow->AllocateVkVertexBuffers();  // VMA - Extract from meshes
+    renderFlow->AllocateVkIndexBuffers();   // VMA - Extract from meshes
+    renderFlow->AllocateVkUniformBuffers(); // VMA - Extract from -
+                                            // 1. Camera
+                                            // 2. Mesh
+                                            // 3. Mesh material
+    // -------------
+
+    renderFlow->CreateDescriptorSetLayouts(); // Done
+    renderFlow->CreateDescriptorPool();       // Move to factory
+    renderFlow->CreateDescriptorSets();       // Move to factory
+    renderFlow->CreatePipelines();            // ALMOST DONE
   }
 };
 
@@ -156,8 +168,7 @@ void RendererVk::AssignSceneObjectsToRenderFlows() {
   //            - Per material UBO (tbd)
   for (auto &scene : m_sceneLibrary.GetScenes()) {
     for (auto &node : scene->GetNodes()) {
-      // Recurse
-      ProcessGameObjectNode(node);
+      ProcessGameObjectNode(node); // Recursive (FYI)
     };
   };
 };
@@ -168,10 +179,10 @@ void RendererVk::ProcessGameObjectNode(GameObject *node) {
     // Add Mesh
     auto *mesh = static_cast<Mesh *>(node);
     for (auto &basicSubmesh : mesh->GetSubmeshes<MaterialTypes::BasicMat>()) {
-      m_basicSubmeshes.push_back(&basicSubmesh);
+      RenderFlowVk::AddSubmesh(&basicSubmesh);
     };
     for (auto &pbrSubmesh : mesh->GetSubmeshes<MaterialTypes::PbrMat>()) {
-      m_pbrSubmeshes.push_back(&pbrSubmesh);
+      RenderFlowVk::AddSubmesh(&pbrSubmesh);
     };
   } break;
   case Popcorn::Gfx::GameObjectTypes::Camera:
@@ -191,7 +202,6 @@ void RendererVk::ProcessGameObjectNode(GameObject *node) {
 };
 
 RenderFlowVk *RendererVk::GetRenderFlow(const RenderFlows index) {
-
   return s_renderFlows[(int)index];
 };
 
