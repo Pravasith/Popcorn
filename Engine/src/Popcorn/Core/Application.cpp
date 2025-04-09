@@ -152,7 +152,7 @@ void Application::OnEvent(Event &e) {
 void Application::ProcessScenes() {
   // Assigns game objects to workflows
   s_renderer->CreateRenderFlows();
-  s_renderer->AssignScenesToRenderFlows();
+  s_renderer->AssignSceneObjectsToRenderFlows();
   s_renderer->CreateRenderFlowResources();
 };
 

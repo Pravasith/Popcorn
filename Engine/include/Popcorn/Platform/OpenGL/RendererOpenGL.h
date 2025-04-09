@@ -15,6 +15,8 @@ public:
   virtual void AssignSceneObjectsToRenderFlows() override {};
   virtual void CreateRenderFlowResources() override {};
 
+  virtual void ProcessGameObjectNode(GameObject *node) override {};
+
   virtual void DrawFrame(const Scene &) override {};
 
   virtual bool OnFrameBufferResize(FrameBfrResizeEvent &) override {

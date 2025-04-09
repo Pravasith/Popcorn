@@ -405,6 +405,9 @@ GltfLoader::ExtractVertexBuffer(const tinygltf::Model &model,
     auto *verticesBuffer = vertices->GetBufferData() + i * totalAttrByteSize;
     size_t cpyOffset = 0;
 
+    // TODO: Set size & count in VertexBuffer::m_data after memcpy in
+    // gltf-loader
+
     const byte_t *pos =
         reinterpret_cast<const byte_t *>(posData + i * posStride);
     memcpy(verticesBuffer + cpyOffset, pos, posByteSize);

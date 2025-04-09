@@ -156,6 +156,16 @@ public:
     }
   };
 
+  template <MaterialTypes T>
+  [[nodiscard]]
+  std::vector<Submesh<T>> &GetSubmeshes() {
+    if constexpr (T == MaterialTypes::BasicMat) {
+      return m_basicSubmeshes;
+    } else if constexpr (T == MaterialTypes::PbrMat) {
+      return m_pbrSubmeshes;
+    };
+  };
+
 protected:
   Uniforms m_uniformBuffer;
 

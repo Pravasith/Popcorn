@@ -9,6 +9,7 @@
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <vector>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -97,6 +98,10 @@ public:
   virtual void OnAttach() {};
   virtual void OnUpdate() {};
   virtual void OnRender() {};
+
+  [[nodiscard]] const std::vector<GameObject *> GetChildren() const {
+    return m_children;
+  }
 
   void SetParent(GameObject *gameObj);
   void RemoveParent();

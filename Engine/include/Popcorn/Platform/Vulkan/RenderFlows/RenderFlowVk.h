@@ -2,13 +2,9 @@
 
 #include "GameObject.h"
 #include "GlobalMacros.h"
-#include "Material.h"
-#include "Mesh.h"
 #include "PipelineFactoryVk.h"
 #include "Popcorn/Core/Base.h"
-#include <algorithm>
 #include <cstdint>
-#include <vector>
 #include <vulkan/vulkan_core.h>
 
 // TODO: Redo this class. But only after a full working animated scene is

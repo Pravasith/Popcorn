@@ -64,7 +64,7 @@ public:
     triScene.AddNode(mesh);
 
     auto &renderer = Popcorn::Context::GetRenderer();
-    renderer.AddSceneToStage(&triScene);
+    renderer.AddScene(&triScene);
   };
 
   virtual void OnDetach() override {

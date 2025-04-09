@@ -1,8 +1,8 @@
 #include "RendererVk.h"
 #include "CommandPoolVk.h"
 #include "ContextVk.h"
+#include "GameObject.h"
 #include "Material.h"
-#include "Mesh.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
 #include "RenderFlows/BasicRenderFlowVk.h"
@@ -13,7 +13,7 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 ContextVk *RendererVk::s_vulkanContext = nullptr;
-std::vector<RenderFlowVk *> RendererVk::s_renderWorkflows{};
+std::vector<RenderFlowVk *> RendererVk::s_renderFlows{};
 
 //
 // -------------------------------------------------------------------------
@@ -21,7 +21,7 @@ std::vector<RenderFlowVk *> RendererVk::s_renderWorkflows{};
 
 void RendererVk::DrawFrame(const Scene &scene) {
   BasicRenderFlowVk *basicRenderFlow = reinterpret_cast<BasicRenderFlowVk *>(
-      s_renderWorkflows[(int)RenderFlows::Basic]);
+      s_renderFlows[(int)RenderFlows::Basic]);
 
   ContextVk::Frame()->Draw(
       m_drawingCommandBuffers,
@@ -81,11 +81,11 @@ RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
 
 RendererVk::~RendererVk() {
   // Renderflow clean ups
-  for (auto *workflow : s_renderWorkflows) {
+  for (auto *workflow : s_renderFlows) {
     workflow->CleanUp();
     delete workflow;
   }
-  s_renderWorkflows.clear();
+  s_renderFlows.clear();
 
   DestroyVulkanContext();
   PC_PRINT("DESTROYED", TagType::Destr, "RENDERER-VULKAN");
@@ -106,15 +106,18 @@ void RendererVk::DestroyVulkanContext() {
 // ---------------------------------------------------------------------------
 // --- RENDER WORKFLOWS ------------------------------------------------------
 void RendererVk::CreateRenderFlows() {
-  BasicRenderFlowVk *basicRendererWorkflow = new BasicRenderFlowVk;
-  s_renderWorkflows.push_back(basicRendererWorkflow);
+  BasicRenderFlowVk *basicRenderFlow = new BasicRenderFlowVk;
+  s_renderFlows.push_back(basicRenderFlow);
 
   //
   // CREATE WORKFLOW RESOURCES -----------------------------------------------
   PC_WARN("Expensive initialization operation: Creating workflow Vulkan "
           "resources! Should only be done once per workflow object init.")
-  for (auto &renderWorkflow : s_renderWorkflows) {
+
+  for (auto &renderWorkflow : s_renderFlows) {
+    // Creates RenderPass info (deferred, lighting, postfx)
     renderWorkflow->CreateRenderPass();
+    // Creates FrameBuffers (defferedFBfr, lightingFBfr, postfxFBfr)
     renderWorkflow->CreateFramebuffers();
   }
 };
@@ -125,7 +128,7 @@ void RendererVk::CreateRenderFlowResources() {
   // Create VMA Allocator
   ContextVk::MemoryAllocator()->CreateVMAAllocator();
 
-  for (auto &renderWorkflow : s_renderWorkflows) {
+  for (auto &renderWorkflow : s_renderFlows) {
     // Loops through all meshes & creates a contiguous Vulkan buffer memory for
     // each workflow -- each workflow has one VkBuffer & one VkDeviceMemory each
     renderWorkflow->AllocateVkVertexBuffers();    // VMA - Extract from meshes
@@ -154,17 +157,42 @@ void RendererVk::AssignSceneObjectsToRenderFlows() {
   for (auto &scene : m_sceneLibrary.GetScenes()) {
     for (auto &node : scene->GetNodes()) {
       // Recurse
-      // ProcessGameObjectNode(node);
+      ProcessGameObjectNode(node);
     };
   };
+};
 
-  // BasicRenderFlowVk *basicRenderFlow = reinterpret_cast<BasicRenderFlowVk *>(
-  //     s_renderWorkflows[(int)RenderFlows::Basic]);
-  // basicRenderFlow->AddMeshToWorkflow(mesh);
+void RendererVk::ProcessGameObjectNode(GameObject *node) {
+  switch (node->GetType()) {
+  case Popcorn::Gfx::GameObjectTypes::Mesh: {
+    // Add Mesh
+    auto *mesh = static_cast<Mesh *>(node);
+    for (auto &basicSubmesh : mesh->GetSubmeshes<MaterialTypes::BasicMat>()) {
+      m_basicSubmeshes.push_back(&basicSubmesh);
+    };
+    for (auto &pbrSubmesh : mesh->GetSubmeshes<MaterialTypes::PbrMat>()) {
+      m_pbrSubmeshes.push_back(&pbrSubmesh);
+    };
+  } break;
+  case Popcorn::Gfx::GameObjectTypes::Camera:
+    // Add Camera (to extract projection & view matrices)
+    break;
+  case Popcorn::Gfx::GameObjectTypes::Empty:
+    // Workflows have nothing to do with this type as of now
+    break;
+  case Popcorn::Gfx::GameObjectTypes::None:
+    PC_ERROR("Wrong gameObject type", "RendererVk")
+    break;
+  }
+
+  for (auto &child : node->GetChildren()) {
+    ProcessGameObjectNode(child);
+  }
 };
 
 RenderFlowVk *RendererVk::GetRenderFlow(const RenderFlows index) {
-  return s_renderWorkflows[(int)index];
+
+  return s_renderFlows[(int)index];
 };
 
 GFX_NAMESPACE_END

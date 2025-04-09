@@ -45,6 +45,8 @@ public:
   virtual void AssignSceneObjectsToRenderFlows() = 0;
   virtual void CreateRenderFlowResources() = 0;
 
+  virtual void ProcessGameObjectNode(GameObject *node) = 0;
+
   virtual void DrawFrame(const Scene &scene) = 0;
 
   // Utils

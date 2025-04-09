@@ -44,8 +44,6 @@ public:
     return m_basicRenderPassVk.GetVkRenderPass();
   };
 
-  virtual void AddMeshToWorkflow(Mesh *mesh) override;
-
   virtual void
   RecordRenderCommands(const uint32_t frameIndex, const uint32_t currentFrame,
                        VkCommandBuffer &currentFrameCommandBuffer) override;

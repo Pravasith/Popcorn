@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ContextVk.h"
+#include "GameObject.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Window.h"
 #include "Popcorn/Events/WindowEvent.h"
@@ -23,6 +24,8 @@ public:
   virtual void CreateRenderFlows() override;
   virtual void AssignSceneObjectsToRenderFlows() override;
   virtual void CreateRenderFlowResources() override;
+
+  virtual void ProcessGameObjectNode(GameObject *node) override;
 
   virtual void DrawFrame(const Scene &scene) override;
 
@@ -48,8 +51,11 @@ public:
 
 private:
   static ContextVk *s_vulkanContext;
-  static std::vector<RenderFlowVk *> s_renderWorkflows;
+  static std::vector<RenderFlowVk *> s_renderFlows;
   std::vector<VkCommandBuffer> m_drawingCommandBuffers;
+
+  std::vector<Submesh<MaterialTypes::BasicMat> *> m_basicSubmeshes;
+  std::vector<Submesh<MaterialTypes::PbrMat> *> m_pbrSubmeshes;
 };
 
 GFX_NAMESPACE_END
