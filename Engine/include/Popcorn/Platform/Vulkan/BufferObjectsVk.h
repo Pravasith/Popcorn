@@ -61,10 +61,9 @@ public:
   VertexBufferVk &operator=(VertexBufferVk &&other) = default;
 
   virtual uint64_t GetSize() const override { return m_buffer.GetSize(); };
-  virtual uint64_t GetCount() const override { return m_buffer.GetCount(); };
-
-  virtual void Bind() override;
-  virtual void UnBind() override;
+  virtual uint64_t GetCount() const override {
+    return m_buffer.GetCount(m_layout.strideValue);
+  };
 };
 
 //

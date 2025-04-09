@@ -61,7 +61,7 @@ private:
   [[nodiscard]] static VertexBuffer *
   ExtractVertexBuffer(const tinygltf::Model &model,
                       const tinygltf::Primitive &primitive);
-  [[nodiscard]] static IndexBuffer<uint16_t> *
+  [[nodiscard]] static IndexBuffer<uint32_t> *
   ExtractIndexBuffer(const tinygltf::Model &model,
                      const tinygltf::Primitive &primitive);
 

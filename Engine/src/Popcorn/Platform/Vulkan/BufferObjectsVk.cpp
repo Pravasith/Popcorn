@@ -13,14 +13,6 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-void VertexBufferVk::Bind() {
-
-};
-
-void VertexBufferVk::UnBind() {
-
-};
-
 void VertexBufferVk::GetDefaultVertexInputBindingDescription(
     VkVertexInputBindingDescription &bindingDescription,
     const BufferDefs::Layout &layout) {

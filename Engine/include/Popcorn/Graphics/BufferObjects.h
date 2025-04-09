@@ -141,14 +141,15 @@ public:
   virtual uint64_t GetSize() const = 0;
   virtual uint64_t GetCount() const = 0;
 
-  virtual void Bind() = 0;
-  virtual void UnBind() = 0;
-
-  template <typename T> void PrintBuffer() { Buffer::Print<T>(m_buffer); };
-
   template <typename T> void Fill(std::initializer_list<T> list) {
     m_buffer.SetData(list);
   };
+
+  void Fill(const void *data, uint64_t size, uint64_t offset = 0) {
+    m_buffer.WriteBytes(data, size, offset);
+  };
+
+  template <typename T> void PrintBuffer() { Buffer::Print<T>(m_buffer); };
 
   static VertexBuffer *Create();
   static void Destroy(VertexBuffer *);
@@ -222,11 +223,15 @@ public:
   ~IndexBuffer() { PC_PRINT("DESTROYED", TagType::Destr, "IndexBuffer") };
 
   const uint64_t GetSize() const { return m_buffer.GetSize(); };
-  const uint64_t GetCount() const { return m_buffer.GetCount(); };
+  const uint64_t GetCount() const { return m_buffer.GetCount(sizeof(T)); };
 
   void Allocate(uint64_t size) { m_buffer.Resize(size); };
 
   void Fill(std::initializer_list<T> elements) { m_buffer.SetData(elements); };
+
+  void Fill(const void *data, uint64_t size, uint64_t offset = 0) {
+    m_buffer.WriteBytes(data, size, offset);
+  };
 
   [[nodiscard]] inline byte_t *GetBufferData() const {
     return m_buffer.GetData();
@@ -234,11 +239,11 @@ public:
 
   // COPY CONSTRUCTOR
   IndexBuffer(const IndexBuffer &other) {
-    PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Constr, "INDEX-BUFFER")
+    PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Constr, "IndexBuffer")
     m_buffer = other.m_buffer;
   };
   virtual IndexBuffer &operator=(const IndexBuffer &other) {
-    PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print, "INDEX-BUFFER")
+    PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print, "IndexBuffer")
 
     if (this == &other)
       return *this;

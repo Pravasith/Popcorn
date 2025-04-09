@@ -402,52 +402,47 @@ GltfLoader::ExtractVertexBuffer(const tinygltf::Model &model,
   }
 
   for (size_t i = 0; i < vertexCount; ++i) {
-    auto *verticesBuffer = vertices->GetBufferData() + i * totalAttrByteSize;
+    size_t baseOffset = i * totalAttrByteSize;
     size_t cpyOffset = 0;
-
-    // TODO: Set size & count in VertexBuffer::m_data after memcpy in
-    // gltf-loader
 
     const byte_t *pos =
         reinterpret_cast<const byte_t *>(posData + i * posStride);
-    memcpy(verticesBuffer + cpyOffset, pos, posByteSize);
+    vertices->Fill(pos, posByteSize, baseOffset + cpyOffset);
     cpyOffset += posByteSize;
 
     if (normData) {
       const byte_t *norm =
           reinterpret_cast<const byte_t *>(normData + i * normStride);
-      memcpy(verticesBuffer + cpyOffset, norm, normByteSize);
+      vertices->Fill(norm, normByteSize, baseOffset + cpyOffset);
       cpyOffset += normByteSize;
     } else {
       const float defaultNormal[3] = {0, 0, 0};
-      memcpy(verticesBuffer + cpyOffset, defaultNormal, normByteSize);
+      vertices->Fill(defaultNormal, normByteSize, baseOffset + cpyOffset);
+      cpyOffset += normByteSize;
     }
 
     if (uvData) {
       const byte_t *uv =
           reinterpret_cast<const byte_t *>(uvData + i * uvStride);
-      memcpy(verticesBuffer + cpyOffset, uv, uvByteSize);
+      vertices->Fill(uv, uvByteSize, baseOffset + cpyOffset);
       cpyOffset += uvByteSize;
     } else {
       const float defaultUV[2] = {0, 0};
-      memcpy(verticesBuffer + cpyOffset, defaultUV, uvByteSize);
+      vertices->Fill(defaultUV, uvByteSize, baseOffset + cpyOffset);
+      cpyOffset += uvByteSize;
     }
   }
 
   return vertices;
 }
 
-IndexBuffer<uint16_t> *
+IndexBuffer<uint32_t> *
 GltfLoader::ExtractIndexBuffer(const tinygltf::Model &model,
                                const tinygltf::Primitive &primitive) {
   PC_ASSERT(primitive.indices >= 0, "Primitive has no indices");
 
   const auto &indexAccessor = model.accessors[primitive.indices];
   const size_t indexCount = indexAccessor.count;
-
-  // Allocate index buffer
-  IndexBuffer<uint16_t> *indices = new IndexBuffer<uint16_t>();
-  indices->Allocate(indexCount);
 
   const auto &indexView = model.bufferViews[indexAccessor.bufferView];
   const auto &gltfIndexBuffer = model.buffers[indexView.buffer];
@@ -457,6 +452,11 @@ GltfLoader::ExtractIndexBuffer(const tinygltf::Model &model,
 
   // Handle stride (distance between indices in bytes)
   size_t stride = indexView.byteStride;
+
+  // Allocate index buffer
+  IndexBuffer<uint32_t> *indices = new IndexBuffer<uint32_t>();
+  indices->Allocate(indexCount);
+
   if (stride == 0) {
     // Default stride based on component type
     switch (indexAccessor.componentType) {
@@ -473,29 +473,26 @@ GltfLoader::ExtractIndexBuffer(const tinygltf::Model &model,
     }
   }
 
-  // Convert indices to 16-bit
+  // Convert indices to 32-bit
   for (size_t i = 0; i < indexCount; ++i) {
-    const byte_t *src = srcData + i * stride;
-    uint32_t index;
+    const size_t offset = i * stride;
+    const byte_t *src = srcData + offset;
 
+    uint32_t indexValue = 0;
     switch (indexAccessor.componentType) {
     case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
-      memcpy(&index, src, sizeof(uint16_t));
+      indexValue = *reinterpret_cast<const uint16_t *>(src);
       break;
     case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
-      memcpy(&index, src, sizeof(uint32_t));
-      if (index > 0xFFFF) {
-        PC_ERROR("32-bit index exceeds 16-bit limit", "GltfLoader");
-        delete indices;
-        return nullptr;
-      }
+      indexValue = *reinterpret_cast<const uint32_t *>(src);
       break;
     default:
+      PC_ERROR("Unsupported index type - conversion", "GltfLoader");
       delete indices;
       return nullptr;
     }
 
-    indices->GetBufferData()[i] = static_cast<uint16_t>(index);
+    indices->GetBufferData()[i] = indexValue;
   }
 
   return indices;

@@ -2,6 +2,7 @@
 
 #include "GlobalMacros.h"
 #include "Helpers.h"
+#include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
 #include <cassert>
 #include <cstdint>
@@ -11,10 +12,6 @@
 #include <type_traits>
 
 ENGINE_NAMESPACE_BEGIN
-
-template <typename T, uint64_t Count> struct SizeOf {
-  static constexpr uint64_t value = sizeof(T) * Count;
-};
 
 // PRIMARY TEMPLATE
 template <typename T, typename V = void> struct HasPrint : std::false_type {};
@@ -41,8 +38,13 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "BUFFER")
   };
 
-  // TODO: Add memcpy to a new block of contiguous memory logic
-  void Resize(uint64_t newSize) { AllocBytes(newSize); }
+  //
+  // -----------------------------------------------------------------------
+  // --- MEMORY ALLOCATION -------------------------------------------------
+  void Resize(uint64_t size) {
+    //
+    AllocBytes(size);
+  }
 
   Buffer(uint64_t size) {
     PC_PRINT("CREATED(Fixed size runtime)", TagType::Constr, "BUFFER")
@@ -57,7 +59,6 @@ public:
     AllocBytes(size);
 
     memcpy(m_data, list.begin(), size);
-    m_count = list.size();
     m_size = size;
   };
 
@@ -65,25 +66,10 @@ public:
     return static_cast<byte_t *>(m_data);
   };
 
-  // TODO: FIX THIS
-  template <typename T, uint64_t Count = 0>
-  Buffer() : m_count(Count), m_size((sizeof(T) * m_count)) {
-    PC_PRINT("CREATED", TagType::Constr, "BUFFER")
-    AllocBytes(SizeOf<T, Count>::value);
-  };
-
-  // TODO: FIX THIS
-  template <typename T> Buffer(uint64_t count) : m_count(count) {
-    PC_PRINT("CREATED", TagType::Constr, "BUFFER")
-    AllocBytes(count * sizeof(T));
-  };
-
-  // TODO: FIX THIS
-  template <typename T>
-  Buffer(T *data, uint64_t count = 0)
-      : m_data(data), m_count(count)
-        //
-        {PC_PRINT("CREATED", TagType::Constr, "BUFFER")};
+  void WriteBytes(const void *data, uint64_t size, uint64_t offset = 0) {
+    PC_ASSERT(offset + size <= m_size, "WriteBytes out of bounds!");
+    memcpy(static_cast<byte_t *>(m_data) + offset, data, size);
+  }
 
   //
   // -----------------------------------------------------------------------
@@ -122,41 +108,44 @@ public:
 
     m_data = other.m_data;
     m_size = other.m_size;
-    m_count = other.m_count;
 
     other.m_data = nullptr;
     other.m_size = 0;
-    other.m_count = 0;
   };
 
-  Buffer &&operator=(Buffer &&other) {
+  Buffer &operator=(Buffer &&other) {
     PC_PRINT("MOVE ASSIGNMENT EVOKED", TagType::Print, "BUFFER")
     if (this == &other) {
-      return std::move(*this);
+      return *this;
     };
 
     m_data = other.m_data;
     m_size = other.m_size;
-    m_count = other.m_count;
 
     other.m_data = nullptr;
     other.m_size = 0;
-    other.m_count = 0;
 
     // delete (decltype(other.m_data) *)other.m_data;
-    return std::move(*this);
+    return *this;
   };
 
-  [[nodiscard]] inline const uint64_t GetCount() const { return m_count; };
-  [[nodiscard]] inline const uint64_t GetSize() const { return m_size; };
+  [[nodiscard]] const uint64_t GetCount(const uint64_t offset) const {
+    PC_ASSERT(offset > 0, "Offset must be greater than zero!");
+    return m_size / offset;
+  };
 
+  [[nodiscard]] const uint64_t GetSize() const { return m_size; };
+
+  // Iterations
   template <typename T> T *begin() { return static_cast<T *>(m_data); };
   template <typename T> const T *begin() const {
     return static_cast<T *>(m_data);
   };
-  template <typename T> T *end() { return static_cast<T *>(m_data) + m_count; };
+  template <typename T> T *end() {
+    return static_cast<T *>(m_data) + (m_size / sizeof(T));
+  };
   template <typename T> const T *end() const {
-    return static_cast<T *>(m_data) + m_count;
+    return static_cast<T *>(m_data) + (m_size / sizeof(T));
   };
 
 #ifdef PC_DEBUG
@@ -201,11 +190,9 @@ private:
       delete[] static_cast<byte_t *>(m_data);
     m_data = nullptr;
     m_size = 0;
-    m_count = 0;
   };
 
   void *m_data = nullptr;
-  uint64_t m_count = 0;
   uint64_t m_size = 0;
 };
 
