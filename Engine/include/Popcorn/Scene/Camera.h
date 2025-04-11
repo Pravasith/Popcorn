@@ -18,6 +18,8 @@ public:
   virtual void OnAttach() {};
   virtual void OnUpdate() {};
   virtual void OnRender() {};
+
+private:
 };
 
 GFX_NAMESPACE_END

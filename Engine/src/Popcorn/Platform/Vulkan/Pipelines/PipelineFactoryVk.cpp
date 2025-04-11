@@ -1,7 +1,6 @@
 
 #include "PipelineFactoryVk.h"
 #include "BufferObjectsVk.h"
-#include "ContextVk.h"
 #include "DescriptorFactoryVk.h"
 #include "DeviceVk.h"
 #include "SwapchainVk.h"
@@ -11,7 +10,7 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 template <>
-void PipelineFactoryVk::CreatePipeline<Pipelines::Base>(
+void PipelineFactoryVk::CreatePipeline<Pipelines::Deferred>(
     const BufferDefs::Layout &vertexBufferLayout,
     const RenderPassVk &basicRenderPass) {
   //

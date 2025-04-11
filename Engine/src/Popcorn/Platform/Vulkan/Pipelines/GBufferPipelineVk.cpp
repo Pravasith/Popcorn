@@ -1,4 +1,4 @@
-#include "GfxPipelineVk.h"
+#include "GBufferPipelineVk.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #define GLFW_INCLUDE_VULKAN
@@ -7,11 +7,11 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-void GfxPipelineVk::CreateVkPipeline(
+void GBufferPipelineVk::CreateVkPipeline(
     const VkDevice &device, const PipelineStateType &pipelineCreateInfo,
     const VkRenderPass &renderPass) {
   if (m_pipeline != VK_NULL_HANDLE) {
-    PC_WARN("Attempt to create GfxPipeline when it already exists")
+    PC_WARN("Attempt to create GBufferPipeline when it already exists")
     return;
   };
 
@@ -52,7 +52,7 @@ void GfxPipelineVk::CreateVkPipeline(
   }
 }
 
-void GfxPipelineVk::CleanUp(const VkDevice &device) {
+void GBufferPipelineVk::CleanUp(const VkDevice &device) {
   PC_VK_NULL_CHECK(device)
   PC_VK_NULL_CHECK(m_pipeline)
   DestroyPipelineLayout(device);
@@ -61,7 +61,7 @@ void GfxPipelineVk::CleanUp(const VkDevice &device) {
   m_pipeline = VK_NULL_HANDLE;
 };
 
-void GfxPipelineVk::CreateShaderStageCreateInfos(
+void GBufferPipelineVk::CreateShaderStageCreateInfos(
     std::forward_list<VkShaderModule> &shaderModules) {
 
   std::vector<VkPipelineShaderStageCreateInfo> shaderStages{};
@@ -110,7 +110,7 @@ void GfxPipelineVk::CreateShaderStageCreateInfos(
   m_shaderStageCreateInfos = std::move(shaderStages);
 };
 
-void GfxPipelineVk::CreatePipelineLayout(
+void GBufferPipelineVk::CreatePipelineLayout(
     const VkDevice &device,
     const VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo) {
   PC_VK_NULL_CHECK(device)
@@ -121,7 +121,7 @@ void GfxPipelineVk::CreatePipelineLayout(
   }
 };
 
-void GfxPipelineVk::DestroyPipelineLayout(const VkDevice &device) {
+void GBufferPipelineVk::DestroyPipelineLayout(const VkDevice &device) {
   vkDestroyPipelineLayout(device, m_pipelineLayout, nullptr);
 };
 

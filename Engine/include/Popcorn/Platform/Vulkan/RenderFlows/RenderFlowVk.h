@@ -14,7 +14,7 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 enum class RenderFlows {
-  Basic = 0, // Basic colors
+  Deferred = 0,
   Lights,
 };
 
@@ -42,9 +42,23 @@ public:
   virtual void CleanUp() = 0;
 
   //
-  // VIRTUAL ----------------------------------------------------------------
-  virtual void CreateRenderPass() {};
-  virtual void CreateFramebuffers() {};
+  //
+  //
+  //
+  //
+  // NEW -- NEW -- NEW -- NEW -- NEW -- NEW -- NEW -- NEW --
+  //
+  virtual void CreateAttachments() = 0;
+  virtual void CreateRenderPass() = 0;
+  virtual void CreateFramebuffers() = 0;
+  //
+  //
+  //
+  //
+  //
+  //
+
+  // COMMON
   virtual void AllocateVkVertexBuffers() {};
   virtual void AllocateVkIndexBuffers() {};
   virtual void AllocateVkUniformBuffers() {};
@@ -60,6 +74,7 @@ public:
       PC_ValidateAndAddSubmesh(submesh, s_basicSubmeshes);
     }
   };
+
   template <MaterialTypes T> static void RemoveSubmesh(Submesh<T> *submesh) {
     if constexpr (T == MaterialTypes::BasicMat) {
       PC_ValidateAndRemoveSubmesh(submesh, s_basicSubmeshes);

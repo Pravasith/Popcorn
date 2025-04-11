@@ -1,9 +1,9 @@
-#include "RenderFlows/BasicRenderFlowVk.h"
+#include "RenderFlows/GBufferRenderFlowVk.h"
 #include "BufferObjects.h"
 #include "BufferObjectsVk.h"
 #include "ContextVk.h"
 #include "DescriptorsVk.h"
-#include "GfxPipelineVk.h"
+#include "GBufferPipelineVk.h"
 #include "GlobalMacros.h"
 #include "Material.h"
 #include "PipelineVk.h"
@@ -25,13 +25,25 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-BufferDefs::Layout BasicRenderFlowVk::s_vertexBufferLayout{};
+BufferDefs::Layout GBufferRenderFlowVk::s_vertexBufferLayout{};
 
 #ifdef PC_DEBUG
 constexpr bool showDrawCommandCount = false;
 #endif
 
-void BasicRenderFlowVk::CreatePipelines() {
+void GBufferRenderFlowVk::CreateAttachments() {
+  // Create images
+
+  VkAttachmentDescription colorAttachment{};
+  VkAttachmentDescription depthAttachment{};
+  VkAttachmentDescription normalAttachment{};
+
+  RenderPassVk::GetDefaultAttachmentDescription(colorAttachment);
+  RenderPassVk::GetDefaultAttachmentDescription(depthAttachment);
+  RenderPassVk::GetDefaultAttachmentDescription(normalAttachment);
+};
+
+void GBufferRenderFlowVk::CreatePipelines() {
 
   // CREATE BASE PIPELINE
   // TODO: Create pipeline abstraction in the factory
@@ -45,7 +57,7 @@ void BasicRenderFlowVk::CreatePipelines() {
   // CreateBasePipeline(); // From Pipeline factory
 };
 
-void BasicRenderFlowVk::CreateRenderPass() {
+void GBufferRenderFlowVk::CreateRenderPass() {
   //
   // ----------------------------------------------------------------
   // --- Basic RenderPass -------------------------------------------
@@ -68,9 +80,12 @@ void BasicRenderFlowVk::CreateRenderPass() {
   std::vector<VkAttachmentReference> attachmentRefs{}; // size 0
   attachmentRefs.emplace_back(colorAttachmentRef);     // size 1
 
-  //
-  // SUBPASSES ------------------------------------------------------
-  VkSubpassDescription subpass1{};
+  vkCmdBeginRendering(VkCommandBuffer commandBuffer,
+                      const VkRenderingInfo *pRenderingInfo)
+
+      //
+      // SUBPASSES ------------------------------------------------------
+      VkSubpassDescription subpass1{};
   RenderPassVk::GetDefaultSubpassDescription(subpass1);
   subpass1.pColorAttachments = attachmentRefs.data();
 
@@ -114,14 +129,14 @@ void BasicRenderFlowVk::CreateRenderPass() {
                              ContextVk::Device()->GetDevice());
 };
 
-void BasicRenderFlowVk::CreateFramebuffers() {
+void GBufferRenderFlowVk::CreateFramebuffers() {
   ContextVk::Swapchain()->CreateSwapchainFramebuffers(
       ContextVk::Device()->GetDevice(), m_basicRenderPassVk.GetVkRenderPass());
 };
 
-void BasicRenderFlowVk::RecordRenderCommands(const uint32_t imageIndex,
-                                             const uint32_t currentFrame,
-                                             VkCommandBuffer &commandBuffer) {
+void GBufferRenderFlowVk::RecordRenderCommands(const uint32_t imageIndex,
+                                               const uint32_t currentFrame,
+                                               VkCommandBuffer &commandBuffer) {
   auto *swapchainVkStn = ContextVk::Swapchain();
 
   //
@@ -212,7 +227,7 @@ void BasicRenderFlowVk::RecordRenderCommands(const uint32_t imageIndex,
 #endif
 };
 
-void BasicRenderFlowVk::AddMeshToWorkflow(Mesh *mesh) {
+void GBufferRenderFlowVk::AddMeshToWorkflow(Mesh *mesh) {
   auto ptr = std::find(m_meshes.begin(), m_meshes.end(), mesh);
 
   if (ptr != m_meshes.end()) {
@@ -246,7 +261,7 @@ void BasicRenderFlowVk::AddMeshToWorkflow(Mesh *mesh) {
 // --------------------------------------------------------------------------
 // --- VERTEX BUFFER ALLOCATION ---------------------------------------------
 //
-void BasicRenderFlowVk::AllocateVkVertexBuffers() {
+void GBufferRenderFlowVk::AllocateVkVertexBuffers() {
   m_vertexBufferOffsets.resize(m_meshes.size());
 
   VkDeviceSize currentOffset = 0;
@@ -321,7 +336,7 @@ void BasicRenderFlowVk::AllocateVkVertexBuffers() {
 // --------------------------------------------------------------------------
 // --- INDEX BUFFER ALLOCATION ----------------------------------------------
 //
-void BasicRenderFlowVk::AllocateVkIndexBuffers() {
+void GBufferRenderFlowVk::AllocateVkIndexBuffers() {
   m_indexBufferOffsets.resize(m_meshes.size());
 
   VkDeviceSize currentOffset = 0;
@@ -394,7 +409,7 @@ void BasicRenderFlowVk::AllocateVkIndexBuffers() {
 // --------------------------------------------------------------------------
 // --- UNIFORM BUFFERS ALLOCATION -------------------------------------------
 //
-void BasicRenderFlowVk::AllocateVkUniformBuffers() {
+void GBufferRenderFlowVk::AllocateVkUniformBuffers() {
   const VkExtent2D &swapchainExtent =
       ContextVk::Swapchain()->GetSwapchainExtent();
   constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
@@ -475,12 +490,12 @@ void BasicRenderFlowVk::AllocateVkUniformBuffers() {
 // --- DESCRIPTOR POOL & SETS -----------------------------------------------
 //
 
-void BasicRenderFlowVk::CreateDescriptorSetLayouts() {
+void GBufferRenderFlowVk::CreateDescriptorSetLayouts() {
   ContextVk::DescriptorFactory()->CreateDescriptorSetLayouts<Pipelines::Base>();
   // ContextVk::DescriptorFactory()->CreateDescriptorSetLayouts<Pipelines::Deferred>();
 };
 
-void BasicRenderFlowVk::CreateDescriptorPool() {
+void GBufferRenderFlowVk::CreateDescriptorPool() {
   constexpr uint32_t maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
   uint32_t maxDSets = 2 * maxFramesInFlight; // 1 global + 1 per-object
 
@@ -495,7 +510,7 @@ void BasicRenderFlowVk::CreateDescriptorPool() {
   DescriptorPoolVk::CreateDescriptorPool(poolInfo, &m_descriptorPool);
 };
 
-void BasicRenderFlowVk::CreateDescriptorSets() {
+void GBufferRenderFlowVk::CreateDescriptorSets() {
   constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
   auto &device = ContextVk::Device()->GetDevice();
 
@@ -585,7 +600,7 @@ void BasicRenderFlowVk::CreateDescriptorSets() {
 // --- RUNS EVERY FRAME -----------------------------------------------------
 //
 
-void BasicRenderFlowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
+void GBufferRenderFlowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
   // Copy view project matrix first
   BufferVkUtils::CopyBufferCPUToGPU(
       (byte_t *)m_globalMappedUniforms[currentFrame], &m_viewProjUBO,
@@ -606,7 +621,7 @@ void BasicRenderFlowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
 // --------------------------------------------------------------------------
 // --- CLEANUP --------------------------------------------------------------
 //
-void BasicRenderFlowVk::CleanUp() {
+void GBufferRenderFlowVk::CleanUp() {
   auto &device = ContextVk::Device()->GetDevice();
   auto *framebuffersVkStn = FramebuffersVk::Get();
   const auto &allocator = MemoryAllocatorVk::Get()->GetVMAAllocator();

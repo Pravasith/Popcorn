@@ -1,7 +1,7 @@
 #pragma once
 
 #include "BufferObjects.h"
-#include "GfxPipelineVk.h"
+#include "GBufferPipelineVk.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include "RenderPassVk.h"
@@ -9,7 +9,13 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-enum class Pipelines { Base = 0, Deferred };
+enum class Pipelines { Deferred = 1, Lighting };
+
+template <Pipelines T> struct DeriveGfxPipelineType;
+
+template <> struct DeriveGfxPipelineType<Pipelines::Deferred> {
+  using type = GBufferPipelineVk;
+};
 
 class PipelineFactoryVk {
 public:
@@ -43,29 +49,30 @@ public:
   void CreatePipeline(const BufferDefs::Layout &vertexBufferLayout,
                       const RenderPassVk &basicRenderPass);
 
-  template <Pipelines T>
-  [[nodiscard]] constexpr const GfxPipelineVk &GetPipeline() const {
-    if constexpr (T == Pipelines::Base) {
-      return m_basePipeline;
-    } else if constexpr (T == Pipelines::Deferred) {
-      return m_deferredPipeline;
+  template <Pipelines U>
+  [[nodiscard]] constexpr DeriveGfxPipelineType<U>::type &GetGfxPipeline() {
+    if constexpr (U == Pipelines::Deferred) {
+      return m_gBufferPipeline;
+    } else if constexpr (U == Pipelines::Lighting) {
+      return m_lightingPipeline;
     }
+    // Other pipelines
   };
 
 private:
   PipelineFactoryVk() {
-    PC_PRINT("CREATED", TagType::Constr, "PipelineFactoryVk.h")
+    PC_PRINT("CREATED", TagType::Constr, "PipelineFactoryVk")
   };
 
   ~PipelineFactoryVk() {
-    PC_PRINT("DESTROYED", TagType::Destr, "PipelineFactoryVk.h")
+    PC_PRINT("DESTROYED", TagType::Destr, "PipelineFactoryVk")
   };
 
 private:
   static PipelineFactoryVk *s_instance;
 
-  GfxPipelineVk m_basePipeline;
-  GfxPipelineVk m_deferredPipeline;
+  GBufferPipelineVk m_gBufferPipeline;
+  GBufferPipelineVk m_lightingPipeline;
 };
 
 GFX_NAMESPACE_END

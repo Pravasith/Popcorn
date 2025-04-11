@@ -2,8 +2,9 @@
 
 #include "BufferObjects.h"
 #include "Camera.h"
-#include "GfxPipelineVk.h"
+#include "GBufferPipelineVk.h"
 #include "GlobalMacros.h"
+#include "PipelineFactoryVk.h"
 #include "Popcorn/Core/Base.h"
 #include "RenderFlowVk.h"
 #include "RenderPassVk.h"
@@ -12,28 +13,45 @@
 #include <vector>
 #include <vulkan/vulkan_core.h>
 
-// TODO: Redo this class. But only after a full working animated scene is
-// rendered on screen
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-class BasicRenderFlowVk : public RenderFlowVk {
-public:
-  struct Uniforms {
-    alignas(16) glm::mat4 view;
-    alignas(16) glm::mat4 proj;
-  };
+struct Uniforms {
+  alignas(16) glm::mat4 view;
+  alignas(16) glm::mat4 proj;
+};
 
+class GBufferRenderFlowVk : public RenderFlowVk {
 public:
-  BasicRenderFlowVk() {
+  GBufferRenderFlowVk()
+      : m_pipelineFactory(PipelineFactoryVk::Get()),
+        m_gBufferPipeline(
+            m_pipelineFactory->GetGfxPipeline<Pipelines::Deferred>()) {
+
     s_vertexBufferLayout
         .Set<BufferDefs::AttrTypes::Float3, BufferDefs::AttrTypes::Float3>();
 
     PC_PRINT("CREATED", TagType::Constr, "BasicWorkflowVk")
   };
-  virtual ~BasicRenderFlowVk() override {
+
+  virtual ~GBufferRenderFlowVk() override {
     PC_PRINT("DESTROYED", TagType::Destr, "BasicWorkflowVk")
   };
+
+  //
+  //
+  //
+  //
+  //
+  //
+  // NEW -- NEW -- NEW -- NEW -- NEW -- NEW -- NEW -- NEW --
+  virtual void CreateAttachments() override;
+  //
+  //
+  //
+  //
+  //
+  //
 
   [[nodiscard]] inline static const BufferDefs::Layout &
   GetBasicWorkflowVertexLayout() {
@@ -41,7 +59,7 @@ public:
   }
 
   [[nodiscard]] virtual const VkRenderPass &GetRenderPass() const override {
-    return m_basicRenderPassVk.GetVkRenderPass();
+    return m_renderPass.GetVkRenderPass();
   };
 
   virtual void
@@ -65,15 +83,32 @@ public:
 private:
   //
   // NEW --------------------------------------------------------------------
+  struct ImageViews {
+    // G-Buffer image views
+    VkImageView colorMap{};
+    VkImageView depthMap{};
+    VkImageView normalMap{};
+  };
+
+  struct FrameBuffer {
+    ImageViews imageViews{};
+  };
+
+  // Renderpass & 2 subpasses
+  RenderPassVk m_renderPass;
+  VkSubpassDescription m_subpasses[2]{};
+
   Camera *camera;
+
+  PipelineFactoryVk *m_pipelineFactory = nullptr;
+
+  // Pipelines
+  GBufferPipelineVk &m_gBufferPipeline;
 
   //
   // OLD --------------------------------------------------------------------
 
   static BufferDefs::Layout s_vertexBufferLayout;
-
-  RenderPassVk m_basicRenderPassVk;
-  GfxPipelineVk m_colorPipelineVk;
 
   std::vector<VkDeviceSize> m_vertexBufferOffsets;
   std::vector<VkDeviceSize> m_indexBufferOffsets;

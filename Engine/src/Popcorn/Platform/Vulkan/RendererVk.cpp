@@ -140,7 +140,7 @@ void RendererVk::CreateRenderFlowResources() {
     // -----------
     // TODO: Following 3 are not renderflow specific - create them in
     // RenderFlowVk as common resources
-    // name it something like -- CreateModelData
+    // name it something like -- CreateModelResources
     renderFlow->AllocateVkVertexBuffers();  // VMA - Extract from meshes
     renderFlow->AllocateVkIndexBuffers();   // VMA - Extract from meshes
     renderFlow->AllocateVkUniformBuffers(); // VMA - Extract from -
