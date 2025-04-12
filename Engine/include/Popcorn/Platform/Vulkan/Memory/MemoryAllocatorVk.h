@@ -3,7 +3,6 @@
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
-#include <stdexcept>
 #include <vk_mem_alloc.h>
 
 ENGINE_NAMESPACE_BEGIN

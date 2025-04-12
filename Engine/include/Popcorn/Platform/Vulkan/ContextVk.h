@@ -7,7 +7,7 @@
 #include "FrameVk.h"
 #include "FramebuffersVk.h"
 #include "GlobalMacros.h"
-#include "MemoryAllocatorVk.h"
+#include "Memory/MemoryAllocatorVk.h"
 #include "Popcorn/Core/Window.h"
 #include "SurfaceVk.h"
 #include "SwapchainVk.h"
@@ -36,9 +36,6 @@ public:
     };
   };
 
-  void VulkanInit(const Window &appWin);
-  void VulkanCleanUp();
-
   static DeviceVk *Device() {
     if (!s_deviceVk) {
       throw std::runtime_error("DeviceVk is null");
@@ -57,6 +54,7 @@ public:
     if (!s_swapchainVk) {
       throw std::runtime_error("SwapchainVk is null");
     }
+
     return s_swapchainVk;
   }
 
@@ -101,6 +99,9 @@ public:
     }
     return s_descriptorFactoryVk;
   }
+
+  void VulkanInit(const Window &appWin);
+  void VulkanCleanUp();
 
 private:
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
