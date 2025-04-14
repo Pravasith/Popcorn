@@ -39,6 +39,9 @@ public:
   void CreateVMAAllocator();
   void CleanUp();
 
+  void AllocateBufferMemory(VmaAllocation &allocation);
+  void AllocateImageMemory(VmaAllocation &allocation);
+
   const VmaAllocator &GetVMAAllocator() const {
     //
     return m_allocator;
