@@ -32,7 +32,7 @@ void GBufferRenderFlowVk::CreateAttachments() {
   ImageVk::GetDefaultImageCreateInfo(depthMapInfo, width, height);
   depthMapInfo.format = depthFormat;
   depthMapInfo.usage =
-      VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+      VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
   VkImageCreateInfo normalMapInfo;
   ImageVk::GetDefaultImageCreateInfo(normalMapInfo, width, height);
@@ -44,9 +44,9 @@ void GBufferRenderFlowVk::CreateAttachments() {
   VmaAllocationCreateInfo depthAlloc{.usage = VMA_MEMORY_USAGE_AUTO};
   VmaAllocationCreateInfo normalAlloc{.usage = VMA_MEMORY_USAGE_AUTO};
 
-  ImageVk albedoImage{};
-  ImageVk depthImage{};
-  ImageVk normalImage{};
+  ImageVk &albedoImage = m_gBuffer.albedoMap;
+  ImageVk &depthImage = m_gBuffer.depthMap;
+  ImageVk &normalImage = m_gBuffer.normalMap;
 
   albedoImage.CreateVmaImage(albedoMapInfo, albedoAlloc);
   depthImage.CreateVmaImage(depthMapInfo, depthAlloc);
@@ -92,15 +92,19 @@ void GBufferRenderFlowVk::CreateAttachments() {
   RenderPassVk::GetDefaultAttachmentDescription(normalAttachment);
   normalAttachment.format = normalFormat;
   normalAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+  albedoImage.SetAttachmentDescription(albedoAttachment);
+  depthImage.SetAttachmentDescription(depthAttachment);
+  normalImage.SetAttachmentDescription(normalAttachment);
 };
 
 void GBufferRenderFlowVk::CreateFramebuffer() {
   const auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
 
   std::vector<VkImageView> attachments = {
-      m_gBufferData.albedoMap.GetVkImageView(),
-      m_gBufferData.depthMap.GetVkImageView(),
-      m_gBufferData.normalMap.GetVkImageView(),
+      m_gBuffer.albedoMap.GetVkImageView(),
+      m_gBuffer.depthMap.GetVkImageView(),
+      m_gBuffer.normalMap.GetVkImageView(),
   };
 
   VkFramebufferCreateInfo createInfo{};
@@ -129,13 +133,44 @@ void GBufferRenderFlowVk::CleanUp() {
 
   //
   // --- Destroy G-Buffer Attachments ------------------------------------------
-  m_gBufferData.albedoMap.Destroy();
-  m_gBufferData.depthMap.Destroy();
-  m_gBufferData.normalMap.Destroy();
+  m_gBuffer.albedoMap.Destroy();
+  m_gBuffer.depthMap.Destroy();
+  m_gBuffer.normalMap.Destroy();
 }
 
 void GBufferRenderFlowVk::CreateRenderPass() {
+  //
+  // --- Attachment references -------------------------------------------------
+  VkAttachmentReference albedoRef{};
+  RenderPassVk::GetAttachmentRef(albedoRef, 0);
+  albedoRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+  VkAttachmentReference depthRef{};
+  RenderPassVk::GetAttachmentRef(depthRef, 1);
+  depthRef.layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+
+  VkAttachmentReference normalRef{};
+  RenderPassVk::GetAttachmentRef(normalRef, 2);
+  normalRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+  VkAttachmentReference colorAttachments[]{albedoRef, normalRef};
+
+  //
+  // --- Create Subpasses ------------------------------------------------------
+  VkSubpassDescription subpass{};
+  RenderPassVk::GetDefaultSubpassDescription(subpass);
+  subpass.pColorAttachments = colorAttachments;
+  subpass.pDepthStencilAttachment = &depthRef;
+  subpass.colorAttachmentCount = 2;
+  subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+
+  //
+  // --- Dependencies ----------------------------------------------------------
+  VkSubpassDependency dependency{};
+  dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+  dependency.dstSubpass = 0;
+  dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  dependency.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 };
 
 GFX_NAMESPACE_END

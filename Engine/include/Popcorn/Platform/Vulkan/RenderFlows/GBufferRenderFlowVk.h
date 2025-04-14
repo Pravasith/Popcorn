@@ -42,7 +42,7 @@ private:
     ImageVk normalMap{};
   };
 
-  GBufferData m_gBufferData{};
+  GBufferData m_gBuffer{};
 
   // Renderpass & 2 subpasses
   RenderPassVk m_renderPass;

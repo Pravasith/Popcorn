@@ -76,12 +76,9 @@ void GBufferRenderFlowVk::CreateRenderPass() {
   std::vector<VkAttachmentReference> attachmentRefs{}; // size 0
   attachmentRefs.emplace_back(colorAttachmentRef);     // size 1
 
-  vkCmdBeginRendering(VkCommandBuffer commandBuffer,
-                      const VkRenderingInfo *pRenderingInfo)
-
-      //
-      // SUBPASSES ------------------------------------------------------
-      VkSubpassDescription subpass1{};
+  //
+  // SUBPASSES ------------------------------------------------------
+  VkSubpassDescription subpass1{};
   RenderPassVk::GetDefaultSubpassDescription(subpass1);
   subpass1.pColorAttachments = attachmentRefs.data();
 
