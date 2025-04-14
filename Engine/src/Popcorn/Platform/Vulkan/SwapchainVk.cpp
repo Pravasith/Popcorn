@@ -1,4 +1,5 @@
 #include "SwapchainVk.h"
+#include "ContextVk.h"
 #include "DeviceVk.h"
 #include "FramebuffersVk.h"
 #include "Popcorn/Core/Base.h"
@@ -186,11 +187,9 @@ SwapchainVk::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities,
 
 void SwapchainVk::CreateSwapchainFramebuffers(const VkDevice &device,
                                               const VkRenderPass &renderPass) {
-  auto *swapchainVkStn = SwapchainVk::Get();
-  auto *framebuffersVkStn = FramebuffersVk::Get();
 
-  auto &swapchainImgViews = swapchainVkStn->GetSwapchainImageViews();
-  auto &swapchainExtent = swapchainVkStn->GetSwapchainExtent();
+  auto &swapchainImgViews = ContextVk::Swapchain()->GetSwapchainImageViews();
+  auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
 
   m_swapchainFramebuffers.resize(swapchainImgViews.size());
 
@@ -198,15 +197,15 @@ void SwapchainVk::CreateSwapchainFramebuffers(const VkDevice &device,
     VkImageView attachments[] = {swapchainImgViews[i]};
 
     VkFramebufferCreateInfo createInfo{};
-    framebuffersVkStn->GetDefaultFramebufferState(createInfo);
+    FramebuffersVk::GetDefaultFramebufferState(createInfo);
     createInfo.renderPass = renderPass;
     createInfo.pAttachments = attachments;
     createInfo.width = swapchainExtent.width;
     createInfo.height = swapchainExtent.height;
 
     // CREATE VK FRAMEBUFFER
-    framebuffersVkStn->CreateVkFramebuffer(device, createInfo,
-                                           m_swapchainFramebuffers[i]);
+    ContextVk::Framebuffers()->CreateVkFramebuffer(device, createInfo,
+                                                   m_swapchainFramebuffers[i]);
   };
 };
 

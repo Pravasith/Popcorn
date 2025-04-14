@@ -29,7 +29,7 @@ public:
     };
   };
 
-  void GetDefaultFramebufferState(VkFramebufferCreateInfo &createInfo) const {
+  static void GetDefaultFramebufferState(VkFramebufferCreateInfo &createInfo) {
     createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
     createInfo.renderPass = VK_NULL_HANDLE;
     createInfo.attachmentCount = 1;
@@ -40,10 +40,11 @@ public:
     createInfo.pNext = VK_NULL_HANDLE;
   };
 
-  void CreateVkFramebuffer(const VkDevice &device,
-                           const VkFramebufferCreateInfo &createInfo,
-                           VkFramebuffer &framebuffer);
-  void DestroyVkFramebuffer(const VkDevice &device, VkFramebuffer &framebuffer);
+  static void CreateVkFramebuffer(const VkDevice &device,
+                                  const VkFramebufferCreateInfo &createInfo,
+                                  VkFramebuffer &framebuffer);
+  static void DestroyVkFramebuffer(const VkDevice &device,
+                                   VkFramebuffer &framebuffer);
 
 private:
   FramebuffersVk() { PC_PRINT("CREATED", TagType::Constr, "FramebuffersVk") };

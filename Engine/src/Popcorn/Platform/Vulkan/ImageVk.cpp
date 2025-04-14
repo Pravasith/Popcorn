@@ -55,5 +55,21 @@ void ImageVk::CreateImageView(const VkImageViewCreateInfo &imageViewInfo) {
   };
 };
 
+void ImageVk::Destroy() {
+  const VkDevice device = ContextVk::Device()->GetDevice();
+
+  if (m_imageView != VK_NULL_HANDLE) {
+    vkDestroyImageView(device, m_imageView, nullptr);
+    m_imageView = VK_NULL_HANDLE;
+  }
+
+  if (m_image != VK_NULL_HANDLE && m_alloc != nullptr) {
+    vmaDestroyImage(ContextVk::MemoryAllocator()->GetVMAAllocator(), m_image,
+                    m_alloc);
+    m_image = VK_NULL_HANDLE;
+    m_alloc = nullptr;
+  }
+}
+
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

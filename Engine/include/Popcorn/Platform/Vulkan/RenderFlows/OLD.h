@@ -70,7 +70,7 @@ public:
 
   virtual void CreateRenderPass() override;
   virtual void CreatePipelines() override;
-  virtual void CreateFramebuffers() override;
+  virtual void CreateFramebuffer() override;
   virtual void AllocateVkVertexBuffers() override;
   virtual void AllocateVkIndexBuffers() override;
   virtual void AllocateVkUniformBuffers() override;

@@ -1,4 +1,3 @@
-#include "RenderFlows/GBufferRenderFlowVk.h"
 #include "BufferObjects.h"
 #include "BufferObjectsVk.h"
 #include "ContextVk.h"
@@ -7,7 +6,7 @@
 #include "Material.h"
 #include "PipelineVk.h"
 #include "Popcorn/Core/Base.h"
-#include "Popcorn/Core/Helpers.h"
+#include "RenderFlows/GBufferRenderFlowVk.h"
 #include "RenderPassVk.h"
 #include "RendererVk.h"
 #include <cstddef>
@@ -23,8 +22,6 @@
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
-
-BufferDefs::Layout GBufferRenderFlowVk::s_vertexBufferLayout{};
 
 #ifdef PC_DEBUG
 constexpr bool showDrawCommandCount = false;

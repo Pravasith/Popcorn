@@ -50,7 +50,7 @@ public:
   //
   virtual void CreateAttachments() = 0;
   virtual void CreateRenderPass() = 0;
-  virtual void CreateFramebuffers() = 0;
+  virtual void CreateFramebuffer() = 0;
   //
   //
   //
