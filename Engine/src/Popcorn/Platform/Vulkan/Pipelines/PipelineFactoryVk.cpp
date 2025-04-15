@@ -1,6 +1,7 @@
 
 #include "PipelineFactoryVk.h"
 #include "BufferObjectsVk.h"
+#include "ContextVk.h"
 #include "DescriptorFactoryVk.h"
 #include "DeviceVk.h"
 #include "SwapchainVk.h"
@@ -93,6 +94,16 @@ void PipelineFactoryVk::CreatePipeline<Pipelines::Deferred>(
   //
   // --- OTHER PIPELINE --------------------------------------------------
 };
+
+void PipelineFactoryVk::CleanUp() {
+  if (m_lightingPipeline.GetVkPipeline() != VK_NULL_HANDLE) {
+    m_lightingPipeline.CleanUp(ContextVk::Device()->GetDevice());
+  };
+
+  if (m_gBufferPipeline.GetVkPipeline() != VK_NULL_HANDLE) {
+    m_gBufferPipeline.CleanUp(ContextVk::Device()->GetDevice());
+  };
+}
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

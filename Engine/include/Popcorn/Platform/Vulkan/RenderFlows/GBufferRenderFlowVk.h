@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Camera.h"
+#include "ContextVk.h"
 #include "GlobalMacros.h"
 #include "ImageVk.h"
+#include "PipelineFactoryVk.h"
 #include "RenderFlows/RenderFlowVk.h"
 #include <vulkan/vulkan_core.h>
 
@@ -11,31 +12,28 @@ GFX_NAMESPACE_BEGIN
 
 class GBufferRenderFlowVk : public RenderFlowVk {
 public:
-  GBufferRenderFlowVk()
-      : m_pipelineFactory(PipelineFactoryVk::Get()),
-        m_gBufferPipeline(
-            m_pipelineFactory->GetGfxPipeline<Pipelines::Deferred>()) {
-    PC_PRINT("CREATED", TagType::Constr, "BasicWorkflowVk")
-    //
-    // --- Create frame resources -----------------------------------------
+  GBufferRenderFlowVk() {
+    PC_PRINT("CREATED", TagType::Constr, "GBufferRenderFlowVk")
+  };
+
+  virtual ~GBufferRenderFlowVk() override {
+    PC_PRINT("DESTROYED", TagType::Destr, "GBufferRenderflowVk")
+  };
+
+  virtual void Prepare() override {
+    m_gBufferPipeline =
+        &ContextVk::PipelineFactory()->GetGfxPipeline<Pipelines::Deferred>();
+
     CreateAttachments();
     CreateRenderPass();
     CreateFramebuffer();
   };
-
-  virtual ~GBufferRenderFlowVk() override {
-    //
-    // --- Cleanup frame resources ----------------------------------------
-    CleanUp();
-    PC_PRINT("DESTROYED", TagType::Destr, "BasicWorkflowVk")
-  };
+  virtual void CleanUp() override;
 
 private:
   void CreateAttachments() override;
   void CreateFramebuffer() override;
   void CreateRenderPass() override;
-
-  void CleanUp() override;
 
 private:
   struct GBufferData {
@@ -49,11 +47,8 @@ private:
   RenderPassVk m_renderPass;
   VkFramebuffer m_framebuffer;
 
-  Camera *camera;
-  PipelineFactoryVk *m_pipelineFactory = nullptr;
-
   // Pipelines
-  GBufferPipelineVk &m_gBufferPipeline;
+  GBufferPipelineVk *m_gBufferPipeline;
 };
 
 GFX_NAMESPACE_END

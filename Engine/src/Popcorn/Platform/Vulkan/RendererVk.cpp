@@ -6,6 +6,7 @@
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
 #include "RenderFlows/BasicRenderFlowVk.h"
+#include "RenderFlows/GBufferRenderFlowVk.h"
 #include "RenderFlows/RenderFlowVk.h"
 #include <cstring>
 #include <vulkan/vulkan_core.h>
@@ -107,20 +108,17 @@ void RendererVk::DestroyVulkanContext() {
 // ---------------------------------------------------------------------------
 // --- RENDER WORKFLOWS ------------------------------------------------------
 void RendererVk::CreateRenderFlows() {
-  BasicRenderFlowVk *basicRenderFlow = new BasicRenderFlowVk;
-  s_renderFlows.push_back(basicRenderFlow);
+  s_renderFlows.emplace_back(new GBufferRenderFlowVk());
 
-  //
-  // CREATE WORKFLOW RESOURCES -----------------------------------------------
-  PC_WARN("Expensive initialization operation: Creating workflow Vulkan "
-          "resources! Should only be done once per workflow object init.")
+  // //
+  // // CREATE WORKFLOW RESOURCES
+  // ----------------------------------------------- PC_WARN("Expensive
+  // initialization operation: Creating workflow Vulkan "
+  //         "resources! Should only be done once per workflow object init.")
 
   for (auto &renderFlow : s_renderFlows) {
-    // TODO: CreateAttachments()
-    // Creates RenderPass info (deferred, lighting, postfx)
-    renderFlow->CreateRenderPass();
-    // Creates FrameBuffers (defferedFBfr, lightingFBfr, postfxFBfr)
-    renderFlow->CreateFramebuffers();
+    PC_WARN("Preparing renderflow...")
+    renderFlow->Prepare();
   }
 };
 

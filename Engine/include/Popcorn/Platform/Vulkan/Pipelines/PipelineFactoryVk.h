@@ -3,6 +3,7 @@
 #include "BufferObjects.h"
 #include "GBufferPipelineVk.h"
 #include "GlobalMacros.h"
+#include "LightingPipelineVk.h"
 #include "Popcorn/Core/Base.h"
 #include "RenderPassVk.h"
 
@@ -15,6 +16,10 @@ template <Pipelines T> struct DeriveGfxPipelineType;
 
 template <> struct DeriveGfxPipelineType<Pipelines::Deferred> {
   using type = GBufferPipelineVk;
+};
+
+template <> struct DeriveGfxPipelineType<Pipelines::Lighting> {
+  using type = LightingPipelineVk;
 };
 
 class PipelineFactoryVk {
@@ -59,6 +64,8 @@ public:
     // Other pipelines
   };
 
+  void CleanUp();
+
 private:
   PipelineFactoryVk() {
     PC_PRINT("CREATED", TagType::Constr, "PipelineFactoryVk")
@@ -72,7 +79,7 @@ private:
   static PipelineFactoryVk *s_instance;
 
   GBufferPipelineVk m_gBufferPipeline;
-  GBufferPipelineVk m_lightingPipeline;
+  LightingPipelineVk m_lightingPipeline;
 };
 
 GFX_NAMESPACE_END

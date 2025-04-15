@@ -1,9 +1,9 @@
 #pragma once
 
+#include "Camera.h"
 #include "GlobalMacros.h"
 #include "Material.h"
 #include "Mesh.h"
-#include "PipelineFactoryVk.h"
 #include "Popcorn/Core/Base.h"
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
@@ -20,25 +20,16 @@ enum class RenderFlows {
 
 class RenderFlowVk {
 public:
-  RenderFlowVk() {
-    m_pipelineFactory = PipelineFactoryVk::Get();
-    PC_PRINT("CREATED", TagType::Constr, "RenderFlowVk")
-  };
+  RenderFlowVk() { PC_PRINT("CREATED", TagType::Constr, "RenderFlowVk") };
   virtual ~RenderFlowVk() {
-    PipelineFactoryVk::Destroy();
-    m_pipelineFactory = nullptr;
     PC_PRINT("DESTROYED", TagType::Destr, "RenderFlowVk")
   };
 
-  //
-  // PURE -------------------------------------------------------------------
-  virtual const VkRenderPass &GetRenderPass() const = 0;
-
+  virtual void ProcessSceneUpdates(const uint32_t currentFrame) = 0;
   virtual void
   RecordRenderCommands(const uint32_t frameIndex, const uint32_t currentFrame,
                        VkCommandBuffer &currentFrameCommandBuffer) = 0;
-  virtual void ProcessSceneUpdates(const uint32_t currentFrame) = 0;
-  virtual void CreatePipelines() = 0;
+  virtual void Prepare() = 0;
   virtual void CleanUp() = 0;
 
   //
@@ -48,9 +39,10 @@ public:
   //
   // NEW -- NEW -- NEW -- NEW -- NEW -- NEW -- NEW -- NEW --
   //
-  virtual void CreateAttachments() = 0;
-  virtual void CreateRenderPass() = 0;
-  virtual void CreateFramebuffer() = 0;
+  virtual void CreateAttachments() {};
+  virtual void CreateRenderPass() {};
+  virtual void CreateFramebuffer() {};
+  virtual void CreatePipelines() {};
   //
   //
   //
@@ -84,7 +76,8 @@ public:
   };
 
 protected:
-  PipelineFactoryVk *m_pipelineFactory;
+  // Camera
+  Camera *camera;
 
   // Submeshes for batching (sorta)
   static std::vector<Submesh<MaterialTypes::BasicMat> *> s_basicSubmeshes;
