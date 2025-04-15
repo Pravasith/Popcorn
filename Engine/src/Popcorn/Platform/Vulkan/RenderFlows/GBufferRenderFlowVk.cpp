@@ -140,6 +140,13 @@ void GBufferRenderFlowVk::CleanUp() {
 
 void GBufferRenderFlowVk::CreateRenderPass() {
   //
+  // --- Attachments -----------------------------------------------------------
+  VkAttachmentDescription attachments[]{
+      m_gBuffer.albedoMap.GetAttachmentDescription(),
+      m_gBuffer.depthMap.GetAttachmentDescription(),
+      m_gBuffer.normalMap.GetAttachmentDescription()};
+
+  //
   // --- Attachment references -------------------------------------------------
   VkAttachmentReference albedoRef{};
   RenderPassVk::GetAttachmentRef(albedoRef, 0);
@@ -164,13 +171,30 @@ void GBufferRenderFlowVk::CreateRenderPass() {
   subpass.colorAttachmentCount = 2;
   subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 
+  VkSubpassDescription subpasses[]{subpass};
+
   //
   // --- Dependencies ----------------------------------------------------------
   VkSubpassDependency dependency{};
   dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
   dependency.dstSubpass = 0;
-  dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-  dependency.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+  dependency.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+  dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  dependency.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+  dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+  dependency.dependencyFlags = 0;
+
+  //
+  // --- Renderpass ------------------------------------------------------------
+  VkRenderPassCreateInfo renderPassInfo{};
+  RenderPassVk::GetDefaultRenderPassCreateInfo(renderPassInfo);
+  renderPassInfo.dependencyCount = 1;
+  renderPassInfo.pDependencies = &dependency;
+  renderPassInfo.pAttachments = attachments;
+  renderPassInfo.pSubpasses = subpasses;
+  renderPassInfo.subpassCount = 1;
+
+  m_renderPass.Create(renderPassInfo, ContextVk::Device()->GetDevice());
 };
 
 GFX_NAMESPACE_END

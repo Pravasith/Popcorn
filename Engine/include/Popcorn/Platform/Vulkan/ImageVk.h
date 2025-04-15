@@ -26,6 +26,11 @@ public:
     return m_imageView;
   };
 
+  [[nodiscard]] const VkAttachmentDescription &
+  GetAttachmentDescription() const {
+    return m_imageDescription;
+  };
+
   void SetAttachmentDescription(const VkAttachmentDescription &description) {
     m_imageDescription = description;
   };

@@ -198,6 +198,7 @@ void SwapchainVk::CreateSwapchainFramebuffers(const VkDevice &device,
 
     VkFramebufferCreateInfo createInfo{};
     FramebuffersVk::GetDefaultFramebufferState(createInfo);
+
     createInfo.renderPass = renderPass;
     createInfo.pAttachments = attachments;
     createInfo.width = swapchainExtent.width;
