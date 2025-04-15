@@ -22,35 +22,35 @@ void GBufferRenderFlowVk::CreateAttachments() {
   //
   //
   // --- Create G-Buffer Images ------------------------------------------------
-  VkImageCreateInfo albedoMapInfo;
-  ImageVk::GetDefaultImageCreateInfo(albedoMapInfo, width, height);
-  albedoMapInfo.format = albedoFormat;
-  albedoMapInfo.usage =
+  VkImageCreateInfo albedoImageInfo;
+  ImageVk::GetDefaultImageCreateInfo(albedoImageInfo, width, height);
+  albedoImageInfo.format = albedoFormat;
+  albedoImageInfo.usage =
       VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
-  VkImageCreateInfo depthMapInfo;
-  ImageVk::GetDefaultImageCreateInfo(depthMapInfo, width, height);
-  depthMapInfo.format = depthFormat;
-  depthMapInfo.usage =
+  VkImageCreateInfo depthImageInfo;
+  ImageVk::GetDefaultImageCreateInfo(depthImageInfo, width, height);
+  depthImageInfo.format = depthFormat;
+  depthImageInfo.usage =
       VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
-  VkImageCreateInfo normalMapInfo;
-  ImageVk::GetDefaultImageCreateInfo(normalMapInfo, width, height);
-  normalMapInfo.format = normalFormat;
-  normalMapInfo.usage =
+  VkImageCreateInfo normalImageInfo;
+  ImageVk::GetDefaultImageCreateInfo(normalImageInfo, width, height);
+  normalImageInfo.format = normalFormat;
+  normalImageInfo.usage =
       VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
   VmaAllocationCreateInfo albedoAlloc{.usage = VMA_MEMORY_USAGE_AUTO};
   VmaAllocationCreateInfo depthAlloc{.usage = VMA_MEMORY_USAGE_AUTO};
   VmaAllocationCreateInfo normalAlloc{.usage = VMA_MEMORY_USAGE_AUTO};
 
-  ImageVk &albedoImage = m_gBuffer.albedoMap;
-  ImageVk &depthImage = m_gBuffer.depthMap;
-  ImageVk &normalImage = m_gBuffer.normalMap;
+  ImageVk &albedoImage = m_attachments.albedoImage;
+  ImageVk &depthImage = m_attachments.depthImage;
+  ImageVk &normalImage = m_attachments.normalImage;
 
-  albedoImage.CreateVmaImage(albedoMapInfo, albedoAlloc);
-  depthImage.CreateVmaImage(depthMapInfo, depthAlloc);
-  normalImage.CreateVmaImage(normalMapInfo, normalAlloc);
+  albedoImage.CreateVmaImage(albedoImageInfo, albedoAlloc);
+  depthImage.CreateVmaImage(depthImageInfo, depthAlloc);
+  normalImage.CreateVmaImage(normalImageInfo, normalAlloc);
 
   //
   //
@@ -59,16 +59,19 @@ void GBufferRenderFlowVk::CreateAttachments() {
   ImageVk::GetDefaultImageViewCreateInfo(albedoViewInfo,
                                          albedoImage.GetVkImage());
   albedoViewInfo.format = albedoFormat;
+  albedoViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 
   VkImageViewCreateInfo depthViewInfo{};
   ImageVk::GetDefaultImageViewCreateInfo(depthViewInfo,
                                          depthImage.GetVkImage());
   depthViewInfo.format = depthFormat;
+  depthViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
   VkImageViewCreateInfo normalViewInfo{};
   ImageVk::GetDefaultImageViewCreateInfo(normalViewInfo,
                                          normalImage.GetVkImage());
   normalViewInfo.format = normalFormat;
+  normalViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 
   albedoImage.CreateImageView(albedoViewInfo);
   depthImage.CreateImageView(depthViewInfo);
@@ -102,9 +105,9 @@ void GBufferRenderFlowVk::CreateFramebuffer() {
   const auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
 
   std::vector<VkImageView> attachments = {
-      m_gBuffer.albedoMap.GetVkImageView(),
-      m_gBuffer.depthMap.GetVkImageView(),
-      m_gBuffer.normalMap.GetVkImageView(),
+      m_attachments.albedoImage.GetVkImageView(),
+      m_attachments.depthImage.GetVkImageView(),
+      m_attachments.normalImage.GetVkImageView(),
   };
 
   VkFramebufferCreateInfo createInfo{};
@@ -139,18 +142,18 @@ void GBufferRenderFlowVk::CleanUp() {
 
   //
   // --- Destroy G-Buffer Attachments ------------------------------------------
-  m_gBuffer.albedoMap.Destroy();
-  m_gBuffer.depthMap.Destroy();
-  m_gBuffer.normalMap.Destroy();
+  m_attachments.albedoImage.Destroy();
+  m_attachments.depthImage.Destroy();
+  m_attachments.normalImage.Destroy();
 }
 
 void GBufferRenderFlowVk::CreateRenderPass() {
   //
   // --- Attachments -----------------------------------------------------------
   VkAttachmentDescription attachments[]{
-      m_gBuffer.albedoMap.GetAttachmentDescription(),
-      m_gBuffer.depthMap.GetAttachmentDescription(),
-      m_gBuffer.normalMap.GetAttachmentDescription()};
+      m_attachments.albedoImage.GetAttachmentDescription(),
+      m_attachments.depthImage.GetAttachmentDescription(),
+      m_attachments.normalImage.GetAttachmentDescription()};
 
   //
   // --- Attachment references -------------------------------------------------
@@ -184,8 +187,8 @@ void GBufferRenderFlowVk::CreateRenderPass() {
   VkSubpassDependency dependency{};
   dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
   dependency.dstSubpass = 0;
-  dependency.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-  dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  dependency.srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+  dependency.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
   dependency.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
   dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
   dependency.dependencyFlags = 0;

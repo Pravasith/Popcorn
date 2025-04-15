@@ -36,13 +36,13 @@ private:
   void CreateRenderPass() override;
 
 private:
-  struct GBufferData {
-    ImageVk albedoMap{};
-    ImageVk depthMap{};
-    ImageVk normalMap{};
+  struct Attachments {
+    ImageVk albedoImage{};
+    ImageVk depthImage{};
+    ImageVk normalImage{};
   };
 
-  GBufferData m_gBuffer{};
+  Attachments m_attachments{};
 
   RenderPassVk m_renderPass;
   VkFramebuffer m_framebuffer;

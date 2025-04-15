@@ -36,13 +36,11 @@ private:
   void CreateRenderPass() override;
 
 private:
-  struct LightingData {
-    ImageVk albedoMap{};
-    ImageVk depthMap{};
-    ImageVk normalMap{};
+  struct Attachments {
+    ImageVk lightBuffer{};
   };
 
-  LightingData m_lightingData{};
+  Attachments m_attachments{};
 
   RenderPassVk m_renderPass;
   VkFramebuffer m_framebuffer;
