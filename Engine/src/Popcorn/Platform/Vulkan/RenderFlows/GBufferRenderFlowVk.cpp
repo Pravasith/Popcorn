@@ -127,8 +127,14 @@ void GBufferRenderFlowVk::CleanUp() {
   //
   // --- Destroy Framebuffer ---------------------------------------------------
   if (m_framebuffer != VK_NULL_HANDLE) {
-    vkDestroyFramebuffer(device, m_framebuffer, nullptr);
+    FramebuffersVk::DestroyVkFramebuffer(device, m_framebuffer);
     m_framebuffer = VK_NULL_HANDLE;
+  }
+
+  //
+  // --- Destroy Renderpass ----------------------------------------------------
+  if (m_renderPass.GetVkRenderPass() != VK_NULL_HANDLE) {
+    m_renderPass.Destroy(device);
   }
 
   //

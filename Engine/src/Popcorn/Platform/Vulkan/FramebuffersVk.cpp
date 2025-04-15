@@ -25,6 +25,7 @@ void FramebuffersVk::DestroyVkFramebuffer(const VkDevice &device,
   PC_VK_NULL_CHECK(framebuffer)
 
   vkDestroyFramebuffer(device, framebuffer, nullptr);
+  framebuffer = VK_NULL_HANDLE;
 };
 
 //

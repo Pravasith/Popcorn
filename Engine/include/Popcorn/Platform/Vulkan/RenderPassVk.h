@@ -109,6 +109,7 @@ public:
     PC_VK_NULL_CHECK(m_renderPass)
 
     vkDestroyRenderPass(device, m_renderPass, nullptr);
+    m_renderPass = VK_NULL_HANDLE;
   };
 
   void GetDefaultCmdBeginRenderPassInfo(const VkFramebuffer &frameBuffer,

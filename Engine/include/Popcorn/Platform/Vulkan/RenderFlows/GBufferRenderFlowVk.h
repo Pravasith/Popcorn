@@ -19,6 +19,7 @@ public:
     //
     // --- Create frame resources -----------------------------------------
     CreateAttachments();
+    CreateRenderPass();
     CreateFramebuffer();
   };
 
@@ -45,11 +46,8 @@ private:
 
   GBufferData m_gBuffer{};
 
-  // Renderpass & 2 subpasses
   RenderPassVk m_renderPass;
   VkFramebuffer m_framebuffer;
-
-  VkSubpassDescription m_subpasses[2]{};
 
   Camera *camera;
   PipelineFactoryVk *m_pipelineFactory = nullptr;
