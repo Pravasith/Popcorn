@@ -1,4 +1,4 @@
-#include "RenderFlows/LightingRenderFlowVk.h"
+#include "RenderFlows/CompositeRenderFlowVk.h"
 #include "GlobalMacros.h"
 #include "ImageVk.h"
 #include "RenderPassVk.h"
@@ -7,51 +7,51 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-void LightingRenderFlowVk::CreateAttachments() {
-  const auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
+void CompositeRenderFlowVk::CreateAttachments() {
+  const auto &swapchain = ContextVk::Swapchain();
 
-  const auto &format = VK_FORMAT_R16G16B16A16_SFLOAT;
+  const auto &format = swapchain->GetSwapchainImageFormat();
 
   //
   // --- Create Images ---------------------------------------------------------
-  VkImageCreateInfo lightBufferInfo;
-  ImageVk::GetDefaultImageCreateInfo(lightBufferInfo, swapchainExtent.width,
-                                     swapchainExtent.height);
-  lightBufferInfo.format = format;
-  lightBufferInfo.usage =
-      VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+  VkImageCreateInfo presentImageInfo;
+  ImageVk::GetDefaultImageCreateInfo(presentImageInfo,
+                                     swapchain->GetSwapchainExtent().width,
+                                     swapchain->GetSwapchainExtent().height);
+  presentImageInfo.format = format;
+  presentImageInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-  VmaAllocationCreateInfo lightBufferAlloc{.usage = VMA_MEMORY_USAGE_AUTO};
+  VmaAllocationCreateInfo presentImageAlloc{.usage = VMA_MEMORY_USAGE_AUTO};
 
-  ImageVk &lightBufferRef = m_attachments.lightBuffer;
-  lightBufferRef.CreateVmaImage(lightBufferInfo, lightBufferAlloc);
+  ImageVk &presentImageRef = m_attachments.presentImage;
+  presentImageRef.CreateVmaImage(presentImageInfo, presentImageAlloc);
 
   //
   // --- Image views -----------------------------------------------------------
-  VkImageViewCreateInfo lightBufferViewInfo{};
-  ImageVk::GetDefaultImageViewCreateInfo(lightBufferViewInfo,
-                                         lightBufferRef.GetVkImage());
-  lightBufferViewInfo.format = format;
-  lightBufferViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  VkImageViewCreateInfo presentImageViewInfo{};
+  ImageVk::GetDefaultImageViewCreateInfo(presentImageViewInfo,
+                                         presentImageRef.GetVkImage());
+  presentImageViewInfo.format = format;
+  presentImageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 
-  lightBufferRef.CreateImageView(lightBufferViewInfo);
+  presentImageRef.CreateImageView(presentImageViewInfo);
 
   //
   // --- Attachments -----------------------------------------------------------
-  VkAttachmentDescription lightBufferAttachment{};
-  RenderPassVk::GetDefaultAttachmentDescription(lightBufferAttachment);
-  lightBufferAttachment.format = format;
-  lightBufferAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-  lightBufferAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+  VkAttachmentDescription presentImageAttachment{};
+  RenderPassVk::GetDefaultAttachmentDescription(presentImageAttachment);
+  presentImageAttachment.format = format;
+  presentImageAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  presentImageAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-  lightBufferRef.SetAttachmentDescription(lightBufferAttachment);
+  presentImageRef.SetAttachmentDescription(presentImageAttachment);
 }
 
-void LightingRenderFlowVk::CreateRenderPass() {
+void CompositeRenderFlowVk::CreateRenderPass() {
   //
   // --- Attachments -----------------------------------------------------------
   VkAttachmentDescription attachments[]{
-      m_attachments.lightBuffer.GetAttachmentDescription()};
+      m_attachments.presentImage.GetAttachmentDescription()};
 
   //
   // --- Attachment references -------------------------------------------------

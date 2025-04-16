@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BufferObjects.h"
+#include "CompositePipelineVk.h"
 #include "GBufferPipelineVk.h"
 #include "GlobalMacros.h"
 #include "LightingPipelineVk.h"
@@ -10,7 +11,11 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-enum class Pipelines { Deferred = 1, Lighting };
+enum class Pipelines {
+  Deferred = 1, // G-Buffer
+  Lighting,     // Lighting
+  Composite     // Composition
+};
 
 template <Pipelines T> struct DeriveGfxPipelineType;
 
@@ -20,6 +25,10 @@ template <> struct DeriveGfxPipelineType<Pipelines::Deferred> {
 
 template <> struct DeriveGfxPipelineType<Pipelines::Lighting> {
   using type = LightingPipelineVk;
+};
+
+template <> struct DeriveGfxPipelineType<Pipelines::Composite> {
+  using type = CompositePipelineVk;
 };
 
 class PipelineFactoryVk {
@@ -50,6 +59,8 @@ public:
   PipelineFactoryVk(PipelineFactoryVk &&) = delete;
   PipelineFactoryVk &operator=(PipelineFactoryVk &&) = delete;
 
+  // Potentially takes in PipelineLayout and spits out the appropriate Pipeline
+  // ref
   template <Pipelines T>
   void CreatePipeline(const BufferDefs::Layout &vertexBufferLayout,
                       const RenderPassVk &basicRenderPass);
@@ -60,6 +71,8 @@ public:
       return m_gBufferPipeline;
     } else if constexpr (U == Pipelines::Lighting) {
       return m_lightingPipeline;
+    } else if constexpr (U == Pipelines::Composite) {
+      return m_compositePipeline;
     }
     // Other pipelines
   };
@@ -80,6 +93,7 @@ private:
 
   GBufferPipelineVk m_gBufferPipeline;
   LightingPipelineVk m_lightingPipeline;
+  CompositePipelineVk m_compositePipeline;
 };
 
 GFX_NAMESPACE_END
