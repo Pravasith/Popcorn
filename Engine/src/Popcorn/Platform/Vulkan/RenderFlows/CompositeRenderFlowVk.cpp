@@ -1,4 +1,5 @@
 #include "RenderFlows/CompositeRenderFlowVk.h"
+#include "ContextVk.h"
 #include "GlobalMacros.h"
 #include "ImageVk.h"
 #include "RenderPassVk.h"
@@ -99,6 +100,44 @@ void CompositeRenderFlowVk::CreateRenderPass() {
 
   //
   // --- Renderpass ------------------------------------------------------------
+  VkRenderPassCreateInfo renderPassInfo{};
+  RenderPassVk::GetDefaultRenderPassCreateInfo(renderPassInfo);
+  renderPassInfo.attachmentCount = 1;
+  renderPassInfo.pAttachments = attachments;
+  renderPassInfo.subpassCount = 1;
+  renderPassInfo.pSubpasses = subpasses;
+  renderPassInfo.dependencyCount = 1;
+  renderPassInfo.pDependencies = &dependency;
+
+  m_renderPass.Create(renderPassInfo, ContextVk::Device()->GetDevice());
+};
+
+//
+//
+//
+//
+//
+// --- CREATE FRAMEBUFFER ------------------------------------------------------
+// --- CREATE FRAMEBUFFER ------------------------------------------------------
+// --- CREATE FRAMEBUFFER ------------------------------------------------------
+//
+void CompositeRenderFlowVk::CreateFramebuffer() {
+  const auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
+
+  std::vector<VkImageView> attachments{
+      m_attachments.presentImage.GetVkImageView()};
+
+  VkFramebufferCreateInfo createInfo{};
+  FramebuffersVk::GetDefaultFramebufferState(createInfo);
+  createInfo.renderPass = m_renderPass.GetVkRenderPass();
+  createInfo.pAttachments = attachments.data();
+  createInfo.attachmentCount = attachments.size();
+  createInfo.width = swapchainExtent.width;
+  createInfo.height = swapchainExtent.height;
+  createInfo.layers = 1;
+
+  FramebuffersVk::CreateVkFramebuffer(ContextVk::Device()->GetDevice(),
+                                      createInfo, m_framebuffer);
 };
 
 GFX_NAMESPACE_END

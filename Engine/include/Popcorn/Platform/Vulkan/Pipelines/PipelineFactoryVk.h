@@ -62,8 +62,8 @@ public:
   // Potentially takes in PipelineLayout and spits out the appropriate Pipeline
   // ref
   template <Pipelines T>
-  void CreatePipeline(const BufferDefs::Layout &vertexBufferLayout,
-                      const RenderPassVk &basicRenderPass);
+  static void CreatePipeline(const BufferDefs::Layout &vertexBufferLayout,
+                             const RenderPassVk &basicRenderPass);
 
   template <Pipelines U>
   [[nodiscard]] constexpr DeriveGfxPipelineType<U>::type &GetGfxPipeline() {

@@ -166,11 +166,12 @@ void GBufferRenderFlowVk::CreateRenderPass() {
   // --- Renderpass ------------------------------------------------------------
   VkRenderPassCreateInfo renderPassInfo{};
   RenderPassVk::GetDefaultRenderPassCreateInfo(renderPassInfo);
+  renderPassInfo.attachmentCount = 3;
+  renderPassInfo.pAttachments = attachments;
+  renderPassInfo.subpassCount = 1;
+  renderPassInfo.pSubpasses = subpasses;
   renderPassInfo.dependencyCount = 1;
   renderPassInfo.pDependencies = &dependency;
-  renderPassInfo.pAttachments = attachments;
-  renderPassInfo.pSubpasses = subpasses;
-  renderPassInfo.subpassCount = 1;
 
   m_renderPass.Create(renderPassInfo, ContextVk::Device()->GetDevice());
 };
@@ -195,7 +196,6 @@ void GBufferRenderFlowVk::CreateFramebuffer() {
 
   VkFramebufferCreateInfo createInfo{};
   FramebuffersVk::GetDefaultFramebufferState(createInfo);
-
   createInfo.renderPass = m_renderPass.GetVkRenderPass();
   createInfo.pAttachments = attachments.data();
   createInfo.attachmentCount = attachments.size();
@@ -205,6 +205,25 @@ void GBufferRenderFlowVk::CreateFramebuffer() {
 
   FramebuffersVk::CreateVkFramebuffer(ContextVk::Device()->GetDevice(),
                                       createInfo, m_framebuffer);
+};
+
+//
+//
+//
+//
+//
+// --- CREATE PIPELINES --------------------------------------------------------
+// --- CREATE PIPELINES --------------------------------------------------------
+// --- CREATE PIPELINES --------------------------------------------------------
+//
+void GBufferRenderFlowVk::CreatePipelines() {
+  // - Vertexbuffer layout
+  // - Enabled shader stage bits
+  // - Material-type specific shader codes (for custom shaders, user needs to
+  //   provide as attachment in the material)
+  // - Custom shader data - uniforms & defines
+  //
+
 };
 
 //

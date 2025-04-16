@@ -27,6 +27,7 @@ public:
     CreateAttachments();
     CreateRenderPass();
     CreateFramebuffer();
+    CreatePipelines();
   };
   virtual void CleanUp() override;
 
@@ -34,6 +35,7 @@ private:
   void CreateAttachments() override;
   void CreateFramebuffer() override;
   void CreateRenderPass() override;
+  void CreatePipelines() override;
 
 private:
   struct Attachments {

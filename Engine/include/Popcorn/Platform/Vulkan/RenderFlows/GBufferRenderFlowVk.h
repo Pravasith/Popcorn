@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ContextVk.h"
+#include "GBufferPipelineVk.h"
 #include "GlobalMacros.h"
 #include "ImageVk.h"
 #include "PipelineFactoryVk.h"
@@ -27,6 +28,7 @@ public:
     CreateAttachments();
     CreateRenderPass();
     CreateFramebuffer();
+    CreatePipelines();
   };
   virtual void CleanUp() override;
 
@@ -34,6 +36,7 @@ private:
   void CreateAttachments() override;
   void CreateFramebuffer() override;
   void CreateRenderPass() override;
+  void CreatePipelines() override;
 
 private:
   struct Attachments {
@@ -47,7 +50,6 @@ private:
   RenderPassVk m_renderPass;
   VkFramebuffer m_framebuffer;
 
-  // Pipelines
   GBufferPipelineVk *m_gBufferPipeline;
 };
 

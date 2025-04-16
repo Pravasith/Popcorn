@@ -96,6 +96,48 @@ void LightingRenderFlowVk::CreateRenderPass() {
   dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
   dependency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
   dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+  //
+  // --- Renderpass ------------------------------------------------------------
+  VkRenderPassCreateInfo renderPassInfo{};
+  RenderPassVk::GetDefaultRenderPassCreateInfo(renderPassInfo);
+  renderPassInfo.attachmentCount = 1;
+  renderPassInfo.pAttachments = attachments;
+  renderPassInfo.subpassCount = 1;
+  renderPassInfo.pSubpasses = subpasses;
+  renderPassInfo.dependencyCount = 1;
+  renderPassInfo.pDependencies = &dependency;
+
+  m_renderPass.Create(renderPassInfo, ContextVk::Device()->GetDevice());
+};
+
+//
+//
+//
+//
+//
+// --- CREATE FRAMEBUFFER ------------------------------------------------------
+// --- CREATE FRAMEBUFFER ------------------------------------------------------
+// --- CREATE FRAMEBUFFER ------------------------------------------------------
+//
+void LightingRenderFlowVk::CreateFramebuffer() {
+  const auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
+
+  std::vector<VkImageView> attachments{
+      m_attachments.lightBuffer.GetVkImageView()};
+
+  VkFramebufferCreateInfo createInfo{};
+  FramebuffersVk::GetDefaultFramebufferState(createInfo);
+
+  createInfo.renderPass = m_renderPass.GetVkRenderPass();
+  createInfo.pAttachments = attachments.data();
+  createInfo.attachmentCount = attachments.size();
+  createInfo.width = swapchainExtent.width;
+  createInfo.height = swapchainExtent.height;
+  createInfo.layers = 1;
+
+  FramebuffersVk::CreateVkFramebuffer(ContextVk::Device()->GetDevice(),
+                                      createInfo, m_framebuffer);
 };
 
 GFX_NAMESPACE_END
