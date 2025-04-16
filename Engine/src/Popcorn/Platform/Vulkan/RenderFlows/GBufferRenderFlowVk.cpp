@@ -222,8 +222,6 @@ void GBufferRenderFlowVk::CreatePipelines() {
   // - Material-type specific shader codes (for custom shaders, user needs to
   //   provide as attachment in the material)
   // - Custom shader data - uniforms & defines
-  //
-
 };
 
 //

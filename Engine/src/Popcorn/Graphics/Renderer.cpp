@@ -37,11 +37,11 @@ void Renderer::Init(const Window &appWin) {
   s_gfxContext = GfxContext::Get();
 
   if (s_type == RendererType::Vulkan) {
-    s_instance = new RendererVk(appWin);
+    s_instance = new RendererVk(appWin); // Creates Vulkan context
 
     RendererVk *vkRenderer = static_cast<RendererVk *>(s_instance);
-    vkRenderer->CreateRenderWorkflows();
-    vkRenderer->CreateBasicCommandBuffers();
+    vkRenderer->CreateRenderingCommandBuffers();
+    vkRenderer->CreateRenderFlows();
 
   } else if (s_type == RendererType::OpenGL) {
     s_instance = new RendererOpenGL(appWin);

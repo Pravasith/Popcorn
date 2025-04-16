@@ -79,8 +79,6 @@ template <RendererType T> Renderer *Renderer::Create(const Window &appWin) {
   if (!s_instance) {
     // PC_ASSERT(s_instance, "NO RENDERER INSTANCE");
     s_type = T;
-
-    // s_instance = new Renderer(appWin);
     Renderer::Init(appWin);
   }
 

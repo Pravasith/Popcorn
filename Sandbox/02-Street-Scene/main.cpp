@@ -96,14 +96,13 @@ private:
 };
 
 int main(int argc, char **argv) {
-  Popcorn::Context::Begin();
+  Popcorn::Context::BeginContext();
 
   auto gameLayer = new GameLayer();
   Application::AddLayer(gameLayer);
-  // Adds scene on attach
+  // Adds scene to renderer on attach
 
   Popcorn::Context::StartGame();
-
-  Popcorn::Context::End();
+  Popcorn::Context::EndContext();
   return 0;
 }

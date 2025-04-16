@@ -38,14 +38,7 @@ public:
   void DestroyVulkanContext();
 
   static RenderFlowVk *GetRenderFlow(const RenderFlows index);
-  void CreateBasicCommandBuffers();
-
-private:
-  //
-  // -----------------------------------------------------------------------
-  // --- TODO: Potential methods -------------------------------------------
-  void RecordCmdBuffer(void *renderPass, void *pipeline) {};
-  void SubmitCmdBuffer(void *cmdBuffer) {};
+  void CreateRenderingCommandBuffers();
 
 public:
   static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;

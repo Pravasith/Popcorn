@@ -6,7 +6,9 @@
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
 #include "RenderFlows/BasicRenderFlowVk.h"
+#include "RenderFlows/CompositeRenderFlowVk.h"
 #include "RenderFlows/GBufferRenderFlowVk.h"
+#include "RenderFlows/LightingRenderFlowVk.h"
 #include "RenderFlows/RenderFlowVk.h"
 #include <cstring>
 #include <vulkan/vulkan_core.h>
@@ -62,7 +64,7 @@ bool RendererVk::OnFrameBufferResize(FrameBfrResizeEvent &) {
   return true;
 };
 
-void RendererVk::CreateBasicCommandBuffers() {
+void RendererVk::CreateRenderingCommandBuffers() {
   auto *commandPoolVkStn = CommandPoolVk::Get();
   VkCommandBufferAllocateInfo allocInfo{};
   commandPoolVkStn->GetDefaultCommandBufferAllocInfo(allocInfo);
@@ -109,17 +111,19 @@ void RendererVk::DestroyVulkanContext() {
 // --- RENDER WORKFLOWS ------------------------------------------------------
 void RendererVk::CreateRenderFlows() {
   s_renderFlows.emplace_back(new GBufferRenderFlowVk());
+  s_renderFlows.emplace_back(new LightingRenderFlowVk());
+  s_renderFlows.emplace_back(new CompositeRenderFlowVk());
+
+  for (auto &renderFlow : s_renderFlows) {
+    PC_WARN("Preparing renderflow...")
+    renderFlow->Prepare();
+  }
 
   // //
   // // CREATE WORKFLOW RESOURCES
   // ----------------------------------------------- PC_WARN("Expensive
   // initialization operation: Creating workflow Vulkan "
   //         "resources! Should only be done once per workflow object init.")
-
-  for (auto &renderFlow : s_renderFlows) {
-    PC_WARN("Preparing renderflow...")
-    renderFlow->Prepare();
-  }
 };
 
 // Sort materials, allocate descriptor sets, vk buffers, index buffers &

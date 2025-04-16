@@ -12,8 +12,11 @@ static Application *s_application = nullptr;
 static void BeginContext() {
   Application::Start();
   s_application = &Application::Get();
-  s_renderer =
-      Renderer::Create<RendererType::Vulkan>(s_application->GetAppWindow());
+  s_renderer = Renderer::Create<RendererType::Vulkan>(
+      s_application
+          ->GetAppWindow()); // This creates vulkan renderer, creates render
+                             // command buffers, and creates renderflows
+
   s_application->SetRenderer(*s_renderer);
 }
 

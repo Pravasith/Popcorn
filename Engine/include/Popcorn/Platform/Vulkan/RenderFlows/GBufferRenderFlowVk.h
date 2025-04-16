@@ -28,7 +28,6 @@ public:
     CreateAttachments();
     CreateRenderPass();
     CreateFramebuffer();
-    CreatePipelines();
   };
   virtual void CleanUp() override;
 

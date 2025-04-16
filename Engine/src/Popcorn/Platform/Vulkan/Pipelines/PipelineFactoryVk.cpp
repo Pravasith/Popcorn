@@ -21,10 +21,6 @@ void PipelineFactoryVk::CreatePipeline<Pipelines::Deferred>(
   auto &device = deviceVkStn->GetDevice();
   const auto &swapchainExtent = swapchainVkStn->GetSwapchainExtent();
 
-  // TODO: Material specific pipelines; loop over materials to create unique
-  // pipelines. Unique material properties as hash -- pipeline layout
-  // auto &material = m_materials[0];
-
   Buffer vertShaderBuffer = std::move(material->GetShaders()[0]);
   Buffer fragShaderBuffer = std::move(material->GetShaders()[1]);
 
