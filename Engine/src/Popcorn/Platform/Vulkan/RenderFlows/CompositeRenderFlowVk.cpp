@@ -7,6 +7,12 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+//
+//
+// --- CREATE ATTACHMENTS ------------------------------------------------------
+// --- CREATE ATTACHMENTS ------------------------------------------------------
+// --- CREATE ATTACHMENTS ------------------------------------------------------
+//
 void CompositeRenderFlowVk::CreateAttachments() {
   const auto &swapchain = ContextVk::Swapchain();
 
@@ -42,11 +48,20 @@ void CompositeRenderFlowVk::CreateAttachments() {
   RenderPassVk::GetDefaultAttachmentDescription(presentImageAttachment);
   presentImageAttachment.format = format;
   presentImageAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-  presentImageAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+  presentImageAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
   presentImageRef.SetAttachmentDescription(presentImageAttachment);
 }
 
+//
+//
+//
+//
+//
+// --- CREATE RENDER PASS ------------------------------------------------------
+// --- CREATE RENDER PASS ------------------------------------------------------
+// --- CREATE RENDER PASS ------------------------------------------------------
+//
 void CompositeRenderFlowVk::CreateRenderPass() {
   //
   // --- Attachments -----------------------------------------------------------
@@ -55,11 +70,11 @@ void CompositeRenderFlowVk::CreateRenderPass() {
 
   //
   // --- Attachment references -------------------------------------------------
-  VkAttachmentReference lightAttachmentRef{};
-  RenderPassVk::GetAttachmentRef(lightAttachmentRef, 0);
-  lightAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+  VkAttachmentReference finalAttachmentRef{};
+  RenderPassVk::GetAttachmentRef(finalAttachmentRef, 0);
+  finalAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-  VkAttachmentReference attachmentRefs[]{lightAttachmentRef};
+  VkAttachmentReference attachmentRefs[]{finalAttachmentRef};
 
   //
   // --- Create Subpasses ------------------------------------------------------
@@ -82,17 +97,8 @@ void CompositeRenderFlowVk::CreateRenderPass() {
   dependency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
   dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
-  {
-    // // Composite pass
-    // VkSubpassDependency dependency{};
-    // dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    // dependency.dstSubpass = 0;
-    // dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    // dependency.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-    // dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    // dependency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-    // dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-  }
+  //
+  // --- Renderpass ------------------------------------------------------------
 };
 
 GFX_NAMESPACE_END

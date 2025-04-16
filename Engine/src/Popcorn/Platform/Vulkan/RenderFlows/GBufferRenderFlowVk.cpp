@@ -9,6 +9,12 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+//
+//
+// --- CREATE ATTACHMENTS ------------------------------------------------------
+// --- CREATE ATTACHMENTS ------------------------------------------------------
+// --- CREATE ATTACHMENTS ------------------------------------------------------
+//
 void GBufferRenderFlowVk::CreateAttachments() {
   const auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
 
@@ -101,52 +107,15 @@ void GBufferRenderFlowVk::CreateAttachments() {
   normalImage.SetAttachmentDescription(normalAttachment);
 };
 
-void GBufferRenderFlowVk::CreateFramebuffer() {
-  const auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
-
-  std::vector<VkImageView> attachments = {
-      m_attachments.albedoImage.GetVkImageView(),
-      m_attachments.depthImage.GetVkImageView(),
-      m_attachments.normalImage.GetVkImageView(),
-  };
-
-  VkFramebufferCreateInfo createInfo{};
-  FramebuffersVk::GetDefaultFramebufferState(createInfo);
-
-  createInfo.renderPass = m_renderPass.GetVkRenderPass();
-  createInfo.pAttachments = attachments.data();
-  createInfo.attachmentCount = attachments.size();
-  createInfo.width = swapchainExtent.width;
-  createInfo.height = swapchainExtent.height;
-  createInfo.layers = 1;
-
-  FramebuffersVk::CreateVkFramebuffer(ContextVk::Device()->GetDevice(),
-                                      createInfo, m_framebuffer);
-};
-
-void GBufferRenderFlowVk::CleanUp() {
-  const VkDevice &device = ContextVk::Device()->GetDevice();
-
-  //
-  // --- Destroy Framebuffer ---------------------------------------------------
-  if (m_framebuffer != VK_NULL_HANDLE) {
-    FramebuffersVk::DestroyVkFramebuffer(device, m_framebuffer);
-    m_framebuffer = VK_NULL_HANDLE;
-  }
-
-  //
-  // --- Destroy Renderpass ----------------------------------------------------
-  if (m_renderPass.GetVkRenderPass() != VK_NULL_HANDLE) {
-    m_renderPass.Destroy(device);
-  }
-
-  //
-  // --- Destroy G-Buffer Attachments ------------------------------------------
-  m_attachments.albedoImage.Destroy();
-  m_attachments.depthImage.Destroy();
-  m_attachments.normalImage.Destroy();
-}
-
+//
+//
+//
+//
+//
+// --- CREATE RENDER PASS ------------------------------------------------------
+// --- CREATE RENDER PASS ------------------------------------------------------
+// --- CREATE RENDER PASS ------------------------------------------------------
+//
 void GBufferRenderFlowVk::CreateRenderPass() {
   //
   // --- Attachments -----------------------------------------------------------
@@ -205,6 +174,69 @@ void GBufferRenderFlowVk::CreateRenderPass() {
 
   m_renderPass.Create(renderPassInfo, ContextVk::Device()->GetDevice());
 };
+
+//
+//
+//
+//
+//
+// --- CREATE FRAMEBUFFER ------------------------------------------------------
+// --- CREATE FRAMEBUFFER ------------------------------------------------------
+// --- CREATE FRAMEBUFFER ------------------------------------------------------
+//
+void GBufferRenderFlowVk::CreateFramebuffer() {
+  const auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
+
+  std::vector<VkImageView> attachments = {
+      m_attachments.albedoImage.GetVkImageView(),
+      m_attachments.depthImage.GetVkImageView(),
+      m_attachments.normalImage.GetVkImageView(),
+  };
+
+  VkFramebufferCreateInfo createInfo{};
+  FramebuffersVk::GetDefaultFramebufferState(createInfo);
+
+  createInfo.renderPass = m_renderPass.GetVkRenderPass();
+  createInfo.pAttachments = attachments.data();
+  createInfo.attachmentCount = attachments.size();
+  createInfo.width = swapchainExtent.width;
+  createInfo.height = swapchainExtent.height;
+  createInfo.layers = 1;
+
+  FramebuffersVk::CreateVkFramebuffer(ContextVk::Device()->GetDevice(),
+                                      createInfo, m_framebuffer);
+};
+
+//
+//
+//
+//
+// --- CLEAN UP ----------------------------------------------------------------
+// --- CLEAN UP ----------------------------------------------------------------
+// --- CLEAN UP ----------------------------------------------------------------
+//
+void GBufferRenderFlowVk::CleanUp() {
+  const VkDevice &device = ContextVk::Device()->GetDevice();
+
+  //
+  // --- Destroy Framebuffer ---------------------------------------------------
+  if (m_framebuffer != VK_NULL_HANDLE) {
+    FramebuffersVk::DestroyVkFramebuffer(device, m_framebuffer);
+    m_framebuffer = VK_NULL_HANDLE;
+  }
+
+  //
+  // --- Destroy Renderpass ----------------------------------------------------
+  if (m_renderPass.GetVkRenderPass() != VK_NULL_HANDLE) {
+    m_renderPass.Destroy(device);
+  }
+
+  //
+  // --- Destroy G-Buffer Attachments ------------------------------------------
+  m_attachments.albedoImage.Destroy();
+  m_attachments.depthImage.Destroy();
+  m_attachments.normalImage.Destroy();
+}
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
