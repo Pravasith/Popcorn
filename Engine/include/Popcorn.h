@@ -1,13 +1,18 @@
 #pragma once
 
 #include "Application.h"
+#include "GameObject.h"
 #include "GlobalMacros.h"
+#include "Popcorn/Loaders/GltfLoader.h"
+#include "Scene.h"
 
 ENGINE_NAMESPACE_BEGIN
 CTX_NAMESPACE_BEGIN
 
 static Renderer *s_renderer = nullptr;
 static Application *s_application = nullptr;
+
+using Model = tinygltf::Model;
 
 static void BeginContext() {
   Application::Start();
@@ -42,6 +47,12 @@ static Application &GetApplication() {
     PC_WARN("s_s_application is nullptr")
   };
   return *s_application;
+};
+
+static void AddGltfToScene(const std::string &filename, Scene &scene) {
+  tinygltf::Model model;
+  GltfLoader::LoadFromFile(filename, model);
+  GltfLoader::ExtractModelData(model, scene.GetGameObjects());
 };
 
 CTX_NAMESPACE_END

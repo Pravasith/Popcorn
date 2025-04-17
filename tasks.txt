@@ -2,36 +2,28 @@
 --- TASKS ------------------------------------------------------------------
 ----------------------------------------------------------------------------
 
---- 18 Feb ------------------------------------ X
---- 04 Mar ------------------------------------
-
-:: Refactor Renderflow (Vertex & index memories, descriptors) - Today & tomorrow
 :: Show blender scene in Popcorn - friday
 
 // USE IN VIDEO
 // https://x.com/gunsnrosesgirl3/status/1907830742106755259
-//
 
 :: Make a central DB for all Vulkan resources
 
 
-:: Make all singletons stack allocated with static local variables
-   BE CAREFUL ABOUT THIS ONE ^^
-   Stack allocated local variables last until the end of the program.
 
-
---- 18 Feb ------------------------------------
 --- Make video - 28th Feb --------------------------
 
 :: Implement ImGui
 
 
 
---- TASKS ------------------------------------------------------------------
-----------------------------------------------------------------------------
 
 LOW PRIORITY:
 -------------
+
+:: Make all singletons stack allocated with static local variables
+   BE CAREFUL ABOUT THIS ONE ^^
+   Stack allocated local variables last until the end of the program.
 
 :: Fix Buffer class constructors
 

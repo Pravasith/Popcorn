@@ -15,67 +15,28 @@
 #include <vector>
 
 using namespace Popcorn;
+class BlenderScene : public Scene {};
 
 class GameLayer : public Layer {
-  class TriangleScene : public Scene {};
 
 public:
   GameLayer() { PC_PRINT("CREATED", TagType::Constr, "GAME-LAYER") };
   ~GameLayer() { PC_PRINT("DESTROYED", TagType::Destr, "GAME-LAYER") };
 
   virtual void OnAttach() override {
-    struct Vertex {
-      glm::vec3 pos;
-      glm::vec3 color;
-      std::string Print() {
-        std::stringstream ss;
-        ss << pos.x << ", " << pos.y << "; " << color.r << ", " << color.g
-           << ", " << color.b;
-        return ss.str();
-      };
-    };
 
-    // Create shared buffers
-    vertexBuffer = VertexBuffer::Create();
-    indexBuffer = new IndexBuffer<uint16_t>();
+    Context::AddGltfToScene("assets/models/blenderModel.gltf", scene);
 
-    vertexBuffer->SetLayout<BufferDefs::AttrTypes::Float3,
-                            BufferDefs::AttrTypes::Float3>();
-
-    // Single quad data (shared by all cube faces)
-    vertexBuffer->Fill<Vertex>({{{-0.5f, -0.5f, .0f}, {1.0f, 0.0f, 0.0f}},
-                                {{0.5f, -0.5f, .0f}, {0.0f, 1.0f, 0.0f}},
-                                {{0.5f, 0.5f, .0f}, {0.0f, 0.0f, 1.0f}},
-                                {{-0.5f, 0.5f, .0f}, {1.0f, 1.0f, 1.0f}}});
-
-    indexBuffer->Fill({0, 1, 2, 2, 3, 0});
-
-    // Material setup
-    std::vector shaderFiles{"shaders/tri_vert.spv", "shaders/tri_frag.spv"};
-    MaterialData matData{(ShaderStages::VertexBit | ShaderStages::FragmentBit),
-                         shaderFiles};
-    triMat = new BasicMaterial(matData);
-
-    mesh = new Mesh{*vertexBuffer, indexBuffer, *triMat};
-
-    mesh->SetPosition({.0f, 1.f, 0.f});
-    mesh->RotateX(glm::radians(-90.f));
-
-    triScene.AddNode(mesh);
-
-    auto &renderer = Popcorn::Context::GetRenderer();
-    renderer.AddScene(&triScene);
+    auto &renderer = Context::GetRenderer();
+    renderer.AddScene(&scene);
   };
 
   virtual void OnDetach() override {
+    // TODO: Delete scene -- and all it's heap allocated children
+    // Client is the sole owner of all GameObject resources
+
     delete triMat;
     triMat = nullptr;
-
-    delete indexBuffer;
-    indexBuffer = nullptr;
-
-    VertexBuffer::Destroy(vertexBuffer);
-    delete mesh;
   };
 
   virtual void OnUpdate(TimeEvent &e) override {
@@ -88,11 +49,8 @@ public:
   virtual bool OnEvent(Event &e) override { return false; };
 
 private:
-  VertexBuffer *vertexBuffer;
-  IndexBuffer<uint16_t> *indexBuffer;
-  TriangleScene triScene;
-  Mesh *mesh;
   Material *triMat;
+  BlenderScene scene;
 };
 
 int main(int argc, char **argv) {
@@ -104,5 +62,6 @@ int main(int argc, char **argv) {
 
   Popcorn::Context::StartGame();
   Popcorn::Context::EndContext();
+
   return 0;
 }

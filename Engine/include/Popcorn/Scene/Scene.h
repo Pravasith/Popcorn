@@ -15,7 +15,7 @@ public:
   Scene();
   virtual ~Scene();
 
-  [[nodiscard]] inline const std::vector<GameObject *> &GetNodes() const {
+  [[nodiscard]] inline std::vector<GameObject *> &GetGameObjects() {
     return m_nodes;
   };
 

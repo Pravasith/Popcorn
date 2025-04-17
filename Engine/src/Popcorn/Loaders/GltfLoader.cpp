@@ -53,7 +53,7 @@ bool GltfLoader::LoadFromFile(const std::string &filename,
 
 void GltfLoader::ExtractModelData(const tinygltf::Model &model,
                                   std::vector<GameObject *> &gameObjects) {
-  for (const auto &node : model.nodes) {
+  for (auto &node : model.nodes) {
     GameObject *gameObject = ConvertGltfNodeToGameObject(model, node);
     gameObjects.push_back(gameObject);
   }
