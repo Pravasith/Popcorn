@@ -24,9 +24,7 @@ public:
   ~GameLayer() { PC_PRINT("DESTROYED", TagType::Destr, "GAME-LAYER") };
 
   virtual void OnAttach() override {
-
     Context::AddGltfToScene("assets/models/blenderModel.gltf", scene);
-
     auto &renderer = Context::GetRenderer();
     renderer.AddScene(&scene);
   };
@@ -57,8 +55,7 @@ int main(int argc, char **argv) {
   Popcorn::Context::BeginContext();
 
   auto gameLayer = new GameLayer();
-  Application::AddLayer(gameLayer);
-  // Adds scene to renderer on attach
+  Application::AddLayer(gameLayer); // Adds scene to renderer on attach
 
   Popcorn::Context::StartGame();
   Popcorn::Context::EndContext();

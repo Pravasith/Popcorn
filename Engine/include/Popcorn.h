@@ -27,6 +27,7 @@ static void BeginContext() {
 
 static void StartGame() {
   s_application->ProcessScenes(); // Loads models, converts to game objects
+
   s_application->StartGameLoop(); // Starts game loop
 };
 

@@ -1,8 +1,6 @@
 #include "Scene.h"
 #include "GameObject.h"
 #include "GlobalMacros.h"
-#include "Material.h"
-#include "Mesh.h"
 #include "Popcorn/Core/Base.h"
 #include "Renderer.h"
 #include <algorithm>

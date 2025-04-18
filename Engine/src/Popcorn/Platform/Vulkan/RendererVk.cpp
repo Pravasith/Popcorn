@@ -133,16 +133,20 @@ void RendererVk::CreateRenderFlowResources() {
   // Create VMA Allocator
   ContextVk::MemoryAllocator()->CreateVMAAllocator();
 
-  //
-  // Allocate all resources
+  // TODO:
+  // 1. Group similar materials and save in a hashmap
+  // 2. Create Vulkan resources:
+  //    - Camera UBO memory (outside all loops)
+  //    - Basic UBO memory (per each unique material combo)
+  //    - Pbr UBO memory (per each unique material combo)
+  //    - Model matrix UBO memory (per each game object)
+  //    - (One big) Vertex buffer memory (submeshes, basic & pbr)
+  //    - (One big) Index buffer memory
+  //    - Descriptor sets (for every frame)
+
+  // RenderFlowVk::AllocateMemory();
 
   for (auto &renderFlow : s_renderFlows) {
-    // Loops through all meshes & creates a contiguous Vulkan buffer memory for
-    // each workflow -- each workflow has one VkBuffer & one VkDeviceMemory each
-    // -----------
-    // TODO: Following 3 are not renderflow specific - create them in
-    // RenderFlowVk as common resources
-    // name it something like -- CreateModelResources
     renderFlow->AllocateVkVertexBuffers();  // VMA - Extract from meshes
     renderFlow->AllocateVkIndexBuffers();   // VMA - Extract from meshes
     renderFlow->AllocateVkUniformBuffers(); // VMA - Extract from -
@@ -159,17 +163,8 @@ void RendererVk::CreateRenderFlowResources() {
 };
 
 void RendererVk::AssignSceneObjectsToRenderFlows() {
-  // Attach Meshes to Workflows (ptrs)
-  // Segregate to submesh types
-  // Create Vulkan resources:
-  //      - Vertex buffer memory
-  //      - Index buffer memory
-  //      - Descriptor sets (for every frame)
-  //            - Camera UBO
-  //            - Per mesh UBO (world matrix)
-  //            - Per material UBO (tbd)
   for (auto &scene : m_sceneLibrary.GetScenes()) {
-    for (auto &node : scene->GetNodes()) {
+    for (auto &node : scene->GetGameObjects()) {
       ProcessGameObjectNode(node); // Recursive (FYI)
     };
   };

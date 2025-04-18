@@ -151,7 +151,7 @@ void Application::OnEvent(Event &e) {
 
 void Application::ProcessScenes() {
   s_renderer->AssignSceneObjectsToRenderFlows();
-  s_renderer->CreateRenderFlowResources();
+  s_renderer->CreateRenderFlowResources(); // TODO: Allocate Vulkan memory here
 };
 
 ENGINE_NAMESPACE_END
