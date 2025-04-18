@@ -8,8 +8,6 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-// TODO: MAKE A PROPER SCENE GRAPH
-// For now, the scene graph contains a linear list of nodes
 class Scene {
 public:
   Scene();
