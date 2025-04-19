@@ -29,6 +29,10 @@ public:
     s_shaderByteCodeMap[stage] = spirVShaderCode;
   };
 
+  [[nodiscard]] const DeriveMaterialDataType<T>::type &GetMaterialData() const {
+    return m_data;
+  };
+
   // Shaders, uniform data (roughness, metallic etc)
   void SetData(const DeriveMaterialDataType<T>::type &materialData) {
     m_data = materialData;
@@ -68,6 +72,32 @@ void PC_ValidateAndRemoveMaterial(Material<T> *materialPtr,
   };
 
   materials.erase(ptr);
+};
+
+template <MaterialTypes T>
+static MaterialHashType PC_HashMaterialGroups(Material<T> *material) {
+  MaterialHashType uid = 0;
+
+  const auto &matData = material->GetMaterialData();
+
+  if constexpr (T == MaterialTypes::BasicMat) {
+    uid ^= PC_HashFloat(matData.baseColorFactor.x);
+    uid ^= PC_HashFloat(matData.baseColorFactor.y) >> 3;
+    uid ^= PC_HashFloat(matData.baseColorFactor.z) >> 6;
+    uid *= 2654435761u; // Knuth’s multiplicative hash
+  } else if constexpr (T == MaterialTypes::PbrMat) {
+    uid ^= PC_HashFloat(matData.baseColorFactor.x);
+    uid ^= PC_HashFloat(matData.baseColorFactor.y) >> 3;
+    uid ^= PC_HashFloat(matData.baseColorFactor.z) >> 6;
+    uid ^= PC_HashFloat(matData.metallicFactor) << 2;
+    uid ^= PC_HashFloat(matData.roughnessFactor) << 3;
+    uid ^= matData.hasBaseColorTexture ? 0x1 : 0;
+    uid ^= matData.hasNormalTexture ? 0x2 : 0;
+    uid ^= matData.hasMetallicRoughnessTexture ? 0x4 : 0;
+    uid *= 2654435761u;
+  }
+
+  return uid;
 };
 
 GFX_NAMESPACE_END

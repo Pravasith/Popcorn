@@ -2,10 +2,11 @@
 
 #include "Camera.h"
 #include "GlobalMacros.h"
-#include "Material.h"
+#include "MaterialTypes.h"
 #include "Mesh.h"
 #include "Popcorn/Core/Base.h"
 #include <cstdint>
+#include <cstring>
 #include <vulkan/vulkan_core.h>
 
 // TODO: Redo this class. But only after a full working animated scene is
@@ -25,6 +26,9 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "RenderFlowVk")
   };
 
+  using BasicSubmeshGroupType = std::vector<Submesh<MaterialTypes::BasicMat> *>;
+  using PbrSubmeshGroupType = std::vector<Submesh<MaterialTypes::PbrMat> *>;
+
   virtual void ProcessSceneUpdates(const uint32_t currentFrame) = 0;
   virtual void
   RecordRenderCommands(const uint32_t frameIndex, const uint32_t currentFrame,
@@ -43,6 +47,25 @@ public:
   virtual void CreateRenderPass() {};
   virtual void CreateFramebuffer() {};
   virtual void CreatePipelines() {};
+
+  // Allocates VBOs, IBOs, and UBOs
+  virtual void AllocateVMABuffers() {
+    // Basic Material --
+    for (auto &[matId, submeshes] : s_basicSubmeshGroups) {
+      for (auto &submesh : submeshes) {
+        // Basic submesh
+        // TODO: Allocate VMA VBOs, IBOs, and Material
+      }
+    };
+
+    // Pbr Material --
+    for (auto &[matId, submeshes] : s_pbrSubmeshGroups) {
+      for (auto &submesh : submeshes) {
+        // Basic submesh
+      }
+    };
+  };
+
   //
   //
   //
@@ -61,17 +84,21 @@ public:
 
   template <MaterialTypes T> static void AddSubmesh(Submesh<T> *submesh) {
     if constexpr (T == MaterialTypes::BasicMat) {
-      PC_ValidateAndAddSubmesh(submesh, s_basicSubmeshes);
+      uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
+      PC_ValidateAndAddSubmesh(submesh, s_basicSubmeshGroups[materialId]);
     } else if constexpr (T == MaterialTypes::PbrMat) {
-      PC_ValidateAndAddSubmesh(submesh, s_basicSubmeshes);
+      uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
+      PC_ValidateAndAddSubmesh(submesh, s_pbrSubmeshGroups[materialId]);
     }
   };
 
   template <MaterialTypes T> static void RemoveSubmesh(Submesh<T> *submesh) {
     if constexpr (T == MaterialTypes::BasicMat) {
-      PC_ValidateAndRemoveSubmesh(submesh, s_basicSubmeshes);
+      uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
+      PC_ValidateAndRemoveSubmesh(submesh, s_basicSubmeshGroups[materialId]);
     } else if constexpr (T == MaterialTypes::PbrMat) {
-      PC_ValidateAndRemoveSubmesh(submesh, s_pbrSubmeshes);
+      uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
+      PC_ValidateAndRemoveSubmesh(submesh, s_pbrSubmeshGroups[materialId]);
     }
   };
 
@@ -79,9 +106,10 @@ protected:
   // Camera
   Camera *camera;
 
-  // Submeshes for batching (sorta)
-  static std::vector<Submesh<MaterialTypes::BasicMat> *> s_basicSubmeshes;
-  static std::vector<Submesh<MaterialTypes::PbrMat> *> s_pbrSubmeshes;
+  static std::unordered_map<MaterialHashType, BasicSubmeshGroupType>
+      s_basicSubmeshGroups;
+  static std::unordered_map<MaterialHashType, PbrSubmeshGroupType>
+      s_pbrSubmeshGroups;
 };
 
 GFX_NAMESPACE_END

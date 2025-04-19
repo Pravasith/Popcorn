@@ -116,19 +116,22 @@ void RendererVk::CreateRenderFlows() {
 
   for (auto &renderFlow : s_renderFlows) {
     PC_WARN("Preparing renderflow...")
-    renderFlow->Prepare();
+    renderFlow->Prepare(); // Creates Vulkan:
+                           //   - Attachments
+                           //   - RenderPass
+                           //   - Framebuffer
   }
-
-  // //
-  // // CREATE WORKFLOW RESOURCES
-  // ----------------------------------------------- PC_WARN("Expensive
-  // initialization operation: Creating workflow Vulkan "
-  //         "resources! Should only be done once per workflow object init.")
 };
 
 // Sort materials, allocate descriptor sets, vk buffers, index buffers &
 // create pipelines
 void RendererVk::CreateRenderFlowResources() {
+  // //
+  // // CREATE WORKFLOW RESOURCES
+  // ----------------------------------------------- PC_WARN("Expensive
+  // initialization operation: Creating workflow Vulkan "
+  //         "resources! Should only be done once per workflow object init.")
+
   //
   // Create VMA Allocator
   ContextVk::MemoryAllocator()->CreateVMAAllocator();

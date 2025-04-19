@@ -48,6 +48,7 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "Submesh");
   }
 
+  [[nodiscard]] Material<T> *GetMaterial() const { return m_material; };
 
   static constexpr MaterialTypes type_value = T;
 
@@ -196,7 +197,7 @@ void PC_ValidateAndAddSubmesh(Submesh<T> *submesh,
 
 template <MaterialTypes T>
 void PC_ValidateAndRemoveSubmesh(Submesh<T> *submesh,
-                                  std::vector<Submesh<T> *> &submeshes) {
+                                 std::vector<Submesh<T> *> &submeshes) {
   auto ptr = std::find(submeshes.begin(), submeshes.end(), submesh);
 
   if (ptr == submeshes.end()) {
