@@ -5,6 +5,7 @@
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include <vk_mem_alloc.h>
+#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -52,6 +53,16 @@ private:
 private:
   static MemoryFactoryVk *s_instance;
   static DeviceVk *s_deviceVk;
+
+  // Device-Local VkBufferMemory
+  VkBuffer m_submeshVBOs;
+  VkBuffer m_submeshIBOs;
+
+  // Host-visible VkBufferMemory
+  VkBuffer m_basicMaterialUBOs;
+  VkBuffer m_pbrMaterialUBOs;
+  VkBuffer m_modelMatrixUBOs;
+  VkBuffer m_viewProjMatrixUBO; // Small size -- can be a push constant
 };
 
 GFX_NAMESPACE_END
