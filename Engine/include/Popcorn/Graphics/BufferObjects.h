@@ -53,7 +53,7 @@ static constexpr uint32_t GetAttrTypeSize(BufferDefs::AttrTypes attrType) {
 
 struct Layout {
   std::vector<AttrTypes> attrTypesValue;
-  std::vector<uint32_t> attrOffsetsValue = {0};
+  std::vector<uint32_t> attrOffsetsValue{};
   uint32_t strideValue = 0;
   uint32_t countValue = 0;
 
@@ -61,7 +61,6 @@ struct Layout {
   void Reset() {
     attrTypesValue.clear();
     attrOffsetsValue.clear();
-    attrOffsetsValue.push_back(0);
     strideValue = 0;
     countValue = 0;
   };

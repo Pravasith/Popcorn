@@ -183,13 +183,13 @@ protected:
 // ----------------------------------------------------------------------------
 // --- UTIL FUNCTIONS (GLOBAL) ------------------------------------------------
 template <MaterialTypes T>
-void PC_ValidateAndAddSubmesh(Submesh<T> *submesh,
+bool PC_ValidateAndAddSubmesh(Submesh<T> *submesh,
                               std::vector<Submesh<T> *> &submeshes) {
   auto ptr = std::find(submeshes.begin(), submeshes.end(), submesh);
 
   if (ptr != submeshes.end()) {
     PC_WARN("Submesh already exists in the submesh library!")
-    return;
+    return false;
   };
 
   submeshes.emplace_back(submesh);

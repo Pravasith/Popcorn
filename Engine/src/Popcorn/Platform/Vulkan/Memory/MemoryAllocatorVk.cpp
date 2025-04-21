@@ -21,7 +21,6 @@ void MemoryAllocatorVk::CreateVMAAllocator() {
 };
 
 void MemoryAllocatorVk::AllocateBufferMemory(VmaAllocation &allocation) {};
-
 void MemoryAllocatorVk::AllocateImageMemory(VmaAllocation &allocation) {};
 
 void MemoryAllocatorVk::CleanUp() { vmaDestroyAllocator(m_allocator); };

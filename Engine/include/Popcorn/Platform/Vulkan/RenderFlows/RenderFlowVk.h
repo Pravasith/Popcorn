@@ -50,12 +50,14 @@ public:
 
   // Allocates VBOs, IBOs, and UBOs
   virtual void AllocateVMABuffers() {
-    // I Need a way to access these buffer memories
     // TODO: Allocate VMA VBOs, IBOs, and Material
     // - Device-local memory
     //      -- One big VBO (has all submeshes VBOs)
     //      -- One big IBO (has all submeshes IBOs)
     // - Host-visible memory
+    //      -- Staging: One big VBO (has all submeshes VBOs)
+    //      -- Staging: One big IBO (has all submeshes IBOs)
+    //
     //      -- One big BasicMaterial UBO (has all BasicMaterial UBOs)
     //      -- One big PbrMaterial UBO (has all PbrMaterial UBOs)
     //      -- One big ModelMatrix UBO (has all submeshes modelMatrix UBOs)
@@ -72,6 +74,7 @@ public:
       // TODO: Later, in render loop -- Bind DescriptorSet -
       //       Basic-Material-DSet(offset)
       for (auto &submesh : submeshes) {
+
         // TODO: Creation: Add submesh VBO to big VBO buffer (dynamic offsets,
         //       local memory)
         // TODO: Creation: Add submesh IBO to big IBO buffer (dynamic offsets,
@@ -111,20 +114,30 @@ public:
   template <MaterialTypes T> static void AddSubmesh(Submesh<T> *submesh) {
     if constexpr (T == MaterialTypes::BasicMat) {
       uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
-      PC_ValidateAndAddSubmesh(submesh, s_basicSubmeshGroups[materialId]);
+      if (PC_ValidateAndAddSubmesh(submesh, s_basicSubmeshGroups[materialId])) {
+        ++s_submeshCount;
+      };
     } else if constexpr (T == MaterialTypes::PbrMat) {
       uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
-      PC_ValidateAndAddSubmesh(submesh, s_pbrSubmeshGroups[materialId]);
+      if (PC_ValidateAndAddSubmesh(submesh, s_pbrSubmeshGroups[materialId])) {
+        ++s_submeshCount;
+      };
     }
   };
 
   template <MaterialTypes T> static void RemoveSubmesh(Submesh<T> *submesh) {
     if constexpr (T == MaterialTypes::BasicMat) {
       uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
-      PC_ValidateAndRemoveSubmesh(submesh, s_basicSubmeshGroups[materialId]);
+      if (PC_ValidateAndRemoveSubmesh(submesh,
+                                      s_basicSubmeshGroups[materialId])) {
+        --s_submeshCount;
+      };
     } else if constexpr (T == MaterialTypes::PbrMat) {
       uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
-      PC_ValidateAndRemoveSubmesh(submesh, s_pbrSubmeshGroups[materialId]);
+      if (PC_ValidateAndRemoveSubmesh(submesh,
+                                      s_pbrSubmeshGroups[materialId])) {
+        --s_submeshCount;
+      };
     }
   };
 
@@ -136,6 +149,8 @@ protected:
       s_basicSubmeshGroups;
   static std::unordered_map<MaterialHashType, PbrSubmeshGroupType>
       s_pbrSubmeshGroups;
+
+  static uint64_t s_submeshCount;
 };
 
 GFX_NAMESPACE_END

@@ -1,9 +1,15 @@
 
 #pragma once
 
+#include "BufferObjects.h"
+#include "BufferObjectsVk.h"
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
+#include "MaterialTypes.h"
+#include "Mesh.h"
 #include "Popcorn/Core/Base.h"
+#include <cstdint>
+#include <unordered_map>
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan_core.h>
 
@@ -27,6 +33,20 @@ public:
       s_instance = nullptr;
     } else {
       PC_WARN("Trying to destroy a non-existant instance of MemoryFactoryVk")
+    };
+  };
+
+  template <MaterialTypes T>
+  void CreateSubmeshVBOs(
+      const std::unordered_map<MaterialHashType, std::vector<Submesh<T> *>>
+          &submeshGroups) {
+    VkBufferCreateInfo vboInfo{};
+    BufferVkUtils::GetDefaultVkBufferState(vboInfo, bufferSize);
+    vboInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+
+    for (auto &[matId, submeshes] : submeshGroups) {
+      for (auto &submesh : submeshes) {
+      }
     };
   };
 
@@ -58,10 +78,20 @@ private:
   VkBuffer m_submeshVBOs;
   VkBuffer m_submeshIBOs;
 
+  VmaAllocationInfo m_submeshVBOsVMAInfo;
+  VmaAllocationInfo m_submeshIBOsVMAInfo;
+
+  VkBuffer m_submeshVBOsStaging;
+  VkBuffer m_submeshIBOsStaging;
+
+  VmaAllocationInfo m_submeshVBOsStagingVMAInfo;
+  VmaAllocationInfo m_submeshIBOsStagingVMAInfo;
+
   // Host-visible VkBufferMemory
   VkBuffer m_basicMaterialUBOs;
   VkBuffer m_pbrMaterialUBOs;
   VkBuffer m_modelMatrixUBOs;
+
   VkBuffer m_viewProjMatrixUBO; // Small size -- can be a push constant
 };
 
