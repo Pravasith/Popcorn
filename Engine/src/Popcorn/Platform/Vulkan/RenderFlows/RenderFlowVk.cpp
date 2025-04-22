@@ -45,14 +45,13 @@ void RenderFlowVk::AllocateVMABuffers() {
   // - Host-visible memory
   //      DONE -- Staging: One big VBO (has all submeshes VBOs)
   //      DONE -- Staging: One big IBO (has all submeshes IBOs)
-  //
   //      -- One big BasicMaterial UBO (has all BasicMaterial UBOs)
   //      -- One big PbrMaterial UBO (has all PbrMaterial UBOs)
   //      -- One big ModelMatrix UBO (has all submeshes modelMatrix UBOs)
   //      -- One ViewProjMatrix UBO (has camera's UBOs)
 
-  // Memory creation example -- (basic materials)
   //
+  // Memory creation example -- (basic materials)
   // TODO: Creation: Add ViewProj UBO (host-visible memory)
   // TODO: Later, in render loop -- Bind DescriptorSet -
   //       View-Proj-Matrix-DSet(offset)

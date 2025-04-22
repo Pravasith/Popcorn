@@ -136,11 +136,26 @@ void RendererVk::CreateRenderFlowResources() {
   ContextVk::MemoryAllocator()->CreateVMAAllocator();
 
   // Allocates vulkan buffers
-  RenderFlowVk::AllocateVMABuffers();
+  RenderFlowVk::AllocateVMABuffers(); // VBO, IBO
+
+  // TODO:
+  // 1. Create descriptors for
+  //     - BasicMaterial UBOs (submesh wise)
+  //     - PbrMaterial UBOs (submesh wise)
+  //     - ModelMatrix UBOs (submesh wise)
+  //     - CameraMatrix UBO (small size)
+  //     - Samplers (later - for lighting & passes)
+  //
+  // 2. Pipelines
+  //     - GBuffer (DSet 1)
+  //        - BasicMaterial UBO
+  //        - PbrMaterial UBO
+  //        - ModelMatrix UBO
+  //        - CameraMatrix UBO
+  //     - Lighting (DSet 1)
+  //     - Composition
 
   for (auto &renderFlow : s_renderFlows) {
-    renderFlow->AllocateVkVertexBuffers();  // VMA - Extract from meshes
-    renderFlow->AllocateVkIndexBuffers();   // VMA - Extract from meshes
     renderFlow->AllocateVkUniformBuffers(); // VMA - Extract from -
                                             // 1. Camera
                                             // 2. Mesh
