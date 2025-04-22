@@ -75,21 +75,22 @@ class BufferVkUtils {
 public:
   static void GetDefaultVkBufferState(VkBufferCreateInfo &bufferInfo,
                                       VkDeviceSize bufferSize);
-  static void AllocateVkBuffer(VkBuffer &vkBuffer,
-                               VkDeviceMemory &vkBufferMemory,
-                               const VkBufferCreateInfo &bufferInfo,
-                               const VkMemoryPropertyFlags memoryPropertyFlags);
-  static void DestroyVkBuffer(VkBuffer &vkBuffer,
-                              VkDeviceMemory &vkBufferMemory);
+  // static void AllocateVkBuffer(VkBuffer &vkBuffer,
+  //                              VkDeviceMemory &vkBufferMemory,
+  //                              const VkBufferCreateInfo &bufferInfo,
+  //                              const VkMemoryPropertyFlags
+  //                              memoryPropertyFlags);
+  // static void DestroyVkBuffer(VkBuffer &vkBuffer,
+  //                             VkDeviceMemory &vkBufferMemory);
 
-  static void *MapVkMemoryToCPU(VkDeviceMemory &vkBufferMemory,
-                                VkDeviceSize beginOffset,
-                                VkDeviceSize endOffset);
-  static void CopyBufferCPUToGPU(void *destPtr, void *srcPtr,
-                                 VkDeviceSize size);
-  static void CopyBufferGPUToGPU(VkBuffer &srcBuffer, VkBuffer &dstBuffer,
-                                 VkDeviceSize size);
-  static void UnmapVkMemoryFromCPU(VkDeviceMemory &vkBufferMemory);
+  // static void *MapVkMemoryToCPU(VkDeviceMemory &vkBufferMemory,
+  //                               VkDeviceSize beginOffset,
+  //                               VkDeviceSize endOffset);
+  // static void CopyBufferCPUToGPU(void *destPtr, void *srcPtr,
+  //                                VkDeviceSize size);
+  // static void CopyBufferGPUToGPU(VkBuffer &srcBuffer, VkBuffer &dstBuffer,
+  //                                VkDeviceSize size);
+  // static void UnmapVkMemoryFromCPU(VkDeviceMemory &vkBufferMemory);
 
   //
   // --- Record commands ---------------------------------------------------

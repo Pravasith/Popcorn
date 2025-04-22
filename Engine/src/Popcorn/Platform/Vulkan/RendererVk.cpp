@@ -126,28 +126,17 @@ void RendererVk::CreateRenderFlows() {
 // Sort materials, allocate descriptor sets, vk buffers, index buffers &
 // create pipelines
 void RendererVk::CreateRenderFlowResources() {
-  // //
-  // // CREATE WORKFLOW RESOURCES
-  // ----------------------------------------------- PC_WARN("Expensive
-  // initialization operation: Creating workflow Vulkan "
-  //         "resources! Should only be done once per workflow object init.")
+  //
+  // CREATE WORKFLOW RESOURCES -----------------------------------------------
+  PC_WARN("Expensive initialization operation: Creating workflow Vulkan "
+          "resources! Should only be done once")
 
   //
   // Create VMA Allocator
   ContextVk::MemoryAllocator()->CreateVMAAllocator();
 
-  // TODO:
-  // 1. Group similar materials and save in a hashmap
-  // 2. Create Vulkan resources:
-  //    - Camera UBO memory (outside all loops)
-  //    - Basic UBO memory (per each unique material combo)
-  //    - Pbr UBO memory (per each unique material combo)
-  //    - Model matrix UBO memory (per each game object)
-  //    - (One big) Vertex buffer memory (submeshes, basic & pbr)
-  //    - (One big) Index buffer memory
-  //    - Descriptor sets (for every frame)
-
-  // RenderFlowVk::AllocateMemory();
+  // Allocates vulkan buffers
+  RenderFlowVk::AllocateVMABuffers();
 
   for (auto &renderFlow : s_renderFlows) {
     renderFlow->AllocateVkVertexBuffers();  // VMA - Extract from meshes
@@ -168,12 +157,12 @@ void RendererVk::CreateRenderFlowResources() {
 void RendererVk::AssignSceneObjectsToRenderFlows() {
   for (auto &scene : m_sceneLibrary.GetScenes()) {
     for (auto &node : scene->GetGameObjects()) {
-      ProcessGameObjectNode(node); // Recursive (FYI)
+      ProcessGameObjectNode(node); // Recursive
     };
   };
 };
 
-void RendererVk::ProcessGameObjectNode(GameObject *node) {
+void RendererVk::ProcessGameObjectNode(GameObject *node) { // Recursive
   switch (node->GetType()) {
   case Popcorn::Gfx::GameObjectTypes::Mesh: {
     // Add Mesh
@@ -197,7 +186,7 @@ void RendererVk::ProcessGameObjectNode(GameObject *node) {
   }
 
   for (auto &child : node->GetChildren()) {
-    ProcessGameObjectNode(child);
+    ProcessGameObjectNode(child); // Recursive
   }
 };
 

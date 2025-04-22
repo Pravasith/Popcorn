@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Application.h"
-#include "GameObject.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Loaders/GltfLoader.h"
 #include "Scene.h"

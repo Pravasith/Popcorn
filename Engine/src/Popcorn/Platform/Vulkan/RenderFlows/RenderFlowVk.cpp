@@ -2,7 +2,6 @@
 #include "ContextVk.h"
 #include "Memory/MemoryFactoryVk.h"
 #include <cstdint>
-#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -12,32 +11,41 @@ PcPbrSubmeshGroups RenderFlowVk::s_pbrSubmeshGroups{};
 uint64_t RenderFlowVk::s_submeshCount = 0;
 
 void RenderFlowVk::AllocateVMABuffers() {
+  // basicMat1 : [sm1, sm2, sm3, ... ]
+  // basicMat2 : [sm1, sm2 ... ]
+
+  // pbrMat1 : [sm1, sm2, sm3, ... ]
+  // pbrMat2 : [sm1, sm2 ... ]
+  //
   auto *memoryFactory = ContextVk::MemoryFactory();
   memoryFactory->AllocateStagingBuffers(s_submeshCount, s_submeshCount);
 
   //
   // Copy VBO, IBO data to staging buffers ----------------------------------
   PcSubmeshGroupOffsets groupOffsets{};
-  memoryFactory->CopySubmeshGroupToStagingBuffer(groupOffsets,
-                                                 s_basicSubmeshGroups);
-  memoryFactory->CopySubmeshGroupToStagingBuffer(groupOffsets,
-                                                 s_pbrSubmeshGroups);
+  memoryFactory->CopySubmeshGroupToStagingBuffer<MaterialTypes::BasicMat>(
+      groupOffsets, s_basicSubmeshGroups);
+  memoryFactory->CopySubmeshGroupToStagingBuffer<MaterialTypes::PbrMat>(
+      groupOffsets, s_pbrSubmeshGroups);
 
   //
   // Copy the staging data to local buffers ---------------------------------
   memoryFactory->AllocateLocalBuffers(s_submeshCount, s_submeshCount);
+  memoryFactory->FlushBuffersStagingToMain(groupOffsets.submeshGroupVboSize,
+                                           groupOffsets.submeshGroupIboSize);
 
   //
-  // Copy the staging data to local buffers ---------------------------------
-  //
+  // Unmap & destroy staging buffers ----------------------------------------
+  memoryFactory->DeallocateStagingBuffers();
 
   // TODO: Allocate VMA VBOs, IBOs, and Material
   // - Device-local memory
-  //      -- One big VBO (has all submeshes VBOs)
-  //      -- One big IBO (has all submeshes IBOs)
+  //      DONE -- One big VBO (has all submeshes VBOs)
+  //      DONE -- One big IBO (has all submeshes IBOs)
   // - Host-visible memory
-  //      -- Staging: One big VBO (has all submeshes VBOs)
-  //      -- Staging: One big IBO (has all submeshes IBOs)
+  //      DONE -- Staging: One big VBO (has all submeshes VBOs)
+  //      DONE -- Staging: One big IBO (has all submeshes IBOs)
+  //
   //      -- One big BasicMaterial UBO (has all BasicMaterial UBOs)
   //      -- One big PbrMaterial UBO (has all PbrMaterial UBOs)
   //      -- One big ModelMatrix UBO (has all submeshes modelMatrix UBOs)

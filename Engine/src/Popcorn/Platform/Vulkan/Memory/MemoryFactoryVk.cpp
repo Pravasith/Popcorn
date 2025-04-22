@@ -1,4 +1,5 @@
 #include "Memory/MemoryFactoryVk.h"
+#include "BufferObjectsVk.h"
 #include "ContextVk.h"
 #include "GlobalMacros.h"
 
@@ -10,8 +11,6 @@ void MemoryFactoryVk::AllocateStagingBuffers(VkDeviceSize vboSize,
   //
   // -----------------------------------------------------------------------
   // --- VERTEX BUFFERS CREATION -------------------------------------------
-  VkBuffer vboStagingBuffer{};
-  VmaAllocation vboStagingAlloc{};
 
   VkBufferCreateInfo vboStagingInfo{};
   BufferVkUtils::GetDefaultVkBufferState(vboStagingInfo, vboSize);
@@ -22,7 +21,8 @@ void MemoryFactoryVk::AllocateStagingBuffers(VkDeviceSize vboSize,
 
   VkResult vboResult = vmaCreateBuffer(
       ContextVk::MemoryAllocator()->GetVMAAllocator(), &vboStagingInfo,
-      &vboStagingVmaInfo, &vboStagingBuffer, &vboStagingAlloc, nullptr);
+      &vboStagingVmaInfo, &m_submeshVBOsStaging, &m_submeshVBOsAllocStaging,
+      nullptr);
   if (vboResult != VK_SUCCESS) {
     throw std::runtime_error("Couldn't create VBO staging buffer");
   };
@@ -31,7 +31,8 @@ void MemoryFactoryVk::AllocateStagingBuffers(VkDeviceSize vboSize,
   // -----------------------------------------------------------------------
   // --- VERTEX BUFFERS MAP & COPY -----------------------------------------
   if (vmaMapMemory(ContextVk::MemoryAllocator()->GetVMAAllocator(),
-                   vboStagingAlloc, &m_submeshVboMapping) != VK_SUCCESS) {
+                   m_submeshVBOsAllocStaging,
+                   &m_submeshVboMapping) != VK_SUCCESS) {
     throw std::runtime_error("Couldn't 'map' VBO staging buffer");
   };
 
@@ -41,9 +42,6 @@ void MemoryFactoryVk::AllocateStagingBuffers(VkDeviceSize vboSize,
   //
   // -----------------------------------------------------------------------
   // --- INDEX BUFFERS CREATION --------------------------------------------
-  VkBuffer iboStagingBuffer{};
-  VmaAllocation iboStagingAlloc{};
-
   VkBufferCreateInfo iboStagingInfo{};
   BufferVkUtils::GetDefaultVkBufferState(iboStagingInfo, iboSize);
   iboStagingInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
@@ -53,7 +51,8 @@ void MemoryFactoryVk::AllocateStagingBuffers(VkDeviceSize vboSize,
 
   VkResult iboResult = vmaCreateBuffer(
       ContextVk::MemoryAllocator()->GetVMAAllocator(), &iboStagingInfo,
-      &iboStagingVmaInfo, &iboStagingBuffer, &iboStagingAlloc, nullptr);
+      &iboStagingVmaInfo, &m_submeshIBOsStaging, &m_submeshIBOsAllocStaging,
+      nullptr);
   if (iboResult != VK_SUCCESS) {
     throw std::runtime_error("Couldn't create IBO staging buffer");
   };
@@ -62,7 +61,8 @@ void MemoryFactoryVk::AllocateStagingBuffers(VkDeviceSize vboSize,
   // -----------------------------------------------------------------------
   // --- INDEX BUFFERS MAP & COPY ------------------------------------------
   if (vmaMapMemory(ContextVk::MemoryAllocator()->GetVMAAllocator(),
-                   iboStagingAlloc, &m_submeshIboMapping) != VK_SUCCESS) {
+                   m_submeshIBOsAllocStaging,
+                   &m_submeshIboMapping) != VK_SUCCESS) {
     throw std::runtime_error("Couldn't map IBO staging buffer");
   };
 }
@@ -111,6 +111,34 @@ void MemoryFactoryVk::AllocateLocalBuffers(VkDeviceSize vboSize,
     throw std::runtime_error("Couldn't create IBO device buffer");
   };
 }
+
+void MemoryFactoryVk::DeallocateStagingBuffers() {
+  auto &allocator = ContextVk::MemoryAllocator()->GetVMAAllocator();
+
+  if (m_submeshVboMapping) {
+    vmaUnmapMemory(allocator, m_submeshVBOsAllocStaging);
+    m_submeshVboMapping = nullptr;
+  }
+
+  if (m_submeshIboMapping) {
+    vmaUnmapMemory(allocator, m_submeshIBOsAllocStaging);
+    m_submeshIboMapping = nullptr;
+  }
+
+  if (m_submeshVBOsStaging != VK_NULL_HANDLE && m_submeshVBOsAllocStaging) {
+    vmaDestroyBuffer(allocator, m_submeshVBOsStaging,
+                     m_submeshVBOsAllocStaging);
+    m_submeshVBOsStaging = VK_NULL_HANDLE;
+    m_submeshVBOsAllocStaging = nullptr;
+  }
+
+  if (m_submeshIBOsStaging != VK_NULL_HANDLE && m_submeshIBOsAllocStaging) {
+    vmaDestroyBuffer(allocator, m_submeshIBOsStaging,
+                     m_submeshIBOsAllocStaging);
+    m_submeshIBOsStaging = VK_NULL_HANDLE;
+    m_submeshIBOsAllocStaging = nullptr;
+  }
+};
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

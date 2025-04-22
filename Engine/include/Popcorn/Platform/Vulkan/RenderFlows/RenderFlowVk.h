@@ -21,6 +21,7 @@ enum class RenderFlows {
 
 using PcBasicSubmeshes = std::vector<Submesh<MaterialTypes::BasicMat> *>;
 using PcPbrSubmeshes = std::vector<Submesh<MaterialTypes::PbrMat> *>;
+
 using PcBasicSubmeshGroups =
     std::unordered_map<MaterialHashType, PcBasicSubmeshes>;
 using PcPbrSubmeshGroups = std::unordered_map<MaterialHashType, PcPbrSubmeshes>;
@@ -52,7 +53,7 @@ public:
   virtual void CreatePipelines() {};
 
   // Allocates VBOs, IBOs, and UBOs
-  virtual void AllocateVMABuffers();
+  static void AllocateVMABuffers();
 
   //
   //

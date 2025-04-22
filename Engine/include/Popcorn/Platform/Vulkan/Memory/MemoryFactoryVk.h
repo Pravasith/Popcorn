@@ -1,7 +1,7 @@
-
 #pragma once
 
 #include "BufferObjects.h"
+#include "BufferObjectsVk.h"
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
 #include "MaterialTypes.h"
@@ -60,12 +60,6 @@ public:
       const std::unordered_map<MaterialHashType, std::vector<Submesh<T> *>>
           &submeshGroups) {
 
-    // basicMat1 : [sm1, sm2, sm3, ... ]
-    // basicMat2 : [sm1, sm2 ... ]
-
-    // pbrMat1 : [sm1, sm2, sm3, ... ]
-    // pbrMat2 : [sm1, sm2 ... ]
-
     VkDeviceSize &vboOffset = prevSubmeshGroupOffsets.submeshGroupVboSize;
     VkDeviceSize &iboOffset = prevSubmeshGroupOffsets.submeshGroupIboSize;
 
@@ -87,13 +81,22 @@ public:
                indexBuffer.GetBufferData(), (size_t)iboSize);
 
         m_vboIboOffsets[matId].emplace_back(std::pair(vboOffset, iboOffset));
+
         vboOffset += vboSize;
         iboOffset += iboSize;
       }
     };
   };
 
-  void CopySubmeshDataToStagingBuffers(void *dest, void *src, VkDeviceSize) {};
+  void FlushBuffersStagingToMain(VkDeviceSize submeshVbosSize,
+                                 VkDeviceSize submeshIbosSize) {
+    BufferVkUtils::CopyBufferGPUToGPU(m_submeshVBOsStaging, m_submeshVBOs,
+                                      submeshVbosSize);
+    BufferVkUtils::CopyBufferGPUToGPU(m_submeshIBOsStaging, m_submeshIBOs,
+                                      submeshIbosSize);
+  };
+
+  void DeallocateStagingBuffers();
 
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
   MemoryFactoryVk(const MemoryFactoryVk &) = delete;
@@ -123,16 +126,26 @@ private:
   static MemoryFactoryVk *s_instance;
   static DeviceVk *s_deviceVk;
 
-  // Device-Local
+  //
+  // Host-visible & temporary -----------------------------------------------
+  VkBuffer m_submeshVBOsStaging;
+  VmaAllocation m_submeshVBOsAllocStaging;
+  void *m_submeshVboMapping; // temp variable
+
+  VkBuffer m_submeshIBOsStaging;
+  VmaAllocation m_submeshIBOsAllocStaging;
+  void *m_submeshIboMapping; // temp variable
+
+  //
+  // Device-local -----------------------------------------------------------
   VkBuffer m_submeshVBOs;
   VmaAllocation m_submeshVBOsAlloc;
-  byte_t *m_submeshVboMapping; // temp variable
 
   VkBuffer m_submeshIBOs;
   VmaAllocation m_submeshIBOsAlloc;
-  byte_t *m_submeshIboMapping; // temp variable
 
-  // Host-visible
+  //
+  // Host-visible -----------------------------------------------------------
   VkBuffer m_basicMaterialUBOs; // And an equivalent VMA allocation
   VkBuffer m_pbrMaterialUBOs;   // And an equivalent VMA allocation
   VkBuffer m_modelMatrixUBOs;   // And an equivalent VMA allocation
