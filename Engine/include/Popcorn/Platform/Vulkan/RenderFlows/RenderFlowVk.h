@@ -74,7 +74,6 @@ public:
       // TODO: Later, in render loop -- Bind DescriptorSet -
       //       Basic-Material-DSet(offset)
       for (auto &submesh : submeshes) {
-
         // TODO: Creation: Add submesh VBO to big VBO buffer (dynamic offsets,
         //       local memory)
         // TODO: Creation: Add submesh IBO to big IBO buffer (dynamic offsets,

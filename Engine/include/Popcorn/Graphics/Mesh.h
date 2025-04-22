@@ -193,19 +193,21 @@ bool PC_ValidateAndAddSubmesh(Submesh<T> *submesh,
   };
 
   submeshes.emplace_back(submesh);
+  return true;
 };
 
 template <MaterialTypes T>
-void PC_ValidateAndRemoveSubmesh(Submesh<T> *submesh,
+bool PC_ValidateAndRemoveSubmesh(Submesh<T> *submesh,
                                  std::vector<Submesh<T> *> &submeshes) {
   auto ptr = std::find(submeshes.begin(), submeshes.end(), submesh);
 
   if (ptr == submeshes.end()) {
     PC_WARN("Submesh not found!")
-    return;
+    return false;
   };
 
   submeshes.erase(ptr);
+  return true;
 };
 
 GFX_NAMESPACE_END
