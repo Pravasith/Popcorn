@@ -8,6 +8,7 @@
 #include "FramebuffersVk.h"
 #include "GlobalMacros.h"
 #include "Memory/MemoryAllocatorVk.h"
+#include "Memory/MemoryFactoryVk.h"
 #include "PipelineFactoryVk.h"
 #include "Popcorn/Core/Window.h"
 #include "SurfaceVk.h"
@@ -87,6 +88,13 @@ public:
     return s_memoryAllocatorVk;
   }
 
+  static MemoryFactoryVk *MemoryFactory() {
+    if (!s_memoryFactoryVk) {
+      throw std::runtime_error("MemoryFactoryVk is null");
+    }
+    return s_memoryFactoryVk;
+  }
+
   static DescriptorSetLayoutsVk *DescriptorSetLayouts() {
     if (!s_descriptorSetLayoutsVk) {
       throw std::runtime_error("DescriptorSetLayoutsVk is null");
@@ -131,6 +139,7 @@ private:
     // TOOD: move to workflows
     s_descriptorSetLayoutsVk = DescriptorSetLayoutsVk::Get();
     s_memoryAllocatorVk = MemoryAllocatorVk::Get();
+    s_memoryFactoryVk = MemoryFactoryVk::Get();
     s_descriptorFactoryVk = DescriptorFactoryVk::Get();
     s_pipelineFactoryVk = PipelineFactoryVk::Get();
 
@@ -146,6 +155,7 @@ private:
   static FramebuffersVk *s_framebuffersVk;
   static CommandPoolVk *s_commandPoolVk;
   static FrameVk *s_frameVk;
+  static MemoryFactoryVk *s_memoryFactoryVk;
   static MemoryAllocatorVk *s_memoryAllocatorVk;
   static DescriptorSetLayoutsVk *s_descriptorSetLayoutsVk;
   static DescriptorFactoryVk *s_descriptorFactoryVk;

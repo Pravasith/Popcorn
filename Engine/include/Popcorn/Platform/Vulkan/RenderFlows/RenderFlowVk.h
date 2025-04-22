@@ -19,15 +19,18 @@ enum class RenderFlows {
   Lights,
 };
 
+using PcBasicSubmeshes = std::vector<Submesh<MaterialTypes::BasicMat> *>;
+using PcPbrSubmeshes = std::vector<Submesh<MaterialTypes::PbrMat> *>;
+using PcBasicSubmeshGroups =
+    std::unordered_map<MaterialHashType, PcBasicSubmeshes>;
+using PcPbrSubmeshGroups = std::unordered_map<MaterialHashType, PcPbrSubmeshes>;
+
 class RenderFlowVk {
 public:
   RenderFlowVk() { PC_PRINT("CREATED", TagType::Constr, "RenderFlowVk") };
   virtual ~RenderFlowVk() {
     PC_PRINT("DESTROYED", TagType::Destr, "RenderFlowVk")
   };
-
-  using BasicSubmeshGroupType = std::vector<Submesh<MaterialTypes::BasicMat> *>;
-  using PbrSubmeshGroupType = std::vector<Submesh<MaterialTypes::PbrMat> *>;
 
   virtual void ProcessSceneUpdates(const uint32_t currentFrame) = 0;
   virtual void
@@ -49,50 +52,7 @@ public:
   virtual void CreatePipelines() {};
 
   // Allocates VBOs, IBOs, and UBOs
-  virtual void AllocateVMABuffers() {
-    // TODO: Allocate VMA VBOs, IBOs, and Material
-    // - Device-local memory
-    //      -- One big VBO (has all submeshes VBOs)
-    //      -- One big IBO (has all submeshes IBOs)
-    // - Host-visible memory
-    //      -- Staging: One big VBO (has all submeshes VBOs)
-    //      -- Staging: One big IBO (has all submeshes IBOs)
-    //
-    //      -- One big BasicMaterial UBO (has all BasicMaterial UBOs)
-    //      -- One big PbrMaterial UBO (has all PbrMaterial UBOs)
-    //      -- One big ModelMatrix UBO (has all submeshes modelMatrix UBOs)
-    //      -- One ViewProjMatrix UBO (has camera's UBOs)
-
-    // Memory creation example -- (basic materials)
-    //
-    // TODO: Creation: Add ViewProj UBO (host-visible memory)
-    // TODO: Later, in render loop -- Bind DescriptorSet -
-    //       View-Proj-Matrix-DSet(offset)
-    for (auto &[matId, submeshes] : s_basicSubmeshGroups) {
-      // TODO: Creation: Add basic material UBO to big BasicMaterialUBO buffer
-      //       (dynamic offsets, host-visible memory)
-      // TODO: Later, in render loop -- Bind DescriptorSet -
-      //       Basic-Material-DSet(offset)
-      for (auto &submesh : submeshes) {
-        // TODO: Creation: Add submesh VBO to big VBO buffer (dynamic offsets,
-        //       local memory)
-        // TODO: Creation: Add submesh IBO to big IBO buffer (dynamic offsets,
-        //       local memory)
-        // TODO: Creation: Add submesh ModelMatrix UBO to big IBO buffer
-        //       (dynamic offsets, host-visible memory)
-        // TODO: Later, in render loop
-        //          -- Bind Submesh VBO:  VBO-Memory(offset),
-        //          -- Bind DescriptorSet - SubmeshModelMatrixDSet(offset)
-        //          -- Draw-Indexed Submesh: IBO-Memory(offset)
-      }
-    };
-
-    // Pbr Material --
-    for (auto &[matId, submeshes] : s_pbrSubmeshGroups) {
-      for (auto &submesh : submeshes) {
-      }
-    };
-  };
+  virtual void AllocateVMABuffers();
 
   //
   //
@@ -142,12 +102,10 @@ public:
 
 protected:
   // Camera
-  Camera *camera;
+  Camera *camera = nullptr;
 
-  static std::unordered_map<MaterialHashType, BasicSubmeshGroupType>
-      s_basicSubmeshGroups;
-  static std::unordered_map<MaterialHashType, PbrSubmeshGroupType>
-      s_pbrSubmeshGroups;
+  static PcBasicSubmeshGroups s_basicSubmeshGroups;
+  static PcPbrSubmeshGroups s_pbrSubmeshGroups;
 
   static uint64_t s_submeshCount;
 };

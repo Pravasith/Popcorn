@@ -2,14 +2,14 @@
 #pragma once
 
 #include "BufferObjects.h"
-#include "BufferObjectsVk.h"
-#include "ContextVk.h"
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
 #include "MaterialTypes.h"
 #include "Mesh.h"
 #include "Popcorn/Core/Base.h"
+#include "Popcorn/Core/Helpers.h"
 #include <cstdint>
+#include <cstring>
 #include <unordered_map>
 #include <vector>
 #include <vk_mem_alloc.h>
@@ -17,6 +17,17 @@
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
+
+struct PcSubmeshGroupOffsets {
+  VkDeviceSize submeshGroupVboSize = 0;
+  VkDeviceSize submeshGroupIboSize = 0;
+
+  PcSubmeshGroupOffsets &operator+=(PcSubmeshGroupOffsets &other) {
+    this->submeshGroupVboSize += other.submeshGroupVboSize;
+    this->submeshGroupIboSize += other.submeshGroupIboSize;
+    return *this;
+  };
+};
 
 class MemoryFactoryVk {
 public:
@@ -38,27 +49,14 @@ public:
     };
   };
 
-  void AllocateVkMemory(VkDeviceSize vboSize) {
-    VkBuffer vboStagingBuffer{};
-    VmaAllocation vboStagingAlloc{};
+  void AllocateStagingBuffers(VkDeviceSize vboSize, VkDeviceSize iboSize);
+  void AllocateLocalBuffers(VkDeviceSize vboSize, VkDeviceSize iboSize);
+  void CopyToStagingBuffer(byte_t *data, VkDeviceSize size);
 
-    VkBufferCreateInfo vboStagingInfo{};
-    BufferVkUtils::GetDefaultVkBufferState(vboStagingInfo, vboSize);
-    vboStagingInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-
-    VmaAllocationCreateInfo vboStagingVmaInfo{};
-    vboStagingVmaInfo.usage = VMA_MEMORY_USAGE_CPU_ONLY;
-
-    vmaCreateBuffer(ContextVk::MemoryAllocator()->GetVMAAllocator(),
-                    &vboStagingInfo, &vboStagingVmaInfo, &vboStagingBuffer,
-                    &vboStagingAlloc, nullptr);
-
-    // DON'T PREMATURELY ABSTRACT CODE!!!!
-    // DO EVERYTHING IN THIS FUNCTION AND ONCE DONE, ABSTRACT.
-  };
-
+  // -> current material group offset in bytes
   template <MaterialTypes T>
-  void CreateSubmeshVBOs(
+  void CopySubmeshGroupToStagingBuffer(
+      PcSubmeshGroupOffsets &prevSubmeshGroupOffsets,
       const std::unordered_map<MaterialHashType, std::vector<Submesh<T> *>>
           &submeshGroups) {
 
@@ -68,17 +66,34 @@ public:
     // pbrMat1 : [sm1, sm2, sm3, ... ]
     // pbrMat2 : [sm1, sm2 ... ]
 
+    VkDeviceSize &vboOffset = prevSubmeshGroupOffsets.submeshGroupVboSize;
+    VkDeviceSize &iboOffset = prevSubmeshGroupOffsets.submeshGroupIboSize;
+
     for (auto &[matId, submeshes] : submeshGroups) {
-      VkDeviceSize offset = 0;
-      for (auto &submesh : submeshes) {
-        // CreateVmaBuffer( offset = matId + submeshIdx );
-        m_vboIboOffsets[matId].emplace_back(std::pair(offset, // VBO
-                                                      0 // IBO (adds later)
-                                                      ));
-        // offset += (i * vtxStride);
+      for (Submesh<T> *submesh : submeshes) {
+        // VBOs ---------------------------------------------------------------
+        BufferDefs::Layout &vboLayout = submesh->GetVertexBuffer()->GetLayout();
+        const VkDeviceSize vboSize =
+            vboLayout.countValue * vboLayout.strideValue;
+
+        memcpy((byte_t *)m_submeshVboMapping + vboOffset,
+               submesh->GetVertexBuffer()->GetBufferData(), (size_t)vboSize);
+
+        // IBOs ---------------------------------------------------------------
+        IndexBuffer<uint32_t> indexBuffer = submesh->GetIndexBuffer();
+        const VkDeviceSize iboSize = indexBuffer.GetCount() * sizeof(uint32_t);
+
+        memcpy((byte_t *)m_submeshIboMapping + iboOffset,
+               indexBuffer.GetBufferData(), (size_t)iboSize);
+
+        m_vboIboOffsets[matId].emplace_back(std::pair(vboOffset, iboOffset));
+        vboOffset += vboSize;
+        iboOffset += iboSize;
       }
     };
   };
+
+  void CopySubmeshDataToStagingBuffers(void *dest, void *src, VkDeviceSize) {};
 
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
   MemoryFactoryVk(const MemoryFactoryVk &) = delete;
@@ -101,32 +116,28 @@ private:
   };
 
 private:
-  static MemoryFactoryVk *s_instance;
-  static DeviceVk *s_deviceVk;
-
-  // Device-Local VkBufferMemory
-  VkBuffer m_submeshVBOs;
-  VkBuffer m_submeshIBOs;
-
-  VmaAllocationInfo m_submeshVBOsVMAInfo;
-  VmaAllocationInfo m_submeshIBOsVMAInfo;
-
-  VkBuffer m_submeshVBOsStaging;
-  VkBuffer m_submeshIBOsStaging;
-
-  VmaAllocationInfo m_submeshVBOsStagingVMAInfo;
-  VmaAllocationInfo m_submeshIBOsStagingVMAInfo;
-
-  // Host-visible VkBufferMemory
-  VkBuffer m_basicMaterialUBOs;
-  VkBuffer m_pbrMaterialUBOs;
-  VkBuffer m_modelMatrixUBOs;
-
-  VkBuffer m_viewProjMatrixUBO; // Small size -- can be a push constant
-
   using VboIboOffsets =
       std::unordered_map<MaterialHashType,
                          std::vector<std::pair<VkDeviceSize, VkDeviceSize>>>;
+
+  static MemoryFactoryVk *s_instance;
+  static DeviceVk *s_deviceVk;
+
+  // Device-Local
+  VkBuffer m_submeshVBOs;
+  VmaAllocation m_submeshVBOsAlloc;
+  byte_t *m_submeshVboMapping; // temp variable
+
+  VkBuffer m_submeshIBOs;
+  VmaAllocation m_submeshIBOsAlloc;
+  byte_t *m_submeshIboMapping; // temp variable
+
+  // Host-visible
+  VkBuffer m_basicMaterialUBOs; // And an equivalent VMA allocation
+  VkBuffer m_pbrMaterialUBOs;   // And an equivalent VMA allocation
+  VkBuffer m_modelMatrixUBOs;   // And an equivalent VMA allocation
+
+  VkBuffer m_viewProjMatrixUBO; // Small size -- can be a push constant
 
   VboIboOffsets m_vboIboOffsets{};
 };

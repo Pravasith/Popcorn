@@ -19,7 +19,7 @@ GFX_NAMESPACE_BEGIN
 // --- UTILS ------------------------------------------------------------------
 template <MaterialTypes T>
 [[nodiscard]] uint32_t PC_GetHashedSubmeshId(VertexBuffer *vertexBuffer,
-                                             IndexBuffer<uint16_t> *indexBuffer,
+                                             IndexBuffer<uint32_t> *indexBuffer,
                                              Material<T> *material) {
   uintptr_t vAddr = reinterpret_cast<uintptr_t>(vertexBuffer);
   uintptr_t iAddr = reinterpret_cast<uintptr_t>(indexBuffer);
@@ -38,7 +38,7 @@ template <MaterialTypes T>
 //
 template <MaterialTypes T> class Submesh {
 public:
-  Submesh(VertexBuffer *vbo, IndexBuffer<uint16_t> *ibo, Material<T> *mat)
+  Submesh(VertexBuffer *vbo, IndexBuffer<uint32_t> *ibo, Material<T> *mat)
       : m_vertexBuffer(vbo), m_indexBuffer(ibo), m_material(mat) {
     PC_PRINT("CREATED", TagType::Constr, "Submesh");
     m_id = PC_GetHashedSubmeshId(vbo, ibo, mat);
@@ -51,6 +51,11 @@ public:
   [[nodiscard]] Material<T> *GetMaterial() const { return m_material; };
 
   static constexpr MaterialTypes type_value = T;
+
+  [[nodiscard]] VertexBuffer *GetVertexBuffer() { return m_vertexBuffer; };
+  [[nodiscard]] IndexBuffer<uint32_t> *GetIndexBuffer() {
+    return m_indexBuffer;
+  };
 
   // DELETE COPY CONSTRUCTOR AND ASSIGNMENT
   // Because this class deletes vbo, ibo, and mat data, disabling copy avoids
@@ -100,7 +105,7 @@ private:
   }
 
   VertexBuffer *m_vertexBuffer = nullptr;
-  IndexBuffer<uint16_t> *m_indexBuffer = nullptr;
+  IndexBuffer<uint32_t> *m_indexBuffer = nullptr;
   Material<T> *m_material = nullptr;
   uint32_t m_id = 0;
 };

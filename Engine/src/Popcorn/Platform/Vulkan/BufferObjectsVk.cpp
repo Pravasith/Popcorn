@@ -104,11 +104,6 @@ void *BufferVkUtils::MapVkMemoryToCPU(VkDeviceMemory &vkBufferMemory,
   return data;
 };
 
-void BufferVkUtils::CopyBufferCPUToGPU(void *destPtr, void *srcPtr,
-                                       VkDeviceSize size) {
-  memcpy(destPtr, srcPtr, (size_t)size);
-};
-
 void BufferVkUtils::CopyBufferGPUToGPU(VkBuffer &srcBuffer, VkBuffer &dstBuffer,
                                        VkDeviceSize size) {
   auto &device = DeviceVk::Get()->GetDevice();
