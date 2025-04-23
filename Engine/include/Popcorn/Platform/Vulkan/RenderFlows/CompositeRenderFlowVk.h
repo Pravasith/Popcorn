@@ -1,10 +1,10 @@
 #pragma once
 
-#include "ContextVk.h"
+#include "CompositePipelineVk.h"
 #include "GlobalMacros.h"
 #include "ImageVk.h"
-#include "PipelineFactoryVk.h"
 #include "RenderFlows/RenderFlowVk.h"
+#include "RenderPassVk.h"
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -20,21 +20,14 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "CompositeRenderflowVk")
   };
 
-  virtual void Prepare() override {
-    m_compositePipeline =
-        &ContextVk::PipelineFactory()->GetGfxPipeline<Pipelines::Composite>();
-
-    CreateAttachments();
-    CreateRenderPass();
-    CreateFramebuffer();
-  };
   virtual void CleanUp() override;
 
 private:
-  void CreateAttachments() override;
-  void CreateFramebuffer() override;
-  void CreateRenderPass() override;
-  void CreatePipelines() override;
+  virtual void CreateAttachments() override;
+  virtual void CreateFramebuffer() override;
+  virtual void CreateRenderPass() override;
+  virtual void CreatePipelines() override;
+  virtual void CreateAndAllocDescriptors() override;
 
 private:
   struct Attachments {

@@ -91,7 +91,7 @@ void BufferVkUtils::GetDefaultVkBufferState(VkBufferCreateInfo &bufferInfo,
 //   // BIND MEMORY TO THE BUFFER
 //   vkBindBufferMemory(device, vkBuffer, vkBufferMemory, 0);
 // };
-//
+
 // void *BufferVkUtils::MapVkMemoryToCPU(VkDeviceMemory &vkBufferMemory,
 //                                       VkDeviceSize beginOffset,
 //                                       VkDeviceSize endOffset) {
@@ -104,55 +104,55 @@ void BufferVkUtils::GetDefaultVkBufferState(VkBufferCreateInfo &bufferInfo,
 //
 //   return data;
 // };
-//
-// void BufferVkUtils::CopyBufferGPUToGPU(VkBuffer &srcBuffer, VkBuffer
-// &dstBuffer,
-//                                        VkDeviceSize size) {
-//   auto &device = DeviceVk::Get()->GetDevice();
-//   auto *commandPoolVkStn = CommandPoolVk::Get();
-//
-//   VkCommandBufferAllocateInfo allocInfo{};
-//   commandPoolVkStn->GetDefaultCommandBufferAllocInfo(allocInfo);
-//
-//   VkCommandBuffer commandBuffer;
-//   commandPoolVkStn->AllocCommandBuffers(allocInfo, &commandBuffer);
-//
-//   VkCommandBufferBeginInfo beginInfo{};
-//   beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-//   beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-//
-//   //
-//   // Record command buffer
-//   {
-//     vkBeginCommandBuffer(commandBuffer, &beginInfo);
-//
-//     VkBufferCopy copyRegion{};
-//     copyRegion.srcOffset = 0; // Optional
-//     copyRegion.dstOffset = 0; // Optional
-//     copyRegion.size = size;
-//     vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
-//
-//     vkEndCommandBuffer(commandBuffer);
-//   }
-//
-//   //
-//   // Submit command buffer
-//   {
-//     VkSubmitInfo submitInfo{};
-//     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-//     submitInfo.commandBufferCount = 1;
-//     submitInfo.pCommandBuffers = &commandBuffer;
-//
-//     auto &graphicsQueue = DeviceVk::Get()->GetGraphicsQueue();
-//
-//     vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-//     vkQueueWaitIdle(graphicsQueue);
-//   }
-//
-//   vkFreeCommandBuffers(device, commandPoolVkStn->GetVkCommandPool(), 1,
-//                        &commandBuffer);
-// };
-//
+
+void BufferVkUtils::CopyStagingToMainBuffers(VkBuffer &srcBuffer,
+                                             VkBuffer &dstBuffer,
+                                             VkDeviceSize size) {
+  auto &device = DeviceVk::Get()->GetDevice();
+  auto *commandPoolVkStn = CommandPoolVk::Get();
+
+  VkCommandBufferAllocateInfo allocInfo{};
+  commandPoolVkStn->GetDefaultCommandBufferAllocInfo(allocInfo);
+
+  VkCommandBuffer commandBuffer;
+  commandPoolVkStn->AllocCommandBuffers(allocInfo, &commandBuffer);
+
+  VkCommandBufferBeginInfo beginInfo{};
+  beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+  //
+  // Record command buffer
+  {
+    vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+    VkBufferCopy copyRegion{};
+    copyRegion.srcOffset = 0; // Optional
+    copyRegion.dstOffset = 0; // Optional
+    copyRegion.size = size;
+    vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+    vkEndCommandBuffer(commandBuffer);
+  }
+
+  //
+  // Submit command buffer
+  {
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
+    auto &graphicsQueue = DeviceVk::Get()->GetGraphicsQueue();
+
+    vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(graphicsQueue);
+  }
+
+  vkFreeCommandBuffers(device, commandPoolVkStn->GetVkCommandPool(), 1,
+                       &commandBuffer);
+};
+
 // void BufferVkUtils::UnmapVkMemoryFromCPU(VkDeviceMemory &vkBufferMemory) {
 //   auto &device = DeviceVk::Get()->GetDevice();
 //   vkUnmapMemory(device, vkBufferMemory);

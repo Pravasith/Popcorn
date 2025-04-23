@@ -14,11 +14,6 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-enum class RenderFlows {
-  Deferred = 0,
-  Lights,
-};
-
 using PcBasicSubmeshes = std::vector<Submesh<MaterialTypes::BasicMat> *>;
 using PcPbrSubmeshes = std::vector<Submesh<MaterialTypes::PbrMat> *>;
 
@@ -33,11 +28,27 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "RenderFlowVk")
   };
 
-  virtual void ProcessSceneUpdates(const uint32_t currentFrame) = 0;
-  virtual void
+  //
+  // NEW ----------------------------------------------------------------
+  static void AllocSubmeshPrimitiveBuffers(); // Only once
+  void Prepare() {
+    CreateAttachments();
+    CreateRenderPass();
+    CreateFramebuffer();
+  };
+
+private:
+  virtual void CreateAttachments() = 0;
+  virtual void CreateRenderPass() = 0;
+  virtual void CreateFramebuffer() = 0;
+
+public:
+  virtual void CreateAndAllocDescriptors() = 0;
+  virtual void CreatePipelines() = 0;
+  static void ProcessSceneUpdates(const uint32_t currentFrame); // Only once
+  static void
   RecordRenderCommands(const uint32_t frameIndex, const uint32_t currentFrame,
-                       VkCommandBuffer &currentFrameCommandBuffer) = 0;
-  virtual void Prepare() = 0;
+                       VkCommandBuffer &currentFrameCommandBuffer); // Only once
   virtual void CleanUp() = 0;
 
   //
@@ -45,31 +56,19 @@ public:
   //
   //
   //
-  // NEW -- NEW -- NEW -- NEW -- NEW -- NEW -- NEW -- NEW --
-  //
-  virtual void CreateAttachments() {};
-  virtual void CreateRenderPass() {};
-  virtual void CreateFramebuffer() {};
-  virtual void CreatePipelines() {};
-
-  // Allocates VBOs, IBOs, and UBOs
-  static void AllocateVMABuffers();
-
-  //
-  //
-  //
-  //
-  //
   //
 
-  // COMMON
-  virtual void AllocateVkVertexBuffers() {};
-  virtual void AllocateVkIndexBuffers() {};
-  virtual void AllocateVkUniformBuffers() {};
-  virtual void CreateCommandBuffer() {};
-  virtual void CreateDescriptorSetLayouts() {};
-  virtual void CreateDescriptorPool() {};
-  virtual void CreateDescriptorSets() {};
+  //
+  // OLD ----------------------------------------------------------------
+  // virtual void AllocateVkVertexBuffers() {};
+  // virtual void AllocateVkIndexBuffers() {};
+  // virtual void AllocateVkUniformBuffers() {};
+  // virtual void CreateCommandBuffer() {};
+  // virtual void CreateDescriptorSetLayouts() {};
+  // virtual void CreateDescriptorPool() {};
+  // virtual void CreateDescriptorSets() {};
+  // --------------------------------------------------------------------
+  //
 
   template <MaterialTypes T> static void AddSubmesh(Submesh<T> *submesh) {
     if constexpr (T == MaterialTypes::BasicMat) {

@@ -88,8 +88,8 @@ public:
   //                               VkDeviceSize endOffset);
   // static void CopyBufferCPUToGPU(void *destPtr, void *srcPtr,
   //                                VkDeviceSize size);
-  // static void CopyBufferGPUToGPU(VkBuffer &srcBuffer, VkBuffer &dstBuffer,
-  //                                VkDeviceSize size);
+  static void CopyStagingToMainBuffers(VkBuffer &srcBuffer, VkBuffer &dstBuffer,
+                                       VkDeviceSize size);
   // static void UnmapVkMemoryFromCPU(VkDeviceMemory &vkBufferMemory);
 
   //

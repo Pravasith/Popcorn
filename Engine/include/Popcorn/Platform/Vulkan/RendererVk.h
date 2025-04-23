@@ -37,7 +37,6 @@ public:
   void CreateVulkanContext();
   void DestroyVulkanContext();
 
-  static RenderFlowVk *GetRenderFlow(const RenderFlows index);
   void CreateRenderingCommandBuffers();
 
 public:
@@ -45,7 +44,7 @@ public:
 
 private:
   static ContextVk *s_vulkanContext;
-  static std::vector<RenderFlowVk *> s_renderFlows;
+  static std::vector<RenderFlowVk> s_renderFlows;
   std::vector<VkCommandBuffer> m_drawingCommandBuffers;
 };
 

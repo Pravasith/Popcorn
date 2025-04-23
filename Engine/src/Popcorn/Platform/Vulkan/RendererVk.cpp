@@ -5,7 +5,6 @@
 #include "Material.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
-#include "RenderFlows/BasicRenderFlowVk.h"
 #include "RenderFlows/CompositeRenderFlowVk.h"
 #include "RenderFlows/GBufferRenderFlowVk.h"
 #include "RenderFlows/LightingRenderFlowVk.h"
@@ -17,7 +16,7 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 ContextVk *RendererVk::s_vulkanContext = nullptr;
-std::vector<RenderFlowVk *> RendererVk::s_renderFlows{};
+std::vector<RenderFlowVk> RendererVk::s_renderFlows{};
 
 //
 // -------------------------------------------------------------------------
@@ -85,9 +84,8 @@ RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
 
 RendererVk::~RendererVk() {
   // Renderflow clean ups
-  for (auto *workflow : s_renderFlows) {
-    workflow->CleanUp();
-    delete workflow;
+  for (auto &workflow : s_renderFlows) {
+    workflow.CleanUp();
   }
   s_renderFlows.clear();
 
@@ -110,16 +108,16 @@ void RendererVk::DestroyVulkanContext() {
 // ---------------------------------------------------------------------------
 // --- RENDER WORKFLOWS ------------------------------------------------------
 void RendererVk::CreateRenderFlows() {
-  s_renderFlows.emplace_back(new GBufferRenderFlowVk());
-  s_renderFlows.emplace_back(new LightingRenderFlowVk());
-  s_renderFlows.emplace_back(new CompositeRenderFlowVk());
+  s_renderFlows.emplace_back(GBufferRenderFlowVk());
+  s_renderFlows.emplace_back(LightingRenderFlowVk());
+  s_renderFlows.emplace_back(CompositeRenderFlowVk());
 
   for (auto &renderFlow : s_renderFlows) {
     PC_WARN("Preparing renderflow...")
-    renderFlow->Prepare(); // Creates Vulkan:
-                           //   - Attachments
-                           //   - RenderPass
-                           //   - Framebuffer
+    renderFlow.Prepare(); // Creates Vulkan:
+                          //   - Attachments
+                          //   - RenderPass
+                          //   - Framebuffer
   }
 };
 
@@ -136,36 +134,11 @@ void RendererVk::CreateRenderFlowResources() {
   ContextVk::MemoryAllocator()->CreateVMAAllocator();
 
   // Allocates vulkan buffers
-  RenderFlowVk::AllocateVMABuffers(); // VBO, IBO
-
-  // TODO:
-  // 1. Create descriptors for
-  //     - BasicMaterial UBOs (submesh wise)
-  //     - PbrMaterial UBOs (submesh wise)
-  //     - ModelMatrix UBOs (submesh wise)
-  //     - CameraMatrix UBO (small size)
-  //     - Samplers (later - for lighting & passes)
-  //
-  // 2. Pipelines
-  //     - GBuffer (DSet 1)
-  //        - BasicMaterial UBO
-  //        - PbrMaterial UBO
-  //        - ModelMatrix UBO
-  //        - CameraMatrix UBO
-  //     - Lighting (DSet 1)
-  //     - Composition
+  RenderFlowVk::AllocSubmeshPrimitiveBuffers();
 
   for (auto &renderFlow : s_renderFlows) {
-    renderFlow->AllocateVkUniformBuffers(); // VMA - Extract from -
-                                            // 1. Camera
-                                            // 2. Mesh
-                                            // 3. Mesh material
-    // -------------
-
-    renderFlow->CreateDescriptorSetLayouts(); // Done
-    renderFlow->CreateDescriptorPool();       // Move to factory
-    renderFlow->CreateDescriptorSets();       // Move to factory
-    renderFlow->CreatePipelines();            // ALMOST DONE
+    renderFlow.CreateAndAllocDescriptors();
+    renderFlow.CreatePipelines(); // ALMOST DONE
   }
 };
 
@@ -203,10 +176,6 @@ void RendererVk::ProcessGameObjectNode(GameObject *node) { // Recursive
   for (auto &child : node->GetChildren()) {
     ProcessGameObjectNode(child); // Recursive
   }
-};
-
-RenderFlowVk *RendererVk::GetRenderFlow(const RenderFlows index) {
-  return s_renderFlows[(int)index];
 };
 
 GFX_NAMESPACE_END

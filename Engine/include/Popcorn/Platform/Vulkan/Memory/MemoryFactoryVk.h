@@ -90,10 +90,10 @@ public:
 
   void FlushBuffersStagingToMain(VkDeviceSize submeshVbosSize,
                                  VkDeviceSize submeshIbosSize) {
-    BufferVkUtils::CopyBufferGPUToGPU(m_submeshVBOsStaging, m_submeshVBOs,
-                                      submeshVbosSize);
-    BufferVkUtils::CopyBufferGPUToGPU(m_submeshIBOsStaging, m_submeshIBOs,
-                                      submeshIbosSize);
+    BufferVkUtils::CopyStagingToMainBuffers(m_submeshVBOsStaging, m_submeshVBOs,
+                                            submeshVbosSize);
+    BufferVkUtils::CopyStagingToMainBuffers(m_submeshIBOsStaging, m_submeshIBOs,
+                                            submeshIbosSize);
   };
 
   void DeallocateStagingBuffers();
