@@ -26,8 +26,8 @@ private:
   virtual void CreateAttachments() override;
   virtual void CreateFramebuffer() override;
   virtual void CreateRenderPass() override;
-  virtual void CreatePipelines() override;
   virtual void CreateAndAllocDescriptors() override;
+  virtual void CreatePipelines() override;
 
 private:
   struct Attachments {

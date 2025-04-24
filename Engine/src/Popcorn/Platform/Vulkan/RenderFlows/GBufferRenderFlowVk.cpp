@@ -212,9 +212,29 @@ void GBufferRenderFlowVk::CreateFramebuffer() {
 //
 //
 //
-// --- CREATE PIPELINES --------------------------------------------------------
-// --- CREATE PIPELINES --------------------------------------------------------
-// --- CREATE PIPELINES --------------------------------------------------------
+// --- CREATE DESCRIPTORS ------------------------------------------------------
+// --- CREATE DESCRIPTORS ------------------------------------------------------
+// --- CREATE DESCRIPTORS ------------------------------------------------------
+//
+void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
+  // Descriptor set 0
+  //
+  // Layout -
+  // - Camera UBO
+  //
+};
+
+//
+//
+//
+//
+//
+// --- CREATE PIPELINES
+// --------------------------------------------------------
+// --- CREATE PIPELINES
+// --------------------------------------------------------
+// --- CREATE PIPELINES
+// --------------------------------------------------------
 //
 void GBufferRenderFlowVk::CreatePipelines() {
   // - Vertexbuffer layout
@@ -228,28 +248,34 @@ void GBufferRenderFlowVk::CreatePipelines() {
 //
 //
 //
-// --- CLEAN UP ----------------------------------------------------------------
-// --- CLEAN UP ----------------------------------------------------------------
-// --- CLEAN UP ----------------------------------------------------------------
+// --- CLEAN UP
+// ----------------------------------------------------------------
+// --- CLEAN UP
+// ----------------------------------------------------------------
+// --- CLEAN UP
+// ----------------------------------------------------------------
 //
 void GBufferRenderFlowVk::CleanUp() {
   const VkDevice &device = ContextVk::Device()->GetDevice();
 
   //
-  // --- Destroy Framebuffer ---------------------------------------------------
+  // --- Destroy Framebuffer
+  // ---------------------------------------------------
   if (m_framebuffer != VK_NULL_HANDLE) {
     FramebuffersVk::DestroyVkFramebuffer(device, m_framebuffer);
     m_framebuffer = VK_NULL_HANDLE;
   }
 
   //
-  // --- Destroy Renderpass ----------------------------------------------------
+  // --- Destroy Renderpass
+  // ----------------------------------------------------
   if (m_renderPass.GetVkRenderPass() != VK_NULL_HANDLE) {
     m_renderPass.Destroy(device);
   }
 
   //
-  // --- Destroy G-Buffer Attachments ------------------------------------------
+  // --- Destroy G-Buffer Attachments
+  // ------------------------------------------
   m_attachments.albedoImage.Destroy();
   m_attachments.depthImage.Destroy();
   m_attachments.normalImage.Destroy();

@@ -2,7 +2,6 @@
 
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
-#include <cstdint>
 #include <unordered_map>
 #include <vector>
 #include <vulkan/vulkan_core.h>
@@ -66,32 +65,6 @@ private:
   static DescriptorSetLayoutsVk *s_instance;
 
   std::unordered_map<size_t, VkDescriptorSetLayout> m_layoutCache;
-};
-
-//
-//
-// -------------------------------------------------------------------------
-// --- DESCRIPTOR POOL -----------------------------------------------------
-//
-class DescriptorPoolVk {
-public:
-  // --- UTILS -----------------------------------------------------------------
-  static void CreateDescriptorPool(const VkDescriptorPoolCreateInfo &poolInfo,
-                                   VkDescriptorPool *pool);
-  static void DestroyDescriptorPool(VkDescriptorPool &pool);
-
-  static void
-  GetDefaultDescriptorPoolState(VkDescriptorPoolCreateInfo &poolInfo,
-                                uint32_t maxDSets,
-                                std::vector<VkDescriptorPoolSize> &poolSizes);
-
-private:
-  DescriptorPoolVk() {
-    PC_PRINT("CREATED", TagType::Constr, "DescriptorPoolVk")
-  };
-  ~DescriptorPoolVk() {
-    PC_PRINT("DESTROYED", TagType::Destr, "DescriptorPoolVk")
-  };
 };
 
 //

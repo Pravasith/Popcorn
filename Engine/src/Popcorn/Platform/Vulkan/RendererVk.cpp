@@ -16,7 +16,7 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 ContextVk *RendererVk::s_vulkanContext = nullptr;
-std::vector<RenderFlowVk> RendererVk::s_renderFlows{};
+std::vector<RenderFlowVk *> RendererVk::s_renderFlows{};
 
 //
 // -------------------------------------------------------------------------
@@ -85,7 +85,9 @@ RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
 RendererVk::~RendererVk() {
   // Renderflow clean ups
   for (auto &workflow : s_renderFlows) {
-    workflow.CleanUp();
+    workflow->CleanUp();
+    delete workflow;
+    workflow = nullptr;
   }
   s_renderFlows.clear();
 
@@ -108,16 +110,16 @@ void RendererVk::DestroyVulkanContext() {
 // ---------------------------------------------------------------------------
 // --- RENDER WORKFLOWS ------------------------------------------------------
 void RendererVk::CreateRenderFlows() {
-  s_renderFlows.emplace_back(GBufferRenderFlowVk());
-  s_renderFlows.emplace_back(LightingRenderFlowVk());
-  s_renderFlows.emplace_back(CompositeRenderFlowVk());
+  s_renderFlows.emplace_back(new GBufferRenderFlowVk());
+  s_renderFlows.emplace_back(new LightingRenderFlowVk());
+  s_renderFlows.emplace_back(new CompositeRenderFlowVk());
 
   for (auto &renderFlow : s_renderFlows) {
     PC_WARN("Preparing renderflow...")
-    renderFlow.Prepare(); // Creates Vulkan:
-                          //   - Attachments
-                          //   - RenderPass
-                          //   - Framebuffer
+    renderFlow->Prepare(); // Creates Vulkan:
+                           //   - Attachments
+                           //   - RenderPass
+                           //   - Framebuffer
   }
 };
 
@@ -137,8 +139,8 @@ void RendererVk::CreateRenderFlowResources() {
   RenderFlowVk::AllocSubmeshPrimitiveBuffers();
 
   for (auto &renderFlow : s_renderFlows) {
-    renderFlow.CreateAndAllocDescriptors();
-    renderFlow.CreatePipelines(); // ALMOST DONE
+    renderFlow->CreateAndAllocDescriptors();
+    // renderFlow->CreatePipelines();
   }
 };
 

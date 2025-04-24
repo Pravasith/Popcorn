@@ -91,33 +91,6 @@ void DescriptorSetLayoutsVk::CleanUp() {
 //
 //
 // -------------------------------------------------------------------------
-// --- DESCRIPTOR POOL -----------------------------------------------------
-//
-void DescriptorPoolVk::GetDefaultDescriptorPoolState(
-    VkDescriptorPoolCreateInfo &poolInfo, uint32_t maxDSets,
-    std::vector<VkDescriptorPoolSize> &poolSizes) {
-  poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-  poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
-  poolInfo.pPoolSizes = poolSizes.data();
-  poolInfo.maxSets = maxDSets;
-  poolInfo.flags = 0;
-};
-
-void DescriptorPoolVk::CreateDescriptorPool(
-    const VkDescriptorPoolCreateInfo &poolInfo, VkDescriptorPool *pool) {
-  auto &device = DeviceVk::Get()->GetDevice();
-  if (vkCreateDescriptorPool(device, &poolInfo, nullptr, pool) != VK_SUCCESS) {
-    throw std::runtime_error("failed to create descriptor pool!");
-  }
-}
-
-void DescriptorPoolVk::DestroyDescriptorPool(VkDescriptorPool &pool) {
-  vkDestroyDescriptorPool(DeviceVk::Get()->GetDevice(), pool, nullptr);
-};
-
-//
-//
-// -------------------------------------------------------------------------
 // --- DESCRIPTOR SETS -----------------------------------------------------
 //
 void DescriptorSetsVk::AllocateDescriptorSets(
@@ -138,7 +111,6 @@ void DescriptorSetsVk::GetDefaultDescriptorSetAllocateState(
     const std::vector<VkDescriptorSetLayout> &dSetLayouts,
     const VkDescriptorPool &pool, VkDescriptorSetAllocateInfo &allocInfo) {
   constexpr auto maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
-
   allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
   allocInfo.descriptorPool = pool;
   allocInfo.descriptorSetCount = static_cast<uint32_t>(dSetLayouts.size());
