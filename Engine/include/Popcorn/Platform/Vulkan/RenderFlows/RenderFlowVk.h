@@ -56,6 +56,8 @@ private:
 
 public:
   virtual void CreateAndAllocDescriptors() = 0;
+  virtual void DestroyDescriptors() = 0;
+
   virtual void CreatePipelines() = 0;
   static void ProcessSceneUpdates(const uint32_t currentFrame); // Only once
   static void

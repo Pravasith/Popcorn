@@ -6,6 +6,7 @@
 #include "Material.h"
 #include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
+#include "Uniforms.h"
 #include <cstdint>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
@@ -38,8 +39,10 @@ template <MaterialTypes T>
 //
 template <MaterialTypes T> class Submesh {
 public:
-  Submesh(VertexBuffer *vbo, IndexBuffer<uint32_t> *ibo, Material<T> *mat)
-      : m_vertexBuffer(vbo), m_indexBuffer(ibo), m_material(mat) {
+  Submesh(Mesh *parentMesh, VertexBuffer *vbo, IndexBuffer<uint32_t> *ibo,
+          Material<T> *mat)
+      : m_parentMesh(parentMesh), m_vertexBuffer(vbo), m_indexBuffer(ibo),
+        m_material(mat) {
     PC_PRINT("CREATED", TagType::Constr, "Submesh");
     m_id = PC_GetHashedSubmeshId(vbo, ibo, mat);
   }
@@ -49,6 +52,7 @@ public:
   }
 
   [[nodiscard]] Material<T> *GetMaterial() const { return m_material; };
+  [[nodiscard]] Mesh *GetParentMesh() const { return m_parentMesh; };
 
   static constexpr MaterialTypes type_value = T;
 
@@ -66,9 +70,10 @@ public:
   //
   // --- MOVE CONSTRUCTOR -----------------------------------------------------
   Submesh(Submesh &&other) noexcept
-      : m_vertexBuffer(other.m_vertexBuffer),
+      : m_parentMesh(other.m_parentMesh), m_vertexBuffer(other.m_vertexBuffer),
         m_indexBuffer(other.m_indexBuffer), m_material(other.m_material),
         m_id(other.m_id) {
+    other.m_parentMesh = nullptr;
     other.m_vertexBuffer = nullptr;
     other.m_indexBuffer = nullptr;
     other.m_material = nullptr;
@@ -80,11 +85,13 @@ public:
     if (this != &other) {
       Cleanup();
 
+      m_parentMesh = other.m_parentMesh;
       m_vertexBuffer = other.m_vertexBuffer;
       m_indexBuffer = other.m_indexBuffer;
       m_material = other.m_material;
       m_id = other.m_id;
 
+      other.m_parentMesh = nullptr;
       other.m_vertexBuffer = nullptr;
       other.m_indexBuffer = nullptr;
       other.m_material = nullptr;
@@ -104,22 +111,26 @@ private:
       delete m_material;
   }
 
+  Mesh *m_parentMesh = nullptr;
   VertexBuffer *m_vertexBuffer = nullptr;
   IndexBuffer<uint32_t> *m_indexBuffer = nullptr;
   Material<T> *m_material = nullptr;
   uint32_t m_id = 0;
 };
 
+//
+//
+//
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// --- MESH -------------------------------------------------------------------
+//
 class Mesh : public GameObject {
 public:
-  struct Uniforms {
-    alignas(16) glm::mat4 modelMatrix; // Model matrix
-  };
-
   // TODO: Handle the case of duplicating meshes & materials
   // TODO: Make m_indexBuffer a variant
   Mesh() {
-    m_uniformBuffer.modelMatrix = m_worldMatrix;
+    m_uniforms.worldMatrix = m_worldMatrix;
     PC_PRINT("CREATED", TagType::Constr, "MESH");
   };
   virtual ~Mesh() { PC_PRINT("DESTROYED", TagType::Destr, "MESH"); };
@@ -127,7 +138,7 @@ public:
   // virtual void OnAttach() override {};
   virtual void OnUpdate() override {
     // Resets buffer data and fills again
-    m_uniformBuffer.modelMatrix = GetWorldMatrix();
+    m_uniforms.worldMatrix = GetWorldMatrix();
   };
   // virtual void OnRender() override {};
 
@@ -135,7 +146,9 @@ public:
     return GameObjectTypes::Mesh;
   };
 
-  [[nodiscard]] inline Uniforms &GetUniformBuffer() { return m_uniformBuffer; };
+  [[nodiscard]] inline UniformDefs::GameObjectUniform &GetMeshUniforms() {
+    return m_uniforms;
+  };
 
   template <MaterialTypes T>
   void AddSubmesh(VertexBuffer *vbo, IndexBuffer<uint32_t> *ibo,
@@ -150,7 +163,7 @@ public:
         };
       }
 
-      m_basicSubmeshes.emplace_back(vbo, ibo, mat);
+      m_basicSubmeshes.emplace_back(this, vbo, ibo, mat);
     } else if constexpr (T == MaterialTypes::PbrMat) {
       for (auto &submesh : m_pbrSubmeshes) {
         if (submesh.GetId() == PC_GetHashedSubmeshId(vbo, ibo, mat)) {
@@ -159,7 +172,7 @@ public:
         };
       }
 
-      m_pbrSubmeshes.emplace_back(vbo, ibo, mat);
+      m_pbrSubmeshes.emplace_back(this, vbo, ibo, mat);
     } else {
       // Rest material types...
     }
@@ -176,15 +189,18 @@ public:
   };
 
 protected:
-  Uniforms m_uniformBuffer;
+  UniformDefs::GameObjectUniform m_uniforms;
 
-  //
   std::vector<Submesh<MaterialTypes::BasicMat>> m_basicSubmeshes;
   std::vector<Submesh<MaterialTypes::PbrMat>> m_pbrSubmeshes;
 };
 
 //
 //
+//
+//
+//
+// ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // --- UTIL FUNCTIONS (GLOBAL) ------------------------------------------------
 template <MaterialTypes T>

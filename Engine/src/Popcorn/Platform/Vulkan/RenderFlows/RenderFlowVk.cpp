@@ -42,7 +42,7 @@ void RenderFlowVk::CreateAndAllocateVBOsAndIBOs() {
   memoryFactory->CleanUpStagingBuffers(); // Unmap, deallocate & destroy
 };
 
-void RenderFlowVk::DestroySubmeshPrimitiveBuffers() {
+void RenderFlowVk::DestroyVBOsAndIBOs() {
   auto *memoryFactory = ContextVk::MemoryFactory();
   memoryFactory->CleanUpLocalBuffers(); // Deallocate & destroy
 };

@@ -221,6 +221,9 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
   //
   // Layout -
   // - Camera UBO
+  // - ModelMatrix UBO
+  // - BasicMaterial UBO
+  // - PbrMaterial UBO
   //
 };
 
