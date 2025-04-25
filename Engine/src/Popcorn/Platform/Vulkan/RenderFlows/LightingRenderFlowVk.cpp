@@ -1,4 +1,5 @@
 #include "RenderFlows/LightingRenderFlowVk.h"
+#include "ContextVk.h"
 #include "GlobalMacros.h"
 #include "ImageVk.h"
 #include "RenderPassVk.h"
@@ -138,6 +139,32 @@ void LightingRenderFlowVk::CreateFramebuffer() {
 
   FramebuffersVk::CreateVkFramebuffer(ContextVk::Device()->GetDevice(),
                                       createInfo, m_framebuffer);
+};
+
+//
+//
+//
+//
+// --- CLEAN UP ----------------------------------------------------------------
+// --- CLEAN UP ----------------------------------------------------------------
+// --- CLEAN UP ----------------------------------------------------------------
+//
+void LightingRenderFlowVk::DestroyFramebuffer() {
+  if (m_framebuffer != VK_NULL_HANDLE) {
+    FramebuffersVk::DestroyVkFramebuffer(ContextVk::Device()->GetDevice(),
+                                         m_framebuffer);
+    m_framebuffer = VK_NULL_HANDLE;
+  }
+};
+
+void LightingRenderFlowVk::DestroyRenderPass() {
+  if (m_renderPass.GetVkRenderPass() != VK_NULL_HANDLE) {
+    m_renderPass.Destroy(ContextVk::Device()->GetDevice());
+  }
+};
+
+void LightingRenderFlowVk::DestroyAttachments() {
+  m_attachments.lightBuffer.Destroy();
 };
 
 GFX_NAMESPACE_END

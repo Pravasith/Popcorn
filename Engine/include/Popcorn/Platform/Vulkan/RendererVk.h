@@ -23,6 +23,7 @@ public:
 
   // Before GameLoop
   virtual void CreateRenderFlows() override;
+  virtual void PrepareRenderFlows() override;
   virtual void AssignSceneObjectsToRenderFlows() override;
   virtual void CreateRenderFlowResources() override;
 
@@ -44,7 +45,9 @@ public:
 
 private:
   static ContextVk *s_vulkanContext;
+
   static std::vector<RenderFlowVk *> s_renderFlows;
+
   std::vector<VkCommandBuffer> m_drawingCommandBuffers;
 };
 

@@ -2,7 +2,6 @@
 
 #include "GfxContext.h"
 #include "GlobalMacros.h"
-#include "Mesh.h"
 #include "Popcorn/Core/Window.h"
 #include "Popcorn/Events/WindowEvent.h"
 #include "SceneLibrary.h"
@@ -42,7 +41,10 @@ public:
   void RemoveScene(Scene *scene) { m_sceneLibrary.Remove(scene); };
 
   virtual void CreateRenderFlows() = 0;
+  virtual void PrepareRenderFlows() = 0;
+
   virtual void AssignSceneObjectsToRenderFlows() = 0;
+
   virtual void CreateRenderFlowResources() = 0;
 
   virtual void ProcessGameObjectNode(GameObject *node) = 0;

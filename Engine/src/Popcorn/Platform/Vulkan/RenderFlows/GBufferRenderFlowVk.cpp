@@ -229,12 +229,9 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
 //
 //
 //
-// --- CREATE PIPELINES
-// --------------------------------------------------------
-// --- CREATE PIPELINES
-// --------------------------------------------------------
-// --- CREATE PIPELINES
-// --------------------------------------------------------
+// --- CREATE PIPELINES --------------------------------------------------------
+// --- CREATE PIPELINES --------------------------------------------------------
+// --- CREATE PIPELINES --------------------------------------------------------
 //
 void GBufferRenderFlowVk::CreatePipelines() {
   // - Vertexbuffer layout
@@ -248,38 +245,29 @@ void GBufferRenderFlowVk::CreatePipelines() {
 //
 //
 //
-// --- CLEAN UP
-// ----------------------------------------------------------------
-// --- CLEAN UP
-// ----------------------------------------------------------------
-// --- CLEAN UP
-// ----------------------------------------------------------------
+// --- CLEAN UP ----------------------------------------------------------------
+// --- CLEAN UP ----------------------------------------------------------------
+// --- CLEAN UP ----------------------------------------------------------------
 //
-void GBufferRenderFlowVk::CleanUp() {
-  const VkDevice &device = ContextVk::Device()->GetDevice();
-
-  //
-  // --- Destroy Framebuffer
-  // ---------------------------------------------------
+void GBufferRenderFlowVk::DestroyFramebuffer() {
   if (m_framebuffer != VK_NULL_HANDLE) {
-    FramebuffersVk::DestroyVkFramebuffer(device, m_framebuffer);
+    FramebuffersVk::DestroyVkFramebuffer(ContextVk::Device()->GetDevice(),
+                                         m_framebuffer);
     m_framebuffer = VK_NULL_HANDLE;
   }
+};
 
-  //
-  // --- Destroy Renderpass
-  // ----------------------------------------------------
+void GBufferRenderFlowVk::DestroyRenderPass() {
   if (m_renderPass.GetVkRenderPass() != VK_NULL_HANDLE) {
-    m_renderPass.Destroy(device);
+    m_renderPass.Destroy(ContextVk::Device()->GetDevice());
   }
+};
 
-  //
-  // --- Destroy G-Buffer Attachments
-  // ------------------------------------------
+void GBufferRenderFlowVk::DestroyAttachments() {
   m_attachments.albedoImage.Destroy();
   m_attachments.depthImage.Destroy();
   m_attachments.normalImage.Destroy();
-}
+};
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

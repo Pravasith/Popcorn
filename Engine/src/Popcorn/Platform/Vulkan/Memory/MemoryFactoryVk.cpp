@@ -6,8 +6,8 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-void MemoryFactoryVk::AllocateStagingBuffers(VkDeviceSize vboSize,
-                                             VkDeviceSize iboSize) {
+void MemoryFactoryVk::CreateAndAllocStagingBuffers(VkDeviceSize vboSize,
+                                                   VkDeviceSize iboSize) {
   //
   // -----------------------------------------------------------------------
   // --- VERTEX BUFFERS CREATION -------------------------------------------
@@ -67,8 +67,16 @@ void MemoryFactoryVk::AllocateStagingBuffers(VkDeviceSize vboSize,
   };
 }
 
-void MemoryFactoryVk::AllocateLocalBuffers(VkDeviceSize vboSize,
-                                           VkDeviceSize iboSize) {
+void MemoryFactoryVk::FlushBuffersStagingToLocal(VkDeviceSize submeshVbosSize,
+                                                 VkDeviceSize submeshIbosSize) {
+  BufferVkUtils::CopyStagingToMainBuffers(m_submeshVBOsStaging, m_submeshVBOs,
+                                          submeshVbosSize);
+  BufferVkUtils::CopyStagingToMainBuffers(m_submeshIBOsStaging, m_submeshIBOs,
+                                          submeshIbosSize);
+};
+
+void MemoryFactoryVk::CreateAndAllocLocalBuffers(VkDeviceSize vboSize,
+                                                 VkDeviceSize iboSize) {
   //
   //
   //
@@ -112,7 +120,7 @@ void MemoryFactoryVk::AllocateLocalBuffers(VkDeviceSize vboSize,
   };
 }
 
-void MemoryFactoryVk::DeallocateStagingBuffers() {
+void MemoryFactoryVk::CleanUpStagingBuffers() {
   auto &allocator = ContextVk::MemoryAllocator()->GetVMAAllocator();
 
   if (m_submeshVboMapping) {
@@ -137,6 +145,22 @@ void MemoryFactoryVk::DeallocateStagingBuffers() {
                      m_submeshIBOsAllocStaging);
     m_submeshIBOsStaging = VK_NULL_HANDLE;
     m_submeshIBOsAllocStaging = nullptr;
+  }
+};
+
+void MemoryFactoryVk::CleanUpLocalBuffers() {
+  auto &allocator = ContextVk::MemoryAllocator()->GetVMAAllocator();
+
+  if (m_submeshVBOs != VK_NULL_HANDLE && m_submeshVBOsAlloc) {
+    vmaDestroyBuffer(allocator, m_submeshVBOs, m_submeshVBOsAlloc);
+    m_submeshVBOs = VK_NULL_HANDLE;
+    m_submeshVBOsAlloc = nullptr;
+  }
+
+  if (m_submeshIBOs != VK_NULL_HANDLE && m_submeshIBOsAlloc) {
+    vmaDestroyBuffer(allocator, m_submeshIBOs, m_submeshIBOsAlloc);
+    m_submeshIBOs = VK_NULL_HANDLE;
+    m_submeshIBOsAlloc = nullptr;
   }
 };
 

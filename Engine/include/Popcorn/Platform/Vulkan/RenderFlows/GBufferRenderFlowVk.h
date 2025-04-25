@@ -20,12 +20,15 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "GBufferRenderflowVk")
   };
 
-  virtual void CleanUp() override;
-
 private:
   virtual void CreateAttachments() override;
   virtual void CreateFramebuffer() override;
   virtual void CreateRenderPass() override;
+
+  virtual void DestroyRenderPass() override;
+  virtual void DestroyFramebuffer() override;
+  virtual void DestroyAttachments() override;
+
   virtual void CreateAndAllocDescriptors() override;
   virtual void CreatePipelines() override;
 

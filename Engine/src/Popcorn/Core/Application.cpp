@@ -149,11 +149,4 @@ void Application::OnEvent(Event &e) {
   };
 };
 
-void Application::ProcessScenes() {
-  s_renderer->AssignSceneObjectsToRenderFlows(); // Sorts submeshes material
-                                                 // wise & adds to renderflows
-  s_renderer->CreateRenderFlowResources(); // Renderflow submeshes converted and
-                                           // copied to vulkan memory objects
-};
-
 ENGINE_NAMESPACE_END

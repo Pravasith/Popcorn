@@ -25,7 +25,6 @@ public:
   static void Stop();
 
   static void StartGameLoop();
-  static void ProcessScenes();
   static void CreateWorkflowResources();
   static void AddLayer(Layer *);
 

@@ -11,7 +11,7 @@ PcBasicSubmeshGroups RenderFlowVk::s_basicSubmeshGroups{};
 PcPbrSubmeshGroups RenderFlowVk::s_pbrSubmeshGroups{};
 uint64_t RenderFlowVk::s_submeshCount = 0;
 
-void RenderFlowVk::AllocSubmeshPrimitiveBuffers() {
+void RenderFlowVk::CreateAndAllocateVBOsAndIBOs() {
   // basicMat1 : [sm1, sm2, sm3, ... ]
   // basicMat2 : [sm1, sm2 ... ]
 
@@ -19,29 +19,32 @@ void RenderFlowVk::AllocSubmeshPrimitiveBuffers() {
   // pbrMat2 : [sm1, sm2 ... ]
   //
   auto *memoryFactory = ContextVk::MemoryFactory();
-  memoryFactory->AllocateStagingBuffers(s_submeshCount, s_submeshCount);
+  memoryFactory->CreateAndAllocStagingBuffers(s_submeshCount, s_submeshCount);
+  memoryFactory->CreateAndAllocLocalBuffers(s_submeshCount, s_submeshCount);
 
   //
   // Copy VBO, IBO data to staging buffers ----------------------------------
   PcSubmeshGroupOffsets groupOffsets{};
   // Basic material submesh groups
-  memoryFactory->CopySubmeshGroupToStagingBuffer(groupOffsets,
-                                                 s_basicSubmeshGroups);
+  memoryFactory->CopySubmeshGroupToStagingBuffers(groupOffsets,
+                                                  s_basicSubmeshGroups);
   // Pbr material submesh groups
-  memoryFactory->CopySubmeshGroupToStagingBuffer(groupOffsets,
-                                                 s_pbrSubmeshGroups);
+  memoryFactory->CopySubmeshGroupToStagingBuffers(groupOffsets,
+                                                  s_pbrSubmeshGroups);
 
   //
   // Copy the staging data to local buffers ---------------------------------
   PC_ASSERT(s_submeshCount, "Submesh count is zero.");
 
-  memoryFactory->AllocateLocalBuffers(s_submeshCount, s_submeshCount);
-  memoryFactory->FlushBuffersStagingToMain(groupOffsets.submeshGroupVboSize,
-                                           groupOffsets.submeshGroupIboSize);
+  memoryFactory->FlushBuffersStagingToLocal(groupOffsets.submeshGroupVboSize,
+                                            groupOffsets.submeshGroupIboSize);
 
-  //
-  // Unmap & destroy staging buffers ----------------------------------------
-  memoryFactory->DeallocateStagingBuffers();
+  memoryFactory->CleanUpStagingBuffers(); // Unmap, deallocate & destroy
+};
+
+void RenderFlowVk::DestroySubmeshPrimitiveBuffers() {
+  auto *memoryFactory = ContextVk::MemoryFactory();
+  memoryFactory->CleanUpLocalBuffers(); // Deallocate & destroy
 };
 
 void RenderFlowVk::ProcessSceneUpdates(const uint32_t currentFrame) {

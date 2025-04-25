@@ -140,5 +140,31 @@ void CompositeRenderFlowVk::CreateFramebuffer() {
                                       createInfo, m_framebuffer);
 };
 
+//
+//
+//
+//
+// --- CLEAN UP ----------------------------------------------------------------
+// --- CLEAN UP ----------------------------------------------------------------
+// --- CLEAN UP ----------------------------------------------------------------
+//
+void CompositeRenderFlowVk::DestroyFramebuffer() {
+  if (m_framebuffer != VK_NULL_HANDLE) {
+    FramebuffersVk::DestroyVkFramebuffer(ContextVk::Device()->GetDevice(),
+                                         m_framebuffer);
+    m_framebuffer = VK_NULL_HANDLE;
+  }
+};
+
+void CompositeRenderFlowVk::DestroyRenderPass() {
+  if (m_renderPass.GetVkRenderPass() != VK_NULL_HANDLE) {
+    m_renderPass.Destroy(ContextVk::Device()->GetDevice());
+  }
+};
+
+void CompositeRenderFlowVk::DestroyAttachments() {
+  m_attachments.presentImage.Destroy();
+};
+
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

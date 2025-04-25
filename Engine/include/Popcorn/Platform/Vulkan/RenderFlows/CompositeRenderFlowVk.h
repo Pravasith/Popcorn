@@ -20,12 +20,15 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "CompositeRenderflowVk")
   };
 
-  virtual void CleanUp() override;
-
 private:
   virtual void CreateAttachments() override;
-  virtual void CreateFramebuffer() override;
   virtual void CreateRenderPass() override;
+  virtual void CreateFramebuffer() override;
+
+  virtual void DestroyFramebuffer() override;
+  virtual void DestroyRenderPass() override;
+  virtual void DestroyAttachments() override;
+
   virtual void CreatePipelines() override;
   virtual void CreateAndAllocDescriptors() override;
 

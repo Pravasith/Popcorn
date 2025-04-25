@@ -84,10 +84,12 @@ RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
 
 RendererVk::~RendererVk() {
   // Renderflow clean ups
-  for (auto &workflow : s_renderFlows) {
-    workflow->CleanUp();
-    delete workflow;
-    workflow = nullptr;
+  RenderFlowVk::DestroyVBOsAndIBOs();
+
+  for (auto &renderFlow : s_renderFlows) {
+    renderFlow->CleanUp();
+    delete renderFlow;
+    renderFlow = nullptr;
   }
   s_renderFlows.clear();
 
@@ -113,7 +115,9 @@ void RendererVk::CreateRenderFlows() {
   s_renderFlows.emplace_back(new GBufferRenderFlowVk());
   s_renderFlows.emplace_back(new LightingRenderFlowVk());
   s_renderFlows.emplace_back(new CompositeRenderFlowVk());
+};
 
+void RendererVk::PrepareRenderFlows() {
   for (auto &renderFlow : s_renderFlows) {
     PC_WARN("Preparing renderflow...")
     renderFlow->Prepare(); // Creates Vulkan:
@@ -136,7 +140,7 @@ void RendererVk::CreateRenderFlowResources() {
   ContextVk::MemoryAllocator()->CreateVMAAllocator();
 
   // Allocates vulkan buffers
-  RenderFlowVk::AllocSubmeshPrimitiveBuffers();
+  RenderFlowVk::CreateAndAllocateVBOsAndIBOs();
 
   for (auto &renderFlow : s_renderFlows) {
     renderFlow->CreateAndAllocDescriptors();

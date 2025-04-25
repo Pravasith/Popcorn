@@ -49,13 +49,18 @@ public:
     };
   };
 
-  void AllocateStagingBuffers(VkDeviceSize vboSize, VkDeviceSize iboSize);
-  void AllocateLocalBuffers(VkDeviceSize vboSize, VkDeviceSize iboSize);
-  void CopyToStagingBuffer(byte_t *data, VkDeviceSize size);
+  void CreateAndAllocStagingBuffers(VkDeviceSize vboSize, VkDeviceSize iboSize);
+  void CleanUpStagingBuffers();
+
+  void FlushBuffersStagingToLocal(VkDeviceSize submeshVbosSize,
+                                  VkDeviceSize submeshIbosSize);
+
+  void CreateAndAllocLocalBuffers(VkDeviceSize vboSize, VkDeviceSize iboSize);
+  void CleanUpLocalBuffers();
 
   // -> current material group offset in bytes
   template <MaterialTypes T>
-  void CopySubmeshGroupToStagingBuffer(
+  void CopySubmeshGroupToStagingBuffers(
       PcSubmeshGroupOffsets &prevSubmeshGroupOffsets,
       const std::unordered_map<MaterialHashType, std::vector<Submesh<T> *>>
           &submeshGroups) {
@@ -87,16 +92,6 @@ public:
       }
     };
   };
-
-  void FlushBuffersStagingToMain(VkDeviceSize submeshVbosSize,
-                                 VkDeviceSize submeshIbosSize) {
-    BufferVkUtils::CopyStagingToMainBuffers(m_submeshVBOsStaging, m_submeshVBOs,
-                                            submeshVbosSize);
-    BufferVkUtils::CopyStagingToMainBuffers(m_submeshIBOsStaging, m_submeshIBOs,
-                                            submeshIbosSize);
-  };
-
-  void DeallocateStagingBuffers();
 
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
   MemoryFactoryVk(const MemoryFactoryVk &) = delete;

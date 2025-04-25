@@ -30,17 +30,29 @@ public:
 
   //
   // NEW ----------------------------------------------------------------
-  static void AllocSubmeshPrimitiveBuffers(); // Only once
+  static void CreateAndAllocateVBOsAndIBOs(); // Only once
+  static void DestroyVBOsAndIBOs();           // Only once
+
   void Prepare() {
     CreateAttachments();
     CreateRenderPass();
     CreateFramebuffer();
   };
 
+  void CleanUp() {
+    DestroyFramebuffer();
+    DestroyRenderPass();
+    DestroyAttachments();
+  };
+
 private:
   virtual void CreateAttachments() = 0;
   virtual void CreateRenderPass() = 0;
   virtual void CreateFramebuffer() = 0;
+
+  virtual void DestroyFramebuffer() = 0;
+  virtual void DestroyRenderPass() = 0;
+  virtual void DestroyAttachments() = 0;
 
 public:
   virtual void CreateAndAllocDescriptors() = 0;
@@ -49,7 +61,6 @@ public:
   static void
   RecordRenderCommands(const uint32_t frameIndex, const uint32_t currentFrame,
                        VkCommandBuffer &currentFrameCommandBuffer); // Only once
-  virtual void CleanUp() = 0;
 
   //
   //
