@@ -1,5 +1,6 @@
 #include "RenderFlows/GBufferRenderFlowVk.h"
 #include "ContextVk.h"
+#include "DescriptorsVk.h"
 #include "FramebuffersVk.h"
 #include "ImageVk.h"
 #include "RenderPassVk.h"
@@ -217,16 +218,43 @@ void GBufferRenderFlowVk::CreateFramebuffer() {
 // --- CREATE DESCRIPTORS ------------------------------------------------------
 //
 void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
-  // Descriptor set 0
-  //
-  // Layout -
-  // - Camera UBO
-  // - ModelMatrix UBO
-  // - BasicMaterial UBO
-  // - PbrMaterial UBO
+  VkDescriptorSetLayoutBinding cameraBinding;
+  cameraBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  cameraBinding.binding = 0;
+  cameraBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+  cameraBinding.descriptorCount = 1;
+  cameraBinding.pImmutableSamplers = nullptr;
 
+  VkDescriptorSetLayoutBinding GameObjectBinding;
+  GameObjectBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+  GameObjectBinding.binding = 1;
+  GameObjectBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+  GameObjectBinding.descriptorCount = 1;
+  GameObjectBinding.pImmutableSamplers = nullptr;
 
+  VkDescriptorSetLayoutBinding BasicMatBinding;
+  BasicMatBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+  BasicMatBinding.binding = 2;
+  BasicMatBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+  BasicMatBinding.descriptorCount = 1;
+  BasicMatBinding.pImmutableSamplers = nullptr;
 
+  VkDescriptorSetLayoutBinding PbrMatBinding;
+  PbrMatBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+  PbrMatBinding.binding = 3;
+  PbrMatBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+  PbrMatBinding.descriptorCount = 1;
+  PbrMatBinding.pImmutableSamplers = nullptr;
+
+  std::vector<VkDescriptorSetLayoutBinding> bindings = {
+      cameraBinding, GameObjectBinding, BasicMatBinding, PbrMatBinding};
+
+  VkDescriptorSetLayout &gBufferDescriptorSetLayout =
+      ContextVk::DescriptorSetLayouts()->GetLayout(bindings);
+
+  if (gBufferDescriptorSetLayout == VK_NULL_HANDLE) {
+    PC_ERROR("Failed to create gbuffer descriptor set layout!", "")
+  };
 };
 
 //
