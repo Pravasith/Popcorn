@@ -131,8 +131,13 @@ DescriptorFactoryVk::GetLayout<DescriptorSets::PbrMatSet>() {
 //
 
 template <>
-VkDescriptorSet &DescriptorFactoryVk::GetDescriptorSet<DescriptorSets::LightingSet>() {
+VkDescriptorSet &
+DescriptorFactoryVk::GetDescriptorSet<DescriptorSets::CameraSet>() {
+  auto *pools = ContextVk::DescriptorPools();
 
+  auto &gBufferPool = pools->GetPool<DescriptorPools::GBufferPool>();
+
+  // gBufferPool->AllocateDescriptorSet();
 };
 
 GFX_NAMESPACE_END

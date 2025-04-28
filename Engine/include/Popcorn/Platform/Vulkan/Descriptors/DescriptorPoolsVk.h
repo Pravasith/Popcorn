@@ -1,7 +1,9 @@
 #pragma once
 
+#include "DescriptorFactoryVk.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include <cstdint>
 #include <unordered_map>
 #include <vulkan/vulkan_core.h>
 
@@ -10,11 +12,39 @@ GFX_NAMESPACE_BEGIN
 
 enum class DescriptorPools { GBufferPool = 1, LightingPool, CompositePool };
 
+class DPoolVk {
+public:
+  DPoolVk() { PC_PRINT("CREATED", TagType::Constr, "DPoolVk.h") }
+  ~DPoolVk() { PC_PRINT("DESTROYED", TagType::Destr, "DPoolVk.h") }
+
+  template <DescriptorSets T> VkDescriptorSet &AllocateDescriptorSet() {
+#if PC_DEBUG
+    if (++m_setsAllocated >= m_maxSets) {
+      PC_ERROR("Pool reached maximum set capacity of " << m_maxSets << ".",
+               "DPoolVk");
+    }
+
+#endif
+  };
+
+  void AllocateDescriptorSets();
+  void Create(VkDescriptorPoolSize *poolSizes, uint32_t poolSizesCount,
+              uint32_t maxSets);
+  void CleanUp();
+
+private:
+#if PC_DEBUG
+  uint32_t m_setsAllocated = 0;
+  uint32_t m_maxSets = 0;
+#endif
+  VkDescriptorPool m_pool = VK_NULL_HANDLE;
+};
+
 // TODO: Make it a growable pool
 class DescriptorPoolsVk {
 
 public:
-  template <DescriptorPools T> VkDescriptorPool &GetPool();
+  template <DescriptorPools T> DPoolVk &GetPool();
   void CleanUp();
 
 public:
@@ -39,10 +69,9 @@ public:
 private:
   DescriptorPoolsVk() {
     PC_PRINT("CREATED", TagType::Constr, "DescriptorPoolsVk.h")
-  };
-  ~DescriptorPoolsVk() {
-    PC_PRINT("DESTROYED", TagType::Destr, "DescriptorPoolsVk.h")
-  };
+  }
+  ~DescriptorPoolsVk(){
+      PC_PRINT("DESTROYED", TagType::Destr, "DescriptorPoolsVk.h")}
 
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
   DescriptorPoolsVk(const DescriptorPoolsVk &) = delete;
@@ -54,7 +83,7 @@ private:
 
 private:
   static DescriptorPoolsVk *s_instance;
-  std::unordered_map<DescriptorPools, VkDescriptorPool> m_pools{};
+  std::unordered_map<DescriptorPools, DPoolVk> m_pools{};
 };
 
 GFX_NAMESPACE_END

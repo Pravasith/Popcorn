@@ -237,12 +237,6 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
   // Create descriptor pool
   // Allocate descriptor sets
   //
-
-  auto *pools = ContextVk::DescriptorPools();
-
-  auto &gBufferPool = pools->GetPool<DescriptorPools::GBufferPool>();
-  auto &lightingPool = pools->GetPool<DescriptorPools::LightingPool>();
-  auto &compositePool = pools->GetPool<DescriptorPools::CompositePool>();
 };
 
 //

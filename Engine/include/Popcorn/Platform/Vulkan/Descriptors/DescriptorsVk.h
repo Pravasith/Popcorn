@@ -67,28 +67,5 @@ private:
   std::unordered_map<size_t, VkDescriptorSetLayout> m_layoutCache;
 };
 
-//
-//
-// -------------------------------------------------------------------------
-// --- DESCRIPTOR SETS -----------------------------------------------------
-//
-class DescriptorSetsVk {
-public:
-  static void
-  AllocateDescriptorSets(const VkDescriptorSetAllocateInfo &allocInfo,
-                         std::vector<VkDescriptorSet> &descriptorSets);
-  static void GetDefaultDescriptorSetAllocateState(
-      const std::vector<VkDescriptorSetLayout> &dSetLayouts,
-      const VkDescriptorPool &pool, VkDescriptorSetAllocateInfo &allocInfo);
-
-private:
-  DescriptorSetsVk() {
-    PC_PRINT("CREATED", TagType::Constr, "DescriptorSetsVk")
-  };
-  ~DescriptorSetsVk() {
-    PC_PRINT("DESTROYED", TagType::Destr, "DescriptorSetsVk")
-  };
-};
-
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

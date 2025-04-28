@@ -6,6 +6,33 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+void DPoolVk::Create(VkDescriptorPoolSize *poolSizes, uint32_t poolSizesCount,
+                     uint32_t maxSets) {
+  if (m_pool != VK_NULL_HANDLE) {
+    throw std::runtime_error("DPool already exists");
+  };
+
+  VkDescriptorPoolCreateInfo poolInfo{};
+  poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+  poolInfo.pPoolSizes = poolSizes;
+  poolInfo.poolSizeCount = poolSizesCount;
+  poolInfo.maxSets = maxSets;
+  poolInfo.flags = 0;
+
+  if (vkCreateDescriptorPool(ContextVk::Device()->GetDevice(), &poolInfo,
+                             nullptr, &m_pool) != VK_SUCCESS) {
+    throw std::runtime_error("Descriptor pool not created!!");
+  }
+
+  m_maxSets = maxSets;
+}
+
+void DPoolVk::CleanUp() {
+  auto &device = ContextVk::Device()->GetDevice();
+  vkDestroyDescriptorPool(device, m_pool, nullptr);
+  m_pool = VK_NULL_HANDLE;
+}
+
 //
 //
 // -------------------------------------------------------------------------
@@ -13,9 +40,8 @@ GFX_NAMESPACE_BEGIN
 //
 //
 template <>
-VkDescriptorPool &DescriptorPoolsVk::GetPool<DescriptorPools::GBufferPool>() {
-  if (!m_pools[DescriptorPools::GBufferPool]) {
-
+DPoolVk &DescriptorPoolsVk::GetPool<DescriptorPools::GBufferPool>() {
+  if (m_pools.find(DescriptorPools::GBufferPool) == m_pools.end()) {
     VkDescriptorPoolSize poolSize0 = {.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                       .descriptorCount =
                                           1 * ContextVk::MAX_FRAMES_IN_FLIGHT};
@@ -35,28 +61,19 @@ VkDescriptorPool &DescriptorPoolsVk::GetPool<DescriptorPools::GBufferPool>() {
     VkDescriptorPoolSize poolSizes[4]{poolSize0, poolSize1, poolSize2,
                                       poolSize3};
 
-    VkDescriptorPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.pPoolSizes = poolSizes;
-    poolInfo.poolSizeCount = 4;
-    poolInfo.maxSets = 4 * ContextVk::MAX_FRAMES_IN_FLIGHT;
-    poolInfo.flags = 0;
+    DPoolVk dPool{};
+    dPool.Create(poolSizes, 4, 4 * ContextVk::MAX_FRAMES_IN_FLIGHT);
 
-    VkDescriptorPool pool;
-    if (vkCreateDescriptorPool(ContextVk::Device()->GetDevice(), &poolInfo,
-                               nullptr, &pool) != VK_SUCCESS) {
-      throw std::runtime_error("Descriptor pool not created!!");
-    };
-
-    m_pools[DescriptorPools::GBufferPool] = pool;
-  };
+    m_pools[DescriptorPools::GBufferPool] =
+        dPool; // Moved by compiler? (probably)
+  }
 
   return m_pools[DescriptorPools::GBufferPool];
 }
 
 template <>
-VkDescriptorPool &DescriptorPoolsVk::GetPool<DescriptorPools::LightingPool>() {
-  if (!m_pools[DescriptorPools::LightingPool]) {
+DPoolVk &DescriptorPoolsVk::GetPool<DescriptorPools::LightingPool>() {
+  if (m_pools.find(DescriptorPools::LightingPool) == m_pools.end()) {
     VkDescriptorPoolSize poolSize0 = {
         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
         .descriptorCount = 1 * ContextVk::MAX_FRAMES_IN_FLIGHT}; // Lights UBO
@@ -79,28 +96,18 @@ VkDescriptorPool &DescriptorPoolsVk::GetPool<DescriptorPools::LightingPool>() {
     VkDescriptorPoolSize poolSizes[4]{poolSize0, poolSize1, poolSize2,
                                       poolSize3};
 
-    VkDescriptorPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.pPoolSizes = poolSizes;
-    poolInfo.poolSizeCount = 4;
-    poolInfo.maxSets = 4 * ContextVk::MAX_FRAMES_IN_FLIGHT;
-    poolInfo.flags = 0;
+    DPoolVk dPool{};
+    dPool.Create(poolSizes, 4, 4 * ContextVk::MAX_FRAMES_IN_FLIGHT);
 
-    VkDescriptorPool pool;
-    if (vkCreateDescriptorPool(ContextVk::Device()->GetDevice(), &poolInfo,
-                               nullptr, &pool) != VK_SUCCESS) {
-      throw std::runtime_error("Descriptor pool not created!!");
-    };
-
-    m_pools[DescriptorPools::LightingPool] = pool;
-  };
+    m_pools[DescriptorPools::LightingPool] = dPool;
+  }
 
   return m_pools[DescriptorPools::LightingPool];
 }
 
 template <>
-VkDescriptorPool &DescriptorPoolsVk::GetPool<DescriptorPools::CompositePool>() {
-  if (!m_pools[DescriptorPools::CompositePool]) {
+DPoolVk &DescriptorPoolsVk::GetPool<DescriptorPools::CompositePool>() {
+  if (m_pools.find(DescriptorPools::CompositePool) == m_pools.end()) {
 
     VkDescriptorPoolSize poolSize0 = {
         .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
@@ -109,21 +116,11 @@ VkDescriptorPool &DescriptorPoolsVk::GetPool<DescriptorPools::CompositePool>() {
 
     VkDescriptorPoolSize poolSizes[1]{poolSize0};
 
-    VkDescriptorPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.pPoolSizes = poolSizes;
-    poolInfo.poolSizeCount = 1;
-    poolInfo.maxSets = 1 * ContextVk::MAX_FRAMES_IN_FLIGHT;
-    poolInfo.flags = 0;
+    DPoolVk dPool{};
+    dPool.Create(poolSizes, 1, 1 * ContextVk::MAX_FRAMES_IN_FLIGHT);
 
-    VkDescriptorPool pool;
-    if (vkCreateDescriptorPool(ContextVk::Device()->GetDevice(), &poolInfo,
-                               nullptr, &pool) != VK_SUCCESS) {
-      throw std::runtime_error("Descriptor pool not created!!");
-    };
-
-    m_pools[DescriptorPools::CompositePool] = pool;
-  };
+    m_pools[DescriptorPools::CompositePool] = dPool;
+  }
 
   return m_pools[DescriptorPools::CompositePool];
 }
@@ -131,9 +128,9 @@ VkDescriptorPool &DescriptorPoolsVk::GetPool<DescriptorPools::CompositePool>() {
 void DescriptorPoolsVk::CleanUp() {
   auto &device = ContextVk::Device()->GetDevice();
 
-  for (auto &[a, pool] : m_pools) {
-    vkDestroyDescriptorPool(device, pool, nullptr);
-  };
+  for (auto &[_, dPool] : m_pools) {
+    dPool.CleanUp();
+  }
 
   m_pools.clear();
 };

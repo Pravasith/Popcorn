@@ -93,29 +93,29 @@ void DescriptorSetLayoutsVk::CleanUp() {
 // -------------------------------------------------------------------------
 // --- DESCRIPTOR SETS -----------------------------------------------------
 //
-void DescriptorSetsVk::AllocateDescriptorSets(
-    const VkDescriptorSetAllocateInfo &allocInfo,
-    std::vector<VkDescriptorSet> &descriptorSets) {
-
-  auto &device = DeviceVk::Get()->GetDevice();
-  constexpr auto maxFramesInFlight = ContextVk::MAX_FRAMES_IN_FLIGHT;
-  descriptorSets.resize(maxFramesInFlight);
-
-  if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) !=
-      VK_SUCCESS) {
-    throw std::runtime_error("failed to allocate global descriptor sets!");
-  }
-};
-
-void DescriptorSetsVk::GetDefaultDescriptorSetAllocateState(
-    const std::vector<VkDescriptorSetLayout> &dSetLayouts,
-    const VkDescriptorPool &pool, VkDescriptorSetAllocateInfo &allocInfo) {
-  constexpr auto maxFramesInFlight = ContextVk::MAX_FRAMES_IN_FLIGHT;
-  allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-  allocInfo.descriptorPool = pool;
-  allocInfo.descriptorSetCount = static_cast<uint32_t>(dSetLayouts.size());
-  allocInfo.pSetLayouts = dSetLayouts.data();
-};
+// void DescriptorSetsVk::AllocateDescriptorSets(
+//     const VkDescriptorSetAllocateInfo &allocInfo,
+//     std::vector<VkDescriptorSet> &descriptorSets) {
+//
+//   auto &device = DeviceVk::Get()->GetDevice();
+//   constexpr auto maxFramesInFlight = ContextVk::MAX_FRAMES_IN_FLIGHT;
+//   descriptorSets.resize(maxFramesInFlight);
+//
+//   if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) !=
+//       VK_SUCCESS) {
+//     throw std::runtime_error("failed to allocate global descriptor sets!");
+//   }
+// };
+//
+// void DescriptorSetsVk::GetDefaultDescriptorSetAllocateState(
+//     const std::vector<VkDescriptorSetLayout> &dSetLayouts,
+//     const VkDescriptorPool &pool, VkDescriptorSetAllocateInfo &allocInfo) {
+//   constexpr auto maxFramesInFlight = ContextVk::MAX_FRAMES_IN_FLIGHT;
+//   allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+//   allocInfo.descriptorPool = pool;
+//   allocInfo.descriptorSetCount = static_cast<uint32_t>(dSetLayouts.size());
+//   allocInfo.pSetLayouts = dSetLayouts.data();
+// };
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
