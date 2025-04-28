@@ -244,10 +244,7 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
   // Something like this --
   // factory->AllocateDescriptorSets<<DescriptorSets::CameraSet>>;
 
-  //
-  // Create descriptor pool
-  // Allocate descriptor sets
-  //
+  // Create VMA buffers for UBOs
 };
 
 //
