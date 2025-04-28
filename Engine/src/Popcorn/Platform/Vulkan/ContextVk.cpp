@@ -15,6 +15,7 @@ MemoryAllocatorVk *ContextVk::s_memoryAllocatorVk = nullptr;
 MemoryFactoryVk *ContextVk::s_memoryFactoryVk = nullptr;
 DescriptorSetLayoutsVk *ContextVk::s_descriptorSetLayoutsVk = nullptr;
 DescriptorFactoryVk *ContextVk::s_descriptorFactoryVk = nullptr;
+DescriptorPoolsVk *ContextVk::s_descriptorPoolsVk = nullptr;
 PipelineFactoryVk *ContextVk::s_pipelineFactoryVk = nullptr;
 
 void ContextVk::VulkanInit(const Window &appWin) {
@@ -62,8 +63,13 @@ void ContextVk::VulkanCleanUp() {
   s_pipelineFactoryVk->Destroy();
   s_pipelineFactoryVk = nullptr;
 
+  s_descriptorFactoryVk->CleanUp();
   s_descriptorFactoryVk->Destroy();
   s_descriptorFactoryVk = nullptr;
+
+  s_descriptorPoolsVk->CleanUp();
+  s_descriptorPoolsVk->Destroy();
+  s_descriptorPoolsVk = nullptr;
 
   s_descriptorSetLayoutsVk->CleanUp();
   DescriptorSetLayoutsVk::Destroy();

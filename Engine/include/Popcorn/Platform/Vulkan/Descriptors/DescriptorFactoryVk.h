@@ -1,28 +1,31 @@
 #pragma once
 
 #include "GlobalMacros.h"
-#include "PipelineFactoryVk.h"
 #include "Popcorn/Core/Base.h"
 #include <unordered_map>
-#include <vector>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+enum class DescriptorSets {
+  CameraSet = 1, // 1 Static UBO - Camera matrix
+  GameObjectSet, // 1 Dynamic UBO - Model matrix
+  BasicMatSet,   // 1 Dynamic UBO - Basic material matrix
+  PbrMatSet,     // 1 Dynamic UBO - Pbr material matrix
+
+  LightingSet, // 1 Dynamic UBO - Lights info (pos, rot, scale)
+               // 1 Sampler - Albedo image & sampler
+               // 1 Sampler - Depth image & sampler
+               // 1 Sampler - Normal image & sampler
+};
+
 class DescriptorFactoryVk {
 public:
-  // Create DescriptorSet Layout
-  // Create Vk memory and set offsets
-  // Create VMA crap
-  // Create DescriptorSets
+  template <DescriptorSets T> [[nodiscard]] VkDescriptorSetLayout &GetLayout();
+  template <DescriptorSets T> [[nodiscard]] VkDescriptorSet &GetDescriptorSet();
 
-  template <Pipelines T> void CreateDescriptorSetLayouts();
-  template <Pipelines T>
-  [[nodiscard]] const std::vector<VkDescriptorSetLayout> &
-  GetDescriptorSetLayouts() const {
-    return m_descriptorLayoutMap.at(T);
-  };
+  void CleanUp() { m_layouts.clear(); };
 
 public:
   [[nodiscard]] inline static DescriptorFactoryVk *Get() {
@@ -63,8 +66,8 @@ private:
 
 private:
   static DescriptorFactoryVk *s_instance;
-  std::unordered_map<Pipelines, std::vector<VkDescriptorSetLayout>>
-      m_descriptorLayoutMap;
+  std::unordered_map<DescriptorSets, VkDescriptorSetLayout>
+      m_layouts; // VkDescriptorSetLayout is just a uint64_t so cheap to copy
 };
 
 GFX_NAMESPACE_END

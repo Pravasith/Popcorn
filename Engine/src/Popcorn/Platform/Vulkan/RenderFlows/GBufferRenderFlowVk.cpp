@@ -1,6 +1,6 @@
 #include "RenderFlows/GBufferRenderFlowVk.h"
 #include "ContextVk.h"
-#include "DescriptorsVk.h"
+#include "DescriptorFactoryVk.h"
 #include "FramebuffersVk.h"
 #include "ImageVk.h"
 #include "RenderPassVk.h"
@@ -218,43 +218,24 @@ void GBufferRenderFlowVk::CreateFramebuffer() {
 // --- CREATE DESCRIPTORS ------------------------------------------------------
 //
 void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
-  VkDescriptorSetLayoutBinding cameraBinding;
-  cameraBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-  cameraBinding.binding = 0;
-  cameraBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-  cameraBinding.descriptorCount = 1;
-  cameraBinding.pImmutableSamplers = nullptr;
+  auto *factory = ContextVk::DescriptorFactory();
 
-  VkDescriptorSetLayoutBinding GameObjectBinding;
-  GameObjectBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-  GameObjectBinding.binding = 1;
-  GameObjectBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-  GameObjectBinding.descriptorCount = 1;
-  GameObjectBinding.pImmutableSamplers = nullptr;
+  VkDescriptorSetLayout &cameraLayout =
+      factory->GetLayout<DescriptorSets::CameraSet>();
 
-  VkDescriptorSetLayoutBinding BasicMatBinding;
-  BasicMatBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-  BasicMatBinding.binding = 2;
-  BasicMatBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-  BasicMatBinding.descriptorCount = 1;
-  BasicMatBinding.pImmutableSamplers = nullptr;
+  VkDescriptorSetLayout &gameObjectLayout =
+      factory->GetLayout<DescriptorSets::GameObjectSet>();
 
-  VkDescriptorSetLayoutBinding PbrMatBinding;
-  PbrMatBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-  PbrMatBinding.binding = 3;
-  PbrMatBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-  PbrMatBinding.descriptorCount = 1;
-  PbrMatBinding.pImmutableSamplers = nullptr;
+  VkDescriptorSetLayout &basicMatLayout =
+      factory->GetLayout<DescriptorSets::BasicMatSet>();
 
-  std::vector<VkDescriptorSetLayoutBinding> bindings = {
-      cameraBinding, GameObjectBinding, BasicMatBinding, PbrMatBinding};
+  VkDescriptorSetLayout &pbrMatLayout =
+      factory->GetLayout<DescriptorSets::PbrMatSet>();
 
-  VkDescriptorSetLayout &gBufferDescriptorSetLayout =
-      ContextVk::DescriptorSetLayouts()->GetLayout(bindings);
-
-  if (gBufferDescriptorSetLayout == VK_NULL_HANDLE) {
-    PC_ERROR("Failed to create gbuffer descriptor set layout!", "")
-  };
+  //
+  // Create descriptor pool
+  // Allocate descriptor sets
+  //
 };
 
 //
