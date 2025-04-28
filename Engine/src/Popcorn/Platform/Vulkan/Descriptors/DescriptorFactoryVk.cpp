@@ -129,5 +129,11 @@ DescriptorFactoryVk::GetLayout<DescriptorSets::PbrMatSet>() {
 // --- DESCRIPTOR SETS ---------------------------------------------------------
 // --- DESCRIPTOR SETS ---------------------------------------------------------
 //
+
+template <>
+VkDescriptorSet &DescriptorFactoryVk::GetDescriptorSet<DescriptorSets::LightingSet>() {
+
+};
+
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

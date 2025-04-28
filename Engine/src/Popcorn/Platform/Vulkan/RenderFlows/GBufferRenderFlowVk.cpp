@@ -1,6 +1,7 @@
 #include "RenderFlows/GBufferRenderFlowVk.h"
 #include "ContextVk.h"
 #include "DescriptorFactoryVk.h"
+#include "DescriptorPoolsVk.h"
 #include "FramebuffersVk.h"
 #include "ImageVk.h"
 #include "RenderPassVk.h"
@@ -236,6 +237,12 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
   // Create descriptor pool
   // Allocate descriptor sets
   //
+
+  auto *pools = ContextVk::DescriptorPools();
+
+  auto &gBufferPool = pools->GetPool<DescriptorPools::GBufferPool>();
+  auto &lightingPool = pools->GetPool<DescriptorPools::LightingPool>();
+  auto &compositePool = pools->GetPool<DescriptorPools::CompositePool>();
 };
 
 //

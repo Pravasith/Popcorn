@@ -40,9 +40,6 @@ public:
 
   void CreateRenderingCommandBuffers();
 
-public:
-  static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
-
 private:
   static ContextVk *s_vulkanContext;
 
