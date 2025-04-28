@@ -220,6 +220,7 @@ void GBufferRenderFlowVk::CreateFramebuffer() {
 //
 void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
   auto *factory = ContextVk::DescriptorFactory();
+  auto *pools = ContextVk::DescriptorPools();
 
   VkDescriptorSetLayout &cameraLayout =
       factory->GetLayout<DescriptorSets::CameraSet>();
@@ -232,6 +233,16 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
 
   VkDescriptorSetLayout &pbrMatLayout =
       factory->GetLayout<DescriptorSets::PbrMatSet>();
+
+  DPoolVk &gBufferPool =
+      pools->GetPool<DescriptorPools::GBufferPool>(); // Creates pool if it
+                                                      // doesn't exist
+
+  // TODO: Move to descriptor factory
+  gBufferPool.AllocateDescriptorSets<DescriptorSets::CameraSet>(&cameraLayout);
+
+  // Something like this --
+  // factory->AllocateDescriptorSets<<DescriptorSets::CameraSet>>;
 
   //
   // Create descriptor pool

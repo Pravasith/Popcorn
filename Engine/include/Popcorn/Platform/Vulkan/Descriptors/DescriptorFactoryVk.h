@@ -8,6 +8,12 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+enum class DescriptorSetGroups {
+  GBufferGroup = 1,
+  LightingGroup,
+  CompositeGroup
+};
+
 enum class DescriptorSets {
   CameraSet = 1, // 1 Static UBO - Camera matrix
   GameObjectSet, // 1 Dynamic UBO - Model matrix
@@ -18,6 +24,8 @@ enum class DescriptorSets {
                // 1 Sampler - Albedo image & sampler
                // 1 Sampler - Depth image & sampler
                // 1 Sampler - Normal image & sampler
+
+  CompositeSet
 };
 
 class DescriptorFactoryVk {

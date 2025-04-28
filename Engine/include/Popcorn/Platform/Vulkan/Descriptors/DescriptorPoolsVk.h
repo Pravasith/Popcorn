@@ -5,6 +5,7 @@
 #include "Popcorn/Core/Base.h"
 #include <cstdint>
 #include <unordered_map>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -13,21 +14,38 @@ GFX_NAMESPACE_BEGIN
 enum class DescriptorPools { GBufferPool = 1, LightingPool, CompositePool };
 
 class DPoolVk {
+  friend class DescriptorPoolsVk;
+
 public:
+  template <DescriptorSets T>
+  std::vector<VkDescriptorSet>
+  AllocateDescriptorSets(const VkDescriptorSetLayout *layouts);
+
+  //
+  // --- UTILS -------------------------------------------------------------
+  template <uint32_t Count>
+  void DefaultAllocateDescriptorSets(const VkDevice &device,
+                                     const VkDescriptorSetLayout *layouts,
+                                     std::vector<VkDescriptorSet> &sets) {
+    VkDescriptorSetAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocInfo.pSetLayouts = layouts;
+    allocInfo.descriptorPool = m_pool;
+    allocInfo.descriptorSetCount = Count;
+    allocInfo.pNext = nullptr;
+
+    sets.resize(Count);
+
+    if (vkAllocateDescriptorSets(device, &allocInfo, sets.data()) !=
+        VK_SUCCESS) {
+      throw std::runtime_error("Failed to create descriptor set!");
+    };
+  };
+
+private:
   DPoolVk() { PC_PRINT("CREATED", TagType::Constr, "DPoolVk.h") }
   ~DPoolVk() { PC_PRINT("DESTROYED", TagType::Destr, "DPoolVk.h") }
 
-  template <DescriptorSets T> VkDescriptorSet &AllocateDescriptorSet() {
-#if PC_DEBUG
-    if (++m_setsAllocated >= m_maxSets) {
-      PC_ERROR("Pool reached maximum set capacity of " << m_maxSets << ".",
-               "DPoolVk");
-    }
-
-#endif
-  };
-
-  void AllocateDescriptorSets();
   void Create(VkDescriptorPoolSize *poolSizes, uint32_t poolSizesCount,
               uint32_t maxSets);
   void CleanUp();

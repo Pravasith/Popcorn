@@ -1,5 +1,6 @@
 #include "DescriptorPoolsVk.h"
 #include "ContextVk.h"
+#include "DescriptorFactoryVk.h"
 #include <stdexcept>
 #include <vulkan/vulkan_core.h>
 
@@ -26,6 +27,22 @@ void DPoolVk::Create(VkDescriptorPoolSize *poolSizes, uint32_t poolSizesCount,
 
   m_maxSets = maxSets;
 }
+
+template <>
+std::vector<VkDescriptorSet>
+DPoolVk::AllocateDescriptorSets<DescriptorSets::CameraSet>(
+    const VkDescriptorSetLayout *layouts) {
+#if PC_DEBUG
+  if (++m_setsAllocated >= m_maxSets) {
+    PC_ERROR("Pool reached maximum set capacity of " << m_maxSets << ".",
+             "DPoolVk");
+  }
+#endif
+  std::vector<VkDescriptorSet> sets;
+  DefaultAllocateDescriptorSets<ContextVk::MAX_FRAMES_IN_FLIGHT>(
+      ContextVk::Device()->GetDevice(), layouts, sets);
+  return sets;
+};
 
 void DPoolVk::CleanUp() {
   auto &device = ContextVk::Device()->GetDevice();
@@ -64,8 +81,7 @@ DPoolVk &DescriptorPoolsVk::GetPool<DescriptorPools::GBufferPool>() {
     DPoolVk dPool{};
     dPool.Create(poolSizes, 4, 4 * ContextVk::MAX_FRAMES_IN_FLIGHT);
 
-    m_pools[DescriptorPools::GBufferPool] =
-        dPool; // Moved by compiler? (probably)
+    m_pools[DescriptorPools::GBufferPool] = dPool;
   }
 
   return m_pools[DescriptorPools::GBufferPool];
