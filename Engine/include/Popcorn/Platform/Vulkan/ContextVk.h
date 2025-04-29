@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CommandPoolVk.h"
-#include "DescriptorFactoryVk.h"
+#include "DescriptorLayoutsVk.h"
 #include "DescriptorPoolsVk.h"
 #include "DescriptorsVk.h"
 #include "DeviceVk.h"
@@ -110,11 +110,11 @@ public:
     return s_descriptorPoolsVk;
   }
 
-  static DescriptorFactoryVk *DescriptorFactory() {
-    if (!s_descriptorFactoryVk) {
-      throw std::runtime_error("DescriptorFactoryVk is null");
+  static DescriptorLayoutsVk *DescriptorLayouts() {
+    if (!s_descriptorLayoutsVk) {
+      throw std::runtime_error("DescriptorLayoutsVk is null");
     }
-    return s_descriptorFactoryVk;
+    return s_descriptorLayoutsVk;
   }
 
   static PipelineFactoryVk *PipelineFactory() {
@@ -151,7 +151,7 @@ private:
     s_memoryAllocatorVk = MemoryAllocatorVk::Get();
     s_memoryFactoryVk = MemoryFactoryVk::Get();
     s_descriptorPoolsVk = DescriptorPoolsVk::Get();
-    s_descriptorFactoryVk = DescriptorFactoryVk::Get();
+    s_descriptorLayoutsVk = DescriptorLayoutsVk::Get();
     s_pipelineFactoryVk = PipelineFactoryVk::Get();
 
     PC_PRINT("CREATED", TagType::Constr, "ContextVk.h")
@@ -170,7 +170,7 @@ private:
   static MemoryAllocatorVk *s_memoryAllocatorVk;
   static DescriptorSetLayoutsVk *s_descriptorSetLayoutsVk;
   static DescriptorPoolsVk *s_descriptorPoolsVk;
-  static DescriptorFactoryVk *s_descriptorFactoryVk;
+  static DescriptorLayoutsVk *s_descriptorLayoutsVk;
   static PipelineFactoryVk *s_pipelineFactoryVk;
 };
 

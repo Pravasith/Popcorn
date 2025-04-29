@@ -143,7 +143,7 @@ void RendererVk::CreateRenderFlowResources() {
   RenderFlowVk::CreateAndAllocateVBOsAndIBOs();
 
   for (auto &renderFlow : s_renderFlows) {
-    renderFlow->CreateAndAllocDescriptors();
+    renderFlow->CreateAndAllocDescriptors(); // Static for now
     // renderFlow->CreatePipelines();
   }
 };

@@ -144,6 +144,34 @@ void CompositeRenderFlowVk::CreateFramebuffer() {
 //
 //
 //
+//
+// --- CREATE DESCRIPTORS ------------------------------------------------------
+// --- CREATE DESCRIPTORS ------------------------------------------------------
+// --- CREATE DESCRIPTORS ------------------------------------------------------
+//
+void CompositeRenderFlowVk::CreateAndAllocDescriptors() {
+  auto *pools = ContextVk::DescriptorPools();
+
+  VkDescriptorSetLayout &compositeLayout =
+      ContextVk::DescriptorLayouts()->GetLayout<DescriptorSets::CompositeSet>();
+
+  std::array<VkDescriptorSetLayout, ContextVk::MAX_FRAMES_IN_FLIGHT>
+      compositeLayouts{};
+  std::fill(compositeLayouts.begin(), compositeLayouts.end(), compositeLayout);
+
+  DPoolVk &compositePool = pools->GetPool<DescriptorPools::CompositePool>();
+
+  // Creates multiple sets (from Count template param)
+  std::vector<VkDescriptorSet> compositeSets =
+      compositePool.AllocateDescriptorSets<DescriptorSets::CompositeSet,
+                                           ContextVk::MAX_FRAMES_IN_FLIGHT>(
+          ContextVk::Device()->GetDevice(), compositeLayouts);
+};
+
+//
+//
+//
+//
 // --- CLEAN UP ----------------------------------------------------------------
 // --- CLEAN UP ----------------------------------------------------------------
 // --- CLEAN UP ----------------------------------------------------------------

@@ -1,10 +1,11 @@
 #include "RenderFlows/GBufferRenderFlowVk.h"
 #include "ContextVk.h"
-#include "DescriptorFactoryVk.h"
+#include "DescriptorLayoutsVk.h"
 #include "DescriptorPoolsVk.h"
 #include "FramebuffersVk.h"
 #include "ImageVk.h"
 #include "RenderPassVk.h"
+#include <algorithm>
 #include <vector>
 #include <vulkan/vulkan_core.h>
 
@@ -219,32 +220,70 @@ void GBufferRenderFlowVk::CreateFramebuffer() {
 // --- CREATE DESCRIPTORS ------------------------------------------------------
 //
 void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
-  auto *factory = ContextVk::DescriptorFactory();
+  auto *layouts = ContextVk::DescriptorLayouts();
   auto *pools = ContextVk::DescriptorPools();
 
   VkDescriptorSetLayout &cameraLayout =
-      factory->GetLayout<DescriptorSets::CameraSet>();
+      layouts->GetLayout<DescriptorSets::CameraSet>();
+  std::array<VkDescriptorSetLayout, ContextVk::MAX_FRAMES_IN_FLIGHT>
+      cameraLayouts{};
+  std::fill(cameraLayouts.begin(), cameraLayouts.end(), cameraLayout);
 
   VkDescriptorSetLayout &gameObjectLayout =
-      factory->GetLayout<DescriptorSets::GameObjectSet>();
+      layouts->GetLayout<DescriptorSets::GameObjectSet>();
+  std::array<VkDescriptorSetLayout, ContextVk::MAX_FRAMES_IN_FLIGHT>
+      gameObjectLayouts{};
+  std::fill(gameObjectLayouts.begin(), gameObjectLayouts.end(),
+            gameObjectLayout);
 
   VkDescriptorSetLayout &basicMatLayout =
-      factory->GetLayout<DescriptorSets::BasicMatSet>();
+      layouts->GetLayout<DescriptorSets::BasicMatSet>();
+  std::array<VkDescriptorSetLayout, ContextVk::MAX_FRAMES_IN_FLIGHT>
+      basicMatLayouts{};
+  std::fill(basicMatLayouts.begin(), basicMatLayouts.end(), basicMatLayout);
 
   VkDescriptorSetLayout &pbrMatLayout =
-      factory->GetLayout<DescriptorSets::PbrMatSet>();
+      layouts->GetLayout<DescriptorSets::PbrMatSet>();
+  std::array<VkDescriptorSetLayout, ContextVk::MAX_FRAMES_IN_FLIGHT>
+      pbrMatLayouts{};
+  std::fill(pbrMatLayouts.begin(), pbrMatLayouts.end(), pbrMatLayout);
 
   DPoolVk &gBufferPool =
       pools->GetPool<DescriptorPools::GBufferPool>(); // Creates pool if it
                                                       // doesn't exist
 
-  // TODO: Move to descriptor factory
-  gBufferPool.AllocateDescriptorSets<DescriptorSets::CameraSet>(&cameraLayout);
+  constexpr uint32_t maxFramesInFlight = ContextVk::MAX_FRAMES_IN_FLIGHT;
+  const VkDevice &device = ContextVk::Device()->GetDevice();
 
-  // Something like this --
-  // factory->AllocateDescriptorSets<<DescriptorSets::CameraSet>>;
+  std::vector<VkDescriptorSet> cameraSets =
+      gBufferPool
+          .AllocateDescriptorSets<DescriptorSets::CameraSet, maxFramesInFlight>(
+              device, cameraLayouts);
 
-  // Create VMA buffers for UBOs
+  std::vector<VkDescriptorSet> gameObjectSets =
+      gBufferPool.AllocateDescriptorSets<DescriptorSets::GameObjectSet,
+                                         maxFramesInFlight>(device,
+                                                            gameObjectLayouts);
+
+  std::vector<VkDescriptorSet> basicMatSets =
+      gBufferPool.AllocateDescriptorSets<DescriptorSets::BasicMatSet,
+                                         maxFramesInFlight>(device,
+                                                            basicMatLayouts);
+
+  std::vector<VkDescriptorSet> pbrMatSets =
+      gBufferPool
+          .AllocateDescriptorSets<DescriptorSets::PbrMatSet, maxFramesInFlight>(
+              device, pbrMatLayouts);
+
+  // - Create VMA buffers for UBOs
+  // - Bind(write/update) buffers to descriptor sets(or descriptors?)
+  // - Copy scene updates(UBOs) via OnUpdate() to mapped bits
+
+  // - Repeat the process for other renderflows
+  // - Write lighting shaders
+  // - Finish create pipelines
+  // - Write render callback for renderflows
+  // - Test G-Buffer after debugging
 };
 
 //

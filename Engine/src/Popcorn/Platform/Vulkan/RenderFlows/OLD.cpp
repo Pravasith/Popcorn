@@ -519,6 +519,7 @@ void GBufferRenderFlowVk::CreateDescriptorSets() {
     throw std::runtime_error(
         "Global UBO descriptor set layout is not initialized!");
   }
+
   VkDescriptorSetAllocateInfo globalDSetsAllocInfo{};
   auto allFramesGlobalLayouts =
       std::vector(maxFramesInFlight, m_globalUBOsDSetLayout);

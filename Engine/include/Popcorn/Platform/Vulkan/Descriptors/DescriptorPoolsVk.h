@@ -1,8 +1,9 @@
 #pragma once
 
-#include "DescriptorFactoryVk.h"
+#include "DescriptorLayoutsVk.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include <array>
 #include <cstdint>
 #include <unordered_map>
 #include <vector>
@@ -17,31 +18,15 @@ class DPoolVk {
   friend class DescriptorPoolsVk;
 
 public:
-  template <DescriptorSets T>
-  std::vector<VkDescriptorSet>
-  AllocateDescriptorSets(const VkDescriptorSetLayout *layouts);
+  template <DescriptorSets T, uint32_t Count>
+  [[nodiscard]] std::vector<VkDescriptorSet> AllocateDescriptorSets(
+      const VkDevice &device,
+      const std::array<VkDescriptorSetLayout, Count> &layouts) {
+    return DefaultAllocateDescriptorSets<Count>(device, layouts);
+  };
 
   //
   // --- UTILS -------------------------------------------------------------
-  template <uint32_t Count>
-  void DefaultAllocateDescriptorSets(const VkDevice &device,
-                                     const VkDescriptorSetLayout *layouts,
-                                     std::vector<VkDescriptorSet> &sets) {
-    VkDescriptorSetAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.pSetLayouts = layouts;
-    allocInfo.descriptorPool = m_pool;
-    allocInfo.descriptorSetCount = Count;
-    allocInfo.pNext = nullptr;
-
-    sets.resize(Count);
-
-    if (vkAllocateDescriptorSets(device, &allocInfo, sets.data()) !=
-        VK_SUCCESS) {
-      throw std::runtime_error("Failed to create descriptor set!");
-    };
-  };
-
 private:
   DPoolVk() { PC_PRINT("CREATED", TagType::Constr, "DPoolVk.h") }
   ~DPoolVk() { PC_PRINT("DESTROYED", TagType::Destr, "DPoolVk.h") }
@@ -49,6 +34,34 @@ private:
   void Create(VkDescriptorPoolSize *poolSizes, uint32_t poolSizesCount,
               uint32_t maxSets);
   void CleanUp();
+
+  template <uint32_t Count>
+  [[nodiscard]] std::vector<VkDescriptorSet> DefaultAllocateDescriptorSets(
+      const VkDevice &device,
+      std::array<VkDescriptorSetLayout, Count> &layouts) {
+#if PC_DEBUG
+    m_setsAllocated += Count;
+    if (m_setsAllocated >= m_maxSets) {
+      PC_ERROR("Pool reached maximum set capacity of " << m_maxSets << ".",
+               "DPoolVk");
+    }
+#endif
+    VkDescriptorSetAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocInfo.pSetLayouts = layouts;
+    allocInfo.descriptorPool = m_pool;
+    allocInfo.descriptorSetCount = Count;
+    allocInfo.pNext = nullptr;
+
+    std::vector<VkDescriptorSet> sets(Count);
+
+    if (vkAllocateDescriptorSets(device, &allocInfo, sets.data()) !=
+        VK_SUCCESS) {
+      throw std::runtime_error("Failed to create descriptor set!");
+    };
+
+    return sets;
+  };
 
 private:
 #if PC_DEBUG
@@ -62,7 +75,7 @@ private:
 class DescriptorPoolsVk {
 
 public:
-  template <DescriptorPools T> DPoolVk &GetPool();
+  template <DescriptorPools T> [[nodiscard]] DPoolVk &GetPool();
   void CleanUp();
 
 public:

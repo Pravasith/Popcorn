@@ -1,5 +1,5 @@
-#include "DescriptorFactoryVk.h"
 #include "ContextVk.h"
+#include "DescriptorLayoutsVk.h"
 #include "GlobalMacros.h"
 #include <stdexcept>
 #include <vulkan/vulkan_core.h>
@@ -7,7 +7,7 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-DescriptorFactoryVk *DescriptorFactoryVk::s_instance = nullptr;
+DescriptorLayoutsVk *DescriptorLayoutsVk::s_instance = nullptr;
 
 //
 //
@@ -20,7 +20,7 @@ DescriptorFactoryVk *DescriptorFactoryVk::s_instance = nullptr;
 //
 template <>
 VkDescriptorSetLayout &
-DescriptorFactoryVk::GetLayout<DescriptorSets::CameraSet>() {
+DescriptorLayoutsVk::GetLayout<DescriptorSets::CameraSet>() {
   if (!m_layouts[DescriptorSets::CameraSet]) {
     VkDescriptorSetLayoutBinding cameraBinding;
     cameraBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -45,7 +45,7 @@ DescriptorFactoryVk::GetLayout<DescriptorSets::CameraSet>() {
 
 template <>
 VkDescriptorSetLayout &
-DescriptorFactoryVk::GetLayout<DescriptorSets::GameObjectSet>() {
+DescriptorLayoutsVk::GetLayout<DescriptorSets::GameObjectSet>() {
   if (!m_layouts[DescriptorSets::GameObjectSet]) {
     VkDescriptorSetLayoutBinding gameObjectBinding;
     gameObjectBinding.descriptorType =
@@ -72,7 +72,7 @@ DescriptorFactoryVk::GetLayout<DescriptorSets::GameObjectSet>() {
 
 template <>
 VkDescriptorSetLayout &
-DescriptorFactoryVk::GetLayout<DescriptorSets::BasicMatSet>() {
+DescriptorLayoutsVk::GetLayout<DescriptorSets::BasicMatSet>() {
   if (!m_layouts[DescriptorSets::BasicMatSet]) {
     VkDescriptorSetLayoutBinding basicMatBinding;
     basicMatBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
@@ -97,7 +97,7 @@ DescriptorFactoryVk::GetLayout<DescriptorSets::BasicMatSet>() {
 
 template <>
 VkDescriptorSetLayout &
-DescriptorFactoryVk::GetLayout<DescriptorSets::PbrMatSet>() {
+DescriptorLayoutsVk::GetLayout<DescriptorSets::PbrMatSet>() {
   if (!m_layouts[DescriptorSets::PbrMatSet]) {
     VkDescriptorSetLayoutBinding pbrMatBinding;
     pbrMatBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
@@ -120,6 +120,76 @@ DescriptorFactoryVk::GetLayout<DescriptorSets::PbrMatSet>() {
   return m_layouts[DescriptorSets::PbrMatSet];
 };
 
+template <>
+VkDescriptorSetLayout &
+DescriptorLayoutsVk::GetLayout<DescriptorSets::LightingSet>() {
+  if (!m_layouts[DescriptorSets::LightingSet]) {
+    VkDescriptorSetLayoutBinding lightsBinding;
+    lightsBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    lightsBinding.binding = 0;
+    lightsBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    lightsBinding.descriptorCount = 1;
+    lightsBinding.pImmutableSamplers = nullptr;
+
+    VkDescriptorSetLayoutBinding albedoBuffer;
+    albedoBuffer.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    albedoBuffer.binding = 1;
+    albedoBuffer.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    albedoBuffer.descriptorCount = 1;
+    albedoBuffer.pImmutableSamplers = nullptr;
+
+    VkDescriptorSetLayoutBinding depthBuffer;
+    depthBuffer.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    depthBuffer.binding = 2;
+    depthBuffer.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    depthBuffer.descriptorCount = 1;
+    depthBuffer.pImmutableSamplers = nullptr;
+
+    VkDescriptorSetLayoutBinding normalsBuffer;
+    normalsBuffer.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    normalsBuffer.binding = 3;
+    normalsBuffer.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    normalsBuffer.descriptorCount = 1;
+    normalsBuffer.pImmutableSamplers = nullptr;
+
+    std::vector<VkDescriptorSetLayoutBinding> lightsBindings{
+        lightsBinding, albedoBuffer, depthBuffer, normalsBuffer};
+
+    m_layouts[DescriptorSets::LightingSet] =
+        ContextVk::DescriptorSetLayouts()->GetLayout(lightsBindings);
+
+    if (m_layouts[DescriptorSets::LightingSet] == VK_NULL_HANDLE) {
+      throw std::runtime_error("Lighting layout couldn't be created");
+    };
+  };
+
+  return m_layouts[DescriptorSets::LightingSet];
+};
+
+template <>
+VkDescriptorSetLayout &
+DescriptorLayoutsVk::GetLayout<DescriptorSets::CompositeSet>() {
+  if (!m_layouts[DescriptorSets::CompositeSet]) {
+    VkDescriptorSetLayoutBinding lightsBuffer;
+    lightsBuffer.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    lightsBuffer.binding = 0;
+    lightsBuffer.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    lightsBuffer.descriptorCount = 1;
+    lightsBuffer.pImmutableSamplers = nullptr;
+
+    std::vector<VkDescriptorSetLayoutBinding> compositeBindings{lightsBuffer};
+
+    m_layouts[DescriptorSets::CompositeSet] =
+        ContextVk::DescriptorSetLayouts()->GetLayout(compositeBindings);
+
+    if (m_layouts[DescriptorSets::CompositeSet] == VK_NULL_HANDLE) {
+      throw std::runtime_error("Composite layout couldn't be created");
+    };
+  };
+
+  return m_layouts[DescriptorSets::CompositeSet];
+};
+
 //
 //
 //
@@ -132,7 +202,7 @@ DescriptorFactoryVk::GetLayout<DescriptorSets::PbrMatSet>() {
 
 template <>
 VkDescriptorSet &
-DescriptorFactoryVk::GetDescriptorSet<DescriptorSets::CameraSet>() {
+DescriptorLayoutsVk::GetDescriptorSet<DescriptorSets::CameraSet>() {
   auto *pools = ContextVk::DescriptorPools();
 
   auto &gBufferPool = pools->GetPool<DescriptorPools::GBufferPool>();

@@ -1,8 +1,11 @@
 #include "RenderFlows/LightingRenderFlowVk.h"
 #include "ContextVk.h"
+#include "DescriptorLayoutsVk.h"
+#include "DescriptorPoolsVk.h"
 #include "GlobalMacros.h"
 #include "ImageVk.h"
 #include "RenderPassVk.h"
+#include <array>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -139,6 +142,25 @@ void LightingRenderFlowVk::CreateFramebuffer() {
 
   FramebuffersVk::CreateVkFramebuffer(ContextVk::Device()->GetDevice(),
                                       createInfo, m_framebuffer);
+};
+
+void LightingRenderFlowVk::CreateAndAllocDescriptors() {
+  auto *pools = ContextVk::DescriptorPools();
+
+  VkDescriptorSetLayout &lightingLayout =
+      ContextVk::DescriptorLayouts()->GetLayout<DescriptorSets::LightingSet>();
+
+  std::array<VkDescriptorSetLayout, ContextVk::MAX_FRAMES_IN_FLIGHT>
+      lightingLayouts{};
+  std::fill(lightingLayouts.begin(), lightingLayouts.end(), lightingLayout);
+
+  DPoolVk &lightsPool = pools->GetPool<DescriptorPools::LightingPool>();
+
+  // Creates multiple sets (from Count template param)
+  std::vector<VkDescriptorSet> lightingSets =
+      lightsPool.AllocateDescriptorSets<DescriptorSets::LightingSet,
+                                        ContextVk::MAX_FRAMES_IN_FLIGHT>(
+          ContextVk::Device()->GetDevice(), lightingLayouts);
 };
 
 //

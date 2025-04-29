@@ -1,6 +1,5 @@
 #include "DescriptorPoolsVk.h"
 #include "ContextVk.h"
-#include "DescriptorFactoryVk.h"
 #include <stdexcept>
 #include <vulkan/vulkan_core.h>
 
@@ -28,21 +27,9 @@ void DPoolVk::Create(VkDescriptorPoolSize *poolSizes, uint32_t poolSizesCount,
   m_maxSets = maxSets;
 }
 
-template <>
-std::vector<VkDescriptorSet>
-DPoolVk::AllocateDescriptorSets<DescriptorSets::CameraSet>(
-    const VkDescriptorSetLayout *layouts) {
-#if PC_DEBUG
-  if (++m_setsAllocated >= m_maxSets) {
-    PC_ERROR("Pool reached maximum set capacity of " << m_maxSets << ".",
-             "DPoolVk");
-  }
-#endif
-  std::vector<VkDescriptorSet> sets;
-  DefaultAllocateDescriptorSets<ContextVk::MAX_FRAMES_IN_FLIGHT>(
-      ContextVk::Device()->GetDevice(), layouts, sets);
-  return sets;
-};
+//
+// Don't modify these partial template methods! Could've moved these to header
+// file but ContextVK has a circular dep
 
 void DPoolVk::CleanUp() {
   auto &device = ContextVk::Device()->GetDevice();

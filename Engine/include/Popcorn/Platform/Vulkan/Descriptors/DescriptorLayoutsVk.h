@@ -28,7 +28,7 @@ enum class DescriptorSets {
   CompositeSet
 };
 
-class DescriptorFactoryVk {
+class DescriptorLayoutsVk {
 public:
   template <DescriptorSets T> [[nodiscard]] VkDescriptorSetLayout &GetLayout();
   template <DescriptorSets T> [[nodiscard]] VkDescriptorSet &GetDescriptorSet();
@@ -36,12 +36,12 @@ public:
   void CleanUp() { m_layouts.clear(); };
 
 public:
-  [[nodiscard]] inline static DescriptorFactoryVk *Get() {
+  [[nodiscard]] inline static DescriptorLayoutsVk *Get() {
     if (s_instance) {
       return s_instance;
     };
 
-    s_instance = new DescriptorFactoryVk();
+    s_instance = new DescriptorLayoutsVk();
     return s_instance;
   };
 
@@ -51,29 +51,29 @@ public:
       s_instance = nullptr;
     } else {
       PC_WARN(
-          "Trying to destroy a non-existant instance of DescriptorFactoryVk")
+          "Trying to destroy a non-existant instance of DescriptorLayoutsVk")
     };
   };
 
 private:
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
-  DescriptorFactoryVk(const DescriptorFactoryVk &) = delete;
-  DescriptorFactoryVk &operator=(const DescriptorFactoryVk &) = delete;
+  DescriptorLayoutsVk(const DescriptorLayoutsVk &) = delete;
+  DescriptorLayoutsVk &operator=(const DescriptorLayoutsVk &) = delete;
 
   // DELETE THE MOVE CONSTRUCTOR AND MOVE ASSIGNMENT OPERATOR
-  DescriptorFactoryVk(DescriptorFactoryVk &&) = delete;
-  DescriptorFactoryVk &operator=(DescriptorFactoryVk &&) = delete;
+  DescriptorLayoutsVk(DescriptorLayoutsVk &&) = delete;
+  DescriptorLayoutsVk &operator=(DescriptorLayoutsVk &&) = delete;
 
 private:
-  DescriptorFactoryVk() {
-    PC_PRINT("CREATED", TagType::Constr, "DescriptorFactoryVk.h")
+  DescriptorLayoutsVk() {
+    PC_PRINT("CREATED", TagType::Constr, "DescriptorLayoutsVk.h")
   };
-  ~DescriptorFactoryVk() {
-    PC_PRINT("DESTROYED", TagType::Destr, "DescriptorFactoryVk.h")
+  ~DescriptorLayoutsVk() {
+    PC_PRINT("DESTROYED", TagType::Destr, "DescriptorLayoutsVk.h")
   };
 
 private:
-  static DescriptorFactoryVk *s_instance;
+  static DescriptorLayoutsVk *s_instance;
   std::unordered_map<DescriptorSets, VkDescriptorSetLayout>
       m_layouts; // VkDescriptorSetLayout is just a uint64_t so cheap to copy
 };
