@@ -21,6 +21,7 @@ void DPoolVk::Create(VkDescriptorPoolSize *poolSizes, uint32_t poolSizesCount,
 
   if (vkCreateDescriptorPool(ContextVk::Device()->GetDevice(), &poolInfo,
                              nullptr, &m_pool) != VK_SUCCESS) {
+    m_pool = VK_NULL_HANDLE;
     throw std::runtime_error("Descriptor pool not created!!");
   }
 

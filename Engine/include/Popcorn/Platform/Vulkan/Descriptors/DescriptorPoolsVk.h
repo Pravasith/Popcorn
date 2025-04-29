@@ -12,7 +12,7 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-enum class DescriptorPools { GBufferPool = 1, LightingPool, CompositePool };
+enum DescriptorPools { GBufferPool = 1, LightingPool, CompositePool };
 
 class DPoolVk {
   friend class DescriptorPoolsVk;
@@ -48,7 +48,7 @@ private:
 #endif
     VkDescriptorSetAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.pSetLayouts = layouts;
+    allocInfo.pSetLayouts = layouts.data();
     allocInfo.descriptorPool = m_pool;
     allocInfo.descriptorSetCount = Count;
     allocInfo.pNext = nullptr;

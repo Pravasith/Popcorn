@@ -190,25 +190,5 @@ DescriptorLayoutsVk::GetLayout<DescriptorSets::CompositeSet>() {
   return m_layouts[DescriptorSets::CompositeSet];
 };
 
-//
-//
-//
-//
-//
-// --- DESCRIPTOR SETS ---------------------------------------------------------
-// --- DESCRIPTOR SETS ---------------------------------------------------------
-// --- DESCRIPTOR SETS ---------------------------------------------------------
-//
-
-template <>
-VkDescriptorSet &
-DescriptorLayoutsVk::GetDescriptorSet<DescriptorSets::CameraSet>() {
-  auto *pools = ContextVk::DescriptorPools();
-
-  auto &gBufferPool = pools->GetPool<DescriptorPools::GBufferPool>();
-
-  // gBufferPool->AllocateDescriptorSet();
-};
-
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

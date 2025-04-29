@@ -3,7 +3,6 @@
 #include "CommandPoolVk.h"
 #include "DescriptorLayoutsVk.h"
 #include "DescriptorPoolsVk.h"
-#include "DescriptorsVk.h"
 #include "DeviceVk.h"
 #include "FrameVk.h"
 #include "FramebuffersVk.h"
@@ -96,13 +95,6 @@ public:
     return s_memoryFactoryVk;
   }
 
-  static DescriptorSetLayoutsVk *DescriptorSetLayouts() {
-    if (!s_descriptorSetLayoutsVk) {
-      throw std::runtime_error("DescriptorSetLayoutsVk is null");
-    }
-    return s_descriptorSetLayoutsVk;
-  }
-
   static DescriptorPoolsVk *DescriptorPools() {
     if (!s_descriptorPoolsVk) {
       throw std::runtime_error("DescriptorPoolsVk is null");
@@ -147,7 +139,6 @@ private:
     s_framebuffersVk = FramebuffersVk::Get();
     s_commandPoolVk = CommandPoolVk::Get();
     s_frameVk = FrameVk::Get();
-    s_descriptorSetLayoutsVk = DescriptorSetLayoutsVk::Get();
     s_memoryAllocatorVk = MemoryAllocatorVk::Get();
     s_memoryFactoryVk = MemoryFactoryVk::Get();
     s_descriptorPoolsVk = DescriptorPoolsVk::Get();
@@ -168,7 +159,6 @@ private:
   static FrameVk *s_frameVk;
   static MemoryFactoryVk *s_memoryFactoryVk;
   static MemoryAllocatorVk *s_memoryAllocatorVk;
-  static DescriptorSetLayoutsVk *s_descriptorSetLayoutsVk;
   static DescriptorPoolsVk *s_descriptorPoolsVk;
   static DescriptorLayoutsVk *s_descriptorLayoutsVk;
   static PipelineFactoryVk *s_pipelineFactoryVk;

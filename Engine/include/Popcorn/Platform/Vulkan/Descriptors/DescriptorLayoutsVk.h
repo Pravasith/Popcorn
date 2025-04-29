@@ -8,13 +8,9 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-enum class DescriptorSetGroups {
-  GBufferGroup = 1,
-  LightingGroup,
-  CompositeGroup
-};
+enum DescriptorSetGroups { GBufferGroup = 1, LightingGroup, CompositeGroup };
 
-enum class DescriptorSets {
+enum DescriptorSets {
   CameraSet = 1, // 1 Static UBO - Camera matrix
   GameObjectSet, // 1 Dynamic UBO - Model matrix
   BasicMatSet,   // 1 Dynamic UBO - Basic material matrix
@@ -31,7 +27,6 @@ enum class DescriptorSets {
 class DescriptorLayoutsVk {
 public:
   template <DescriptorSets T> [[nodiscard]] VkDescriptorSetLayout &GetLayout();
-  template <DescriptorSets T> [[nodiscard]] VkDescriptorSet &GetDescriptorSet();
 
   void CleanUp() { m_layouts.clear(); };
 
