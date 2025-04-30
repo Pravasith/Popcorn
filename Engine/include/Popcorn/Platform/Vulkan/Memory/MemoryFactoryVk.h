@@ -70,7 +70,9 @@ public:
   MemoryFactoryVk(MemoryFactoryVk &&) = delete;
   MemoryFactoryVk &operator=(MemoryFactoryVk &&) = delete;
 
-  void CleanUp();
+  void CleanUp() {
+    // Nothing so far
+  };
 
 private:
   MemoryFactoryVk() {

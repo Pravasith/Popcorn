@@ -146,22 +146,26 @@ void RendererVk::CreateRenderFlowResources() {
     renderFlow->AllocUBOsMemory();
     //
     // -------
-    // - Camera UBO - viewProj
-    // - GameObj UBOs - worldMatrices (dynamic offsets)
-    // - BasicMat UBOs - BaseColor vec3s (dynamic offsets)
-    // - PbrMat UBOs - A bunch of shit (dynamic offsets)
+    // - Camera UBO - viewProj -- per frame (lvl 0)
     // -------
-    // - Lights UBOs - lightpos vec3s (dynamic offsets)
-    // - Albedo Image+Sampler - ??
-    // - Depth Image+Sampler - ??
-    // - Normals Image+Sampler - ??
+    // - GameObj UBOs - worldMatrices (dynamic offsets) -- per submesh (lvl 2)
     // -------
-    // - LitScene Image+Sampler - ??
+    // - BasicMat UBOs - BaseColor vec3s (dynamic offsets) -- per mat (lvl 1)
+    // -------
+    // - PbrMat UBOs - A bunch of shit (dynamic offsets) -- per mat (lvl 1)
+    // -------
+    // - Lights UBOs - lightpos vec3s (dynamic offsets) -- per light
+    // - Albedo Image+Sampler - just one
+    // - Depth Image+Sampler - just one
+    // - Normals Image+Sampler - just one
+    // -------
+    // - LitScene Image+Sampler - just one
 
     renderFlow->CreateAndAllocDescriptors(); // Static for now
     // renderFlow->CreatePipelines();
   }
 
+  // TODOs:
   // - Create VMA buffers for UBOs
   // - Bind(write/update) buffers to descriptor sets(or descriptors?)
   // - Copy scene updates(UBOs) via OnUpdate() to mapped bits
