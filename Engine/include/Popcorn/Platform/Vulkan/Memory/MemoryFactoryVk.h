@@ -141,11 +141,9 @@ private:
 
   //
   // Host-visible -----------------------------------------------------------
-  VkBuffer m_basicMaterialUBOs; // And an equivalent VMA allocation
-  VkBuffer m_pbrMaterialUBOs;   // And an equivalent VMA allocation
-  VkBuffer m_modelMatrixUBOs;   // And an equivalent VMA allocation
-
-  VkBuffer m_viewProjMatrixUBO; // Small size -- can be a push constant
+  // VkBuffer m_basicMaterialUBOs; // And an equivalent VMA allocation
+  // VkBuffer m_pbrMaterialUBOs;   // And an equivalent VMA allocation
+  // VkBuffer m_modelMatrixUBOs;   // And an equivalent VMA allocation
 
   VboIboOffsets m_vboIboOffsets{};
 };

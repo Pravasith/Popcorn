@@ -9,8 +9,6 @@
 #include <cstring>
 #include <vulkan/vulkan_core.h>
 
-// TODO: Redo this class. But only after a full working animated scene is
-// rendered on screen
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
@@ -21,6 +19,9 @@ using PcBasicSubmeshGroups =
     std::unordered_map<MaterialHashType, PcBasicSubmeshes>;
 using PcPbrSubmeshGroups = std::unordered_map<MaterialHashType, PcPbrSubmeshes>;
 
+// TODO: Refactor
+//       - Vulkan specific for now.
+//       - Make it platform agnostic
 class RenderFlowVk {
 public:
   RenderFlowVk() { PC_PRINT("CREATED", TagType::Constr, "RenderFlowVk") };
@@ -30,8 +31,10 @@ public:
 
   //
   // NEW ----------------------------------------------------------------
-  static void CreateAndAllocateVBOsAndIBOs(); // Only once
-  static void DestroyVBOsAndIBOs();           // Only once
+  static void AllocVBOsAndIBOsMemory(); // Only once
+  static void FreeVBOsAndIBOsMemory();  // Only once
+  static void AllocUBOsMemory();        // Only once
+  static void FreeUBOsMemory();         // Only once
 
   void Prepare() {
     CreateAttachments();

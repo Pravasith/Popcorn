@@ -140,12 +140,37 @@ void RendererVk::CreateRenderFlowResources() {
   ContextVk::MemoryAllocator()->CreateVMAAllocator();
 
   // Allocates vulkan buffers
-  RenderFlowVk::CreateAndAllocateVBOsAndIBOs();
+  RenderFlowVk::AllocVBOsAndIBOsMemory();
 
   for (auto &renderFlow : s_renderFlows) {
+    renderFlow->AllocUBOsMemory();
+    //
+    // -------
+    // - Camera UBO - viewProj
+    // - GameObj UBOs - worldMatrices (dynamic offsets)
+    // - BasicMat UBOs - BaseColor vec3s (dynamic offsets)
+    // - PbrMat UBOs - A bunch of shit (dynamic offsets)
+    // -------
+    // - Lights UBOs - lightpos vec3s (dynamic offsets)
+    // - Albedo Image+Sampler - ??
+    // - Depth Image+Sampler - ??
+    // - Normals Image+Sampler - ??
+    // -------
+    // - LitScene Image+Sampler - ??
+
     renderFlow->CreateAndAllocDescriptors(); // Static for now
     // renderFlow->CreatePipelines();
   }
+
+  // - Create VMA buffers for UBOs
+  // - Bind(write/update) buffers to descriptor sets(or descriptors?)
+  // - Copy scene updates(UBOs) via OnUpdate() to mapped bits
+
+  // - Repeat the process for other renderflows
+  // - Write lighting shaders
+  // - Finish create pipelines
+  // - Write render callback for renderflows
+  // - Test G-Buffer after debugging
 };
 
 void RendererVk::AssignSceneObjectsToRenderFlows() {

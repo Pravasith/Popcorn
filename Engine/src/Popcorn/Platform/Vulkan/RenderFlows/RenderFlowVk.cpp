@@ -11,7 +11,7 @@ PcBasicSubmeshGroups RenderFlowVk::s_basicSubmeshGroups{};
 PcPbrSubmeshGroups RenderFlowVk::s_pbrSubmeshGroups{};
 uint64_t RenderFlowVk::s_submeshCount = 0;
 
-void RenderFlowVk::CreateAndAllocateVBOsAndIBOs() {
+void RenderFlowVk::AllocVBOsAndIBOsMemory() {
   // basicMat1 : [sm1, sm2, sm3, ... ]
   // basicMat2 : [sm1, sm2 ... ]
 
@@ -42,7 +42,7 @@ void RenderFlowVk::CreateAndAllocateVBOsAndIBOs() {
   memoryFactory->CleanUpStagingBuffers(); // Unmap, deallocate & destroy
 };
 
-void RenderFlowVk::DestroyVBOsAndIBOs() {
+void RenderFlowVk::FreeVBOsAndIBOsMemory() {
   auto *memoryFactory = ContextVk::MemoryFactory();
   memoryFactory->CleanUpLocalBuffers(); // Deallocate & destroy
 };

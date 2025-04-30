@@ -274,16 +274,6 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
       gBufferPool
           .AllocateDescriptorSets<DescriptorSets::PbrMatSet, maxFramesInFlight>(
               device, pbrMatLayouts);
-
-  // - Create VMA buffers for UBOs
-  // - Bind(write/update) buffers to descriptor sets(or descriptors?)
-  // - Copy scene updates(UBOs) via OnUpdate() to mapped bits
-
-  // - Repeat the process for other renderflows
-  // - Write lighting shaders
-  // - Finish create pipelines
-  // - Write render callback for renderflows
-  // - Test G-Buffer after debugging
 };
 
 //
