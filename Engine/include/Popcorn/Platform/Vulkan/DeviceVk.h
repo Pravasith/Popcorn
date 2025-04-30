@@ -1,9 +1,11 @@
 #pragma once
 
+#include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 #include "CommonVk.h"
 #include "GlobalMacros.h"
@@ -81,6 +83,12 @@ public:
   void CreateLogicalDevice(const VkSurfaceKHR &surface);
   uint32_t FindMemoryType(uint32_t typeFilter,
                           VkMemoryPropertyFlags properties);
+
+  void GetPhysicalDeviceProperties(VkPhysicalDeviceProperties &properties) {
+    PC_ASSERT(m_physicalDevice != VK_NULL_HANDLE, "Physical device not found");
+
+    vkGetPhysicalDeviceProperties(m_physicalDevice, &properties);
+  };
 
   void CleanUp();
 

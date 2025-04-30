@@ -1,14 +1,11 @@
 #pragma once
 
-#include "BufferObjects.h"
-#include "BufferObjectsVk.h"
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
 #include "MaterialTypes.h"
 #include "Mesh.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
-#include <cstdint>
 #include <cstring>
 #include <unordered_map>
 #include <vector>
@@ -52,8 +49,8 @@ public:
   void CreateAndAllocStagingBuffers(VkDeviceSize vboSize, VkDeviceSize iboSize);
   void CleanUpStagingBuffers();
 
-  void FlushBuffersStagingToLocal(VkDeviceSize submeshVbosSize,
-                                  VkDeviceSize submeshIbosSize);
+  void FlushVBOsAndIBOsStagingToLocal(VkDeviceSize submeshVbosSize,
+                                      VkDeviceSize submeshIbosSize);
 
   void CreateAndAllocLocalBuffers(VkDeviceSize vboSize, VkDeviceSize iboSize);
   void CleanUpLocalBuffers();
@@ -61,37 +58,9 @@ public:
   // -> current material group offset in bytes
   template <MaterialTypes T>
   void CopySubmeshGroupToStagingBuffers(
-      PcSubmeshGroupOffsets &prevSubmeshGroupOffsets,
+      PcSubmeshGroupOffsets &accSubmeshGroupOffsets,
       const std::unordered_map<MaterialHashType, std::vector<Submesh<T> *>>
-          &submeshGroups) {
-
-    VkDeviceSize &vboOffset = prevSubmeshGroupOffsets.submeshGroupVboSize;
-    VkDeviceSize &iboOffset = prevSubmeshGroupOffsets.submeshGroupIboSize;
-
-    for (auto &[matId, submeshes] : submeshGroups) {
-      for (Submesh<T> *submesh : submeshes) {
-        // VBOs ---------------------------------------------------------------
-        BufferDefs::Layout &vboLayout = submesh->GetVertexBuffer()->GetLayout();
-        const VkDeviceSize vboSize =
-            vboLayout.countValue * vboLayout.strideValue;
-
-        memcpy((byte_t *)m_submeshVboMapping + vboOffset,
-               submesh->GetVertexBuffer()->GetBufferData(), (size_t)vboSize);
-
-        // IBOs ---------------------------------------------------------------
-        IndexBuffer<uint32_t> indexBuffer = submesh->GetIndexBuffer();
-        const VkDeviceSize iboSize = indexBuffer.GetCount() * sizeof(uint32_t);
-
-        memcpy((byte_t *)m_submeshIboMapping + iboOffset,
-               indexBuffer.GetBufferData(), (size_t)iboSize);
-
-        m_vboIboOffsets[matId].emplace_back(std::pair(vboOffset, iboOffset));
-
-        vboOffset += vboSize;
-        iboOffset += iboSize;
-      }
-    };
-  };
+          &submeshGroups);
 
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
   MemoryFactoryVk(const MemoryFactoryVk &) = delete;

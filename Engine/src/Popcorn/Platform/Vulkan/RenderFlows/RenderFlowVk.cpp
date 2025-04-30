@@ -35,12 +35,14 @@ void RenderFlowVk::AllocVBOsAndIBOsMemory() {
   //
   // Copy the staging data to local buffers ---------------------------------
   PC_ASSERT(s_submeshCount, "Submesh count is zero.");
-
-  memoryFactory->FlushBuffersStagingToLocal(groupOffsets.submeshGroupVboSize,
-                                            groupOffsets.submeshGroupIboSize);
-
+  memoryFactory->FlushVBOsAndIBOsStagingToLocal(
+      groupOffsets.submeshGroupVboSize, groupOffsets.submeshGroupIboSize);
   memoryFactory->CleanUpStagingBuffers(); // Unmap, deallocate & destroy
 };
+
+void RenderFlowVk::AllocUBOsMemory() {};
+
+void RenderFlowVk::FreeUBOsMemory() {};
 
 void RenderFlowVk::FreeVBOsAndIBOsMemory() {
   auto *memoryFactory = ContextVk::MemoryFactory();

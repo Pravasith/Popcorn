@@ -54,57 +54,6 @@ void BufferVkUtils::GetDefaultVkBufferState(VkBufferCreateInfo &bufferInfo,
   bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 };
 
-// void BufferVkUtils::AllocateVkBuffer(
-//     VkBuffer &vkBuffer, VkDeviceMemory &vkBufferMemory,
-//     const VkBufferCreateInfo &bufferInfo,
-//     const VkMemoryPropertyFlags memoryPropertyFlags) {
-//
-//   auto *deviceVkStn = DeviceVk::Get();
-//   auto &device = deviceVkStn->GetDevice();
-//
-//   if (vkCreateBuffer(device, &bufferInfo, nullptr, &vkBuffer) != VK_SUCCESS)
-//   {
-//     std::runtime_error("Error creating  Buffer!");
-//   };
-//
-//   //
-//   // QUERY MEMORY REQIREMENTS USING device AND vkBuffer
-//   VkMemoryRequirements memRequirements;
-//   vkGetBufferMemoryRequirements(device, vkBuffer, &memRequirements);
-//
-//   //
-//   // ALLOCATE MEMORY
-//   // TODO: Use VMA to allocate memory
-//   VkMemoryAllocateInfo allocInfo{};
-//   allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-//   allocInfo.allocationSize = memRequirements.size;
-//   allocInfo.memoryTypeIndex = deviceVkStn->FindMemoryType(
-//       memRequirements.memoryTypeBits, memoryPropertyFlags);
-//
-//   if (vkAllocateMemory(device, &allocInfo, nullptr, &vkBufferMemory) !=
-//       VK_SUCCESS) {
-//     throw std::runtime_error(
-//         "Failed to allocate memory for the vertex buffer!");
-//   };
-//
-//   //
-//   // BIND MEMORY TO THE BUFFER
-//   vkBindBufferMemory(device, vkBuffer, vkBufferMemory, 0);
-// };
-
-// void *BufferVkUtils::MapVkMemoryToCPU(VkDeviceMemory &vkBufferMemory,
-//                                       VkDeviceSize beginOffset,
-//                                       VkDeviceSize endOffset) {
-//   auto &device = DeviceVk::Get()->GetDevice();
-//
-//   //
-//   // FILL VERTEX BUFFER
-//   void *data;
-//   vkMapMemory(device, vkBufferMemory, beginOffset, endOffset, 0, &data);
-//
-//   return data;
-// };
-
 void BufferVkUtils::CopyStagingToMainBuffers(VkBuffer &srcBuffer,
                                              VkBuffer &dstBuffer,
                                              VkDeviceSize size) {

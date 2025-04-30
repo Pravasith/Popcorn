@@ -2,18 +2,29 @@
 #include "BufferObjectsVk.h"
 #include "ContextVk.h"
 #include "GlobalMacros.h"
+#include "MaterialTypes.h"
+#include "Memory/Helpers.h"
+#include <cstdint>
+#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 void MemoryFactoryVk::CreateAndAllocStagingBuffers(VkDeviceSize vboSize,
                                                    VkDeviceSize iboSize) {
+
+  VkPhysicalDeviceProperties properties{};
+  ContextVk::Device()->GetPhysicalDeviceProperties(properties);
+
+  VkDeviceSize alignedVboSize =
+      PC_AlignCeil(vboSize, properties.limits.optimalBufferCopyOffsetAlignment);
+  VkDeviceSize alignedIboSize =
+      PC_AlignCeil(iboSize, properties.limits.optimalBufferCopyOffsetAlignment);
   //
   // -----------------------------------------------------------------------
   // --- VERTEX BUFFERS CREATION -------------------------------------------
-
   VkBufferCreateInfo vboStagingInfo{};
-  BufferVkUtils::GetDefaultVkBufferState(vboStagingInfo, vboSize);
+  BufferVkUtils::GetDefaultVkBufferState(vboStagingInfo, alignedVboSize);
   vboStagingInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 
   VmaAllocationCreateInfo vboStagingVmaInfo{};
@@ -43,7 +54,7 @@ void MemoryFactoryVk::CreateAndAllocStagingBuffers(VkDeviceSize vboSize,
   // -----------------------------------------------------------------------
   // --- INDEX BUFFERS CREATION --------------------------------------------
   VkBufferCreateInfo iboStagingInfo{};
-  BufferVkUtils::GetDefaultVkBufferState(iboStagingInfo, iboSize);
+  BufferVkUtils::GetDefaultVkBufferState(iboStagingInfo, alignedIboSize);
   iboStagingInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 
   VmaAllocationCreateInfo iboStagingVmaInfo{};
@@ -67,16 +78,31 @@ void MemoryFactoryVk::CreateAndAllocStagingBuffers(VkDeviceSize vboSize,
   };
 }
 
-void MemoryFactoryVk::FlushBuffersStagingToLocal(VkDeviceSize submeshVbosSize,
-                                                 VkDeviceSize submeshIbosSize) {
+void MemoryFactoryVk::FlushVBOsAndIBOsStagingToLocal(
+    VkDeviceSize submeshVbosSize, VkDeviceSize submeshIbosSize) {
+  VkPhysicalDeviceProperties properties{};
+  ContextVk::Device()->GetPhysicalDeviceProperties(properties);
+  VkDeviceSize alignedVboSize = PC_AlignCeil(
+      submeshVbosSize, properties.limits.optimalBufferCopyOffsetAlignment);
+  VkDeviceSize alignedIboSize = PC_AlignCeil(
+      submeshIbosSize, properties.limits.optimalBufferCopyOffsetAlignment);
+
   BufferVkUtils::CopyStagingToMainBuffers(m_submeshVBOsStaging, m_submeshVBOs,
-                                          submeshVbosSize);
+                                          alignedVboSize);
   BufferVkUtils::CopyStagingToMainBuffers(m_submeshIBOsStaging, m_submeshIBOs,
-                                          submeshIbosSize);
+                                          alignedIboSize);
 };
 
 void MemoryFactoryVk::CreateAndAllocLocalBuffers(VkDeviceSize vboSize,
                                                  VkDeviceSize iboSize) {
+
+  VkPhysicalDeviceProperties properties{};
+  ContextVk::Device()->GetPhysicalDeviceProperties(properties);
+
+  VkDeviceSize alignedVboSize =
+      PC_AlignCeil(vboSize, properties.limits.optimalBufferCopyOffsetAlignment);
+  VkDeviceSize alignedIboSize =
+      PC_AlignCeil(iboSize, properties.limits.optimalBufferCopyOffsetAlignment);
   //
   //
   //
@@ -84,7 +110,7 @@ void MemoryFactoryVk::CreateAndAllocLocalBuffers(VkDeviceSize vboSize,
   // -----------------------------------------------------------------------
   // --- VERTEX BUFFERS CREATION -------------------------------------------
   VkBufferCreateInfo vboMainInfo{};
-  BufferVkUtils::GetDefaultVkBufferState(vboMainInfo, vboSize);
+  BufferVkUtils::GetDefaultVkBufferState(vboMainInfo, alignedVboSize);
   vboMainInfo.usage =
       VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
@@ -105,7 +131,7 @@ void MemoryFactoryVk::CreateAndAllocLocalBuffers(VkDeviceSize vboSize,
   // -----------------------------------------------------------------------
   // --- INDEX BUFFERS CREATION --------------------------------------------
   VkBufferCreateInfo iboMainInfo{};
-  BufferVkUtils::GetDefaultVkBufferState(iboMainInfo, iboSize);
+  BufferVkUtils::GetDefaultVkBufferState(iboMainInfo, alignedIboSize);
   iboMainInfo.usage =
       VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
@@ -163,6 +189,63 @@ void MemoryFactoryVk::CleanUpLocalBuffers() {
     m_submeshIBOsAlloc = nullptr;
   }
 };
+
+template <MaterialTypes T>
+void MemoryFactoryVk::CopySubmeshGroupToStagingBuffers(
+    PcSubmeshGroupOffsets &accSubmeshGroupOffsets,
+    const std::unordered_map<MaterialHashType, std::vector<Submesh<T> *>>
+        &submeshGroups) {
+
+  VkDeviceSize &vboOffsetRef = accSubmeshGroupOffsets.submeshGroupVboSize;
+  VkDeviceSize &iboOffsetRef = accSubmeshGroupOffsets.submeshGroupIboSize;
+
+  auto *device = ContextVk::Device();
+  VkPhysicalDeviceProperties properties{};
+  device->GetPhysicalDeviceProperties(properties);
+  VkDeviceSize alignment = properties.limits.optimalBufferCopyOffsetAlignment;
+
+  for (auto &[matId, submeshes] : submeshGroups) {
+    for (Submesh<T> *submesh : submeshes) {
+      //
+      // VBOs ---------------------------------------------------------------
+      const BufferDefs::Layout &vboLayout =
+          submesh->GetVertexBuffer()->GetLayout();
+      const VkDeviceSize vboSize = vboLayout.countValue * vboLayout.strideValue;
+      memcpy((byte_t *)m_submeshVboMapping + vboOffsetRef,
+             submesh->GetVertexBuffer()->GetBufferData(), (size_t)vboSize);
+
+      //
+      // IBOs ---------------------------------------------------------------
+      IndexBuffer<uint32_t> *indexBuffer = submesh->GetIndexBuffer();
+      const VkDeviceSize iboSize = indexBuffer->GetCount() * sizeof(uint32_t);
+      memcpy((byte_t *)m_submeshIboMapping + iboOffsetRef,
+             indexBuffer->GetBufferData(), (size_t)iboSize);
+
+      //
+      // Offsets ------------------------------------------------------------
+      m_vboIboOffsets[matId].emplace_back(
+          std::pair(vboOffsetRef, iboOffsetRef));
+
+      vboOffsetRef += vboSize;
+      iboOffsetRef += iboSize;
+    }
+  };
+};
+
+// Template instantiation (explicit for linker visibility)
+template void
+MemoryFactoryVk::CopySubmeshGroupToStagingBuffers<MaterialTypes::BasicMat>(
+    PcSubmeshGroupOffsets &accSubmeshGroupOffsets,
+    const std::unordered_map<MaterialHashType,
+                             std::vector<Submesh<MaterialTypes::BasicMat> *>>
+        &submeshGroups);
+
+template void
+MemoryFactoryVk::CopySubmeshGroupToStagingBuffers<MaterialTypes::PbrMat>(
+    PcSubmeshGroupOffsets &accSubmeshGroupOffsets,
+    const std::unordered_map<MaterialHashType,
+                             std::vector<Submesh<MaterialTypes::PbrMat> *>>
+        &submeshGroups);
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
