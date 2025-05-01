@@ -8,8 +8,9 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-PcBasicSubmeshGroups RenderFlowVk::s_basicSubmeshGroups{};
-PcPbrSubmeshGroups RenderFlowVk::s_pbrSubmeshGroups{};
+BasicSubmeshGroups RenderFlowVk::s_basicSubmeshGroups{};
+PbrSubmeshGroups RenderFlowVk::s_pbrSubmeshGroups{};
+
 uint64_t RenderFlowVk::s_submeshCount = 0;
 
 void RenderFlowVk::AllocVBOsAndIBOsMemory() {
@@ -19,29 +20,42 @@ void RenderFlowVk::AllocVBOsAndIBOsMemory() {
   // pbrMat1 : [sm1, sm2, sm3, ... ]
   // pbrMat2 : [sm1, sm2 ... ]
   //
+
   auto *memoryFactory = ContextVk::MemoryFactory();
-  memoryFactory->CreateAndAllocStagingBuffers(s_submeshCount, s_submeshCount);
-  memoryFactory->CreateAndAllocLocalBuffers(s_submeshCount, s_submeshCount);
+
+  VkDeviceSize vboSize, iboSize, uboSize;
+  // Basic submeshes size
+  memoryFactory->GetVboIboUboSizes(s_basicSubmeshGroups, vboSize, iboSize,
+                                   uboSize);
+  // Pbr submeshes size
+  memoryFactory->GetVboIboUboSizes(s_pbrSubmeshGroups, vboSize, iboSize,
+                                   uboSize);
+
+  memoryFactory->AllocVboIboStagingBuffers(vboSize, iboSize);
+  memoryFactory->AllocVboIboLocalBuffers(vboSize, iboSize);
 
   //
   // Copy VBO, IBO data to staging buffers ----------------------------------
-  PcSubmeshGroupOffsets groupOffsets{};
-  // Basic material submesh groups
-  memoryFactory->CopySubmeshGroupToStagingBuffers(groupOffsets,
-                                                  s_basicSubmeshGroups);
-  // Pbr material submesh groups
-  memoryFactory->CopySubmeshGroupToStagingBuffers(groupOffsets,
-                                                  s_pbrSubmeshGroups);
+  SubmeshOffsets submeshOffsets{};
+  // Basic material submeshes
+  memoryFactory->CopySubmeshGroupToVboIboStagingBuffers(submeshOffsets,
+                                                        s_basicSubmeshGroups);
+  // Pbr material submeshes
+  memoryFactory->CopySubmeshGroupToVboIboStagingBuffers(submeshOffsets,
+                                                        s_pbrSubmeshGroups);
 
   //
   // Copy the staging data to local buffers ---------------------------------
   PC_ASSERT(s_submeshCount, "Submesh count is zero.");
-  memoryFactory->FlushVBOsAndIBOsStagingToLocal(
-      groupOffsets.submeshGroupVboSize, groupOffsets.submeshGroupIboSize);
-  memoryFactory->CleanUpStagingBuffers(); // Unmap, deallocate & destroy
+  memoryFactory->FlushVBOsAndIBOsStagingToLocal(submeshOffsets.vboOffset,
+                                                submeshOffsets.iboOffset);
+  memoryFactory->CleanUpVboIboStagingBuffers(); // Unmap, deallocate & destroy
 };
 
 void RenderFlowVk::AllocUBOsMemory() {
+  auto *memoryFactory = ContextVk::MemoryFactory();
+  memoryFactory->CreateAndAllocUboBuffers();
+
   VkBufferCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
   createInfo.size = 0;
@@ -51,15 +65,13 @@ void RenderFlowVk::AllocUBOsMemory() {
   VmaAllocationCreateInfo allocCreateInfo{};
   allocCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
   allocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
-
-  // CONTINUE CODE;
 };
 
 void RenderFlowVk::FreeUBOsMemory() {};
 
 void RenderFlowVk::FreeVBOsAndIBOsMemory() {
   auto *memoryFactory = ContextVk::MemoryFactory();
-  memoryFactory->CleanUpLocalBuffers(); // Deallocate & destroy
+  memoryFactory->CleanUpVboIboLocalBuffers(); // Deallocate & destroy
 };
 
 void RenderFlowVk::ProcessSceneUpdates(const uint32_t currentFrame) {

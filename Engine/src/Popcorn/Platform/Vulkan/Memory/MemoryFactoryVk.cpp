@@ -4,14 +4,15 @@
 #include "GlobalMacros.h"
 #include "MaterialTypes.h"
 #include "Memory/Helpers.h"
+#include "RenderFlows/RenderFlowVk.h"
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-void MemoryFactoryVk::CreateAndAllocStagingBuffers(VkDeviceSize vboSize,
-                                                   VkDeviceSize iboSize) {
+void MemoryFactoryVk::AllocVboIboStagingBuffers(VkDeviceSize vboSize,
+                                                VkDeviceSize iboSize) {
 
   VkPhysicalDeviceProperties properties{};
   ContextVk::Device()->GetPhysicalDeviceProperties(properties);
@@ -32,8 +33,7 @@ void MemoryFactoryVk::CreateAndAllocStagingBuffers(VkDeviceSize vboSize,
 
   VkResult vboResult = vmaCreateBuffer(
       ContextVk::MemoryAllocator()->GetVMAAllocator(), &vboStagingInfo,
-      &vboStagingVmaInfo, &m_submeshVBOsStaging, &m_submeshVBOsAllocStaging,
-      nullptr);
+      &vboStagingVmaInfo, &m_vboStaging, &m_vboStagingAlloc, nullptr);
   if (vboResult != VK_SUCCESS) {
     throw std::runtime_error("Couldn't create VBO staging buffer");
   };
@@ -42,8 +42,7 @@ void MemoryFactoryVk::CreateAndAllocStagingBuffers(VkDeviceSize vboSize,
   // -----------------------------------------------------------------------
   // --- VERTEX BUFFERS MAP & COPY -----------------------------------------
   if (vmaMapMemory(ContextVk::MemoryAllocator()->GetVMAAllocator(),
-                   m_submeshVBOsAllocStaging,
-                   &m_submeshVboMapping) != VK_SUCCESS) {
+                   m_vboStagingAlloc, &m_vboStagingMapping) != VK_SUCCESS) {
     throw std::runtime_error("Couldn't 'map' VBO staging buffer");
   };
 
@@ -62,8 +61,7 @@ void MemoryFactoryVk::CreateAndAllocStagingBuffers(VkDeviceSize vboSize,
 
   VkResult iboResult = vmaCreateBuffer(
       ContextVk::MemoryAllocator()->GetVMAAllocator(), &iboStagingInfo,
-      &iboStagingVmaInfo, &m_submeshIBOsStaging, &m_submeshIBOsAllocStaging,
-      nullptr);
+      &iboStagingVmaInfo, &m_iboStaging, &m_iboStagingAlloc, nullptr);
   if (iboResult != VK_SUCCESS) {
     throw std::runtime_error("Couldn't create IBO staging buffer");
   };
@@ -72,8 +70,7 @@ void MemoryFactoryVk::CreateAndAllocStagingBuffers(VkDeviceSize vboSize,
   // -----------------------------------------------------------------------
   // --- INDEX BUFFERS MAP & COPY ------------------------------------------
   if (vmaMapMemory(ContextVk::MemoryAllocator()->GetVMAAllocator(),
-                   m_submeshIBOsAllocStaging,
-                   &m_submeshIboMapping) != VK_SUCCESS) {
+                   m_iboStagingAlloc, &m_iboStagingMapping) != VK_SUCCESS) {
     throw std::runtime_error("Couldn't map IBO staging buffer");
   };
 }
@@ -87,14 +84,12 @@ void MemoryFactoryVk::FlushVBOsAndIBOsStagingToLocal(
   VkDeviceSize alignedIboSize = PC_AlignCeil(
       submeshIbosSize, properties.limits.optimalBufferCopyOffsetAlignment);
 
-  BufferVkUtils::CopyStagingToMainBuffers(m_submeshVBOsStaging, m_submeshVBOs,
-                                          alignedVboSize);
-  BufferVkUtils::CopyStagingToMainBuffers(m_submeshIBOsStaging, m_submeshIBOs,
-                                          alignedIboSize);
+  BufferVkUtils::CopyStagingToMainBuffers(m_vboStaging, m_vbo, alignedVboSize);
+  BufferVkUtils::CopyStagingToMainBuffers(m_iboStaging, m_ibo, alignedIboSize);
 };
 
-void MemoryFactoryVk::CreateAndAllocLocalBuffers(VkDeviceSize vboSize,
-                                                 VkDeviceSize iboSize) {
+void MemoryFactoryVk::AllocVboIboLocalBuffers(VkDeviceSize vboSize,
+                                              VkDeviceSize iboSize) {
 
   VkPhysicalDeviceProperties properties{};
   ContextVk::Device()->GetPhysicalDeviceProperties(properties);
@@ -119,7 +114,7 @@ void MemoryFactoryVk::CreateAndAllocLocalBuffers(VkDeviceSize vboSize,
 
   VkResult vboResult = vmaCreateBuffer(
       ContextVk::MemoryAllocator()->GetVMAAllocator(), &vboMainInfo,
-      &vboMainVmaInfo, &m_submeshVBOs, &m_submeshVBOsAlloc, nullptr);
+      &vboMainVmaInfo, &m_vbo, &m_vboAlloc, nullptr);
   if (vboResult != VK_SUCCESS) {
     throw std::runtime_error("Couldn't create VBO device buffer");
   };
@@ -140,69 +135,61 @@ void MemoryFactoryVk::CreateAndAllocLocalBuffers(VkDeviceSize vboSize,
 
   VkResult iboResult = vmaCreateBuffer(
       ContextVk::MemoryAllocator()->GetVMAAllocator(), &iboMainInfo,
-      &iboMainVmaInfo, &m_submeshIBOs, &m_submeshIBOsAlloc, nullptr);
+      &iboMainVmaInfo, &m_ibo, &m_iboAlloc, nullptr);
   if (iboResult != VK_SUCCESS) {
     throw std::runtime_error("Couldn't create IBO device buffer");
   };
 }
 
-void MemoryFactoryVk::CleanUpStagingBuffers() {
+void MemoryFactoryVk::CleanUpVboIboStagingBuffers() {
   auto &allocator = ContextVk::MemoryAllocator()->GetVMAAllocator();
 
-  if (m_submeshVboMapping) {
-    vmaUnmapMemory(allocator, m_submeshVBOsAllocStaging);
-    m_submeshVboMapping = nullptr;
+  if (m_vboStagingMapping) {
+    vmaUnmapMemory(allocator, m_vboStagingAlloc);
+    m_vboStagingMapping = nullptr;
   }
 
-  if (m_submeshIboMapping) {
-    vmaUnmapMemory(allocator, m_submeshIBOsAllocStaging);
-    m_submeshIboMapping = nullptr;
+  if (m_iboStagingMapping) {
+    vmaUnmapMemory(allocator, m_iboStagingAlloc);
+    m_iboStagingMapping = nullptr;
   }
 
-  if (m_submeshVBOsStaging != VK_NULL_HANDLE && m_submeshVBOsAllocStaging) {
-    vmaDestroyBuffer(allocator, m_submeshVBOsStaging,
-                     m_submeshVBOsAllocStaging);
-    m_submeshVBOsStaging = VK_NULL_HANDLE;
-    m_submeshVBOsAllocStaging = nullptr;
+  if (m_vboStaging != VK_NULL_HANDLE && m_vboStagingAlloc) {
+    vmaDestroyBuffer(allocator, m_vboStaging, m_vboStagingAlloc);
+    m_vboStaging = VK_NULL_HANDLE;
+    m_vboStagingAlloc = nullptr;
   }
 
-  if (m_submeshIBOsStaging != VK_NULL_HANDLE && m_submeshIBOsAllocStaging) {
-    vmaDestroyBuffer(allocator, m_submeshIBOsStaging,
-                     m_submeshIBOsAllocStaging);
-    m_submeshIBOsStaging = VK_NULL_HANDLE;
-    m_submeshIBOsAllocStaging = nullptr;
+  if (m_iboStaging != VK_NULL_HANDLE && m_iboStagingAlloc) {
+    vmaDestroyBuffer(allocator, m_iboStaging, m_iboStagingAlloc);
+    m_iboStaging = VK_NULL_HANDLE;
+    m_iboStagingAlloc = nullptr;
   }
 };
 
-void MemoryFactoryVk::CleanUpLocalBuffers() {
+void MemoryFactoryVk::CleanUpVboIboLocalBuffers() {
   auto &allocator = ContextVk::MemoryAllocator()->GetVMAAllocator();
 
-  if (m_submeshVBOs != VK_NULL_HANDLE && m_submeshVBOsAlloc) {
-    vmaDestroyBuffer(allocator, m_submeshVBOs, m_submeshVBOsAlloc);
-    m_submeshVBOs = VK_NULL_HANDLE;
-    m_submeshVBOsAlloc = nullptr;
+  if (m_vbo != VK_NULL_HANDLE && m_vboAlloc) {
+    vmaDestroyBuffer(allocator, m_vbo, m_vboAlloc);
+    m_vbo = VK_NULL_HANDLE;
+    m_vboAlloc = nullptr;
   }
 
-  if (m_submeshIBOs != VK_NULL_HANDLE && m_submeshIBOsAlloc) {
-    vmaDestroyBuffer(allocator, m_submeshIBOs, m_submeshIBOsAlloc);
-    m_submeshIBOs = VK_NULL_HANDLE;
-    m_submeshIBOsAlloc = nullptr;
+  if (m_ibo != VK_NULL_HANDLE && m_iboAlloc) {
+    vmaDestroyBuffer(allocator, m_ibo, m_iboAlloc);
+    m_ibo = VK_NULL_HANDLE;
+    m_iboAlloc = nullptr;
   }
 };
 
 template <MaterialTypes T>
-void MemoryFactoryVk::CopySubmeshGroupToStagingBuffers(
-    PcSubmeshGroupOffsets &accSubmeshGroupOffsets,
-    const std::unordered_map<MaterialHashType, std::vector<Submesh<T> *>>
-        &submeshGroups) {
+void MemoryFactoryVk::CopySubmeshGroupToVboIboStagingBuffers(
+    SubmeshOffsets &accSubmeshGroupOffsets,
+    const SubmeshGroups<T> &submeshGroups) {
 
-  VkDeviceSize &vboOffsetRef = accSubmeshGroupOffsets.submeshGroupVboSize;
-  VkDeviceSize &iboOffsetRef = accSubmeshGroupOffsets.submeshGroupIboSize;
-
-  auto *device = ContextVk::Device();
-  VkPhysicalDeviceProperties properties{};
-  device->GetPhysicalDeviceProperties(properties);
-  VkDeviceSize alignment = properties.limits.optimalBufferCopyOffsetAlignment;
+  VkDeviceSize &vboOffsetRef = accSubmeshGroupOffsets.vboOffset;
+  VkDeviceSize &iboOffsetRef = accSubmeshGroupOffsets.iboOffset;
 
   for (auto &[matId, submeshes] : submeshGroups) {
     for (Submesh<T> *submesh : submeshes) {
@@ -211,14 +198,14 @@ void MemoryFactoryVk::CopySubmeshGroupToStagingBuffers(
       const BufferDefs::Layout &vboLayout =
           submesh->GetVertexBuffer()->GetLayout();
       const VkDeviceSize vboSize = vboLayout.countValue * vboLayout.strideValue;
-      memcpy((byte_t *)m_submeshVboMapping + vboOffsetRef,
+      memcpy((byte_t *)m_vboStagingMapping + vboOffsetRef,
              submesh->GetVertexBuffer()->GetBufferData(), (size_t)vboSize);
 
       //
       // IBOs ---------------------------------------------------------------
       IndexBuffer<uint32_t> *indexBuffer = submesh->GetIndexBuffer();
       const VkDeviceSize iboSize = indexBuffer->GetCount() * sizeof(uint32_t);
-      memcpy((byte_t *)m_submeshIboMapping + iboOffsetRef,
+      memcpy((byte_t *)m_iboStagingMapping + iboOffsetRef,
              indexBuffer->GetBufferData(), (size_t)iboSize);
 
       //
@@ -233,16 +220,16 @@ void MemoryFactoryVk::CopySubmeshGroupToStagingBuffers(
 };
 
 // Template instantiation (explicit for linker visibility)
-template void
-MemoryFactoryVk::CopySubmeshGroupToStagingBuffers<MaterialTypes::BasicMat>(
-    PcSubmeshGroupOffsets &accSubmeshGroupOffsets,
+template void MemoryFactoryVk::CopySubmeshGroupToVboIboStagingBuffers<
+    MaterialTypes::BasicMat>(
+    SubmeshOffsets &accSubmeshOffsets,
     const std::unordered_map<MaterialHashType,
                              std::vector<Submesh<MaterialTypes::BasicMat> *>>
         &submeshGroups);
 
 template void
-MemoryFactoryVk::CopySubmeshGroupToStagingBuffers<MaterialTypes::PbrMat>(
-    PcSubmeshGroupOffsets &accSubmeshGroupOffsets,
+MemoryFactoryVk::CopySubmeshGroupToVboIboStagingBuffers<MaterialTypes::PbrMat>(
+    SubmeshOffsets &accSubmeshOffsets,
     const std::unordered_map<MaterialHashType,
                              std::vector<Submesh<MaterialTypes::PbrMat> *>>
         &submeshGroups);

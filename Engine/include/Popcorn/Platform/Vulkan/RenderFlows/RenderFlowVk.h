@@ -14,12 +14,15 @@ GFX_NAMESPACE_BEGIN
 
 enum RenderFlows { GBuffer = 1, Lighting, Composite };
 
-using PcBasicSubmeshes = std::vector<Submesh<MaterialTypes::BasicMat> *>;
-using PcPbrSubmeshes = std::vector<Submesh<MaterialTypes::PbrMat> *>;
+using BasicSubmeshes = std::vector<Submesh<MaterialTypes::BasicMat> *>;
+using PbrSubmeshes = std::vector<Submesh<MaterialTypes::PbrMat> *>;
 
-using PcBasicSubmeshGroups =
-    std::unordered_map<MaterialHashType, PcBasicSubmeshes>;
-using PcPbrSubmeshGroups = std::unordered_map<MaterialHashType, PcPbrSubmeshes>;
+using BasicSubmeshGroups = std::unordered_map<MaterialHashType, BasicSubmeshes>;
+using PbrSubmeshGroups = std::unordered_map<MaterialHashType, PbrSubmeshes>;
+
+template <MaterialTypes T>
+using SubmeshGroups =
+    std::unordered_map<MaterialHashType, std::vector<Submesh<T> *>>;
 
 // TODO: Refactor
 //       - Vulkan specific for now.
@@ -122,8 +125,8 @@ protected:
   // Camera
   Camera *camera = nullptr;
 
-  static PcBasicSubmeshGroups s_basicSubmeshGroups;
-  static PcPbrSubmeshGroups s_pbrSubmeshGroups;
+  static BasicSubmeshGroups s_basicSubmeshGroups;
+  static PbrSubmeshGroups s_pbrSubmeshGroups;
 
   static uint64_t s_submeshCount;
 };
