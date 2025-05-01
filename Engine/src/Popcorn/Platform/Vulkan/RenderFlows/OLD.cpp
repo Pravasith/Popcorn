@@ -445,6 +445,8 @@ void GBufferRenderFlowVk::AllocateVkUniformBuffers() {
   allocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
   allocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
+  // CONTINUE CODE;
+
   m_globalUniformBuffers.resize(maxFramesInFlight);
   m_globalUniformAllocations.resize(maxFramesInFlight);
   m_globalUniformAllocationInfos.resize(maxFramesInFlight);

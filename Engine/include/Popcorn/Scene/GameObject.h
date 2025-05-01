@@ -25,9 +25,11 @@ enum class GameObjectTypes {
   Mesh,
   Camera,
   Empty,
+  Light,
 };
 
 enum class Axes { X = 1, Y, Z };
+
 enum class EulerOrder {
   XYZ = 1,
   XZY,
@@ -36,6 +38,7 @@ enum class EulerOrder {
   ZXY,
   ZYX,
 };
+
 enum class Transforms { Translate = 1, Rotate, Scale, Shear, Reflect };
 
 class GameObject {

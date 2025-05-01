@@ -160,6 +160,11 @@ void RendererVk::CreateRenderFlowResources() {
     // - Normals Image+Sampler - just one
     // -------
     // - LitScene Image+Sampler - just one
+    //
+    // for (auto &[matId, submeshes] : submeshGroups) {
+    //   for (Submesh<T> *submesh : submeshes) {
+    //   }
+    // };
 
     renderFlow->CreateAndAllocDescriptors(); // Static for now
     // renderFlow->CreatePipelines();
@@ -167,6 +172,7 @@ void RendererVk::CreateRenderFlowResources() {
 
   // TODOs:
   // - Create VMA buffers for UBOs
+  // - Create Samplers for G-Buffer & LitScene-Buffer
   // - Bind(write/update) buffers to descriptor sets(or descriptors?)
   // - Copy scene updates(UBOs) via OnUpdate() to mapped bits
 
@@ -174,7 +180,7 @@ void RendererVk::CreateRenderFlowResources() {
   // - Write lighting shaders
   // - Finish create pipelines
   // - Write render callback for renderflows
-  // - Test G-Buffer after debugging
+  // - Blender scene yaayyy!
 };
 
 void RendererVk::AssignSceneObjectsToRenderFlows() {

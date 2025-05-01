@@ -12,6 +12,8 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+enum RenderFlows { GBuffer = 1, Lighting, Composite };
+
 using PcBasicSubmeshes = std::vector<Submesh<MaterialTypes::BasicMat> *>;
 using PcPbrSubmeshes = std::vector<Submesh<MaterialTypes::PbrMat> *>;
 

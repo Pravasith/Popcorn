@@ -6,6 +6,7 @@
 #include "Mesh.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
+#include "RenderFlows/RenderFlowVk.h"
 #include <cstring>
 #include <unordered_map>
 #include <vector>
@@ -24,6 +25,19 @@ struct PcSubmeshGroupOffsets {
     this->submeshGroupIboSize += other.submeshGroupIboSize;
     return *this;
   };
+};
+
+enum UboViews {
+  WorldMatrix = 1,
+  BasicMatValues,
+  PbrMatValues,
+  LightsValues,
+  CameraMatrix
+};
+
+struct UboBufferView {
+  VkDeviceSize offset = 0;
+  VkDeviceSize alignedSize = 0;
 };
 
 class MemoryFactoryVk {
@@ -85,10 +99,6 @@ private:
   };
 
 private:
-  using VboIboOffsets =
-      std::unordered_map<MaterialHashType,
-                         std::vector<std::pair<VkDeviceSize, VkDeviceSize>>>;
-
   static MemoryFactoryVk *s_instance;
   static DeviceVk *s_deviceVk;
 
@@ -112,11 +122,29 @@ private:
 
   //
   // Host-visible -----------------------------------------------------------
-  // VkBuffer m_basicMaterialUBOs; // And an equivalent VMA allocation
-  // VkBuffer m_pbrMaterialUBOs;   // And an equivalent VMA allocation
-  // VkBuffer m_modelMatrixUBOs;   // And an equivalent VMA allocation
+  VkBuffer m_gBufferPassUBOs;
+  VmaAllocation m_gBufferPassUBOsAlloc;
 
-  VboIboOffsets m_vboIboOffsets{};
+  VkBuffer m_lightPassUBOs;
+  VmaAllocation m_lightPassUBOsAlloc;
+
+  VkBuffer m_compositePassUBOs;
+  VmaAllocation m_compositePassUBOsAlloc;
+
+  using VboIboOffsets =
+      std::unordered_map<MaterialHashType,
+                         std::vector<std::pair<VkDeviceSize, VkDeviceSize>>>;
+
+  VboIboOffsets m_vboIboOffsets{}; // Accumulated offsets for BOTH basic & pbr
+                                   // material types
+
+  using UboBufferViewMap = std::unordered_map<UboViews, UboBufferView>;
+
+  UboBufferViewMap m_uboBufferViewMap{
+      {UboViews::WorldMatrix, {}},  {UboViews::BasicMatValues, {}},
+      {UboViews::PbrMatValues, {}}, {UboViews::LightsValues, {}},
+      {UboViews::WorldMatrix, {}},
+  };
 };
 
 GFX_NAMESPACE_END

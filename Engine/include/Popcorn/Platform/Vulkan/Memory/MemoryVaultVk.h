@@ -39,6 +39,8 @@ private:
 
 private:
   static MemoryVaultVk *s_instance;
+
+private:
 };
 
 ENGINE_NAMESPACE_END

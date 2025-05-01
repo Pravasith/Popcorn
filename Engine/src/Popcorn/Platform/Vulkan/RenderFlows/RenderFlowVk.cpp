@@ -3,6 +3,7 @@
 #include "Memory/MemoryFactoryVk.h"
 #include "Popcorn/Core/Assert.h"
 #include <cstdint>
+#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -40,7 +41,19 @@ void RenderFlowVk::AllocVBOsAndIBOsMemory() {
   memoryFactory->CleanUpStagingBuffers(); // Unmap, deallocate & destroy
 };
 
-void RenderFlowVk::AllocUBOsMemory() {};
+void RenderFlowVk::AllocUBOsMemory() {
+  VkBufferCreateInfo createInfo{};
+  createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+  createInfo.size = 0;
+  createInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+  createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+  VmaAllocationCreateInfo allocCreateInfo{};
+  allocCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+  allocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
+
+  // CONTINUE CODE;
+};
 
 void RenderFlowVk::FreeUBOsMemory() {};
 

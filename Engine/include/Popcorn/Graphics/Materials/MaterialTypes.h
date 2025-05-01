@@ -9,7 +9,7 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-enum class MaterialTypes {
+enum MaterialTypes {
   BasicMat = 1,
   PbrMat
   // Add more

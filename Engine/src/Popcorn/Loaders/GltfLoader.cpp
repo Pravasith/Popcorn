@@ -8,6 +8,7 @@
 #include "GfxContext.h"
 #include "GlobalMacros.h"
 #include "Helpers.h"
+#include "Light.h"
 #include "Material.h"
 #include "Mesh.h"
 #include "Shader.h"
@@ -132,13 +133,16 @@ GameObject *GltfLoader::CreateGameObjectByType(const tinygltf::Model &model,
     ExtractMeshData(model, node, *mesh);
     return mesh;
   } else if (node.camera >= 0) {
+    // Make this abstract
     Camera *camera = new Camera();
     // TODO: Handle camera later
     return camera;
-    // } else if (node.extensions.find("KHR_lights_punctual") !=
-    //            node.extensions.end()) {
-    //   // Light node (requires KHR_lights_punctual extension)
-    //   // TYPE = Light
+  } else if (node.extensions.find("KHR_lights_punctual") !=
+             node.extensions.end()) {
+    // Light node (requires KHR_lights_punctual extension)
+    Light *light = new Light();
+    return light;
+
     // } else if (
     //     // Is Node referenced in any skin.joints array (typically write a
     //     function
