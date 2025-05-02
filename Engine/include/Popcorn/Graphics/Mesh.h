@@ -146,7 +146,7 @@ public:
     return GameObjectTypes::Mesh;
   };
 
-  [[nodiscard]] inline UniformDefs::GameObjectUniform &GetMeshUniforms() {
+  [[nodiscard]] inline UniformDefs::WorldMatrixUniform &GetMeshUniforms() {
     return m_uniforms;
   };
 
@@ -189,7 +189,7 @@ public:
   };
 
 protected:
-  UniformDefs::GameObjectUniform m_uniforms;
+  UniformDefs::WorldMatrixUniform m_uniforms;
 
   std::vector<Submesh<MaterialTypes::BasicMat>> m_basicSubmeshes;
   std::vector<Submesh<MaterialTypes::PbrMat>> m_pbrSubmeshes;
