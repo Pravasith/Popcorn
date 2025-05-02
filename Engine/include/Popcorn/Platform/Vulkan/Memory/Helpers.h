@@ -22,5 +22,28 @@ static constexpr VkDeviceSize PC_AlignFloor(VkDeviceSize size,
   return result;
 };
 
+// Note: all buffer sizes are ALIGNED!!
+// -> Return type of MemoryFactoryVk::GetAccSubmeshesBufferSizes function
+struct AccSubmeshBufferSizes {
+  // VBO & IBO sizes
+  VkDeviceSize vboSize = 0;
+  VkDeviceSize iboSize = 0;
+
+  // World matrices sizes of submeshes (submeshes only, other GameObject type
+  // world matrix ubos are accumulated in the next struct)
+  VkDeviceSize submeshesWorldMatrixUboSize = 0;
+
+  VkDeviceSize basicMatUboSize = 0;
+  VkDeviceSize pbrMatUboSize = 0;
+};
+
+// Note: all buffer sizes are ALIGNED!!
+// -> Return type of MemoryFactoryVk::GetAccGameObjectsBufferSizes function
+struct AccGameObjectUboSizes {
+  VkDeviceSize lightsWorldMatrixUboSize = 0;
+  VkDeviceSize emptysWorldMatrixUboSize = 0;
+  VkDeviceSize camerasWorldMatrixUboSize = 0;
+};
+
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

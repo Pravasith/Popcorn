@@ -1,8 +1,10 @@
 #pragma once
 
 #include "DeviceVk.h"
+#include "GameObject.h"
 #include "GlobalMacros.h"
 #include "MaterialTypes.h"
+#include "Memory/Helpers.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
 #include "RenderFlows/RenderFlowVk.h"
@@ -65,8 +67,12 @@ public:
   //
   // --- UTILS -----------------------------------------------------------------
   template <MaterialTypes T>
-  void GetVboIboUboSizes(SubmeshGroups<T> &submeshGroups, VkDeviceSize &vboSize,
-                         VkDeviceSize &iboSize, VkDeviceSize &uboSize);
+  void GetAccSubmeshesBufferSizes(SubmeshGroups<T> &submeshGroups,
+                                  AccSubmeshBufferSizes &sizes);
+
+  template <GameObjectType T>
+  void GetAccGameObjectsBufferSizes(std::vector<T *> &gameObjects,
+                                    AccGameObjectUboSizes &sizes);
 
 public:
   [[nodiscard]] inline static MemoryFactoryVk *Get() {

@@ -3,6 +3,7 @@
 #include "MathConstants.h"
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/fwd.hpp>
+#include <type_traits>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -176,6 +177,34 @@ void GameObject::SetScale(glm::vec3 scale) {
 void GameObject::UpdateScaleMatrix() {
   m_scaleMatrix = glm::scale(PC_IDENTITY_MAT4, m_scale);
   UpdateLocalMatrix();
+};
+
+template <GameObjectType T>
+bool PC_ValidateAndAddGameObject(T *gameObject, std::vector<T *> &gameObjects) {
+  auto ptr = std::find(gameObjects.begin(), gameObjects.end(), gameObject);
+
+  if (ptr != gameObjects.end()) {
+    PC_WARN("GameObject already exists in the gameObject library!")
+    return false;
+  };
+
+  gameObjects.emplace_back(gameObject);
+  return true;
+};
+
+// Doesn't delete, just erases
+template <GameObjectType T>
+bool PC_ValidateAndRemoveGameObject(T *gameObject,
+                                    std::vector<T *> &gameObjects) {
+  auto ptr = std::find(gameObjects.begin(), gameObjects.end(), gameObject);
+
+  if (ptr == gameObjects.end()) {
+    PC_WARN("GameObject not found!")
+    return false;
+  };
+
+  gameObjects.erase(ptr);
+  return true;
 };
 
 GFX_NAMESPACE_END

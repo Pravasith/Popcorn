@@ -18,8 +18,9 @@ struct CameraUniform : public UniformBuffer<128> { // aligned to 128B (of 256)
   glm::mat4 projMatrix{1.0f}; // 64B - each column-vector is 16B
 };
 
-struct GameObjectUniform : public UniformBuffer<64> { // aligned to 64B (of 256)
-  glm::mat4 worldMatrix{1.0f};                        // 64B
+struct WorldMatrixUniform
+    : public UniformBuffer<64> { // aligned to 64B (of 256)
+  glm::mat4 worldMatrix{1.0f};   // 64B
 };
 
 struct BasicMaterialUniform

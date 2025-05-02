@@ -193,8 +193,8 @@ void RendererVk::AssignSceneObjectsToRenderFlows() {
 
 void RendererVk::ProcessGameObjectNode(GameObject *node) { // Recursive
   switch (node->GetType()) {
-  case Popcorn::Gfx::GameObjectTypes::Mesh: {
-    // Add Mesh
+  case Popcorn::Gfx::GameObjectTypes::Mesh: //
+  {
     auto *mesh = static_cast<Mesh *>(node);
     for (auto &basicSubmesh : mesh->GetSubmeshes<MaterialTypes::BasicMat>()) {
       RenderFlowVk::AddSubmesh(&basicSubmesh);
@@ -203,15 +203,32 @@ void RendererVk::ProcessGameObjectNode(GameObject *node) { // Recursive
       RenderFlowVk::AddSubmesh(&pbrSubmesh);
     };
   } break;
-  case Popcorn::Gfx::GameObjectTypes::Camera:
-    // Add Camera (to extract projection & view matrices)
-    break;
-  case Popcorn::Gfx::GameObjectTypes::Empty:
-    // Workflows have nothing to do with this type as of now
-    break;
-  case Popcorn::Gfx::GameObjectTypes::None:
+
+  case Popcorn::Gfx::GameObjectTypes::Camera: //
+  {
+    auto *camera = static_cast<Camera *>(node);
+    RenderFlowVk::AddCamera(camera);
+  }
+  // Add Camera (to extract projection & view matrices)
+  break;
+
+  case Popcorn::Gfx::GameObjectTypes::Empty: // Workflows have nothing to do
+                                             // with this type as of now
+  {
+    auto *empty = static_cast<Empty *>(node);
+    RenderFlowVk::AddEmpty(empty);
+  } break;
+
+  case Popcorn::Gfx::GameObjectTypes::Light: //
+  {
+    auto *light = static_cast<Light *>(node);
+    RenderFlowVk::AddLight(light);
+  } break;
+
+  case Popcorn::Gfx::GameObjectTypes::None: //
+  {
     PC_ERROR("Wrong gameObject type", "RendererVk")
-    break;
+  } break;
   }
 
   for (auto &child : node->GetChildren()) {

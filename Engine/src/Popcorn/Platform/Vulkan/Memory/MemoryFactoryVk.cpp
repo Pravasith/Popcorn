@@ -1,6 +1,7 @@
 #include "Memory/MemoryFactoryVk.h"
 #include "BufferObjectsVk.h"
 #include "ContextVk.h"
+#include "GameObject.h"
 #include "GlobalMacros.h"
 #include "MaterialTypes.h"
 #include "Memory/Helpers.h"
@@ -15,18 +16,11 @@ GFX_NAMESPACE_BEGIN
 void MemoryFactoryVk::AllocVboIboStagingBuffers(VkDeviceSize vboSize,
                                                 VkDeviceSize iboSize) {
 
-  VkPhysicalDeviceProperties properties{};
-  ContextVk::Device()->GetPhysicalDeviceProperties(properties);
-
-  VkDeviceSize alignedVboSize =
-      PC_AlignCeil(vboSize, properties.limits.optimalBufferCopyOffsetAlignment);
-  VkDeviceSize alignedIboSize =
-      PC_AlignCeil(iboSize, properties.limits.optimalBufferCopyOffsetAlignment);
   //
   // -----------------------------------------------------------------------
   // --- VERTEX BUFFERS CREATION -------------------------------------------
   VkBufferCreateInfo vboStagingInfo{};
-  BufferVkUtils::GetDefaultVkBufferState(vboStagingInfo, alignedVboSize);
+  BufferVkUtils::GetDefaultVkBufferState(vboStagingInfo, vboSize);
   vboStagingInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 
   VmaAllocationCreateInfo vboStagingVmaInfo{};
@@ -54,7 +48,7 @@ void MemoryFactoryVk::AllocVboIboStagingBuffers(VkDeviceSize vboSize,
   // -----------------------------------------------------------------------
   // --- INDEX BUFFERS CREATION --------------------------------------------
   VkBufferCreateInfo iboStagingInfo{};
-  BufferVkUtils::GetDefaultVkBufferState(iboStagingInfo, alignedIboSize);
+  BufferVkUtils::GetDefaultVkBufferState(iboStagingInfo, iboSize);
   iboStagingInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 
   VmaAllocationCreateInfo iboStagingVmaInfo{};
@@ -76,29 +70,15 @@ void MemoryFactoryVk::AllocVboIboStagingBuffers(VkDeviceSize vboSize,
   };
 }
 
-void MemoryFactoryVk::FlushVBOsAndIBOsStagingToLocal(
-    VkDeviceSize submeshVbosSize, VkDeviceSize submeshIbosSize) {
-  VkPhysicalDeviceProperties properties{};
-  ContextVk::Device()->GetPhysicalDeviceProperties(properties);
-  VkDeviceSize alignedVboSize = PC_AlignCeil(
-      submeshVbosSize, properties.limits.optimalBufferCopyOffsetAlignment);
-  VkDeviceSize alignedIboSize = PC_AlignCeil(
-      submeshIbosSize, properties.limits.optimalBufferCopyOffsetAlignment);
-
-  BufferVkUtils::CopyStagingToMainBuffers(m_vboStaging, m_vbo, alignedVboSize);
-  BufferVkUtils::CopyStagingToMainBuffers(m_iboStaging, m_ibo, alignedIboSize);
+void MemoryFactoryVk::FlushVBOsAndIBOsStagingToLocal(VkDeviceSize vbosSize,
+                                                     VkDeviceSize ibosSize) {
+  BufferVkUtils::CopyStagingToMainBuffers(m_vboStaging, m_vbo, vbosSize);
+  BufferVkUtils::CopyStagingToMainBuffers(m_iboStaging, m_ibo, ibosSize);
 };
 
-void MemoryFactoryVk::AllocVboIboLocalBuffers(VkDeviceSize vboSize,
-                                              VkDeviceSize iboSize) {
+void MemoryFactoryVk::AllocVboIboLocalBuffers(VkDeviceSize vbosSize,
+                                              VkDeviceSize ibosSize) {
 
-  VkPhysicalDeviceProperties properties{};
-  ContextVk::Device()->GetPhysicalDeviceProperties(properties);
-
-  VkDeviceSize alignedVboSize =
-      PC_AlignCeil(vboSize, properties.limits.optimalBufferCopyOffsetAlignment);
-  VkDeviceSize alignedIboSize =
-      PC_AlignCeil(iboSize, properties.limits.optimalBufferCopyOffsetAlignment);
   //
   //
   //
@@ -106,7 +86,7 @@ void MemoryFactoryVk::AllocVboIboLocalBuffers(VkDeviceSize vboSize,
   // -----------------------------------------------------------------------
   // --- VERTEX BUFFERS CREATION -------------------------------------------
   VkBufferCreateInfo vboMainInfo{};
-  BufferVkUtils::GetDefaultVkBufferState(vboMainInfo, alignedVboSize);
+  BufferVkUtils::GetDefaultVkBufferState(vboMainInfo, vbosSize);
   vboMainInfo.usage =
       VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
@@ -127,7 +107,7 @@ void MemoryFactoryVk::AllocVboIboLocalBuffers(VkDeviceSize vboSize,
   // -----------------------------------------------------------------------
   // --- INDEX BUFFERS CREATION --------------------------------------------
   VkBufferCreateInfo iboMainInfo{};
-  BufferVkUtils::GetDefaultVkBufferState(iboMainInfo, alignedIboSize);
+  BufferVkUtils::GetDefaultVkBufferState(iboMainInfo, ibosSize);
   iboMainInfo.usage =
       VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
@@ -221,27 +201,21 @@ void MemoryFactoryVk::CopySubmeshGroupToVboIboStagingBuffers(
 };
 
 template <MaterialTypes T>
-void MemoryFactoryVk::GetVboIboUboSizes(SubmeshGroups<T> &submeshGroups,
-                                        VkDeviceSize &vboSize,
-                                        VkDeviceSize &iboSize,
-                                        VkDeviceSize &uboSize) {
-
+void MemoryFactoryVk::GetAccSubmeshesBufferSizes(
+    SubmeshGroups<T> &submeshGroups, AccSubmeshBufferSizes &sizes) {
   auto *device = ContextVk::Device();
   VkPhysicalDeviceProperties properties{};
   device->GetPhysicalDeviceProperties(properties);
   VkDeviceSize alignment = properties.limits.minUniformBufferOffsetAlignment;
 
-  VkDeviceSize vbo = 0, ibo = 0;
-  VkDeviceSize cameraUbo = 0, worldMatrixUbo = 0, basicMatUbo = 0,
-               pbrMatUbo = 0,
-               lightsUbo = 0; // ignore the lightsUbos for now
+  VkDeviceSize vbo = 0, ibo = 0; // temp (not acc)
 
   for (auto &[matId, submeshes] : submeshGroups) {
     if constexpr (T == MaterialTypes::BasicMat) {
-      basicMatUbo +=
+      sizes.basicMatUboSize +=
           PC_AlignCeil(UniformDefs::BasicMaterialUniform::size, alignment);
     } else if constexpr (T == MaterialTypes::PbrMat) {
-      pbrMatUbo +=
+      sizes.pbrMatUboSize +=
           PC_AlignCeil(UniformDefs::PbrMaterialUniform::size, alignment);
     }
 
@@ -254,19 +228,55 @@ void MemoryFactoryVk::GetVboIboUboSizes(SubmeshGroups<T> &submeshGroups,
       IndexBuffer<uint32_t> *indexBuffer = submesh->GetIndexBuffer();
       ibo = indexBuffer->GetCount() * sizeof(uint32_t);
 
-      vboSize += vbo;
-      iboSize += ibo;
+      sizes.vboSize += vbo;
+      sizes.iboSize += ibo;
 
       // --- UBO sizes -------------------------------------------------------
-      worldMatrixUbo +=
-          PC_AlignCeil(UniformDefs::GameObjectUniform::size, alignment);
+      sizes.submeshesWorldMatrixUboSize +=
+          PC_AlignCeil(UniformDefs::WorldMatrixUniform::size, alignment);
     }
   };
 
-  // --- UBO sizes -----------------------------------------------------------
-  cameraUbo = PC_AlignCeil(UniformDefs::CameraUniform::size, alignment);
-  uboSize += worldMatrixUbo + basicMatUbo + pbrMatUbo + cameraUbo;
+  // // --- UBO sizes
+  // ----------------------------------------------------------- cameraUbo =
+  // PC_AlignCeil(UniformDefs::CameraUniform::size, alignment);
 }
+
+template <GameObjectType T>
+void MemoryFactoryVk::GetAccGameObjectsBufferSizes(
+    std::vector<T *> &gameObjects, AccGameObjectUboSizes &sizes) {
+  auto *device = ContextVk::Device();
+  VkPhysicalDeviceProperties properties{};
+  device->GetPhysicalDeviceProperties(properties);
+  VkDeviceSize alignment = properties.limits.minUniformBufferOffsetAlignment;
+
+  for (GameObject *gameObject : gameObjects) {
+    switch (gameObject->GetType()) {
+    case GameObjectTypes::Camera:
+      sizes.camerasWorldMatrixUboSize +=
+          PC_AlignCeil(UniformDefs::CameraUniform::size, alignment);
+      break;
+
+    case GameObjectTypes::Mesh:
+      // handled already in MemoryFactoryVk::GetAccSubmeshesBufferSizes
+      break;
+
+    case GameObjectTypes::Empty:
+      sizes.emptysWorldMatrixUboSize +=
+          PC_AlignCeil(UniformDefs::WorldMatrixUniform::size, alignment);
+      break;
+
+    case GameObjectTypes::Light:
+      sizes.lightsWorldMatrixUboSize +=
+          PC_AlignCeil(UniformDefs::WorldMatrixUniform::size, alignment);
+      break;
+
+    case GameObjectTypes::None:
+      PC_WARN("Unknown GameObject type");
+      break;
+    }
+  }
+};
 
 // Template instantiation (explicit for linker visibility)
 template void MemoryFactoryVk::CopySubmeshGroupToVboIboStagingBuffers<

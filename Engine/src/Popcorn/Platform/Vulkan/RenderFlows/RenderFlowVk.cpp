@@ -1,5 +1,6 @@
 #include "RenderFlows/RenderFlowVk.h"
 #include "ContextVk.h"
+#include "Memory/Helpers.h"
 #include "Memory/MemoryFactoryVk.h"
 #include "Popcorn/Core/Assert.h"
 #include <cstdint>
@@ -23,16 +24,24 @@ void RenderFlowVk::AllocVBOsAndIBOsMemory() {
 
   auto *memoryFactory = ContextVk::MemoryFactory();
 
-  VkDeviceSize vboSize, iboSize, uboSize;
-  // Basic submeshes size
-  memoryFactory->GetVboIboUboSizes(s_basicSubmeshGroups, vboSize, iboSize,
-                                   uboSize);
-  // Pbr submeshes size
-  memoryFactory->GetVboIboUboSizes(s_pbrSubmeshGroups, vboSize, iboSize,
-                                   uboSize);
+  AccSubmeshBufferSizes submeshSizes{};
 
-  memoryFactory->AllocVboIboStagingBuffers(vboSize, iboSize);
-  memoryFactory->AllocVboIboLocalBuffers(vboSize, iboSize);
+  // Basic submeshes size
+  memoryFactory->GetAccSubmeshesBufferSizes(s_basicSubmeshGroups, submeshSizes);
+  // Pbr submeshes size
+  memoryFactory->GetAccSubmeshesBufferSizes(s_pbrSubmeshGroups, submeshSizes);
+
+  VkPhysicalDeviceProperties properties{};
+  ContextVk::Device()->GetPhysicalDeviceProperties(properties);
+
+  // Align for optimal copy offset
+  VkDeviceSize alignedVboSize = PC_AlignCeil(
+      submeshSizes.vboSize, properties.limits.optimalBufferCopyOffsetAlignment);
+  VkDeviceSize alignedIboSize = PC_AlignCeil(
+      submeshSizes.iboSize, properties.limits.optimalBufferCopyOffsetAlignment);
+
+  memoryFactory->AllocVboIboStagingBuffers(alignedVboSize, alignedIboSize);
+  memoryFactory->AllocVboIboLocalBuffers(alignedVboSize, alignedIboSize);
 
   //
   // Copy VBO, IBO data to staging buffers ----------------------------------
@@ -47,14 +56,20 @@ void RenderFlowVk::AllocVBOsAndIBOsMemory() {
   //
   // Copy the staging data to local buffers ---------------------------------
   PC_ASSERT(s_submeshCount, "Submesh count is zero.");
-  memoryFactory->FlushVBOsAndIBOsStagingToLocal(submeshOffsets.vboOffset,
-                                                submeshOffsets.iboOffset);
+  memoryFactory->FlushVBOsAndIBOsStagingToLocal(alignedVboSize, alignedIboSize);
   memoryFactory->CleanUpVboIboStagingBuffers(); // Unmap, deallocate & destroy
 };
 
 void RenderFlowVk::AllocUBOsMemory() {
   auto *memoryFactory = ContextVk::MemoryFactory();
-  memoryFactory->CreateAndAllocUboBuffers();
+  AccGameObjectUboSizes gameObjectSizes{};
+
+  // Get aligned ubo sizes
+  memoryFactory->GetAccGameObjectsBufferSizes(s_cameras, gameObjectSizes);
+  memoryFactory->GetAccGameObjectsBufferSizes(s_emptys, gameObjectSizes);
+  memoryFactory->GetAccGameObjectsBufferSizes(s_lights, gameObjectSizes);
+
+  memoryFactory->AllocUboLocalBuffers();
 
   VkBufferCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;

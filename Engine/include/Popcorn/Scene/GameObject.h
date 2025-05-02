@@ -194,5 +194,16 @@ protected:
   bool m_worldMatrixNeedsUpdate = false;
 };
 
+template <typename T>
+concept GameObjectType = std::is_base_of<GameObject, T>::value;
+
+template <GameObjectType T>
+bool PC_ValidateAndAddGameObject(T *gameObject, std::vector<T *> &gameObjects);
+
+// Doesn't delete, just erases
+template <GameObjectType T>
+bool PC_ValidateAndRemoveGameObject(T *gameObject,
+                                    std::vector<T *> &gameObjects);
+
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
