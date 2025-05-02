@@ -5,6 +5,7 @@
 #include "MaterialTypes.h"
 #include "Memory/Helpers.h"
 #include "RenderFlows/RenderFlowVk.h"
+#include "Uniforms.h"
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
 
@@ -218,6 +219,54 @@ void MemoryFactoryVk::CopySubmeshGroupToVboIboStagingBuffers(
     }
   };
 };
+
+template <MaterialTypes T>
+void MemoryFactoryVk::GetVboIboUboSizes(SubmeshGroups<T> &submeshGroups,
+                                        VkDeviceSize &vboSize,
+                                        VkDeviceSize &iboSize,
+                                        VkDeviceSize &uboSize) {
+
+  auto *device = ContextVk::Device();
+  VkPhysicalDeviceProperties properties{};
+  device->GetPhysicalDeviceProperties(properties);
+  VkDeviceSize alignment = properties.limits.minUniformBufferOffsetAlignment;
+
+  VkDeviceSize vbo = 0, ibo = 0;
+  VkDeviceSize cameraUbo = 0, worldMatrixUbo = 0, basicMatUbo = 0,
+               pbrMatUbo = 0,
+               lightsUbo = 0; // ignore the lightsUbos for now
+
+  for (auto &[matId, submeshes] : submeshGroups) {
+    if constexpr (T == MaterialTypes::BasicMat) {
+      basicMatUbo +=
+          PC_AlignCeil(UniformDefs::BasicMaterialUniform::size, alignment);
+    } else if constexpr (T == MaterialTypes::PbrMat) {
+      pbrMatUbo +=
+          PC_AlignCeil(UniformDefs::PbrMaterialUniform::size, alignment);
+    }
+
+    for (Submesh<T> *submesh : submeshes) {
+      // --- VBO & IBO sizes -------------------------------------------------
+      const BufferDefs::Layout &vboLayout =
+          submesh->GetVertexBuffer()->GetLayout();
+      vbo = vboLayout.countValue * vboLayout.strideValue;
+
+      IndexBuffer<uint32_t> *indexBuffer = submesh->GetIndexBuffer();
+      ibo = indexBuffer->GetCount() * sizeof(uint32_t);
+
+      vboSize += vbo;
+      iboSize += ibo;
+
+      // --- UBO sizes -------------------------------------------------------
+      worldMatrixUbo +=
+          PC_AlignCeil(UniformDefs::GameObjectUniform::size, alignment);
+    }
+  };
+
+  // --- UBO sizes -----------------------------------------------------------
+  cameraUbo = PC_AlignCeil(UniformDefs::CameraUniform::size, alignment);
+  uboSize += worldMatrixUbo + basicMatUbo + pbrMatUbo + cameraUbo;
+}
 
 // Template instantiation (explicit for linker visibility)
 template void MemoryFactoryVk::CopySubmeshGroupToVboIboStagingBuffers<

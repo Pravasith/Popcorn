@@ -6,7 +6,9 @@
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
 #include "RenderFlows/RenderFlowVk.h"
+#include "Uniforms.h"
 #include <cstring>
+#include <glm/fwd.hpp>
 #include <unordered_map>
 #include <vector>
 #include <vk_mem_alloc.h>
@@ -64,33 +66,7 @@ public:
   // --- UTILS -----------------------------------------------------------------
   template <MaterialTypes T>
   void GetVboIboUboSizes(SubmeshGroups<T> &submeshGroups, VkDeviceSize &vboSize,
-                         VkDeviceSize &iboSize, VkDeviceSize &uboSize) {
-    VkDeviceSize vbo, ibo, ubo;
-
-    // auto *device = ContextVk::Device();
-    // VkPhysicalDeviceProperties properties{};
-    // device->GetPhysicalDeviceProperties(properties);
-    // VkDeviceSize alignment =
-    // properties.limits.optimalBufferCopyOffsetAlignment;
-
-    for (auto &[matId, submeshes] : submeshGroups) {
-      for (Submesh<T> *submesh : submeshes) {
-        const BufferDefs::Layout &vboLayout =
-            submesh->GetVertexBuffer()->GetLayout();
-        vbo = vboLayout.countValue * vboLayout.strideValue;
-
-        IndexBuffer<uint32_t> *indexBuffer = submesh->GetIndexBuffer();
-        ibo = indexBuffer->GetCount() * sizeof(uint32_t);
-
-        vboSize += vbo;
-        iboSize += ibo;
-
-        // TODO: Calculate:
-        // - Vbo, ibo total sizes -- DONE
-        // - Calculate ubo final size as well (incl. lights UBOs)
-      }
-    };
-  };
+                         VkDeviceSize &iboSize, VkDeviceSize &uboSize);
 
 public:
   [[nodiscard]] inline static MemoryFactoryVk *Get() {
@@ -163,6 +139,7 @@ private:
   // Host-visible -----------------------------------------------------------
   VkBuffer m_ubo;
   VmaAllocation m_uboAlloc;
+  void *m_uboMapping;
 
   using VboIboOffsets =
       std::unordered_map<MaterialHashType,

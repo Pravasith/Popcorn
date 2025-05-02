@@ -8,27 +8,43 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 UNIFORM_DEFS_NAMESPACE_BEGIN
 
-struct CameraUniform {
-  glm::mat4 viewMatrix{1.0f}; // aligned to 64 - each column-vector is 16
-  glm::mat4 projMatrix{1.0f}; // aligned to 64 - each column-vector is 16
+template <size_t Size> struct UniformBuffer {
+  // Internally aligned size
+  static constexpr size_t size = Size;
 };
 
-struct GameObjectUniform {
-  glm::mat4 worldMatrix{1.0f}; // aligned to 64
+struct CameraUniform : public UniformBuffer<128> { // aligned to 128B (of 256)
+  glm::mat4 viewMatrix{1.0f}; // 64B - each column-vector is 16B
+  glm::mat4 projMatrix{1.0f}; // 64B - each column-vector is 16B
 };
 
-struct BasicMaterialUniform {
-  glm::vec4 baseColorFactor{1.0f}; // aligned to 16
+struct GameObjectUniform : public UniformBuffer<64> { // aligned to 64B (of 256)
+  glm::mat4 worldMatrix{1.0f};                        // 64B
 };
 
-struct PbrMaterialUniform {
-  glm::vec4 baseColorFactor{1.0f};     // aligned to 16
-  float metallicFactor = 1.0f;         // aligned to 4
-  float roughnessFactor = 1.0f;        // aligned to 4
-  float alphaCutoff = 0.5f;            // aligned to 4
-  int hasBaseColorTexture = 0;         // aligned to 4
-  int hasNormalTexture = 0;            // aligned to 4
-  int hasMetallicRoughnessTexture = 0; // aligned to 4
+struct BasicMaterialUniform
+    : public UniformBuffer<16> {   // aligned to 16B (of 256)
+  glm::vec4 baseColorFactor{1.0f}; // 16B
+  // TODO: Add other material properties in the future cause right
+  // now a lot of space is wasted (256 - 16)!!
+};
+
+struct PbrMaterialUniform
+    : public UniformBuffer<16 + 16 + 16> { // aligned to 48B (of 256)
+  glm::vec4 baseColorFactor{1.0f};         // 16B
+                                           //
+  float metallicFactor = 1.0f;             // 4B
+  float roughnessFactor = 1.0f;            // 4B
+  float alphaCutoff = 0.5f;                // 4B
+  int hasBaseColorTexture = 0;             // 4B
+                                           //
+  int hasNormalTexture = 0;                // 4B
+  int hasMetallicRoughnessTexture = 0;     // 4B
+                                           // padding - 8B
+};
+
+struct LightsUniform : public UniformBuffer<16> { // aligned to 16B (of 256)
+  glm::vec3 position{};                           // 16B
 };
 
 UNIFORM_DEFS_NAMESPACE_END
