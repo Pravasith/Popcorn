@@ -1,4 +1,5 @@
 #include "FrameVk.h"
+#include "CommonVk.h"
 #include "ContextVk.h"
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
@@ -15,7 +16,7 @@ void FrameVk::CreateRenderSyncObjects() {
   auto *deviceVkStn = DeviceVk::Get();
   auto &device = deviceVkStn->GetDevice();
 
-  constexpr uint32_t maxFramesInFlight = ContextVk::MAX_FRAMES_IN_FLIGHT;
+  constexpr uint32_t maxFramesInFlight = MAX_FRAMES_IN_FLIGHT;
 
   m_imageAvailableSemaphores.resize(maxFramesInFlight);
   m_frameRenderedSemaphores.resize(maxFramesInFlight);
@@ -119,7 +120,7 @@ void FrameVk::Draw(
   // steps after the gameloop in the program (usually cleanup)
   vkDeviceWaitIdle(device);
 
-  m_currentFrame = (m_currentFrame + 1) % ContextVk::MAX_FRAMES_IN_FLIGHT;
+  m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 };
 
 void FrameVk::PresentImageToSwapchain(VkSemaphore *signalSemaphores,
@@ -207,7 +208,7 @@ void FrameVk::SubmitDrawCommands(const VkCommandBuffer &commandBuffer,
 void FrameVk::CleanUp() {
   auto &device = DeviceVk::Get()->GetDevice();
 
-  for (int i = 0; i < ContextVk::MAX_FRAMES_IN_FLIGHT; ++i) {
+  for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
     vkDestroySemaphore(device, m_imageAvailableSemaphores[i], nullptr);
     vkDestroySemaphore(device, m_frameRenderedSemaphores[i], nullptr);
     vkDestroyFence(device, m_inFlightFences[i], nullptr);

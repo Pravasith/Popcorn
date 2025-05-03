@@ -150,8 +150,7 @@ void LightingRenderFlowVk::CreateAndAllocDescriptors() {
   VkDescriptorSetLayout &lightingLayout =
       ContextVk::DescriptorLayouts()->GetLayout<DescriptorSets::LightingSet>();
 
-  std::array<VkDescriptorSetLayout, ContextVk::MAX_FRAMES_IN_FLIGHT>
-      lightingLayouts{};
+  std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> lightingLayouts{};
   std::fill(lightingLayouts.begin(), lightingLayouts.end(), lightingLayout);
 
   DPoolVk &lightsPool = pools->GetPool<DescriptorPools::LightingPool>();
@@ -159,7 +158,7 @@ void LightingRenderFlowVk::CreateAndAllocDescriptors() {
   // Creates multiple sets (from Count template param)
   std::vector<VkDescriptorSet> lightingSets =
       lightsPool.AllocateDescriptorSets<DescriptorSets::LightingSet,
-                                        ContextVk::MAX_FRAMES_IN_FLIGHT>(
+                                        MAX_FRAMES_IN_FLIGHT>(
           ContextVk::Device()->GetDevice(), lightingLayouts);
 };
 

@@ -49,25 +49,25 @@ DPoolVk &DescriptorPoolsVk::GetPool<DescriptorPools::GBufferPool>() {
   if (m_pools.find(DescriptorPools::GBufferPool) == m_pools.end()) {
     VkDescriptorPoolSize poolSize0 = {.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                       .descriptorCount =
-                                          1 * ContextVk::MAX_FRAMES_IN_FLIGHT};
+                                          1 * MAX_FRAMES_IN_FLIGHT};
 
     VkDescriptorPoolSize poolSize1 = {
         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-        .descriptorCount = 1 * ContextVk::MAX_FRAMES_IN_FLIGHT};
+        .descriptorCount = 1 * MAX_FRAMES_IN_FLIGHT};
 
     VkDescriptorPoolSize poolSize2 = {
         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-        .descriptorCount = 1 * ContextVk::MAX_FRAMES_IN_FLIGHT};
+        .descriptorCount = 1 * MAX_FRAMES_IN_FLIGHT};
 
     VkDescriptorPoolSize poolSize3 = {
         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-        .descriptorCount = 1 * ContextVk::MAX_FRAMES_IN_FLIGHT};
+        .descriptorCount = 1 * MAX_FRAMES_IN_FLIGHT};
 
     VkDescriptorPoolSize poolSizes[4]{poolSize0, poolSize1, poolSize2,
                                       poolSize3};
 
     DPoolVk dPool{};
-    dPool.Create(poolSizes, 4, 4 * ContextVk::MAX_FRAMES_IN_FLIGHT);
+    dPool.Create(poolSizes, 4, 4 * MAX_FRAMES_IN_FLIGHT);
 
     m_pools[DescriptorPools::GBufferPool] = dPool;
   }
@@ -80,28 +80,25 @@ DPoolVk &DescriptorPoolsVk::GetPool<DescriptorPools::LightingPool>() {
   if (m_pools.find(DescriptorPools::LightingPool) == m_pools.end()) {
     VkDescriptorPoolSize poolSize0 = {
         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-        .descriptorCount = 1 * ContextVk::MAX_FRAMES_IN_FLIGHT}; // Lights UBO
+        .descriptorCount = 1 * MAX_FRAMES_IN_FLIGHT}; // Lights UBO
 
     VkDescriptorPoolSize poolSize1 = {
         .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-        .descriptorCount =
-            1 * ContextVk::MAX_FRAMES_IN_FLIGHT}; // Albedo image + sampler
+        .descriptorCount = 1 * MAX_FRAMES_IN_FLIGHT}; // Albedo image + sampler
 
     VkDescriptorPoolSize poolSize2 = {
         .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-        .descriptorCount =
-            1 * ContextVk::MAX_FRAMES_IN_FLIGHT}; // Depth image + sampler
+        .descriptorCount = 1 * MAX_FRAMES_IN_FLIGHT}; // Depth image + sampler
 
     VkDescriptorPoolSize poolSize3 = {
         .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-        .descriptorCount =
-            1 * ContextVk::MAX_FRAMES_IN_FLIGHT}; // Normals image + sampler
+        .descriptorCount = 1 * MAX_FRAMES_IN_FLIGHT}; // Normals image + sampler
 
     VkDescriptorPoolSize poolSizes[4]{poolSize0, poolSize1, poolSize2,
                                       poolSize3};
 
     DPoolVk dPool{};
-    dPool.Create(poolSizes, 4, 4 * ContextVk::MAX_FRAMES_IN_FLIGHT);
+    dPool.Create(poolSizes, 4, 4 * MAX_FRAMES_IN_FLIGHT);
 
     m_pools[DescriptorPools::LightingPool] = dPool;
   }
@@ -115,13 +112,12 @@ DPoolVk &DescriptorPoolsVk::GetPool<DescriptorPools::CompositePool>() {
 
     VkDescriptorPoolSize poolSize0 = {
         .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-        .descriptorCount =
-            1 * ContextVk::MAX_FRAMES_IN_FLIGHT}; // Lights image + sampler
+        .descriptorCount = 1 * MAX_FRAMES_IN_FLIGHT}; // Lights image + sampler
 
     VkDescriptorPoolSize poolSizes[1]{poolSize0};
 
     DPoolVk dPool{};
-    dPool.Create(poolSizes, 1, 1 * ContextVk::MAX_FRAMES_IN_FLIGHT);
+    dPool.Create(poolSizes, 1, 1 * MAX_FRAMES_IN_FLIGHT);
 
     m_pools[DescriptorPools::CompositePool] = dPool;
   }

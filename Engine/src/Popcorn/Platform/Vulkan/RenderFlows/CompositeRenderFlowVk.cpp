@@ -155,8 +155,7 @@ void CompositeRenderFlowVk::CreateAndAllocDescriptors() {
   VkDescriptorSetLayout &compositeLayout =
       ContextVk::DescriptorLayouts()->GetLayout<DescriptorSets::CompositeSet>();
 
-  std::array<VkDescriptorSetLayout, ContextVk::MAX_FRAMES_IN_FLIGHT>
-      compositeLayouts{};
+  std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> compositeLayouts{};
   std::fill(compositeLayouts.begin(), compositeLayouts.end(), compositeLayout);
 
   DPoolVk &compositePool = pools->GetPool<DescriptorPools::CompositePool>();
@@ -164,7 +163,7 @@ void CompositeRenderFlowVk::CreateAndAllocDescriptors() {
   // Creates multiple sets (from Count template param)
   std::vector<VkDescriptorSet> compositeSets =
       compositePool.AllocateDescriptorSets<DescriptorSets::CompositeSet,
-                                           ContextVk::MAX_FRAMES_IN_FLIGHT>(
+                                           MAX_FRAMES_IN_FLIGHT>(
           ContextVk::Device()->GetDevice(), compositeLayouts);
 };
 

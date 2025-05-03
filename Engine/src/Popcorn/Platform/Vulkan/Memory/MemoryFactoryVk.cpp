@@ -1,5 +1,6 @@
 #include "Memory/MemoryFactoryVk.h"
 #include "BufferObjectsVk.h"
+#include "CommonVk.h"
 #include "ContextVk.h"
 #include "GameObject.h"
 #include "GlobalMacros.h"
@@ -122,48 +123,6 @@ void MemoryFactoryVk::AllocVboIboLocalBuffers(VkDeviceSize vbosSize,
   };
 }
 
-void MemoryFactoryVk::CleanUpVboIboStagingBuffers() {
-  auto &allocator = ContextVk::MemoryAllocator()->GetVMAAllocator();
-
-  if (m_vboStagingMapping) {
-    vmaUnmapMemory(allocator, m_vboStagingAlloc);
-    m_vboStagingMapping = nullptr;
-  }
-
-  if (m_iboStagingMapping) {
-    vmaUnmapMemory(allocator, m_iboStagingAlloc);
-    m_iboStagingMapping = nullptr;
-  }
-
-  if (m_vboStaging != VK_NULL_HANDLE && m_vboStagingAlloc) {
-    vmaDestroyBuffer(allocator, m_vboStaging, m_vboStagingAlloc);
-    m_vboStaging = VK_NULL_HANDLE;
-    m_vboStagingAlloc = nullptr;
-  }
-
-  if (m_iboStaging != VK_NULL_HANDLE && m_iboStagingAlloc) {
-    vmaDestroyBuffer(allocator, m_iboStaging, m_iboStagingAlloc);
-    m_iboStaging = VK_NULL_HANDLE;
-    m_iboStagingAlloc = nullptr;
-  }
-};
-
-void MemoryFactoryVk::CleanUpVboIboLocalBuffers() {
-  auto &allocator = ContextVk::MemoryAllocator()->GetVMAAllocator();
-
-  if (m_vbo != VK_NULL_HANDLE && m_vboAlloc) {
-    vmaDestroyBuffer(allocator, m_vbo, m_vboAlloc);
-    m_vbo = VK_NULL_HANDLE;
-    m_vboAlloc = nullptr;
-  }
-
-  if (m_ibo != VK_NULL_HANDLE && m_iboAlloc) {
-    vmaDestroyBuffer(allocator, m_ibo, m_iboAlloc);
-    m_ibo = VK_NULL_HANDLE;
-    m_iboAlloc = nullptr;
-  }
-};
-
 template <MaterialTypes T>
 void MemoryFactoryVk::CopySubmeshGroupToVboIboStagingBuffers(
     SubmeshOffsets &accSubmeshGroupOffsets,
@@ -242,40 +201,94 @@ void MemoryFactoryVk::GetAccSubmeshesBufferSizes(
   // PC_AlignCeil(UniformDefs::CameraUniform::size, alignment);
 }
 
-template <GameObjectType T>
-void MemoryFactoryVk::GetAccGameObjectsBufferSizes(
-    std::vector<T *> &gameObjects, AccGameObjectUboSizes &sizes) {
-  auto *device = ContextVk::Device();
-  VkPhysicalDeviceProperties properties{};
-  device->GetPhysicalDeviceProperties(properties);
-  VkDeviceSize alignment = properties.limits.minUniformBufferOffsetAlignment;
+void MemoryFactoryVk::AllocUboLocalBuffers(
+    AccSubmeshBufferSizes &submeshSizes,
+    AccGameObjectUboSizes &gameObjectSizes) {
+  VkDeviceSize totalUboSize =
+      //
+      submeshSizes.submeshesWorldMatrixUboSize + submeshSizes.basicMatUboSize +
+      submeshSizes.pbrMatUboSize +
+      //
+      gameObjectSizes.emptysWorldMatrixUboSize +
+      gameObjectSizes.lightsWorldMatrixUboSize +
+      gameObjectSizes.camerasWorldMatrixUboSize;
 
-  for (GameObject *gameObject : gameObjects) {
-    switch (gameObject->GetType()) {
-    case GameObjectTypes::Camera:
-      sizes.camerasWorldMatrixUboSize +=
-          PC_AlignCeil(UniformDefs::CameraUniform::size, alignment);
-      break;
+  VkBufferCreateInfo createInfo{};
+  createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+  createInfo.size = totalUboSize;
+  createInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+  createInfo.sharingMode =
+      VK_SHARING_MODE_EXCLUSIVE; // not sharing other queues
 
-    case GameObjectTypes::Mesh:
-      // handled already in MemoryFactoryVk::GetAccSubmeshesBufferSizes
-      break;
+  VmaAllocationCreateInfo allocCreateInfo{};
+  allocCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+  allocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
-    case GameObjectTypes::Empty:
-      sizes.emptysWorldMatrixUboSize +=
-          PC_AlignCeil(UniformDefs::WorldMatrixUniform::size, alignment);
-      break;
+  for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+    VmaAllocationInfo allocInfo{};
+    if (vmaCreateBuffer(ContextVk::MemoryAllocator()->GetVMAAllocator(),
+                        &createInfo, &allocCreateInfo, &m_uboSet[i],
+                        &m_uboAllocSet[i], &allocInfo) != VK_SUCCESS) {
+      throw std::runtime_error("Failed to create uniform buffer");
+    };
+    m_uboMappingSet[i] = allocInfo.pMappedData;
+  };
+};
 
-    case GameObjectTypes::Light:
-      sizes.lightsWorldMatrixUboSize +=
-          PC_AlignCeil(UniformDefs::WorldMatrixUniform::size, alignment);
-      break;
+// Clean up functions --------------------------------------------------------
+void MemoryFactoryVk::CleanUpVboIboStagingBuffers() {
+  auto &allocator = ContextVk::MemoryAllocator()->GetVMAAllocator();
 
-    case GameObjectTypes::None:
-      PC_WARN("Unknown GameObject type");
-      break;
-    }
+  if (m_vboStagingMapping) {
+    vmaUnmapMemory(allocator, m_vboStagingAlloc);
+    m_vboStagingMapping = nullptr;
   }
+
+  if (m_iboStagingMapping) {
+    vmaUnmapMemory(allocator, m_iboStagingAlloc);
+    m_iboStagingMapping = nullptr;
+  }
+
+  if (m_vboStaging != VK_NULL_HANDLE && m_vboStagingAlloc) {
+    vmaDestroyBuffer(allocator, m_vboStaging, m_vboStagingAlloc);
+    m_vboStaging = VK_NULL_HANDLE;
+    m_vboStagingAlloc = nullptr;
+  }
+
+  if (m_iboStaging != VK_NULL_HANDLE && m_iboStagingAlloc) {
+    vmaDestroyBuffer(allocator, m_iboStaging, m_iboStagingAlloc);
+    m_iboStaging = VK_NULL_HANDLE;
+    m_iboStagingAlloc = nullptr;
+  }
+};
+
+void MemoryFactoryVk::CleanUpVboIboLocalBuffers() {
+  auto &allocator = ContextVk::MemoryAllocator()->GetVMAAllocator();
+
+  if (m_vbo != VK_NULL_HANDLE && m_vboAlloc) {
+    vmaDestroyBuffer(allocator, m_vbo, m_vboAlloc);
+    m_vbo = VK_NULL_HANDLE;
+    m_vboAlloc = nullptr;
+  }
+
+  if (m_ibo != VK_NULL_HANDLE && m_iboAlloc) {
+    vmaDestroyBuffer(allocator, m_ibo, m_iboAlloc);
+    m_ibo = VK_NULL_HANDLE;
+    m_iboAlloc = nullptr;
+  }
+};
+
+void MemoryFactoryVk::CleanUpUboBuffers() {
+  auto &allocator = ContextVk::MemoryAllocator()->GetVMAAllocator();
+
+  for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+    if (m_uboSet[i] != VK_NULL_HANDLE && m_uboAllocSet[i]) {
+      vmaDestroyBuffer(allocator, m_uboSet[i], m_uboAllocSet[i]);
+      m_uboSet[i] = VK_NULL_HANDLE;
+      m_uboAllocSet[i] = nullptr;
+      m_uboMappingSet[i] = nullptr;
+    }
+  };
 };
 
 // Template instantiation (explicit for linker visibility)
@@ -292,6 +305,16 @@ MemoryFactoryVk::CopySubmeshGroupToVboIboStagingBuffers<MaterialTypes::PbrMat>(
     const std::unordered_map<MaterialHashType,
                              std::vector<Submesh<MaterialTypes::PbrMat> *>>
         &submeshGroups);
+
+template <>
+void MemoryFactoryVk::GetAccSubmeshesBufferSizes<MaterialTypes::BasicMat>(
+    SubmeshGroups<MaterialTypes::BasicMat> &submeshGroups,
+    AccSubmeshBufferSizes &sizes) {};
+
+template <>
+void MemoryFactoryVk::GetAccSubmeshesBufferSizes<MaterialTypes::PbrMat>(
+    SubmeshGroups<MaterialTypes::PbrMat> &submeshGroups,
+    AccSubmeshBufferSizes &sizes) {};
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

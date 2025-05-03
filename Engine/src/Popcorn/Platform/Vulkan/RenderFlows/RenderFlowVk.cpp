@@ -20,7 +20,6 @@ void RenderFlowVk::AllocVBOsAndIBOsMemory() {
 
   // pbrMat1 : [sm1, sm2, sm3, ... ]
   // pbrMat2 : [sm1, sm2 ... ]
-  //
 
   auto *memoryFactory = ContextVk::MemoryFactory();
 
@@ -64,29 +63,27 @@ void RenderFlowVk::AllocUBOsMemory() {
   auto *memoryFactory = ContextVk::MemoryFactory();
   AccGameObjectUboSizes gameObjectSizes{};
 
+  VkPhysicalDeviceProperties properties{};
+  ContextVk::Device()->GetPhysicalDeviceProperties(properties);
+
   // Get aligned ubo sizes
-  memoryFactory->GetAccGameObjectsBufferSizes(s_cameras, gameObjectSizes);
-  memoryFactory->GetAccGameObjectsBufferSizes(s_emptys, gameObjectSizes);
-  memoryFactory->GetAccGameObjectsBufferSizes(s_lights, gameObjectSizes);
+  memoryFactory->GetAccGameObjectsBufferSizes(s_cameras, gameObjectSizes,
+                                              properties);
+  memoryFactory->GetAccGameObjectsBufferSizes(s_emptys, gameObjectSizes,
+                                              properties);
+  memoryFactory->GetAccGameObjectsBufferSizes(s_lights, gameObjectSizes,
+                                              properties);
 
-  memoryFactory->AllocUboLocalBuffers();
-
-  VkBufferCreateInfo createInfo{};
-  createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-  createInfo.size = 0;
-  createInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-  createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-  VmaAllocationCreateInfo allocCreateInfo{};
-  allocCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
-  allocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
+  memoryFactory->AllocUboLocalBuffers(gameObjectSizes);
 };
 
-void RenderFlowVk::FreeUBOsMemory() {};
+void RenderFlowVk::FreeUBOsMemory() {
+  ContextVk::MemoryFactory()->CleanUpUboBuffers();
+};
 
 void RenderFlowVk::FreeVBOsAndIBOsMemory() {
-  auto *memoryFactory = ContextVk::MemoryFactory();
-  memoryFactory->CleanUpVboIboLocalBuffers(); // Deallocate & destroy
+  ContextVk::MemoryFactory()
+      ->CleanUpVboIboLocalBuffers(); // Deallocate & destroy
 };
 
 void RenderFlowVk::ProcessSceneUpdates(const uint32_t currentFrame) {

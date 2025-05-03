@@ -24,5 +24,7 @@ struct QueueFamilyIndices {
   }
 };
 
+constexpr static uint32_t MAX_FRAMES_IN_FLIGHT = 2;
+
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

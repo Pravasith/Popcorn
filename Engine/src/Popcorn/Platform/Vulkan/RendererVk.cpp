@@ -84,7 +84,8 @@ RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
 
 RendererVk::~RendererVk() {
   // Renderflow clean ups
-  RenderFlowVk::DestroyVBOsAndIBOs();
+  RenderFlowVk::FreeVBOsAndIBOsMemory();
+  RenderFlowVk::FreeUBOsMemory();
 
   for (auto &renderFlow : s_renderFlows) {
     renderFlow->CleanUp();

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "CommonVk.h"
 #include "DeviceVk.h"
 #include "GameObject.h"
 #include "GlobalMacros.h"
@@ -31,7 +32,7 @@ struct SubmeshOffsets {
 };
 
 enum UboViews {
-  WorldMatrix = 1,
+  WorldMatrixValues = 1,
   BasicMatValues,
   PbrMatValues,
   LightsValues,
@@ -58,11 +59,14 @@ public:
                                       VkDeviceSize submeshIbosSize);
 
   void AllocVboIboLocalBuffers(VkDeviceSize vboSize, VkDeviceSize iboSize);
+
   void CleanUpVboIboLocalBuffers();
+  void CleanUpUboBuffers();
 
   //
   // --- UBOs ------------------------------------------------------------------
-  void AllocUboLocalBuffers();
+  void AllocUboLocalBuffers(AccSubmeshBufferSizes &submeshSizes,
+                            AccGameObjectUboSizes &gameObjectSizes);
 
   //
   // --- UTILS -----------------------------------------------------------------
@@ -72,7 +76,37 @@ public:
 
   template <GameObjectType T>
   void GetAccGameObjectsBufferSizes(std::vector<T *> &gameObjects,
-                                    AccGameObjectUboSizes &sizes);
+                                    AccGameObjectUboSizes &sizes,
+                                    VkPhysicalDeviceProperties &properties) {
+    VkDeviceSize alignment = properties.limits.minUniformBufferOffsetAlignment;
+
+    for (GameObject *gameObject : gameObjects) {
+      switch (gameObject->GetType()) {
+      case GameObjectTypes::Camera:
+        sizes.camerasWorldMatrixUboSize +=
+            PC_AlignCeil(UniformDefs::CameraUniform::size, alignment);
+        break;
+
+      case GameObjectTypes::Mesh:
+        // handled already in MemoryFactoryVk::GetAccSubmeshesBufferSizes
+        break;
+
+      case GameObjectTypes::Empty:
+        sizes.emptysWorldMatrixUboSize +=
+            PC_AlignCeil(UniformDefs::WorldMatrixUniform::size, alignment);
+        break;
+
+      case GameObjectTypes::Light:
+        sizes.lightsWorldMatrixUboSize +=
+            PC_AlignCeil(UniformDefs::WorldMatrixUniform::size, alignment);
+        break;
+
+      case GameObjectTypes::None:
+        PC_WARN("Unknown GameObject type");
+        break;
+      }
+    }
+  };
 
 public:
   [[nodiscard]] inline static MemoryFactoryVk *Get() {
@@ -143,9 +177,9 @@ private:
 
   //
   // Host-visible -----------------------------------------------------------
-  VkBuffer m_ubo;
-  VmaAllocation m_uboAlloc;
-  void *m_uboMapping;
+  std::array<VkBuffer, MAX_FRAMES_IN_FLIGHT> m_uboSet;
+  std::array<VmaAllocation, MAX_FRAMES_IN_FLIGHT> m_uboAllocSet;
+  std::array<void *, MAX_FRAMES_IN_FLIGHT> m_uboMappingSet;
 
   using VboIboOffsets =
       std::unordered_map<MaterialHashType,
@@ -160,9 +194,9 @@ private:
   using UboBufferViewMap = std::unordered_map<UboViews, UboBufferView>;
 
   UboBufferViewMap m_uboBufferViewMap{
-      {UboViews::WorldMatrix, {}},  {UboViews::BasicMatValues, {}},
-      {UboViews::PbrMatValues, {}}, {UboViews::LightsValues, {}},
-      {UboViews::WorldMatrix, {}},
+      {UboViews::WorldMatrixValues, {}}, {UboViews::BasicMatValues, {}},
+      {UboViews::PbrMatValues, {}},      {UboViews::LightsValues, {}},
+      {UboViews::CameraMatrix, {}},
   };
 };
 

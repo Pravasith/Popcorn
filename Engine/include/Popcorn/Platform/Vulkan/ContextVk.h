@@ -119,9 +119,6 @@ public:
   void VulkanInit(const Window &appWin);
   void VulkanCleanUp();
 
-public:
-  static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
-
 private:
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
   ContextVk(const ContextVk &) = delete;

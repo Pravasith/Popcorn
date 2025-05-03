@@ -225,34 +225,30 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
 
   VkDescriptorSetLayout &cameraLayout =
       layouts->GetLayout<DescriptorSets::CameraSet>();
-  std::array<VkDescriptorSetLayout, ContextVk::MAX_FRAMES_IN_FLIGHT>
-      cameraLayouts{};
+  std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> cameraLayouts{};
   std::fill(cameraLayouts.begin(), cameraLayouts.end(), cameraLayout);
 
   VkDescriptorSetLayout &gameObjectLayout =
       layouts->GetLayout<DescriptorSets::GameObjectSet>();
-  std::array<VkDescriptorSetLayout, ContextVk::MAX_FRAMES_IN_FLIGHT>
-      gameObjectLayouts{};
+  std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> gameObjectLayouts{};
   std::fill(gameObjectLayouts.begin(), gameObjectLayouts.end(),
             gameObjectLayout);
 
   VkDescriptorSetLayout &basicMatLayout =
       layouts->GetLayout<DescriptorSets::BasicMatSet>();
-  std::array<VkDescriptorSetLayout, ContextVk::MAX_FRAMES_IN_FLIGHT>
-      basicMatLayouts{};
+  std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> basicMatLayouts{};
   std::fill(basicMatLayouts.begin(), basicMatLayouts.end(), basicMatLayout);
 
   VkDescriptorSetLayout &pbrMatLayout =
       layouts->GetLayout<DescriptorSets::PbrMatSet>();
-  std::array<VkDescriptorSetLayout, ContextVk::MAX_FRAMES_IN_FLIGHT>
-      pbrMatLayouts{};
+  std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> pbrMatLayouts{};
   std::fill(pbrMatLayouts.begin(), pbrMatLayouts.end(), pbrMatLayout);
 
   DPoolVk &gBufferPool =
       pools->GetPool<DescriptorPools::GBufferPool>(); // Creates pool if it
                                                       // doesn't exist
 
-  constexpr uint32_t maxFramesInFlight = ContextVk::MAX_FRAMES_IN_FLIGHT;
+  constexpr uint32_t maxFramesInFlight = MAX_FRAMES_IN_FLIGHT;
   const VkDevice &device = ContextVk::Device()->GetDevice();
 
   std::vector<VkDescriptorSet> cameraSets =
