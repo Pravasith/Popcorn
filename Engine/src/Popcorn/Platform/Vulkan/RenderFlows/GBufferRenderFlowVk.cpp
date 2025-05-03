@@ -255,17 +255,14 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
       gBufferPool
           .AllocateDescriptorSets<DescriptorSets::CameraSet, maxFramesInFlight>(
               device, cameraLayouts);
-
   std::vector<VkDescriptorSet> gameObjectSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::GameObjectSet,
                                          maxFramesInFlight>(device,
                                                             gameObjectLayouts);
-
   std::vector<VkDescriptorSet> basicMatSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::BasicMatSet,
                                          maxFramesInFlight>(device,
                                                             basicMatLayouts);
-
   std::vector<VkDescriptorSet> pbrMatSets =
       gBufferPool
           .AllocateDescriptorSets<DescriptorSets::PbrMatSet, maxFramesInFlight>(
