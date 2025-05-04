@@ -84,8 +84,7 @@ RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
 
 RendererVk::~RendererVk() {
   // Renderflow clean ups
-  RenderFlowVk::FreeVBOsAndIBOsMemory();
-  RenderFlowVk::FreeUBOsMemory();
+  RenderFlowVk::FreeMemory();
 
   for (auto &renderFlow : s_renderFlows) {
     renderFlow->CleanUp();
@@ -141,10 +140,9 @@ void RendererVk::CreateRenderFlowResources() {
   ContextVk::MemoryAllocator()->CreateVMAAllocator();
 
   // Allocates vulkan buffers
-  RenderFlowVk::AllocVBOsAndIBOsMemory();
+  RenderFlowVk::AllocMemory();
 
   for (auto &renderFlow : s_renderFlows) {
-    renderFlow->AllocUBOsMemory();
     //
     // -------
     // - Camera UBO - viewProj -- per frame (lvl 0)

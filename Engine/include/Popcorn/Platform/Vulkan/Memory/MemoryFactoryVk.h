@@ -20,17 +20,6 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-struct SubmeshOffsets {
-  VkDeviceSize vboOffset = 0;
-  VkDeviceSize iboOffset = 0;
-
-  SubmeshOffsets &operator+=(SubmeshOffsets &other) {
-    this->vboOffset += other.vboOffset;
-    this->iboOffset += other.iboOffset;
-    return *this;
-  };
-};
-
 enum UboViews {
   WorldMatrixValues = 1,
   BasicMatValues,

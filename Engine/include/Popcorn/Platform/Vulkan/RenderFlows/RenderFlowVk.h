@@ -40,10 +40,8 @@ public:
 
   //
   // NEW ----------------------------------------------------------------
-  static void AllocVBOsAndIBOsMemory(); // Only once
-  static void FreeVBOsAndIBOsMemory();  // Only once
-  static void AllocUBOsMemory();        // Only once
-  static void FreeUBOsMemory();         // Only once
+  static void AllocMemory(); // Only once
+  static void FreeMemory();  // Only once
 
   void Prepare() {
     CreateAttachments();

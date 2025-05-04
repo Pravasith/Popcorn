@@ -231,6 +231,7 @@ void MemoryFactoryVk::AllocUboLocalBuffers(
                         &m_uboAllocSet[i], &allocInfo) != VK_SUCCESS) {
       throw std::runtime_error("Failed to create uniform buffer");
     };
+
     m_uboMappingSet[i] = allocInfo.pMappedData;
   };
 };

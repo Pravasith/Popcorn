@@ -45,5 +45,21 @@ struct AccGameObjectUboSizes {
   VkDeviceSize camerasWorldMatrixUboSize = 0;
 };
 
+struct SubmeshOffsets {
+  VkDeviceSize vboOffset = 0;
+  VkDeviceSize iboOffset = 0;
+  VkDeviceSize worldMatrixOffset = 0;
+
+  SubmeshOffsets &operator+=(SubmeshOffsets &other) {
+    this->vboOffset += other.vboOffset;
+    this->iboOffset += other.iboOffset;
+    return *this;
+  };
+};
+
+struct GameObjectOffsets {
+  // VkDeviceSize lights
+};
+
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

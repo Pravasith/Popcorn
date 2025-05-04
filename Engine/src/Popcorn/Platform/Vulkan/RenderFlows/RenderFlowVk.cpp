@@ -14,7 +14,7 @@ PbrSubmeshGroups RenderFlowVk::s_pbrSubmeshGroups{};
 
 uint64_t RenderFlowVk::s_submeshCount = 0;
 
-void RenderFlowVk::AllocVBOsAndIBOsMemory() {
+void RenderFlowVk::AllocMemory() {
   // basicMat1 : [sm1, sm2, sm3, ... ]
   // basicMat2 : [sm1, sm2 ... ]
 
@@ -57,31 +57,27 @@ void RenderFlowVk::AllocVBOsAndIBOsMemory() {
   PC_ASSERT(s_submeshCount, "Submesh count is zero.");
   memoryFactory->FlushVBOsAndIBOsStagingToLocal(alignedVboSize, alignedIboSize);
   memoryFactory->CleanUpVboIboStagingBuffers(); // Unmap, deallocate & destroy
-};
 
-void RenderFlowVk::AllocUBOsMemory() {
-  auto *memoryFactory = ContextVk::MemoryFactory();
   AccGameObjectUboSizes gameObjectSizes{};
-
-  VkPhysicalDeviceProperties properties{};
   ContextVk::Device()->GetPhysicalDeviceProperties(properties);
 
-  // Get aligned ubo sizes
+  // Cameras ubos
   memoryFactory->GetAccGameObjectsBufferSizes(s_cameras, gameObjectSizes,
                                               properties);
+  // Emptys ubos
   memoryFactory->GetAccGameObjectsBufferSizes(s_emptys, gameObjectSizes,
                                               properties);
+  // Lights ubos
   memoryFactory->GetAccGameObjectsBufferSizes(s_lights, gameObjectSizes,
                                               properties);
 
-  memoryFactory->AllocUboLocalBuffers(gameObjectSizes);
+  //
+  // Allocate ubo buffers
+  memoryFactory->AllocUboLocalBuffers(submeshSizes, gameObjectSizes);
 };
 
-void RenderFlowVk::FreeUBOsMemory() {
+void RenderFlowVk::FreeMemory() {
   ContextVk::MemoryFactory()->CleanUpUboBuffers();
-};
-
-void RenderFlowVk::FreeVBOsAndIBOsMemory() {
   ContextVk::MemoryFactory()
       ->CleanUpVboIboLocalBuffers(); // Deallocate & destroy
 };
