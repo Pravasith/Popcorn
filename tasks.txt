@@ -2,6 +2,7 @@
 --- TASKS ------------------------------------------------------------------
 ----------------------------------------------------------------------------
 
+:: Optimise space by allocating one model matrix per mesh, not per submesh
 :: Show blender scene in Popcorn - friday
 
 // USE IN VIDEO

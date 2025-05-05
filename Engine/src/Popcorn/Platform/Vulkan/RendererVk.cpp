@@ -161,7 +161,10 @@ void RendererVk::CreateRenderFlowResources() {
     // - LitScene Image+Sampler - just one
     //
     // for (auto &[matId, submeshes] : submeshGroups) {
+    // // Bind material ubo
     //   for (Submesh<T> *submesh : submeshes) {
+    //   // Bind vbo, ibo
+    //   // Bind world matrix ubo
     //   }
     // };
 

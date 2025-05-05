@@ -20,19 +20,6 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-enum UboViews {
-  WorldMatrixValues = 1,
-  BasicMatValues,
-  PbrMatValues,
-  LightsValues,
-  CameraMatrix
-};
-
-struct UboBufferView {
-  VkDeviceSize offset = 0;
-  VkDeviceSize alignedSize = 0;
-};
-
 class MemoryFactoryVk {
 public:
   //
@@ -60,8 +47,9 @@ public:
   //
   // --- UTILS -----------------------------------------------------------------
   template <MaterialTypes T>
-  void GetAccSubmeshesBufferSizes(SubmeshGroups<T> &submeshGroups,
-                                  AccSubmeshBufferSizes &sizes);
+  void ExtractMaterialAndSubmeshOffsets(SubmeshGroups<T> &submeshGroups,
+                                        SubmeshOffsets &submeshOffsets,
+                                        MaterialOffsets &materialOffsets);
 
   template <GameObjectType T>
   void GetAccGameObjectsBufferSizes(std::vector<T *> &gameObjects,
@@ -182,7 +170,7 @@ private:
 
   using UboBufferViewMap = std::unordered_map<UboViews, UboBufferView>;
 
-  UboBufferViewMap m_uboBufferViewMap{
+  UboBufferViewMap m_uboBufferViewMap {
       {UboViews::WorldMatrixValues, {}}, {UboViews::BasicMatValues, {}},
       {UboViews::PbrMatValues, {}},      {UboViews::LightsValues, {}},
       {UboViews::CameraMatrix, {}},

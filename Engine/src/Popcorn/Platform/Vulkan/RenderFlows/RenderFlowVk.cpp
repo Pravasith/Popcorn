@@ -24,11 +24,12 @@ void RenderFlowVk::AllocMemory() {
   auto *memoryFactory = ContextVk::MemoryFactory();
 
   AccSubmeshBufferSizes submeshSizes{};
+  SubmeshOffsets submeshOffsets{};
 
   // Basic submeshes size
-  memoryFactory->GetAccSubmeshesBufferSizes(s_basicSubmeshGroups, submeshSizes);
+  memoryFactory->AccSubmeshOffsets(s_basicSubmeshGroups, submeshOffsets);
   // Pbr submeshes size
-  memoryFactory->GetAccSubmeshesBufferSizes(s_pbrSubmeshGroups, submeshSizes);
+  memoryFactory->AccSubmeshOffsets(s_pbrSubmeshGroups, submeshOffsets);
 
   VkPhysicalDeviceProperties properties{};
   ContextVk::Device()->GetPhysicalDeviceProperties(properties);
