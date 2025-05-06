@@ -9,8 +9,8 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-BasicSubmeshGroups RenderFlowVk::s_basicSubmeshGroups{};
-PbrSubmeshGroups RenderFlowVk::s_pbrSubmeshGroups{};
+BasicMaterialSubmeshes RenderFlowVk::s_basicSubmeshGroups{};
+PbrMaterialSubmeshes RenderFlowVk::s_pbrSubmeshGroups{};
 
 uint64_t RenderFlowVk::s_submeshCount = 0;
 
@@ -22,17 +22,19 @@ void RenderFlowVk::AllocMemory() {
   // pbrMat2 : [sm1, sm2 ... ]
 
   auto *memoryFactory = ContextVk::MemoryFactory();
-
-  AccSubmeshBufferSizes submeshSizes{};
-  SubmeshOffsets submeshOffsets{};
-
-  // Basic submeshes size
-  memoryFactory->AccSubmeshOffsets(s_basicSubmeshGroups, submeshOffsets);
-  // Pbr submeshes size
-  memoryFactory->AccSubmeshOffsets(s_pbrSubmeshGroups, submeshOffsets);
-
   VkPhysicalDeviceProperties properties{};
   ContextVk::Device()->GetPhysicalDeviceProperties(properties);
+
+  SubmeshOffsets submeshOffsets{};
+  MaterialOffsets materialOffsets{};
+  EmptysCamerasLightsOffsets emptysCamerasLightsOffsets{};
+
+  // Basic submeshes size
+  memoryFactory->ExtractMaterialAndSubmeshOffsets(
+      s_basicSubmeshGroups, submeshOffsets, materialOffsets);
+  // Pbr submeshes size
+  memoryFactory->ExtractMaterialAndSubmeshOffsets(
+      s_pbrSubmeshGroups, submeshOffsets, materialOffsets);
 
   // Align for optimal copy offset
   VkDeviceSize alignedVboSize = PC_AlignCeil(
@@ -43,15 +45,10 @@ void RenderFlowVk::AllocMemory() {
   memoryFactory->AllocVboIboStagingBuffers(alignedVboSize, alignedIboSize);
   memoryFactory->AllocVboIboLocalBuffers(alignedVboSize, alignedIboSize);
 
-  //
-  // Copy VBO, IBO data to staging buffers ----------------------------------
-  SubmeshOffsets submeshOffsets{};
-  // Basic material submeshes
-  memoryFactory->CopySubmeshGroupToVboIboStagingBuffers(submeshOffsets,
-                                                        s_basicSubmeshGroups);
-  // Pbr material submeshes
-  memoryFactory->CopySubmeshGroupToVboIboStagingBuffers(submeshOffsets,
-                                                        s_pbrSubmeshGroups);
+  memoryFactory->FillMaterialAndSubmeshBuffers(s_basicSubmeshGroups,
+                                               submeshOffsets, materialOffsets);
+  memoryFactory->FillMaterialAndSubmeshBuffers(s_pbrSubmeshGroups,
+                                               submeshOffsets, materialOffsets);
 
   //
   // Copy the staging data to local buffers ---------------------------------

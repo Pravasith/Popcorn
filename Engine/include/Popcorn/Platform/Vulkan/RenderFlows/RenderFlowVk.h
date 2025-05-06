@@ -5,6 +5,7 @@
 #include "GameObject.h"
 #include "GlobalMacros.h"
 #include "Light.h"
+#include "Material.h"
 #include "MaterialTypes.h"
 #include "Mesh.h"
 #include "Popcorn/Core/Base.h"
@@ -21,12 +22,16 @@ enum RenderFlows { GBuffer = 1, Lighting, Composite };
 using BasicSubmeshes = std::vector<Submesh<MaterialTypes::BasicMat> *>;
 using PbrSubmeshes = std::vector<Submesh<MaterialTypes::PbrMat> *>;
 
-using BasicSubmeshGroups = std::unordered_map<MaterialHashType, BasicSubmeshes>;
-using PbrSubmeshGroups = std::unordered_map<MaterialHashType, PbrSubmeshes>;
+using BasicMaterialSubmeshes =
+    std::unordered_map<MaterialHashType, BasicSubmeshes>;
+using PbrMaterialSubmeshes = std::unordered_map<MaterialHashType, PbrSubmeshes>;
 
 template <MaterialTypes T>
-using SubmeshGroups =
+using Submeshes =
     std::unordered_map<MaterialHashType, std::vector<Submesh<T> *>>;
+
+template <MaterialTypes T>
+using Materials = std::unordered_map<MaterialHashType, Material<T> *>;
 
 // TODO: Refactor
 //       - Vulkan specific for now.
@@ -113,29 +118,25 @@ public:
     PC_ValidateAndRemoveGameObject(light, s_lights);
   };
 
-  template <MaterialTypes T> static void AddSubmesh(Submesh<T> *submesh) {
+  template <MaterialTypes T>
+  static void RegisterMaterialAndSubmesh(Submesh<T> *submesh) {
     if constexpr (T == MaterialTypes::BasicMat) {
       uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
-      if (PC_ValidateAndAddSubmesh(
-              submesh,
-              s_basicSubmeshGroups[materialId] // automatically default
-                                               // allocates if key not found
-              )) {
+      if (PC_ValidateAndAddSubmesh(submesh, s_basicSubmeshGroups[materialId])) {
+        s_basicMaterials[materialId] = submesh->GetMaterial();
         ++s_submeshCount;
       };
     } else if constexpr (T == MaterialTypes::PbrMat) {
       uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
-      if (PC_ValidateAndAddSubmesh(
-              submesh,
-              s_pbrSubmeshGroups[materialId] // automatically default
-                                             // allocates if key not found
-              )) {
+      if (PC_ValidateAndAddSubmesh(submesh, s_pbrSubmeshGroups[materialId])) {
+        s_pbrMaterials[materialId] = submesh->GetMaterial();
         ++s_submeshCount;
       };
     }
   };
 
-  template <MaterialTypes T> static void RemoveSubmesh(Submesh<T> *submesh) {
+  template <MaterialTypes T>
+  static void UnregisterMaterialAndSubmesh(Submesh<T> *submesh) {
     if constexpr (T == MaterialTypes::BasicMat) {
       uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
       if (PC_ValidateAndRemoveSubmesh(submesh,
@@ -156,8 +157,11 @@ protected:
   static std::vector<Empty *> s_emptys;
   static std::vector<Light *> s_lights;
 
-  static BasicSubmeshGroups s_basicSubmeshGroups;
-  static PbrSubmeshGroups s_pbrSubmeshGroups;
+  static BasicMaterialSubmeshes s_basicSubmeshGroups;
+  static PbrMaterialSubmeshes s_pbrSubmeshGroups;
+
+  static Materials<MaterialTypes::BasicMat> s_basicMaterials;
+  static Materials<MaterialTypes::PbrMat> s_pbrMaterials;
 
   static uint64_t s_submeshCount;
 };

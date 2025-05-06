@@ -199,10 +199,10 @@ void RendererVk::ProcessGameObjectNode(GameObject *node) { // Recursive
   {
     auto *mesh = static_cast<Mesh *>(node);
     for (auto &basicSubmesh : mesh->GetSubmeshes<MaterialTypes::BasicMat>()) {
-      RenderFlowVk::AddSubmesh(&basicSubmesh);
+      RenderFlowVk::RegisterMaterialAndSubmesh(&basicSubmesh);
     };
     for (auto &pbrSubmesh : mesh->GetSubmeshes<MaterialTypes::PbrMat>()) {
-      RenderFlowVk::AddSubmesh(&pbrSubmesh);
+      RenderFlowVk::RegisterMaterialAndSubmesh(&pbrSubmesh);
     };
   } break;
 

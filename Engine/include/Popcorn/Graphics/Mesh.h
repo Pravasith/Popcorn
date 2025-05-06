@@ -129,25 +129,15 @@ class Mesh : public GameObject {
 public:
   // TODO: Handle the case of duplicating meshes & materials
   // TODO: Make m_indexBuffer a variant
-  Mesh() {
-    m_uniforms.worldMatrix = m_worldMatrix;
-    PC_PRINT("CREATED", TagType::Constr, "MESH");
-  };
+  Mesh() { PC_PRINT("CREATED", TagType::Constr, "MESH"); };
   virtual ~Mesh() { PC_PRINT("DESTROYED", TagType::Destr, "MESH"); };
-
-  // virtual void OnAttach() override {};
-  virtual void OnUpdate() override {
-    // Resets buffer data and fills again
-    m_uniforms.worldMatrix = GetWorldMatrix();
-  };
-  // virtual void OnRender() override {};
 
   virtual constexpr GameObjectTypes GetType() const override {
     return GameObjectTypes::Mesh;
   };
 
-  [[nodiscard]] inline UniformDefs::WorldMatrixUniform &GetMeshUniforms() {
-    return m_uniforms;
+  [[nodiscard]] inline UniformDefs::SubmeshUniform &GetMeshUniforms() {
+    return m_uniform;
   };
 
   template <MaterialTypes T>
@@ -189,8 +179,6 @@ public:
   };
 
 protected:
-  UniformDefs::WorldMatrixUniform m_uniforms;
-
   std::vector<Submesh<MaterialTypes::BasicMat>> m_basicSubmeshes;
   std::vector<Submesh<MaterialTypes::PbrMat>> m_pbrSubmeshes;
 };

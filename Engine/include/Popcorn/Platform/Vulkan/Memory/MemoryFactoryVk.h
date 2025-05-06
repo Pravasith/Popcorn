@@ -23,12 +23,20 @@ GFX_NAMESPACE_BEGIN
 class MemoryFactoryVk {
 public:
   //
-  // --- VBOs & IBOs -----------------------------------------------------------
-  void AllocVboIboStagingBuffers(VkDeviceSize vboSize, VkDeviceSize iboSize);
+  //
+  // --- SUBMESH & MATERIAL ----------------------------------------------------
+  // --- SUBMESH & MATERIAL ----------------------------------------------------
+  // --- SUBMESH & MATERIAL ----------------------------------------------------
   template <MaterialTypes T>
-  void
-  CopySubmeshGroupToVboIboStagingBuffers(SubmeshOffsets &accSubmeshGroupOffsets,
-                                         const SubmeshGroups<T> &submeshGroups);
+  void ExtractMaterialAndSubmeshOffsets(Submeshes<T> &submeshGroups,
+                                        SubmeshOffsets &submeshOffsets,
+                                        MaterialOffsets &materialOffsets);
+  template <MaterialTypes T>
+  void FillMaterialAndSubmeshBuffers(Submeshes<T> &submeshGroups,
+                                     SubmeshOffsets &submeshOffsets,
+                                     MaterialOffsets &materialOffsets);
+
+  void AllocVboIboStagingBuffers(VkDeviceSize vboSize, VkDeviceSize iboSize);
   void CleanUpVboIboStagingBuffers();
 
   void FlushVBOsAndIBOsStagingToLocal(VkDeviceSize submeshVbosSize,
@@ -46,10 +54,6 @@ public:
 
   //
   // --- UTILS -----------------------------------------------------------------
-  template <MaterialTypes T>
-  void ExtractMaterialAndSubmeshOffsets(SubmeshGroups<T> &submeshGroups,
-                                        SubmeshOffsets &submeshOffsets,
-                                        MaterialOffsets &materialOffsets);
 
   template <GameObjectType T>
   void GetAccGameObjectsBufferSizes(std::vector<T *> &gameObjects,
@@ -130,10 +134,6 @@ private:
   static MemoryFactoryVk *s_instance;
   static DeviceVk *s_deviceVk;
 
-  // One big VBO
-  // One big IBO
-  // One big UBO
-
   //
   // Host-visible & temporary -----------------------------------------------
   VkBuffer m_vboStaging;
@@ -158,23 +158,20 @@ private:
   std::array<VmaAllocation, MAX_FRAMES_IN_FLIGHT> m_uboAllocSet;
   std::array<void *, MAX_FRAMES_IN_FLIGHT> m_uboMappingSet;
 
-  using VboIboOffsets =
-      std::unordered_map<MaterialHashType,
-                         std::vector<std::pair<VkDeviceSize, VkDeviceSize>>>;
+  //
+  // Accessors --------------------------------------------------------------
+  MaterialOffsets m_materialOffsets{};
+  SubmeshOffsets
+      m_submeshOffsets{}; // Accumulated offsets for BOTH basic & pbr
+                          // material types. Don't worry about the MatType
+                          // sequence mismatch because matId (the key) is
+                          // uniquely hashed based on material properties.
+  EmptysCamerasLightsOffsets m_emptysCamerasLightsOffsets{};
 
-  VboIboOffsets
-      m_vboIboOffsets{}; // Accumulated offsets for BOTH basic & pbr
-                         // material types. Don't worry about the MatType
-                         // sequence mismatch because matId (the key) is
-                         // uniquely hashed based on material properties.
-
-  using UboBufferViewMap = std::unordered_map<UboViews, UboBufferView>;
-
-  UboBufferViewMap m_uboBufferViewMap {
-      {UboViews::WorldMatrixValues, {}}, {UboViews::BasicMatValues, {}},
-      {UboViews::PbrMatValues, {}},      {UboViews::LightsValues, {}},
-      {UboViews::CameraMatrix, {}},
-  };
+  //
+  // Buffer views -----------------------------------------------------------
+  UboBufferViews m_uboBufferViews{};
+  SsboBufferViews m_ssboBufferViews{};
 };
 
 GFX_NAMESPACE_END

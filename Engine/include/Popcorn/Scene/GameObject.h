@@ -98,9 +98,9 @@ public:
 
   virtual constexpr GameObjectTypes GetType() const = 0;
 
-  virtual void OnAttach() {};
   virtual void OnUpdate() {};
   virtual void OnRender() {};
+  virtual void OnEvent() {};
 
   [[nodiscard]] const std::vector<GameObject *> GetChildren() const {
     return m_children;

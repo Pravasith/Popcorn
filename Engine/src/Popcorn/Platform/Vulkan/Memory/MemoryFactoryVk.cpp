@@ -14,6 +14,79 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+template <MaterialTypes T>
+void MemoryFactoryVk::ExtractMaterialAndSubmeshOffsets(
+    Submeshes<T> &submeshGroups, SubmeshOffsets &submeshOffsets,
+    MaterialOffsets &materialOffsets) {
+  auto *device = ContextVk::Device();
+  VkPhysicalDeviceProperties properties{};
+  device->GetPhysicalDeviceProperties(properties);
+  VkDeviceSize alignment = properties.limits.minUniformBufferOffsetAlignment;
+
+  // temps
+  VkDeviceSize vboOffset = 0, iboOffset = 0, worldMatrixOffset = 0;
+
+  for (auto &[matId, submeshes] : submeshGroups) {
+    //
+    // Extract Material Offsets ------------------------------------------------
+    if constexpr (T == MaterialTypes::BasicMat) {
+      materialOffsets.basicMaterialOffsets[matId] =
+          PC_AlignCeil(UniformDefs::BasicMaterialUniform::size, alignment);
+    } else if constexpr (T == MaterialTypes::PbrMat) {
+      materialOffsets.pbrMaterialOffsets[matId] =
+          PC_AlignCeil(UniformDefs::PbrMaterialUniform::size, alignment);
+    }
+
+    //
+    // Extract VBO & IBO & UBO offsets -----------------------------------------
+    for (Submesh<T> *submesh : submeshes) {
+      submeshOffsets.vboOffsets.push_back(vboOffset);
+      submeshOffsets.iboOffsets.push_back(iboOffset);
+      // Align offsets
+      submeshOffsets.worldMatrixOffsets.push_back(worldMatrixOffset);
+
+      const BufferDefs::Layout &vboLayout =
+          submesh->GetVertexBuffer()->GetLayout();
+      vboOffset += vboLayout.countValue * vboLayout.strideValue;
+
+      IndexBuffer<uint32_t> *indexBuffer = submesh->GetIndexBuffer();
+      iboOffset += indexBuffer->GetCount() * sizeof(uint32_t);
+
+      worldMatrixOffset +=
+          PC_AlignCeil(UniformDefs::SubmeshUniform::size, alignment);
+    }
+  }
+}
+
+template <MaterialTypes T>
+void MemoryFactoryVk::FillMaterialAndSubmeshBuffers(
+    Submeshes<T> &submeshGroups, SubmeshOffsets &submeshOffsets,
+    MaterialOffsets &materialOffsets) {
+  auto &[vboOffsets, iboOffsets, worldMatrixOffsets] = submeshOffsets;
+  auto &[basicMaterialOffsets, pbrMaterialOffsets] = materialOffsets;
+
+  for (auto &[matId, submeshes] : submeshGroups) {
+
+    for (int i = 0; i < submeshes.size(); ++i) {
+      Submesh<T> *submesh = submeshes[i];
+      //
+      // VBOs ---------------------------------------------------------------
+      const BufferDefs::Layout &vboLayout =
+          submesh->GetVertexBuffer()->GetLayout();
+      const VkDeviceSize vboSize = vboLayout.countValue * vboLayout.strideValue;
+      memcpy((byte_t *)m_vboStagingMapping + vboOffsets[i],
+             submesh->GetVertexBuffer()->GetBufferData(), (size_t)vboSize);
+
+      //
+      // IBOs ---------------------------------------------------------------
+      IndexBuffer<uint32_t> *indexBuffer = submesh->GetIndexBuffer();
+      const VkDeviceSize iboSize = indexBuffer->GetCount() * sizeof(uint32_t);
+      memcpy((byte_t *)m_iboStagingMapping + iboOffsets[i],
+             indexBuffer->GetBufferData(), (size_t)iboSize);
+    }
+  };
+};
+
 void MemoryFactoryVk::AllocVboIboStagingBuffers(VkDeviceSize vboSize,
                                                 VkDeviceSize iboSize) {
 
@@ -121,80 +194,6 @@ void MemoryFactoryVk::AllocVboIboLocalBuffers(VkDeviceSize vbosSize,
   if (iboResult != VK_SUCCESS) {
     throw std::runtime_error("Couldn't create IBO device buffer");
   };
-}
-
-template <MaterialTypes T>
-void MemoryFactoryVk::CopySubmeshGroupToVboIboStagingBuffers(
-    SubmeshOffsets &accSubmeshGroupOffsets,
-    const SubmeshGroups<T> &submeshGroups) {
-
-  for (auto &[matId, submeshes] : submeshGroups) {
-    for (Submesh<T> *submesh : submeshes) {
-      //
-      // VBOs ---------------------------------------------------------------
-      const BufferDefs::Layout &vboLayout =
-          submesh->GetVertexBuffer()->GetLayout();
-      const VkDeviceSize vboSize = vboLayout.countValue * vboLayout.strideValue;
-      memcpy((byte_t *)m_vboStagingMapping + vboOffsetRef,
-             submesh->GetVertexBuffer()->GetBufferData(), (size_t)vboSize);
-
-      //
-      // IBOs ---------------------------------------------------------------
-      IndexBuffer<uint32_t> *indexBuffer = submesh->GetIndexBuffer();
-      const VkDeviceSize iboSize = indexBuffer->GetCount() * sizeof(uint32_t);
-      memcpy((byte_t *)m_iboStagingMapping + iboOffsetRef,
-             indexBuffer->GetBufferData(), (size_t)iboSize);
-
-      //
-      // Offsets ------------------------------------------------------------
-      m_vboIboOffsets[matId].emplace_back(
-          std::pair(vboOffsetRef, iboOffsetRef));
-
-      vboOffsetRef += vboSize;
-      iboOffsetRef += iboSize;
-    }
-  };
-};
-
-template <MaterialTypes T>
-void MemoryFactoryVk::ExtractMaterialAndSubmeshOffsets(
-    SubmeshGroups<T> &submeshGroups, SubmeshOffsets &submeshOffsets,
-    MaterialOffsets &materialOffsets) {
-  auto *device = ContextVk::Device();
-  VkPhysicalDeviceProperties properties{};
-  device->GetPhysicalDeviceProperties(properties);
-  VkDeviceSize alignment = properties.limits.minUniformBufferOffsetAlignment;
-
-  // temps
-  VkDeviceSize vboOffset = 0, iboOffset = 0;
-
-  for (auto &[matId, submeshes] : submeshGroups) {
-    //
-    // Extract Material Offsets -----------------------------------------------
-    if constexpr (T == MaterialTypes::BasicMat) {
-      materialOffsets.basicMaterialOffsets[matId] =
-          PC_AlignCeil(UniformDefs::BasicMaterialUniform::size, alignment);
-    } else if constexpr (T == MaterialTypes::PbrMat) {
-      materialOffsets.basicMaterialOffsets[matId] =
-          PC_AlignCeil(UniformDefs::PbrMaterialUniform::size, alignment);
-    }
-
-    //
-    // Extract VBO & IBO offsets ---------------------------------------------
-    for (Submesh<T> *submesh : submeshes) {
-      const BufferDefs::Layout &vboLayout =
-          submesh->GetVertexBuffer()->GetLayout();
-      vboOffset = vboLayout.countValue * vboLayout.strideValue;
-
-      IndexBuffer<uint32_t> *indexBuffer = submesh->GetIndexBuffer();
-      iboOffset = indexBuffer->GetCount() * sizeof(uint32_t);
-
-      submeshOffsets.vboOffsets.push_back(vboOffset);
-      submeshOffsets.iboOffsets.push_back(iboOffset);
-      submeshOffsets.worldMatrixOffsets.push_back(
-          PC_AlignCeil(UniformDefs::WorldMatrixUniform::size, alignment));
-    }
-  }
 }
 
 void MemoryFactoryVk::AllocUboLocalBuffers(
@@ -305,7 +304,7 @@ MemoryFactoryVk::CopySubmeshGroupToVboIboStagingBuffers<MaterialTypes::PbrMat>(
 
 template <>
 void MemoryFactoryVk::GetAccSubmeshesBufferSizes<MaterialTypes::BasicMat>(
-    SubmeshGroups<MaterialTypes::BasicMat> &submeshGroups,
+    Submeshes<MaterialTypes::BasicMat> &submeshGroups,
     AccSubmeshBufferSizes &sizes) {};
 
 template <>
