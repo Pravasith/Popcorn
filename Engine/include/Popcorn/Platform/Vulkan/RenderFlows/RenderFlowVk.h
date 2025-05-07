@@ -7,6 +7,7 @@
 #include "Light.h"
 #include "Material.h"
 #include "MaterialTypes.h"
+#include "Memory/Memory.h"
 #include "Mesh.h"
 #include "Popcorn/Core/Base.h"
 #include <cstdint>
@@ -18,20 +19,6 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 enum RenderFlows { GBuffer = 1, Lighting, Composite };
-
-using BasicSubmeshes = std::vector<Submesh<MaterialTypes::BasicMat> *>;
-using PbrSubmeshes = std::vector<Submesh<MaterialTypes::PbrMat> *>;
-
-using BasicMaterialSubmeshes =
-    std::unordered_map<MaterialHashType, BasicSubmeshes>;
-using PbrMaterialSubmeshes = std::unordered_map<MaterialHashType, PbrSubmeshes>;
-
-template <MaterialTypes T>
-using Submeshes =
-    std::unordered_map<MaterialHashType, std::vector<Submesh<T> *>>;
-
-template <MaterialTypes T>
-using Materials = std::unordered_map<MaterialHashType, Material<T> *>;
 
 // TODO: Refactor
 //       - Vulkan specific for now.
@@ -153,16 +140,22 @@ public:
   };
 
 protected:
-  static std::vector<Camera *> s_cameras;
-  static std::vector<Empty *> s_emptys;
+  //
+  // Game Object refs -------------------------------------------------------
+  static MaterialSubmeshesMap<MaterialTypes::BasicMat> s_basicSubmeshGroups;
+  static MaterialSubmeshesMap<MaterialTypes::PbrMat> s_pbrSubmeshGroups;
+
   static std::vector<Light *> s_lights;
+  static std::vector<Camera *> s_cameras;
+  static std::vector<Empty *> s_emptys; // useless for now
 
-  static BasicMaterialSubmeshes s_basicSubmeshGroups;
-  static PbrMaterialSubmeshes s_pbrSubmeshGroups;
+  //
+  // Material values --------------------------------------------------------
+  static MaterialMap<MaterialTypes::BasicMat> s_basicMaterials;
+  static MaterialMap<MaterialTypes::PbrMat> s_pbrMaterials;
 
-  static Materials<MaterialTypes::BasicMat> s_basicMaterials;
-  static Materials<MaterialTypes::PbrMat> s_pbrMaterials;
-
+  //
+  // ------------------------------------------------------------------------
   static uint64_t s_submeshCount;
 };
 

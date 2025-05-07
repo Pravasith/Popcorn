@@ -1,6 +1,5 @@
 #include "RenderFlows/RenderFlowVk.h"
 #include "ContextVk.h"
-#include "Memory/Helpers.h"
 #include "Memory/MemoryFactoryVk.h"
 #include "Popcorn/Core/Assert.h"
 #include <cstdint>
@@ -9,9 +8,23 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-BasicMaterialSubmeshes RenderFlowVk::s_basicSubmeshGroups{};
-PbrMaterialSubmeshes RenderFlowVk::s_pbrSubmeshGroups{};
+//
+// Game Object refs -------------------------------------------------------
+MaterialSubmeshesMap<MaterialTypes::BasicMat>
+    RenderFlowVk::s_basicSubmeshGroups{};
+MaterialSubmeshesMap<MaterialTypes::PbrMat> RenderFlowVk::s_pbrSubmeshGroups{};
 
+std::vector<Light *> RenderFlowVk::s_lights{};
+std::vector<Camera *> RenderFlowVk::s_cameras{};
+std::vector<Empty *> RenderFlowVk::s_emptys{}; // useless for now
+
+//
+// Material values --------------------------------------------------------
+MaterialMap<MaterialTypes::BasicMat> RenderFlowVk::s_basicMaterials;
+MaterialMap<MaterialTypes::PbrMat> RenderFlowVk::s_pbrMaterials;
+
+//
+// ------------------------------------------------------------------------
 uint64_t RenderFlowVk::s_submeshCount = 0;
 
 void RenderFlowVk::AllocMemory() {
@@ -25,16 +38,10 @@ void RenderFlowVk::AllocMemory() {
   VkPhysicalDeviceProperties properties{};
   ContextVk::Device()->GetPhysicalDeviceProperties(properties);
 
-  SubmeshOffsets submeshOffsets{};
-  MaterialOffsets materialOffsets{};
-  EmptysCamerasLightsOffsets emptysCamerasLightsOffsets{};
-
   // Basic submeshes size
-  memoryFactory->ExtractMaterialAndSubmeshOffsets(
-      s_basicSubmeshGroups, submeshOffsets, materialOffsets);
+  memoryFactory->ExtractMaterialSubmeshOffsets(s_basicSubmeshGroups);
   // Pbr submeshes size
-  memoryFactory->ExtractMaterialAndSubmeshOffsets(
-      s_pbrSubmeshGroups, submeshOffsets, materialOffsets);
+  memoryFactory->ExtractMaterialSubmeshOffsets(s_pbrSubmeshGroups);
 
   // Align for optimal copy offset
   VkDeviceSize alignedVboSize = PC_AlignCeil(

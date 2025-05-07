@@ -5,14 +5,12 @@
 #include "GameObject.h"
 #include "GlobalMacros.h"
 #include "MaterialTypes.h"
-#include "Memory/Helpers.h"
+#include "Memory/Memory.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
-#include "RenderFlows/RenderFlowVk.h"
 #include "Uniforms.h"
 #include <cstring>
 #include <glm/fwd.hpp>
-#include <unordered_map>
 #include <vector>
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan_core.h>
@@ -28,13 +26,12 @@ public:
   // --- SUBMESH & MATERIAL ----------------------------------------------------
   // --- SUBMESH & MATERIAL ----------------------------------------------------
   template <MaterialTypes T>
-  void ExtractMaterialAndSubmeshOffsets(Submeshes<T> &submeshGroups,
-                                        SubmeshOffsets &submeshOffsets,
-                                        MaterialOffsets &materialOffsets);
+  void
+  ExtractMaterialSubmeshOffsets(MaterialSubmeshesMap<T> &materialSubmeshesMap);
+
   template <MaterialTypes T>
-  void FillMaterialAndSubmeshBuffers(Submeshes<T> &submeshGroups,
-                                     SubmeshOffsets &submeshOffsets,
-                                     MaterialOffsets &materialOffsets);
+  void
+  FillMaterialSubmeshBuffers(MaterialSubmeshesMap<T> &materialSubmeshesMap);
 
   void AllocVboIboStagingBuffers(VkDeviceSize vboSize, VkDeviceSize iboSize);
   void CleanUpVboIboStagingBuffers();
@@ -160,13 +157,7 @@ private:
 
   //
   // Accessors --------------------------------------------------------------
-  MaterialOffsets m_materialOffsets{};
-  SubmeshOffsets
-      m_submeshOffsets{}; // Accumulated offsets for BOTH basic & pbr
-                          // material types. Don't worry about the MatType
-                          // sequence mismatch because matId (the key) is
-                          // uniquely hashed based on material properties.
-  EmptysCamerasLightsOffsets m_emptysCamerasLightsOffsets{};
+  BufferOffsets m_bufferOffsets{};
 
   //
   // Buffer views -----------------------------------------------------------

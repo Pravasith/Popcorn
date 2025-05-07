@@ -5,8 +5,7 @@
 #include "GameObject.h"
 #include "GlobalMacros.h"
 #include "MaterialTypes.h"
-#include "Memory/Helpers.h"
-#include "RenderFlows/RenderFlowVk.h"
+#include "Memory/Memory.h"
 #include "Uniforms.h"
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
@@ -15,9 +14,8 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 template <MaterialTypes T>
-void MemoryFactoryVk::ExtractMaterialAndSubmeshOffsets(
-    Submeshes<T> &submeshGroups, SubmeshOffsets &submeshOffsets,
-    MaterialOffsets &materialOffsets) {
+void MemoryFactoryVk::ExtractMaterialSubmeshOffsets(
+    MaterialSubmeshesMap<T> &materialSubmeshesMap) {
   auto *device = ContextVk::Device();
   VkPhysicalDeviceProperties properties{};
   device->GetPhysicalDeviceProperties(properties);
@@ -25,25 +23,26 @@ void MemoryFactoryVk::ExtractMaterialAndSubmeshOffsets(
 
   // temps
   VkDeviceSize vboOffset = 0, iboOffset = 0, worldMatrixOffset = 0;
+  VkDeviceSize basicMatOffset = 0, pbrMatOffset = 0;
 
-  for (auto &[matId, submeshes] : submeshGroups) {
+  for (auto &[matId, submeshes] : materialSubmeshesMap) {
     //
     // Extract Material Offsets ------------------------------------------------
     if constexpr (T == MaterialTypes::BasicMat) {
-      materialOffsets.basicMaterialOffsets[matId] =
+      m_bufferOffsets.materialOffsets[matId] = basicMatOffset;
+      basicMatOffset +=
           PC_AlignCeil(UniformDefs::BasicMaterialUniform::size, alignment);
     } else if constexpr (T == MaterialTypes::PbrMat) {
-      materialOffsets.pbrMaterialOffsets[matId] =
+      m_bufferOffsets.materialOffsets[matId] = pbrMatOffset;
+      pbrMatOffset +=
           PC_AlignCeil(UniformDefs::PbrMaterialUniform::size, alignment);
     }
 
     //
     // Extract VBO & IBO & UBO offsets -----------------------------------------
     for (Submesh<T> *submesh : submeshes) {
-      submeshOffsets.vboOffsets.push_back(vboOffset);
-      submeshOffsets.iboOffsets.push_back(iboOffset);
-      // Align offsets
-      submeshOffsets.worldMatrixOffsets.push_back(worldMatrixOffset);
+      m_bufferOffsets.submeshesOffsets[matId].push_back(
+          {vboOffset, iboOffset, worldMatrixOffset});
 
       const BufferDefs::Layout &vboLayout =
           submesh->GetVertexBuffer()->GetLayout();
@@ -59,13 +58,10 @@ void MemoryFactoryVk::ExtractMaterialAndSubmeshOffsets(
 }
 
 template <MaterialTypes T>
-void MemoryFactoryVk::FillMaterialAndSubmeshBuffers(
-    Submeshes<T> &submeshGroups, SubmeshOffsets &submeshOffsets,
-    MaterialOffsets &materialOffsets) {
-  auto &[vboOffsets, iboOffsets, worldMatrixOffsets] = submeshOffsets;
-  auto &[basicMaterialOffsets, pbrMaterialOffsets] = materialOffsets;
-
-  for (auto &[matId, submeshes] : submeshGroups) {
+void MemoryFactoryVk::FillMaterialSubmeshBuffers(
+    MaterialSubmeshesMap<T> &materialSubmeshesMap) {
+  for (auto &[matId, submeshes] : materialSubmeshesMap) {
+    // fill materials too
 
     for (int i = 0; i < submeshes.size(); ++i) {
       Submesh<T> *submesh = submeshes[i];
@@ -74,14 +70,16 @@ void MemoryFactoryVk::FillMaterialAndSubmeshBuffers(
       const BufferDefs::Layout &vboLayout =
           submesh->GetVertexBuffer()->GetLayout();
       const VkDeviceSize vboSize = vboLayout.countValue * vboLayout.strideValue;
-      memcpy((byte_t *)m_vboStagingMapping + vboOffsets[i],
+      memcpy((byte_t *)m_vboStagingMapping +
+                 m_bufferOffsets.submeshesOffsets[matId][i].vboOffset,
              submesh->GetVertexBuffer()->GetBufferData(), (size_t)vboSize);
 
       //
       // IBOs ---------------------------------------------------------------
       IndexBuffer<uint32_t> *indexBuffer = submesh->GetIndexBuffer();
       const VkDeviceSize iboSize = indexBuffer->GetCount() * sizeof(uint32_t);
-      memcpy((byte_t *)m_iboStagingMapping + iboOffsets[i],
+      memcpy((byte_t *)m_iboStagingMapping +
+                 m_bufferOffsets.submeshesOffsets[matId][i].iboOffset,
              indexBuffer->GetBufferData(), (size_t)iboSize);
     }
   };
