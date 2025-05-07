@@ -1,5 +1,6 @@
 #include "RenderFlows/RenderFlowVk.h"
 #include "ContextVk.h"
+#include "Memory/Memory.h"
 #include "Memory/MemoryFactoryVk.h"
 #include "Popcorn/Core/Assert.h"
 #include <cstdint>
@@ -43,19 +44,26 @@ void RenderFlowVk::AllocMemory() {
   // Pbr submeshes size
   memoryFactory->ExtractMaterialSubmeshOffsets(s_pbrSubmeshGroups);
 
+  // Others
+  memoryFactory->ExtractLightsCamerasEmptysOffsets(s_lights, s_cameras,
+                                                   s_emptys);
+
+  const BufferViews &bufferViews = memoryFactory->GetBufferViews();
+
+  //
   // Align for optimal copy offset
-  VkDeviceSize alignedVboSize = PC_AlignCeil(
-      submeshSizes.vboSize, properties.limits.optimalBufferCopyOffsetAlignment);
-  VkDeviceSize alignedIboSize = PC_AlignCeil(
-      submeshSizes.iboSize, properties.limits.optimalBufferCopyOffsetAlignment);
+  VkDeviceSize alignedVboSize =
+      PC_AlignCeil(bufferViews.submeshVbo.size,
+                   properties.limits.optimalBufferCopyOffsetAlignment);
+  VkDeviceSize alignedIboSize =
+      PC_AlignCeil(bufferViews.submeshIbo.size,
+                   properties.limits.optimalBufferCopyOffsetAlignment);
 
   memoryFactory->AllocVboIboStagingBuffers(alignedVboSize, alignedIboSize);
   memoryFactory->AllocVboIboLocalBuffers(alignedVboSize, alignedIboSize);
 
-  memoryFactory->FillMaterialAndSubmeshBuffers(s_basicSubmeshGroups,
-                                               submeshOffsets, materialOffsets);
-  memoryFactory->FillMaterialAndSubmeshBuffers(s_pbrSubmeshGroups,
-                                               submeshOffsets, materialOffsets);
+  memoryFactory->FillMaterialSubmeshBuffers(s_basicSubmeshGroups);
+  memoryFactory->FillMaterialSubmeshBuffers(s_pbrSubmeshGroups);
 
   //
   // Copy the staging data to local buffers ---------------------------------

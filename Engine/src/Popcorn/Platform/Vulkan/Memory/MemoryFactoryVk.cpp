@@ -2,7 +2,7 @@
 #include "BufferObjectsVk.h"
 #include "CommonVk.h"
 #include "ContextVk.h"
-#include "GameObject.h"
+#include "Empty.h"
 #include "GlobalMacros.h"
 #include "MaterialTypes.h"
 #include "Memory/Memory.h"
@@ -55,7 +55,50 @@ void MemoryFactoryVk::ExtractMaterialSubmeshOffsets(
           PC_AlignCeil(UniformDefs::SubmeshUniform::size, alignment);
     }
   }
+
+  if constexpr (T == MaterialTypes::BasicMat) {
+    m_bufferViews.basicMatUbo = {0, basicMatOffset};
+  } else if constexpr (T == MaterialTypes::PbrMat) {
+    m_bufferViews.pbrMatUbo = {0, pbrMatOffset};
+  }
+
+  m_bufferViews.submeshVbo += {0, vboOffset};
+  m_bufferViews.submeshIbo += {0, iboOffset};
+  m_bufferViews.submeshUbo += {0, worldMatrixOffset};
 }
+
+void MemoryFactoryVk::ExtractLightsCamerasEmptysOffsets(
+    std::vector<Light *> &lights, std::vector<Camera *> &cameras,
+    std::vector<Empty *> &emptys) {
+  auto *device = ContextVk::Device();
+  VkPhysicalDeviceProperties properties{};
+  device->GetPhysicalDeviceProperties(properties);
+  auto &limits = properties.limits;
+
+  VkDeviceSize lightOffsets = 0, cameraOffsets = 0, emptyOffsets = 0;
+
+  for (Light *light : lights) {
+    m_bufferOffsets.lightsWorldMatrixOffsets.push_back(lightOffsets);
+    lightOffsets += PC_AlignCeil(UniformDefs::LightUniform::size,
+                                 limits.minStorageBufferOffsetAlignment);
+  };
+
+  for (Camera *camera : cameras) {
+    m_bufferOffsets.camerasWorldMatrixOffsets.push_back(cameraOffsets);
+    cameraOffsets += PC_AlignCeil(UniformDefs::CameraUniform::size,
+                                  limits.minUniformBufferOffsetAlignment);
+  };
+
+  for (Empty *empty : emptys) {
+    m_bufferOffsets.emptysWorldMatrixOffsets.push_back(emptyOffsets);
+    emptyOffsets += PC_AlignCeil(UniformDefs::EmptyUniform::size,
+                                 limits.minUniformBufferOffsetAlignment);
+  };
+
+  m_bufferViews.lightsSsbo = {0, lightOffsets};
+  m_bufferViews.camerasUbo = {0, cameraOffsets};
+  m_bufferViews.emptysUbo = {0, emptyOffsets};
+};
 
 template <MaterialTypes T>
 void MemoryFactoryVk::FillMaterialSubmeshBuffers(

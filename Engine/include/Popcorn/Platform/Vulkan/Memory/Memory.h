@@ -45,23 +45,28 @@ struct BufferOffsets {
 // --- Buffer views --------------------------------------------------------
 struct BufferView {
   VkDeviceSize offset = 0;
-  VkDeviceSize alignedSize = 0;
+  VkDeviceSize size = 0;
+
+  void operator+=(const BufferView &other) {
+    offset += other.offset;
+    size += other.size;
+  };
 };
 
-struct UboBufferViews {
-  // Material info values for each unique type
-  BufferView basicMatVkUbo{};
-  BufferView pbrMatVkUbo{};
+struct BufferViews {
+  // VBOs & IBOs -----------------
+  BufferView submeshVbo{}; // done
+  BufferView submeshIbo{}; // done
 
-  // World matrices
-  BufferView submeshVkUbo{};
-  BufferView emptysVkUbo{};
-  BufferView camerasVkUbo{};
-};
+  // UBOs ------------------------
+  BufferView basicMatUbo{}; // done
+  BufferView pbrMatUbo{};   // done
+  BufferView submeshUbo{};  // done
+  BufferView camerasUbo{};  // done
+  BufferView emptysUbo{};   // done
 
-struct SsboBufferViews {
-  // Lights info values
-  BufferView lightsVkSsbo{};
+  // SSBOs -----------------------
+  BufferView lightsSsbo{}; // done
 };
 
 static constexpr VkDeviceSize PC_AlignCeil(VkDeviceSize size,

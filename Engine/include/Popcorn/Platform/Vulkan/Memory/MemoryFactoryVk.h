@@ -1,9 +1,12 @@
 #pragma once
 
+#include "Camera.h"
 #include "CommonVk.h"
 #include "DeviceVk.h"
+#include "Empty.h"
 #include "GameObject.h"
 #include "GlobalMacros.h"
+#include "Light.h"
 #include "MaterialTypes.h"
 #include "Memory/Memory.h"
 #include "Popcorn/Core/Base.h"
@@ -29,28 +32,50 @@ public:
   void
   ExtractMaterialSubmeshOffsets(MaterialSubmeshesMap<T> &materialSubmeshesMap);
 
+  void ExtractLightsCamerasEmptysOffsets(std::vector<Light *> &lights,
+                                         std::vector<Camera *> &cameras,
+                                         std::vector<Empty *> &emptys);
+
+  // TODO:
+  // -------------------------------------------------
+  // 1. Adjust bufferViews of objects
+  //    - Set each bufferView offset (for UBOs & SSBOs)
+  //    - Check offsets & sizes for minBufferAlignment
+  //
+  // 2. Alloc Vulkan Memory for -
+  //    a. Submesh world matrices - UBO
+  //    b. Basic material values - UBO
+  //    c. Pbr material values - UBO
+  //    d. Camera matrix & other values - UBO
+  //    e. Empty values - UBO
+  //    f. Lights values - SSBO
+  //
+  // 3. Actually allocate buffer values
+  //
+  void AllocVboIboStagingBuffers(VkDeviceSize vboSize, VkDeviceSize iboSize);
+  void AllocVboIboLocalBuffers(VkDeviceSize vboSize, VkDeviceSize iboSize);
+  void AllocUboLocalBuffers(AccSubmeshBufferSizes &submeshSizes,
+                            AccGameObjectUboSizes &gameObjectSizes);
+
   template <MaterialTypes T>
   void
   FillMaterialSubmeshBuffers(MaterialSubmeshesMap<T> &materialSubmeshesMap);
 
-  void AllocVboIboStagingBuffers(VkDeviceSize vboSize, VkDeviceSize iboSize);
-  void CleanUpVboIboStagingBuffers();
-
   void FlushVBOsAndIBOsStagingToLocal(VkDeviceSize submeshVbosSize,
                                       VkDeviceSize submeshIbosSize);
-
-  void AllocVboIboLocalBuffers(VkDeviceSize vboSize, VkDeviceSize iboSize);
+  void CleanUpVboIboStagingBuffers();
 
   void CleanUpVboIboLocalBuffers();
   void CleanUpUboBuffers();
 
   //
   // --- UBOs ------------------------------------------------------------------
-  void AllocUboLocalBuffers(AccSubmeshBufferSizes &submeshSizes,
-                            AccGameObjectUboSizes &gameObjectSizes);
 
   //
   // --- UTILS -----------------------------------------------------------------
+  [[nodiscard]] const BufferViews &GetBufferViews() const {
+    return m_bufferViews;
+  };
 
   template <GameObjectType T>
   void GetAccGameObjectsBufferSizes(std::vector<T *> &gameObjects,
@@ -156,13 +181,12 @@ private:
   std::array<void *, MAX_FRAMES_IN_FLIGHT> m_uboMappingSet;
 
   //
-  // Accessors --------------------------------------------------------------
+  // Offsets ----------------------------------------------------------------
   BufferOffsets m_bufferOffsets{};
 
   //
   // Buffer views -----------------------------------------------------------
-  UboBufferViews m_uboBufferViews{};
-  SsboBufferViews m_ssboBufferViews{};
+  BufferViews m_bufferViews{};
 };
 
 GFX_NAMESPACE_END
