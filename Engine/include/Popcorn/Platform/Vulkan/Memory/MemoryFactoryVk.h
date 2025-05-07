@@ -38,11 +38,11 @@ public:
 
   // TODO:
   // -------------------------------------------------
-  // 1. Adjust bufferViews of objects
+  // 1. Adjust bufferViews of objects - 20 mins
   //    - Set each bufferView offset (for UBOs & SSBOs)
   //    - Check offsets & sizes for minBufferAlignment
   //
-  // 2. Alloc Vulkan Memory for -
+  // 2. Alloc Vulkan Memory for - 20 mins
   //    a. Submesh world matrices - UBO
   //    b. Basic material values - UBO
   //    c. Pbr material values - UBO
@@ -50,7 +50,25 @@ public:
   //    e. Empty values - UBO
   //    f. Lights values - SSBO
   //
-  // 3. Actually allocate buffer values
+  // 3. Create mappings for all needed ubos & ssbos - 20 mins
+  //    a. basicMatUboMapping
+  //    b. pbrMatUboMapping
+  //    c. submeshUboMapping
+  //    d. camerasUboMapping
+  //    e. emptysUboMapping
+  //    f. LightsSsboMapping
+  //
+  // 4. Copy buffer values - 30 mins
+  //    a. Submesh world matrices - UBO - submesh->GetWorldMatrix()
+  //    b. Basic material values - UBO - materialsMap[matId]
+  //    c. Pbr material values - UBO - materialsMap[matId]
+  //    d. Camera matrix & other values - UBO - camera->GetWorldMatrix(),
+  //       camera->GetViewProjMatrix() ..etc
+  //    e. Empty values - UBO - empty->GetEmptyValues()
+  //    f. Lights values - SSBO - light->GetLightValues()
+  //
+  //
+  //
   //
   void AllocVboIboStagingBuffers(VkDeviceSize vboSize, VkDeviceSize iboSize);
   void AllocVboIboLocalBuffers(VkDeviceSize vboSize, VkDeviceSize iboSize);
