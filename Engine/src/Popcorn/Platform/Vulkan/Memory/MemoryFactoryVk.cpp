@@ -100,6 +100,45 @@ void MemoryFactoryVk::ExtractLightsCamerasEmptysOffsets(
   m_bufferViews.emptysUbo = {0, emptyOffsets};
 };
 
+void MemoryFactoryVk::SetBufferViewOffsets() {
+  auto *device = ContextVk::Device();
+  VkPhysicalDeviceProperties properties{};
+  device->GetPhysicalDeviceProperties(properties);
+  auto &limits = properties.limits;
+
+  VkDeviceSize bufferViewOffset = 0;
+
+  m_bufferViews.submeshUbo.offset = bufferViewOffset;
+  VkDeviceSize submeshUboSize = PC_AlignCeil(
+      m_bufferViews.submeshUbo.size, limits.minUniformBufferOffsetAlignment);
+  bufferViewOffset += submeshUboSize;
+  m_bufferViews.submeshUbo.size = submeshUboSize;
+
+  m_bufferViews.basicMatUbo.offset = bufferViewOffset;
+  VkDeviceSize basicMatUboSize = PC_AlignCeil(
+      m_bufferViews.basicMatUbo.size, limits.minUniformBufferOffsetAlignment);
+  bufferViewOffset += basicMatUboSize;
+  m_bufferViews.basicMatUbo.size = basicMatUboSize;
+
+  m_bufferViews.pbrMatUbo.offset = bufferViewOffset;
+  VkDeviceSize pbrMatUboSize = PC_AlignCeil(
+      m_bufferViews.pbrMatUbo.size, limits.minUniformBufferOffsetAlignment);
+  bufferViewOffset += pbrMatUboSize;
+  m_bufferViews.pbrMatUbo.size = pbrMatUboSize;
+
+  m_bufferViews.camerasUbo.offset = bufferViewOffset;
+  VkDeviceSize camerasUboSize = PC_AlignCeil(
+      m_bufferViews.camerasUbo.size, limits.minUniformBufferOffsetAlignment);
+  bufferViewOffset += camerasUboSize;
+  m_bufferViews.camerasUbo.size = camerasUboSize;
+
+  m_bufferViews.emptysUbo.offset = bufferViewOffset;
+  VkDeviceSize emptysUboSize = PC_AlignCeil(
+      m_bufferViews.emptysUbo.size, limits.minUniformBufferOffsetAlignment);
+  bufferViewOffset += emptysUboSize;
+  m_bufferViews.emptysUbo.size = emptysUboSize;
+};
+
 template <MaterialTypes T>
 void MemoryFactoryVk::FillMaterialSubmeshBuffers(
     MaterialSubmeshesMap<T> &materialSubmeshesMap) {

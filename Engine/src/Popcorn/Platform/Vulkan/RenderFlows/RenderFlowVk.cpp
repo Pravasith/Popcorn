@@ -71,18 +71,20 @@ void RenderFlowVk::AllocMemory() {
   memoryFactory->FlushVBOsAndIBOsStagingToLocal(alignedVboSize, alignedIboSize);
   memoryFactory->CleanUpVboIboStagingBuffers(); // Unmap, deallocate & destroy
 
-  AccGameObjectUboSizes gameObjectSizes{};
-  ContextVk::Device()->GetPhysicalDeviceProperties(properties);
+  memoryFactory->SetBufferViewOffsets();
 
-  // Cameras ubos
-  memoryFactory->GetAccGameObjectsBufferSizes(s_cameras, gameObjectSizes,
-                                              properties);
-  // Emptys ubos
-  memoryFactory->GetAccGameObjectsBufferSizes(s_emptys, gameObjectSizes,
-                                              properties);
-  // Lights ubos
-  memoryFactory->GetAccGameObjectsBufferSizes(s_lights, gameObjectSizes,
-                                              properties);
+  // AccGameObjectUboSizes gameObjectSizes{};
+  // ContextVk::Device()->GetPhysicalDeviceProperties(properties);
+  //
+  // // Cameras ubos
+  // memoryFactory->GetAccGameObjectsBufferSizes(s_cameras, gameObjectSizes,
+  //                                             properties);
+  // // Emptys ubos
+  // memoryFactory->GetAccGameObjectsBufferSizes(s_emptys, gameObjectSizes,
+  //                                             properties);
+  // // Lights ubos
+  // memoryFactory->GetAccGameObjectsBufferSizes(s_lights, gameObjectSizes,
+  //                                             properties);
 
   //
   // Allocate ubo buffers

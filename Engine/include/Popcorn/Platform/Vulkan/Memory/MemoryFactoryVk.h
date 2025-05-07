@@ -35,6 +35,7 @@ public:
   void ExtractLightsCamerasEmptysOffsets(std::vector<Light *> &lights,
                                          std::vector<Camera *> &cameras,
                                          std::vector<Empty *> &emptys);
+  void SetBufferViewOffsets();
 
   // TODO:
   // -------------------------------------------------
