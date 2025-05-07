@@ -58,7 +58,12 @@ public:
   //    e. emptysUboMapping
   //    f. LightsSsboMapping
   //
-  // 4. Copy buffer values - 30 mins
+  // 4. Descriptor sets allocation --
+  //    - Plan this before copying values
+  //    - basically bind memory (buffers, images & samplers) to descriptor sets
+  //      and get them ready for the scene updates process function
+  //
+  // 5. Process scene updates - Copy buffer values --
   //    a. Submesh world matrices - UBO - submesh->GetWorldMatrix()
   //    b. Basic material values - UBO - materialsMap[matId]
   //    c. Pbr material values - UBO - materialsMap[matId]
@@ -67,6 +72,8 @@ public:
   //    e. Empty values - UBO - empty->GetEmptyValues()
   //    f. Lights values - SSBO - light->GetLightValues()
   //
+  // 6. Make pipelines ready for each renderflows
+  // 7. Finally, the draw call
   //
   //
   //
