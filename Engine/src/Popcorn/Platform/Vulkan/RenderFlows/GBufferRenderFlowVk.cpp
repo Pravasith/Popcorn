@@ -1,4 +1,5 @@
 #include "RenderFlows/GBufferRenderFlowVk.h"
+#include "AttachmentVk.h"
 #include "ContextVk.h"
 #include "DescriptorLayoutsVk.h"
 #include "DescriptorPoolsVk.h"
@@ -53,9 +54,9 @@ void GBufferRenderFlowVk::CreateAttachments() {
   VmaAllocationCreateInfo depthAlloc{.usage = VMA_MEMORY_USAGE_AUTO};
   VmaAllocationCreateInfo normalAlloc{.usage = VMA_MEMORY_USAGE_AUTO};
 
-  ImageVk &albedoImage = m_attachments.albedoImage;
-  ImageVk &depthImage = m_attachments.depthImage;
-  ImageVk &normalImage = m_attachments.normalImage;
+  ImageVk &albedoImage = m_imagesVk.albedoImage;
+  ImageVk &depthImage = m_imagesVk.depthImage;
+  ImageVk &normalImage = m_imagesVk.normalImage;
 
   albedoImage.CreateVmaImage(albedoImageInfo, albedoAlloc);
   depthImage.CreateVmaImage(depthImageInfo, depthAlloc);
@@ -90,24 +91,28 @@ void GBufferRenderFlowVk::CreateAttachments() {
   //
   // --- Create G-Buffer Attachments -------------------------------------------
   VkAttachmentDescription albedoAttachment{};
-  RenderPassVk::GetDefaultAttachmentDescription(albedoAttachment);
+  AttachmentVk::GetDefaultAttachmentDescription(albedoAttachment);
   albedoAttachment.format = albedoFormat;
   albedoAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
   VkAttachmentDescription depthAttachment{};
-  RenderPassVk::GetDefaultAttachmentDescription(depthAttachment);
+  AttachmentVk::GetDefaultAttachmentDescription(depthAttachment);
   depthAttachment.format = depthFormat;
   depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
   depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
   VkAttachmentDescription normalAttachment{};
-  RenderPassVk::GetDefaultAttachmentDescription(normalAttachment);
+  AttachmentVk::GetDefaultAttachmentDescription(normalAttachment);
   normalAttachment.format = normalFormat;
   normalAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-  albedoImage.SetAttachmentDescription(albedoAttachment);
-  depthImage.SetAttachmentDescription(depthAttachment);
-  normalImage.SetAttachmentDescription(normalAttachment);
+  m_attachmentsVk.albedoAttachment.SetImageVk(&albedoImage);
+  m_attachmentsVk.depthAttachment.SetImageVk(&depthImage);
+  m_attachmentsVk.normalAttachment.SetImageVk(&normalImage);
+
+  m_attachmentsVk.albedoAttachment.SetAttachmentDescription(albedoAttachment);
+  m_attachmentsVk.depthAttachment.SetAttachmentDescription(depthAttachment);
+  m_attachmentsVk.normalAttachment.SetAttachmentDescription(normalAttachment);
 };
 
 //
@@ -123,22 +128,22 @@ void GBufferRenderFlowVk::CreateRenderPass() {
   //
   // --- Attachments -----------------------------------------------------------
   VkAttachmentDescription attachments[]{
-      m_attachments.albedoImage.GetAttachmentDescription(),
-      m_attachments.depthImage.GetAttachmentDescription(),
-      m_attachments.normalImage.GetAttachmentDescription()};
+      m_attachmentsVk.albedoAttachment.GetAttachmentDescription(),
+      m_attachmentsVk.depthAttachment.GetAttachmentDescription(),
+      m_attachmentsVk.normalAttachment.GetAttachmentDescription()};
 
   //
   // --- Attachment references -------------------------------------------------
   VkAttachmentReference albedoRef{};
-  RenderPassVk::GetAttachmentRef(albedoRef, 0);
+  AttachmentVk::GetAttachmentRef(albedoRef, 0);
   albedoRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
   VkAttachmentReference depthRef{};
-  RenderPassVk::GetAttachmentRef(depthRef, 1);
+  AttachmentVk::GetAttachmentRef(depthRef, 1);
   depthRef.layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
 
   VkAttachmentReference normalRef{};
-  RenderPassVk::GetAttachmentRef(normalRef, 2);
+  AttachmentVk::GetAttachmentRef(normalRef, 2);
   normalRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
   VkAttachmentReference colorAttachments[]{albedoRef, normalRef};
@@ -193,9 +198,9 @@ void GBufferRenderFlowVk::CreateFramebuffer() {
   const auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
 
   std::vector<VkImageView> attachments = {
-      m_attachments.albedoImage.GetVkImageView(),
-      m_attachments.depthImage.GetVkImageView(),
-      m_attachments.normalImage.GetVkImageView(),
+      m_imagesVk.albedoImage.GetVkImageView(),
+      m_imagesVk.depthImage.GetVkImageView(),
+      m_imagesVk.normalImage.GetVkImageView(),
   };
 
   VkFramebufferCreateInfo createInfo{};
@@ -310,9 +315,9 @@ void GBufferRenderFlowVk::DestroyRenderPass() {
 };
 
 void GBufferRenderFlowVk::DestroyAttachments() {
-  m_attachments.albedoImage.Destroy();
-  m_attachments.depthImage.Destroy();
-  m_attachments.normalImage.Destroy();
+  m_imagesVk.albedoImage.Destroy();
+  m_imagesVk.depthImage.Destroy();
+  m_imagesVk.normalImage.Destroy();
 };
 
 GFX_NAMESPACE_END

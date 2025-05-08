@@ -78,7 +78,7 @@ void RendererVk::CreateRenderingCommandBuffers() {
 // --- PRIVATE METHODS -----------------------------------------------------
 
 RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
-  PC_PRINT("CREATED", TagType::Constr, "RENDERER-VK");
+  PC_PRINT("CREATED", TagType::Constr, "RendererVk");
   CreateVulkanContext();
 };
 
@@ -94,7 +94,7 @@ RendererVk::~RendererVk() {
   s_renderFlows.clear();
 
   DestroyVulkanContext();
-  PC_PRINT("DESTROYED", TagType::Destr, "RENDERER-VULKAN");
+  PC_PRINT("DESTROYED", TagType::Destr, "RendererVk");
 };
 
 void RendererVk::CreateVulkanContext() {

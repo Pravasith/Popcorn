@@ -45,9 +45,9 @@ TODO:
    x. Pbr material values - UBO - done
    x. Camera matrix & other values - UBO - done
    x. Empty values - UBO - done
-   -. Lights values - SSBO
-       - Allocate SSBO,
-       -
+   x. Lights values - SSBO
+       x Allocate SSBO,
+       x Clean up ubo & ssbo
 
 3. Create mappings for all needed ubos & ssbos - 20 mins
    a. basicMatUboMapping
@@ -56,6 +56,8 @@ TODO:
    d. camerasUboMapping
    e. emptysUboMapping
    f. LightsSsboMapping
+
+3.5. Create samplers for gbuffer & lighting buffer
 
 4. Descriptor sets allocation --
    - Plan this before copying values
@@ -73,5 +75,3 @@ TODO:
 
 6. Make pipelines ready for each renderflows
 7. Finally, the draw call
-
-

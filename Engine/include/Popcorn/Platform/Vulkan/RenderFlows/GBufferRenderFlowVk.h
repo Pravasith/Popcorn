@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AttachmentVk.h"
 #include "GBufferPipelineVk.h"
 #include "GlobalMacros.h"
 #include "ImageVk.h"
@@ -33,13 +34,20 @@ private:
   virtual void CreatePipelines() override;
 
 private:
-  struct Attachments {
+  struct ImagesVk {
     ImageVk albedoImage{};
     ImageVk depthImage{};
     ImageVk normalImage{};
   };
 
-  Attachments m_attachments{};
+  struct AttachmentsVk {
+    AttachmentVk albedoAttachment{};
+    AttachmentVk depthAttachment{};
+    AttachmentVk normalAttachment{};
+  };
+
+  ImagesVk m_imagesVk{};
+  AttachmentsVk m_attachmentsVk{};
 
   RenderPassVk m_renderPass;
   VkFramebuffer m_framebuffer;

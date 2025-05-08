@@ -10,6 +10,7 @@
 #include "Memory/Memory.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
+#include <array>
 #include <cstring>
 #include <glm/fwd.hpp>
 #include <vector>
@@ -34,6 +35,7 @@ public:
   void AllocSubmeshVboIboStaging();
   void AllocSubmeshVboIboLocal();
   void AllocUboSsboLocalBuffers();
+  void MapUboSsboLocalBuffers();
 
   template <MaterialTypes T>
   void
@@ -43,7 +45,7 @@ public:
   void CleanUpSubmeshVboIboBuffersStaging();
 
   void CleanUpVboIboLocalBuffers();
-  void CleanUpUboBuffers();
+  void CleanUpUboSsboLocalBuffers();
 
   [[nodiscard]] const BufferViews &GetBufferViews() const {
     return m_bufferViews;
@@ -117,6 +119,10 @@ private:
   std::array<VkBuffer, MAX_FRAMES_IN_FLIGHT> m_uboSet;
   std::array<VmaAllocation, MAX_FRAMES_IN_FLIGHT> m_uboAllocSet;
   std::array<void *, MAX_FRAMES_IN_FLIGHT> m_uboMappingSet;
+
+  std::array<VkBuffer, MAX_FRAMES_IN_FLIGHT> m_ssboSet;
+  std::array<VmaAllocation, MAX_FRAMES_IN_FLIGHT> m_ssboAllocSet;
+  std::array<void *, MAX_FRAMES_IN_FLIGHT> m_ssboMappingSet;
 
   //
   // Offsets ----------------------------------------------------------------

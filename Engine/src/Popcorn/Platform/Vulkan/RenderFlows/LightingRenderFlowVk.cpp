@@ -1,4 +1,5 @@
 #include "RenderFlows/LightingRenderFlowVk.h"
+#include "AttachmentVk.h"
 #include "ContextVk.h"
 #include "DescriptorLayoutsVk.h"
 #include "DescriptorPoolsVk.h"
@@ -24,37 +25,40 @@ void LightingRenderFlowVk::CreateAttachments() {
 
   //
   // --- Create Images ---------------------------------------------------------
-  VkImageCreateInfo lightBufferInfo;
-  ImageVk::GetDefaultImageCreateInfo(lightBufferInfo, swapchainExtent.width,
+  VkImageCreateInfo lightImageInfo;
+  ImageVk::GetDefaultImageCreateInfo(lightImageInfo, swapchainExtent.width,
                                      swapchainExtent.height);
-  lightBufferInfo.format = format;
-  lightBufferInfo.usage =
+  lightImageInfo.format = format;
+  lightImageInfo.usage =
       VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
-  VmaAllocationCreateInfo lightBufferAlloc{.usage = VMA_MEMORY_USAGE_AUTO};
+  VmaAllocationCreateInfo lightImageAlloc{.usage = VMA_MEMORY_USAGE_AUTO};
 
-  ImageVk &lightBufferRef = m_attachments.lightBuffer;
-  lightBufferRef.CreateVmaImage(lightBufferInfo, lightBufferAlloc);
+  ImageVk &lightImageRef = m_imagesVk.lightImage;
+  lightImageRef.CreateVmaImage(lightImageInfo, lightImageAlloc);
 
   //
   // --- Image views -----------------------------------------------------------
-  VkImageViewCreateInfo lightBufferViewInfo{};
-  ImageVk::GetDefaultImageViewCreateInfo(lightBufferViewInfo,
-                                         lightBufferRef.GetVkImage());
-  lightBufferViewInfo.format = format;
-  lightBufferViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  VkImageViewCreateInfo lightImageViewInfo{};
+  ImageVk::GetDefaultImageViewCreateInfo(lightImageViewInfo,
+                                         lightImageRef.GetVkImage());
+  lightImageViewInfo.format = format;
+  lightImageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 
-  lightBufferRef.CreateImageView(lightBufferViewInfo);
+  lightImageRef.CreateImageView(lightImageViewInfo);
 
   //
   // --- Attachments -----------------------------------------------------------
-  VkAttachmentDescription lightBufferAttachment{};
-  RenderPassVk::GetDefaultAttachmentDescription(lightBufferAttachment);
-  lightBufferAttachment.format = format;
-  lightBufferAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-  lightBufferAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+  VkAttachmentDescription lightImageAttachment{};
+  AttachmentVk::GetDefaultAttachmentDescription(lightImageAttachment);
+  lightImageAttachment.format = format;
+  lightImageAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  lightImageAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-  lightBufferRef.SetAttachmentDescription(lightBufferAttachment);
+  m_attachmentsVk.lightAttachment.SetImageVk(&lightImageRef);
+
+  m_attachmentsVk.lightAttachment.SetAttachmentDescription(
+      lightImageAttachment);
 }
 
 //
@@ -70,12 +74,12 @@ void LightingRenderFlowVk::CreateRenderPass() {
   //
   // --- Attachments -----------------------------------------------------------
   VkAttachmentDescription attachments[]{
-      m_attachments.lightBuffer.GetAttachmentDescription()};
+      m_attachmentsVk.lightAttachment.GetAttachmentDescription()};
 
   //
   // --- Attachment references -------------------------------------------------
   VkAttachmentReference lightAttachmentRef{};
-  RenderPassVk::GetAttachmentRef(lightAttachmentRef, 0);
+  AttachmentVk::GetAttachmentRef(lightAttachmentRef, 0);
   lightAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
   VkAttachmentReference attachmentRefs[]{lightAttachmentRef};
@@ -128,7 +132,7 @@ void LightingRenderFlowVk::CreateFramebuffer() {
   const auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
 
   std::vector<VkImageView> attachments{
-      m_attachments.lightBuffer.GetVkImageView()};
+      m_attachments.lightImage.GetVkImageView()};
 
   VkFramebufferCreateInfo createInfo{};
   FramebuffersVk::GetDefaultFramebufferState(createInfo);
@@ -185,7 +189,7 @@ void LightingRenderFlowVk::DestroyRenderPass() {
 };
 
 void LightingRenderFlowVk::DestroyAttachments() {
-  m_attachments.lightBuffer.Destroy();
+  m_imagesVk.lightImage.Destroy();
 };
 
 GFX_NAMESPACE_END

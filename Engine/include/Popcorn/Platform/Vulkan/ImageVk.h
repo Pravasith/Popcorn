@@ -26,15 +26,6 @@ public:
     return m_imageView;
   };
 
-  [[nodiscard]] const VkAttachmentDescription &
-  GetAttachmentDescription() const {
-    return m_imageDescription;
-  };
-
-  void SetAttachmentDescription(const VkAttachmentDescription &description) {
-    m_imageDescription = description;
-  };
-
   static void GetDefaultImageCreateInfo(VkImageCreateInfo &imageInfo,
                                         uint32_t width, uint32_t height);
   static void GetDefaultImageViewCreateInfo(VkImageViewCreateInfo &viewInfo,
@@ -43,7 +34,6 @@ public:
 private:
   VkImage m_image = VK_NULL_HANDLE;
   VkImageView m_imageView = VK_NULL_HANDLE;
-  VkAttachmentDescription m_imageDescription{};
 
   VmaAllocation m_alloc = nullptr;
 };

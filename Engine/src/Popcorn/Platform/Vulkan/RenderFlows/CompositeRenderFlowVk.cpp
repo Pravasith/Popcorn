@@ -1,4 +1,5 @@
 #include "RenderFlows/CompositeRenderFlowVk.h"
+#include "AttachmentVk.h"
 #include "ContextVk.h"
 #include "GlobalMacros.h"
 #include "ImageVk.h"
@@ -30,7 +31,7 @@ void CompositeRenderFlowVk::CreateAttachments() {
 
   VmaAllocationCreateInfo presentImageAlloc{.usage = VMA_MEMORY_USAGE_AUTO};
 
-  ImageVk &presentImageRef = m_attachments.presentImage;
+  ImageVk &presentImageRef = m_imagesVk.presentImage;
   presentImageRef.CreateVmaImage(presentImageInfo, presentImageAlloc);
 
   //
@@ -46,12 +47,14 @@ void CompositeRenderFlowVk::CreateAttachments() {
   //
   // --- Attachments -----------------------------------------------------------
   VkAttachmentDescription presentImageAttachment{};
-  RenderPassVk::GetDefaultAttachmentDescription(presentImageAttachment);
+  AttachmentVk::GetDefaultAttachmentDescription(presentImageAttachment);
   presentImageAttachment.format = format;
   presentImageAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
   presentImageAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-  presentImageRef.SetAttachmentDescription(presentImageAttachment);
+  m_attachmentsVk.presentAttachment.SetImageVk(&presentImageRef);
+  m_attachmentsVk.presentAttachment.SetAttachmentDescription(
+      presentImageAttachment);
 }
 
 //
@@ -67,12 +70,12 @@ void CompositeRenderFlowVk::CreateRenderPass() {
   //
   // --- Attachments -----------------------------------------------------------
   VkAttachmentDescription attachments[]{
-      m_attachments.presentImage.GetAttachmentDescription()};
+      m_attachmentsVk.presentAttachment.GetAttachmentDescription()};
 
   //
   // --- Attachment references -------------------------------------------------
   VkAttachmentReference finalAttachmentRef{};
-  RenderPassVk::GetAttachmentRef(finalAttachmentRef, 0);
+  AttachmentVk::GetAttachmentRef(finalAttachmentRef, 0);
   finalAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
   VkAttachmentReference attachmentRefs[]{finalAttachmentRef};
@@ -125,7 +128,7 @@ void CompositeRenderFlowVk::CreateFramebuffer() {
   const auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
 
   std::vector<VkImageView> attachments{
-      m_attachments.presentImage.GetVkImageView()};
+      m_imagesVk.presentImage.GetVkImageView()};
 
   VkFramebufferCreateInfo createInfo{};
   FramebuffersVk::GetDefaultFramebufferState(createInfo);
@@ -190,7 +193,7 @@ void CompositeRenderFlowVk::DestroyRenderPass() {
 };
 
 void CompositeRenderFlowVk::DestroyAttachments() {
-  m_attachments.presentImage.Destroy();
+  m_imagesVk.presentImage.Destroy();
 };
 
 GFX_NAMESPACE_END

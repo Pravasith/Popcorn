@@ -307,31 +307,52 @@ void MemoryFactoryVk::AllocSubmeshVboIboLocal() {
 }
 
 void MemoryFactoryVk::AllocUboSsboLocalBuffers() {
-  VkDeviceSize totalUboSize =
+  VkDeviceSize uboTotalSize =
       m_bufferViews.submeshUbo.size + m_bufferViews.basicMatUbo.size +
       m_bufferViews.pbrMatUbo.size + m_bufferViews.camerasUbo.size +
       m_bufferViews.emptysUbo.size;
+  VkDeviceSize ssboTotalSize = m_bufferViews.lightsSsbo.size;
 
-  VkBufferCreateInfo createInfo{};
-  createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-  createInfo.size = totalUboSize;
-  createInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-  createInfo.sharingMode =
+  VkBufferCreateInfo uboCreateInfo{};
+  uboCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+  uboCreateInfo.size = uboTotalSize;
+  uboCreateInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+  uboCreateInfo.sharingMode =
       VK_SHARING_MODE_EXCLUSIVE; // not sharing other queues
 
-  VmaAllocationCreateInfo allocCreateInfo{};
-  allocCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
-  allocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
+  VkBufferCreateInfo ssboCreateInfo{};
+  ssboCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+  ssboCreateInfo.size = ssboTotalSize;
+  ssboCreateInfo.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+  ssboCreateInfo.sharingMode =
+      VK_SHARING_MODE_EXCLUSIVE; // not sharing other queues
+
+  VmaAllocationCreateInfo uboAllocCreateInfo{};
+  uboAllocCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+  uboAllocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
+
+  VmaAllocationCreateInfo ssboAllocCreateInfo{};
+  ssboAllocCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+  ssboAllocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
   for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-    VmaAllocationInfo allocInfo{};
+    VmaAllocationInfo uboVmaInfo{};
     if (vmaCreateBuffer(ContextVk::MemoryAllocator()->GetVMAAllocator(),
-                        &createInfo, &allocCreateInfo, &m_uboSet[i],
-                        &m_uboAllocSet[i], &allocInfo) != VK_SUCCESS) {
+                        &uboCreateInfo, &uboAllocCreateInfo, &m_uboSet[i],
+                        &m_uboAllocSet[i], &uboVmaInfo) != VK_SUCCESS) {
       throw std::runtime_error("Failed to create uniform buffer");
     };
 
-    m_uboMappingSet[i] = allocInfo.pMappedData;
+    m_uboMappingSet[i] = uboVmaInfo.pMappedData;
+
+    VmaAllocationInfo ssboVmaInfo{};
+    if (vmaCreateBuffer(ContextVk::MemoryAllocator()->GetVMAAllocator(),
+                        &ssboCreateInfo, &ssboAllocCreateInfo, &m_ssboSet[i],
+                        &m_ssboAllocSet[i], &ssboVmaInfo) != VK_SUCCESS) {
+      throw std::runtime_error("Failed to create uniform buffer");
+    };
+
+    m_ssboMappingSet[i] = ssboVmaInfo.pMappedData;
   };
 };
 
@@ -378,7 +399,7 @@ void MemoryFactoryVk::CleanUpVboIboLocalBuffers() {
   }
 };
 
-void MemoryFactoryVk::CleanUpUboBuffers() {
+void MemoryFactoryVk::CleanUpUboSsboLocalBuffers() {
   auto &allocator = ContextVk::MemoryAllocator()->GetVMAAllocator();
 
   for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
@@ -387,6 +408,13 @@ void MemoryFactoryVk::CleanUpUboBuffers() {
       m_uboSet[i] = VK_NULL_HANDLE;
       m_uboAllocSet[i] = nullptr;
       m_uboMappingSet[i] = nullptr;
+    }
+
+    if (m_ssboSet[i] != VK_NULL_HANDLE && m_ssboAllocSet[i]) {
+      vmaDestroyBuffer(allocator, m_ssboSet[i], m_ssboAllocSet[i]);
+      m_ssboSet[i] = VK_NULL_HANDLE;
+      m_ssboAllocSet[i] = nullptr;
+      m_ssboMappingSet[i] = nullptr;
     }
   };
 };

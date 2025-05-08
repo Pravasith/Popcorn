@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Base.h"
 #include "GlobalMacros.h"
+#include "Popcorn/Core/Base.h"
 
 //
 // GRAPHICS CLASS ----------------------------------------------------

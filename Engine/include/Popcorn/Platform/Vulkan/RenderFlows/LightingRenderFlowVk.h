@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AttachmentVk.h"
 #include "GlobalMacros.h"
 #include "ImageVk.h"
 #include "LightingPipelineVk.h"
@@ -33,11 +34,16 @@ private:
   virtual void CreateAndAllocDescriptors() override;
 
 private:
-  struct Attachments {
-    ImageVk lightBuffer{};
+  struct ImagesVk {
+    ImageVk lightImage{};
   };
 
-  Attachments m_attachments{};
+  struct AttachmentsVk {
+    AttachmentVk lightAttachment{};
+  };
+
+  ImagesVk m_imagesVk{};
+  AttachmentsVk m_attachmentsVk{};
 
   RenderPassVk m_renderPass;
   VkFramebuffer m_framebuffer;
