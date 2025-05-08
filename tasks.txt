@@ -1,40 +1,77 @@
 
---- TASKS ------------------------------------------------------------------
+----------------------------------------------------------------------------
+-- TASKS ---- TASKS ---- TASKS ---- TASKS ---- TASKS ---- TASKS ---- TASKS -
 ----------------------------------------------------------------------------
 
+
+
+HIGH PRIORITY:
+----------------------------------------------------------------------------
+
+
 :: Optimise space by allocating one model matrix per mesh, not per submesh
-:: Show blender scene in Popcorn - friday
-
-// USE IN VIDEO
-// https://x.com/gunsnrosesgirl3/status/1907830742106755259
-
-:: Make a central DB for all Vulkan resources
-
-
-
---- Make video - 28th Feb --------------------------
-
-:: Implement ImGui
-
-
+:: Use in video -  https://x.com/gunsnrosesgirl3/status/1907830742106755259
 
 
 LOW PRIORITY:
--------------
+----------------------------------------------------------------------------
 
 :: Make all singletons stack allocated with static local variables
    BE CAREFUL ABOUT THIS ONE ^^
    Stack allocated local variables last until the end of the program.
 
-:: Fix Buffer class constructors
+:: Build for windows
 
-::  Build for windows
-::  Make Readme for the project
+:: Update Readme for the project
 
-::  Test minimization logic -
-    https://vulkan-tutorial.com/Drawing_a_triangle/Swap_chain_recreation
+:: Test minimization logic -
+   https://vulkan-tutorial.com/Drawing_a_triangle/Swap_chain_recreation
 
-::  Check Events class for perf issues
+:: Check Events class for perf issues
 
-::  Precompiled headers
-    Add precompiled headers to the project and in cmake
+:: Precompiled headers
+   Add precompiled headers to the project and in cmake
+
+
+TODO:
+-------------------------------------------------
+1. Adjust bufferViews of objects - 20 mins - done
+   x Set each bufferView offset (for UBOs & SSBOs) - done
+   x Check offsets & sizes for minBufferAlignment - done
+
+2. Alloc Vulkan Memory for - 20 mins
+   x. Submesh world matrices - UBO - done
+   x. Basic material values - UBO - done
+   x. Pbr material values - UBO - done
+   x. Camera matrix & other values - UBO - done
+   x. Empty values - UBO - done
+   -. Lights values - SSBO
+       - Allocate SSBO,
+       -
+
+3. Create mappings for all needed ubos & ssbos - 20 mins
+   a. basicMatUboMapping
+   b. pbrMatUboMapping
+   c. submeshUboMapping
+   d. camerasUboMapping
+   e. emptysUboMapping
+   f. LightsSsboMapping
+
+4. Descriptor sets allocation --
+   - Plan this before copying values
+   - basically bind memory (buffers, images & samplers) to descriptor sets
+     and get them ready for the scene updates process function
+
+5. Process scene updates - Copy buffer values --
+   a. Submesh world matrices - UBO - submesh->GetWorldMatrix()
+   b. Basic material values - UBO - materialsMap[matId]
+   c. Pbr material values - UBO - materialsMap[matId]
+   d. Camera matrix & other values - UBO - camera->GetWorldMatrix(),
+      camera->GetViewProjMatrix() ..etc
+   e. Empty values - UBO - empty->GetEmptyValues()
+   f. Lights values - SSBO - light->GetLightValues()
+
+6. Make pipelines ready for each renderflows
+7. Finally, the draw call
+
+

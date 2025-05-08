@@ -6,6 +6,8 @@
 #include "GlobalMacros.h"
 #include "MaterialTypes.h"
 #include "Memory/Memory.h"
+#include "Popcorn/Core/Base.h"
+#include "Popcorn/Core/Helpers.h"
 #include "Uniforms.h"
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
@@ -14,7 +16,7 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 template <MaterialTypes T>
-void MemoryFactoryVk::ExtractMaterialSubmeshOffsets(
+void MemoryFactoryVk::ExtractOffsetsMaterialsSubmeshes(
     MaterialSubmeshesMap<T> &materialSubmeshesMap) {
   auto *device = ContextVk::Device();
   VkPhysicalDeviceProperties properties{};
@@ -67,7 +69,7 @@ void MemoryFactoryVk::ExtractMaterialSubmeshOffsets(
   m_bufferViews.submeshUbo += {0, worldMatrixOffset};
 }
 
-void MemoryFactoryVk::ExtractLightsCamerasEmptysOffsets(
+void MemoryFactoryVk::ExtractOffsetsLightsCamerasEmptys(
     std::vector<Light *> &lights, std::vector<Camera *> &cameras,
     std::vector<Empty *> &emptys) {
   auto *device = ContextVk::Device();
@@ -100,7 +102,19 @@ void MemoryFactoryVk::ExtractLightsCamerasEmptysOffsets(
   m_bufferViews.emptysUbo = {0, emptyOffsets};
 };
 
-void MemoryFactoryVk::SetBufferViewOffsets() {
+void MemoryFactoryVk::AlignVboIboBufferViews() {
+  VkPhysicalDeviceProperties properties{};
+  ContextVk::Device()->GetPhysicalDeviceProperties(properties);
+
+  m_bufferViews.submeshVbo.size =
+      PC_AlignCeil(m_bufferViews.submeshVbo.size,
+                   properties.limits.optimalBufferCopyOffsetAlignment);
+  m_bufferViews.submeshIbo.size =
+      PC_AlignCeil(m_bufferViews.submeshIbo.size,
+                   properties.limits.optimalBufferCopyOffsetAlignment);
+};
+
+void MemoryFactoryVk::CalculateUboSsboBaseOffsets() {
   auto *device = ContextVk::Device();
   VkPhysicalDeviceProperties properties{};
   device->GetPhysicalDeviceProperties(properties);
@@ -137,10 +151,34 @@ void MemoryFactoryVk::SetBufferViewOffsets() {
       m_bufferViews.emptysUbo.size, limits.minUniformBufferOffsetAlignment);
   bufferViewOffset += emptysUboSize;
   m_bufferViews.emptysUbo.size = emptysUboSize;
+
+  // clang-format off
+  PC_PRINT(
+          "\nSubmesh UBO: \n" <<
+          m_bufferViews.submeshUbo.offset << " " <<
+          m_bufferViews.submeshUbo.size << " "
+          "\nBasicMat UBO: \n" << " " <<
+          m_bufferViews.basicMatUbo.offset << " " <<
+          m_bufferViews.basicMatUbo.size <<
+          "\nPbrMat UBO: \n" <<
+          m_bufferViews.pbrMatUbo.offset << " " <<
+          m_bufferViews.pbrMatUbo.size<< " " <<
+          "\nCamerasMat UBO: \n" <<
+          m_bufferViews.camerasUbo.offset<< " " <<
+          m_bufferViews.camerasUbo.size << " " <<
+          "\nEmptys UBO: \n" <<
+          m_bufferViews.emptysUbo.offset << " " <<
+          m_bufferViews.emptysUbo.size  << " " <<
+          "\nLights SSBO: \n" <<
+          m_bufferViews.lightsSsbo.offset << " " <<
+          m_bufferViews.lightsSsbo.size << " " <<
+          "\n"
+          , TagType::Print, "MemoryFactoryVk")
+  // clang-format on
 };
 
 template <MaterialTypes T>
-void MemoryFactoryVk::FillMaterialSubmeshBuffers(
+void MemoryFactoryVk::FillBuffersMaterialsSubmeshes(
     MaterialSubmeshesMap<T> &materialSubmeshesMap) {
   for (auto &[matId, submeshes] : materialSubmeshesMap) {
     // fill materials too
@@ -167,14 +205,12 @@ void MemoryFactoryVk::FillMaterialSubmeshBuffers(
   };
 };
 
-void MemoryFactoryVk::AllocVboIboStagingBuffers(VkDeviceSize vboSize,
-                                                VkDeviceSize iboSize) {
-
+void MemoryFactoryVk::AllocSubmeshVboIboStaging() {
   //
-  // -----------------------------------------------------------------------
   // --- VERTEX BUFFERS CREATION -------------------------------------------
   VkBufferCreateInfo vboStagingInfo{};
-  BufferVkUtils::GetDefaultVkBufferState(vboStagingInfo, vboSize);
+  BufferVkUtils::GetDefaultVkBufferState(vboStagingInfo,
+                                         m_bufferViews.submeshVbo.size);
   vboStagingInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 
   VmaAllocationCreateInfo vboStagingVmaInfo{};
@@ -202,7 +238,8 @@ void MemoryFactoryVk::AllocVboIboStagingBuffers(VkDeviceSize vboSize,
   // -----------------------------------------------------------------------
   // --- INDEX BUFFERS CREATION --------------------------------------------
   VkBufferCreateInfo iboStagingInfo{};
-  BufferVkUtils::GetDefaultVkBufferState(iboStagingInfo, iboSize);
+  BufferVkUtils::GetDefaultVkBufferState(iboStagingInfo,
+                                         m_bufferViews.submeshIbo.size);
   iboStagingInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 
   VmaAllocationCreateInfo iboStagingVmaInfo{};
@@ -224,23 +261,19 @@ void MemoryFactoryVk::AllocVboIboStagingBuffers(VkDeviceSize vboSize,
   };
 }
 
-void MemoryFactoryVk::FlushVBOsAndIBOsStagingToLocal(VkDeviceSize vbosSize,
-                                                     VkDeviceSize ibosSize) {
-  BufferVkUtils::CopyStagingToMainBuffers(m_vboStaging, m_vbo, vbosSize);
-  BufferVkUtils::CopyStagingToMainBuffers(m_iboStaging, m_ibo, ibosSize);
+void MemoryFactoryVk::FlushVboIboStagingToLocal() {
+  BufferVkUtils::CopyStagingToMainBuffers(m_vboStaging, m_vbo,
+                                          m_bufferViews.submeshVbo.size);
+  BufferVkUtils::CopyStagingToMainBuffers(m_iboStaging, m_ibo,
+                                          m_bufferViews.submeshIbo.size);
 };
 
-void MemoryFactoryVk::AllocVboIboLocalBuffers(VkDeviceSize vbosSize,
-                                              VkDeviceSize ibosSize) {
-
+void MemoryFactoryVk::AllocSubmeshVboIboLocal() {
   //
-  //
-  //
-  //
-  // -----------------------------------------------------------------------
   // --- VERTEX BUFFERS CREATION -------------------------------------------
   VkBufferCreateInfo vboMainInfo{};
-  BufferVkUtils::GetDefaultVkBufferState(vboMainInfo, vbosSize);
+  BufferVkUtils::GetDefaultVkBufferState(vboMainInfo,
+                                         m_bufferViews.submeshVbo.size);
   vboMainInfo.usage =
       VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
@@ -255,13 +288,10 @@ void MemoryFactoryVk::AllocVboIboLocalBuffers(VkDeviceSize vbosSize,
   };
 
   //
-  //
-  //
-  //
-  // -----------------------------------------------------------------------
   // --- INDEX BUFFERS CREATION --------------------------------------------
   VkBufferCreateInfo iboMainInfo{};
-  BufferVkUtils::GetDefaultVkBufferState(iboMainInfo, ibosSize);
+  BufferVkUtils::GetDefaultVkBufferState(iboMainInfo,
+                                         m_bufferViews.submeshIbo.size);
   iboMainInfo.usage =
       VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
@@ -276,17 +306,11 @@ void MemoryFactoryVk::AllocVboIboLocalBuffers(VkDeviceSize vbosSize,
   };
 }
 
-void MemoryFactoryVk::AllocUboLocalBuffers(
-    AccSubmeshBufferSizes &submeshSizes,
-    AccGameObjectUboSizes &gameObjectSizes) {
+void MemoryFactoryVk::AllocUboSsboLocalBuffers() {
   VkDeviceSize totalUboSize =
-      //
-      submeshSizes.submeshesWorldMatrixUboSize + submeshSizes.basicMatUboSize +
-      submeshSizes.pbrMatUboSize +
-      //
-      gameObjectSizes.emptysWorldMatrixUboSize +
-      gameObjectSizes.lightsWorldMatrixUboSize +
-      gameObjectSizes.camerasWorldMatrixUboSize;
+      m_bufferViews.submeshUbo.size + m_bufferViews.basicMatUbo.size +
+      m_bufferViews.pbrMatUbo.size + m_bufferViews.camerasUbo.size +
+      m_bufferViews.emptysUbo.size;
 
   VkBufferCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -312,7 +336,7 @@ void MemoryFactoryVk::AllocUboLocalBuffers(
 };
 
 // Clean up functions --------------------------------------------------------
-void MemoryFactoryVk::CleanUpVboIboStagingBuffers() {
+void MemoryFactoryVk::CleanUpSubmeshVboIboBuffersStaging() {
   auto &allocator = ContextVk::MemoryAllocator()->GetVMAAllocator();
 
   if (m_vboStagingMapping) {
@@ -367,30 +391,20 @@ void MemoryFactoryVk::CleanUpUboBuffers() {
   };
 };
 
-// Template instantiation (explicit for linker visibility)
-template void MemoryFactoryVk::CopySubmeshGroupToVboIboStagingBuffers<
-    MaterialTypes::BasicMat>(
-    SubmeshOffsets &accSubmeshOffsets,
-    const std::unordered_map<MaterialHashType,
-                             std::vector<Submesh<MaterialTypes::BasicMat> *>>
-        &submeshGroups);
+// Linker stuff
+template void
+MemoryFactoryVk::ExtractOffsetsMaterialsSubmeshes<MaterialTypes::BasicMat>(
+    MaterialSubmeshesMap<MaterialTypes::BasicMat> &);
+template void
+MemoryFactoryVk::ExtractOffsetsMaterialsSubmeshes<MaterialTypes::PbrMat>(
+    MaterialSubmeshesMap<MaterialTypes::PbrMat> &);
 
 template void
-MemoryFactoryVk::CopySubmeshGroupToVboIboStagingBuffers<MaterialTypes::PbrMat>(
-    SubmeshOffsets &accSubmeshOffsets,
-    const std::unordered_map<MaterialHashType,
-                             std::vector<Submesh<MaterialTypes::PbrMat> *>>
-        &submeshGroups);
-
-template <>
-void MemoryFactoryVk::GetAccSubmeshesBufferSizes<MaterialTypes::BasicMat>(
-    Submeshes<MaterialTypes::BasicMat> &submeshGroups,
-    AccSubmeshBufferSizes &sizes) {};
-
-template <>
-void MemoryFactoryVk::GetAccSubmeshesBufferSizes<MaterialTypes::PbrMat>(
-    SubmeshGroups<MaterialTypes::PbrMat> &submeshGroups,
-    AccSubmeshBufferSizes &sizes) {};
+MemoryFactoryVk::FillBuffersMaterialsSubmeshes<MaterialTypes::BasicMat>(
+    MaterialSubmeshesMap<MaterialTypes::BasicMat> &);
+template void
+MemoryFactoryVk::FillBuffersMaterialsSubmeshes<MaterialTypes::PbrMat>(
+    MaterialSubmeshesMap<MaterialTypes::PbrMat> &);
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

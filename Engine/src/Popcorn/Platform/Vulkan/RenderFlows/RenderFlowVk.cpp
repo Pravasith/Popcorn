@@ -36,59 +36,41 @@ void RenderFlowVk::AllocMemory() {
   // pbrMat2 : [sm1, sm2 ... ]
 
   auto *memoryFactory = ContextVk::MemoryFactory();
-  VkPhysicalDeviceProperties properties{};
-  ContextVk::Device()->GetPhysicalDeviceProperties(properties);
 
-  // Basic submeshes size
-  memoryFactory->ExtractMaterialSubmeshOffsets(s_basicSubmeshGroups);
-  // Pbr submeshes size
-  memoryFactory->ExtractMaterialSubmeshOffsets(s_pbrSubmeshGroups);
-
-  // Others
-  memoryFactory->ExtractLightsCamerasEmptysOffsets(s_lights, s_cameras,
+  // Extract -
+  // 1. All vbos, ibos, ubos individual offsets (BufferOffsets)
+  // 2. Ubo & ssbo bufferView sizes (not aligned)
+  memoryFactory->ExtractOffsetsMaterialsSubmeshes(s_basicSubmeshGroups);
+  memoryFactory->ExtractOffsetsMaterialsSubmeshes(s_pbrSubmeshGroups);
+  memoryFactory->ExtractOffsetsLightsCamerasEmptys(s_lights, s_cameras,
                                                    s_emptys);
 
-  const BufferViews &bufferViews = memoryFactory->GetBufferViews();
+  // Aligns vbo & ibo (BufferViews) for optimal copy (staging -> local)
+  memoryFactory->AlignVboIboBufferViews();
 
-  //
-  // Align for optimal copy offset
-  VkDeviceSize alignedVboSize =
-      PC_AlignCeil(bufferViews.submeshVbo.size,
-                   properties.limits.optimalBufferCopyOffsetAlignment);
-  VkDeviceSize alignedIboSize =
-      PC_AlignCeil(bufferViews.submeshIbo.size,
-                   properties.limits.optimalBufferCopyOffsetAlignment);
+  // Calculates aligned ubo bufferView sizes (BufferViews)
+  memoryFactory->CalculateUboSsboBaseOffsets();
 
-  memoryFactory->AllocVboIboStagingBuffers(alignedVboSize, alignedIboSize);
-  memoryFactory->AllocVboIboLocalBuffers(alignedVboSize, alignedIboSize);
+  // Allocate vbo and ibo buffers (staging & local)
+  memoryFactory->AllocSubmeshVboIboStaging();
+  memoryFactory->AllocSubmeshVboIboLocal();
 
-  memoryFactory->FillMaterialSubmeshBuffers(s_basicSubmeshGroups);
-  memoryFactory->FillMaterialSubmeshBuffers(s_pbrSubmeshGroups);
+  // Allocate ubo buffers (local)
+  memoryFactory
+      ->AllocUboSsboLocalBuffers(); // clean up in RenderFlowVk::FreeMemory()
 
-  //
-  // Copy the staging data to local buffers ---------------------------------
+  // Fill submesh vbos, ibos and ubos, material ubos
+  memoryFactory->FillBuffersMaterialsSubmeshes(s_basicSubmeshGroups);
+  memoryFactory->FillBuffersMaterialsSubmeshes(s_pbrSubmeshGroups);
+  memoryFactory->FillBuffersLightsCamerasEmptys(s_lights, s_cameras, s_emptys);
+
   PC_ASSERT(s_submeshCount, "Submesh count is zero.");
-  memoryFactory->FlushVBOsAndIBOsStagingToLocal(alignedVboSize, alignedIboSize);
-  memoryFactory->CleanUpVboIboStagingBuffers(); // Unmap, deallocate & destroy
 
-  memoryFactory->SetBufferViewOffsets();
+  // Copy the staging data to local buffers
+  memoryFactory->FlushVboIboStagingToLocal();
 
-  // AccGameObjectUboSizes gameObjectSizes{};
-  // ContextVk::Device()->GetPhysicalDeviceProperties(properties);
-  //
-  // // Cameras ubos
-  // memoryFactory->GetAccGameObjectsBufferSizes(s_cameras, gameObjectSizes,
-  //                                             properties);
-  // // Emptys ubos
-  // memoryFactory->GetAccGameObjectsBufferSizes(s_emptys, gameObjectSizes,
-  //                                             properties);
-  // // Lights ubos
-  // memoryFactory->GetAccGameObjectsBufferSizes(s_lights, gameObjectSizes,
-  //                                             properties);
-
-  //
-  // Allocate ubo buffers
-  memoryFactory->AllocUboLocalBuffers(submeshSizes, gameObjectSizes);
+  // Unmap, deallocate & destroy staging buffers
+  memoryFactory->CleanUpSubmeshVboIboBuffersStaging();
 };
 
 void RenderFlowVk::FreeMemory() {
