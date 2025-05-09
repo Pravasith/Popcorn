@@ -35,14 +35,14 @@ LOW PRIORITY:
 
 TODO:
 -------------------------------------------------
-1. Adjust bufferViews of objects - 20 mins - done
-   x Set each bufferView offset (for UBOs & SSBOs) - done
-   x Check offsets & sizes for minBufferAlignment - done
+x. Adjust bufferViews of objects - 20 mins - DONE
+   x Set each bufferView offset (for UBOs & SSBOs)
+   x Check offsets & sizes for minBufferAlignment
 
-2. Alloc Vulkan Memory for - 20 mins
-   x. Submesh world matrices - UBO - done
-   x. Basic material values - UBO - done
-   x. Pbr material values - UBO - done
+x. Alloc Vulkan Memory for - 20 mins - DONE
+   x. Submesh world matrices - UBO - DONE
+   x. Basic material values - UBO - DONE
+   x. Pbr material values - UBO - DONE
    x. Camera matrix & other values - UBO - done
    x. Empty values - UBO - done
    x. Lights values - SSBO
@@ -57,10 +57,11 @@ TODO:
    e. emptysUboMapping
    f. LightsSsboMapping
 
-3.5. Create samplers for gbuffer & lighting buffer
+x. Create samplers for gbuffer & lighting buffer - DONE
 
 4. Descriptor sets allocation --
-   - Plan this before copying values
+   x Plan this before copying values
+   x Created layouts and pools to get descriptors
    - basically bind memory (buffers, images & samplers) to descriptor sets
      and get them ready for the scene updates process function
 

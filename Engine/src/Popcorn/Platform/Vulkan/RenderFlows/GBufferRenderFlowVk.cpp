@@ -231,6 +231,12 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
   auto *pools = ContextVk::DescriptorPools();
   constexpr uint32_t maxFIF = MAX_FRAMES_IN_FLIGHT;
 
+  DPoolVk &gBufferPool = pools->GetPool<DescriptorPools::GBufferPool>(
+      MAX_FRAMES_IN_FLIGHT); // Creates pool if it
+                             // doesn't exist
+
+  const VkDevice &device = ContextVk::Device()->GetDevice();
+
   VkDescriptorSetLayout &cameraLayout =
       layouts->GetLayout<DescriptorSets::CameraSet>();
   std::array<VkDescriptorSetLayout, maxFIF> cameraLayouts{};
@@ -250,12 +256,6 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
       layouts->GetLayout<DescriptorSets::PbrMatSet>();
   std::array<VkDescriptorSetLayout, maxFIF> pbrMatLayouts{};
   std::fill(pbrMatLayouts.begin(), pbrMatLayouts.end(), pbrMatLayout);
-
-  DPoolVk &gBufferPool = pools->GetPool<DescriptorPools::GBufferPool>(
-      MAX_FRAMES_IN_FLIGHT); // Creates pool if it
-                             // doesn't exist
-
-  const VkDevice &device = ContextVk::Device()->GetDevice();
 
   std::vector<VkDescriptorSet> cameraSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::CameraSet, maxFIF>(
