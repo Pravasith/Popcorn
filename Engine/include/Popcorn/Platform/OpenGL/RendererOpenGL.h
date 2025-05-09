@@ -12,6 +12,7 @@ public:
   virtual ~RendererOpenGL() override;
 
   virtual void CreateRenderFlows() override {};
+  virtual void DestroyRenderFlows() override {};
   virtual void PrepareRenderFlows() override {};
   virtual void AssignSceneObjectsToRenderFlows() override {};
   virtual void CreateRenderFlowResources() override {};

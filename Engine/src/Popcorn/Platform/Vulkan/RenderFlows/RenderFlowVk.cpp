@@ -3,6 +3,7 @@
 #include "Memory/Memory.h"
 #include "Memory/MemoryFactoryVk.h"
 #include "Popcorn/Core/Assert.h"
+#include "SamplerVk.h"
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
 
@@ -18,6 +19,11 @@ MaterialSubmeshesMap<MaterialTypes::PbrMat> RenderFlowVk::s_pbrSubmeshGroups{};
 std::vector<Light *> RenderFlowVk::s_lights{};
 std::vector<Camera *> RenderFlowVk::s_cameras{};
 std::vector<Empty *> RenderFlowVk::s_emptys{}; // useless for now
+                                               //
+
+//
+// Samplers ---------------------------------------------------------------
+RenderFlowVk::SamplersVk RenderFlowVk::s_samplersVk{};
 
 //
 // Material values --------------------------------------------------------
@@ -73,8 +79,18 @@ void RenderFlowVk::AllocMemory() {
   memoryFactory->CleanUpSubmeshVboIboBuffersStaging();
 };
 
+void RenderFlowVk::CreateSamplers() {
+  VkSamplerCreateInfo samplerInfo{};
+  SamplerVk::GetDefaultSamplerCreateInfoValues(samplerInfo);
+  samplerInfo.magFilter = VK_FILTER_NEAREST;
+  samplerInfo.minFilter = VK_FILTER_NEAREST;
+  s_samplersVk.frameSampler.Create(samplerInfo);
+};
+
+void RenderFlowVk::DestroySamplers() { s_samplersVk.frameSampler.Destroy(); };
+
 void RenderFlowVk::FreeMemory() {
-  ContextVk::MemoryFactory()->CleanUpUboBuffers();
+  ContextVk::MemoryFactory()->CleanUpUboSsboLocalBuffers();
   ContextVk::MemoryFactory()
       ->CleanUpVboIboLocalBuffers(); // Deallocate & destroy
 };

@@ -24,6 +24,17 @@ template <UniformLayouts L, size_t S> struct Uniform {
   static constexpr size_t size = S;
 };
 
+struct alignas(16) CameraUniform
+    : public Uniform<UniformLayouts::Camera,
+                     192> {    // aligned to 192B (of 256B)
+                               //
+  glm::mat4 worldMatrix{1.0f}; // 64B
+  glm::mat4 viewMatrix{1.0f};  // 64B
+  glm::mat4 projMatrix{1.0f};  // 64B
+                               //
+                               // 64B free
+};
+
 struct alignas(16) SubmeshUniform
     : public Uniform<UniformLayouts::Submesh, 64> { // aligned to 64B (of 256)
                                                     //
@@ -55,17 +66,6 @@ struct alignas(16) PbrMaterialUniform
   float pad1;                          // 4B (padding)
                                        //
                                        // 208B free
-};
-
-struct alignas(16) CameraUniform
-    : public Uniform<UniformLayouts::Camera,
-                     192> {    // aligned to 192B (of 256B)
-                               //
-  glm::mat4 worldMatrix{1.0f}; // 64B
-  glm::mat4 viewMatrix{1.0f};  // 64B
-  glm::mat4 projMatrix{1.0f};  // 64B
-                               //
-                               // 64B free
 };
 
 struct alignas(16) LightUniform

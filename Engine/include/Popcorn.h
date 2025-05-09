@@ -50,6 +50,7 @@ static void StartGame() {
 static void RenderScenes(Scene &scene) { s_renderer->DrawFrame(scene); };
 
 static void EndContext() {
+  s_renderer->DestroyRenderFlows();
   s_renderer = nullptr;
   Application::Stop();
 }

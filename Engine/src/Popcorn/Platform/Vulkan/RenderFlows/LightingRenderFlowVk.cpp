@@ -59,13 +59,6 @@ void LightingRenderFlowVk::CreateAttachments() {
 
   m_attachmentsVk.lightAttachment.SetAttachmentDescription(
       lightImageAttachment);
-
-  //
-  // --- Samplers --------------------------------------------------------------
-  VkSamplerCreateInfo samplerInfo{};
-  SamplerVk::GetDefaultSamplerCreateInfoValues(samplerInfo);
-
-  m_samplersVk.lightSampler.Create(samplerInfo);
 }
 
 //

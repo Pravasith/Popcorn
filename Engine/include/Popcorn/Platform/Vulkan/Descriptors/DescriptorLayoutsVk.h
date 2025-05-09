@@ -3,6 +3,7 @@
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include <unordered_map>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -11,24 +12,31 @@ GFX_NAMESPACE_BEGIN
 enum DescriptorSetGroups { GBufferGroup = 1, LightingGroup, CompositeGroup };
 
 enum DescriptorSets {
-  CameraSet = 1, // 1 Static UBO - Camera matrix
-  GameObjectSet, // 1 Dynamic UBO - Model matrix
-  BasicMatSet,   // 1 Dynamic UBO - Basic material matrix
-  PbrMatSet,     // 1 Dynamic UBO - Pbr material matrix
-
-  LightingSet, // 1 Dynamic UBO - Lights info (pos, rot, scale)
-               // 1 Sampler - Albedo image & sampler
-               // 1 Sampler - Depth image & sampler
-               // 1 Sampler - Normal image & sampler
-
-  CompositeSet
+  CameraSet = 1, // 1 Static UBO - camera matrix - one camera at a time
+                 //
+  BasicMatSet,   // 1 Dynamic UBO - basic material values
+  PbrMatSet,     // 1 Dynamic UBO - pbr material values
+                 //
+  SubmeshSet,    // 1 Dynamic UBO - model matrix
+                 //
+  LightingSet,   // 1 Static SSBO - lights info (pos, rot, scale)
+                 // 1 Sampler - albedo image & sampler
+                 // 1 Sampler - depth image & sampler
+                 // 1 Sampler - normal image & sampler
+                 //
+  CompositeSet   // 1 Sampler - light image & sampler
 };
 
 class DescriptorLayoutsVk {
 public:
   template <DescriptorSets T> [[nodiscard]] VkDescriptorSetLayout &GetLayout();
 
-  void CleanUp() { m_layouts.clear(); };
+public:
+  [[nodiscard]] static VkDescriptorSetLayout CreateDescriptorSetLayout(
+      const std::vector<VkDescriptorSetLayoutBinding> &bindings);
+  static size_t
+  HashLayoutBindings(const std::vector<VkDescriptorSetLayoutBinding> &bindings);
+  void CleanUp();
 
 public:
   [[nodiscard]] inline static DescriptorLayoutsVk *Get() {
@@ -51,6 +59,9 @@ public:
   };
 
 private:
+  [[nodiscard]] VkDescriptorSetLayout &
+  GetCachedLayout(const std::vector<VkDescriptorSetLayoutBinding> &bindings);
+
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
   DescriptorLayoutsVk(const DescriptorLayoutsVk &) = delete;
   DescriptorLayoutsVk &operator=(const DescriptorLayoutsVk &) = delete;
@@ -59,7 +70,6 @@ private:
   DescriptorLayoutsVk(DescriptorLayoutsVk &&) = delete;
   DescriptorLayoutsVk &operator=(DescriptorLayoutsVk &&) = delete;
 
-private:
   DescriptorLayoutsVk() {
     PC_PRINT("CREATED", TagType::Constr, "DescriptorLayoutsVk.h")
   };
@@ -69,6 +79,8 @@ private:
 
 private:
   static DescriptorLayoutsVk *s_instance;
+
+  std::unordered_map<size_t, VkDescriptorSetLayout> m_layoutCache;
   std::unordered_map<DescriptorSets, VkDescriptorSetLayout>
       m_layouts; // VkDescriptorSetLayout is just a uint64_t so cheap to copy
 };

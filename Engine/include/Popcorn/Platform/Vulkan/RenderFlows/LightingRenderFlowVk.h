@@ -6,7 +6,6 @@
 #include "LightingPipelineVk.h"
 #include "RenderFlows/RenderFlowVk.h"
 #include "RenderPassVk.h"
-#include "SamplerVk.h"
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -43,13 +42,8 @@ private:
     AttachmentVk lightAttachment{};
   };
 
-  struct SamplersVk {
-    SamplerVk lightSampler{};
-  };
-
   ImagesVk m_imagesVk{};
   AttachmentsVk m_attachmentsVk{};
-  SamplersVk m_samplersVk{};
 
   RenderPassVk m_renderPass;
   VkFramebuffer m_framebuffer;

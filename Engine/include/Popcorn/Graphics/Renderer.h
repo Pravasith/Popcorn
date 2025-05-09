@@ -41,6 +41,7 @@ public:
   void RemoveScene(Scene *scene) { m_sceneLibrary.Remove(scene); };
 
   virtual void CreateRenderFlows() = 0;
+  virtual void DestroyRenderFlows() = 0;
   virtual void PrepareRenderFlows() = 0;
 
   virtual void AssignSceneObjectsToRenderFlows() = 0;

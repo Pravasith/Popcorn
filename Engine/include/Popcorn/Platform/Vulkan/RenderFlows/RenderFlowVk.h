@@ -10,6 +10,7 @@
 #include "Memory/Memory.h"
 #include "Mesh.h"
 #include "Popcorn/Core/Base.h"
+#include "SamplerVk.h"
 #include <cstdint>
 #include <cstring>
 #include <vector>
@@ -30,10 +31,10 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "RenderFlowVk")
   };
 
-  //
-  // NEW ----------------------------------------------------------------
-  static void AllocMemory(); // Only once
-  static void FreeMemory();  // Only once
+  static void AllocMemory();
+  static void FreeMemory();
+  static void CreateSamplers();
+  static void DestroySamplers();
 
   void Prepare() {
     CreateAttachments();
@@ -139,9 +140,14 @@ public:
     }
   };
 
+public:
+  struct SamplersVk {
+    SamplerVk frameSampler;
+  };
+
 protected:
   //
-  // Game Object refs -------------------------------------------------------
+  // Game object refs -------------------------------------------------------
   static MaterialSubmeshesMap<MaterialTypes::BasicMat> s_basicSubmeshGroups;
   static MaterialSubmeshesMap<MaterialTypes::PbrMat> s_pbrSubmeshGroups;
 
@@ -153,6 +159,11 @@ protected:
   // Material values --------------------------------------------------------
   static MaterialMap<MaterialTypes::BasicMat> s_basicMaterials;
   static MaterialMap<MaterialTypes::PbrMat> s_pbrMaterials;
+
+  //
+  // Samplers ---------------------------------------------------------------
+
+  static SamplersVk s_samplersVk;
 
   //
   // ------------------------------------------------------------------------

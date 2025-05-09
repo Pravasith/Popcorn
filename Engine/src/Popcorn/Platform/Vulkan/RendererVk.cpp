@@ -83,16 +83,6 @@ RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
 };
 
 RendererVk::~RendererVk() {
-  // Renderflow clean ups
-  RenderFlowVk::FreeMemory();
-
-  for (auto &renderFlow : s_renderFlows) {
-    renderFlow->CleanUp();
-    delete renderFlow;
-    renderFlow = nullptr;
-  }
-  s_renderFlows.clear();
-
   DestroyVulkanContext();
   PC_PRINT("DESTROYED", TagType::Destr, "RendererVk");
 };
@@ -115,6 +105,18 @@ void RendererVk::CreateRenderFlows() {
   s_renderFlows.emplace_back(new GBufferRenderFlowVk());
   s_renderFlows.emplace_back(new LightingRenderFlowVk());
   s_renderFlows.emplace_back(new CompositeRenderFlowVk());
+};
+
+void RendererVk::DestroyRenderFlows() {
+  RenderFlowVk::DestroySamplers();
+  RenderFlowVk::FreeMemory();
+
+  for (auto &renderFlow : s_renderFlows) {
+    renderFlow->CleanUp();
+    delete renderFlow;
+    renderFlow = nullptr;
+  }
+  s_renderFlows.clear();
 };
 
 void RendererVk::PrepareRenderFlows() {
@@ -141,6 +143,7 @@ void RendererVk::CreateRenderFlowResources() {
 
   // Allocates vulkan buffers
   RenderFlowVk::AllocMemory();
+  RenderFlowVk::CreateSamplers();
 
   for (auto &renderFlow : s_renderFlows) {
     //
@@ -173,8 +176,8 @@ void RendererVk::CreateRenderFlowResources() {
   }
 
   // TODOs:
-  // - Create VMA buffers for UBOs
-  // - Create Samplers for G-Buffer & LitScene-Buffer
+  // x Create VMA buffers for UBOs
+  // x Create Samplers for G-Buffer & LitScene-Buffer
   // - Bind(write/update) buffers to descriptor sets(or descriptors?)
   // - Copy scene updates(UBOs) via OnUpdate() to mapped bits
 
