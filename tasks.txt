@@ -51,6 +51,8 @@ x. Alloc Vulkan Memory for - 20 mins - DONE
 
 x. Create samplers for gbuffer & lighting buffer - DONE
 
+-  Pass camera data into lighting renderflow - need it for lighting
+
 4. Descriptor sets allocation --
    x Plan this before copying values
    x Created layouts and pools to get descriptors
