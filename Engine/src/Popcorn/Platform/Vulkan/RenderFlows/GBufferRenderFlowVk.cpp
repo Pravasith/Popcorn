@@ -1,5 +1,6 @@
 #include "RenderFlows/GBufferRenderFlowVk.h"
 #include "AttachmentVk.h"
+#include "CommonVk.h"
 #include "ContextVk.h"
 #include "DescriptorLayoutsVk.h"
 #include "DescriptorPoolsVk.h"
@@ -235,11 +236,10 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
   std::array<VkDescriptorSetLayout, maxFIF> cameraLayouts{};
   std::fill(cameraLayouts.begin(), cameraLayouts.end(), cameraLayout);
 
-  VkDescriptorSetLayout &gameObjectLayout =
-      layouts->GetLayout<DescriptorSets::GameObjectSet>();
-  std::array<VkDescriptorSetLayout, maxFIF> gameObjectLayouts{};
-  std::fill(gameObjectLayouts.begin(), gameObjectLayouts.end(),
-            gameObjectLayout);
+  VkDescriptorSetLayout &submeshLayout =
+      layouts->GetLayout<DescriptorSets::SubmeshSet>();
+  std::array<VkDescriptorSetLayout, maxFIF> submeshLayouts{};
+  std::fill(submeshLayouts.begin(), submeshLayouts.end(), submeshLayout);
 
   VkDescriptorSetLayout &basicMatLayout =
       layouts->GetLayout<DescriptorSets::BasicMatSet>();
@@ -251,18 +251,18 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
   std::array<VkDescriptorSetLayout, maxFIF> pbrMatLayouts{};
   std::fill(pbrMatLayouts.begin(), pbrMatLayouts.end(), pbrMatLayout);
 
-  DPoolVk &gBufferPool =
-      pools->GetPool<DescriptorPools::GBufferPool>(); // Creates pool if it
-                                                      // doesn't exist
+  DPoolVk &gBufferPool = pools->GetPool<DescriptorPools::GBufferPool>(
+      MAX_FRAMES_IN_FLIGHT); // Creates pool if it
+                             // doesn't exist
 
   const VkDevice &device = ContextVk::Device()->GetDevice();
 
   std::vector<VkDescriptorSet> cameraSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::CameraSet, maxFIF>(
           device, cameraLayouts);
-  std::vector<VkDescriptorSet> gameObjectSets =
-      gBufferPool.AllocateDescriptorSets<DescriptorSets::GameObjectSet, maxFIF>(
-          device, gameObjectLayouts);
+  std::vector<VkDescriptorSet> submeshSets =
+      gBufferPool.AllocateDescriptorSets<DescriptorSets::SubmeshSet, maxFIF>(
+          device, submeshLayouts);
   std::vector<VkDescriptorSet> basicMatSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::BasicMatSet, maxFIF>(
           device, basicMatLayouts);

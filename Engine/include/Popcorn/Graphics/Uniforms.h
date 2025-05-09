@@ -68,13 +68,14 @@ struct alignas(16) PbrMaterialUniform
                                        // 208B free
 };
 
+// Note: this is an SSBO in vulkan
 struct alignas(16) LightUniform
     : public Uniform<UniformLayouts::Light,
-                     80> {     // aligned to 80B (of 256B)
-                               //
-  glm::vec3 position{0.0f};    // 12B
-  float pad0;                  // 4B (padding)
-                               //
+                     80> {  // aligned to 80B (of 256B)
+                            //
+  glm::vec3 position{0.0f}; // 12B (in shader it's 16B)
+  // float pad0; // 4B (Optional bc padding is applied implicitly anyway)
+  //             // if you add this, don't forget to add in shader too
   glm::mat4 worldMatrix{1.0f}; // 64B
                                //
                                // 176B free

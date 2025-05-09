@@ -1,5 +1,6 @@
 #include "RenderFlows/LightingRenderFlowVk.h"
 #include "AttachmentVk.h"
+#include "CommonVk.h"
 #include "ContextVk.h"
 #include "DescriptorLayoutsVk.h"
 #include "DescriptorPoolsVk.h"
@@ -157,7 +158,8 @@ void LightingRenderFlowVk::CreateAndAllocDescriptors() {
   std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> lightingLayouts{};
   std::fill(lightingLayouts.begin(), lightingLayouts.end(), lightingLayout);
 
-  DPoolVk &lightsPool = pools->GetPool<DescriptorPools::LightingPool>();
+  DPoolVk &lightsPool =
+      pools->GetPool<DescriptorPools::LightingPool>(MAX_FRAMES_IN_FLIGHT);
 
   // Creates multiple sets (from Count template param)
   std::vector<VkDescriptorSet> lightingSets =

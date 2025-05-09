@@ -1,5 +1,6 @@
 #include "RenderFlows/CompositeRenderFlowVk.h"
 #include "AttachmentVk.h"
+#include "CommonVk.h"
 #include "ContextVk.h"
 #include "GlobalMacros.h"
 #include "ImageVk.h"
@@ -161,7 +162,8 @@ void CompositeRenderFlowVk::CreateAndAllocDescriptors() {
   std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> compositeLayouts{};
   std::fill(compositeLayouts.begin(), compositeLayouts.end(), compositeLayout);
 
-  DPoolVk &compositePool = pools->GetPool<DescriptorPools::CompositePool>();
+  DPoolVk &compositePool =
+      pools->GetPool<DescriptorPools::CompositePool>(MAX_FRAMES_IN_FLIGHT);
 
   // Creates multiple sets (from Count template param)
   std::vector<VkDescriptorSet> compositeSets =

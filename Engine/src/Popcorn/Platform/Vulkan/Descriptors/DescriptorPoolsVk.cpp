@@ -45,29 +45,33 @@ void DPoolVk::CleanUp() {
 //
 //
 template <>
-DPoolVk &DescriptorPoolsVk::GetPool<DescriptorPools::GBufferPool>() {
+DPoolVk &
+DescriptorPoolsVk::GetPool<DescriptorPools::GBufferPool>(uint32_t count) {
   if (m_pools.find(DescriptorPools::GBufferPool) == m_pools.end()) {
+    // Camera ubo
     VkDescriptorPoolSize poolSize0 = {.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                                      .descriptorCount =
-                                          1 * MAX_FRAMES_IN_FLIGHT};
+                                      .descriptorCount = 1 * count};
 
+    // BasicMat dynamic-ubo
     VkDescriptorPoolSize poolSize1 = {
         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-        .descriptorCount = 1 * MAX_FRAMES_IN_FLIGHT};
+        .descriptorCount = 1 * count};
 
+    // PbrMat dynamic-ubo
     VkDescriptorPoolSize poolSize2 = {
         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-        .descriptorCount = 1 * MAX_FRAMES_IN_FLIGHT};
+        .descriptorCount = 1 * count};
 
+    // Submesh dynamic-ubo
     VkDescriptorPoolSize poolSize3 = {
         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-        .descriptorCount = 1 * MAX_FRAMES_IN_FLIGHT};
+        .descriptorCount = 1 * count};
 
     VkDescriptorPoolSize poolSizes[4]{poolSize0, poolSize1, poolSize2,
                                       poolSize3};
 
     DPoolVk dPool{};
-    dPool.Create(poolSizes, 4, 4 * MAX_FRAMES_IN_FLIGHT);
+    dPool.Create(poolSizes, 4, 4 * count);
 
     m_pools[DescriptorPools::GBufferPool] = dPool;
   }
@@ -76,29 +80,30 @@ DPoolVk &DescriptorPoolsVk::GetPool<DescriptorPools::GBufferPool>() {
 }
 
 template <>
-DPoolVk &DescriptorPoolsVk::GetPool<DescriptorPools::LightingPool>() {
+DPoolVk &
+DescriptorPoolsVk::GetPool<DescriptorPools::LightingPool>(uint32_t count) {
   if (m_pools.find(DescriptorPools::LightingPool) == m_pools.end()) {
-    VkDescriptorPoolSize poolSize0 = {
-        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-        .descriptorCount = 1 * MAX_FRAMES_IN_FLIGHT}; // Lights UBO
+    VkDescriptorPoolSize poolSize0 = {.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                                      .descriptorCount =
+                                          1 * count}; // Lights SSBO
 
     VkDescriptorPoolSize poolSize1 = {
         .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-        .descriptorCount = 1 * MAX_FRAMES_IN_FLIGHT}; // Albedo image + sampler
+        .descriptorCount = 1 * count}; // Albedo image + sampler
 
     VkDescriptorPoolSize poolSize2 = {
         .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-        .descriptorCount = 1 * MAX_FRAMES_IN_FLIGHT}; // Depth image + sampler
+        .descriptorCount = 1 * count}; // Depth image + sampler
 
     VkDescriptorPoolSize poolSize3 = {
         .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-        .descriptorCount = 1 * MAX_FRAMES_IN_FLIGHT}; // Normals image + sampler
+        .descriptorCount = 1 * count}; // Normals image + sampler
 
     VkDescriptorPoolSize poolSizes[4]{poolSize0, poolSize1, poolSize2,
                                       poolSize3};
 
     DPoolVk dPool{};
-    dPool.Create(poolSizes, 4, 4 * MAX_FRAMES_IN_FLIGHT);
+    dPool.Create(poolSizes, 4, 4 * count);
 
     m_pools[DescriptorPools::LightingPool] = dPool;
   }
@@ -107,17 +112,18 @@ DPoolVk &DescriptorPoolsVk::GetPool<DescriptorPools::LightingPool>() {
 }
 
 template <>
-DPoolVk &DescriptorPoolsVk::GetPool<DescriptorPools::CompositePool>() {
+DPoolVk &
+DescriptorPoolsVk::GetPool<DescriptorPools::CompositePool>(uint32_t count) {
   if (m_pools.find(DescriptorPools::CompositePool) == m_pools.end()) {
 
     VkDescriptorPoolSize poolSize0 = {
         .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-        .descriptorCount = 1 * MAX_FRAMES_IN_FLIGHT}; // Lights image + sampler
+        .descriptorCount = 1 * count}; // Lights image + sampler
 
     VkDescriptorPoolSize poolSizes[1]{poolSize0};
 
     DPoolVk dPool{};
-    dPool.Create(poolSizes, 1, 1 * MAX_FRAMES_IN_FLIGHT);
+    dPool.Create(poolSizes, 1, 1 * count);
 
     m_pools[DescriptorPools::CompositePool] = dPool;
   }

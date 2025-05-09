@@ -75,7 +75,7 @@ private:
 class DescriptorPoolsVk {
 
 public:
-  template <DescriptorPools T> [[nodiscard]] DPoolVk &GetPool();
+  template <DescriptorPools T> [[nodiscard]] DPoolVk &GetPool(uint32_t count);
   void CleanUp();
 
 public:
