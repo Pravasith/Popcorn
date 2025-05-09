@@ -18,6 +18,7 @@ GFX_NAMESPACE_BEGIN
 template <MaterialTypes T>
 void MemoryFactoryVk::ExtractOffsetsMaterialsSubmeshes(
     MaterialSubmeshesMap<T> &materialSubmeshesMap) {
+
   auto *device = ContextVk::Device();
   VkPhysicalDeviceProperties properties{};
   device->GetPhysicalDeviceProperties(properties);

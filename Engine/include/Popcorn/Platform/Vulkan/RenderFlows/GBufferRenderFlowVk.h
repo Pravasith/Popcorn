@@ -6,6 +6,7 @@
 #include "ImageVk.h"
 #include "RenderFlows/RenderFlowVk.h"
 #include "RenderPassVk.h"
+#include "SamplerVk.h"
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -46,8 +47,15 @@ private:
     AttachmentVk normalAttachment{};
   };
 
+  struct SamplersVk {
+    SamplerVk albedoSampler{};
+    SamplerVk depthSampler{};
+    SamplerVk normalSampler{};
+  };
+
   ImagesVk m_imagesVk{};
   AttachmentsVk m_attachmentsVk{};
+  SamplersVk m_samplersVk{};
 
   RenderPassVk m_renderPass;
   VkFramebuffer m_framebuffer;

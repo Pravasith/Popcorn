@@ -31,7 +31,7 @@ void GBufferRenderFlowVk::CreateAttachments() {
 
   //
   //
-  // --- Create G-Buffer Images ------------------------------------------------
+  // --- Create g-buffer images ------------------------------------------------
   VkImageCreateInfo albedoImageInfo;
   ImageVk::GetDefaultImageCreateInfo(albedoImageInfo, width, height);
   albedoImageInfo.format = albedoFormat;
@@ -64,7 +64,7 @@ void GBufferRenderFlowVk::CreateAttachments() {
 
   //
   //
-  // --- Create G-Buffer Image Views -------------------------------------------
+  // --- Create g-buffer image-views -------------------------------------------
   VkImageViewCreateInfo albedoViewInfo{};
   ImageVk::GetDefaultImageViewCreateInfo(albedoViewInfo,
                                          albedoImage.GetVkImage());
@@ -89,7 +89,7 @@ void GBufferRenderFlowVk::CreateAttachments() {
 
   //
   //
-  // --- Create G-Buffer Attachments -------------------------------------------
+  // --- Create g-buffer attachments -------------------------------------------
   VkAttachmentDescription albedoAttachment{};
   AttachmentVk::GetDefaultAttachmentDescription(albedoAttachment);
   albedoAttachment.format = albedoFormat;
@@ -113,6 +113,16 @@ void GBufferRenderFlowVk::CreateAttachments() {
   m_attachmentsVk.albedoAttachment.SetAttachmentDescription(albedoAttachment);
   m_attachmentsVk.depthAttachment.SetAttachmentDescription(depthAttachment);
   m_attachmentsVk.normalAttachment.SetAttachmentDescription(normalAttachment);
+
+  //
+  //
+  // --- Create g-buffer samplers ----------------------------------------------
+  VkSamplerCreateInfo samplerInfo{};
+  SamplerVk::GetDefaultSamplerCreateInfoValues(samplerInfo);
+
+  m_samplersVk.albedoSampler.Create(samplerInfo);
+  m_samplersVk.depthSampler.Create(samplerInfo);
+  m_samplersVk.normalSampler.Create(samplerInfo);
 };
 
 //

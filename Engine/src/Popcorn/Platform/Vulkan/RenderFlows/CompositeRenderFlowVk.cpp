@@ -55,6 +55,13 @@ void CompositeRenderFlowVk::CreateAttachments() {
   m_attachmentsVk.presentAttachment.SetImageVk(&presentImageRef);
   m_attachmentsVk.presentAttachment.SetAttachmentDescription(
       presentImageAttachment);
+
+  //
+  // --- Samplers --------------------------------------------------------------
+  VkSamplerCreateInfo samplerInfo{};
+  SamplerVk::GetDefaultSamplerCreateInfoValues(samplerInfo);
+
+  m_samplersVk.presentSampler.Create(samplerInfo);
 }
 
 //
