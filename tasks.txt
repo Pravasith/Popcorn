@@ -49,14 +49,6 @@ x. Alloc Vulkan Memory for - 20 mins - DONE
        x Allocate SSBO,
        x Clean up ubo & ssbo
 
-3. Create mappings for all needed ubos & ssbos - 20 mins
-   a. basicMatUboMapping
-   b. pbrMatUboMapping
-   c. submeshUboMapping
-   d. camerasUboMapping
-   e. emptysUboMapping
-   f. LightsSsboMapping
-
 x. Create samplers for gbuffer & lighting buffer - DONE
 
 4. Descriptor sets allocation --
@@ -64,6 +56,14 @@ x. Create samplers for gbuffer & lighting buffer - DONE
    x Created layouts and pools to get descriptors
    - basically bind memory (buffers, images & samplers) to descriptor sets
      and get them ready for the scene updates process function
+
+3. Create mappings for all needed ubos & ssbos - 20 mins
+   a. basicMatUboMapping
+   b. pbrMatUboMapping
+   c. submeshUboMapping
+   d. camerasUboMapping
+   e. emptysUboMapping
+   f. LightsSsboMapping
 
 5. Process scene updates - Copy buffer values --
    a. Submesh world matrices - UBO - submesh->GetWorldMatrix()
