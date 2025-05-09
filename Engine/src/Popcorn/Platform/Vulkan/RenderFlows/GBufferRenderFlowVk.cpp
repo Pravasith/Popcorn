@@ -269,6 +269,8 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
   std::vector<VkDescriptorSet> pbrMatSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::PbrMatSet, maxFIF>(
           device, pbrMatLayouts);
+
+  // Bind sets with buffers
 };
 
 //
