@@ -6,8 +6,11 @@
 #include "DescriptorPoolsVk.h"
 #include "FramebuffersVk.h"
 #include "ImageVk.h"
+#include "Memory/Memory.h"
 #include "RenderPassVk.h"
+#include "Uniforms.h"
 #include <algorithm>
+#include <cstdint>
 #include <vector>
 #include <vulkan/vulkan_core.h>
 
@@ -229,13 +232,14 @@ void GBufferRenderFlowVk::CreateFramebuffer() {
 void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
   auto *layouts = ContextVk::DescriptorLayouts();
   auto *pools = ContextVk::DescriptorPools();
+  const VkDevice &device = ContextVk::Device()->GetDevice();
+  auto *memory = ContextVk::Memory();
+
   constexpr uint32_t maxFIF = MAX_FRAMES_IN_FLIGHT;
 
   DPoolVk &gBufferPool = pools->GetPool<DescriptorPools::GBufferPool>(
       MAX_FRAMES_IN_FLIGHT); // Creates pool if it
                              // doesn't exist
-
-  const VkDevice &device = ContextVk::Device()->GetDevice();
 
   VkDescriptorSetLayout &cameraLayout =
       layouts->GetLayout<DescriptorSets::CameraSet>();
@@ -257,6 +261,16 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
   std::array<VkDescriptorSetLayout, maxFIF> pbrMatLayouts{};
   std::fill(pbrMatLayouts.begin(), pbrMatLayouts.end(), pbrMatLayout);
 
+  //
+  // --- 4 sets each frame ---
+  // - Camera - Static UBO
+  // - Submesh - Dynamic UBO
+  // - BasicMat - Dynamic UBO
+  // - PbrMat - Dynamic UBO
+  //
+  // Descriptor set will be cleaned automatically when pools are destroyed
+  //
+  //
   std::vector<VkDescriptorSet> cameraSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::CameraSet, maxFIF>(
           device, cameraLayouts);
@@ -271,6 +285,12 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
           device, pbrMatLayouts);
 
   // Bind sets with buffers
+  for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+    VkDescriptorBufferInfo bufferInfo{};
+    bufferInfo.buffer = memory->GetUboSet(i);
+    bufferInfo.offset = memory->GetBufferViews().camerasUbo.offset;
+    bufferInfo.range =
+  };
 };
 
 //

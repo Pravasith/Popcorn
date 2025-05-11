@@ -39,6 +39,7 @@ private:
   [[nodiscard]] std::vector<VkDescriptorSet> DefaultAllocateDescriptorSets(
       const VkDevice &device,
       std::array<VkDescriptorSetLayout, Count> &layouts) {
+
 #if PC_DEBUG
     m_setsAllocated += Count;
     if (m_setsAllocated >= m_maxSets) {
@@ -46,6 +47,7 @@ private:
                "DPoolVk");
     }
 #endif
+
     VkDescriptorSetAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     allocInfo.pSetLayouts = layouts.data();

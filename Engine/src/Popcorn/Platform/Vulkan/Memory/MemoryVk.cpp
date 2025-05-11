@@ -1,11 +1,10 @@
-#include "Memory/MemoryFactoryVk.h"
+#include "Memory/MemoryVk.h"
 #include "BufferObjectsVk.h"
 #include "CommonVk.h"
 #include "ContextVk.h"
 #include "Empty.h"
 #include "GlobalMacros.h"
 #include "MaterialTypes.h"
-#include "Memory/Memory.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
 #include "Uniforms.h"
@@ -16,7 +15,7 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 template <MaterialTypes T>
-void MemoryFactoryVk::ExtractOffsetsMaterialsSubmeshes(
+void MemoryVk::ExtractOffsetsMaterialsSubmeshes(
     MaterialSubmeshesMap<T> &materialSubmeshesMap) {
 
   auto *device = ContextVk::Device();
@@ -27,6 +26,9 @@ void MemoryFactoryVk::ExtractOffsetsMaterialsSubmeshes(
   // temps
   VkDeviceSize vboOffset = 0, iboOffset = 0, worldMatrixOffset = 0;
   VkDeviceSize basicMatOffset = 0, pbrMatOffset = 0;
+
+  VkDeviceSize vboStride = 0, iboStride = 0, worldMatrixStride = 0;
+  VkDeviceSize basicMatStride = 0, pbrMatStride = 0;
 
   for (auto &[matId, submeshes] : materialSubmeshesMap) {
     //
@@ -47,9 +49,9 @@ void MemoryFactoryVk::ExtractOffsetsMaterialsSubmeshes(
       m_bufferOffsets.submeshesOffsets[matId].push_back(
           {vboOffset, iboOffset, worldMatrixOffset});
 
-      const BufferDefs::Layout &vboLayout =
-          submesh->GetVertexBuffer()->GetLayout();
-      vboOffset += vboLayout.countValue * vboLayout.strideValue;
+      VertexBuffer *vertexBuffer = submesh->GetVertexBuffer();
+      vboStride = vertexBuffer->GetLayout().strideValue;
+      vboOffset += vertexBuffer->GetCount() * vboStride;
 
       IndexBuffer<uint32_t> *indexBuffer = submesh->GetIndexBuffer();
       iboOffset += indexBuffer->GetCount() * sizeof(uint32_t);
@@ -65,14 +67,14 @@ void MemoryFactoryVk::ExtractOffsetsMaterialsSubmeshes(
     m_bufferViews.pbrMatUbo = {0, pbrMatOffset};
   }
 
-  m_bufferViews.submeshVbo += {0, vboOffset};
-  m_bufferViews.submeshIbo += {0, iboOffset};
-  m_bufferViews.submeshUbo += {0, worldMatrixOffset};
+  m_bufferViews.submeshVbo += {0, vboOffset, stride};
+  m_bufferViews.submeshIbo += {0, iboOffset, stride};
+  m_bufferViews.submeshUbo += {0, worldMatrixOffset, stride};
 }
 
-void MemoryFactoryVk::ExtractOffsetsLightsCamerasEmptys(
-    std::vector<Light *> &lights, std::vector<Camera *> &cameras,
-    std::vector<Empty *> &emptys) {
+void MemoryVk::ExtractOffsetsLightsCamerasEmptys(std::vector<Light *> &lights,
+                                                 std::vector<Camera *> &cameras,
+                                                 std::vector<Empty *> &emptys) {
   auto *device = ContextVk::Device();
   VkPhysicalDeviceProperties properties{};
   device->GetPhysicalDeviceProperties(properties);
@@ -103,19 +105,19 @@ void MemoryFactoryVk::ExtractOffsetsLightsCamerasEmptys(
   m_bufferViews.emptysUbo = {0, emptyOffsets};
 };
 
-void MemoryFactoryVk::AlignVboIboBufferViews() {
+void MemoryVk::AlignVboIboBufferViews() {
   VkPhysicalDeviceProperties properties{};
   ContextVk::Device()->GetPhysicalDeviceProperties(properties);
 
-  m_bufferViews.submeshVbo.size =
-      PC_AlignCeil(m_bufferViews.submeshVbo.size,
+  m_bufferViews.submeshVbo.alignedSize =
+      PC_AlignCeil(m_bufferViews.submeshVbo.alignedSize,
                    properties.limits.optimalBufferCopyOffsetAlignment);
-  m_bufferViews.submeshIbo.size =
-      PC_AlignCeil(m_bufferViews.submeshIbo.size,
+  m_bufferViews.submeshIbo.alignedSize =
+      PC_AlignCeil(m_bufferViews.submeshIbo.alignedSize,
                    properties.limits.optimalBufferCopyOffsetAlignment);
 };
 
-void MemoryFactoryVk::CalculateUboSsboBaseOffsets() {
+void MemoryVk::CalculateUboSsboBaseOffsets() {
   auto *device = ContextVk::Device();
   VkPhysicalDeviceProperties properties{};
   device->GetPhysicalDeviceProperties(properties);
@@ -124,62 +126,67 @@ void MemoryFactoryVk::CalculateUboSsboBaseOffsets() {
   VkDeviceSize bufferViewOffset = 0;
 
   m_bufferViews.submeshUbo.offset = bufferViewOffset;
-  VkDeviceSize submeshUboSize = PC_AlignCeil(
-      m_bufferViews.submeshUbo.size, limits.minUniformBufferOffsetAlignment);
+  VkDeviceSize submeshUboSize =
+      PC_AlignCeil(m_bufferViews.submeshUbo.alignedSize,
+                   limits.minUniformBufferOffsetAlignment);
   bufferViewOffset += submeshUboSize;
-  m_bufferViews.submeshUbo.size = submeshUboSize;
+  m_bufferViews.submeshUbo.alignedSize = submeshUboSize;
 
   m_bufferViews.basicMatUbo.offset = bufferViewOffset;
-  VkDeviceSize basicMatUboSize = PC_AlignCeil(
-      m_bufferViews.basicMatUbo.size, limits.minUniformBufferOffsetAlignment);
+  VkDeviceSize basicMatUboSize =
+      PC_AlignCeil(m_bufferViews.basicMatUbo.alignedSize,
+                   limits.minUniformBufferOffsetAlignment);
   bufferViewOffset += basicMatUboSize;
-  m_bufferViews.basicMatUbo.size = basicMatUboSize;
+  m_bufferViews.basicMatUbo.alignedSize = basicMatUboSize;
 
   m_bufferViews.pbrMatUbo.offset = bufferViewOffset;
-  VkDeviceSize pbrMatUboSize = PC_AlignCeil(
-      m_bufferViews.pbrMatUbo.size, limits.minUniformBufferOffsetAlignment);
+  VkDeviceSize pbrMatUboSize =
+      PC_AlignCeil(m_bufferViews.pbrMatUbo.alignedSize,
+                   limits.minUniformBufferOffsetAlignment);
   bufferViewOffset += pbrMatUboSize;
-  m_bufferViews.pbrMatUbo.size = pbrMatUboSize;
+  m_bufferViews.pbrMatUbo.alignedSize = pbrMatUboSize;
 
   m_bufferViews.camerasUbo.offset = bufferViewOffset;
-  VkDeviceSize camerasUboSize = PC_AlignCeil(
-      m_bufferViews.camerasUbo.size, limits.minUniformBufferOffsetAlignment);
+  VkDeviceSize camerasUboSize =
+      PC_AlignCeil(m_bufferViews.camerasUbo.alignedSize,
+                   limits.minUniformBufferOffsetAlignment);
   bufferViewOffset += camerasUboSize;
-  m_bufferViews.camerasUbo.size = camerasUboSize;
+  m_bufferViews.camerasUbo.alignedSize = camerasUboSize;
 
   m_bufferViews.emptysUbo.offset = bufferViewOffset;
-  VkDeviceSize emptysUboSize = PC_AlignCeil(
-      m_bufferViews.emptysUbo.size, limits.minUniformBufferOffsetAlignment);
+  VkDeviceSize emptysUboSize =
+      PC_AlignCeil(m_bufferViews.emptysUbo.alignedSize,
+                   limits.minUniformBufferOffsetAlignment);
   bufferViewOffset += emptysUboSize;
-  m_bufferViews.emptysUbo.size = emptysUboSize;
+  m_bufferViews.emptysUbo.alignedSize = emptysUboSize;
 
   // clang-format off
   PC_PRINT(
           "\nSubmesh UBO: \n" <<
           m_bufferViews.submeshUbo.offset << " " <<
-          m_bufferViews.submeshUbo.size << " "
+          m_bufferViews.submeshUbo.alignedSize << " "
           "\nBasicMat UBO: \n" << " " <<
           m_bufferViews.basicMatUbo.offset << " " <<
-          m_bufferViews.basicMatUbo.size <<
+          m_bufferViews.basicMatUbo.alignedSize <<
           "\nPbrMat UBO: \n" <<
           m_bufferViews.pbrMatUbo.offset << " " <<
-          m_bufferViews.pbrMatUbo.size<< " " <<
+          m_bufferViews.pbrMatUbo.alignedSize<< " " <<
           "\nCamerasMat UBO: \n" <<
           m_bufferViews.camerasUbo.offset<< " " <<
-          m_bufferViews.camerasUbo.size << " " <<
+          m_bufferViews.camerasUbo.alignedSize << " " <<
           "\nEmptys UBO: \n" <<
           m_bufferViews.emptysUbo.offset << " " <<
-          m_bufferViews.emptysUbo.size  << " " <<
+          m_bufferViews.emptysUbo.alignedSize  << " " <<
           "\nLights SSBO: \n" <<
           m_bufferViews.lightsSsbo.offset << " " <<
-          m_bufferViews.lightsSsbo.size << " " <<
+          m_bufferViews.lightsSsbo.alignedSize << " " <<
           "\n"
-          , TagType::Print, "MemoryFactoryVk")
+          , TagType::Print, "MemoryVk")
   // clang-format on
 };
 
 template <MaterialTypes T>
-void MemoryFactoryVk::FillBuffersMaterialsSubmeshes(
+void MemoryVk::FillBuffersMaterialsSubmeshes(
     MaterialSubmeshesMap<T> &materialSubmeshesMap) {
   for (auto &[matId, submeshes] : materialSubmeshesMap) {
     // fill materials too
@@ -206,12 +213,12 @@ void MemoryFactoryVk::FillBuffersMaterialsSubmeshes(
   };
 };
 
-void MemoryFactoryVk::AllocSubmeshVboIboStaging() {
+void MemoryVk::AllocSubmeshVboIboStaging() {
   //
   // --- VERTEX BUFFERS CREATION -------------------------------------------
   VkBufferCreateInfo vboStagingInfo{};
   BufferVkUtils::GetDefaultVkBufferState(vboStagingInfo,
-                                         m_bufferViews.submeshVbo.size);
+                                         m_bufferViews.submeshVbo.alignedSize);
   vboStagingInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 
   VmaAllocationCreateInfo vboStagingVmaInfo{};
@@ -240,7 +247,7 @@ void MemoryFactoryVk::AllocSubmeshVboIboStaging() {
   // --- INDEX BUFFERS CREATION --------------------------------------------
   VkBufferCreateInfo iboStagingInfo{};
   BufferVkUtils::GetDefaultVkBufferState(iboStagingInfo,
-                                         m_bufferViews.submeshIbo.size);
+                                         m_bufferViews.submeshIbo.alignedSize);
   iboStagingInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 
   VmaAllocationCreateInfo iboStagingVmaInfo{};
@@ -262,19 +269,19 @@ void MemoryFactoryVk::AllocSubmeshVboIboStaging() {
   };
 }
 
-void MemoryFactoryVk::FlushVboIboStagingToLocal() {
+void MemoryVk::FlushVboIboStagingToLocal() {
   BufferVkUtils::CopyStagingToMainBuffers(m_vboStaging, m_vbo,
-                                          m_bufferViews.submeshVbo.size);
+                                          m_bufferViews.submeshVbo.alignedSize);
   BufferVkUtils::CopyStagingToMainBuffers(m_iboStaging, m_ibo,
-                                          m_bufferViews.submeshIbo.size);
+                                          m_bufferViews.submeshIbo.alignedSize);
 };
 
-void MemoryFactoryVk::AllocSubmeshVboIboLocal() {
+void MemoryVk::AllocSubmeshVboIboLocal() {
   //
   // --- VERTEX BUFFERS CREATION -------------------------------------------
   VkBufferCreateInfo vboMainInfo{};
   BufferVkUtils::GetDefaultVkBufferState(vboMainInfo,
-                                         m_bufferViews.submeshVbo.size);
+                                         m_bufferViews.submeshVbo.alignedSize);
   vboMainInfo.usage =
       VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
@@ -292,7 +299,7 @@ void MemoryFactoryVk::AllocSubmeshVboIboLocal() {
   // --- INDEX BUFFERS CREATION --------------------------------------------
   VkBufferCreateInfo iboMainInfo{};
   BufferVkUtils::GetDefaultVkBufferState(iboMainInfo,
-                                         m_bufferViews.submeshIbo.size);
+                                         m_bufferViews.submeshIbo.alignedSize);
   iboMainInfo.usage =
       VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
@@ -307,12 +314,13 @@ void MemoryFactoryVk::AllocSubmeshVboIboLocal() {
   };
 }
 
-void MemoryFactoryVk::AllocUboSsboLocalBuffers() {
-  VkDeviceSize uboTotalSize =
-      m_bufferViews.submeshUbo.size + m_bufferViews.basicMatUbo.size +
-      m_bufferViews.pbrMatUbo.size + m_bufferViews.camerasUbo.size +
-      m_bufferViews.emptysUbo.size;
-  VkDeviceSize ssboTotalSize = m_bufferViews.lightsSsbo.size;
+void MemoryVk::AllocUboSsboLocalBuffers() {
+  VkDeviceSize uboTotalSize = m_bufferViews.submeshUbo.alignedSize +
+                              m_bufferViews.basicMatUbo.alignedSize +
+                              m_bufferViews.pbrMatUbo.alignedSize +
+                              m_bufferViews.camerasUbo.alignedSize +
+                              m_bufferViews.emptysUbo.alignedSize;
+  VkDeviceSize ssboTotalSize = m_bufferViews.lightsSsbo.alignedSize;
 
   VkBufferCreateInfo uboCreateInfo{};
   uboCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -358,7 +366,7 @@ void MemoryFactoryVk::AllocUboSsboLocalBuffers() {
 };
 
 // Clean up functions --------------------------------------------------------
-void MemoryFactoryVk::CleanUpSubmeshVboIboBuffersStaging() {
+void MemoryVk::CleanUpSubmeshVboIboBuffersStaging() {
   auto &allocator = ContextVk::MemoryAllocator()->GetVMAAllocator();
 
   if (m_vboStagingMapping) {
@@ -384,7 +392,7 @@ void MemoryFactoryVk::CleanUpSubmeshVboIboBuffersStaging() {
   }
 };
 
-void MemoryFactoryVk::CleanUpVboIboLocalBuffers() {
+void MemoryVk::CleanUpVboIboLocalBuffers() {
   auto &allocator = ContextVk::MemoryAllocator()->GetVMAAllocator();
 
   if (m_vbo != VK_NULL_HANDLE && m_vboAlloc) {
@@ -400,7 +408,7 @@ void MemoryFactoryVk::CleanUpVboIboLocalBuffers() {
   }
 };
 
-void MemoryFactoryVk::CleanUpUboSsboLocalBuffers() {
+void MemoryVk::CleanUpUboSsboLocalBuffers() {
   auto &allocator = ContextVk::MemoryAllocator()->GetVMAAllocator();
 
   for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
@@ -422,17 +430,14 @@ void MemoryFactoryVk::CleanUpUboSsboLocalBuffers() {
 
 // Linker stuff
 template void
-MemoryFactoryVk::ExtractOffsetsMaterialsSubmeshes<MaterialTypes::BasicMat>(
+MemoryVk::ExtractOffsetsMaterialsSubmeshes<MaterialTypes::BasicMat>(
     MaterialSubmeshesMap<MaterialTypes::BasicMat> &);
-template void
-MemoryFactoryVk::ExtractOffsetsMaterialsSubmeshes<MaterialTypes::PbrMat>(
+template void MemoryVk::ExtractOffsetsMaterialsSubmeshes<MaterialTypes::PbrMat>(
     MaterialSubmeshesMap<MaterialTypes::PbrMat> &);
 
-template void
-MemoryFactoryVk::FillBuffersMaterialsSubmeshes<MaterialTypes::BasicMat>(
+template void MemoryVk::FillBuffersMaterialsSubmeshes<MaterialTypes::BasicMat>(
     MaterialSubmeshesMap<MaterialTypes::BasicMat> &);
-template void
-MemoryFactoryVk::FillBuffersMaterialsSubmeshes<MaterialTypes::PbrMat>(
+template void MemoryVk::FillBuffersMaterialsSubmeshes<MaterialTypes::PbrMat>(
     MaterialSubmeshesMap<MaterialTypes::PbrMat> &);
 
 GFX_NAMESPACE_END

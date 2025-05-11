@@ -1,7 +1,4 @@
 #include "RenderFlows/RenderFlowVk.h"
-#include "ContextVk.h"
-#include "Memory/Memory.h"
-#include "Memory/MemoryFactoryVk.h"
 #include "Popcorn/Core/Assert.h"
 #include "SamplerVk.h"
 #include <cstdint>
@@ -41,42 +38,40 @@ void RenderFlowVk::AllocMemory() {
   // pbrMat1 : [sm1, sm2, sm3, ... ]
   // pbrMat2 : [sm1, sm2 ... ]
 
-  auto *memoryFactory = ContextVk::MemoryFactory();
+  auto *memory = ContextVk::Memory();
 
   // Extract -
   // 1. All vbos, ibos, ubos individual offsets (BufferOffsets)
   // 2. Ubo & ssbo bufferView sizes (not aligned)
-  memoryFactory->ExtractOffsetsMaterialsSubmeshes(s_basicSubmeshGroups);
-  memoryFactory->ExtractOffsetsMaterialsSubmeshes(s_pbrSubmeshGroups);
-  memoryFactory->ExtractOffsetsLightsCamerasEmptys(s_lights, s_cameras,
-                                                   s_emptys);
+  memory->ExtractOffsetsMaterialsSubmeshes(s_basicSubmeshGroups);
+  memory->ExtractOffsetsMaterialsSubmeshes(s_pbrSubmeshGroups);
+  memory->ExtractOffsetsLightsCamerasEmptys(s_lights, s_cameras, s_emptys);
 
   // Aligns vbo & ibo (BufferViews) for optimal copy (staging -> local)
-  memoryFactory->AlignVboIboBufferViews();
+  memory->AlignVboIboBufferViews();
 
   // Calculates aligned ubo bufferView sizes (BufferViews)
-  memoryFactory->CalculateUboSsboBaseOffsets();
+  memory->CalculateUboSsboBaseOffsets();
 
   // Allocate vbo and ibo buffers (staging & local)
-  memoryFactory->AllocSubmeshVboIboStaging();
-  memoryFactory->AllocSubmeshVboIboLocal();
+  memory->AllocSubmeshVboIboStaging();
+  memory->AllocSubmeshVboIboLocal();
 
   // Allocate ubo buffers (local)
-  memoryFactory
-      ->AllocUboSsboLocalBuffers(); // clean up in RenderFlowVk::FreeMemory()
+  memory->AllocUboSsboLocalBuffers(); // clean up in RenderFlowVk::FreeMemory()
 
   // Fill submesh vbos, ibos and ubos, material ubos
-  memoryFactory->FillBuffersMaterialsSubmeshes(s_basicSubmeshGroups);
-  memoryFactory->FillBuffersMaterialsSubmeshes(s_pbrSubmeshGroups);
-  memoryFactory->FillBuffersLightsCamerasEmptys(s_lights, s_cameras, s_emptys);
+  memory->FillBuffersMaterialsSubmeshes(s_basicSubmeshGroups);
+  memory->FillBuffersMaterialsSubmeshes(s_pbrSubmeshGroups);
+  memory->FillBuffersLightsCamerasEmptys(s_lights, s_cameras, s_emptys);
 
   PC_ASSERT(s_submeshCount, "Submesh count is zero.");
 
   // Copy the staging data to local buffers
-  memoryFactory->FlushVboIboStagingToLocal();
+  memory->FlushVboIboStagingToLocal();
 
   // Unmap, deallocate & destroy staging buffers
-  memoryFactory->CleanUpSubmeshVboIboBuffersStaging();
+  memory->CleanUpSubmeshVboIboBuffersStaging();
 };
 
 void RenderFlowVk::CreateSamplers() {
@@ -88,11 +83,9 @@ void RenderFlowVk::CreateSamplers() {
 };
 
 void RenderFlowVk::DestroySamplers() { s_samplersVk.frameSampler.Destroy(); };
-
 void RenderFlowVk::FreeMemory() {
-  ContextVk::MemoryFactory()->CleanUpUboSsboLocalBuffers();
-  ContextVk::MemoryFactory()
-      ->CleanUpVboIboLocalBuffers(); // Deallocate & destroy
+  ContextVk::Memory()->CleanUpUboSsboLocalBuffers();
+  ContextVk::Memory()->CleanUpVboIboLocalBuffers();
 };
 
 void RenderFlowVk::ProcessSceneUpdates(const uint32_t currentFrame) {

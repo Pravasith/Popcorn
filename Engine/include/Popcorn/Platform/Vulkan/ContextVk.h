@@ -8,7 +8,7 @@
 #include "FramebuffersVk.h"
 #include "GlobalMacros.h"
 #include "Memory/MemoryAllocatorVk.h"
-#include "Memory/MemoryFactoryVk.h"
+#include "Memory/MemoryVk.h"
 #include "PipelineFactoryVk.h"
 #include "Popcorn/Core/Window.h"
 #include "SurfaceVk.h"
@@ -88,11 +88,11 @@ public:
     return s_memoryAllocatorVk;
   }
 
-  static MemoryFactoryVk *MemoryFactory() {
-    if (!s_memoryFactoryVk) {
-      throw std::runtime_error("MemoryFactoryVk is null");
+  static MemoryVk *Memory() {
+    if (!s_memoryVk) {
+      throw std::runtime_error("MemoryVk is null");
     }
-    return s_memoryFactoryVk;
+    return s_memoryVk;
   }
 
   static DescriptorPoolsVk *DescriptorPools() {
@@ -137,7 +137,7 @@ private:
     s_commandPoolVk = CommandPoolVk::Get();
     s_frameVk = FrameVk::Get();
     s_memoryAllocatorVk = MemoryAllocatorVk::Get();
-    s_memoryFactoryVk = MemoryFactoryVk::Get();
+    s_memoryVk = MemoryVk::Get();
     s_descriptorPoolsVk = DescriptorPoolsVk::Get();
     s_descriptorLayoutsVk = DescriptorLayoutsVk::Get();
     s_pipelineFactoryVk = PipelineFactoryVk::Get();
@@ -154,7 +154,7 @@ private:
   static FramebuffersVk *s_framebuffersVk;
   static CommandPoolVk *s_commandPoolVk;
   static FrameVk *s_frameVk;
-  static MemoryFactoryVk *s_memoryFactoryVk;
+  static MemoryVk *s_memoryVk;
   static MemoryAllocatorVk *s_memoryAllocatorVk;
   static DescriptorPoolsVk *s_descriptorPoolsVk;
   static DescriptorLayoutsVk *s_descriptorLayoutsVk;

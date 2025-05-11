@@ -7,10 +7,11 @@
 #include "GlobalMacros.h"
 #include "Light.h"
 #include "MaterialTypes.h"
-#include "Memory/Memory.h"
+#include "Memory/MemoryDefsVk.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
 #include <array>
+#include <cstdint>
 #include <cstring>
 #include <glm/fwd.hpp>
 #include <vector>
@@ -20,8 +21,18 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-class MemoryFactoryVk {
+class MemoryVk {
 public:
+  [[nodiscard]] const VkBuffer &GetUboSet(uint32_t frameIndex) const {
+    return m_uboSet[frameIndex];
+  };
+  [[nodiscard]] const BufferViews &GetBufferViews() const {
+    return m_bufferViews;
+  };
+  [[nodiscard]] const BufferOffsets &GetBufferOffsets() const {
+    return m_bufferOffsets;
+  };
+
   template <MaterialTypes T>
   void ExtractOffsetsMaterialsSubmeshes(
       MaterialSubmeshesMap<T> &materialSubmeshesMap);
@@ -47,17 +58,13 @@ public:
   void CleanUpVboIboLocalBuffers();
   void CleanUpUboSsboLocalBuffers();
 
-  [[nodiscard]] const BufferViews &GetBufferViews() const {
-    return m_bufferViews;
-  };
-
 public:
-  [[nodiscard]] inline static MemoryFactoryVk *Get() {
+  [[nodiscard]] inline static MemoryVk *Get() {
     if (s_instance) {
       return s_instance;
     };
 
-    s_instance = new MemoryFactoryVk();
+    s_instance = new MemoryVk();
     return s_instance;
   };
 
@@ -71,29 +78,29 @@ public:
   };
 
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
-  MemoryFactoryVk(const MemoryFactoryVk &) = delete;
-  MemoryFactoryVk &operator=(const MemoryFactoryVk &) = delete;
+  MemoryVk(const MemoryVk &) = delete;
+  MemoryVk &operator=(const MemoryVk &) = delete;
 
   // DELETE THE MOVE CONSTRUCTOR AND MOVE ASSIGNMENT OPERATOR
-  MemoryFactoryVk(MemoryFactoryVk &&) = delete;
-  MemoryFactoryVk &operator=(MemoryFactoryVk &&) = delete;
+  MemoryVk(MemoryVk &&) = delete;
+  MemoryVk &operator=(MemoryVk &&) = delete;
 
   void CleanUp() {
     // Nothing so far
   };
 
 private:
-  MemoryFactoryVk() {
+  MemoryVk() {
     s_deviceVk = DeviceVk::Get();
-    PC_PRINT("CREATED", TagType::Constr, "MemoryFactoryVk")
+    PC_PRINT("CREATED", TagType::Constr, "MemoryVk")
   };
-  ~MemoryFactoryVk() {
+  ~MemoryVk() {
     s_deviceVk = nullptr;
-    PC_PRINT("DESTROYED", TagType::Destr, "MemoryFactoryVk")
+    PC_PRINT("DESTROYED", TagType::Destr, "MemoryVk")
   };
 
 private:
-  static MemoryFactoryVk *s_instance;
+  static MemoryVk *s_instance;
   static DeviceVk *s_deviceVk;
 
   //

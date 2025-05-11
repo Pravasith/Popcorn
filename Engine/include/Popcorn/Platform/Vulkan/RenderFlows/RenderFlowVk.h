@@ -7,7 +7,6 @@
 #include "Light.h"
 #include "Material.h"
 #include "MaterialTypes.h"
-#include "Memory/Memory.h"
 #include "Mesh.h"
 #include "Popcorn/Core/Base.h"
 #include "SamplerVk.h"
