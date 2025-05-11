@@ -232,8 +232,11 @@ void GBufferRenderFlowVk::CreateFramebuffer() {
 void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
   auto *layouts = ContextVk::DescriptorLayouts();
   auto *pools = ContextVk::DescriptorPools();
-  const VkDevice &device = ContextVk::Device()->GetDevice();
+  auto *device = ContextVk::Device();
   auto *memory = ContextVk::Memory();
+
+  VkPhysicalDeviceProperties properties{};
+  device->GetPhysicalDeviceProperties(properties);
 
   constexpr uint32_t maxFIF = MAX_FRAMES_IN_FLIGHT;
 
@@ -273,23 +276,42 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
   //
   std::vector<VkDescriptorSet> cameraSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::CameraSet, maxFIF>(
-          device, cameraLayouts);
+          device->GetDevice(), cameraLayouts);
   std::vector<VkDescriptorSet> submeshSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::SubmeshSet, maxFIF>(
-          device, submeshLayouts);
+          device->GetDevice(), submeshLayouts);
   std::vector<VkDescriptorSet> basicMatSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::BasicMatSet, maxFIF>(
-          device, basicMatLayouts);
+          device->GetDevice(), basicMatLayouts);
   std::vector<VkDescriptorSet> pbrMatSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::PbrMatSet, maxFIF>(
-          device, pbrMatLayouts);
+          device->GetDevice(), pbrMatLayouts);
 
   // Bind sets with buffers
   for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-    VkDescriptorBufferInfo bufferInfo{};
-    bufferInfo.buffer = memory->GetUboSet(i);
-    bufferInfo.offset = memory->GetBufferViews().camerasUbo.offset;
-    bufferInfo.range =
+    VkDescriptorBufferInfo cameraBufferInfo{};
+    cameraBufferInfo.buffer = memory->GetUboSet(i);
+    cameraBufferInfo.offset = memory->GetBufferViews().camerasUbo.offset;
+    cameraBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
+        DescriptorSets::CameraSet>(properties.limits);
+
+    VkDescriptorBufferInfo submeshBufferInfo{};
+    submeshBufferInfo.buffer = memory->GetUboSet(i);
+    submeshBufferInfo.offset = memory->GetBufferViews().submeshUbo.offset;
+    submeshBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
+        DescriptorSets::SubmeshSet>(properties.limits);
+
+    VkDescriptorBufferInfo basicMatBufferInfo{};
+    basicMatBufferInfo.buffer = memory->GetUboSet(i);
+    basicMatBufferInfo.offset = memory->GetBufferViews().basicMatUbo.offset;
+    basicMatBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
+        DescriptorSets::BasicMatSet>(properties.limits);
+
+    VkDescriptorBufferInfo pbrMatBufferInfo{};
+    pbrMatBufferInfo.buffer = memory->GetUboSet(i);
+    pbrMatBufferInfo.offset = memory->GetBufferViews().pbrMatUbo.offset;
+    pbrMatBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
+        DescriptorSets::PbrMatSet>(properties.limits);
   };
 };
 

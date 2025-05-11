@@ -1,7 +1,9 @@
 #pragma once
 
 #include "GlobalMacros.h"
+#include "Memory/MemoryDefsVk.h"
 #include "Popcorn/Core/Base.h"
+#include "Uniforms.h"
 #include <unordered_map>
 #include <vector>
 #include <vulkan/vulkan_core.h>
@@ -24,12 +26,34 @@ enum DescriptorSets {
                  // 1 Sampler - depth image & sampler
                  // 1 Sampler - normal image & sampler
                  //
-  CompositeSet   // 1 Sampler - light image & sampler
+  PresentSet     // 1 Sampler - light image & sampler
 };
 
 class DescriptorLayoutsVk {
 public:
   template <DescriptorSets T> [[nodiscard]] VkDescriptorSetLayout &GetLayout();
+
+  template <DescriptorSets T>
+  [[nodiscard]] static VkDeviceSize
+  GetDescriptorBufferRange(const VkPhysicalDeviceLimits &limits) {
+    if constexpr (T == DescriptorSets::CameraSet) {
+      return PC_AlignCeil(UniformDefs::CameraUniform::size,
+                          limits.minUniformBufferOffsetAlignment);
+    } else if constexpr (T == DescriptorSets::BasicMatSet) {
+      return PC_AlignCeil(UniformDefs::BasicMaterialUniform::size,
+                          limits.minUniformBufferOffsetAlignment);
+    } else if constexpr (T == DescriptorSets::PbrMatSet) {
+      return PC_AlignCeil(UniformDefs::PbrMaterialUniform::size,
+                          limits.minUniformBufferOffsetAlignment);
+    } else if constexpr (T == DescriptorSets::SubmeshSet) {
+      return PC_AlignCeil(UniformDefs::SubmeshUniform::size,
+                          limits.minUniformBufferOffsetAlignment);
+    } else if constexpr (T == DescriptorSets::PresentSet) {
+    } else if constexpr (T == DescriptorSets::LightingSet) {
+      return PC_AlignCeil(UniformDefs::LightUniform::size,
+                          limits.minStorageBufferOffsetAlignment);
+    };
+  };
 
 public:
   [[nodiscard]] static VkDescriptorSetLayout CreateDescriptorSetLayout(

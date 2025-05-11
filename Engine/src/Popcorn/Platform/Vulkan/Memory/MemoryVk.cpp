@@ -26,9 +26,9 @@ void MemoryVk::ExtractOffsetsMaterialsSubmeshes(
   // temps
   VkDeviceSize vboOffset = 0, iboOffset = 0, worldMatrixOffset = 0;
   VkDeviceSize basicMatOffset = 0, pbrMatOffset = 0;
-
-  VkDeviceSize vboStride = 0, iboStride = 0, worldMatrixStride = 0;
-  VkDeviceSize basicMatStride = 0, pbrMatStride = 0;
+  //
+  // VkDeviceSize vboStride = 0, iboStride = 0, worldMatrixStride = 0;
+  // VkDeviceSize basicMatStride = 0, pbrMatStride = 0;
 
   for (auto &[matId, submeshes] : materialSubmeshesMap) {
     //
@@ -50,8 +50,8 @@ void MemoryVk::ExtractOffsetsMaterialsSubmeshes(
           {vboOffset, iboOffset, worldMatrixOffset});
 
       VertexBuffer *vertexBuffer = submesh->GetVertexBuffer();
-      vboStride = vertexBuffer->GetLayout().strideValue;
-      vboOffset += vertexBuffer->GetCount() * vboStride;
+      vboOffset +=
+          vertexBuffer->GetCount() * vertexBuffer->GetLayout().strideValue;
 
       IndexBuffer<uint32_t> *indexBuffer = submesh->GetIndexBuffer();
       iboOffset += indexBuffer->GetCount() * sizeof(uint32_t);
@@ -67,9 +67,9 @@ void MemoryVk::ExtractOffsetsMaterialsSubmeshes(
     m_bufferViews.pbrMatUbo = {0, pbrMatOffset};
   }
 
-  m_bufferViews.submeshVbo += {0, vboOffset, stride};
-  m_bufferViews.submeshIbo += {0, iboOffset, stride};
-  m_bufferViews.submeshUbo += {0, worldMatrixOffset, stride};
+  m_bufferViews.submeshVbo += {0, vboOffset};
+  m_bufferViews.submeshIbo += {0, iboOffset};
+  m_bufferViews.submeshUbo += {0, worldMatrixOffset};
 }
 
 void MemoryVk::ExtractOffsetsLightsCamerasEmptys(std::vector<Light *> &lights,

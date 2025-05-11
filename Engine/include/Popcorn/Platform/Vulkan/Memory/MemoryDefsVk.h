@@ -46,13 +46,10 @@ struct BufferOffsets {
 struct BufferView {
   VkDeviceSize offset = 0;
   VkDeviceSize alignedSize = 0;
-  // Individual ubo stride
-  VkDeviceSize alignedElementStride = 0;
 
   void operator+=(const BufferView &other) {
     offset += other.offset;
     alignedSize += other.alignedSize;
-    alignedElementStride += other.alignedElementStride;
   };
 };
 
