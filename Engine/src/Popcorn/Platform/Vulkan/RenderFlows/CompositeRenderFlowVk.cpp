@@ -155,9 +155,13 @@ void CompositeRenderFlowVk::CreateFramebuffer() {
 //
 void CompositeRenderFlowVk::CreateAndAllocDescriptors() {
   auto *pools = ContextVk::DescriptorPools();
+  auto *device = ContextVk::Device();
+  auto *memory = ContextVk::Memory();
+  VkPhysicalDeviceProperties properties{};
+  device->GetPhysicalDeviceProperties(properties);
 
   VkDescriptorSetLayout &compositeLayout =
-      ContextVk::DescriptorLayouts()->GetLayout<DescriptorSets::CompositeSet>();
+      ContextVk::DescriptorLayouts()->GetLayout<DescriptorSets::PresentSet>();
 
   std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> compositeLayouts{};
   std::fill(compositeLayouts.begin(), compositeLayouts.end(), compositeLayout);
@@ -166,10 +170,33 @@ void CompositeRenderFlowVk::CreateAndAllocDescriptors() {
       pools->GetPool<DescriptorPools::CompositePool>(MAX_FRAMES_IN_FLIGHT);
 
   // Creates multiple sets (from Count template param)
-  std::vector<VkDescriptorSet> compositeSets =
-      compositePool.AllocateDescriptorSets<DescriptorSets::CompositeSet,
+  m_descriptorSetsVk.presentSets =
+      compositePool.AllocateDescriptorSets<DescriptorSets::PresentSet,
                                            MAX_FRAMES_IN_FLIGHT>(
           ContextVk::Device()->GetDevice(), compositeLayouts);
+
+  for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+    VkDescriptorImageInfo lightImageInfo{};
+    lightImageInfo.imageView = m_dependencyImages.lightImage.GetVkImageView();
+    lightImageInfo.sampler = s_samplersVk.frameSampler.GetVkSampler();
+    lightImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+    VkWriteDescriptorSet lightWrite{};
+    lightWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    lightWrite.dstSet = m_descriptorSetsVk.presentSets[i];
+    lightWrite.dstBinding = 0;
+    lightWrite.dstArrayElement = 0;
+    lightWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    lightWrite.descriptorCount = 1;
+    lightWrite.pBufferInfo = nullptr;
+    lightWrite.pImageInfo = &lightImageInfo;
+    lightWrite.pTexelBufferView = nullptr;
+
+    std::vector<VkWriteDescriptorSet> writes{lightWrite};
+
+    vkUpdateDescriptorSets(device->GetDevice(), writes.size(), writes.data(), 0,
+                           nullptr);
+  }
 };
 
 //

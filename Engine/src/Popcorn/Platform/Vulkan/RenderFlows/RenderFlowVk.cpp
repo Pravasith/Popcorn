@@ -66,9 +66,11 @@ void RenderFlowVk::AllocMemory() {
   memory->AllocUboSsboLocalBuffers(); // clean up in RenderFlowVk::FreeMemory()
 
   // Fill submesh vbos, ibos and ubos, material ubos
-  memory->FillBuffersMaterialsSubmeshes(s_basicSubmeshGroups);
-  memory->FillBuffersMaterialsSubmeshes(s_pbrSubmeshGroups);
-  memory->FillBuffersLightsCamerasEmptys(s_lights, s_cameras, s_emptys);
+  memory->FillVbosIbosUbosSubmeshMaterial(s_basicSubmeshGroups,
+                                          s_basicMaterials);
+  memory->FillVbosIbosUbosSubmeshMaterial(s_pbrSubmeshGroups, s_pbrMaterials);
+
+  // memory->FillUbos
 
   PC_ASSERT(s_submeshCount, "Submesh count is zero.");
 

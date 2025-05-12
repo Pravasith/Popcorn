@@ -48,9 +48,18 @@ public:
   void AllocUboSsboLocalBuffers();
   void MapUboSsboLocalBuffers();
 
+  // Static buffer data, won't change per frame
   template <MaterialTypes T>
-  void FillBuffersMaterialsSubmeshes(
-      PcMaterialSubmeshesMap<T> &materialSubmeshesMap);
+  void FillVbosIbosUbosSubmeshMaterial(
+      PcMaterialSubmeshesMap<T> &materialSubmeshesMap,
+      PcMaterialMap<T> &materialMap);
+
+  // Dynamic buffer data, they all change per frame
+  template <MaterialTypes T>
+  void FillUbosSubmesh(PcMaterialSubmeshesMap<T> &materialSubmeshesMap);
+  void FillUbosSsbosLightCameraEmpty(std::vector<Light *> &lights,
+                                     std::vector<Camera *> &cameras,
+                                     std::vector<Empty *> &emptys);
 
   void FlushVboIboStagingToLocal();
   void CleanUpSubmeshVboIboBuffersStaging();

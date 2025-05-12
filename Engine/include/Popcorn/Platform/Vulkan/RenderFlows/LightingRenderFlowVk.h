@@ -42,19 +42,12 @@ private:
     std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> lightingSets{};
   };
 
-  struct DependenciesVk {
-    ImageVk albedoImage{};
-    ImageVk depthImage{};
-    ImageVk normalImage{};
-  };
-
   PcRenderFlowImages<RenderFlows::Lighting> &m_imagesVk = s_lightingImages;
   PcRenderFlowImages<RenderFlows::GBuffer> &m_dependencyImages =
       s_gBufferImages;
 
   AttachmentsVk m_attachmentsVk{};
   DescriptorSetsVk m_descriptorSetsVk{};
-  DependenciesVk m_dependenciesVk{};
 
   RenderPassVk m_renderPass;
   VkFramebuffer m_framebuffer;

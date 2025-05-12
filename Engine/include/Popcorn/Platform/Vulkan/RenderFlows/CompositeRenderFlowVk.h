@@ -38,11 +38,16 @@ private:
     AttachmentVk presentAttachment{};
   };
 
+  struct DescriptorSetsVk {
+    std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> presentSets{};
+  };
+
   PcRenderFlowImages<RenderFlows::Composite> &m_imagesVk = s_compositeImages;
   PcRenderFlowImages<RenderFlows::Lighting> &m_dependencyImages =
       s_lightingImages;
 
   AttachmentsVk m_attachmentsVk{};
+  DescriptorSetsVk m_descriptorSetsVk{};
 
   RenderPassVk m_renderPass;
   VkFramebuffer m_framebuffer;

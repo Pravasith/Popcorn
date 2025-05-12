@@ -186,10 +186,11 @@ void MemoryVk::CalculateUboSsboBaseOffsets() {
 };
 
 template <MaterialTypes T>
-void MemoryVk::FillBuffersMaterialsSubmeshes(
-    PcMaterialSubmeshesMap<T> &materialSubmeshesMap) {
+void MemoryVk::FillVbosIbosUbosSubmeshMaterial(
+    PcMaterialSubmeshesMap<T> &materialSubmeshesMap,
+    PcMaterialMap<T> &materialMap) {
   for (auto &[matId, submeshes] : materialSubmeshesMap) {
-    // fill materials too
+    // TODO: fill materials
 
     for (int i = 0; i < submeshes.size(); ++i) {
       Submesh<T> *submesh = submeshes[i];
@@ -211,6 +212,23 @@ void MemoryVk::FillBuffersMaterialsSubmeshes(
              indexBuffer->GetBufferData(), (size_t)iboSize);
     }
   };
+};
+
+template <MaterialTypes T>
+void MemoryVk::FillUbosSubmesh(
+    PcMaterialSubmeshesMap<T> &materialSubmeshesMap) {
+  for (auto &[matId, submeshes] : materialSubmeshesMap) {
+    for (int i = 0; i < submeshes.size(); ++i) {
+      Submesh<T> *submesh = submeshes[i];
+      // TODO: Fill submeshes world matrices
+    }
+  };
+};
+
+void MemoryVk::FillUbosSsbosLightCameraEmpty(std::vector<Light *> &lights,
+                                             std::vector<Camera *> &cameras,
+                                             std::vector<Empty *> &emptys) {
+  // TODO: Fill all here too
 };
 
 void MemoryVk::AllocSubmeshVboIboStaging() {

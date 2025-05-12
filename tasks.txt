@@ -57,7 +57,7 @@ x. Create samplers for gbuffer & lighting buffer - DONE
    x Plan this before copying values
    x Created layouts and pools to get descriptors
    - Align vertex buffer with minVertexBufferAlignemnt
-   - basically bind memory (buffers, images & samplers) to descriptor sets
+   x basically bind memory (buffers, images & samplers) to descriptor sets
      and get them ready for the scene updates process function
 
 3. Create mappings for all needed ubos & ssbos - 20 mins
@@ -77,5 +77,10 @@ x. Create samplers for gbuffer & lighting buffer - DONE
    e. Empty values - UBO - empty->GetEmptyValues()
    f. Lights values - SSBO - light->GetLightValues()
 
+6. Bind descriptors & pipelines but...
+7. Write shaders -
+   a. GBuffer shaders - vert & frag
+   b. Light shaders - vert & frag
+   c. Composite shaders - vert & frag
 6. Make pipelines ready for each renderflows
 7. Finally, the draw call
