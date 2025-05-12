@@ -34,15 +34,14 @@ private:
   virtual void CreateAndAllocDescriptors() override;
 
 private:
-  struct ImagesVk {
-    ImageVk presentImage{};
-  };
-
   struct AttachmentsVk {
     AttachmentVk presentAttachment{};
   };
 
-  ImagesVk m_imagesVk{};
+  PcRenderFlowImages<RenderFlows::Composite> &m_imagesVk = s_compositeImages;
+  PcRenderFlowImages<RenderFlows::Lighting> &m_dependencyImages =
+      s_lightingImages;
+
   AttachmentsVk m_attachmentsVk{};
 
   RenderPassVk m_renderPass;

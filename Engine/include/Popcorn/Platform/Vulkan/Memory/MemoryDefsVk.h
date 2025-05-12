@@ -13,28 +13,27 @@ GFX_NAMESPACE_BEGIN
 //
 // --- Typedefs ------------------------------------------------------------
 template <MaterialTypes T>
-using MaterialMap = std::unordered_map<MaterialHashType, Material<T> *>;
-
-using MaterialOffsetsMap = std::unordered_map<MaterialHashType, VkDeviceSize>;
+using PcMaterialMap = std::unordered_map<MaterialHashType, Material<T> *>;
+using PcMaterialOffsetsMap = std::unordered_map<MaterialHashType, VkDeviceSize>;
 
 template <MaterialTypes T>
-using MaterialSubmeshesMap =
+using PcMaterialSubmeshesMap =
     std::unordered_map<MaterialHashType, std::vector<Submesh<T> *>>;
 
-struct SubmeshOffsets {
+struct PcSubmeshOffsets {
   VkDeviceSize vboOffset = 0;
   VkDeviceSize iboOffset = 0;
   VkDeviceSize worldMatrixOffset = 0;
 };
 
-using SubmeshesOffsetsMap =
-    std::unordered_map<MaterialHashType, std::vector<SubmeshOffsets>>;
+using PcSubmeshesOffsetsMap =
+    std::unordered_map<MaterialHashType, std::vector<PcSubmeshOffsets>>;
 
 //
 // --- Buffer offsets ------------------------------------------------------
-struct BufferOffsets {
-  SubmeshesOffsetsMap submeshesOffsets{}; // aligned
-  MaterialOffsetsMap materialOffsets{};   // aligned
+struct PcBufferOffsets {
+  PcSubmeshesOffsetsMap submeshesOffsets{}; // aligned
+  PcMaterialOffsetsMap materialOffsets{};   // aligned
 
   std::vector<VkDeviceSize> lightsWorldMatrixOffsets{};  // aligned
   std::vector<VkDeviceSize> camerasWorldMatrixOffsets{}; // aligned
@@ -43,30 +42,30 @@ struct BufferOffsets {
 
 //
 // --- Buffer views --------------------------------------------------------
-struct BufferView {
+struct PcBufferView {
   VkDeviceSize offset = 0;
   VkDeviceSize alignedSize = 0;
 
-  void operator+=(const BufferView &other) {
+  void operator+=(const PcBufferView &other) {
     offset += other.offset;
     alignedSize += other.alignedSize;
   };
 };
 
-struct BufferViews {
+struct PcBufferViews {
   // VBOs & IBOs -----------------
-  BufferView submeshVbo{}; // done
-  BufferView submeshIbo{}; // done
+  PcBufferView submeshVbo{}; // done
+  PcBufferView submeshIbo{}; // done
 
   // UBOs ------------------------
-  BufferView basicMatUbo{}; // done
-  BufferView pbrMatUbo{};   // done
-  BufferView submeshUbo{};  // done
-  BufferView camerasUbo{};  // done
-  BufferView emptysUbo{};   // done
+  PcBufferView basicMatUbo{}; // done
+  PcBufferView pbrMatUbo{};   // done
+  PcBufferView submeshUbo{};  // done
+  PcBufferView camerasUbo{};  // done
+  PcBufferView emptysUbo{};   // done
 
   // SSBOs -----------------------
-  BufferView lightsSsbo{}; // done
+  PcBufferView lightsSsbo{}; // done
 };
 
 static constexpr VkDeviceSize PC_AlignCeil(VkDeviceSize size,

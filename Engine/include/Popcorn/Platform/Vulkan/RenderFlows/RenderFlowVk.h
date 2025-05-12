@@ -4,6 +4,7 @@
 #include "Empty.h"
 #include "GameObject.h"
 #include "GlobalMacros.h"
+#include "ImageVk.h"
 #include "Light.h"
 #include "Material.h"
 #include "MaterialTypes.h"
@@ -19,6 +20,25 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 enum RenderFlows { GBuffer = 1, Lighting, Composite };
+
+template <RenderFlows T> struct PcRenderFlowImages {
+  virtual ~PcRenderFlowImages() = default;
+  static constexpr RenderFlows type_value = T;
+};
+
+template <> struct PcRenderFlowImages<RenderFlows::GBuffer> {
+  ImageVk albedoImage{};
+  ImageVk depthImage{};
+  ImageVk normalImage{};
+};
+
+template <> struct PcRenderFlowImages<RenderFlows::Lighting> {
+  ImageVk lightImage{};
+};
+
+template <> struct PcRenderFlowImages<RenderFlows::Composite> {
+  ImageVk presentImage{};
+};
 
 // TODO: Refactor
 //       - Vulkan specific for now.
@@ -147,8 +167,8 @@ public:
 protected:
   //
   // Game object refs -------------------------------------------------------
-  static MaterialSubmeshesMap<MaterialTypes::BasicMat> s_basicSubmeshGroups;
-  static MaterialSubmeshesMap<MaterialTypes::PbrMat> s_pbrSubmeshGroups;
+  static PcMaterialSubmeshesMap<MaterialTypes::BasicMat> s_basicSubmeshGroups;
+  static PcMaterialSubmeshesMap<MaterialTypes::PbrMat> s_pbrSubmeshGroups;
 
   static std::vector<Light *> s_lights;
   static std::vector<Camera *> s_cameras;
@@ -156,12 +176,16 @@ protected:
 
   //
   // Material values --------------------------------------------------------
-  static MaterialMap<MaterialTypes::BasicMat> s_basicMaterials;
-  static MaterialMap<MaterialTypes::PbrMat> s_pbrMaterials;
+  static PcMaterialMap<MaterialTypes::BasicMat> s_basicMaterials;
+  static PcMaterialMap<MaterialTypes::PbrMat> s_pbrMaterials;
+
+  // Images
+  static PcRenderFlowImages<GBuffer> s_gBufferImages;
+  static PcRenderFlowImages<Lighting> s_lightingImages;
+  static PcRenderFlowImages<Composite> s_compositeImages;
 
   //
   // Samplers ---------------------------------------------------------------
-
   static SamplersVk s_samplersVk;
 
   //

@@ -26,16 +26,16 @@ public:
   [[nodiscard]] const VkBuffer &GetUboSet(uint32_t frameIndex) const {
     return m_uboSet[frameIndex];
   };
-  [[nodiscard]] const BufferViews &GetBufferViews() const {
+  [[nodiscard]] const PcBufferViews &GetBufferViews() const {
     return m_bufferViews;
   };
-  [[nodiscard]] const BufferOffsets &GetBufferOffsets() const {
+  [[nodiscard]] const PcBufferOffsets &GetBufferOffsets() const {
     return m_bufferOffsets;
   };
 
   template <MaterialTypes T>
   void ExtractOffsetsMaterialsSubmeshes(
-      MaterialSubmeshesMap<T> &materialSubmeshesMap);
+      PcMaterialSubmeshesMap<T> &materialSubmeshesMap);
 
   void ExtractOffsetsLightsCamerasEmptys(std::vector<Light *> &lights,
                                          std::vector<Camera *> &cameras,
@@ -49,8 +49,8 @@ public:
   void MapUboSsboLocalBuffers();
 
   template <MaterialTypes T>
-  void
-  FillBuffersMaterialsSubmeshes(MaterialSubmeshesMap<T> &materialSubmeshesMap);
+  void FillBuffersMaterialsSubmeshes(
+      PcMaterialSubmeshesMap<T> &materialSubmeshesMap);
 
   void FlushVboIboStagingToLocal();
   void CleanUpSubmeshVboIboBuffersStaging();
@@ -133,11 +133,11 @@ private:
 
   //
   // Offsets ----------------------------------------------------------------
-  BufferOffsets m_bufferOffsets{};
+  PcBufferOffsets m_bufferOffsets{};
 
   //
   // Buffer views -----------------------------------------------------------
-  BufferViews m_bufferViews{};
+  PcBufferViews m_bufferViews{};
 };
 
 GFX_NAMESPACE_END

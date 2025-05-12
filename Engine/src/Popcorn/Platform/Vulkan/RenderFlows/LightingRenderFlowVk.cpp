@@ -150,6 +150,10 @@ void LightingRenderFlowVk::CreateFramebuffer() {
 
 void LightingRenderFlowVk::CreateAndAllocDescriptors() {
   auto *pools = ContextVk::DescriptorPools();
+  auto *device = ContextVk::Device();
+  auto *memory = ContextVk::Memory();
+  VkPhysicalDeviceProperties properties{};
+  device->GetPhysicalDeviceProperties(properties);
 
   VkDescriptorSetLayout &lightingLayout =
       ContextVk::DescriptorLayouts()->GetLayout<DescriptorSets::LightingSet>();
@@ -161,10 +165,87 @@ void LightingRenderFlowVk::CreateAndAllocDescriptors() {
       pools->GetPool<DescriptorPools::LightingPool>(MAX_FRAMES_IN_FLIGHT);
 
   // Creates multiple sets (from Count template param)
-  std::vector<VkDescriptorSet> lightingSets =
+  m_descriptorSetsVk.lightingSets =
       lightsPool.AllocateDescriptorSets<DescriptorSets::LightingSet,
                                         MAX_FRAMES_IN_FLIGHT>(
           ContextVk::Device()->GetDevice(), lightingLayouts);
+
+  for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+    VkDescriptorBufferInfo lightBufferInfo{};
+    lightBufferInfo.buffer = memory->GetUboSet(i);
+    lightBufferInfo.offset = memory->GetBufferViews().lightsSsbo.offset;
+    lightBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
+        DescriptorSets::LightingSet>(properties.limits);
+
+    VkDescriptorImageInfo albedoImageInfo{};
+    albedoImageInfo.imageView = m_dependencyImages.albedoImage.GetVkImageView();
+    albedoImageInfo.sampler = s_samplersVk.frameSampler.GetVkSampler();
+    albedoImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+    VkDescriptorImageInfo depthImageInfo{};
+    depthImageInfo.imageView = m_dependencyImages.depthImage.GetVkImageView();
+    depthImageInfo.sampler = s_samplersVk.frameSampler.GetVkSampler();
+    depthImageInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+
+    VkDescriptorImageInfo normalImageInfo{};
+    normalImageInfo.imageView = m_dependencyImages.normalImage.GetVkImageView();
+    normalImageInfo.sampler = s_samplersVk.frameSampler.GetVkSampler();
+    normalImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+    VkWriteDescriptorSet lightWrite{};
+    lightWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    lightWrite.dstSet = m_descriptorSetsVk.lightingSets[i];
+    lightWrite.dstBinding = 0;
+    lightWrite.dstArrayElement = 0;
+    lightWrite.descriptorType =
+        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; // is this correct?
+    lightWrite.descriptorCount = 1;
+    lightWrite.pBufferInfo = &lightBufferInfo;
+    lightWrite.pImageInfo = nullptr;
+    lightWrite.pTexelBufferView = nullptr;
+
+    VkWriteDescriptorSet albedoWrite{};
+    albedoWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    albedoWrite.dstSet = m_descriptorSetsVk.lightingSets[i];
+    albedoWrite.dstBinding = 1;
+    albedoWrite.dstArrayElement = 0;
+    albedoWrite.descriptorType =
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; // is this correct?
+    albedoWrite.descriptorCount = 1;
+    albedoWrite.pBufferInfo = nullptr;
+    albedoWrite.pImageInfo = &albedoImageInfo;
+    albedoWrite.pTexelBufferView = nullptr;
+
+    VkWriteDescriptorSet depthWrite{};
+    depthWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    depthWrite.dstSet = m_descriptorSetsVk.lightingSets[i];
+    depthWrite.dstBinding = 2;
+    depthWrite.dstArrayElement = 0;
+    depthWrite.descriptorType =
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; // is this correct?
+    depthWrite.descriptorCount = 1;
+    depthWrite.pBufferInfo = nullptr;
+    depthWrite.pImageInfo = &depthImageInfo;
+    depthWrite.pTexelBufferView = nullptr;
+
+    VkWriteDescriptorSet normalWrite{};
+    normalWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    normalWrite.dstSet = m_descriptorSetsVk.lightingSets[i];
+    normalWrite.dstBinding = 3;
+    normalWrite.dstArrayElement = 0;
+    normalWrite.descriptorType =
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; // is this correct?
+    normalWrite.descriptorCount = 1;
+    normalWrite.pBufferInfo = nullptr;
+    normalWrite.pImageInfo = &normalImageInfo;
+    normalWrite.pTexelBufferView = nullptr;
+
+    std::vector<VkWriteDescriptorSet> writes{lightWrite, albedoWrite,
+                                             depthWrite, normalWrite};
+
+    vkUpdateDescriptorSets(device->GetDevice(), writes.size(), writes.data(), 0,
+                           nullptr);
+  };
 };
 
 //

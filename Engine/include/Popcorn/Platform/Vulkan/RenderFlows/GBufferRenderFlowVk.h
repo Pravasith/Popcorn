@@ -1,11 +1,12 @@
 #pragma once
 
 #include "AttachmentVk.h"
+#include "CommonVk.h"
 #include "GBufferPipelineVk.h"
 #include "GlobalMacros.h"
-#include "ImageVk.h"
 #include "RenderFlows/RenderFlowVk.h"
 #include "RenderPassVk.h"
+#include <array>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -34,20 +35,23 @@ private:
   virtual void CreatePipelines() override;
 
 private:
-  struct ImagesVk {
-    ImageVk albedoImage{};
-    ImageVk depthImage{};
-    ImageVk normalImage{};
-  };
-
   struct AttachmentsVk {
     AttachmentVk albedoAttachment{};
     AttachmentVk depthAttachment{};
     AttachmentVk normalAttachment{};
   };
 
-  ImagesVk m_imagesVk{};
+  struct DescriptorSetsVk {
+    std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> cameraSets{};
+    std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> submeshSets{};
+    std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> basicMatSets{};
+    std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> pbrMatSets{};
+  };
+
+  PcRenderFlowImages<RenderFlows::GBuffer> &m_imagesVk = s_gBufferImages;
+
   AttachmentsVk m_attachmentsVk{};
+  DescriptorSetsVk m_descriptorSetsVk{};
 
   RenderPassVk m_renderPass;
   VkFramebuffer m_framebuffer;

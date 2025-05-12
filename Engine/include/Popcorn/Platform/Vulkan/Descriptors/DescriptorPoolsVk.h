@@ -19,7 +19,7 @@ class DPoolVk {
 
 public:
   template <DescriptorSets T, uint32_t Count>
-  [[nodiscard]] std::vector<VkDescriptorSet> AllocateDescriptorSets(
+  [[nodiscard]] std::array<VkDescriptorSet, Count> AllocateDescriptorSets(
       const VkDevice &device,
       const std::array<VkDescriptorSetLayout, Count> &layouts) {
     return DefaultAllocateDescriptorSets<Count>(device, layouts);
@@ -36,7 +36,8 @@ private:
   void CleanUp();
 
   template <uint32_t Count>
-  [[nodiscard]] std::vector<VkDescriptorSet> DefaultAllocateDescriptorSets(
+  [[nodiscard]] std::array<VkDescriptorSet, Count>
+  DefaultAllocateDescriptorSets(
       const VkDevice &device,
       std::array<VkDescriptorSetLayout, Count> &layouts) {
 
@@ -55,7 +56,7 @@ private:
     allocInfo.descriptorSetCount = Count;
     allocInfo.pNext = nullptr;
 
-    std::vector<VkDescriptorSet> sets(Count);
+    std::array<VkDescriptorSet, Count> sets{};
 
     if (vkAllocateDescriptorSets(device, &allocInfo, sets.data()) !=
         VK_SUCCESS) {

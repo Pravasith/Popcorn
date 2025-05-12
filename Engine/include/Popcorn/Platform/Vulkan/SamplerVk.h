@@ -40,6 +40,8 @@ public:
     createInfo.maxLod = 0.0f;
   };
 
+  [[nodiscard]] const VkSampler &GetVkSampler() const { return m_sampler; };
+
   void Create(const VkSamplerCreateInfo &createInfo) {
     // error in the funtion
     if (vkCreateSampler(ContextVk::Device()->GetDevice(), &createInfo, nullptr,

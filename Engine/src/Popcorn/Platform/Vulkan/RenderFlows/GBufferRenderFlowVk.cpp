@@ -6,9 +6,8 @@
 #include "DescriptorPoolsVk.h"
 #include "FramebuffersVk.h"
 #include "ImageVk.h"
-#include "Memory/Memory.h"
+#include "Memory/MemoryVk.h"
 #include "RenderPassVk.h"
-#include "Uniforms.h"
 #include <algorithm>
 #include <cstdint>
 #include <vector>
@@ -97,17 +96,20 @@ void GBufferRenderFlowVk::CreateAttachments() {
   VkAttachmentDescription albedoAttachment{};
   AttachmentVk::GetDefaultAttachmentDescription(albedoAttachment);
   albedoAttachment.format = albedoFormat;
+  albedoAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
   albedoAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
   VkAttachmentDescription depthAttachment{};
   AttachmentVk::GetDefaultAttachmentDescription(depthAttachment);
   depthAttachment.format = depthFormat;
   depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-  depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+  depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
 
   VkAttachmentDescription normalAttachment{};
   AttachmentVk::GetDefaultAttachmentDescription(normalAttachment);
   normalAttachment.format = normalFormat;
+  normalAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
   normalAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
   m_attachmentsVk.albedoAttachment.SetImageVk(&albedoImage);
@@ -271,19 +273,18 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
   // - BasicMat - Dynamic UBO
   // - PbrMat - Dynamic UBO
   //
+  //
   // Descriptor set will be cleaned automatically when pools are destroyed
-  //
-  //
-  std::vector<VkDescriptorSet> cameraSets =
+  m_descriptorSetsVk.cameraSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::CameraSet, maxFIF>(
           device->GetDevice(), cameraLayouts);
-  std::vector<VkDescriptorSet> submeshSets =
+  m_descriptorSetsVk.submeshSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::SubmeshSet, maxFIF>(
           device->GetDevice(), submeshLayouts);
-  std::vector<VkDescriptorSet> basicMatSets =
+  m_descriptorSetsVk.basicMatSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::BasicMatSet, maxFIF>(
           device->GetDevice(), basicMatLayouts);
-  std::vector<VkDescriptorSet> pbrMatSets =
+  m_descriptorSetsVk.pbrMatSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::PbrMatSet, maxFIF>(
           device->GetDevice(), pbrMatLayouts);
 
@@ -312,6 +313,56 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
     pbrMatBufferInfo.offset = memory->GetBufferViews().pbrMatUbo.offset;
     pbrMatBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
         DescriptorSets::PbrMatSet>(properties.limits);
+
+    VkWriteDescriptorSet cameraWrite{};
+    cameraWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    cameraWrite.dstSet = m_descriptorSetsVk.cameraSets[i];
+    cameraWrite.dstBinding = 0;
+    cameraWrite.dstArrayElement = 0;
+    cameraWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    cameraWrite.descriptorCount = 1;
+    cameraWrite.pBufferInfo = &cameraBufferInfo;
+    cameraWrite.pImageInfo = nullptr;
+    cameraWrite.pTexelBufferView = nullptr;
+
+    VkWriteDescriptorSet submeshWrite{};
+    submeshWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    submeshWrite.dstSet = m_descriptorSetsVk.submeshSets[i];
+    submeshWrite.dstBinding = 0;
+    submeshWrite.dstArrayElement = 0;
+    submeshWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    submeshWrite.descriptorCount = 1;
+    submeshWrite.pBufferInfo = &submeshBufferInfo;
+    submeshWrite.pImageInfo = nullptr;
+    submeshWrite.pTexelBufferView = nullptr;
+
+    VkWriteDescriptorSet basicMatWrite{};
+    basicMatWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    basicMatWrite.dstSet = m_descriptorSetsVk.basicMatSets[i];
+    basicMatWrite.dstBinding = 0;
+    basicMatWrite.dstArrayElement = 0;
+    basicMatWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    basicMatWrite.descriptorCount = 1;
+    basicMatWrite.pBufferInfo = &basicMatBufferInfo;
+    basicMatWrite.pImageInfo = nullptr;
+    basicMatWrite.pTexelBufferView = nullptr;
+
+    VkWriteDescriptorSet pbrMatWrite{};
+    pbrMatWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    pbrMatWrite.dstSet = m_descriptorSetsVk.pbrMatSets[i];
+    pbrMatWrite.dstBinding = 0;
+    pbrMatWrite.dstArrayElement = 0;
+    pbrMatWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    pbrMatWrite.descriptorCount = 1;
+    pbrMatWrite.pBufferInfo = &pbrMatBufferInfo;
+    pbrMatWrite.pImageInfo = nullptr;
+    pbrMatWrite.pTexelBufferView = nullptr;
+
+    std::vector<VkWriteDescriptorSet> writes{cameraWrite, submeshWrite,
+                                             basicMatWrite, pbrMatWrite};
+
+    vkUpdateDescriptorSets(device->GetDevice(), writes.size(), writes.data(), 0,
+                           nullptr);
   };
 };
 

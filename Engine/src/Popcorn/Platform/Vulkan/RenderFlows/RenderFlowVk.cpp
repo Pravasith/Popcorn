@@ -9,9 +9,10 @@ GFX_NAMESPACE_BEGIN
 
 //
 // Game Object refs -------------------------------------------------------
-MaterialSubmeshesMap<MaterialTypes::BasicMat>
+PcMaterialSubmeshesMap<MaterialTypes::BasicMat>
     RenderFlowVk::s_basicSubmeshGroups{};
-MaterialSubmeshesMap<MaterialTypes::PbrMat> RenderFlowVk::s_pbrSubmeshGroups{};
+PcMaterialSubmeshesMap<MaterialTypes::PbrMat>
+    RenderFlowVk::s_pbrSubmeshGroups{};
 
 std::vector<Light *> RenderFlowVk::s_lights{};
 std::vector<Camera *> RenderFlowVk::s_cameras{};
@@ -24,12 +25,16 @@ RenderFlowVk::SamplersVk RenderFlowVk::s_samplersVk{};
 
 //
 // Material values --------------------------------------------------------
-MaterialMap<MaterialTypes::BasicMat> RenderFlowVk::s_basicMaterials;
-MaterialMap<MaterialTypes::PbrMat> RenderFlowVk::s_pbrMaterials;
+PcMaterialMap<MaterialTypes::BasicMat> RenderFlowVk::s_basicMaterials;
+PcMaterialMap<MaterialTypes::PbrMat> RenderFlowVk::s_pbrMaterials;
 
 //
 // ------------------------------------------------------------------------
 uint64_t RenderFlowVk::s_submeshCount = 0;
+
+PcRenderFlowImages<GBuffer> RenderFlowVk::s_gBufferImages{};
+PcRenderFlowImages<Lighting> RenderFlowVk::s_lightingImages{};
+PcRenderFlowImages<Composite> RenderFlowVk::s_compositeImages{};
 
 void RenderFlowVk::AllocMemory() {
   // basicMat1 : [sm1, sm2, sm3, ... ]

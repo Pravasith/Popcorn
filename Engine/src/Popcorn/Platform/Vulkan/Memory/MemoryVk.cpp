@@ -16,7 +16,7 @@ GFX_NAMESPACE_BEGIN
 
 template <MaterialTypes T>
 void MemoryVk::ExtractOffsetsMaterialsSubmeshes(
-    MaterialSubmeshesMap<T> &materialSubmeshesMap) {
+    PcMaterialSubmeshesMap<T> &materialSubmeshesMap) {
 
   auto *device = ContextVk::Device();
   VkPhysicalDeviceProperties properties{};
@@ -187,7 +187,7 @@ void MemoryVk::CalculateUboSsboBaseOffsets() {
 
 template <MaterialTypes T>
 void MemoryVk::FillBuffersMaterialsSubmeshes(
-    MaterialSubmeshesMap<T> &materialSubmeshesMap) {
+    PcMaterialSubmeshesMap<T> &materialSubmeshesMap) {
   for (auto &[matId, submeshes] : materialSubmeshesMap) {
     // fill materials too
 
@@ -431,14 +431,14 @@ void MemoryVk::CleanUpUboSsboLocalBuffers() {
 // Linker stuff
 template void
 MemoryVk::ExtractOffsetsMaterialsSubmeshes<MaterialTypes::BasicMat>(
-    MaterialSubmeshesMap<MaterialTypes::BasicMat> &);
+    PcMaterialSubmeshesMap<MaterialTypes::BasicMat> &);
 template void MemoryVk::ExtractOffsetsMaterialsSubmeshes<MaterialTypes::PbrMat>(
-    MaterialSubmeshesMap<MaterialTypes::PbrMat> &);
+    PcMaterialSubmeshesMap<MaterialTypes::PbrMat> &);
 
 template void MemoryVk::FillBuffersMaterialsSubmeshes<MaterialTypes::BasicMat>(
-    MaterialSubmeshesMap<MaterialTypes::BasicMat> &);
+    PcMaterialSubmeshesMap<MaterialTypes::BasicMat> &);
 template void MemoryVk::FillBuffersMaterialsSubmeshes<MaterialTypes::PbrMat>(
-    MaterialSubmeshesMap<MaterialTypes::PbrMat> &);
+    PcMaterialSubmeshesMap<MaterialTypes::PbrMat> &);
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
