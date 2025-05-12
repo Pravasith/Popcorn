@@ -150,8 +150,8 @@ DescriptorLayoutsVk::GetLayout<DescriptorSets::LightingSet>() {
 
 template <>
 VkDescriptorSetLayout &
-DescriptorLayoutsVk::GetLayout<DescriptorSets::CompositeSet>() {
-  if (!m_layouts[DescriptorSets::CompositeSet]) {
+DescriptorLayoutsVk::GetLayout<DescriptorSets::PresentSet>() {
+  if (!m_layouts[DescriptorSets::PresentSet]) {
     VkDescriptorSetLayoutBinding lightsBuffer;
     lightsBuffer.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     lightsBuffer.binding = 0;
@@ -161,15 +161,14 @@ DescriptorLayoutsVk::GetLayout<DescriptorSets::CompositeSet>() {
 
     std::vector<VkDescriptorSetLayoutBinding> compositeBindings{lightsBuffer};
 
-    m_layouts[DescriptorSets::CompositeSet] =
-        GetCachedLayout(compositeBindings);
+    m_layouts[DescriptorSets::PresentSet] = GetCachedLayout(compositeBindings);
 
-    if (m_layouts[DescriptorSets::CompositeSet] == VK_NULL_HANDLE) {
+    if (m_layouts[DescriptorSets::PresentSet] == VK_NULL_HANDLE) {
       throw std::runtime_error("Composite layout couldn't be created");
     };
   };
 
-  return m_layouts[DescriptorSets::CompositeSet];
+  return m_layouts[DescriptorSets::PresentSet];
 };
 
 size_t DescriptorLayoutsVk::HashLayoutBindings(

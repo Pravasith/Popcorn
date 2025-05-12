@@ -132,8 +132,7 @@ void LightingRenderFlowVk::CreateRenderPass() {
 void LightingRenderFlowVk::CreateFramebuffer() {
   const auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
 
-  std::vector<VkImageView> attachments{
-      m_attachments.lightImage.GetVkImageView()};
+  std::vector<VkImageView> attachments{m_imagesVk.lightImage.GetVkImageView()};
 
   VkFramebufferCreateInfo createInfo{};
   FramebuffersVk::GetDefaultFramebufferState(createInfo);
