@@ -4,11 +4,14 @@
 #include "ContextVk.h"
 #include "Empty.h"
 #include "GlobalMacros.h"
+#include "Material.h"
 #include "MaterialTypes.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
 #include "Uniforms.h"
 #include <cstdint>
+#include <cstring>
+#include <glm/fwd.hpp>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -190,7 +193,37 @@ void MemoryVk::FillVbosIbosUbosSubmeshMaterial(
     PcMaterialSubmeshesMap<T> &materialSubmeshesMap,
     PcMaterialMap<T> &materialMap) {
   for (auto &[matId, submeshes] : materialSubmeshesMap) {
-    // TODO: fill materials
+    //
+    // TODO: 1. Optimise the extra copy:
+    // Instead of doing materialData -> Uniform -> VulkanBuffer copy, do
+    // materialData -> VulkanBuffer memcpy
+    //
+    // TODO: 2. Optimise the extra buffer:
+    // Instead of having 2 buffers (one per maxFIF), have one buffer with all
+    // the submeshes material data - only for submesh materials
+    //
+
+    if constexpr (T == MaterialTypes::BasicMat) {
+      UniformDefs::BasicMaterialUniform basicMatUniform{};
+      Material<MaterialTypes::BasicMat> *material = materialMap[matId];
+      const BasicMaterialData &matData = material->GetMaterialData();
+      basicMatUniform.baseColorFactor = matData.baseColorFactor;
+    } else if constexpr (T == MaterialTypes::PbrMat) {
+      UniformDefs::PbrMaterialUniform pbrMatUniform{};
+      Material<MaterialTypes::PbrMat> *material = materialMap[matId];
+      const PbrMaterialData &matData = material->GetMaterialData();
+      pbrMatUniform.baseColorFactor = matData.baseColorFactor;
+      pbrMatUniform.metallicFactor = matData.metallicFactor;
+
+      pbrMatUniform.roughnessFactor = matData.roughnessFactor;
+      pbrMatUniform.alphaCutoff = matData.alphaCutoff;
+      pbrMatUniform.hasBaseColorTexture = matData.hasBaseColorTexture;
+
+      pbrMatUniform.hasNormalTexture = matData.hasNormalTexture;
+      pbrMatUniform.hasMetallicRoughnessTexture =
+          matData.hasMetallicRoughnessTexture;
+    } else {
+    };
 
     for (int i = 0; i < submeshes.size(); ++i) {
       Submesh<T> *submesh = submeshes[i];
@@ -220,7 +253,14 @@ void MemoryVk::FillUbosSubmesh(
   for (auto &[matId, submeshes] : materialSubmeshesMap) {
     for (int i = 0; i < submeshes.size(); ++i) {
       Submesh<T> *submesh = submeshes[i];
-      // TODO: Fill submeshes world matrices
+      // TODO: Extract world matrices from meshes instead of submeshes
+      uint64_t uniformSize = UniformDefs::CameraUniform::size;
+      glm::mat4 &worldMatrix = submesh->GetParentMesh()->GetWorldMatrix();
+      byte_t *worldMatrixUboMapping =
+          (byte_t *)m_uboMappingSet[1] + m_bufferViews.submeshUbo.offset +
+          m_bufferOffsets.submeshesOffsets[matId][i]; // all offsets are aligned
+                                                      // to minUniformBufferSize
+      memcpy(worldMatrixUboMapping, &worldMatrix, uniformSize);
     }
   };
 };

@@ -5,7 +5,6 @@
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
 #include "Shader.h"
-#include "Uniforms.h"
 #include <unordered_map>
 #include <vector>
 

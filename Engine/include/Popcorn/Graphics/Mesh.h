@@ -6,7 +6,6 @@
 #include "Material.h"
 #include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
-#include "Uniforms.h"
 #include <cstdint>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
@@ -136,9 +135,9 @@ public:
     return GameObjectTypes::Mesh;
   };
 
-  [[nodiscard]] inline UniformDefs::SubmeshUniform &GetMeshUniforms() {
-    return m_uniform;
-  };
+  // [[nodiscard]] inline UniformDefs::SubmeshUniform &GetMeshUniforms() {
+  //   return m_uniform;
+  // };
 
   template <MaterialTypes T>
   void AddSubmesh(VertexBuffer *vbo, IndexBuffer<uint32_t> *ibo,

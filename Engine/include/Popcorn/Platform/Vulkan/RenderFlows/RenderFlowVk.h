@@ -129,13 +129,14 @@ public:
   static void RegisterMaterialAndSubmesh(Submesh<T> *submesh) {
     if constexpr (T == MaterialTypes::BasicMat) {
       uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
-      if (PC_ValidateAndAddSubmesh(submesh, s_basicSubmeshGroups[materialId])) {
+      if (PC_ValidateAndAddSubmesh(submesh,
+                                   s_basicMatSubmeshesMap[materialId])) {
         s_basicMaterials[materialId] = submesh->GetMaterial();
         ++s_submeshCount;
       };
     } else if constexpr (T == MaterialTypes::PbrMat) {
       uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
-      if (PC_ValidateAndAddSubmesh(submesh, s_pbrSubmeshGroups[materialId])) {
+      if (PC_ValidateAndAddSubmesh(submesh, s_pbrMatSubmeshesMap[materialId])) {
         s_pbrMaterials[materialId] = submesh->GetMaterial();
         ++s_submeshCount;
       };
@@ -147,13 +148,13 @@ public:
     if constexpr (T == MaterialTypes::BasicMat) {
       uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
       if (PC_ValidateAndRemoveSubmesh(submesh,
-                                      s_basicSubmeshGroups[materialId])) {
+                                      s_basicMatSubmeshesMap[materialId])) {
         --s_submeshCount;
       };
     } else if constexpr (T == MaterialTypes::PbrMat) {
       uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
       if (PC_ValidateAndRemoveSubmesh(submesh,
-                                      s_pbrSubmeshGroups[materialId])) {
+                                      s_pbrMatSubmeshesMap[materialId])) {
         --s_submeshCount;
       };
     }
@@ -167,8 +168,8 @@ public:
 protected:
   //
   // Game object refs -------------------------------------------------------
-  static PcMaterialSubmeshesMap<MaterialTypes::BasicMat> s_basicSubmeshGroups;
-  static PcMaterialSubmeshesMap<MaterialTypes::PbrMat> s_pbrSubmeshGroups;
+  static PcMaterialSubmeshesMap<MaterialTypes::BasicMat> s_basicMatSubmeshesMap;
+  static PcMaterialSubmeshesMap<MaterialTypes::PbrMat> s_pbrMatSubmeshesMap;
 
   static std::vector<Light *> s_lights;
   static std::vector<Camera *> s_cameras;
