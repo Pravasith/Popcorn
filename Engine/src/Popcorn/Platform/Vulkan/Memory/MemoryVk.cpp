@@ -9,6 +9,7 @@
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
 #include "Uniforms.h"
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <glm/fwd.hpp>
@@ -29,9 +30,6 @@ void MemoryVk::ExtractOffsetsMaterialsSubmeshes(
   // temps
   VkDeviceSize vboOffset = 0, iboOffset = 0, worldMatrixOffset = 0;
   VkDeviceSize basicMatOffset = 0, pbrMatOffset = 0;
-  //
-  // VkDeviceSize vboStride = 0, iboStride = 0, worldMatrixStride = 0;
-  // VkDeviceSize basicMatStride = 0, pbrMatStride = 0;
 
   for (auto &[matId, submeshes] : materialSubmeshesMap) {
     //
@@ -208,6 +206,13 @@ void MemoryVk::FillVbosIbosUbosSubmeshMaterial(
       Material<MaterialTypes::BasicMat> *material = materialMap[matId];
       const BasicMaterialData &matData = material->GetMaterialData();
       basicMatUniform.baseColorFactor = matData.baseColorFactor;
+
+      byte_t *basicMatUboMapping =
+          (byte_t *)m_uboMappingSet[1] + m_bufferViews.basicMatUbo.offset +
+          m_bufferOffsets.materialOffsets[matId]; // all offsets are aligned
+      uint64_t uniformSize = UniformDefs::BasicMaterialUniform::size;
+      memcpy(basicMatUboMapping, &basicMatUniform, uniformSize);
+
     } else if constexpr (T == MaterialTypes::PbrMat) {
       UniformDefs::PbrMaterialUniform pbrMatUniform{};
       Material<MaterialTypes::PbrMat> *material = materialMap[matId];

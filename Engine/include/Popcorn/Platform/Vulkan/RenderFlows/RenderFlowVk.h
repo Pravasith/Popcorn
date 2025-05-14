@@ -4,12 +4,12 @@
 #include "Empty.h"
 #include "GameObject.h"
 #include "GlobalMacros.h"
-#include "ImageVk.h"
 #include "Light.h"
 #include "Material.h"
 #include "MaterialTypes.h"
 #include "Mesh.h"
 #include "Popcorn/Core/Base.h"
+#include "RenderFlowDefs.h"
 #include "SamplerVk.h"
 #include <cstdint>
 #include <cstring>
@@ -18,27 +18,6 @@
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
-
-enum RenderFlows { GBuffer = 1, Lighting, Composite };
-
-template <RenderFlows T> struct PcRenderFlowImages {
-  virtual ~PcRenderFlowImages() = default;
-  static constexpr RenderFlows type_value = T;
-};
-
-template <> struct PcRenderFlowImages<RenderFlows::GBuffer> {
-  ImageVk albedoImage{};
-  ImageVk depthImage{};
-  ImageVk normalImage{};
-};
-
-template <> struct PcRenderFlowImages<RenderFlows::Lighting> {
-  ImageVk lightImage{};
-};
-
-template <> struct PcRenderFlowImages<RenderFlows::Composite> {
-  ImageVk presentImage{};
-};
 
 // TODO: Refactor
 //       - Vulkan specific for now.

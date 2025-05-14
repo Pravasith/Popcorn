@@ -10,9 +10,9 @@ GFX_NAMESPACE_BEGIN
 //
 // Game Object refs -------------------------------------------------------
 PcMaterialSubmeshesMap<MaterialTypes::BasicMat>
-    RenderFlowVk::s_basicSubmeshGroups{};
+    RenderFlowVk::s_basicMatSubmeshesMap{};
 PcMaterialSubmeshesMap<MaterialTypes::PbrMat>
-    RenderFlowVk::s_pbrSubmeshGroups{};
+    RenderFlowVk::s_pbrMatSubmeshesMap{};
 
 std::vector<Light *> RenderFlowVk::s_lights{};
 std::vector<Camera *> RenderFlowVk::s_cameras{};
@@ -48,8 +48,8 @@ void RenderFlowVk::AllocMemory() {
   // Extract -
   // 1. All vbos, ibos, ubos individual offsets (BufferOffsets)
   // 2. Ubo & ssbo bufferView sizes (not aligned)
-  memory->ExtractOffsetsMaterialsSubmeshes(s_basicSubmeshGroups);
-  memory->ExtractOffsetsMaterialsSubmeshes(s_pbrSubmeshGroups);
+  memory->ExtractOffsetsMaterialsSubmeshes(s_basicMatSubmeshesMap);
+  memory->ExtractOffsetsMaterialsSubmeshes(s_pbrMatSubmeshesMap);
   memory->ExtractOffsetsLightsCamerasEmptys(s_lights, s_cameras, s_emptys);
 
   // Aligns vbo & ibo (BufferViews) for optimal copy (staging -> local)
@@ -66,9 +66,9 @@ void RenderFlowVk::AllocMemory() {
   memory->AllocUboSsboLocalBuffers(); // clean up in RenderFlowVk::FreeMemory()
 
   // Fill submesh vbos, ibos and ubos, material ubos
-  memory->FillVbosIbosUbosSubmeshMaterial(s_basicSubmeshGroups,
+  memory->FillVbosIbosUbosSubmeshMaterial(s_basicMatSubmeshesMap,
                                           s_basicMaterials);
-  memory->FillVbosIbosUbosSubmeshMaterial(s_pbrSubmeshGroups, s_pbrMaterials);
+  memory->FillVbosIbosUbosSubmeshMaterial(s_pbrMatSubmeshesMap, s_pbrMaterials);
 
   // memory->FillUbos
 

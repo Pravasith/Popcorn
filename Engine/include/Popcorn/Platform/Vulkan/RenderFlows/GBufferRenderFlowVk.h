@@ -4,6 +4,7 @@
 #include "CommonVk.h"
 #include "GBufferPipelineVk.h"
 #include "GlobalMacros.h"
+#include "RenderFlows/RenderFlowDefs.h"
 #include "RenderFlows/RenderFlowVk.h"
 #include "RenderPassVk.h"
 #include <array>
@@ -57,6 +58,8 @@ private:
   VkFramebuffer m_framebuffer;
 
   GBufferPipelineVk *m_gBufferPipeline;
+
+  PcRfUniforms<RenderFlows::GBuffer> m_gBufferUniforms;
 };
 
 GFX_NAMESPACE_END

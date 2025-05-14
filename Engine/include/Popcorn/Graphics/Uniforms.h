@@ -8,8 +8,8 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 UNIFORM_DEFS_NAMESPACE_BEGIN
 
-enum UniformLayouts {
-  Submesh = 1, // TODO: per-MESH matrix instead of per-submesh
+enum class Uniforms {
+  Submesh, // TODO: per-MESH matrix instead of per-submesh
   BasicMat,
   PbrMat,
   Light,
@@ -18,14 +18,14 @@ enum UniformLayouts {
   // add more..
 };
 
-template <UniformLayouts L, size_t S> struct Uniform {
-  static constexpr UniformLayouts layout = L;
+template <Uniforms L, size_t S> struct Uniform {
+  static constexpr Uniforms layout = L;
   // Internally aligned size
   static constexpr size_t size = S;
 };
 
 struct alignas(16) CameraUniform
-    : public Uniform<UniformLayouts::Camera,
+    : public Uniform<Uniforms::Camera,
                      192> {    // aligned to 192B (of 256B)
                                //
   glm::mat4 worldMatrix{1.0f}; // 64B
@@ -36,13 +36,13 @@ struct alignas(16) CameraUniform
 };
 
 struct alignas(16) SubmeshUniform
-    : public Uniform<UniformLayouts::Submesh, 64> { // aligned to 64B (of 256)
-                                                    //
-  glm::mat4 worldMatrix{1.0f};                      // 64B
-                                                    // 192B free
+    : public Uniform<Uniforms::Submesh, 64> { // aligned to 64B (of 256)
+                                              //
+  glm::mat4 worldMatrix{1.0f};                // 64B
+                                              // 192B free
 };
 
-struct BasicMaterialUniform : public Uniform<UniformLayouts::BasicMat,
+struct BasicMaterialUniform : public Uniform<Uniforms::BasicMat,
                                              16> { // aligned to 16B (of 256)
                                                    //
   glm::vec4 baseColorFactor{1.0f};                 // 16B
@@ -50,7 +50,7 @@ struct BasicMaterialUniform : public Uniform<UniformLayouts::BasicMat,
 };
 
 struct alignas(16) PbrMaterialUniform
-    : public Uniform<UniformLayouts::PbrMat,
+    : public Uniform<Uniforms::PbrMat,
                      16 + 16 + 16> {   // aligned to 48B (of 256)
                                        //
   glm::vec4 baseColorFactor{1.0f};     // 16B
@@ -70,7 +70,7 @@ struct alignas(16) PbrMaterialUniform
 
 // Note: this is an SSBO in vulkan
 struct alignas(16) LightUniform
-    : public Uniform<UniformLayouts::Light,
+    : public Uniform<Uniforms::Light,
                      80> {  // aligned to 80B (of 256B)
                             //
   glm::vec3 position{0.0f}; // 12B (in shader it's 16B)
@@ -82,7 +82,7 @@ struct alignas(16) LightUniform
 };
 
 struct alignas(16) EmptyUniform
-    : public Uniform<UniformLayouts::Empty,
+    : public Uniform<Uniforms::Empty,
                      80> {     // aligned to 80B (of 256B)
                                //
   glm::vec3 position{0.0f};    // 12B
