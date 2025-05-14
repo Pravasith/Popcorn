@@ -1,11 +1,14 @@
 #pragma once
 
 #include "Camera.h"
+#include "Empty.h"
 #include "GlobalMacros.h"
 #include "ImageVk.h"
+#include "Light.h"
 #include "MaterialTypes.h"
 #include "Memory/MemoryDefsVk.h"
 #include "Uniforms.h"
+#include <glm/fwd.hpp>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -38,7 +41,7 @@ template <Uniforms U> struct PcCopyUniformToMemory;
 
 template <> struct PcCopyUniformToMemory<Uniforms::BasicMat> {
 public:
-  PcCopyUniformToMemory(BasicMaterialData &data, PcBufferViews &bfrViews,
+  PcCopyUniformToMemory(const BasicMaterialData &data, PcBufferViews &bfrViews,
                         PcBufferOffsets &bfrOffsets)
       : bufferViews(bfrViews), bufferOffsets(bfrOffsets) {
     uniform.baseColorFactor = data.baseColorFactor;
@@ -85,26 +88,35 @@ private:
   PbrMaterialUniform uniform;
 };
 
-// template <> struct PcCopyUniformToMemory<Uniforms::Light> {
-// public:
-//   PcCopyUniformToMemory(Light *light, PcBufferViews &bfrViews,
-//                         PcBufferOffsets &bfrOffsets)
-//       : bufferViews(bfrViews), bufferOffsets(bfrOffsets) {
-//     uniform.position = light->GetPosition();
-//     uniform.worldMatrix = light->GetWorldMatrix();
-//   }
-//
-//   void operator()(void *ssboMapping, size_t index) {
-//     byte_t *dst = (byte_t *)ssboMapping + bufferViews.lightsSsbo.offset +
-//                   bufferOffsets.lightsWorldMatrixOffsets[index];
-//     memcpy(dst, &uniform, UniformDefs::LightUniform::size);
-//   }
-//
-// private:
-//   PcBufferViews &bufferViews;
-//   PcBufferOffsets &bufferOffsets;
-//   LightUniform uniform;
-// };
+template <> struct PcCopyUniformToMemory<Uniforms::Light> {
+public:
+  PcCopyUniformToMemory(Light &light, PcBufferViews &bfrViews,
+                        PcBufferOffsets &bfrOffsets)
+      : bufferViews(bfrViews), bufferOffsets(bfrOffsets) {
+    const LightData &lightData = light.GetLightData();
+    uniform.position = light.GetPosition();
+    uniform.direction = light.GetWorldDirection();
+    uniform.color = lightData.color;
+    uniform.lightType = static_cast<float>(lightData.type);
+    uniform.intensity = lightData.intensity;
+    uniform.innerConeAngle = lightData.innerConeAngle;
+    uniform.outerConeAngle = lightData.outerConeAngle;
+  }
+
+  void operator()(void *ssboMapping, size_t index) {
+    byte_t *lightSsboMapping =
+        (byte_t *)ssboMapping + bufferViews.lightsSsbo.offset +
+        bufferOffsets.lightsWorldMatrixOffsets[index]; // aligned offset
+
+    constexpr uint64_t uniformSize = UniformDefs::LightUniform::size;
+    std::memcpy(lightSsboMapping, &uniform, uniformSize);
+  }
+
+private:
+  PcBufferViews &bufferViews;
+  PcBufferOffsets &bufferOffsets;
+  LightUniform uniform;
+};
 
 template <> struct PcCopyUniformToMemory<Uniforms::Camera> {
 public:
@@ -126,6 +138,50 @@ private:
   PcBufferViews &bufferViews;
   PcBufferOffsets &bufferOffsets;
   CameraUniform uniform;
+};
+
+template <> struct PcCopyUniformToMemory<Uniforms::Submesh> {
+public:
+  PcCopyUniformToMemory(glm::mat4 &worldMatrix, PcBufferViews &bfrViews,
+                        PcBufferOffsets &bfrOffsets)
+      : bufferViews(bfrViews), bufferOffsets(bfrOffsets) {
+    uniform.worldMatrix = worldMatrix;
+  }
+
+  void operator()(void *uboMapping, MaterialHashType matId,
+                  size_t submeshIndex) {
+    const auto &offsetTriple =
+        bufferOffsets.submeshesOffsets[matId][submeshIndex];
+    byte_t *dst = (byte_t *)uboMapping + bufferViews.submeshUbo.offset +
+                  offsetTriple.worldMatrixOffset;
+    memcpy(dst, &uniform, UniformDefs::SubmeshUniform::size);
+  }
+
+private:
+  PcBufferViews &bufferViews;
+  PcBufferOffsets &bufferOffsets;
+  SubmeshUniform uniform;
+};
+
+template <> struct PcCopyUniformToMemory<Uniforms::Empty> {
+public:
+  PcCopyUniformToMemory(Empty *empty, PcBufferViews &bfrViews,
+                        PcBufferOffsets &bfrOffsets)
+      : bufferViews(bfrViews), bufferOffsets(bfrOffsets) {
+    uniform.position = empty->GetPosition();
+    uniform.worldMatrix = empty->GetWorldMatrix();
+  }
+
+  void operator()(void *uboMapping, size_t index) {
+    byte_t *dst = (byte_t *)uboMapping + bufferViews.emptysUbo.offset +
+                  bufferOffsets.emptysWorldMatrixOffsets[index];
+    memcpy(dst, &uniform, UniformDefs::EmptyUniform::size);
+  }
+
+private:
+  PcBufferViews &bufferViews;
+  PcBufferOffsets &bufferOffsets;
+  EmptyUniform uniform;
 };
 
 GFX_NAMESPACE_END

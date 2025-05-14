@@ -197,7 +197,7 @@ void RendererVk::AssignSceneObjectsToRenderFlows() {
 };
 
 void RendererVk::ProcessGameObjectNode(GameObject *node) { // Recursive
-  switch (node->GetType()) {
+  switch (node->GetGameObjectType()) {
   case Popcorn::Gfx::GameObjectTypes::Mesh: //
   {
     auto *mesh = static_cast<Mesh *>(node);

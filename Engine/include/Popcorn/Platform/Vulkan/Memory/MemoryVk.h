@@ -1,11 +1,8 @@
 #pragma once
 
-#include "Camera.h"
 #include "CommonVk.h"
 #include "DeviceVk.h"
-#include "Empty.h"
 #include "GlobalMacros.h"
-#include "Light.h"
 #include "MaterialTypes.h"
 #include "Memory/MemoryDefsVk.h"
 #include "Popcorn/Core/Base.h"
@@ -20,6 +17,10 @@
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
+
+class Light;
+class Camera;
+class Empty;
 
 class MemoryVk {
 public:

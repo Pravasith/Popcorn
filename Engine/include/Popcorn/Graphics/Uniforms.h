@@ -3,6 +3,7 @@
 #include "GlobalMacros.h"
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/fwd.hpp>
+#include <glm/trigonometric.hpp>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -70,15 +71,20 @@ struct alignas(16) PbrMaterialUniform
 
 // Note: this is an SSBO in vulkan
 struct alignas(16) LightUniform
-    : public Uniform<Uniforms::Light,
-                     80> {  // aligned to 80B (of 256B)
-                            //
-  glm::vec3 position{0.0f}; // 12B (in shader it's 16B)
-  // float pad0; // 4B (Optional bc padding is applied implicitly anyway)
-  //             // if you add this, don't forget to add in shader too
-  glm::mat4 worldMatrix{1.0f}; // 64B
-                               //
-                               // 176B free
+    : public Uniform<Uniforms::Light, 64> {   // aligned to 64B
+  glm::vec3 position{0.0f};                   // 12B
+  float pad0;                                 // 4B (optional padding)
+                                              //
+  glm::vec3 direction{0.0f};                  // 12B
+  float pad1;                                 // 4B (optional padding)
+                                              //
+  glm::vec3 color{1.0f, 0.95f, 0.9f};         // 12B
+  float pad2;                                 // 4B (optional padding)
+                                              //
+  float lightType = 1.0f;                     // 4B
+  float intensity = 50.0f;                    // 4B
+  float innerConeAngle = glm::radians(15.0f); // 4B
+  float outerConeAngle = glm::radians(30.0f); // 4B
 };
 
 struct alignas(16) EmptyUniform

@@ -12,13 +12,13 @@ public:
   Empty() { PC_PRINT("CREATED", TagType::Constr, "Empty"); }
   ~Empty() { PC_PRINT("DESTROYED", TagType::Destr, "Empty"); }
 
-  virtual constexpr GameObjectTypes GetType() const {
+  virtual constexpr GameObjectTypes GetGameObjectType() const override {
     return GameObjectTypes::Empty;
   };
 
   virtual void OnAttach() {};
-  virtual void OnUpdate() {};
-  virtual void OnRender() {};
+  // virtual void OnUpdate() {};
+  // virtual void OnRender() {};
 };
 
 GFX_NAMESPACE_END

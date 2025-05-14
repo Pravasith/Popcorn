@@ -131,7 +131,7 @@ public:
   Mesh() { PC_PRINT("CREATED", TagType::Constr, "MESH"); };
   virtual ~Mesh() { PC_PRINT("DESTROYED", TagType::Destr, "MESH"); };
 
-  virtual constexpr GameObjectTypes GetType() const override {
+  virtual constexpr GameObjectTypes GetGameObjectType() const override {
     return GameObjectTypes::Mesh;
   };
 

@@ -96,7 +96,7 @@ public:
     return *this;
   }
 
-  virtual constexpr GameObjectTypes GetType() const = 0;
+  virtual constexpr GameObjectTypes GetGameObjectType() const = 0;
 
   virtual void OnUpdate() {};
   virtual void OnRender() {};
@@ -114,6 +114,7 @@ public:
   // Translation
   void Translate(float signedDistance, Axes axis);
   void SetPosition(glm::vec3 pos);
+  [[nodiscard]] const glm::vec3 &GetPosition() const { return m_position; };
 
   // Rotation
   void SetEulerOrder(EulerOrder order) { m_eulerOrder = order; };
