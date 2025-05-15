@@ -8,10 +8,10 @@
 #include "Light.h"
 #include "Material.h"
 #include "MaterialTypes.h"
+#include "Memory/HelpersVk.h"
 #include "Memory/MemoryDefsVk.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
-#include "RenderFlows/RenderFlowDefs.h"
 #include "Uniforms.h"
 #include <cstddef>
 #include <cstdint>
@@ -203,14 +203,15 @@ void MemoryVk::FillVbosIbosUbosSubmeshMaterial(
 
     if constexpr (T == MaterialTypes::BasicMat) {
       Material<MaterialTypes::BasicMat> *material = materialMap[matId];
-      PcCopyUniformToMemory<Uniforms::BasicMat> copyUniformToMemory{
-          material->GetMaterialData(), m_bufferViews, m_bufferOffsets};
+      PcCopyUniformToMemory<UniformDefs::Uniforms::BasicMat>
+          copyUniformToMemory{material->GetMaterialData(), m_bufferViews,
+                              m_bufferOffsets};
       for (uint16_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
         copyUniformToMemory(m_uboMappingSet[i], matId);
       }
     } else if constexpr (T == MaterialTypes::PbrMat) {
       Material<MaterialTypes::PbrMat> *material = materialMap[matId];
-      PcCopyUniformToMemory<Uniforms::PbrMat> copyUniformToMemory{
+      PcCopyUniformToMemory<UniformDefs::Uniforms::PbrMat> copyUniformToMemory{
           material->GetMaterialData(), m_bufferViews, m_bufferOffsets};
       for (uint16_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
         copyUniformToMemory(m_uboMappingSet[i], matId);
@@ -242,21 +243,47 @@ void MemoryVk::FillVbosIbosUbosSubmeshMaterial(
 };
 
 template <MaterialTypes T>
-void MemoryVk::FillUbosSubmesh(
-    PcMaterialSubmeshesMap<T> &materialSubmeshesMap) {
+void MemoryVk::FillUbosSubmesh(PcMaterialSubmeshesMap<T> &materialSubmeshesMap,
+                               const uint32_t currentFrame) {
   for (auto &[matId, submeshes] : materialSubmeshesMap) {
-    for (int i = 0; i < submeshes.size(); ++i) {
+    for (size_t i = 0; i < submeshes.size(); ++i) {
       Submesh<T> *submesh = submeshes[i];
       glm::mat4 &worldMatrix = submesh->GetParentMesh()->GetWorldMatrix();
-      // TODO: Fill this shit out
+
+      PcCopyUniformToMemory<Uniforms::Submesh> copyUniformToMemory{
+          worldMatrix, m_bufferViews, m_bufferOffsets};
+      copyUniformToMemory(m_uboMappingSet[currentFrame], matId, i);
     }
   };
 };
 
 void MemoryVk::FillUbosSsbosLightCameraEmpty(std::vector<Light *> &lights,
                                              std::vector<Camera *> &cameras,
-                                             std::vector<Empty *> &emptys) {
-  // TODO: Fill all here too
+                                             std::vector<Empty *> &emptys,
+                                             const uint32_t currentFrame) {
+  size_t i = 0;
+  for (Light *light : lights) {
+    PcCopyUniformToMemory<Uniforms::Light> copyUniformToMemory{
+        light, m_bufferViews, m_bufferOffsets};
+    copyUniformToMemory(m_ssboMappingSet[currentFrame], i);
+    ++i;
+  }
+
+  i = 0;
+  for (Camera *camera : cameras) {
+    PcCopyUniformToMemory<Uniforms::Camera> copyUniformToMemory{
+        camera, m_bufferViews, m_bufferOffsets};
+    copyUniformToMemory(m_uboMappingSet[currentFrame], i);
+    ++i;
+  }
+
+  i = 0;
+  for (Empty *empty : emptys) {
+    PcCopyUniformToMemory<Uniforms::Empty> copyUniformToMemory{
+        empty, m_bufferViews, m_bufferOffsets};
+    copyUniformToMemory(m_uboMappingSet[currentFrame], i);
+    ++i;
+  }
 };
 
 void MemoryVk::AllocSubmeshVboIboStaging() {

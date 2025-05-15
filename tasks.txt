@@ -15,6 +15,8 @@ HIGH PRIORITY:
 
 LOW PRIORITY:
 ----------------------------------------------------------------------------
+:: Refactor Core classes (application, window) etc. to have a central access
+   point like ContextVk or PcContext
 
 :: Make all singletons stack allocated with static local variables
    BE CAREFUL ABOUT THIS ONE ^^

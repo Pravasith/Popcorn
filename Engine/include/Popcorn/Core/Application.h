@@ -65,4 +65,5 @@ private:
   static Renderer *s_renderer;
   static DebugUIOverlay *s_debugUIOverlay;
 };
+
 ENGINE_NAMESPACE_END

@@ -36,7 +36,7 @@ void RendererVk::DrawFrame(const Scene &scene) {
       // Update scene data lambda
       [&](const uint32_t currentFrame) {
         // TODO: Write a loop for render workflows instead
-        basicRenderFlow->ProcessSceneUpdates(currentFrame);
+        RenderFlowVk::CopyDynamicUniformsToMemory();
       },
 
       // Record draw commands lambda

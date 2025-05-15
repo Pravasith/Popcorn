@@ -1,8 +1,11 @@
 #pragma once
 
+#include "Camera.h"
 #include "CommonVk.h"
 #include "DeviceVk.h"
+#include "Empty.h"
 #include "GlobalMacros.h"
+#include "Light.h"
 #include "MaterialTypes.h"
 #include "Memory/MemoryDefsVk.h"
 #include "Popcorn/Core/Base.h"
@@ -17,10 +20,6 @@
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
-
-class Light;
-class Camera;
-class Empty;
 
 class MemoryVk {
 public:
@@ -57,10 +56,12 @@ public:
 
   // Dynamic buffer data, they all change per frame
   template <MaterialTypes T>
-  void FillUbosSubmesh(PcMaterialSubmeshesMap<T> &materialSubmeshesMap);
+  void FillUbosSubmesh(PcMaterialSubmeshesMap<T> &materialSubmeshesMap,
+                       const uint32_t currentFrame);
   void FillUbosSsbosLightCameraEmpty(std::vector<Light *> &lights,
                                      std::vector<Camera *> &cameras,
-                                     std::vector<Empty *> &emptys);
+                                     std::vector<Empty *> &emptys,
+                                     const uint32_t currentFrame);
 
   void FlushVboIboStagingToLocal();
   void CleanUpSubmeshVboIboBuffersStaging();

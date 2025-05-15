@@ -34,6 +34,8 @@ public:
   static void CreateSamplers();
   static void DestroySamplers();
 
+  static void CopyDynamicUniformsToMemory(const uint32_t currentFrame);
+
   void Prepare() {
     CreateAttachments();
     CreateRenderPass();

@@ -70,8 +70,6 @@ void RenderFlowVk::AllocMemory() {
                                           s_basicMaterials);
   memory->FillVbosIbosUbosSubmeshMaterial(s_pbrMatSubmeshesMap, s_pbrMaterials);
 
-  // memory->FillUbos
-
   PC_ASSERT(s_submeshCount, "Submesh count is zero.");
 
   // Copy the staging data to local buffers
@@ -79,6 +77,14 @@ void RenderFlowVk::AllocMemory() {
 
   // Unmap, deallocate & destroy staging buffers
   memory->CleanUpSubmeshVboIboBuffersStaging();
+};
+
+void RenderFlowVk::CopyDynamicUniformsToMemory(const uint32_t currentFrame) {
+  auto *memory = ContextVk::Memory();
+  memory->FillUbosSubmesh(s_basicMatSubmeshesMap, currentFrame);
+  memory->FillUbosSubmesh(s_pbrMatSubmeshesMap, currentFrame);
+  memory->FillUbosSsbosLightCameraEmpty(s_lights, s_cameras, s_emptys,
+                                        currentFrame);
 };
 
 void RenderFlowVk::CreateSamplers() {

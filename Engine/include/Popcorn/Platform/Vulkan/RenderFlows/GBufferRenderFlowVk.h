@@ -58,8 +58,6 @@ private:
   VkFramebuffer m_framebuffer;
 
   GBufferPipelineVk *m_gBufferPipeline;
-
-  PcRfUniforms<RenderFlows::GBuffer> m_gBufferUniforms;
 };
 
 GFX_NAMESPACE_END
