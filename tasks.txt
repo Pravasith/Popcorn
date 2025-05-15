@@ -10,7 +10,8 @@ HIGH PRIORITY:
 ----------------------------------------------------------------------------
 :: Pipeline creation
 
-:: Redesign Draw call - Refactor - 1 day max.
+:: Redesign Draw call - Refactor - 1 day max. - also handle framebuffer
+   resize
 
 :: Update camera(fov, aspect ratio, .etc) on FrameBufferResize
 
