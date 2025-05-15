@@ -3,14 +3,20 @@
 -- TASKS ---- TASKS ---- TASKS ---- TASKS ---- TASKS ---- TASKS ---- TASKS -
 ----------------------------------------------------------------------------
 
+:: Use in video -  https://x.com/gunsnrosesgirl3/status/1907830742106755259
 
 
 HIGH PRIORITY:
 ----------------------------------------------------------------------------
+:: Pipeline creation
 
+:: Redesign Draw call - Refactor - 1 day max.
+
+:: Update camera(fov, aspect ratio, .etc) on FrameBufferResize
+
+:: Write camera class properly.
 
 :: Optimise space by allocating one model matrix per mesh, not per submesh
-:: Use in video -  https://x.com/gunsnrosesgirl3/status/1907830742106755259
 
 
 LOW PRIORITY:

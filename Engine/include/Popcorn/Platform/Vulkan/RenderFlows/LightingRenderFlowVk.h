@@ -30,8 +30,12 @@ private:
   virtual void DestroyRenderPass() override;
   virtual void DestroyAttachments() override;
 
-  virtual void CreatePipelines() override;
   virtual void CreateAndAllocDescriptors() override;
+  virtual void CreatePipelines() override;
+  virtual void DestroyPipelines() override;
+
+  virtual void Paint(const uint32_t frameIndex, const uint32_t currentFrame,
+                     VkCommandBuffer &currentFrameCommandBuffer) override;
 
 private:
   struct AttachmentsVk {

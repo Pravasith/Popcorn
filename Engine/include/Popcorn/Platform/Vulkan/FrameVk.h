@@ -10,7 +10,6 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-// Singleton
 class FrameVk {
 public:
   [[nodiscard]] static inline FrameVk *Get() {

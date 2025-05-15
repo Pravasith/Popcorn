@@ -376,6 +376,7 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
 // --- CREATE PIPELINES --------------------------------------------------------
 //
 void GBufferRenderFlowVk::CreatePipelines() {
+
   // - Vertexbuffer layout
   // - Enabled shader stage bits
   // - Material-type specific shader codes (for custom shaders, user needs to

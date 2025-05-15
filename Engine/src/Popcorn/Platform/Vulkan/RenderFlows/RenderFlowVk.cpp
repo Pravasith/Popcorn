@@ -1,4 +1,5 @@
 #include "RenderFlows/RenderFlowVk.h"
+#include "MaterialTypes.h"
 #include "Popcorn/Core/Assert.h"
 #include "SamplerVk.h"
 #include <cstdint>
@@ -101,8 +102,46 @@ void RenderFlowVk::FreeMemory() {
   ContextVk::Memory()->CleanUpVboIboLocalBuffers();
 };
 
-void RenderFlowVk::ProcessSceneUpdates(const uint32_t currentFrame) {
-  // TODO: Copy from OLD
-}
+template void RenderFlowVk::RegisterMaterialAndSubmesh(
+    Submesh<MaterialTypes::BasicMat> *submesh);
+template void RenderFlowVk::RegisterMaterialAndSubmesh(
+    Submesh<MaterialTypes::PbrMat> *submesh);
+template <MaterialTypes T>
+void RenderFlowVk::RegisterMaterialAndSubmesh(Submesh<T> *submesh) {
+  if constexpr (T == MaterialTypes::BasicMat) {
+    uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
+    if (PC_ValidateAndAddSubmesh(submesh, s_basicMatSubmeshesMap[materialId])) {
+      s_basicMaterials[materialId] = submesh->GetMaterial();
+      ++s_submeshCount;
+    };
+  } else if constexpr (T == MaterialTypes::PbrMat) {
+    uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
+    if (PC_ValidateAndAddSubmesh(submesh, s_pbrMatSubmeshesMap[materialId])) {
+      s_pbrMaterials[materialId] = submesh->GetMaterial();
+      ++s_submeshCount;
+    };
+  }
+};
+
+template void RenderFlowVk::UnregisterMaterialAndSubmesh(
+    Submesh<MaterialTypes::BasicMat> *submesh);
+template void RenderFlowVk::UnregisterMaterialAndSubmesh(
+    Submesh<MaterialTypes::PbrMat> *submesh);
+template <MaterialTypes T>
+void RenderFlowVk::UnregisterMaterialAndSubmesh(Submesh<T> *submesh) {
+  if constexpr (T == MaterialTypes::BasicMat) {
+    uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
+    if (PC_ValidateAndRemoveSubmesh(submesh,
+                                    s_basicMatSubmeshesMap[materialId])) {
+      --s_submeshCount;
+    };
+  } else if constexpr (T == MaterialTypes::PbrMat) {
+    uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
+    if (PC_ValidateAndRemoveSubmesh(submesh,
+                                    s_pbrMatSubmeshesMap[materialId])) {
+      --s_submeshCount;
+    };
+  }
+};
 
 GFX_NAMESPACE_END ENGINE_NAMESPACE_END

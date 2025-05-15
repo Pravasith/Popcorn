@@ -127,9 +127,9 @@ void GBufferRenderFlowVk::CreateFramebuffers() {
       ContextVk::Device()->GetDevice(), m_basicRenderPassVk.GetVkRenderPass());
 };
 
-void GBufferRenderFlowVk::RecordRenderCommands(const uint32_t imageIndex,
-                                               const uint32_t currentFrame,
-                                               VkCommandBuffer &commandBuffer) {
+void GBufferRenderFlowVk::Paint(const uint32_t imageIndex,
+                                const uint32_t currentFrame,
+                                VkCommandBuffer &commandBuffer) {
   auto *swapchainVkStn = ContextVk::Swapchain();
 
   //

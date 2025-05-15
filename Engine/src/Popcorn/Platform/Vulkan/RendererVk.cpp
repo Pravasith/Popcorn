@@ -23,8 +23,12 @@ std::vector<RenderFlowVk *> RendererVk::s_renderFlows{};
 // --- PUBLIC METHODS ------------------------------------------------------
 
 void RendererVk::DrawFrame(const Scene &scene) {
-  BasicRenderFlowVk *basicRenderFlow = reinterpret_cast<BasicRenderFlowVk *>(
-      s_renderFlows[(int)RenderFlows::Basic]);
+  const GBufferRenderFlowVk *gBufferRenderFlow =
+      reinterpret_cast<const GBufferRenderFlowVk *>(s_renderFlows[0]);
+  const LightingRenderFlowVk *lightingRenderFlow =
+      reinterpret_cast<const LightingRenderFlowVk *>(s_renderFlows[1]);
+  const CompositeRenderFlowVk *compositeRenderFlow =
+      reinterpret_cast<const CompositeRenderFlowVk *>(s_renderFlows[2]);
 
   ContextVk::Frame()->Draw(
       m_drawingCommandBuffers,
@@ -108,6 +112,10 @@ void RendererVk::CreateRenderFlows() {
 };
 
 void RendererVk::DestroyRenderFlows() {
+  for (auto &renderFlow : s_renderFlows) {
+    renderFlow->DestroyPipelines();
+  }
+
   RenderFlowVk::DestroySamplers();
   RenderFlowVk::FreeMemory();
 
@@ -129,8 +137,6 @@ void RendererVk::PrepareRenderFlows() {
   }
 };
 
-// Sort materials, allocate descriptor sets, vk buffers, index buffers &
-// create pipelines
 void RendererVk::CreateRenderFlowResources() {
   //
   // CREATE WORKFLOW RESOURCES -----------------------------------------------
@@ -139,49 +145,24 @@ void RendererVk::CreateRenderFlowResources() {
 
   //
   // Create VMA Allocator
-  ContextVk::MemoryAllocator()->CreateVMAAllocator();
+  ContextVk::MemoryAllocator()->CreateVMAAllocator(); // Automatically destroyed
 
   // Allocates vulkan buffers
   RenderFlowVk::AllocMemory();
   RenderFlowVk::CreateSamplers();
 
   for (auto &renderFlow : s_renderFlows) {
-    //
-    // -------
-    // - Camera UBO - viewProj -- per frame (lvl 0)
-    // -------
-    // - GameObj UBOs - worldMatrices (dynamic offsets) -- per submesh (lvl 2)
-    // -------
-    // - BasicMat UBOs - BaseColor vec3s (dynamic offsets) -- per mat (lvl 1)
-    // -------
-    // - PbrMat UBOs - A bunch of shit (dynamic offsets) -- per mat (lvl 1)
-    // -------
-    // - Lights UBOs - lightpos vec3s (dynamic offsets) -- per light
-    // - Albedo Image+Sampler - just one
-    // - Depth Image+Sampler - just one
-    // - Normals Image+Sampler - just one
-    // -------
-    // - LitScene Image+Sampler - just one
-    //
-    // for (auto &[matId, submeshes] : submeshGroups) {
-    // // Bind material ubo
-    //   for (Submesh<T> *submesh : submeshes) {
-    //   // Bind vbo, ibo
-    //   // Bind world matrix ubo
-    //   }
-    // };
-
     renderFlow->CreateAndAllocDescriptors(); // Static for now
-    // renderFlow->CreatePipelines();
+    renderFlow->CreatePipelines();
   }
 
   // TODOs:
   // x Create VMA buffers for UBOs
   // x Create Samplers for G-Buffer & LitScene-Buffer
-  // - Bind(write/update) buffers to descriptor sets(or descriptors?)
-  // - Copy scene updates(UBOs) via OnUpdate() to mapped bits
+  // x Bind(write/update) buffers to descriptor sets(or descriptors?)
+  // x Copy scene updates(UBOs) via OnUpdate() to mapped bits
 
-  // - Repeat the process for other renderflows
+  // x Repeat the process for other renderflows
   // - Write lighting shaders
   // - Finish create pipelines
   // - Write render callback for renderflows

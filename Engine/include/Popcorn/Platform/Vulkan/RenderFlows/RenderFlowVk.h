@@ -5,7 +5,6 @@
 #include "GameObject.h"
 #include "GlobalMacros.h"
 #include "Light.h"
-#include "Material.h"
 #include "MaterialTypes.h"
 #include "Mesh.h"
 #include "Popcorn/Core/Base.h"
@@ -36,6 +35,24 @@ public:
 
   static void CopyDynamicUniformsToMemory(const uint32_t currentFrame);
 
+public:
+  virtual void CreateAndAllocDescriptors() = 0; // Automatically destroyed
+  virtual void CreatePipelines() = 0;
+  virtual void DestroyPipelines() = 0;
+
+  virtual void Paint(const uint32_t frameIndex, const uint32_t currentFrame,
+                     VkCommandBuffer &currentFrameCommandBuffer);
+
+private:
+  virtual void CreateAttachments() = 0;
+  virtual void CreateRenderPass() = 0;
+  virtual void CreateFramebuffer() = 0;
+
+  virtual void DestroyFramebuffer() = 0;
+  virtual void DestroyRenderPass() = 0;
+  virtual void DestroyAttachments() = 0;
+
+public:
   void Prepare() {
     CreateAttachments();
     CreateRenderPass();
@@ -48,44 +65,7 @@ public:
     DestroyAttachments();
   };
 
-private:
-  virtual void CreateAttachments() = 0;
-  virtual void CreateRenderPass() = 0;
-  virtual void CreateFramebuffer() = 0;
-
-  virtual void DestroyFramebuffer() = 0;
-  virtual void DestroyRenderPass() = 0;
-  virtual void DestroyAttachments() = 0;
-
 public:
-  virtual void CreateAndAllocDescriptors() = 0;
-  virtual void DestroyDescriptors() = 0;
-
-  virtual void CreatePipelines() = 0;
-  static void ProcessSceneUpdates(const uint32_t currentFrame); // Only once
-  static void
-  RecordRenderCommands(const uint32_t frameIndex, const uint32_t currentFrame,
-                       VkCommandBuffer &currentFrameCommandBuffer); // Only once
-
-  //
-  //
-  //
-  //
-  //
-  //
-
-  //
-  // OLD ----------------------------------------------------------------
-  // virtual void AllocateVkVertexBuffers() {};
-  // virtual void AllocateVkIndexBuffers() {};
-  // virtual void AllocateVkUniformBuffers() {};
-  // virtual void CreateCommandBuffer() {};
-  // virtual void CreateDescriptorSetLayouts() {};
-  // virtual void CreateDescriptorPool() {};
-  // virtual void CreateDescriptorSets() {};
-  // --------------------------------------------------------------------
-  //
-
   static void AddCamera(Camera *camera) {
     PC_ValidateAndAddGameObject(camera, s_cameras);
   };
@@ -107,39 +87,9 @@ public:
   };
 
   template <MaterialTypes T>
-  static void RegisterMaterialAndSubmesh(Submesh<T> *submesh) {
-    if constexpr (T == MaterialTypes::BasicMat) {
-      uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
-      if (PC_ValidateAndAddSubmesh(submesh,
-                                   s_basicMatSubmeshesMap[materialId])) {
-        s_basicMaterials[materialId] = submesh->GetMaterial();
-        ++s_submeshCount;
-      };
-    } else if constexpr (T == MaterialTypes::PbrMat) {
-      uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
-      if (PC_ValidateAndAddSubmesh(submesh, s_pbrMatSubmeshesMap[materialId])) {
-        s_pbrMaterials[materialId] = submesh->GetMaterial();
-        ++s_submeshCount;
-      };
-    }
-  };
-
+  static void RegisterMaterialAndSubmesh(Submesh<T> *submesh);
   template <MaterialTypes T>
-  static void UnregisterMaterialAndSubmesh(Submesh<T> *submesh) {
-    if constexpr (T == MaterialTypes::BasicMat) {
-      uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
-      if (PC_ValidateAndRemoveSubmesh(submesh,
-                                      s_basicMatSubmeshesMap[materialId])) {
-        --s_submeshCount;
-      };
-    } else if constexpr (T == MaterialTypes::PbrMat) {
-      uint32_t materialId = PC_HashMaterialGroups(submesh->GetMaterial());
-      if (PC_ValidateAndRemoveSubmesh(submesh,
-                                      s_pbrMatSubmeshesMap[materialId])) {
-        --s_submeshCount;
-      };
-    }
-  };
+  static void UnregisterMaterialAndSubmesh(Submesh<T> *submesh);
 
 public:
   struct SamplersVk {
