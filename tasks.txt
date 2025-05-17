@@ -69,27 +69,25 @@ x. Create samplers for gbuffer & lighting buffer - DONE
    x basically bind memory (buffers, images & samplers) to descriptor sets
      and get them ready for the scene updates process function
 
-3. Create mappings for all needed ubos & ssbos - 20 mins
-   a. basicMatUboMapping
-   b. pbrMatUboMapping
-   c. submeshUboMapping
-   d. camerasUboMapping
-   e. emptysUboMapping
-   f. LightsSsboMapping
-
-5. Process scene updates - Copy buffer values --
-   a. Submesh world matrices - UBO - submesh->GetWorldMatrix()
-   b. Basic material values - UBO - materialsMap[matId]
-   c. Pbr material values - UBO - materialsMap[matId]
-   d. Camera matrix & other values - UBO - camera->GetWorldMatrix(),
+x. Process scene updates - Copy buffer values --
+   x. Submesh world matrices - UBO - submesh->GetWorldMatrix()
+   x. Basic material values - UBO - materialsMap[matId]
+   x. Pbr material values - UBO - materialsMap[matId]
+   x. Camera matrix & other values - UBO - camera->GetWorldMatrix(),
       camera->GetViewProjMatrix() ..etc
-   e. Empty values - UBO - empty->GetEmptyValues()
-   f. Lights values - SSBO - light->GetLightValues()
+   x. Empty values - UBO - empty->GetEmptyValues()
+   x. Lights values - SSBO - light->GetLightValues()
 
-6. Bind descriptors & pipelines but...
+--------------------------------------------------------------------------
+
+6. Material shaders - constexpr and static for material types
+
+8. Create shader modules
+
 7. Write shaders -
    a. GBuffer shaders - vert & frag
    b. Light shaders - vert & frag
    c. Composite shaders - vert & frag
+
 6. Make pipelines ready for each renderflows
 7. Finally, the draw call

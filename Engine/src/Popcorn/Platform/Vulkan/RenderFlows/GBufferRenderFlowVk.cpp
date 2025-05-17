@@ -376,6 +376,8 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
 // --- CREATE PIPELINES --------------------------------------------------------
 //
 void GBufferRenderFlowVk::CreatePipelines() {
+  // Create PipelineLayout
+  // Create shaders modules & link them
 
   // - Vertexbuffer layout
   // - Enabled shader stage bits

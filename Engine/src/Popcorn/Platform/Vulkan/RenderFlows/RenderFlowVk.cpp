@@ -37,6 +37,13 @@ PcRenderFlowImages<GBuffer> RenderFlowVk::s_gBufferImages{};
 PcRenderFlowImages<Lighting> RenderFlowVk::s_lightingImages{};
 PcRenderFlowImages<Composite> RenderFlowVk::s_compositeImages{};
 
+ShaderLibrary *RenderFlowVk::s_shaderLibrary = nullptr;
+
+//
+// --- METHODS -----------------------------------------------------------
+void RenderFlowVk::LoadShaders() { s_shaderLibrary->LoadShaders(); };
+void RenderFlowVk::UnloadShaders() { s_shaderLibrary->UnloadShaders(); };
+
 void RenderFlowVk::AllocMemory() {
   // basicMat1 : [sm1, sm2, sm3, ... ]
   // basicMat2 : [sm1, sm2 ... ]

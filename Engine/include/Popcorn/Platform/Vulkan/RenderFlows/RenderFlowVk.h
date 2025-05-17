@@ -10,6 +10,7 @@
 #include "Popcorn/Core/Base.h"
 #include "RenderFlowDefs.h"
 #include "SamplerVk.h"
+#include "Shader.h"
 #include <cstdint>
 #include <cstring>
 #include <vector>
@@ -32,8 +33,9 @@ public:
   static void FreeMemory();
   static void CreateSamplers();
   static void DestroySamplers();
-
   static void CopyDynamicUniformsToMemory(const uint32_t currentFrame);
+  static void LoadShaders();
+  static void UnloadShaders();
 
 public:
   virtual void CreateAndAllocDescriptors() = 0; // Automatically destroyed
@@ -123,6 +125,8 @@ protected:
   //
   // ------------------------------------------------------------------------
   static uint64_t s_submeshCount;
+
+  static ShaderLibrary *s_shaderLibrary;
 };
 
 GFX_NAMESPACE_END

@@ -20,13 +20,12 @@ public:
 
   static constexpr MaterialTypes type_value = T;
 
-  [[nodiscard]] static const std::unordered_map<ShaderStages, Buffer &> &
-  GetShaderMap() {
-    return s_shaderByteCodeMap;
+  [[nodiscard]] static const Buffer &GetShader(ShaderStages stage) {
+    return *s_shaderByteCodeMap[stage];
   };
 
   void SetShader(ShaderStages stage, Buffer &spirVShaderCode) {
-    s_shaderByteCodeMap[stage] = spirVShaderCode;
+    s_shaderByteCodeMap[stage] = &spirVShaderCode;
   };
 
   [[nodiscard]] const DeriveMaterialDataType<T>::type &GetMaterialData() const {
@@ -40,7 +39,7 @@ public:
 
 protected:
   // Every Material "Type" has it's own shaders (vert, frag, ...)
-  static std::unordered_map<ShaderStages, Buffer &> s_shaderByteCodeMap;
+  static std::unordered_map<ShaderStages, Buffer *> s_shaderByteCodeMap;
   DeriveMaterialDataType<T>::type m_data;
 };
 

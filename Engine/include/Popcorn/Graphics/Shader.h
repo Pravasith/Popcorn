@@ -23,7 +23,7 @@ enum ShaderStages {
   ComputeBit = shift_l(4)
   //
   // Ray tracing types
-  // TODO: Fill it out when time comes
+  // TODO: Fill it out when time arrives
 };
 
 class Shader {
@@ -77,18 +77,18 @@ public:
     };
   };
 
+public:
   void LoadShaders();
+  void UnloadShaders();
 
   template <ShaderFiles T> Buffer &GetInbuiltShader() {
-    auto it = m_shaders.find(T);
-    if (it != m_shaders.end()) {
+    auto it = s_shaders.find(T);
+    if (it != s_shaders.end()) {
       return it->second; // "Value" in hash map (std::pair)
     } else {
       throw std::runtime_error("Shader not found!");
     }
   }
-
-  // TODO:  
 
 private:
   ShaderLibrary() { PC_PRINT("CREATED", TagType::Constr, "ShaderLibrary.h") };
@@ -104,7 +104,7 @@ private:
 
 private:
   static ShaderLibrary *s_instance;
-  std::unordered_map<ShaderFiles, Buffer> m_shaders;
+  static std::unordered_map<ShaderFiles, Buffer> s_shaders;
 };
 
 GFX_NAMESPACE_END

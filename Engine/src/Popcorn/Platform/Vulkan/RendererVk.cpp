@@ -9,6 +9,7 @@
 #include "RenderFlows/GBufferRenderFlowVk.h"
 #include "RenderFlows/LightingRenderFlowVk.h"
 #include "RenderFlows/RenderFlowVk.h"
+#include "Shader.h"
 #include <cstring>
 #include <vulkan/vulkan_core.h>
 
@@ -112,6 +113,8 @@ void RendererVk::CreateRenderFlows() {
 };
 
 void RendererVk::DestroyRenderFlows() {
+  ShaderLibrary::Destroy();
+
   for (auto &renderFlow : s_renderFlows) {
     renderFlow->DestroyPipelines();
   }
@@ -147,14 +150,22 @@ void RendererVk::CreateRenderFlowResources() {
   // Create VMA Allocator
   ContextVk::MemoryAllocator()->CreateVMAAllocator(); // Automatically destroyed
 
-  // Allocates vulkan buffers
+  //
+  // Allocate memory, samplers & load shaders in the shader library
   RenderFlowVk::AllocMemory();
   RenderFlowVk::CreateSamplers();
+  RenderFlowVk::LoadShaders();
 
+  //
+  // Renderflow specific descriptors & pipelines
   for (auto &renderFlow : s_renderFlows) {
     renderFlow->CreateAndAllocDescriptors(); // Static for now
     renderFlow->CreatePipelines();
   }
+
+  //
+  // Unload shaders in the shader library
+  RenderFlowVk::UnloadShaders();
 
   // TODOs:
   // x Create VMA buffers for UBOs

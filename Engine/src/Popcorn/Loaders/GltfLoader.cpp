@@ -5,7 +5,6 @@
 #include "Camera.h"
 #include "Empty.h"
 #include "GameObject.h"
-#include "GfxContext.h"
 #include "GlobalMacros.h"
 #include "Helpers.h"
 #include "Light.h"
@@ -204,12 +203,12 @@ void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
             new Material<MaterialTypes::PbrMat>();
         mat->SetData(
             ExtractMaterialData<MaterialTypes::PbrMat>(model, gltfMaterial));
-        mat->SetShader(ShaderStages::VertexBit,
-                       GfxContext::Shaders()
-                           ->GetInbuiltShader<ShaderFiles::PbrMat_Vert>());
-        mat->SetShader(ShaderStages::FragmentBit,
-                       GfxContext::Shaders()
-                           ->GetInbuiltShader<ShaderFiles::PbrMat_Frag>());
+        // mat->SetShader(ShaderStages::VertexBit,
+        //                GfxContext::Shaders()
+        //                    ->GetInbuiltShader<ShaderFiles::PbrMat_Vert>());
+        // mat->SetShader(ShaderStages::FragmentBit,
+        //                GfxContext::Shaders()
+        //                    ->GetInbuiltShader<ShaderFiles::PbrMat_Frag>());
         mesh.AddSubmesh(vbo, ibo, mat);
         break;
       }
@@ -218,12 +217,12 @@ void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
             new Material<MaterialTypes::BasicMat>();
         mat->SetData(
             ExtractMaterialData<MaterialTypes::BasicMat>(model, gltfMaterial));
-        mat->SetShader(ShaderStages::VertexBit,
-                       GfxContext::Shaders()
-                           ->GetInbuiltShader<ShaderFiles::BasicMat_Vert>());
-        mat->SetShader(ShaderStages::FragmentBit,
-                       GfxContext::Shaders()
-                           ->GetInbuiltShader<ShaderFiles::BasicMat_Frag>());
+        // mat->SetShader(ShaderStages::VertexBit,
+        //                GfxContext::Shaders()
+        //                    ->GetInbuiltShader<ShaderFiles::BasicMat_Vert>());
+        // mat->SetShader(ShaderStages::FragmentBit,
+        //                GfxContext::Shaders()
+        //                    ->GetInbuiltShader<ShaderFiles::BasicMat_Frag>());
         mesh.AddSubmesh(vbo, ibo, mat);
         break;
       }

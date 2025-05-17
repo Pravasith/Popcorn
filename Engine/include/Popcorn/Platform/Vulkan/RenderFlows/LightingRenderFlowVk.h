@@ -2,7 +2,6 @@
 
 #include "AttachmentVk.h"
 #include "GlobalMacros.h"
-#include "ImageVk.h"
 #include "LightingPipelineVk.h"
 #include "RenderFlows/RenderFlowVk.h"
 #include "RenderPassVk.h"
