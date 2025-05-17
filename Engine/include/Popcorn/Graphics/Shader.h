@@ -81,7 +81,7 @@ public:
   void LoadShaders();
   void UnloadShaders();
 
-  template <ShaderFiles T> Buffer &GetInbuiltShader() {
+  template <ShaderFiles T> Buffer &GetShader() {
     auto it = s_shaders.find(T);
     if (it != s_shaders.end()) {
       return it->second; // "Value" in hash map (std::pair)
@@ -103,6 +103,7 @@ private:
   ShaderLibrary &operator=(ShaderLibrary &&) = delete;
 
 private:
+  bool m_shadersLoaded = false;
   static ShaderLibrary *s_instance;
   static std::unordered_map<ShaderFiles, Buffer> s_shaders;
 };

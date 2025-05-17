@@ -154,7 +154,7 @@ void RendererVk::CreateRenderFlowResources() {
   // Allocate memory, samplers & load shaders in the shader library
   RenderFlowVk::AllocMemory();
   RenderFlowVk::CreateSamplers();
-  RenderFlowVk::LoadShaders();
+  RenderFlowVk::AllocShaders();
 
   //
   // Renderflow specific descriptors & pipelines
@@ -165,7 +165,7 @@ void RendererVk::CreateRenderFlowResources() {
 
   //
   // Unload shaders in the shader library
-  RenderFlowVk::UnloadShaders();
+  RenderFlowVk::FreeShaders();
 
   // TODOs:
   // x Create VMA buffers for UBOs

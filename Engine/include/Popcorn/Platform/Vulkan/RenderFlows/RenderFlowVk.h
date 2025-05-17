@@ -31,11 +31,14 @@ public:
 
   static void AllocMemory();
   static void FreeMemory();
+
   static void CreateSamplers();
   static void DestroySamplers();
+
   static void CopyDynamicUniformsToMemory(const uint32_t currentFrame);
-  static void LoadShaders();
-  static void UnloadShaders();
+
+  static void AllocShaders();
+  static void FreeShaders();
 
 public:
   virtual void CreateAndAllocDescriptors() = 0; // Automatically destroyed

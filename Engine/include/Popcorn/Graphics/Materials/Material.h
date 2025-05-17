@@ -20,12 +20,12 @@ public:
 
   static constexpr MaterialTypes type_value = T;
 
-  [[nodiscard]] static const Buffer &GetShader(ShaderStages stage) {
-    return *s_shaderByteCodeMap[stage];
+  template <ShaderStages S> static void SetShader(Buffer *spirVShaderCode) {
+    s_shaderByteCodeMap[S] = spirVShaderCode;
   };
 
-  void SetShader(ShaderStages stage, Buffer &spirVShaderCode) {
-    s_shaderByteCodeMap[stage] = &spirVShaderCode;
+  [[nodiscard]] static const Buffer &GetShader(ShaderStages stage) {
+    return *s_shaderByteCodeMap[stage];
   };
 
   [[nodiscard]] const DeriveMaterialDataType<T>::type &GetMaterialData() const {

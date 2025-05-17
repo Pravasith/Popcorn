@@ -5,7 +5,9 @@
 #include "Popcorn/Core/Buffer.h"
 #include "Popcorn/Core/Helpers.h"
 #include "Shader.h"
+#include "Sources.h"
 #include <forward_list>
+#include <type_traits>
 #include <vector>
 #include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
@@ -14,10 +16,10 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-enum class PipelineTypes { GraphicsType = 1, ComputeType, RaytracingType };
+enum PipelineTypes { GraphicsType = 1, ComputeType, RaytracingType };
 
 struct GfxPipelineState {
-  constexpr static PipelineTypes type_value = PipelineTypes::GraphicsType;
+  static constexpr PipelineTypes type_value = PipelineTypes::GraphicsType;
 
   VkExtent2D swapchainExtent{};
   VkPipelineDynamicStateCreateInfo dynamicState{};
@@ -32,7 +34,7 @@ struct GfxPipelineState {
 };
 
 struct ComputePipelineState {
-  constexpr static PipelineTypes type_value = PipelineTypes::ComputeType;
+  static constexpr PipelineTypes type_value = PipelineTypes::ComputeType;
 
   VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
   VkPipelineCache pipelineCache = VK_NULL_HANDLE;
@@ -42,7 +44,7 @@ struct ComputePipelineState {
 };
 
 struct RaytracingPipelineState {
-  constexpr static PipelineTypes type_value = PipelineTypes::RaytracingType;
+  static constexpr PipelineTypes type_value = PipelineTypes::RaytracingType;
 
   std::vector<VkRayTracingShaderGroupCreateInfoKHR> shaderGroups{};
   VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;

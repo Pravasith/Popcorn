@@ -2,6 +2,8 @@
 #include "MaterialTypes.h"
 #include "Popcorn/Core/Assert.h"
 #include "SamplerVk.h"
+#include "Shader.h"
+#include "Sources.h"
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
 
@@ -41,8 +43,34 @@ ShaderLibrary *RenderFlowVk::s_shaderLibrary = nullptr;
 
 //
 // --- METHODS -----------------------------------------------------------
-void RenderFlowVk::LoadShaders() { s_shaderLibrary->LoadShaders(); };
-void RenderFlowVk::UnloadShaders() { s_shaderLibrary->UnloadShaders(); };
+void RenderFlowVk::AllocShaders() {
+  //
+  // Load all shaders ----------------------------------------------------
+  s_shaderLibrary->LoadShaders();
+
+  //
+  // Basic mat shaders ---------------------------------------------------
+  Buffer *basicMatShaderVert =
+      &s_shaderLibrary->GetShader<ShaderFiles::BasicMat_Vert>();
+  Buffer *basicMatShaderFrag =
+      &s_shaderLibrary->GetShader<ShaderFiles::BasicMat_Frag>();
+  Material<MaterialTypes::BasicMat>::SetShader<ShaderStages::VertexBit>(
+      basicMatShaderVert);
+  Material<MaterialTypes::BasicMat>::SetShader<ShaderStages::FragmentBit>(
+      basicMatShaderFrag);
+
+  //
+  // Pbr mat shaders -----------------------------------------------------
+  Buffer *pbrMatShaderVert =
+      &s_shaderLibrary->GetShader<ShaderFiles::PbrMat_Vert>();
+  Buffer *pbrMatShaderFrag =
+      &s_shaderLibrary->GetShader<ShaderFiles::PbrMat_Frag>();
+  Material<MaterialTypes::PbrMat>::SetShader<ShaderStages::VertexBit>(
+      pbrMatShaderVert);
+  Material<MaterialTypes::PbrMat>::SetShader<ShaderStages::FragmentBit>(
+      pbrMatShaderFrag);
+};
+void RenderFlowVk::FreeShaders() { s_shaderLibrary->UnloadShaders(); };
 
 void RenderFlowVk::AllocMemory() {
   // basicMat1 : [sm1, sm2, sm3, ... ]
@@ -89,6 +117,7 @@ void RenderFlowVk::AllocMemory() {
 
 void RenderFlowVk::CopyDynamicUniformsToMemory(const uint32_t currentFrame) {
   auto *memory = ContextVk::Memory();
+
   memory->FillUbosSubmesh(s_basicMatSubmeshesMap, currentFrame);
   memory->FillUbosSubmesh(s_pbrMatSubmeshesMap, currentFrame);
   memory->FillUbosSsbosLightCameraEmpty(s_lights, s_cameras, s_emptys,
