@@ -14,16 +14,16 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 void VertexBufferVk::GetDefaultVertexInputBindingDescription(
-    VkVertexInputBindingDescription &bindingDescription,
-    const BufferDefs::Layout &layout) {
+    const BufferDefs::Layout &layout,
+    VkVertexInputBindingDescription &bindingDescription) {
   bindingDescription.binding = 0;
   bindingDescription.stride = layout.strideValue;
   bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 };
 
 void VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
-    std::vector<VkVertexInputAttributeDescription> &attrDescriptions,
-    const BufferDefs::Layout &layout) {
+    const BufferDefs::Layout &layout,
+    std::vector<VkVertexInputAttributeDescription> &attrDescriptions) {
   attrDescriptions.resize(layout.countValue);
 
   for (int i = 0; i < layout.countValue; ++i) {

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "GfxContext.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Window.h"
 #include "Popcorn/Events/WindowEvent.h"
@@ -75,7 +74,6 @@ protected:
 private:
   static RendererType s_type;
   static Renderer *s_instance;
-  static GfxContext *s_gfxContext;
 };
 
 template <RendererType T> Renderer *Renderer::Create(const Window &appWin) {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BufferObjects.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
@@ -106,7 +107,7 @@ public:
 
   void SetShaderStagesMask(int enabledShaderStagesMask);
 
-  virtual void Create() = 0;
+  virtual void Create(const BufferDefs::Layout &vertexBufferLayout) = 0;
   void Destroy(const VkDevice &);
 
 public:
@@ -117,7 +118,7 @@ public:
 
   using PipelineStateType = DerivePipelineCreateInfoType<T>::type;
 
-private:
+protected:
   inline void RecordBindCmdPipelineCommand(const VkCommandBuffer &cmdBfr) {
     PC_VK_NULL_CHECK(cmdBfr)
     PC_VK_NULL_CHECK(m_pipeline)

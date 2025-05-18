@@ -1,5 +1,4 @@
 #include "Renderer.h"
-#include "GfxContext.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
@@ -18,10 +17,7 @@ Renderer::Renderer(const Window &appWin) : m_AppWin(appWin) {
   PC_PRINT("CREATED", TagType::Constr, "RENDERER");
 };
 
-Renderer::~Renderer() {
-  GfxContext::Destroy();
-  PC_PRINT("DESTROYED", TagType::Destr, "RENDERER")
-};
+Renderer::~Renderer() { PC_PRINT("DESTROYED", TagType::Destr, "RENDERER") };
 
 void Renderer::Init(const Window &appWin) {
   if (s_instance) {
@@ -33,8 +29,6 @@ void Renderer::Init(const Window &appWin) {
     PC_WARN("Attempt to create renderer without setting it's type")
     return;
   };
-
-  s_gfxContext = GfxContext::Get();
 
   if (s_type == RendererType::Vulkan) {
     s_instance = new RendererVk(appWin); // Creates Vulkan context

@@ -98,19 +98,24 @@ void GBufferRenderFlowVk::CreateAttachments() {
   albedoAttachment.format = albedoFormat;
   albedoAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
   albedoAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+  albedoAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+  albedoAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
   VkAttachmentDescription depthAttachment{};
   AttachmentVk::GetDefaultAttachmentDescription(depthAttachment);
   depthAttachment.format = depthFormat;
-  depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
   depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
   depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+  depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+  depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
   VkAttachmentDescription normalAttachment{};
   AttachmentVk::GetDefaultAttachmentDescription(normalAttachment);
   normalAttachment.format = normalFormat;
   normalAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
   normalAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+  normalAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+  normalAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
   m_attachmentsVk.albedoAttachment.SetImageVk(&albedoImage);
   m_attachmentsVk.depthAttachment.SetImageVk(&depthImage);

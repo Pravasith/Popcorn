@@ -43,12 +43,12 @@ public:
   //
   // --- UTILS --------------------------------------------------------------
   static void GetDefaultVertexInputBindingDescription(
-      VkVertexInputBindingDescription &bindingDescription,
-      const BufferDefs::Layout &layout);
+      const BufferDefs::Layout &layout,
+      VkVertexInputBindingDescription &bindingDescription);
 
   static void GetDefaultVertexInputAttributeDescriptions(
-      std::vector<VkVertexInputAttributeDescription> &,
-      const BufferDefs::Layout &);
+      const BufferDefs::Layout &layout,
+      std::vector<VkVertexInputAttributeDescription> &attrDescriptions);
 
   //
   // COPY CONSTRUCTOR
