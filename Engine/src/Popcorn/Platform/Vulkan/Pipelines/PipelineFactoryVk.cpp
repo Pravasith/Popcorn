@@ -2,7 +2,6 @@
 #include "PipelineFactoryVk.h"
 #include "BufferObjectsVk.h"
 #include "ContextVk.h"
-#include "DescriptorFactoryVk.h"
 #include "DeviceVk.h"
 #include "SwapchainVk.h"
 #include <vulkan/vulkan_core.h>
@@ -11,13 +10,13 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 template <>
-void PipelineFactoryVk::CreatePipeline<Pipelines::Deferred>(
+void PipelineFactoryVk::CreatePipeline<Pipelines::GBuffer>(
     const BufferDefs::Layout &vertexBufferLayout,
     const RenderPassVk &basicRenderPass) {
-  //
-  // --- MAIN PIPELINE ---------------------------------------------------
+
   auto *deviceVkStn = DeviceVk::Get();
   auto *swapchainVkStn = SwapchainVk::Get();
+
   auto &device = deviceVkStn->GetDevice();
   const auto &swapchainExtent = swapchainVkStn->GetSwapchainExtent();
 

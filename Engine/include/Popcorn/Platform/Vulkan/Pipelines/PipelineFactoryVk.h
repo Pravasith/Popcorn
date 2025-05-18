@@ -1,8 +1,8 @@
 #pragma once
 
+#include "BasicMatPipelineVk.h"
 #include "BufferObjects.h"
 #include "CompositePipelineVk.h"
-#include "GBufferPipelineVk.h"
 #include "GlobalMacros.h"
 #include "LightingPipelineVk.h"
 #include "Popcorn/Core/Base.h"
@@ -12,15 +12,15 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 enum class Pipelines {
-  Deferred = 1, // G-Buffer
-  Lighting,     // Lighting
-  Composite     // Composition
+  GBuffer = 1, // G-Buffer
+  Lighting,    // Lighting
+  Composite    // Composition
 };
 
 template <Pipelines T> struct DeriveGfxPipelineType;
 
-template <> struct DeriveGfxPipelineType<Pipelines::Deferred> {
-  using type = GBufferPipelineVk;
+template <> struct DeriveGfxPipelineType<Pipelines::GBuffer> {
+  using type = BasicMatPipelineVk;
 };
 
 template <> struct DeriveGfxPipelineType<Pipelines::Lighting> {
@@ -67,7 +67,7 @@ public:
 
   template <Pipelines U>
   [[nodiscard]] constexpr DeriveGfxPipelineType<U>::type &GetGfxPipeline() {
-    if constexpr (U == Pipelines::Deferred) {
+    if constexpr (U == Pipelines::GBuffer) {
       return m_gBufferPipeline;
     } else if constexpr (U == Pipelines::Lighting) {
       return m_lightingPipeline;
@@ -91,7 +91,7 @@ private:
 private:
   static PipelineFactoryVk *s_instance;
 
-  GBufferPipelineVk m_gBufferPipeline;
+  BasicMatPipelineVk m_gBufferPipeline;
   LightingPipelineVk m_lightingPipeline;
   CompositePipelineVk m_compositePipeline;
 };

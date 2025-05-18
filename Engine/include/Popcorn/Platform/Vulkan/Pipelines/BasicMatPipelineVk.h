@@ -8,13 +8,13 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-class LightingPipelineVk : public PipelineVk<PipelineTypes::GraphicsType> {
+class BasicMatPipelineVk : public PipelineVk<PipelineTypes::GraphicsType> {
 public:
-  LightingPipelineVk() {
-    PC_PRINT("CREATED", TagType::Constr, "LightingPipelineVk");
+  BasicMatPipelineVk() {
+    PC_PRINT("CREATED", TagType::Constr, "GBufferPipelineVk");
   };
-  ~LightingPipelineVk() {
-    PC_PRINT("DESTROYED", TagType::Destr, "LightingPipelineVk");
+  ~BasicMatPipelineVk() {
+    PC_PRINT("DESTROYED", TagType::Destr, "GBufferPipelineVk");
   };
 
   virtual void Create() override;

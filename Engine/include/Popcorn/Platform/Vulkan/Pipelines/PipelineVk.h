@@ -5,9 +5,7 @@
 #include "Popcorn/Core/Buffer.h"
 #include "Popcorn/Core/Helpers.h"
 #include "Shader.h"
-#include "Sources.h"
 #include <forward_list>
-#include <type_traits>
 #include <vector>
 #include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
@@ -99,122 +97,55 @@ inline static void PC_DestroyShaderModule(const VkDevice &device,
 
 template <PipelineTypes T> class PipelineVk {
 public:
-  PipelineVk() {
-    type_value = T;
-    PC_PRINT("CREATED", TagType::Constr, "PipelineVk");
+  [[nodiscard]] inline const VkPipeline &GetVkPipeline() const {
+    return m_pipeline;
   };
+  [[nodiscard]] inline const VkPipelineLayout &GetVkPipelineLayout() const {
+    return m_pipelineLayout;
+  };
+
+  void SetShaderStagesMask(int enabledShaderStagesMask);
+
+  virtual void Create() = 0;
+  void Destroy(const VkDevice &);
+
+public:
+  PipelineVk() { PC_PRINT("CREATED", TagType::Constr, "PipelineVk"); };
   virtual ~PipelineVk() {
     PC_PRINT("DESTROYED", TagType::Destr, "PipelineVk");
   };
 
   using PipelineStateType = DerivePipelineCreateInfoType<T>::type;
 
-  [[nodiscard]] inline const VkPipeline GetVkPipeline() const {
-    return m_pipeline;
-  };
-
-  [[nodiscard]] inline const VkPipelineLayout GetVkPipelineLayout() const {
-    return m_pipelineLayout;
-  };
-
-  // Shaders
-  void SetShaderStagesMask(int enabledShaderStagesMask) {
-    // Error check
-    switch (type_value) {
-    // case PipelineTypes::None:
-    //   PC_ERROR("PipelineType not set yet!!", "PipelineVk")
-    //   break;
-    case PipelineTypes::GraphicsType:
-      if ((enabledShaderStagesMask &
-           (ShaderStages::VertexBit | ShaderStages::FragmentBit)) !=
-          (ShaderStages::VertexBit | ShaderStages::FragmentBit)) {
-        PC_ERROR(
-            "Either vertex shader or fragment shader or both are not enabled",
-            "PipelineVk")
-      };
-      break;
-    case PipelineTypes::ComputeType:
-      if (!(enabledShaderStagesMask & ShaderStages::ComputeBit))
-        PC_ERROR("Compute shader is not enabled", "PipelineVk")
-      break;
-    case PipelineTypes::RaytracingType:
-      // TODO: Fill it out
-      break;
-    }
-
-    m_enabledShaderStagesMask = enabledShaderStagesMask;
-  };
-
-  virtual void CreateShaderStageCreateInfos(
-      std::forward_list<VkShaderModule> &shaderModules) = 0;
-
-  //
-  // --- PIPELINES ------------------------------------------------------------
-  virtual void CreateVkPipeline(const VkDevice &device,
-                                const PipelineStateType &pipelineCreateInfo,
-                                const VkRenderPass &renderPass) = 0;
-  virtual void CleanUp(const VkDevice &) = 0;
-
-  //
-  // --- LAYOUTS --------------------------------------------------------------
-  virtual void CreatePipelineLayout(
-      const VkDevice &device,
-      const VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo) = 0;
-  virtual void DestroyPipelineLayout(const VkDevice &device) = 0;
-
+private:
   inline void RecordBindCmdPipelineCommand(const VkCommandBuffer &cmdBfr) {
     PC_VK_NULL_CHECK(cmdBfr)
     PC_VK_NULL_CHECK(m_pipeline)
 
-    // Bind pipeline
-    vkCmdBindPipeline(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
+    if constexpr (T == PipelineTypes::GraphicsType) {
+      vkCmdBindPipeline(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
+    } else if constexpr (T == PipelineTypes::ComputeType) {
+    } else if constexpr (T == PipelineTypes::RaytracingType) {
+    }
   };
 
-protected:
-  PipelineTypes type_value = PipelineTypes::GraphicsType;
+  void CreateVkPipeline(const VkDevice &device,
+                        const PipelineStateType &pipelineCreateInfo,
+                        const VkRenderPass &renderPass);
 
+  void CreateShaderStageCreateInfos(
+      std::forward_list<VkShaderModule> &shaderModules);
+
+  void CreatePipelineLayout(
+      const VkDevice &device,
+      const VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo);
+  void DestroyPipelineLayout(const VkDevice &device);
+
+protected:
   VkPipeline m_pipeline = VK_NULL_HANDLE;
   VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
   int m_enabledShaderStagesMask = ShaderStages::None;
   std::vector<VkPipelineShaderStageCreateInfo> m_shaderStageCreateInfos;
-};
-
-class PipelineUtils {
-public:
-  static void
-  GetDefaultDynamicState(VkPipelineDynamicStateCreateInfo &dynamicState);
-
-  static void GetDefaultVertexInputState(
-      VkPipelineVertexInputStateCreateInfo &vertexInputState);
-
-  static void GetDefaultInputAssemblyState(
-      VkPipelineInputAssemblyStateCreateInfo &inputAssemblyState);
-
-  static void
-  GetDefaultViewportState(VkPipelineViewportStateCreateInfo &viewportState);
-
-  static void GetDefaultRasterizationState(
-      VkPipelineRasterizationStateCreateInfo &rasterizationState);
-
-  static void GetDefaultMultisampleState(
-      VkPipelineMultisampleStateCreateInfo &multisampleState);
-
-  static void GetDefaultDepthStencilState(
-      VkPipelineDepthStencilStateCreateInfo &depthStencilState);
-
-  static void
-  GetDefaultViewportAndScissorState(VkViewport &viewport, VkRect2D &scissor,
-                                    const VkExtent2D &swapchainExtent);
-
-  static void GetDefaultColorBlendingState(
-      VkPipelineColorBlendStateCreateInfo &colorBlendState);
-
-  static void GetDefaultPipelineLayoutCreateInfo(
-      VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo);
-
-private:
-  static std::vector<VkDynamicState> s_dynamicStatesDefault;
-  static VkPipelineColorBlendAttachmentState s_colorBlendAttachmentDefault;
 };
 
 GFX_NAMESPACE_END

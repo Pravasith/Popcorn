@@ -2,7 +2,7 @@
 
 #include "AttachmentVk.h"
 #include "CommonVk.h"
-#include "GBufferPipelineVk.h"
+#include "BasicMatPipelineVk.h"
 #include "GlobalMacros.h"
 #include "RenderFlows/RenderFlowDefs.h"
 #include "RenderFlows/RenderFlowVk.h"
@@ -61,7 +61,7 @@ private:
   RenderPassVk m_renderPass;
   VkFramebuffer m_framebuffer;
 
-  GBufferPipelineVk *m_gBufferPipeline;
+  BasicMatPipelineVk *m_basicMatPipeline;
 };
 
 GFX_NAMESPACE_END
