@@ -1,10 +1,10 @@
 #pragma once
 
-#include "BasicMatPipelineVk.h"
 #include "BufferObjects.h"
-#include "CompositePipelineVk.h"
+#include "CompositePipelinesVk.h"
 #include "GlobalMacros.h"
-#include "LightingPipelineVk.h"
+#include "LightingPipelinesVk.h"
+#include "MaterialPipelinesVk.h"
 #include "Popcorn/Core/Base.h"
 #include "RenderPassVk.h"
 
@@ -68,7 +68,7 @@ public:
   template <Pipelines U>
   [[nodiscard]] constexpr DeriveGfxPipelineType<U>::type &GetGfxPipeline() {
     if constexpr (U == Pipelines::GBuffer) {
-      return m_gBufferPipeline;
+      return m_basicMatPipeline;
     } else if constexpr (U == Pipelines::Lighting) {
       return m_lightingPipeline;
     } else if constexpr (U == Pipelines::Composite) {
@@ -91,7 +91,8 @@ private:
 private:
   static PipelineFactoryVk *s_instance;
 
-  BasicMatPipelineVk m_gBufferPipeline;
+  BasicMatPipelineVk m_basicMatPipeline;
+  // PbrMatPipelineVk m_pbrMatPipeline;
   LightingPipelineVk m_lightingPipeline;
   CompositePipelineVk m_compositePipeline;
 };
