@@ -30,7 +30,8 @@ void GBufferRenderFlowVk::CreateAttachments() {
 
   const auto albedoFormat = VK_FORMAT_R8G8B8A8_UNORM;
   const auto depthFormat = VK_FORMAT_D32_SFLOAT;
-  const auto normalFormat = VK_FORMAT_A2B10G10R10_UNORM_PACK32;
+  const auto normalFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+  const auto roughnessMetallicFormat = VK_FORMAT_R8G8_UNORM;
 
   //
   //
@@ -53,17 +54,28 @@ void GBufferRenderFlowVk::CreateAttachments() {
   normalImageInfo.usage =
       VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
+  VkImageCreateInfo roughnessMetallicImageInfo;
+  ImageVk::GetDefaultImageCreateInfo(roughnessMetallicImageInfo, width, height);
+  roughnessMetallicImageInfo.format = roughnessMetallicFormat;
+  roughnessMetallicImageInfo.usage =
+      VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+
   VmaAllocationCreateInfo albedoAlloc{.usage = VMA_MEMORY_USAGE_AUTO};
   VmaAllocationCreateInfo depthAlloc{.usage = VMA_MEMORY_USAGE_AUTO};
   VmaAllocationCreateInfo normalAlloc{.usage = VMA_MEMORY_USAGE_AUTO};
+  VmaAllocationCreateInfo roughnessMetallicAlloc{.usage =
+                                                     VMA_MEMORY_USAGE_AUTO};
 
   ImageVk &albedoImage = m_imagesVk.albedoImage;
   ImageVk &depthImage = m_imagesVk.depthImage;
   ImageVk &normalImage = m_imagesVk.normalImage;
+  ImageVk &roughnessMetallicImage = m_imagesVk.roughnessMetallicImage;
 
   albedoImage.CreateVmaImage(albedoImageInfo, albedoAlloc);
   depthImage.CreateVmaImage(depthImageInfo, depthAlloc);
   normalImage.CreateVmaImage(normalImageInfo, normalAlloc);
+  roughnessMetallicImage.CreateVmaImage(roughnessMetallicImageInfo,
+                                        roughnessMetallicAlloc);
 
   //
   //
@@ -86,9 +98,17 @@ void GBufferRenderFlowVk::CreateAttachments() {
   normalViewInfo.format = normalFormat;
   normalViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 
+  VkImageViewCreateInfo roughnessMetallicViewInfo{};
+  ImageVk::GetDefaultImageViewCreateInfo(roughnessMetallicViewInfo,
+                                         roughnessMetallicImage.GetVkImage());
+  roughnessMetallicViewInfo.format = roughnessMetallicFormat;
+  roughnessMetallicViewInfo.subresourceRange.aspectMask =
+      VK_IMAGE_ASPECT_COLOR_BIT;
+
   albedoImage.CreateImageView(albedoViewInfo);
   depthImage.CreateImageView(depthViewInfo);
   normalImage.CreateImageView(normalViewInfo);
+  roughnessMetallicImage.CreateImageView(roughnessMetallicViewInfo);
 
   //
   //
@@ -117,13 +137,26 @@ void GBufferRenderFlowVk::CreateAttachments() {
   normalAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
   normalAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
+  VkAttachmentDescription roughnessMetallicAttachment{};
+  AttachmentVk::GetDefaultAttachmentDescription(roughnessMetallicAttachment);
+  roughnessMetallicAttachment.format = roughnessMetallicFormat;
+  roughnessMetallicAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  roughnessMetallicAttachment.finalLayout =
+      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+  roughnessMetallicAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+  roughnessMetallicAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
   m_attachmentsVk.albedoAttachment.SetImageVk(&albedoImage);
   m_attachmentsVk.depthAttachment.SetImageVk(&depthImage);
   m_attachmentsVk.normalAttachment.SetImageVk(&normalImage);
+  m_attachmentsVk.roughnessMetallicAttachment.SetImageVk(
+      &roughnessMetallicImage);
 
   m_attachmentsVk.albedoAttachment.SetAttachmentDescription(albedoAttachment);
   m_attachmentsVk.depthAttachment.SetAttachmentDescription(depthAttachment);
   m_attachmentsVk.normalAttachment.SetAttachmentDescription(normalAttachment);
+  m_attachmentsVk.roughnessMetallicAttachment.SetAttachmentDescription(
+      roughnessMetallicAttachment);
 };
 
 //
@@ -141,7 +174,8 @@ void GBufferRenderFlowVk::CreateRenderPass() {
   VkAttachmentDescription attachments[]{
       m_attachmentsVk.albedoAttachment.GetAttachmentDescription(),
       m_attachmentsVk.depthAttachment.GetAttachmentDescription(),
-      m_attachmentsVk.normalAttachment.GetAttachmentDescription()};
+      m_attachmentsVk.normalAttachment.GetAttachmentDescription(),
+      m_attachmentsVk.roughnessMetallicAttachment.GetAttachmentDescription()};
 
   //
   // --- Attachment references -------------------------------------------------
@@ -151,13 +185,18 @@ void GBufferRenderFlowVk::CreateRenderPass() {
 
   VkAttachmentReference depthRef{};
   AttachmentVk::GetAttachmentRef(depthRef, 1);
-  depthRef.layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+  depthRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
   VkAttachmentReference normalRef{};
   AttachmentVk::GetAttachmentRef(normalRef, 2);
   normalRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-  VkAttachmentReference colorAttachments[]{albedoRef, normalRef};
+  VkAttachmentReference roughnessMetallicRef{};
+  AttachmentVk::GetAttachmentRef(roughnessMetallicRef, 3);
+  roughnessMetallicRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+  VkAttachmentReference colorAttachments[]{albedoRef, normalRef,
+                                           roughnessMetallicRef};
 
   //
   // --- Create Subpasses ------------------------------------------------------
@@ -165,7 +204,7 @@ void GBufferRenderFlowVk::CreateRenderPass() {
   RenderPassVk::GetDefaultSubpassDescription(subpass);
   subpass.pColorAttachments = colorAttachments;
   subpass.pDepthStencilAttachment = &depthRef;
-  subpass.colorAttachmentCount = 2;
+  subpass.colorAttachmentCount = 3;
   subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 
   VkSubpassDescription subpasses[]{subpass};
@@ -175,8 +214,7 @@ void GBufferRenderFlowVk::CreateRenderPass() {
   VkSubpassDependency dependency{};
   dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
   dependency.dstSubpass = 0;
-  // dependency.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-  dependency.srcStageMask = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+  dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
   dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
   dependency.srcAccessMask = 0;
   dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
@@ -186,7 +224,7 @@ void GBufferRenderFlowVk::CreateRenderPass() {
   // --- Renderpass ------------------------------------------------------------
   VkRenderPassCreateInfo renderPassInfo{};
   RenderPassVk::GetDefaultRenderPassCreateInfo(renderPassInfo);
-  renderPassInfo.attachmentCount = 3;
+  renderPassInfo.attachmentCount = 4;
   renderPassInfo.pAttachments = attachments;
   renderPassInfo.subpassCount = 1;
   renderPassInfo.pSubpasses = subpasses;
@@ -212,6 +250,7 @@ void GBufferRenderFlowVk::CreateFramebuffer() {
       m_imagesVk.albedoImage.GetVkImageView(),
       m_imagesVk.depthImage.GetVkImageView(),
       m_imagesVk.normalImage.GetVkImageView(),
+      m_imagesVk.roughnessMetallicImage.GetVkImageView(),
   };
 
   VkFramebufferCreateInfo createInfo{};

@@ -17,7 +17,7 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "CompositePipelineVk");
   };
 
-  virtual void Create() override;
+  virtual void Create(const BufferDefs::Layout &vertexBufferLayout) override;
 };
 
 GFX_NAMESPACE_END

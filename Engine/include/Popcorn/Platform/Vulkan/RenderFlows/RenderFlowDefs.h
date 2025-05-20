@@ -19,6 +19,7 @@ template <> struct PcRenderFlowImages<RenderFlows::GBuffer> {
   ImageVk albedoImage{};
   ImageVk depthImage{};
   ImageVk normalImage{};
+  ImageVk roughnessMetallicImage{};
 };
 
 template <> struct PcRenderFlowImages<RenderFlows::Lighting> {

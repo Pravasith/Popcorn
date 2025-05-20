@@ -67,7 +67,7 @@ void BasicMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout) {
   PipelineUtilsVk::GetDefaultPipelineLayoutCreateInfo(
       pipelineState.pipelineLayout);
 
-  // TODO: Get descriptor layouts
+  // TODO: Get descriptor layouts and attach
 
   // DESTROY SHADER MODULES
   PC_DestroyShaderModule(device, vertShaderModule);

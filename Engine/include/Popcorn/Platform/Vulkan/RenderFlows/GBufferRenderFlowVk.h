@@ -1,8 +1,8 @@
 #pragma once
 
 #include "AttachmentVk.h"
-#include "CommonVk.h"
 #include "BasicMatPipelineVk.h"
+#include "CommonVk.h"
 #include "GlobalMacros.h"
 #include "RenderFlows/RenderFlowDefs.h"
 #include "RenderFlows/RenderFlowVk.h"
@@ -44,6 +44,7 @@ private:
     AttachmentVk albedoAttachment{};
     AttachmentVk depthAttachment{};
     AttachmentVk normalAttachment{};
+    AttachmentVk roughnessMetallicAttachment{};
   };
 
   struct DescriptorSetsVk {

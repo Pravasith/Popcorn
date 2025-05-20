@@ -50,7 +50,8 @@ void CompositeRenderFlowVk::CreateAttachments() {
   VkAttachmentDescription presentImageAttachment{};
   AttachmentVk::GetDefaultAttachmentDescription(presentImageAttachment);
   presentImageAttachment.format = format;
-  presentImageAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  presentImageAttachment.initialLayout =
+      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
   presentImageAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
   m_attachmentsVk.presentAttachment.SetImageVk(&presentImageRef);
