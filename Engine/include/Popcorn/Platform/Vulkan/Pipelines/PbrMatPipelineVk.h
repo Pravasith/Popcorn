@@ -17,21 +17,7 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "GBufferPipelineVk");
   };
 
-  virtual void Create() override;
-  virtual void Destroy(const VkDevice &device) override;
-
-private:
-  virtual void CreateVkPipeline(const VkDevice &device,
-                                const PipelineStateType &pipelineCreateInfo,
-                                const VkRenderPass &renderPass) override;
-
-  virtual void CreateShaderStageCreateInfos(
-      std::forward_list<VkShaderModule> &shaderModules) override;
-
-  virtual void CreatePipelineLayout(
-      const VkDevice &device,
-      const VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo) override;
-  virtual void DestroyPipelineLayout(const VkDevice &device) override;
+  virtual void Create(const BufferDefs::Layout &vertexBufferLayout) override;
 };
 
 GFX_NAMESPACE_END

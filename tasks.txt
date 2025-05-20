@@ -9,6 +9,7 @@
 HIGH PRIORITY:
 ----------------------------------------------------------------------------
 :: Pipeline creation
+:: Change composite pass attachments -> retrieve from swapchain class
 
 :: Redesign Draw call - Refactor - 1 day max. - also handle framebuffer
    resize

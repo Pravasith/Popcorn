@@ -22,14 +22,18 @@ GFX_NAMESPACE_BEGIN
 void LightingRenderFlowVk::CreateAttachments() {
   const auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
 
-  const auto &format = VK_FORMAT_R16G16B16A16_SFLOAT;
+  std::vector<VkFormat> lightCandidates = {VK_FORMAT_R16G16B16A16_SFLOAT,
+                                           VK_FORMAT_R8G8B8A8_UNORM};
 
+  VkFormat lightFormat =
+      ImageVk::FindSupportedFormat(lightCandidates, VK_IMAGE_TILING_OPTIMAL,
+                                   VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT);
   //
   // --- Create Images ---------------------------------------------------------
   VkImageCreateInfo lightImageInfo;
   ImageVk::GetDefaultImageCreateInfo(lightImageInfo, swapchainExtent.width,
                                      swapchainExtent.height);
-  lightImageInfo.format = format;
+  lightImageInfo.format = lightFormat;
   lightImageInfo.usage =
       VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
@@ -43,7 +47,7 @@ void LightingRenderFlowVk::CreateAttachments() {
   VkImageViewCreateInfo lightImageViewInfo{};
   ImageVk::GetDefaultImageViewCreateInfo(lightImageViewInfo,
                                          lightImageRef.GetVkImage());
-  lightImageViewInfo.format = format;
+  lightImageViewInfo.format = lightFormat;
   lightImageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 
   lightImageRef.CreateImageView(lightImageViewInfo);
@@ -52,7 +56,7 @@ void LightingRenderFlowVk::CreateAttachments() {
   // --- Attachments -----------------------------------------------------------
   VkAttachmentDescription lightImageAttachment{};
   AttachmentVk::GetDefaultAttachmentDescription(lightImageAttachment);
-  lightImageAttachment.format = format;
+  lightImageAttachment.format = lightFormat;
   lightImageAttachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
   lightImageAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
