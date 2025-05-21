@@ -7,7 +7,8 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 void ImageVk::GetDefaultImageCreateInfo(VkImageCreateInfo &imageInfo,
-                                        uint32_t width, uint32_t height) {
+                                        uint32_t width, uint32_t height,
+                                        VkFormat format) {
   imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
   imageInfo.imageType = VK_IMAGE_TYPE_2D;
   imageInfo.extent.width = width;
@@ -15,7 +16,7 @@ void ImageVk::GetDefaultImageCreateInfo(VkImageCreateInfo &imageInfo,
   imageInfo.extent.depth = 1;
   imageInfo.mipLevels = 1;
   imageInfo.arrayLayers = 1;
-  imageInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
+  imageInfo.format = format;
   imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
   imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
   imageInfo.usage =
@@ -33,14 +34,17 @@ void ImageVk::CreateVmaImage(const VkImageCreateInfo &imageCreateInfo,
   if (result != VK_SUCCESS) {
     throw std::runtime_error("Failed to create VMA image.");
   }
+
+  m_format = imageCreateInfo.format;
 };
 
 void ImageVk::GetDefaultImageViewCreateInfo(VkImageViewCreateInfo &viewInfo,
-                                            const VkImage &image) {
+                                            const VkImage &image,
+                                            const VkFormat format) {
   viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
   viewInfo.image = image;
   viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-  viewInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
+  viewInfo.format = format;
   viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
   viewInfo.subresourceRange.baseMipLevel = 0;
   viewInfo.subresourceRange.levelCount = 1;
@@ -56,6 +60,9 @@ void ImageVk::CreateImageView(const VkImageViewCreateInfo &imageViewInfo) {
 };
 
 void ImageVk::Destroy() {
+  if (m_image == VK_NULL_HANDLE && m_imageView == VK_NULL_HANDLE)
+    return;
+
   const VkDevice device = ContextVk::Device()->GetDevice();
 
   if (m_imageView != VK_NULL_HANDLE) {

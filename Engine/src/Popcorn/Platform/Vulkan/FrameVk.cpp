@@ -88,6 +88,26 @@ void FrameVk::Draw(
   // Reset command buffer & start recording commands to it (lambda called from
   // the RendererVk class)
   vkResetCommandBuffer(commandBuffers[m_currentFrame], 0);
+
+  //
+  // # Frame - 0
+  // -----------
+  // UpdateSceneData()
+  //
+  // G-buffer - [0]
+  // Light - [0]
+  // Composite - [0]
+  //
+  //
+  // # Frame - 1
+  // -----------
+  // UpdateSceneData()
+  //
+  // G-buffer - [1]
+  // Light - [1]
+  // Composite - [1]
+  //
+
   recordDrawCommands(swapchainImageIndex, m_currentFrame,
                      commandBuffers[m_currentFrame]);
 
@@ -118,8 +138,12 @@ void FrameVk::Draw(
   //
   // Wait until all the commandBuffers are executed before moving to the next
   // steps after the gameloop in the program (usually cleanup)
-  vkDeviceWaitIdle(device);
+  // vkDeviceWaitIdle(device); // DON'T NEED THIS. DEFEATS THE PURPOSE OF DOUBLE
+  // BUFFERING
 
+  //
+  // +1 because we're setting it to next frame, the current frame has already
+  // been processed
   m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 };
 

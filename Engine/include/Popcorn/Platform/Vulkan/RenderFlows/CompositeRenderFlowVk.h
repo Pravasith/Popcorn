@@ -4,6 +4,7 @@
 #include "CompositePipelineVk.h"
 #include "GlobalMacros.h"
 #include "ImageVk.h"
+#include "RenderFlows/RenderFlowDefs.h"
 #include "RenderFlows/RenderFlowVk.h"
 #include "RenderPassVk.h"
 #include <vulkan/vulkan_core.h>
@@ -24,9 +25,9 @@ public:
 private:
   virtual void CreateAttachments() override;
   virtual void CreateRenderPass() override;
-  virtual void CreateFramebuffer() override;
+  virtual void CreateFramebuffers() override;
 
-  virtual void DestroyFramebuffer() override;
+  virtual void DestroyFramebuffers() override;
   virtual void DestroyRenderPass() override;
   virtual void DestroyAttachments() override;
 
@@ -39,11 +40,11 @@ private:
 
 private:
   struct AttachmentsVk {
-    AttachmentVk presentAttachment{};
+    PcFramesAttachments presentAttachments{};
   };
 
   struct DescriptorSetsVk {
-    std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> presentSets{};
+    PcFramesDescriptorSets presentSets{};
   };
 
   PcRenderFlowImages<RenderFlows::Composite> &m_imagesVk = s_compositeImages;
@@ -54,7 +55,7 @@ private:
   DescriptorSetsVk m_descriptorSetsVk{};
 
   RenderPassVk m_renderPass;
-  VkFramebuffer m_framebuffer;
+  PcFramesFramebuffers m_framebuffers;
 
   // Pipelines
   CompositePipelineVk *m_compositePipeline;

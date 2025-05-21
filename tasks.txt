@@ -9,7 +9,13 @@
 HIGH PRIORITY:
 ----------------------------------------------------------------------------
 :: Pipeline creation
+
 :: Change composite pass attachments -> retrieve from swapchain class
+   instead of making them inside composite pass
+
+:: Duplicate attachments (count - max frame per flight each) so you can
+   use in the draw call like -
+   draw(frameNumber) { ... use(att[frameNumber]) };
 
 :: Redesign Draw call - Refactor - 1 day max. - also handle framebuffer
    resize

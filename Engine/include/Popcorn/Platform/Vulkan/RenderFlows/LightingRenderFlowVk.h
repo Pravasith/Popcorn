@@ -2,7 +2,8 @@
 
 #include "AttachmentVk.h"
 #include "GlobalMacros.h"
-#include "LightingPipelineVk.h"
+#include "LightingPipelinesVk.h"
+#include "RenderFlows/RenderFlowDefs.h"
 #include "RenderFlows/RenderFlowVk.h"
 #include "RenderPassVk.h"
 #include <vulkan/vulkan_core.h>
@@ -23,9 +24,9 @@ public:
 private:
   virtual void CreateAttachments() override;
   virtual void CreateRenderPass() override;
-  virtual void CreateFramebuffer() override;
+  virtual void CreateFramebuffers() override;
 
-  virtual void DestroyFramebuffer() override;
+  virtual void DestroyFramebuffers() override;
   virtual void DestroyRenderPass() override;
   virtual void DestroyAttachments() override;
 
@@ -38,11 +39,11 @@ private:
 
 private:
   struct AttachmentsVk {
-    AttachmentVk lightAttachment{};
+    PcFramesAttachments lightAttachments{};
   };
 
   struct DescriptorSetsVk {
-    std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> lightingSets{};
+    PcFramesDescriptorSets lightingSets{};
   };
 
   PcRenderFlowImages<RenderFlows::Lighting> &m_imagesVk = s_lightingImages;
@@ -53,7 +54,7 @@ private:
   DescriptorSetsVk m_descriptorSetsVk{};
 
   RenderPassVk m_renderPass;
-  VkFramebuffer m_framebuffer;
+  PcFramesFramebuffers m_framebuffers;
 
   // Pipelines
   LightingPipelineVk *m_lightingPipeline;

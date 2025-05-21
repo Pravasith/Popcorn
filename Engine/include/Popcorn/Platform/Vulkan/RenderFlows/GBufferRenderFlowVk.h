@@ -1,13 +1,10 @@
 #pragma once
 
-#include "AttachmentVk.h"
-#include "BasicMatPipelineVk.h"
-#include "CommonVk.h"
 #include "GlobalMacros.h"
+#include "MaterialPipelinesVk.h"
 #include "RenderFlows/RenderFlowDefs.h"
 #include "RenderFlows/RenderFlowVk.h"
 #include "RenderPassVk.h"
-#include <array>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -25,11 +22,11 @@ public:
 
 private:
   virtual void CreateAttachments() override;
-  virtual void CreateFramebuffer() override;
+  virtual void CreateFramebuffers() override;
   virtual void CreateRenderPass() override;
 
   virtual void DestroyRenderPass() override;
-  virtual void DestroyFramebuffer() override;
+  virtual void DestroyFramebuffers() override;
   virtual void DestroyAttachments() override;
 
   virtual void CreateAndAllocDescriptors() override;
@@ -41,17 +38,17 @@ private:
 
 private:
   struct AttachmentsVk {
-    AttachmentVk albedoAttachment{};
-    AttachmentVk depthAttachment{};
-    AttachmentVk normalAttachment{};
-    AttachmentVk roughnessMetallicAttachment{};
+    PcFramesAttachments albedoAttachments{};
+    PcFramesAttachments depthAttachments{};
+    PcFramesAttachments normalAttachments{};
+    PcFramesAttachments roughnessMetallicAttachments{};
   };
 
   struct DescriptorSetsVk {
-    std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> cameraSets{};
-    std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> submeshSets{};
-    std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> basicMatSets{};
-    std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> pbrMatSets{};
+    PcFramesDescriptorSets cameraSets{};
+    PcFramesDescriptorSets submeshSets{};
+    PcFramesDescriptorSets basicMatSets{};
+    PcFramesDescriptorSets pbrMatSets{};
   };
 
   PcRenderFlowImages<RenderFlows::GBuffer> &m_imagesVk = s_gBufferImages;
@@ -60,9 +57,9 @@ private:
   DescriptorSetsVk m_descriptorSetsVk{};
 
   RenderPassVk m_renderPass;
-  VkFramebuffer m_framebuffer;
+  PcFramesFramebuffers m_framebuffers;
 
-  BasicMatPipelineVk *m_basicMatPipeline;
+  BasicMatPipelineVk *m_basicMatPipeline = nullptr;
 };
 
 GFX_NAMESPACE_END

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GlobalMacros.h"
+#include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
 #include <vector>
 #include <vulkan/vulkan_core.h>
@@ -25,27 +26,29 @@ public:
   };
 
   static void GetDefaultImageCreateInfo(VkImageCreateInfo &imageInfo,
-                                        uint32_t width, uint32_t height);
+                                        uint32_t width, uint32_t height,
+                                        VkFormat format);
   static void GetDefaultImageViewCreateInfo(VkImageViewCreateInfo &viewInfo,
-                                            const VkImage &image);
+                                            const VkImage &image,
+                                            VkFormat format);
 
 public:
   // --- UTILS -------------------------------------------------------------
   static VkFormat FindSupportedFormat(const std::vector<VkFormat> &candidates,
                                       VkImageTiling tiling,
                                       VkFormatFeatureFlags features);
-  static VkFormat FindDepthFormat() {
-    return FindSupportedFormat({VK_FORMAT_D32_SFLOAT,
-                                VK_FORMAT_D32_SFLOAT_S8_UINT,
-                                VK_FORMAT_D24_UNORM_S8_UINT},
-                               VK_IMAGE_TILING_OPTIMAL,
-                               VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
-  };
+
+  bool FormatHasStencilComponent() {
+    PC_ASSERT(m_format != VK_FORMAT_UNDEFINED, "m_format is null");
+    return m_format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
+           m_format == VK_FORMAT_D24_UNORM_S8_UINT;
+  }
 
 private:
   VkImage m_image = VK_NULL_HANDLE;
   VkImageView m_imageView = VK_NULL_HANDLE;
   VmaAllocation m_alloc = nullptr;
+  VkFormat m_format = VK_FORMAT_UNDEFINED;
 };
 
 GFX_NAMESPACE_END

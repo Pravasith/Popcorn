@@ -51,9 +51,9 @@ public:
 private:
   virtual void CreateAttachments() = 0;
   virtual void CreateRenderPass() = 0;
-  virtual void CreateFramebuffer() = 0;
+  virtual void CreateFramebuffers() = 0;
 
-  virtual void DestroyFramebuffer() = 0;
+  virtual void DestroyFramebuffers() = 0;
   virtual void DestroyRenderPass() = 0;
   virtual void DestroyAttachments() = 0;
 
@@ -61,11 +61,11 @@ public:
   void Prepare() {
     CreateAttachments();
     CreateRenderPass();
-    CreateFramebuffer();
+    CreateFramebuffers();
   };
 
   void CleanUp() {
-    DestroyFramebuffer();
+    DestroyFramebuffers();
     DestroyRenderPass();
     DestroyAttachments();
   };

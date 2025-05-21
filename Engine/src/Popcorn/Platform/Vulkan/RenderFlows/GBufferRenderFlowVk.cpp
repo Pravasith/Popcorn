@@ -44,43 +44,46 @@ void GBufferRenderFlowVk::CreateAttachments() {
   // VK_FORMAT_R8G8_UNORM;
   std::vector<VkFormat> roughnessMetallicCandidates = {VK_FORMAT_R8G8_UNORM};
 
-  const auto albedoFormat =
+  VkFormat albedoFormat =
       ImageVk::FindSupportedFormat(albedoCandidates, VK_IMAGE_TILING_OPTIMAL,
                                    VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT);
-  const auto depthFormat = ImageVk::FindSupportedFormat(
+  VkFormat depthFormat = ImageVk::FindSupportedFormat(
       depthCandidates, VK_IMAGE_TILING_OPTIMAL,
       VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
-  const auto normalFormat =
+  VkFormat normalFormat =
       ImageVk::FindSupportedFormat(normalCandidates, VK_IMAGE_TILING_OPTIMAL,
                                    VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT);
-  const auto roughnessMetallicFormat = ImageVk::FindSupportedFormat(
+  VkFormat roughnessMetallicFormat = ImageVk::FindSupportedFormat(
       roughnessMetallicCandidates, VK_IMAGE_TILING_OPTIMAL,
       VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT);
 
   //
   //
-  // --- Create g-buffer images
-  // ------------------------------------------------
+  // --- Create g-buffer images ------------------------------------------------
   VkImageCreateInfo albedoImageInfo;
-  ImageVk::GetDefaultImageCreateInfo(albedoImageInfo, width, height);
+  ImageVk::GetDefaultImageCreateInfo(albedoImageInfo, width, height,
+                                     albedoFormat);
   albedoImageInfo.format = albedoFormat;
   albedoImageInfo.usage =
       VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
   VkImageCreateInfo depthImageInfo;
-  ImageVk::GetDefaultImageCreateInfo(depthImageInfo, width, height);
+  ImageVk::GetDefaultImageCreateInfo(depthImageInfo, width, height,
+                                     depthFormat);
   depthImageInfo.format = depthFormat;
   depthImageInfo.usage =
       VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
   VkImageCreateInfo normalImageInfo;
-  ImageVk::GetDefaultImageCreateInfo(normalImageInfo, width, height);
+  ImageVk::GetDefaultImageCreateInfo(normalImageInfo, width, height,
+                                     normalFormat);
   normalImageInfo.format = normalFormat;
   normalImageInfo.usage =
       VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
   VkImageCreateInfo roughnessMetallicImageInfo;
-  ImageVk::GetDefaultImageCreateInfo(roughnessMetallicImageInfo, width, height);
+  ImageVk::GetDefaultImageCreateInfo(roughnessMetallicImageInfo, width, height,
+                                     roughnessMetallicFormat);
   roughnessMetallicImageInfo.format = roughnessMetallicFormat;
   roughnessMetallicImageInfo.usage =
       VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -91,99 +94,109 @@ void GBufferRenderFlowVk::CreateAttachments() {
   VmaAllocationCreateInfo roughnessMetallicAlloc{.usage =
                                                      VMA_MEMORY_USAGE_AUTO};
 
-  ImageVk &albedoImage = m_imagesVk.albedoImage;
-  ImageVk &depthImage = m_imagesVk.depthImage;
-  ImageVk &normalImage = m_imagesVk.normalImage;
-  ImageVk &roughnessMetallicImage = m_imagesVk.roughnessMetallicImage;
+  for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+    ImageVk &albedoImage = m_imagesVk.albedoImages[i];
+    ImageVk &depthImage = m_imagesVk.depthImages[i];
+    ImageVk &normalImage = m_imagesVk.normalImages[i];
+    ImageVk &roughnessMetallicImage = m_imagesVk.roughnessMetallicImages[i];
 
-  albedoImage.CreateVmaImage(albedoImageInfo, albedoAlloc);
-  depthImage.CreateVmaImage(depthImageInfo, depthAlloc);
-  normalImage.CreateVmaImage(normalImageInfo, normalAlloc);
-  roughnessMetallicImage.CreateVmaImage(roughnessMetallicImageInfo,
-                                        roughnessMetallicAlloc);
+    albedoImage.CreateVmaImage(albedoImageInfo, albedoAlloc);
+    depthImage.CreateVmaImage(depthImageInfo, depthAlloc);
+    normalImage.CreateVmaImage(normalImageInfo, normalAlloc);
+    roughnessMetallicImage.CreateVmaImage(roughnessMetallicImageInfo,
+                                          roughnessMetallicAlloc);
 
-  //
-  //
-  // --- Create g-buffer image-views
-  // -------------------------------------------
-  VkImageViewCreateInfo albedoViewInfo{};
-  ImageVk::GetDefaultImageViewCreateInfo(albedoViewInfo,
-                                         albedoImage.GetVkImage());
-  albedoViewInfo.format = albedoFormat;
-  albedoViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    //
+    //
+    // --- Create g-buffer image-views -----------------------------------------
+    VkImageViewCreateInfo albedoViewInfo{};
+    ImageVk::GetDefaultImageViewCreateInfo(
+        albedoViewInfo, albedoImage.GetVkImage(), albedoFormat);
+    albedoViewInfo.format = albedoFormat;
+    albedoViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 
-  VkImageViewCreateInfo depthViewInfo{};
-  ImageVk::GetDefaultImageViewCreateInfo(depthViewInfo,
-                                         depthImage.GetVkImage());
-  depthViewInfo.format = depthFormat;
-  depthViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    VkImageViewCreateInfo depthViewInfo{};
+    ImageVk::GetDefaultImageViewCreateInfo(
+        depthViewInfo, depthImage.GetVkImage(), depthFormat);
+    depthViewInfo.format = depthFormat;
+    depthViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    if (depthImage.FormatHasStencilComponent()) {
+      depthViewInfo.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+    }
 
-  VkImageViewCreateInfo normalViewInfo{};
-  ImageVk::GetDefaultImageViewCreateInfo(normalViewInfo,
-                                         normalImage.GetVkImage());
-  normalViewInfo.format = normalFormat;
-  normalViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    VkImageViewCreateInfo normalViewInfo{};
+    ImageVk::GetDefaultImageViewCreateInfo(
+        normalViewInfo, normalImage.GetVkImage(), normalFormat);
+    normalViewInfo.format = normalFormat;
+    normalViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 
-  VkImageViewCreateInfo roughnessMetallicViewInfo{};
-  ImageVk::GetDefaultImageViewCreateInfo(roughnessMetallicViewInfo,
-                                         roughnessMetallicImage.GetVkImage());
-  roughnessMetallicViewInfo.format = roughnessMetallicFormat;
-  roughnessMetallicViewInfo.subresourceRange.aspectMask =
-      VK_IMAGE_ASPECT_COLOR_BIT;
+    VkImageViewCreateInfo roughnessMetallicViewInfo{};
+    ImageVk::GetDefaultImageViewCreateInfo(roughnessMetallicViewInfo,
+                                           roughnessMetallicImage.GetVkImage(),
+                                           roughnessMetallicFormat);
+    roughnessMetallicViewInfo.format = roughnessMetallicFormat;
+    roughnessMetallicViewInfo.subresourceRange.aspectMask =
+        VK_IMAGE_ASPECT_COLOR_BIT;
 
-  albedoImage.CreateImageView(albedoViewInfo);
-  depthImage.CreateImageView(depthViewInfo);
-  normalImage.CreateImageView(normalViewInfo);
-  roughnessMetallicImage.CreateImageView(roughnessMetallicViewInfo);
+    albedoImage.CreateImageView(albedoViewInfo);
+    depthImage.CreateImageView(depthViewInfo);
+    normalImage.CreateImageView(normalViewInfo);
+    roughnessMetallicImage.CreateImageView(roughnessMetallicViewInfo);
 
-  //
-  //
-  // --- Create g-buffer attachments
-  // -------------------------------------------
-  VkAttachmentDescription albedoAttachment{};
-  AttachmentVk::GetDefaultAttachmentDescription(albedoAttachment);
-  albedoAttachment.format = albedoFormat;
-  albedoAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-  albedoAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-  albedoAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-  albedoAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    //
+    //
+    // --- Create g-buffer attachments -----------------------------------------
+    VkAttachmentDescription albedoAttachment{};
+    AttachmentVk::GetDefaultAttachmentDescription(albedoAttachment);
+    albedoAttachment.format = albedoFormat;
+    albedoAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    albedoAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    albedoAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    albedoAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
-  VkAttachmentDescription depthAttachment{};
-  AttachmentVk::GetDefaultAttachmentDescription(depthAttachment);
-  depthAttachment.format = depthFormat;
-  depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-  depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
-  depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-  depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    VkAttachmentDescription depthAttachment{};
+    AttachmentVk::GetDefaultAttachmentDescription(depthAttachment);
+    depthAttachment.format = depthFormat;
+    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    depthAttachment.finalLayout =
+        depthImage.FormatHasStencilComponent()
+            ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+            : VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+    depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
-  VkAttachmentDescription normalAttachment{};
-  AttachmentVk::GetDefaultAttachmentDescription(normalAttachment);
-  normalAttachment.format = normalFormat;
-  normalAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-  normalAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-  normalAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-  normalAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    VkAttachmentDescription normalAttachment{};
+    AttachmentVk::GetDefaultAttachmentDescription(normalAttachment);
+    normalAttachment.format = normalFormat;
+    normalAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    normalAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    normalAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    normalAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
-  VkAttachmentDescription roughnessMetallicAttachment{};
-  AttachmentVk::GetDefaultAttachmentDescription(roughnessMetallicAttachment);
-  roughnessMetallicAttachment.format = roughnessMetallicFormat;
-  roughnessMetallicAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-  roughnessMetallicAttachment.finalLayout =
-      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-  roughnessMetallicAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-  roughnessMetallicAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    VkAttachmentDescription roughnessMetallicAttachment{};
+    AttachmentVk::GetDefaultAttachmentDescription(roughnessMetallicAttachment);
+    roughnessMetallicAttachment.format = roughnessMetallicFormat;
+    roughnessMetallicAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    roughnessMetallicAttachment.finalLayout =
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    roughnessMetallicAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    roughnessMetallicAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
-  m_attachmentsVk.albedoAttachment.SetImageVk(&albedoImage);
-  m_attachmentsVk.depthAttachment.SetImageVk(&depthImage);
-  m_attachmentsVk.normalAttachment.SetImageVk(&normalImage);
-  m_attachmentsVk.roughnessMetallicAttachment.SetImageVk(
-      &roughnessMetallicImage);
+    m_attachmentsVk.albedoAttachments[i].SetImageVk(&albedoImage);
+    m_attachmentsVk.depthAttachments[i].SetImageVk(&depthImage);
+    m_attachmentsVk.normalAttachments[i].SetImageVk(&normalImage);
+    m_attachmentsVk.roughnessMetallicAttachments[i].SetImageVk(
+        &roughnessMetallicImage);
 
-  m_attachmentsVk.albedoAttachment.SetAttachmentDescription(albedoAttachment);
-  m_attachmentsVk.depthAttachment.SetAttachmentDescription(depthAttachment);
-  m_attachmentsVk.normalAttachment.SetAttachmentDescription(normalAttachment);
-  m_attachmentsVk.roughnessMetallicAttachment.SetAttachmentDescription(
-      roughnessMetallicAttachment);
+    m_attachmentsVk.albedoAttachments[i].SetAttachmentDescription(
+        albedoAttachment);
+    m_attachmentsVk.depthAttachments[i].SetAttachmentDescription(
+        depthAttachment);
+    m_attachmentsVk.normalAttachments[i].SetAttachmentDescription(
+        normalAttachment);
+    m_attachmentsVk.roughnessMetallicAttachments[i].SetAttachmentDescription(
+        roughnessMetallicAttachment);
+  }
 };
 
 //
@@ -196,25 +209,35 @@ void GBufferRenderFlowVk::CreateAttachments() {
 // --- CREATE RENDER PASS ------------------------------------------------------
 //
 void GBufferRenderFlowVk::CreateRenderPass() {
-  //
-  // --- Attachments
-  // -----------------------------------------------------------
-  VkAttachmentDescription attachments[]{
-      m_attachmentsVk.albedoAttachment.GetAttachmentDescription(),
-      m_attachmentsVk.depthAttachment.GetAttachmentDescription(),
-      m_attachmentsVk.normalAttachment.GetAttachmentDescription(),
-      m_attachmentsVk.roughnessMetallicAttachment.GetAttachmentDescription()};
+  constexpr uint32_t arbitrarilyChosenFrameIndex = 0;
 
   //
-  // --- Attachment references
-  // -------------------------------------------------
+  // --- Attachments -----------------------------------------------------------
+  VkAttachmentDescription attachments[]{
+      m_attachmentsVk.albedoAttachments[arbitrarilyChosenFrameIndex]
+          .GetAttachmentDescription(),
+      m_attachmentsVk.depthAttachments[arbitrarilyChosenFrameIndex]
+          .GetAttachmentDescription(),
+      m_attachmentsVk.normalAttachments[arbitrarilyChosenFrameIndex]
+          .GetAttachmentDescription(),
+      m_attachmentsVk.roughnessMetallicAttachments[arbitrarilyChosenFrameIndex]
+          .GetAttachmentDescription()};
+
+  bool depthHasStencilComponent =
+      m_imagesVk.depthImages[arbitrarilyChosenFrameIndex]
+          .FormatHasStencilComponent();
+
+  //
+  // --- Attachment references -------------------------------------------------
   VkAttachmentReference albedoRef{};
   AttachmentVk::GetAttachmentRef(albedoRef, 0);
   albedoRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
   VkAttachmentReference depthRef{};
   AttachmentVk::GetAttachmentRef(depthRef, 1);
-  depthRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+  depthRef.layout = depthHasStencilComponent
+                        ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+                        : VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
 
   VkAttachmentReference normalRef{};
   AttachmentVk::GetAttachmentRef(normalRef, 2);
@@ -228,8 +251,7 @@ void GBufferRenderFlowVk::CreateRenderPass() {
                                            roughnessMetallicRef};
 
   //
-  // --- Create Subpasses
-  // ------------------------------------------------------
+  // --- Create Subpasses ------------------------------------------------------
   VkSubpassDescription subpass{};
   RenderPassVk::GetDefaultSubpassDescription(subpass);
   subpass.pColorAttachments = colorAttachments;
@@ -240,20 +262,23 @@ void GBufferRenderFlowVk::CreateRenderPass() {
   VkSubpassDescription subpasses[]{subpass};
 
   //
-  // --- Dependencies
-  // ----------------------------------------------------------
+  // --- Dependencies ----------------------------------------------------------
   VkSubpassDependency dependency{};
   dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
   dependency.dstSubpass = 0;
-  dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-  dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+                            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
+                            VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+  dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+                            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
+                            VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
   dependency.srcAccessMask = 0;
-  dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+  dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
+                             VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
   dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
   //
-  // --- Renderpass
-  // ------------------------------------------------------------
+  // --- Renderpass ------------------------------------------------------------
   VkRenderPassCreateInfo renderPassInfo{};
   RenderPassVk::GetDefaultRenderPassCreateInfo(renderPassInfo);
   renderPassInfo.attachmentCount = 4;
@@ -275,27 +300,29 @@ void GBufferRenderFlowVk::CreateRenderPass() {
 // --- CREATE FRAMEBUFFER ------------------------------------------------------
 // --- CREATE FRAMEBUFFER ------------------------------------------------------
 //
-void GBufferRenderFlowVk::CreateFramebuffer() {
+void GBufferRenderFlowVk::CreateFramebuffers() {
   const auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
 
-  std::vector<VkImageView> attachments = {
-      m_imagesVk.albedoImage.GetVkImageView(),
-      m_imagesVk.depthImage.GetVkImageView(),
-      m_imagesVk.normalImage.GetVkImageView(),
-      m_imagesVk.roughnessMetallicImage.GetVkImageView(),
-  };
+  for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+    std::vector<VkImageView> attachments = {
+        m_imagesVk.albedoImages[i].GetVkImageView(),
+        m_imagesVk.depthImages[i].GetVkImageView(),
+        m_imagesVk.normalImages[i].GetVkImageView(),
+        m_imagesVk.roughnessMetallicImages[i].GetVkImageView(),
+    };
 
-  VkFramebufferCreateInfo createInfo{};
-  FramebuffersVk::GetDefaultFramebufferState(createInfo);
-  createInfo.renderPass = m_renderPass.GetVkRenderPass();
-  createInfo.pAttachments = attachments.data();
-  createInfo.attachmentCount = attachments.size();
-  createInfo.width = swapchainExtent.width;
-  createInfo.height = swapchainExtent.height;
-  createInfo.layers = 1;
+    VkFramebufferCreateInfo createInfo{};
+    FramebuffersVk::GetDefaultFramebufferState(createInfo);
+    createInfo.renderPass = m_renderPass.GetVkRenderPass();
+    createInfo.pAttachments = attachments.data();
+    createInfo.attachmentCount = attachments.size();
+    createInfo.width = swapchainExtent.width;
+    createInfo.height = swapchainExtent.height;
+    createInfo.layers = 1;
 
-  FramebuffersVk::CreateVkFramebuffer(ContextVk::Device()->GetDevice(),
-                                      createInfo, m_framebuffer);
+    FramebuffersVk::CreateVkFramebuffer(ContextVk::Device()->GetDevice(),
+                                        createInfo, m_framebuffers[i]);
+  }
 };
 
 //
@@ -470,11 +497,13 @@ void GBufferRenderFlowVk::CreatePipelines() {
 // --- CLEAN UP ----------------------------------------------------------------
 // --- CLEAN UP ----------------------------------------------------------------
 //
-void GBufferRenderFlowVk::DestroyFramebuffer() {
-  if (m_framebuffer != VK_NULL_HANDLE) {
-    FramebuffersVk::DestroyVkFramebuffer(ContextVk::Device()->GetDevice(),
-                                         m_framebuffer);
-    m_framebuffer = VK_NULL_HANDLE;
+void GBufferRenderFlowVk::DestroyFramebuffers() {
+  for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+    if (m_framebuffers[i] != VK_NULL_HANDLE) {
+      FramebuffersVk::DestroyVkFramebuffer(ContextVk::Device()->GetDevice(),
+                                           m_framebuffers[i]);
+      m_framebuffers[i] = VK_NULL_HANDLE;
+    }
   }
 };
 
@@ -485,9 +514,12 @@ void GBufferRenderFlowVk::DestroyRenderPass() {
 };
 
 void GBufferRenderFlowVk::DestroyAttachments() {
-  m_imagesVk.albedoImage.Destroy();
-  m_imagesVk.depthImage.Destroy();
-  m_imagesVk.normalImage.Destroy();
+  for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+    m_imagesVk.albedoImages[i].Destroy();
+    m_imagesVk.depthImages[i].Destroy();
+    m_imagesVk.normalImages[i].Destroy();
+    m_imagesVk.roughnessMetallicImages[i].Destroy();
+  }
 };
 
 GFX_NAMESPACE_END
