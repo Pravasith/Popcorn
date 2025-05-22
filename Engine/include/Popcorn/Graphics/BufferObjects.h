@@ -128,6 +128,10 @@ public:
     m_layout.Set<E...>();
   };
 
+  inline void SetLayout(const BufferDefs::Layout &layout) {
+    m_layout = layout;
+  };
+
   [[nodiscard]] inline const BufferDefs::Layout &GetLayout() const {
     PC_ASSERT(m_layout.countValue != 0, "BufferDefs::Layout is empty!");
     return m_layout;

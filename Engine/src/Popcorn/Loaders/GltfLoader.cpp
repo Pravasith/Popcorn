@@ -10,6 +10,7 @@
 #include "Light.h"
 #include "Material.h"
 #include "Mesh.h"
+#include "Popcorn/Loaders/LoadersDefs.h"
 #include "Shader.h"
 #include "Sources.h"
 #include <cstddef>
@@ -400,9 +401,11 @@ GltfLoader::ExtractVertexBuffer(const tinygltf::Model &model,
   vertices->Allocate(vertexCount * totalAttrByteSize);
   {
     using BufferDefs::AttrTypes;
-    vertices->SetLayout<AttrTypes::Float3,    // Position
-                        AttrTypes::Float3,    // Normal
-                        AttrTypes::Float2>(); // UV
+    // vertices->SetLayout<AttrTypes::Float3,    // Position
+    //                     AttrTypes::Float3,    // Normal
+    //                     AttrTypes::Float2>(); // UV
+
+    vertices->SetLayout(GltfVertexBufferLayout);
   }
 
   for (size_t i = 0; i < vertexCount; ++i) {

@@ -84,7 +84,6 @@ void PipelineUtilsVk::GetDefaultRasterizationState(
 void PipelineUtilsVk::GetDefaultDynamicState(
     VkPipelineDynamicStateCreateInfo &dynamicState) {
   // TODO: Make this function flexible to handle other dynamic states
-  //
   dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
   dynamicState.dynamicStateCount =
       static_cast<uint32_t>(s_dynamicStatesDefault.size());
