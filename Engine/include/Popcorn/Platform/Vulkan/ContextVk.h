@@ -5,6 +5,7 @@
 #include "DescriptorPoolsVk.h"
 #include "DeviceVk.h"
 #include "FrameVk.h"
+#include "FramebufferVk.h"
 #include "GlobalMacros.h"
 #include "Memory/MemoryAllocatorVk.h"
 #include "Memory/MemoryVk.h"
@@ -73,6 +74,13 @@ public:
     return s_frameVk;
   }
 
+  static FramebufferVk *Framebuffer() {
+    if (!s_framebufferVk) {
+      throw std::runtime_error("FramebufferVk is null");
+    }
+    return s_framebufferVk;
+  }
+
   static MemoryAllocatorVk *MemoryAllocator() {
     if (!s_memoryAllocatorVk) {
       throw std::runtime_error("MemoryAllocatorVk is null");
@@ -127,6 +135,7 @@ private:
     s_swapchainVk = SwapchainVk::Get();
     s_commandPoolVk = CommandPoolVk::Get();
     s_frameVk = FrameVk::Get();
+    s_framebufferVk = FramebufferVk::Get();
     s_memoryAllocatorVk = MemoryAllocatorVk::Get();
     s_memoryVk = MemoryVk::Get();
     s_descriptorPoolsVk = DescriptorPoolsVk::Get();
@@ -144,6 +153,7 @@ private:
   static SwapchainVk *s_swapchainVk;
   static CommandPoolVk *s_commandPoolVk;
   static FrameVk *s_frameVk;
+  static FramebufferVk *s_framebufferVk;
   static MemoryVk *s_memoryVk;
   static MemoryAllocatorVk *s_memoryAllocatorVk;
   static DescriptorPoolsVk *s_descriptorPoolsVk;

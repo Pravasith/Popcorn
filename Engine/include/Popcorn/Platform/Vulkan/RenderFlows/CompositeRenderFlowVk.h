@@ -1,6 +1,5 @@
 #pragma once
 
-#include "CommonVk.h"
 #include "CompositePipelinesVk.h"
 #include "GlobalMacros.h"
 #include "RenderFlows/RenderFlowDefs.h"
@@ -39,7 +38,7 @@ private:
 
 private:
   struct AttachmentsVk {
-    PcFramesAttachments<MAX_FRAMES_IN_FLIGHT> presentAttachments{};
+    PcPresentationAttachments presentAttachments{}; // Not used for now
   };
 
   struct DescriptorSetsVk {
@@ -48,13 +47,14 @@ private:
 
   PcRenderFlowImages<RenderFlows::Lighting, MAX_FRAMES_IN_FLIGHT>
       &m_dependencyImages = s_lightingImages;
+
   PcRenderFlowImages<RenderFlows::Composite> &m_imagesVk = s_compositeImages;
 
   AttachmentsVk m_attachmentsVk{};
   DescriptorSetsVk m_descriptorSetsVk{};
 
   RenderPassVk m_renderPass;
-  // PcSwapchainFramebuffersRef m_framebuffers; // Swapchain framebuffers
+  PcPresentationFramebuffers m_framebuffers; // Swapchain framebuffers
 
   // Pipelines
   CompositePipelineVk *m_compositePipeline;

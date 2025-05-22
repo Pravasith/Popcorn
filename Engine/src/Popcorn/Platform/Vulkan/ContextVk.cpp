@@ -10,6 +10,7 @@ SurfaceVk *ContextVk::s_surfaceVk = nullptr;
 SwapchainVk *ContextVk::s_swapchainVk = nullptr;
 CommandPoolVk *ContextVk::s_commandPoolVk = nullptr;
 FrameVk *ContextVk::s_frameVk = nullptr;
+FramebufferVk *ContextVk::s_framebufferVk = nullptr;
 MemoryAllocatorVk *ContextVk::s_memoryAllocatorVk = nullptr;
 MemoryVk *ContextVk::s_memoryVk = nullptr;
 DescriptorLayoutsVk *ContextVk::s_descriptorLayoutsVk = nullptr;
@@ -45,6 +46,7 @@ void ContextVk::VulkanInit(const Window &appWin) {
   //
   // CREATE SWAPCHAIN --------------------------------------------------------
   s_swapchainVk->CreateSwapchainImagesAndVkSwapchain();
+  s_swapchainVk->CreateSwapchainImageViews(device);
 
   //
   // RENDER READY ------------------------------------------------------------
@@ -87,6 +89,10 @@ void ContextVk::VulkanCleanUp() {
   s_swapchainVk->CleanUp(device);
   SwapchainVk::Destroy();
   s_swapchainVk = nullptr;
+
+  // s_framebufferVk->CleanUp();
+  FramebufferVk::Destroy();
+  s_framebufferVk = nullptr;
 
   s_surfaceVk->CleanUp(instance);
   SurfaceVk::Destroy();

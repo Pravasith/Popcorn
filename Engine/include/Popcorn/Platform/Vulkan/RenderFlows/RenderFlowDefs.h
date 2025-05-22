@@ -16,6 +16,8 @@ GFX_NAMESPACE_BEGIN
 
 enum RenderFlows { GBuffer = 1, Lighting, Composite };
 
+//
+// --------------------------------------------------------------------------
 template <uint32_t FrameCount>
 using PcFramesImages = std::array<ImageVk, FrameCount>;
 
@@ -28,8 +30,13 @@ using PcFramesDescriptorSets = std::array<VkDescriptorSet, FrameCount>;
 template <uint32_t FrameCount>
 using PcFramesFramebuffers = std::array<VkFramebuffer, FrameCount>;
 
-// using PcSwapchainFramebuffersRef = std::vector<VkFramebuffer> &;
+//
+// --------------------------------------------------------------------------
+using PcPresentationAttachments = std::vector<AttachmentVk>;
+using PcPresentationFramebuffers = std::vector<VkFramebuffer>;
 
+//
+// --------------------------------------------------------------------------
 template <RenderFlows T, uint32_t Count = 0> struct PcRenderFlowImages {
   static constexpr RenderFlows type_value = T;
   static constexpr uint32_t frameCount = Count;
@@ -53,6 +60,7 @@ struct PcRenderFlowImages<RenderFlows::Lighting, Count> {
 };
 
 template <> struct PcRenderFlowImages<RenderFlows::Composite> {
+  std::vector<ImageVk> swapchainImages{};
   // std::vector<ImageVk> postFxImage1{}; // PostFx images - potentially
 };
 

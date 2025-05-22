@@ -3,7 +3,6 @@
 #include "CommonVk.h"
 #include "ContextVk.h"
 #include "GlobalMacros.h"
-#include "ImageVk.h"
 #include "RenderPassVk.h"
 #include <vulkan/vulkan_core.h>
 
@@ -19,45 +18,37 @@ GFX_NAMESPACE_BEGIN
 void CompositeRenderFlowVk::CreateAttachments() {
   const auto &swapchain = ContextVk::Swapchain();
   const auto &device = ContextVk::Device()->GetDevice();
+
+  //
+  // Note: Swapchain images & views are already created in
+  // ContextVk::InitVulkan()
+
+  auto &swapchainImages = swapchain->GetSwapchainImages();
+  auto &swapchainImageViews = swapchain->GetSwapchainImageViews();
   const auto &format = swapchain->GetSwapchainImageFormat();
 
-  swapchain->CreateImageViews(device);
+  m_imagesVk.swapchainImages.resize(swapchainImages.size());
+  m_attachmentsVk.presentAttachments.resize(swapchainImages.size());
 
-  //
-  // --- Create Images ---------------------------------------------------------
-  VkImageCreateInfo presentImageInfo;
-  ImageVk::GetDefaultImageCreateInfo(presentImageInfo,
-                                     swapchain->GetSwapchainExtent().width,
-                                     swapchain->GetSwapchainExtent().height);
-  presentImageInfo.format = format;
-  presentImageInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+  for (size_t i = 0; i < swapchainImages.size(); ++i) {
+    //
+    // --- Images -------------------------------------------------------------
+    m_imagesVk.swapchainImages[i].SetSwapchainImageData(
+        swapchainImages[i], swapchainImageViews[i], format);
 
-  VmaAllocationCreateInfo presentImageAlloc{.usage = VMA_MEMORY_USAGE_AUTO};
+    //
+    // --- Attachments ---------------------------------------------------------
+    VkAttachmentDescription presentImageAttachment{};
+    AttachmentVk::GetDefaultAttachmentDescription(presentImageAttachment);
+    presentImageAttachment.format = format;
+    presentImageAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    presentImageAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-  ImageVk &presentImageRef = m_imagesVk.presentImage;
-  presentImageRef.CreateVmaImage(presentImageInfo, presentImageAlloc);
-
-  //
-  // --- Image views -----------------------------------------------------------
-  VkImageViewCreateInfo presentImageViewInfo{};
-  ImageVk::GetDefaultImageViewCreateInfo(presentImageViewInfo,
-                                         presentImageRef.GetVkImage());
-  presentImageViewInfo.format = format;
-  presentImageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-
-  presentImageRef.CreateImageView(presentImageViewInfo);
-
-  //
-  // --- Attachments -----------------------------------------------------------
-  VkAttachmentDescription presentImageAttachment{};
-  AttachmentVk::GetDefaultAttachmentDescription(presentImageAttachment);
-  presentImageAttachment.format = format;
-  presentImageAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-  presentImageAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-  m_attachmentsVk.presentAttachment.SetImageVk(&presentImageRef);
-  m_attachmentsVk.presentAttachment.SetAttachmentDescription(
-      presentImageAttachment);
+    m_attachmentsVk.presentAttachments[i].SetImageVk(
+        &m_imagesVk.swapchainImages[i]);
+    m_attachmentsVk.presentAttachments[i].SetAttachmentDescription(
+        presentImageAttachment);
+  }
 }
 
 //
@@ -70,10 +61,13 @@ void CompositeRenderFlowVk::CreateAttachments() {
 // --- CREATE RENDER PASS ------------------------------------------------------
 //
 void CompositeRenderFlowVk::CreateRenderPass() {
+  constexpr uint32_t arbitrarilyChosenSwapchainImageIndex = 0;
+
   //
   // --- Attachments -----------------------------------------------------------
   VkAttachmentDescription attachments[]{
-      m_attachmentsVk.presentAttachment.GetAttachmentDescription()};
+      m_attachmentsVk.presentAttachments[arbitrarilyChosenSwapchainImageIndex]
+          .GetAttachmentDescription()};
 
   //
   // --- Attachment references -------------------------------------------------
@@ -127,23 +121,31 @@ void CompositeRenderFlowVk::CreateRenderPass() {
 // --- CREATE FRAMEBUFFER ------------------------------------------------------
 // --- CREATE FRAMEBUFFER ------------------------------------------------------
 //
-void CompositeRenderFlowVk::CreateFramebuffer() {
+void CompositeRenderFlowVk::CreateFramebuffers() {
+  const auto &device = ContextVk::Device()->GetDevice();
   const auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
+  auto &swapchainImgViews = ContextVk::Swapchain()->GetSwapchainImageViews();
 
-  std::vector<VkImageView> attachments{
-      m_imagesVk.presentImage.GetVkImageView()};
+  m_framebuffers.resize(swapchainImgViews.size());
 
-  VkFramebufferCreateInfo createInfo{};
-  FramebuffersVk::GetDefaultFramebufferState(createInfo);
-  createInfo.renderPass = m_renderPass.GetVkRenderPass();
-  createInfo.pAttachments = attachments.data();
-  createInfo.attachmentCount = attachments.size();
-  createInfo.width = swapchainExtent.width;
-  createInfo.height = swapchainExtent.height;
-  createInfo.layers = 1;
+  for (size_t i = 0; i < swapchainImgViews.size(); ++i) {
+    VkImageView attachments[] = {swapchainImgViews[i]};
 
-  FramebuffersVk::CreateVkFramebuffer(ContextVk::Device()->GetDevice(),
-                                      createInfo, m_framebuffer);
+    VkFramebufferCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    createInfo.renderPass = m_renderPass.GetVkRenderPass();
+    createInfo.attachmentCount = 1;
+    createInfo.pAttachments = attachments;
+    createInfo.width = swapchainExtent.width;
+    createInfo.height = swapchainExtent.height;
+    createInfo.layers = 1;
+    createInfo.pNext = VK_NULL_HANDLE;
+
+    if (vkCreateFramebuffer(device, &createInfo, nullptr, &m_framebuffers[i]) !=
+        VK_SUCCESS) {
+      throw std::runtime_error("failed to create swapchain framebuffer!");
+    }
+  };
 };
 
 //
@@ -159,6 +161,7 @@ void CompositeRenderFlowVk::CreateAndAllocDescriptors() {
   auto *pools = ContextVk::DescriptorPools();
   auto *device = ContextVk::Device();
   auto *memory = ContextVk::Memory();
+
   VkPhysicalDeviceProperties properties{};
   device->GetPhysicalDeviceProperties(properties);
 
@@ -179,7 +182,8 @@ void CompositeRenderFlowVk::CreateAndAllocDescriptors() {
 
   for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
     VkDescriptorImageInfo lightImageInfo{};
-    lightImageInfo.imageView = m_dependencyImages.lightImage.GetVkImageView();
+    lightImageInfo.imageView =
+        m_dependencyImages.lightImages[i].GetVkImageView();
     lightImageInfo.sampler = s_samplersVk.frameSampler.GetVkSampler();
     lightImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
@@ -209,11 +213,13 @@ void CompositeRenderFlowVk::CreateAndAllocDescriptors() {
 // --- CLEAN UP ----------------------------------------------------------------
 // --- CLEAN UP ----------------------------------------------------------------
 //
-void CompositeRenderFlowVk::DestroyFramebuffer() {
-  if (m_framebuffer != VK_NULL_HANDLE) {
-    FramebuffersVk::DestroyVkFramebuffer(ContextVk::Device()->GetDevice(),
-                                         m_framebuffer);
-    m_framebuffer = VK_NULL_HANDLE;
+void CompositeRenderFlowVk::DestroyFramebuffers() {
+  for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+    if (m_framebuffers[i] != VK_NULL_HANDLE) {
+      FramebufferVk::DestroyVkFramebuffer(ContextVk::Device()->GetDevice(),
+                                          m_framebuffers[i]);
+      m_framebuffers[i] = VK_NULL_HANDLE;
+    }
   }
 };
 
@@ -224,7 +230,12 @@ void CompositeRenderFlowVk::DestroyRenderPass() {
 };
 
 void CompositeRenderFlowVk::DestroyAttachments() {
-  m_imagesVk.presentImage.Destroy();
+  uint32_t swapchainImageCount =
+      ContextVk::Swapchain()->GetSwapchainImages().size();
+
+  for (size_t i = 0; i < swapchainImageCount; ++i) {
+    m_imagesVk.swapchainImages[i].Destroy();
+  }
 };
 
 GFX_NAMESPACE_END

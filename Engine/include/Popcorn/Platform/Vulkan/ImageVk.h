@@ -32,6 +32,13 @@ public:
                                             const VkImage &image,
                                             VkFormat format);
 
+  void SetSwapchainImageData(VkImage &swapchainImage,
+                             VkImageView &swapchainImageView, VkFormat format) {
+    m_image = swapchainImage;
+    m_imageView = swapchainImageView;
+    m_format = format;
+  };
+
 public:
   // --- UTILS -------------------------------------------------------------
   static VkFormat FindSupportedFormat(const std::vector<VkFormat> &candidates,

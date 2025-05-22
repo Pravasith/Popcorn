@@ -4,6 +4,7 @@
 #include "ContextVk.h"
 #include "DescriptorLayoutsVk.h"
 #include "DescriptorPoolsVk.h"
+#include "FramebufferVk.h"
 #include "GlobalMacros.h"
 #include "ImageVk.h"
 #include "RenderPassVk.h"
@@ -154,7 +155,7 @@ void LightingRenderFlowVk::CreateFramebuffers() {
         m_imagesVk.lightImages[i].GetVkImageView()};
 
     VkFramebufferCreateInfo createInfo{};
-    FramebuffersVk::GetDefaultFramebufferState(createInfo);
+    FramebufferVk::GetDefaultFramebufferState(createInfo);
 
     createInfo.renderPass = m_renderPass.GetVkRenderPass();
     createInfo.pAttachments = attachments.data();
@@ -163,8 +164,8 @@ void LightingRenderFlowVk::CreateFramebuffers() {
     createInfo.height = swapchainExtent.height;
     createInfo.layers = 1;
 
-    FramebuffersVk::CreateVkFramebuffer(ContextVk::Device()->GetDevice(),
-                                        createInfo, m_framebuffers[i]);
+    FramebufferVk::CreateVkFramebuffer(ContextVk::Device()->GetDevice(),
+                                       createInfo, m_framebuffers[i]);
   }
 };
 
@@ -281,8 +282,8 @@ void LightingRenderFlowVk::CreateAndAllocDescriptors() {
 void LightingRenderFlowVk::DestroyFramebuffers() {
   for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
     if (m_framebuffers[i] != VK_NULL_HANDLE) {
-      FramebuffersVk::DestroyVkFramebuffer(ContextVk::Device()->GetDevice(),
-                                           m_framebuffers[i]);
+      FramebufferVk::DestroyVkFramebuffer(ContextVk::Device()->GetDevice(),
+                                          m_framebuffers[i]);
       m_framebuffers[i] = VK_NULL_HANDLE;
     }
   }
