@@ -18,8 +18,10 @@ GFX_NAMESPACE_BEGIN
 //
 void CompositeRenderFlowVk::CreateAttachments() {
   const auto &swapchain = ContextVk::Swapchain();
-
+  const auto &device = ContextVk::Device()->GetDevice();
   const auto &format = swapchain->GetSwapchainImageFormat();
+
+  swapchain->CreateImageViews(device);
 
   //
   // --- Create Images ---------------------------------------------------------

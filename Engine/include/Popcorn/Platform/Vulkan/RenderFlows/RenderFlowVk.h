@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Camera.h"
+#include "CommonVk.h"
 #include "Empty.h"
 #include "GameObject.h"
 #include "GlobalMacros.h"
@@ -117,8 +118,8 @@ protected:
   static PcMaterialMap<MaterialTypes::PbrMat> s_pbrMaterials;
 
   // Images
-  static PcRenderFlowImages<GBuffer> s_gBufferImages;
-  static PcRenderFlowImages<Lighting> s_lightingImages;
+  static PcRenderFlowImages<GBuffer, MAX_FRAMES_IN_FLIGHT> s_gBufferImages;
+  static PcRenderFlowImages<Lighting, MAX_FRAMES_IN_FLIGHT> s_lightingImages;
   static PcRenderFlowImages<Composite> s_compositeImages;
 
   //

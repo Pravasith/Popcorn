@@ -8,7 +8,6 @@ GFX_NAMESPACE_BEGIN
 DeviceVk *ContextVk::s_deviceVk = nullptr;
 SurfaceVk *ContextVk::s_surfaceVk = nullptr;
 SwapchainVk *ContextVk::s_swapchainVk = nullptr;
-FramebuffersVk *ContextVk::s_framebuffersVk = nullptr;
 CommandPoolVk *ContextVk::s_commandPoolVk = nullptr;
 FrameVk *ContextVk::s_frameVk = nullptr;
 MemoryAllocatorVk *ContextVk::s_memoryAllocatorVk = nullptr;
@@ -45,8 +44,7 @@ void ContextVk::VulkanInit(const Window &appWin) {
 
   //
   // CREATE SWAPCHAIN --------------------------------------------------------
-  s_swapchainVk->CreateSwapchain();
-  s_swapchainVk->CreateImageViews(device);
+  s_swapchainVk->CreateSwapchainImagesAndVkSwapchain();
 
   //
   // RENDER READY ------------------------------------------------------------
@@ -89,8 +87,6 @@ void ContextVk::VulkanCleanUp() {
   s_swapchainVk->CleanUp(device);
   SwapchainVk::Destroy();
   s_swapchainVk = nullptr;
-
-  FramebuffersVk::Destroy();
 
   s_surfaceVk->CleanUp(instance);
   SurfaceVk::Destroy();

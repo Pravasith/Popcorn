@@ -1,5 +1,6 @@
 #pragma once
 
+#include "CommonVk.h"
 #include "GlobalMacros.h"
 #include "MaterialPipelinesVk.h"
 #include "RenderFlows/RenderFlowDefs.h"
@@ -38,26 +39,27 @@ private:
 
 private:
   struct AttachmentsVk {
-    PcFramesAttachments albedoAttachments{};
-    PcFramesAttachments depthAttachments{};
-    PcFramesAttachments normalAttachments{};
-    PcFramesAttachments roughnessMetallicAttachments{};
+    PcFramesAttachments<MAX_FRAMES_IN_FLIGHT> albedoAttachments{};
+    PcFramesAttachments<MAX_FRAMES_IN_FLIGHT> depthAttachments{};
+    PcFramesAttachments<MAX_FRAMES_IN_FLIGHT> normalAttachments{};
+    PcFramesAttachments<MAX_FRAMES_IN_FLIGHT> roughnessMetallicAttachments{};
   };
 
   struct DescriptorSetsVk {
-    PcFramesDescriptorSets cameraSets{};
-    PcFramesDescriptorSets submeshSets{};
-    PcFramesDescriptorSets basicMatSets{};
-    PcFramesDescriptorSets pbrMatSets{};
+    PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> cameraSets{};
+    PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> submeshSets{};
+    PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> basicMatSets{};
+    PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> pbrMatSets{};
   };
 
-  PcRenderFlowImages<RenderFlows::GBuffer> &m_imagesVk = s_gBufferImages;
+  PcRenderFlowImages<RenderFlows::GBuffer, MAX_FRAMES_IN_FLIGHT> &m_imagesVk =
+      s_gBufferImages;
 
   AttachmentsVk m_attachmentsVk{};
   DescriptorSetsVk m_descriptorSetsVk{};
 
   RenderPassVk m_renderPass;
-  PcFramesFramebuffers m_framebuffers;
+  PcFramesFramebuffers<MAX_FRAMES_IN_FLIGHT> m_framebuffers;
 
   BasicMatPipelineVk *m_basicMatPipeline = nullptr;
 };

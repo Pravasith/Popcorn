@@ -1,7 +1,5 @@
 #include "SwapchainVk.h"
-#include "ContextVk.h"
 #include "DeviceVk.h"
-#include "FramebuffersVk.h"
 #include "Popcorn/Core/Base.h"
 #include "SurfaceVk.h"
 #include <algorithm>
@@ -13,7 +11,7 @@ GFX_NAMESPACE_BEGIN
 
 SwapchainVk *SwapchainVk::s_instance = nullptr;
 
-void SwapchainVk::CreateSwapchain() {
+void SwapchainVk::CreateSwapchainImagesAndVkSwapchain() {
   if (m_appWin == nullptr) {
     PC_ERROR("m_appWin is nullptr", "SwapchainVk")
   };
@@ -121,11 +119,13 @@ void SwapchainVk::CleanUp(const VkDevice &device) {
              "BasicWorkFlow")
   };
 
-  auto *framebuffersVkStn = FramebuffersVk::Get();
-
   // Cleanup framebuffers
   for (auto &framebuffer : m_swapchainFramebuffers) {
-    framebuffersVkStn->DestroyVkFramebuffer(device, framebuffer);
+    PC_VK_NULL_CHECK(device)
+    PC_VK_NULL_CHECK(framebuffer)
+
+    vkDestroyFramebuffer(device, framebuffer, nullptr);
+    framebuffer = VK_NULL_HANDLE;
   };
 
   for (auto imageView : m_swapchainImageViews) {
@@ -185,11 +185,10 @@ SwapchainVk::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities,
   }
 }
 
-void SwapchainVk::CreateSwapchainFramebuffers(const VkDevice &device,
-                                              const VkRenderPass &renderPass) {
-
-  auto &swapchainImgViews = ContextVk::Swapchain()->GetSwapchainImageViews();
-  auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
+void SwapchainVk::CreateSwapchainFramebuffers(
+    const VkDevice &device, const VkRenderPass &finalRenderPass) {
+  auto &swapchainImgViews = GetSwapchainImageViews();
+  auto &swapchainExtent = GetSwapchainExtent();
 
   m_swapchainFramebuffers.resize(swapchainImgViews.size());
 
@@ -197,16 +196,19 @@ void SwapchainVk::CreateSwapchainFramebuffers(const VkDevice &device,
     VkImageView attachments[] = {swapchainImgViews[i]};
 
     VkFramebufferCreateInfo createInfo{};
-    FramebuffersVk::GetDefaultFramebufferState(createInfo);
-
-    createInfo.renderPass = renderPass;
+    createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    createInfo.renderPass = finalRenderPass;
+    createInfo.attachmentCount = 1;
     createInfo.pAttachments = attachments;
     createInfo.width = swapchainExtent.width;
     createInfo.height = swapchainExtent.height;
+    createInfo.layers = 1;
+    createInfo.pNext = VK_NULL_HANDLE;
 
-    // CREATE VK FRAMEBUFFER
-    ContextVk::Framebuffers()->CreateVkFramebuffer(device, createInfo,
-                                                   m_swapchainFramebuffers[i]);
+    if (vkCreateFramebuffer(device, &createInfo, nullptr,
+                            &m_swapchainFramebuffers[i]) != VK_SUCCESS) {
+      throw std::runtime_error("failed to create framebuffer!");
+    }
   };
 };
 
@@ -228,7 +230,7 @@ void SwapchainVk::RecreateSwapchain(const VkRenderPass &renderPass) {
   vkDeviceWaitIdle(device);
   CleanUp(device);
 
-  CreateSwapchain();
+  CreateSwapchainImagesAndVkSwapchain();
   CreateImageViews(device);
   CreateSwapchainFramebuffers(device, renderPass);
 };

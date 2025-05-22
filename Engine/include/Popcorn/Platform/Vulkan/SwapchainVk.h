@@ -33,7 +33,7 @@ public:
 
   inline void SetAppWindow(const Window &appWindow) { m_appWin = &appWindow; };
 
-  void CreateSwapchain();
+  void CreateSwapchainImagesAndVkSwapchain();
   void RecreateSwapchain(const VkRenderPass &renderPass);
   void CreateImageViews(const VkDevice &);
 
@@ -60,7 +60,7 @@ public:
   };
 
   void CreateSwapchainFramebuffers(const VkDevice &device,
-                                   const VkRenderPass &renderPass);
+                                   const VkRenderPass &finalRenderPass);
 
   void CleanUp(const VkDevice &);
 

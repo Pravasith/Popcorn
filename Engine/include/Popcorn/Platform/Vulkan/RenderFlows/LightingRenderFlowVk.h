@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AttachmentVk.h"
+#include "CommonVk.h"
 #include "GlobalMacros.h"
 #include "LightingPipelinesVk.h"
 #include "RenderFlows/RenderFlowDefs.h"
@@ -39,22 +40,23 @@ private:
 
 private:
   struct AttachmentsVk {
-    PcFramesAttachments lightAttachments{};
+    PcFramesAttachments<MAX_FRAMES_IN_FLIGHT> lightAttachments{};
   };
 
   struct DescriptorSetsVk {
-    PcFramesDescriptorSets lightingSets{};
+    PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> lightingSets{};
   };
 
-  PcRenderFlowImages<RenderFlows::Lighting> &m_imagesVk = s_lightingImages;
-  PcRenderFlowImages<RenderFlows::GBuffer> &m_dependencyImages =
-      s_gBufferImages;
+  PcRenderFlowImages<RenderFlows::Lighting, MAX_FRAMES_IN_FLIGHT> &m_imagesVk =
+      s_lightingImages;
+  PcRenderFlowImages<RenderFlows::GBuffer, MAX_FRAMES_IN_FLIGHT>
+      &m_dependencyImages = s_gBufferImages;
 
   AttachmentsVk m_attachmentsVk{};
   DescriptorSetsVk m_descriptorSetsVk{};
 
   RenderPassVk m_renderPass;
-  PcFramesFramebuffers m_framebuffers;
+  PcFramesFramebuffers<MAX_FRAMES_IN_FLIGHT> m_framebuffers;
 
   // Pipelines
   LightingPipelineVk *m_lightingPipeline;

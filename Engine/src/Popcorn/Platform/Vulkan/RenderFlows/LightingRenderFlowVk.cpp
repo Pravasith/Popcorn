@@ -32,38 +32,41 @@ void LightingRenderFlowVk::CreateAttachments() {
   // --- Create Images ---------------------------------------------------------
   VkImageCreateInfo lightImageInfo;
   ImageVk::GetDefaultImageCreateInfo(lightImageInfo, swapchainExtent.width,
-                                     swapchainExtent.height);
+                                     swapchainExtent.height, lightFormat);
   lightImageInfo.format = lightFormat;
   lightImageInfo.usage =
       VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
   VmaAllocationCreateInfo lightImageAlloc{.usage = VMA_MEMORY_USAGE_AUTO};
 
-  ImageVk &lightImageRef = m_imagesVk.lightImage;
-  lightImageRef.CreateVmaImage(lightImageInfo, lightImageAlloc);
+  for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+    ImageVk &lightImageRef = m_imagesVk.lightImages[i];
+    lightImageRef.CreateVmaImage(lightImageInfo, lightImageAlloc);
 
-  //
-  // --- Image views -----------------------------------------------------------
-  VkImageViewCreateInfo lightImageViewInfo{};
-  ImageVk::GetDefaultImageViewCreateInfo(lightImageViewInfo,
-                                         lightImageRef.GetVkImage());
-  lightImageViewInfo.format = lightFormat;
-  lightImageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    //
+    // --- Image views
+    // -----------------------------------------------------------
+    VkImageViewCreateInfo lightImageViewInfo{};
+    ImageVk::GetDefaultImageViewCreateInfo(
+        lightImageViewInfo, lightImageRef.GetVkImage(), lightFormat);
+    lightImageViewInfo.format = lightFormat;
+    lightImageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 
-  lightImageRef.CreateImageView(lightImageViewInfo);
+    lightImageRef.CreateImageView(lightImageViewInfo);
 
-  //
-  // --- Attachments -----------------------------------------------------------
-  VkAttachmentDescription lightImageAttachment{};
-  AttachmentVk::GetDefaultAttachmentDescription(lightImageAttachment);
-  lightImageAttachment.format = lightFormat;
-  lightImageAttachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-  lightImageAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    //
+    // --- Attachments
+    // -----------------------------------------------------------
+    VkAttachmentDescription lightImageAttachment{};
+    AttachmentVk::GetDefaultAttachmentDescription(lightImageAttachment);
+    lightImageAttachment.format = lightFormat;
+    lightImageAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    lightImageAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-  m_attachmentsVk.lightAttachment.SetImageVk(&lightImageRef);
-
-  m_attachmentsVk.lightAttachment.SetAttachmentDescription(
-      lightImageAttachment);
+    m_attachmentsVk.lightAttachments[i].SetImageVk(&lightImageRef);
+    m_attachmentsVk.lightAttachments[i].SetAttachmentDescription(
+        lightImageAttachment);
+  }
 }
 
 //
@@ -76,10 +79,13 @@ void LightingRenderFlowVk::CreateAttachments() {
 // --- CREATE RENDER PASS ------------------------------------------------------
 //
 void LightingRenderFlowVk::CreateRenderPass() {
+  constexpr uint32_t arbitrarilyChosenFrameIndex = 0;
+
   //
   // --- Attachments -----------------------------------------------------------
   VkAttachmentDescription attachments[]{
-      m_attachmentsVk.lightAttachment.GetAttachmentDescription()};
+      m_attachmentsVk.lightAttachments[arbitrarilyChosenFrameIndex]
+          .GetAttachmentDescription()};
 
   //
   // --- Attachment references -------------------------------------------------
@@ -105,13 +111,15 @@ void LightingRenderFlowVk::CreateRenderPass() {
   dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
   dependency.dstSubpass = 0;
   dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                            VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+                            VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT |
+                            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
   dependency.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
   dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
                              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
   dependency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT |
                              VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-                             VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
+                             VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
+                             VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
   dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
   //
@@ -137,23 +145,27 @@ void LightingRenderFlowVk::CreateRenderPass() {
 // --- CREATE FRAMEBUFFER ------------------------------------------------------
 // --- CREATE FRAMEBUFFER ------------------------------------------------------
 //
-void LightingRenderFlowVk::CreateFramebuffer() {
+void LightingRenderFlowVk::CreateFramebuffers() {
   const auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
 
-  std::vector<VkImageView> attachments{m_imagesVk.lightImage.GetVkImageView()};
+  for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
 
-  VkFramebufferCreateInfo createInfo{};
-  FramebuffersVk::GetDefaultFramebufferState(createInfo);
+    std::vector<VkImageView> attachments{
+        m_imagesVk.lightImages[i].GetVkImageView()};
 
-  createInfo.renderPass = m_renderPass.GetVkRenderPass();
-  createInfo.pAttachments = attachments.data();
-  createInfo.attachmentCount = attachments.size();
-  createInfo.width = swapchainExtent.width;
-  createInfo.height = swapchainExtent.height;
-  createInfo.layers = 1;
+    VkFramebufferCreateInfo createInfo{};
+    FramebuffersVk::GetDefaultFramebufferState(createInfo);
 
-  FramebuffersVk::CreateVkFramebuffer(ContextVk::Device()->GetDevice(),
-                                      createInfo, m_framebuffer);
+    createInfo.renderPass = m_renderPass.GetVkRenderPass();
+    createInfo.pAttachments = attachments.data();
+    createInfo.attachmentCount = attachments.size();
+    createInfo.width = swapchainExtent.width;
+    createInfo.height = swapchainExtent.height;
+    createInfo.layers = 1;
+
+    FramebuffersVk::CreateVkFramebuffer(ContextVk::Device()->GetDevice(),
+                                        createInfo, m_framebuffers[i]);
+  }
 };
 
 void LightingRenderFlowVk::CreateAndAllocDescriptors() {
@@ -186,17 +198,23 @@ void LightingRenderFlowVk::CreateAndAllocDescriptors() {
         DescriptorSets::LightingSet>(properties.limits);
 
     VkDescriptorImageInfo albedoImageInfo{};
-    albedoImageInfo.imageView = m_dependencyImages.albedoImage.GetVkImageView();
+    albedoImageInfo.imageView =
+        m_dependencyImages.albedoImages[i].GetVkImageView();
     albedoImageInfo.sampler = s_samplersVk.frameSampler.GetVkSampler();
     albedoImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
     VkDescriptorImageInfo depthImageInfo{};
-    depthImageInfo.imageView = m_dependencyImages.depthImage.GetVkImageView();
+    depthImageInfo.imageView =
+        m_dependencyImages.depthImages[i].GetVkImageView();
     depthImageInfo.sampler = s_samplersVk.frameSampler.GetVkSampler();
-    depthImageInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+    depthImageInfo.imageLayout =
+        m_dependencyImages.depthImages[i].FormatHasStencilComponent()
+            ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+            : VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
 
     VkDescriptorImageInfo normalImageInfo{};
-    normalImageInfo.imageView = m_dependencyImages.normalImage.GetVkImageView();
+    normalImageInfo.imageView =
+        m_dependencyImages.normalImages[i].GetVkImageView();
     normalImageInfo.sampler = s_samplersVk.frameSampler.GetVkSampler();
     normalImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
@@ -205,8 +223,7 @@ void LightingRenderFlowVk::CreateAndAllocDescriptors() {
     lightWrite.dstSet = m_descriptorSetsVk.lightingSets[i];
     lightWrite.dstBinding = 0;
     lightWrite.dstArrayElement = 0;
-    lightWrite.descriptorType =
-        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; // is this correct?
+    lightWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     lightWrite.descriptorCount = 1;
     lightWrite.pBufferInfo = &lightBufferInfo;
     lightWrite.pImageInfo = nullptr;
@@ -217,8 +234,7 @@ void LightingRenderFlowVk::CreateAndAllocDescriptors() {
     albedoWrite.dstSet = m_descriptorSetsVk.lightingSets[i];
     albedoWrite.dstBinding = 1;
     albedoWrite.dstArrayElement = 0;
-    albedoWrite.descriptorType =
-        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; // is this correct?
+    albedoWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     albedoWrite.descriptorCount = 1;
     albedoWrite.pBufferInfo = nullptr;
     albedoWrite.pImageInfo = &albedoImageInfo;
@@ -229,8 +245,7 @@ void LightingRenderFlowVk::CreateAndAllocDescriptors() {
     depthWrite.dstSet = m_descriptorSetsVk.lightingSets[i];
     depthWrite.dstBinding = 2;
     depthWrite.dstArrayElement = 0;
-    depthWrite.descriptorType =
-        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; // is this correct?
+    depthWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     depthWrite.descriptorCount = 1;
     depthWrite.pBufferInfo = nullptr;
     depthWrite.pImageInfo = &depthImageInfo;
@@ -241,8 +256,7 @@ void LightingRenderFlowVk::CreateAndAllocDescriptors() {
     normalWrite.dstSet = m_descriptorSetsVk.lightingSets[i];
     normalWrite.dstBinding = 3;
     normalWrite.dstArrayElement = 0;
-    normalWrite.descriptorType =
-        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; // is this correct?
+    normalWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     normalWrite.descriptorCount = 1;
     normalWrite.pBufferInfo = nullptr;
     normalWrite.pImageInfo = &normalImageInfo;
@@ -264,11 +278,13 @@ void LightingRenderFlowVk::CreateAndAllocDescriptors() {
 // --- CLEAN UP ----------------------------------------------------------------
 // --- CLEAN UP ----------------------------------------------------------------
 //
-void LightingRenderFlowVk::DestroyFramebuffer() {
-  if (m_framebuffer != VK_NULL_HANDLE) {
-    FramebuffersVk::DestroyVkFramebuffer(ContextVk::Device()->GetDevice(),
-                                         m_framebuffer);
-    m_framebuffer = VK_NULL_HANDLE;
+void LightingRenderFlowVk::DestroyFramebuffers() {
+  for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+    if (m_framebuffers[i] != VK_NULL_HANDLE) {
+      FramebuffersVk::DestroyVkFramebuffer(ContextVk::Device()->GetDevice(),
+                                           m_framebuffers[i]);
+      m_framebuffers[i] = VK_NULL_HANDLE;
+    }
   }
 };
 
@@ -279,7 +295,9 @@ void LightingRenderFlowVk::DestroyRenderPass() {
 };
 
 void LightingRenderFlowVk::DestroyAttachments() {
-  m_imagesVk.lightImage.Destroy();
+  for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+    m_imagesVk.lightImages[i].Destroy();
+  }
 };
 
 GFX_NAMESPACE_END
