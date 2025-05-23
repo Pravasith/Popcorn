@@ -8,21 +8,20 @@
 
 HIGH PRIORITY:
 ----------------------------------------------------------------------------
-:: Pipeline creation
-
-:: Change composite pass attachments -> retrieve from swapchain class
-   instead of making them inside composite pass
-
-:: Duplicate attachments (count - max frame per flight each) so you can
-   use in the draw call like -
-   draw(frameNumber) { ... use(att[frameNumber]) };
+:: Pipeline creation -- light pass and final pass left
 
 :: Redesign Draw call - Refactor - 1 day max. - also handle framebuffer
    resize
 
 :: Update camera(fov, aspect ratio, .etc) on FrameBufferResize
-
 :: Write camera class properly.
+
+:: Change composite pass attachments -> retrieve from swapchain class
+   instead of making them inside composite pass -- done
+
+:: Duplicate attachments (count - max frame per flight each) so you can
+   use in the draw call like -
+   draw(frameNumber) { ... use(att[frameNumber]) }; -- done
 
 :: Optimise space by allocating one model matrix per mesh, not per submesh
 
