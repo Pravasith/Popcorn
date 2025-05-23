@@ -12,7 +12,6 @@
 #include "Mesh.h"
 #include "Popcorn/Loaders/LoadersDefs.h"
 #include "Shader.h"
-#include "Sources.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstring>

@@ -2,6 +2,8 @@
 
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include <array>
+#include <cstdint>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -101,9 +103,18 @@ public:
     renderPassInfo.framebuffer = frameBuffer;
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = frameExtent;
-    VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
-    renderPassInfo.clearValueCount = 1;
-    renderPassInfo.pClearValues = &clearColor;
+
+    static constexpr VkClearValue clearAlbedo = {{0.0f, 0.0f, 0.0f, 1.0f}};
+    static constexpr VkClearValue clearDepth = {1.0f, 0.0f};
+    static constexpr VkClearValue clearNormal = {{0.0f, 0.0f, 1.0f, 0.0f}};
+    static constexpr VkClearValue clearRoughnessMetallic = {
+        {0.0f, 0.0f, 0.0f, 0.0f}};
+
+    static constexpr std::array<VkClearValue, 4> clearValues{
+        clearAlbedo, clearDepth, clearNormal, clearRoughnessMetallic};
+
+    renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+    renderPassInfo.pClearValues = clearValues.data();
   };
 
   void RecordBeginRenderPassCommand(

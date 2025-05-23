@@ -1,4 +1,5 @@
 #include "PipelineVk.h"
+#include "ContextVk.h"
 #include "GlobalMacros.h"
 #include <vulkan/vulkan_core.h>
 
@@ -151,9 +152,9 @@ void PipelineVk<PipelineTypes::GraphicsType>::DestroyPipelineLayout(
   vkDestroyPipelineLayout(device, m_pipelineLayout, nullptr);
 };
 
-template <>
-void PipelineVk<PipelineTypes::GraphicsType>::Destroy(const VkDevice &device) {
-  PC_VK_NULL_CHECK(device)
+template <> void PipelineVk<PipelineTypes::GraphicsType>::Destroy() {
+  const auto &device = ContextVk::Device()->GetDevice();
+
   PC_VK_NULL_CHECK(m_pipeline)
   DestroyPipelineLayout(device);
 

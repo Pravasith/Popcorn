@@ -4,7 +4,6 @@
 #include "GlobalMacros.h"
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
-#include <tiny_gltf.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN

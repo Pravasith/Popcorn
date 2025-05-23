@@ -113,11 +113,11 @@ void RendererVk::CreateRenderFlows() {
 };
 
 void RendererVk::DestroyRenderFlows() {
-  ShaderLibrary::Destroy();
-
   for (auto &renderFlow : s_renderFlows) {
     renderFlow->DestroyPipelines();
   }
+
+  ShaderLibrary::Destroy();
 
   RenderFlowVk::DestroySamplers();
   RenderFlowVk::FreeMemory();

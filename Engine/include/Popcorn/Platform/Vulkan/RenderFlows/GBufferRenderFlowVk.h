@@ -62,6 +62,7 @@ private:
   PcFramesFramebuffers<MAX_FRAMES_IN_FLIGHT> m_framebuffers;
 
   BasicMatPipelineVk *m_basicMatPipeline = nullptr;
+  PbrMatPipelineVk *m_pbrMatPipeline = nullptr;
 };
 
 GFX_NAMESPACE_END

@@ -4,9 +4,10 @@
 #include "ContextVk.h"
 #include "DescriptorLayoutsVk.h"
 #include "DescriptorPoolsVk.h"
-#include "FramebuffersVk.h"
+#include "FramebufferVk.h"
 #include "ImageVk.h"
 #include "Memory/MemoryVk.h"
+#include "Popcorn/Loaders/LoadersDefs.h"
 #include "RenderPassVk.h"
 #include <algorithm>
 #include <cstdint>
@@ -164,6 +165,12 @@ void GBufferRenderFlowVk::CreateAttachments() {
             : VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
     depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    depthAttachment.stencilLoadOp = depthImage.FormatHasStencilComponent()
+                                        ? VK_ATTACHMENT_LOAD_OP_DONT_CARE
+                                        : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    depthAttachment.stencilStoreOp = depthImage.FormatHasStencilComponent()
+                                         ? VK_ATTACHMENT_STORE_OP_STORE
+                                         : VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
     VkAttachmentDescription normalAttachment{};
     AttachmentVk::GetDefaultAttachmentDescription(normalAttachment);
@@ -247,14 +254,14 @@ void GBufferRenderFlowVk::CreateRenderPass() {
   AttachmentVk::GetAttachmentRef(roughnessMetallicRef, 3);
   roughnessMetallicRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-  VkAttachmentReference colorAttachments[]{albedoRef, normalRef,
-                                           roughnessMetallicRef};
+  VkAttachmentReference colorAttachmentsRefs[]{albedoRef, normalRef,
+                                               roughnessMetallicRef};
 
   //
   // --- Create Subpasses ------------------------------------------------------
   VkSubpassDescription subpass{};
   RenderPassVk::GetDefaultSubpassDescription(subpass);
-  subpass.pColorAttachments = colorAttachments;
+  subpass.pColorAttachments = colorAttachmentsRefs;
   subpass.pDepthStencilAttachment = &depthRef;
   subpass.colorAttachmentCount = 3;
   subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
@@ -266,13 +273,20 @@ void GBufferRenderFlowVk::CreateRenderPass() {
   VkSubpassDependency dependency{};
   dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
   dependency.dstSubpass = 0;
+  //
+  // We're taking into consideration the prev frame's stages for the same
+  // gbuffer pass (not previous light/postfx... etc renderpasses/subpasses). The
+  // depth, color writes need to finish in the prev's gbuffer pass before we
+  // start writing depth/color writes in the current frame. Remember -
+  // MaxFramesPerFlight number of frames run in parallel.
   dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
                             VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
                             VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
   dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
                             VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
                             VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-  dependency.srcAccessMask = 0;
+  dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
+                             VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
   dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
                              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
   dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
@@ -312,7 +326,7 @@ void GBufferRenderFlowVk::CreateFramebuffers() {
     };
 
     VkFramebufferCreateInfo createInfo{};
-    FramebuffersVk::GetDefaultFramebufferState(createInfo);
+    FramebufferVk::GetDefaultFramebufferState(createInfo);
     createInfo.renderPass = m_renderPass.GetVkRenderPass();
     createInfo.pAttachments = attachments.data();
     createInfo.attachmentCount = attachments.size();
@@ -320,8 +334,8 @@ void GBufferRenderFlowVk::CreateFramebuffers() {
     createInfo.height = swapchainExtent.height;
     createInfo.layers = 1;
 
-    FramebuffersVk::CreateVkFramebuffer(ContextVk::Device()->GetDevice(),
-                                        createInfo, m_framebuffers[i]);
+    FramebufferVk::CreateVkFramebuffer(ContextVk::Device()->GetDevice(),
+                                       createInfo, m_framebuffers[i]);
   }
 };
 
@@ -487,6 +501,19 @@ void GBufferRenderFlowVk::CreatePipelines() {
   // - Material-type specific shader codes (for custom shaders, user needs to
   //   provide as attachment in the material)
   // - Custom shader data - uniforms & defines
+
+  m_basicMatPipeline->Create(GltfVertexBufferLayout,
+                             m_renderPass.GetVkRenderPass());
+  m_pbrMatPipeline->Create(GltfVertexBufferLayout,
+                           m_renderPass.GetVkRenderPass());
+};
+
+void GBufferRenderFlowVk::DestroyPipelines() {
+  m_pbrMatPipeline->Destroy();
+  m_pbrMatPipeline = nullptr;
+
+  m_basicMatPipeline->Destroy();
+  m_basicMatPipeline = nullptr;
 };
 
 //
@@ -500,8 +527,8 @@ void GBufferRenderFlowVk::CreatePipelines() {
 void GBufferRenderFlowVk::DestroyFramebuffers() {
   for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
     if (m_framebuffers[i] != VK_NULL_HANDLE) {
-      FramebuffersVk::DestroyVkFramebuffer(ContextVk::Device()->GetDevice(),
-                                           m_framebuffers[i]);
+      FramebufferVk::DestroyVkFramebuffer(ContextVk::Device()->GetDevice(),
+                                          m_framebuffers[i]);
       m_framebuffers[i] = VK_NULL_HANDLE;
     }
   }

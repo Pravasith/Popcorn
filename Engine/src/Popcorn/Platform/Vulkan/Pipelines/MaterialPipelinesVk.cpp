@@ -1,3 +1,5 @@
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include "MaterialPipelinesVk.h"
 #include "BufferObjectsVk.h"
 #include "ContextVk.h"
@@ -6,6 +8,8 @@
 #include "MaterialTypes.h"
 #include "PipelineUtilsVk.h"
 #include "Shader.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -13,7 +17,14 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-void BasicMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout) {
+//
+//
+// --- BASIC MATERIAL PIPELINE -------------------------------------------------
+// --- BASIC MATERIAL PIPELINE -------------------------------------------------
+// --- BASIC MATERIAL PIPELINE -------------------------------------------------
+//
+void BasicMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
+                                const VkRenderPass &renderPass) {
   const VkDevice &device = ContextVk::Device()->GetDevice();
 
   const Buffer &vertShaderBuffer =
@@ -59,28 +70,62 @@ void BasicMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout) {
       pipelineState.rasterizationState);
   PipelineUtilsVk::GetDefaultMultisampleState(pipelineState.multisampleState);
   PipelineUtilsVk::GetDefaultDepthStencilState(pipelineState.depthStencilState);
-  // pipelineState.depthStencilState.depthTestEnable = VK_TRUE;
-  // pipelineState.depthStencilState.depthWriteEnable = VK_TRUE;
-  // TODO: Read depth-buffering & implement
+  pipelineState.depthStencilState.depthTestEnable = VK_TRUE;
+  pipelineState.depthStencilState.depthWriteEnable = VK_TRUE;
+  pipelineState.depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS;
+
+  pipelineState.depthStencilState.depthBoundsTestEnable = VK_FALSE;
+  pipelineState.depthStencilState.minDepthBounds = 0.0f;
+  pipelineState.depthStencilState.maxDepthBounds = 1.0f;
+
+  pipelineState.depthStencilState.stencilTestEnable = VK_FALSE;
+  pipelineState.depthStencilState.front = {};
+  pipelineState.depthStencilState.back = {};
+
   PipelineUtilsVk::GetDefaultColorBlendingState(
       pipelineState.colorBlendState); // Disabled
   PipelineUtilsVk::GetDefaultPipelineLayoutCreateInfo(
       pipelineState.pipelineLayout);
 
-  // TODO: Get descriptor layouts and attach
+  auto *layouts = ContextVk::DescriptorLayouts();
+  VkDescriptorSetLayout &cameraLayout =
+      layouts->GetLayout<DescriptorSets::CameraSet>();
+  VkDescriptorSetLayout &submeshLayout =
+      layouts->GetLayout<DescriptorSets::SubmeshSet>();
+  VkDescriptorSetLayout &basicMatLayout =
+      layouts->GetLayout<DescriptorSets::BasicMatSet>();
+
+  std::array<VkDescriptorSetLayout, 3> dSetLayouts = {
+      cameraLayout, submeshLayout, basicMatLayout};
+
+  pipelineState.pipelineLayout.setLayoutCount = dSetLayouts.size();
+  pipelineState.pipelineLayout.pSetLayouts = dSetLayouts.data();
+
+  CreatePipelineLayout(device, pipelineState.pipelineLayout);
+  CreateVkPipeline(device, pipelineState, renderPass);
 
   // DESTROY SHADER MODULES
   PC_DestroyShaderModule(device, vertShaderModule);
   PC_DestroyShaderModule(device, fragShaderModule);
 };
 
-void PbrMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout) {
+//
+//
+//
+//
+// --- PBR MATERIAL PIPELINE ---------------------------------------------------
+// --- PBR MATERIAL PIPELINE ---------------------------------------------------
+// --- PBR MATERIAL PIPELINE ---------------------------------------------------
+//
+
+void PbrMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
+                              const VkRenderPass &renderPass) {
   const VkDevice &device = ContextVk::Device()->GetDevice();
 
   const Buffer &vertShaderBuffer =
-      Material<MaterialTypes::BasicMat>::GetShader(ShaderStages::VertexBit);
+      Material<MaterialTypes::PbrMat>::GetShader(ShaderStages::VertexBit);
   const Buffer &fragShaderBuffer =
-      Material<MaterialTypes::BasicMat>::GetShader(ShaderStages::FragmentBit);
+      Material<MaterialTypes::PbrMat>::GetShader(ShaderStages::FragmentBit);
 
   auto vertShaderModule = PC_CreateShaderModule(device, vertShaderBuffer);
   auto fragShaderModule = PC_CreateShaderModule(device, fragShaderBuffer);
@@ -120,15 +165,39 @@ void PbrMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout) {
       pipelineState.rasterizationState);
   PipelineUtilsVk::GetDefaultMultisampleState(pipelineState.multisampleState);
   PipelineUtilsVk::GetDefaultDepthStencilState(pipelineState.depthStencilState);
-  // pipelineState.depthStencilState.depthTestEnable = VK_TRUE;
-  // pipelineState.depthStencilState.depthWriteEnable = VK_TRUE;
-  // TODO: Read depth-buffering & implement
+  pipelineState.depthStencilState.depthTestEnable = VK_TRUE;
+  pipelineState.depthStencilState.depthWriteEnable = VK_TRUE;
+  pipelineState.depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS;
+
+  pipelineState.depthStencilState.depthBoundsTestEnable = VK_FALSE;
+  pipelineState.depthStencilState.minDepthBounds = 0.0f;
+  pipelineState.depthStencilState.maxDepthBounds = 1.0f;
+
+  pipelineState.depthStencilState.stencilTestEnable = VK_FALSE;
+  pipelineState.depthStencilState.front = {};
+  pipelineState.depthStencilState.back = {};
+
   PipelineUtilsVk::GetDefaultColorBlendingState(
       pipelineState.colorBlendState); // Disabled
   PipelineUtilsVk::GetDefaultPipelineLayoutCreateInfo(
       pipelineState.pipelineLayout);
 
-  // TODO: Get descriptor layouts and attach
+  auto *layouts = ContextVk::DescriptorLayouts();
+  VkDescriptorSetLayout &cameraLayout =
+      layouts->GetLayout<DescriptorSets::CameraSet>();
+  VkDescriptorSetLayout &submeshLayout =
+      layouts->GetLayout<DescriptorSets::SubmeshSet>();
+  VkDescriptorSetLayout &pbrMatLayout =
+      layouts->GetLayout<DescriptorSets::PbrMatSet>();
+
+  std::array<VkDescriptorSetLayout, 3> dSetLayouts = {
+      cameraLayout, submeshLayout, pbrMatLayout};
+
+  pipelineState.pipelineLayout.setLayoutCount = dSetLayouts.size();
+  pipelineState.pipelineLayout.pSetLayouts = dSetLayouts.data();
+
+  CreatePipelineLayout(device, pipelineState.pipelineLayout);
+  CreateVkPipeline(device, pipelineState, renderPass);
 
   // DESTROY SHADER MODULES
   PC_DestroyShaderModule(device, vertShaderModule);

@@ -19,7 +19,8 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "BasicMatPipelineVk");
   };
 
-  virtual void Create(const BufferDefs::Layout &vertexBufferLayout) override;
+  virtual void Create(const BufferDefs::Layout &vertexBufferLayout,
+                      const VkRenderPass &renderPass) override;
 };
 
 //
@@ -33,7 +34,8 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "PbrMatPipelineVk");
   };
 
-  virtual void Create(const BufferDefs::Layout &vertexBufferLayout) override;
+  virtual void Create(const BufferDefs::Layout &vertexBufferLayout,
+                      const VkRenderPass &renderPass) override;
 };
 
 GFX_NAMESPACE_END

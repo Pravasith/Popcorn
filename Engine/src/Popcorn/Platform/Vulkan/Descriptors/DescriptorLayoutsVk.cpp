@@ -17,7 +17,8 @@ DescriptorLayoutsVk::GetLayout<DescriptorSets::CameraSet>() {
     binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     binding.binding = 0;
     binding.stageFlags =
-        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+        VK_SHADER_STAGE_VERTEX_BIT |  // Gbuffer pass vertex shader
+        VK_SHADER_STAGE_FRAGMENT_BIT; // Light pass frag shader
     binding.descriptorCount = 1;
     binding.pImmutableSamplers = nullptr;
 

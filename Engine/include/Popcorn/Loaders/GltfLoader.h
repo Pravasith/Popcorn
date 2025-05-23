@@ -9,7 +9,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #endif
-
 #include "BufferObjects.h"
 #include "GlobalMacros.h"
 #include <glm/fwd.hpp>
@@ -19,7 +18,6 @@
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
-
 
 class GltfLoader {
 public:
