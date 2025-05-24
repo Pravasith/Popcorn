@@ -4,7 +4,6 @@
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
 #include <cstdint>
-#include <stdexcept>
 #include <vector>
 #include <vulkan/vulkan_core.h>
 

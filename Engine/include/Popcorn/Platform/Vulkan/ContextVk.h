@@ -9,7 +9,6 @@
 #include "GlobalMacros.h"
 #include "Memory/MemoryAllocatorVk.h"
 #include "Memory/MemoryVk.h"
-#include "PipelineFactoryVk.h"
 #include "Popcorn/Core/Window.h"
 #include "SurfaceVk.h"
 #include "SwapchainVk.h"
@@ -109,13 +108,6 @@ public:
     return s_descriptorLayoutsVk;
   }
 
-  static PipelineFactoryVk *PipelineFactory() {
-    if (!s_pipelineFactoryVk) {
-      throw std::runtime_error("PipelineFactoryVk is null");
-    }
-    return s_pipelineFactoryVk;
-  }
-
   void VulkanInit(const Window &appWin);
   void VulkanCleanUp();
 
@@ -140,7 +132,6 @@ private:
     s_memoryVk = MemoryVk::Get();
     s_descriptorPoolsVk = DescriptorPoolsVk::Get();
     s_descriptorLayoutsVk = DescriptorLayoutsVk::Get();
-    s_pipelineFactoryVk = PipelineFactoryVk::Get();
 
     PC_PRINT("CREATED", TagType::Constr, "ContextVk.h")
   };
@@ -158,7 +149,6 @@ private:
   static MemoryAllocatorVk *s_memoryAllocatorVk;
   static DescriptorPoolsVk *s_descriptorPoolsVk;
   static DescriptorLayoutsVk *s_descriptorLayoutsVk;
-  static PipelineFactoryVk *s_pipelineFactoryVk;
 };
 
 GFX_NAMESPACE_END

@@ -1,10 +1,11 @@
+#include "PipelineDefsVk.h"
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include "MaterialPipelinesVk.h"
 #include "BufferObjectsVk.h"
 #include "ContextVk.h"
 #include "GlobalMacros.h"
 #include "Material.h"
+#include "MaterialPipelinesVk.h"
 #include "MaterialTypes.h"
 #include "PipelineUtilsVk.h"
 #include "Shader.h"
@@ -41,51 +42,24 @@ void BasicMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
   SetShaderStagesMask(ShaderStages::VertexBit | ShaderStages::FragmentBit);
   CreateShaderStageCreateInfos(shaderModules);
 
-  GfxPipelineState pipelineState{};
-  PipelineUtilsVk::GetDefaultDynamicState(pipelineState.dynamicState);
-  PipelineUtilsVk::GetDefaultVertexInputState(pipelineState.vertexInputState);
-
-  // Vertex input descriptions
   VkVertexInputBindingDescription bindingDescription{};
   VertexBufferVk::GetDefaultVertexInputBindingDescription(vertexBufferLayout,
                                                           bindingDescription);
   bindingDescription.binding = 0;
 
-  std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
-  VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
-      vertexBufferLayout, attributeDescriptions);
+  GfxPipelineState pipelineState{};
+  PipelineUtilsVk::GetDefaultGfxPipelineState(
+      vertexBufferLayout, bindingDescription, pipelineState);
 
-  pipelineState.vertexInputState.vertexBindingDescriptionCount = 1;
-  pipelineState.vertexInputState.vertexAttributeDescriptionCount =
-      static_cast<uint32_t>(attributeDescriptions.size());
-  pipelineState.vertexInputState.pVertexBindingDescriptions =
-      &bindingDescription;
-  pipelineState.vertexInputState.pVertexAttributeDescriptions =
-      attributeDescriptions.data();
-
-  PipelineUtilsVk::GetDefaultInputAssemblyState(
-      pipelineState.inputAssemblyState);
-  PipelineUtilsVk::GetDefaultViewportState(pipelineState.viewportState);
-  PipelineUtilsVk::GetDefaultRasterizationState(
-      pipelineState.rasterizationState);
-  PipelineUtilsVk::GetDefaultMultisampleState(pipelineState.multisampleState);
-  PipelineUtilsVk::GetDefaultDepthStencilState(pipelineState.depthStencilState);
   pipelineState.depthStencilState.depthTestEnable = VK_TRUE;
   pipelineState.depthStencilState.depthWriteEnable = VK_TRUE;
   pipelineState.depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS;
-
   pipelineState.depthStencilState.depthBoundsTestEnable = VK_FALSE;
   pipelineState.depthStencilState.minDepthBounds = 0.0f;
   pipelineState.depthStencilState.maxDepthBounds = 1.0f;
-
   pipelineState.depthStencilState.stencilTestEnable = VK_FALSE;
   pipelineState.depthStencilState.front = {};
   pipelineState.depthStencilState.back = {};
-
-  PipelineUtilsVk::GetDefaultColorBlendingState(
-      pipelineState.colorBlendState); // Disabled
-  PipelineUtilsVk::GetDefaultPipelineLayoutCreateInfo(
-      pipelineState.pipelineLayout);
 
   auto *layouts = ContextVk::DescriptorLayouts();
   VkDescriptorSetLayout &cameraLayout =
@@ -94,10 +68,8 @@ void BasicMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
       layouts->GetLayout<DescriptorSets::SubmeshSet>();
   VkDescriptorSetLayout &basicMatLayout =
       layouts->GetLayout<DescriptorSets::BasicMatSet>();
-
   std::array<VkDescriptorSetLayout, 3> dSetLayouts = {
       cameraLayout, submeshLayout, basicMatLayout};
-
   pipelineState.pipelineLayout.setLayoutCount = dSetLayouts.size();
   pipelineState.pipelineLayout.pSetLayouts = dSetLayouts.data();
 
@@ -136,63 +108,34 @@ void PbrMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
   SetShaderStagesMask(ShaderStages::VertexBit | ShaderStages::FragmentBit);
   CreateShaderStageCreateInfos(shaderModules);
 
-  GfxPipelineState pipelineState{};
-  PipelineUtilsVk::GetDefaultDynamicState(pipelineState.dynamicState);
-  PipelineUtilsVk::GetDefaultVertexInputState(pipelineState.vertexInputState);
-
-  // Vertex input descriptions
   VkVertexInputBindingDescription bindingDescription{};
   VertexBufferVk::GetDefaultVertexInputBindingDescription(vertexBufferLayout,
                                                           bindingDescription);
   bindingDescription.binding = 0;
 
-  std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
-  VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
-      vertexBufferLayout, attributeDescriptions);
+  GfxPipelineState pipelineState{};
+  PipelineUtilsVk::GetDefaultGfxPipelineState(
+      vertexBufferLayout, bindingDescription, pipelineState);
 
-  pipelineState.vertexInputState.vertexBindingDescriptionCount = 1;
-  pipelineState.vertexInputState.vertexAttributeDescriptionCount =
-      static_cast<uint32_t>(attributeDescriptions.size());
-  pipelineState.vertexInputState.pVertexBindingDescriptions =
-      &bindingDescription;
-  pipelineState.vertexInputState.pVertexAttributeDescriptions =
-      attributeDescriptions.data();
-
-  PipelineUtilsVk::GetDefaultInputAssemblyState(
-      pipelineState.inputAssemblyState);
-  PipelineUtilsVk::GetDefaultViewportState(pipelineState.viewportState);
-  PipelineUtilsVk::GetDefaultRasterizationState(
-      pipelineState.rasterizationState);
-  PipelineUtilsVk::GetDefaultMultisampleState(pipelineState.multisampleState);
-  PipelineUtilsVk::GetDefaultDepthStencilState(pipelineState.depthStencilState);
   pipelineState.depthStencilState.depthTestEnable = VK_TRUE;
   pipelineState.depthStencilState.depthWriteEnable = VK_TRUE;
   pipelineState.depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS;
-
   pipelineState.depthStencilState.depthBoundsTestEnable = VK_FALSE;
   pipelineState.depthStencilState.minDepthBounds = 0.0f;
   pipelineState.depthStencilState.maxDepthBounds = 1.0f;
-
   pipelineState.depthStencilState.stencilTestEnable = VK_FALSE;
   pipelineState.depthStencilState.front = {};
   pipelineState.depthStencilState.back = {};
-
-  PipelineUtilsVk::GetDefaultColorBlendingState(
-      pipelineState.colorBlendState); // Disabled
-  PipelineUtilsVk::GetDefaultPipelineLayoutCreateInfo(
-      pipelineState.pipelineLayout);
 
   auto *layouts = ContextVk::DescriptorLayouts();
   VkDescriptorSetLayout &cameraLayout =
       layouts->GetLayout<DescriptorSets::CameraSet>();
   VkDescriptorSetLayout &submeshLayout =
       layouts->GetLayout<DescriptorSets::SubmeshSet>();
-  VkDescriptorSetLayout &pbrMatLayout =
+  VkDescriptorSetLayout &basicMatLayout =
       layouts->GetLayout<DescriptorSets::PbrMatSet>();
-
   std::array<VkDescriptorSetLayout, 3> dSetLayouts = {
-      cameraLayout, submeshLayout, pbrMatLayout};
-
+      cameraLayout, submeshLayout, basicMatLayout};
   pipelineState.pipelineLayout.setLayoutCount = dSetLayouts.size();
   pipelineState.pipelineLayout.pSetLayouts = dSetLayouts.data();
 

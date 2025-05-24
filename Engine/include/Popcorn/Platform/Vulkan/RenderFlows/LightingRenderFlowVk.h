@@ -1,6 +1,5 @@
 #pragma once
 
-#include "AttachmentVk.h"
 #include "CommonVk.h"
 #include "GlobalMacros.h"
 #include "LightingPipelinesVk.h"
@@ -59,7 +58,7 @@ private:
   PcFramesFramebuffers<MAX_FRAMES_IN_FLIGHT> m_framebuffers;
 
   // Pipelines
-  LightingPipelineVk *m_lightingPipeline;
+  LightingPipelineVk m_lightingPipelineVk;
 };
 
 GFX_NAMESPACE_END

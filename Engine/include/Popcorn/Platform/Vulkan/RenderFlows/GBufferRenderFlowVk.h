@@ -61,8 +61,8 @@ private:
   RenderPassVk m_renderPass;
   PcFramesFramebuffers<MAX_FRAMES_IN_FLIGHT> m_framebuffers;
 
-  BasicMatPipelineVk *m_basicMatPipeline = nullptr;
-  PbrMatPipelineVk *m_pbrMatPipeline = nullptr;
+  BasicMatPipelineVk m_basicMatPipelineVk;
+  PbrMatPipelineVk m_pbrMatPipelineVk;
 };
 
 GFX_NAMESPACE_END

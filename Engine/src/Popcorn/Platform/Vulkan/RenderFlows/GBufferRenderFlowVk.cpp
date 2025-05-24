@@ -493,27 +493,16 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
 // --- CREATE PIPELINES --------------------------------------------------------
 //
 void GBufferRenderFlowVk::CreatePipelines() {
-  // Create PipelineLayout
-  // Create shaders modules & link them
-
-  // - Vertexbuffer layout
-  // - Enabled shader stage bits
-  // - Material-type specific shader codes (for custom shaders, user needs to
-  //   provide as attachment in the material)
-  // - Custom shader data - uniforms & defines
-
-  m_basicMatPipeline->Create(GltfVertexBufferLayout,
-                             m_renderPass.GetVkRenderPass());
-  m_pbrMatPipeline->Create(GltfVertexBufferLayout,
-                           m_renderPass.GetVkRenderPass());
+  // Draws Gltf models
+  m_basicMatPipelineVk.Create(GltfVertexBufferLayout,
+                              m_renderPass.GetVkRenderPass());
+  m_pbrMatPipelineVk.Create(GltfVertexBufferLayout,
+                            m_renderPass.GetVkRenderPass());
 };
 
 void GBufferRenderFlowVk::DestroyPipelines() {
-  m_pbrMatPipeline->Destroy();
-  m_pbrMatPipeline = nullptr;
-
-  m_basicMatPipeline->Destroy();
-  m_basicMatPipeline = nullptr;
+  m_pbrMatPipelineVk.Destroy();
+  m_basicMatPipelineVk.Destroy();
 };
 
 //

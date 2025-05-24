@@ -5,6 +5,39 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+void PipelineUtilsVk::GetDefaultGfxPipelineState(
+    const BufferDefs::Layout &vertexBufferLayout,
+    const VkVertexInputBindingDescription &bindingDescription,
+    GfxPipelineState &pipelineState) {
+  PipelineUtilsVk::GetDefaultDynamicState(pipelineState.dynamicState);
+  PipelineUtilsVk::GetDefaultVertexInputState(pipelineState.vertexInputState);
+
+  std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
+  VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
+      vertexBufferLayout, attributeDescriptions);
+  pipelineState.vertexInputState.vertexBindingDescriptionCount = 1;
+  pipelineState.vertexInputState.vertexAttributeDescriptionCount =
+      static_cast<uint32_t>(attributeDescriptions.size());
+  pipelineState.vertexInputState.pVertexBindingDescriptions =
+      &bindingDescription;
+  pipelineState.vertexInputState.pVertexAttributeDescriptions =
+      attributeDescriptions.data();
+
+  PipelineUtilsVk::GetDefaultInputAssemblyState(
+      pipelineState.inputAssemblyState);
+  PipelineUtilsVk::GetDefaultViewportState(pipelineState.viewportState);
+  PipelineUtilsVk::GetDefaultRasterizationState(
+      pipelineState.rasterizationState);
+  PipelineUtilsVk::GetDefaultMultisampleState(pipelineState.multisampleState);
+  PipelineUtilsVk::GetDefaultDepthStencilState(
+      pipelineState.depthStencilState); // Disabled
+
+  PipelineUtilsVk::GetDefaultColorBlendingState(
+      pipelineState.colorBlendState); // Disabled
+  PipelineUtilsVk::GetDefaultPipelineLayoutCreateInfo(
+      pipelineState.pipelineLayout); // Disabled
+};
+
 std::vector<VkDynamicState> PipelineUtilsVk::s_dynamicStatesDefault{
     VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
 VkPipelineColorBlendAttachmentState

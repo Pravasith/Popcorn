@@ -1,9 +1,11 @@
 #pragma once
 
 #include "GlobalMacros.h"
+#include "PipelineDefsVk.h"
 #include <vector>
 #include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
+#include "BufferObjectsVk.h"
 #include <GLFW/glfw3.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -11,6 +13,11 @@ GFX_NAMESPACE_BEGIN
 
 class PipelineUtilsVk {
 public:
+  static void GetDefaultGfxPipelineState(
+      const BufferDefs::Layout &vertexBufferLayout,
+      const VkVertexInputBindingDescription &bindingDescription,
+      GfxPipelineState &pipelineState);
+
   static void
   GetDefaultDynamicState(VkPipelineDynamicStateCreateInfo &dynamicState);
 

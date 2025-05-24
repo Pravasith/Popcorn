@@ -1,4 +1,5 @@
 #include "RenderFlows/RenderFlowVk.h"
+#include "CommonVk.h"
 #include "MaterialTypes.h"
 #include "Popcorn/Core/Assert.h"
 #include "SamplerVk.h"
@@ -35,8 +36,10 @@ PcMaterialMap<MaterialTypes::PbrMat> RenderFlowVk::s_pbrMaterials;
 // ------------------------------------------------------------------------
 uint64_t RenderFlowVk::s_submeshCount = 0;
 
-PcRenderFlowImages<GBuffer> RenderFlowVk::s_gBufferImages{};
-PcRenderFlowImages<Lighting> RenderFlowVk::s_lightingImages{};
+PcRenderFlowImages<GBuffer, MAX_FRAMES_IN_FLIGHT>
+    RenderFlowVk::s_gBufferImages{};
+PcRenderFlowImages<Lighting, MAX_FRAMES_IN_FLIGHT>
+    RenderFlowVk::s_lightingImages{};
 PcRenderFlowImages<Composite> RenderFlowVk::s_compositeImages{};
 
 ShaderLibrary *RenderFlowVk::s_shaderLibrary = nullptr;

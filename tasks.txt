@@ -13,6 +13,7 @@ HIGH PRIORITY:
 :: Redesign Draw call - Refactor - 1 day max. - also handle framebuffer
    resize
 
+:: Fix camera in GltfLoader
 :: Update camera(fov, aspect ratio, .etc) on FrameBufferResize
 :: Write camera class properly.
 
