@@ -14,16 +14,16 @@ layout(set = 0, binding = 0) uniform CameraUBO {
 } camera;
 
 layout(set = 1, binding = 0) uniform ObjectUBO {
-    mat4 model;
+    mat4 modelMatrix;
     mat4 normalMatrix;
 } object;
 
 void main() {
-    vec4 vertexPos = object.model * vec4(inPosition, 1.0);
+    vec4 vertexPos = object.modelMatrix * vec4(inPosition, 1.0);
 
     gl_Position = camera.proj * camera.view * vertexPos;
 
     fragPosition = vertexPos.xyz;
-    fragNormal = mat3(object.normalMatrix) * inNormal;
+    fragNormal = normalize(mat3(object.normalMatrix) * inNormal);
     fragUV = inUV;
 }

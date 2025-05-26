@@ -3,7 +3,6 @@
 #include "MathConstants.h"
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/fwd.hpp>
-#include <type_traits>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN

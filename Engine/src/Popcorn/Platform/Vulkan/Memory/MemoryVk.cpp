@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <cstring>
 #include <glm/fwd.hpp>
+#include <glm/matrix.hpp>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -32,7 +33,7 @@ void MemoryVk::ExtractOffsetsMaterialsSubmeshes(
   VkDeviceSize alignment = properties.limits.minUniformBufferOffsetAlignment;
 
   // temps
-  VkDeviceSize vboOffset = 0, iboOffset = 0, worldMatrixOffset = 0;
+  VkDeviceSize vboOffset = 0, iboOffset = 0, submeshUboOffset = 0;
   VkDeviceSize basicMatOffset = 0, pbrMatOffset = 0;
 
   for (auto &[matId, submeshes] : materialSubmeshesMap) {
@@ -52,7 +53,7 @@ void MemoryVk::ExtractOffsetsMaterialsSubmeshes(
     // Extract VBO & IBO & UBO offsets -----------------------------------------
     for (Submesh<T> *submesh : submeshes) {
       m_bufferOffsets.submeshesOffsets[matId].push_back(
-          {vboOffset, iboOffset, worldMatrixOffset});
+          {vboOffset, iboOffset, submeshUboOffset});
 
       VertexBuffer *vertexBuffer = submesh->GetVertexBuffer();
       vboOffset +=
@@ -61,7 +62,7 @@ void MemoryVk::ExtractOffsetsMaterialsSubmeshes(
       IndexBuffer<uint32_t> *indexBuffer = submesh->GetIndexBuffer();
       iboOffset += indexBuffer->GetCount() * sizeof(uint32_t);
 
-      worldMatrixOffset +=
+      submeshUboOffset +=
           PC_AlignCeil(UniformDefs::SubmeshUniform::size, alignment);
     }
   }
@@ -74,7 +75,7 @@ void MemoryVk::ExtractOffsetsMaterialsSubmeshes(
 
   m_bufferViews.submeshVbo += {0, vboOffset};
   m_bufferViews.submeshIbo += {0, iboOffset};
-  m_bufferViews.submeshUbo += {0, worldMatrixOffset};
+  m_bufferViews.submeshUbo += {0, submeshUboOffset};
 }
 
 void MemoryVk::ExtractOffsetsLightsCamerasEmptys(std::vector<Light *> &lights,
@@ -249,9 +250,12 @@ void MemoryVk::FillUbosSubmesh(PcMaterialSubmeshesMap<T> &materialSubmeshesMap,
     for (size_t i = 0; i < submeshes.size(); ++i) {
       Submesh<T> *submesh = submeshes[i];
       glm::mat4 &worldMatrix = submesh->GetParentMesh()->GetWorldMatrix();
+      // Normal matrix is for maintaining the property of normal staying
+      // perpendicular to the tangents of the vertex.
+      glm::mat4 normalMatrix = glm::transpose(glm::inverse(worldMatrix));
 
       PcCopyUniformToMemory<Uniforms::Submesh> copyUniformToMemory{
-          worldMatrix, m_bufferViews, m_bufferOffsets};
+          worldMatrix, normalMatrix, m_bufferViews, m_bufferOffsets};
       copyUniformToMemory(m_uboMappingSet[currentFrame], matId, i);
     }
   };

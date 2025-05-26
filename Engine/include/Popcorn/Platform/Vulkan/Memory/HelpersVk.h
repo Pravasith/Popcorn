@@ -67,10 +67,11 @@ private:
 
 template <> struct PcCopyUniformToMemory<Uniforms::Submesh> {
 public:
-  PcCopyUniformToMemory(glm::mat4 &worldMatrix, PcBufferViews &bfrViews,
-                        PcBufferOffsets &bfrOffsets)
+  PcCopyUniformToMemory(glm::mat4 &worldMatrix, glm::mat4 &normalMatrix,
+                        PcBufferViews &bfrViews, PcBufferOffsets &bfrOffsets)
       : bufferViews(bfrViews), bufferOffsets(bfrOffsets) {
     uniform.worldMatrix = worldMatrix;
+    uniform.normalMatrix = normalMatrix;
   }
 
   void operator()(void *uboMapping, MaterialHashType matId,

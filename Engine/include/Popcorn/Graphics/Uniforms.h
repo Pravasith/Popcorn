@@ -37,10 +37,11 @@ struct alignas(16) CameraUniform
 };
 
 struct alignas(16) SubmeshUniform
-    : public Uniform<Uniforms::Submesh, 64> { // aligned to 64B (of 256)
-                                              //
-  glm::mat4 worldMatrix{1.0f};                // 64B
-                                              // 192B free
+    : public Uniform<Uniforms::Submesh, 128> { // aligned to 128B (of 256)
+                                               //
+  glm::mat4 worldMatrix{1.0f};                 // 64B
+  glm::mat4 normalMatrix{1.0f};                // 64B
+                                               // 128B free
 };
 
 struct BasicMaterialUniform : public Uniform<Uniforms::BasicMat,
