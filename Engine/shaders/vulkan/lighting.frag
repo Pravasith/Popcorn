@@ -1,74 +1,96 @@
 #version 450
 
-layout(location = 0) in vec2 uv;
-layout(location = 0) out vec4 outColor;
+layout(set = 0, binding = 0) uniform CameraUBO {
+    mat4 view;
+    mat4 proj;
+    mat4 viewProj;
+    mat4 invViewProj;
+    vec3 camPos;
+} camera;
 
-// G-buffer input textures
-layout(set = 0, binding = 1) uniform sampler2D albedoTex;
-layout(set = 0, binding = 2) uniform sampler2D depthTex;
-layout(set = 0, binding = 3) uniform sampler2D normalTex;
-layout(set = 0, binding = 4) uniform sampler2D roughnessMetallicTex;
-
-// Light storage buffer (example structure)
-struct Light {
+struct LightUniform {
     vec3 position;
+    float pad0;
+
+    vec3 direction;
+    float pad1;
+
     vec3 color;
+    float pad2;
+
+    float lightType;
     float intensity;
+    float innerConeAngle;
+    float outerConeAngle;
 };
 
-layout(set = 0, binding = 0) buffer LightBuffer {
-    Light lights[];
-} lightBuffer;
 
-// Camera info (usually passed as uniform or push constant)
-layout(push_constant) uniform PushConstants {
-    mat4 invProjection;
-    mat4 invView;
-    vec3 cameraPos;
-} pc;
+layout(set = 1, binding = 0) readonly buffer LightBuffer {
+    LightUniform lights[];
+};
 
-vec3 ReconstructPosition(vec2 uv, float depth) {
-    // Reconstruct view space position from depth and screen uv
-    vec4 clipPos = vec4(uv * 2.0 - 1.0, depth, 1.0);
-    vec4 viewPos = pc.invProjection * clipPos;
-    viewPos /= viewPos.w;
-    return viewPos.xyz;
+layout(set = 1, binding = 1) uniform sampler2D albedoTex;
+layout(set = 1, binding = 2) uniform sampler2D depthTex;
+layout(set = 1, binding = 3) uniform sampler2D normalTex;
+layout(set = 1, binding = 4) uniform sampler2D roughMetalTex;
+
+layout(location = 0) in vec2 fragUV;
+layout(location = 0) out vec4 outColor;
+
+// Utility: reconstruct view-space position from depth
+vec3 ReconstructViewPosition(vec2 uv, float depth) {
+    vec4 clip = vec4(uv * 2.0 - 1.0, depth, 1.0);
+    vec4 view = camera.invViewProj * clip;
+    return view.xyz / view.w;
 }
 
 void main() {
-    vec3 albedo = texture(albedoTex, uv).rgb;
-    float depth = texture(depthTex, uv).r;
-    vec3 normal = texture(normalTex, uv).xyz * 2.0 - 1.0;
-    vec2 roughnessMetallic = texture(roughnessMetallicTex, uv).rg;
+    vec3 albedo = texture(albedoTex, fragUV).rgb;
+    float depth = texture(depthTex, fragUV).r;
+    vec3 normal = normalize(texture(normalTex, fragUV).xyz * 2.0 - 1.0);
+    vec2 rm = texture(roughMetalTex, fragUV).rg;
+    float roughness = rm.r;
+    float metallic = rm.g;
 
-    vec3 posView = ReconstructPosition(uv, depth);
-    vec3 posWorld = (pc.invView * vec4(posView, 1.0)).xyz;
+    vec3 viewPos = ReconstructViewPosition(fragUV, depth);
+    vec3 viewNormal = normalize(normal);
+    vec3 viewDir = normalize(camera.camPos - viewPos);
 
-    vec3 viewDir = normalize(pc.cameraPos - posWorld);
+    vec3 finalColor = vec3(0.0);
 
-    vec3 lighting = vec3(0.0);
+    for (uint i = 0; i < lights.length(); ++i) {
+        LightUniform light = lights[i];
+        vec3 lightColor = light.color * light.intensity;
 
-    // Simple loop over lights (assumes count <= some small max, e.g. 32)
-    for (int i = 0; i < lightBuffer.lights.length(); ++i) {
-        Light light = lightBuffer.lights[i];
-        vec3 lightDir = normalize(light.position - posWorld);
-        float dist = length(light.position - posWorld);
-        float attenuation = light.intensity / (dist * dist);
+        vec3 lightVec;
+        float attenuation = 1.0;
 
-        float NdotL = max(dot(normal, lightDir), 0.0);
-        vec3 diffuse = albedo * light.color * NdotL * attenuation;
+        if (light.lightType == 0.0) {
+            // Point light
+            lightVec = light.position - viewPos;
+            float dist = length(lightVec);
+            attenuation = 1.0 / (dist * dist);
+            lightVec /= dist;
+        } else if (light.lightType == 1.0) {
+            // Directional light
+            lightVec = normalize(-light.direction);
+        } else if (light.lightType == 2.0) {
+            // Spotlight
+            lightVec = light.position - viewPos;
+            float dist = length(lightVec);
+            lightVec /= dist;
+            float theta = dot(lightVec, normalize(-light.direction));
+            float epsilon = light.innerConeAngle - light.outerConeAngle;
+            float intensity = clamp((theta - light.outerConeAngle) / epsilon, 0.0, 1.0);
+            attenuation = intensity / (dist * dist);
+        }
 
-        // Simple specular (Blinn-Phong)
-        vec3 halfVec = normalize(lightDir + viewDir);
-        float specAngle = max(dot(normal, halfVec), 0.0);
-        float roughness = roughnessMetallic.r;
-        float specular = pow(specAngle, 16.0 * (1.0 - roughness)); // roughness affects shininess
+        float NdotL = max(dot(viewNormal, lightVec), 0.0);
+        vec3 diffuse = albedo * lightColor * NdotL;
 
-        vec3 specularColor = light.color * specular * attenuation;
-
-        lighting += diffuse + specularColor;
+        finalColor += diffuse * attenuation;
     }
 
-    outColor = vec4(lighting, 1.0);
+    outColor = vec4(finalColor, 1.0);
 }
 
