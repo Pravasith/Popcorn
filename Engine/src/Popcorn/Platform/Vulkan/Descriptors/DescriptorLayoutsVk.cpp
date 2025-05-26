@@ -136,8 +136,17 @@ DescriptorLayoutsVk::GetLayout<DescriptorSets::LightingSet>() {
     normalsBuffer.descriptorCount = 1;
     normalsBuffer.pImmutableSamplers = nullptr;
 
+    VkDescriptorSetLayoutBinding roughnessMetallicBuffer{};
+    roughnessMetallicBuffer.descriptorType =
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    roughnessMetallicBuffer.binding = 4;
+    roughnessMetallicBuffer.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    roughnessMetallicBuffer.descriptorCount = 1;
+    roughnessMetallicBuffer.pImmutableSamplers = nullptr;
+
     std::vector<VkDescriptorSetLayoutBinding> lightsBindings{
-        lightsBinding, albedoBuffer, depthBuffer, normalsBuffer};
+        lightsBinding, albedoBuffer, depthBuffer, normalsBuffer,
+        roughnessMetallicBuffer};
 
     m_layouts[DescriptorSets::LightingSet] = GetCachedLayout(lightsBindings);
 

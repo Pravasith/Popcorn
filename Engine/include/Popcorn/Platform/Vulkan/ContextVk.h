@@ -10,6 +10,7 @@
 #include "Memory/MemoryAllocatorVk.h"
 #include "Memory/MemoryVk.h"
 #include "Popcorn/Core/Window.h"
+#include "Shader.h"
 #include "SurfaceVk.h"
 #include "SwapchainVk.h"
 
@@ -108,6 +109,14 @@ public:
     return s_descriptorLayoutsVk;
   }
 
+  // Same function in the OpenGl context too
+  static ShaderLibrary *Shaders() {
+    if (!s_shaderLibrary) {
+      throw std::runtime_error("ShaderLibrary is null");
+    }
+    return s_shaderLibrary;
+  }
+
   void VulkanInit(const Window &appWin);
   void VulkanCleanUp();
 
@@ -132,6 +141,7 @@ private:
     s_memoryVk = MemoryVk::Get();
     s_descriptorPoolsVk = DescriptorPoolsVk::Get();
     s_descriptorLayoutsVk = DescriptorLayoutsVk::Get();
+    s_shaderLibrary = ShaderLibrary::Get();
 
     PC_PRINT("CREATED", TagType::Constr, "ContextVk.h")
   };
@@ -149,6 +159,7 @@ private:
   static MemoryAllocatorVk *s_memoryAllocatorVk;
   static DescriptorPoolsVk *s_descriptorPoolsVk;
   static DescriptorLayoutsVk *s_descriptorLayoutsVk;
+  static ShaderLibrary *s_shaderLibrary;
 };
 
 GFX_NAMESPACE_END

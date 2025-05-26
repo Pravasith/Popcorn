@@ -1,5 +1,6 @@
 #include "RenderFlows/RenderFlowVk.h"
 #include "CommonVk.h"
+#include "ContextVk.h"
 #include "MaterialTypes.h"
 #include "Popcorn/Core/Assert.h"
 #include "SamplerVk.h"
@@ -42,21 +43,20 @@ PcRenderFlowImages<Lighting, MAX_FRAMES_IN_FLIGHT>
     RenderFlowVk::s_lightingImages{};
 PcRenderFlowImages<Composite> RenderFlowVk::s_compositeImages{};
 
-ShaderLibrary *RenderFlowVk::s_shaderLibrary = nullptr;
-
 //
 // --- METHODS -----------------------------------------------------------
 void RenderFlowVk::AllocShaders() {
   //
   // Load all shaders ----------------------------------------------------
-  s_shaderLibrary->LoadShaders();
+  ShaderLibrary *shaders = ContextVk::Shaders();
+  shaders->LoadShaders<RendererType::Vulkan>();
 
   //
   // Basic mat shaders ---------------------------------------------------
   Buffer *basicMatShaderVert =
-      &s_shaderLibrary->GetShader<ShaderFiles::BasicMat_Vert>();
+      &shaders->GetShader<RendererType::Vulkan, ShaderFiles::BasicMat_Vert>();
   Buffer *basicMatShaderFrag =
-      &s_shaderLibrary->GetShader<ShaderFiles::BasicMat_Frag>();
+      &shaders->GetShader<RendererType::Vulkan, ShaderFiles::BasicMat_Frag>();
   Material<MaterialTypes::BasicMat>::SetShader<ShaderStages::VertexBit>(
       basicMatShaderVert);
   Material<MaterialTypes::BasicMat>::SetShader<ShaderStages::FragmentBit>(
@@ -65,15 +65,19 @@ void RenderFlowVk::AllocShaders() {
   //
   // Pbr mat shaders -----------------------------------------------------
   Buffer *pbrMatShaderVert =
-      &s_shaderLibrary->GetShader<ShaderFiles::PbrMat_Vert>();
+      &shaders->GetShader<RendererType::Vulkan, ShaderFiles::PbrMat_Vert>();
   Buffer *pbrMatShaderFrag =
-      &s_shaderLibrary->GetShader<ShaderFiles::PbrMat_Frag>();
+      &shaders->GetShader<RendererType::Vulkan, ShaderFiles::PbrMat_Frag>();
   Material<MaterialTypes::PbrMat>::SetShader<ShaderStages::VertexBit>(
       pbrMatShaderVert);
   Material<MaterialTypes::PbrMat>::SetShader<ShaderStages::FragmentBit>(
       pbrMatShaderFrag);
 };
-void RenderFlowVk::FreeShaders() { s_shaderLibrary->UnloadShaders(); };
+
+void RenderFlowVk::FreeShaders() {
+  ShaderLibrary *shaders = ContextVk::Shaders();
+  shaders->UnloadShaders<RendererType::Vulkan>();
+};
 
 void RenderFlowVk::AllocMemory() {
   // basicMat1 : [sm1, sm2, sm3, ... ]

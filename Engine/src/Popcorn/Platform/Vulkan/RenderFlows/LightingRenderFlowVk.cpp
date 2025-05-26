@@ -1,5 +1,6 @@
 #include "RenderFlows/LightingRenderFlowVk.h"
 #include "AttachmentVk.h"
+#include "BufferObjects.h"
 #include "CommonVk.h"
 #include "ContextVk.h"
 #include "DescriptorLayoutsVk.h"
@@ -219,6 +220,17 @@ void LightingRenderFlowVk::CreateAndAllocDescriptors() {
     normalImageInfo.sampler = s_samplersVk.frameSampler.GetVkSampler();
     normalImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
+    VkDescriptorImageInfo roughnessMetallicImageInfo{};
+    roughnessMetallicImageInfo.imageView =
+        m_dependencyImages.roughnessMetallicImages[i].GetVkImageView();
+    roughnessMetallicImageInfo.sampler =
+        s_samplersVk.frameSampler.GetVkSampler();
+    roughnessMetallicImageInfo.imageLayout =
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+    std::vector<VkWriteDescriptorSet> writes{};
+    writes.reserve(5);
+
     VkWriteDescriptorSet lightWrite{};
     lightWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     lightWrite.dstSet = m_descriptorSetsVk.lightingSets[i];
@@ -229,6 +241,7 @@ void LightingRenderFlowVk::CreateAndAllocDescriptors() {
     lightWrite.pBufferInfo = &lightBufferInfo;
     lightWrite.pImageInfo = nullptr;
     lightWrite.pTexelBufferView = nullptr;
+    writes.emplace_back(lightWrite);
 
     VkWriteDescriptorSet albedoWrite{};
     albedoWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -240,6 +253,7 @@ void LightingRenderFlowVk::CreateAndAllocDescriptors() {
     albedoWrite.pBufferInfo = nullptr;
     albedoWrite.pImageInfo = &albedoImageInfo;
     albedoWrite.pTexelBufferView = nullptr;
+    writes.emplace_back(albedoWrite);
 
     VkWriteDescriptorSet depthWrite{};
     depthWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -251,6 +265,7 @@ void LightingRenderFlowVk::CreateAndAllocDescriptors() {
     depthWrite.pBufferInfo = nullptr;
     depthWrite.pImageInfo = &depthImageInfo;
     depthWrite.pTexelBufferView = nullptr;
+    writes.emplace_back(depthWrite);
 
     VkWriteDescriptorSet normalWrite{};
     normalWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -262,13 +277,45 @@ void LightingRenderFlowVk::CreateAndAllocDescriptors() {
     normalWrite.pBufferInfo = nullptr;
     normalWrite.pImageInfo = &normalImageInfo;
     normalWrite.pTexelBufferView = nullptr;
+    writes.emplace_back(normalWrite);
 
-    std::vector<VkWriteDescriptorSet> writes{lightWrite, albedoWrite,
-                                             depthWrite, normalWrite};
+    VkWriteDescriptorSet roughnessMetallicWrite{};
+    roughnessMetallicWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    roughnessMetallicWrite.dstSet = m_descriptorSetsVk.lightingSets[i];
+    roughnessMetallicWrite.dstBinding = 4;
+    roughnessMetallicWrite.dstArrayElement = 0;
+    roughnessMetallicWrite.descriptorType =
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    roughnessMetallicWrite.descriptorCount = 1;
+    roughnessMetallicWrite.pBufferInfo = nullptr;
+    roughnessMetallicWrite.pImageInfo = &roughnessMetallicImageInfo;
+    roughnessMetallicWrite.pTexelBufferView = nullptr;
+    writes.emplace_back(roughnessMetallicWrite);
 
     vkUpdateDescriptorSets(device->GetDevice(), writes.size(), writes.data(), 0,
                            nullptr);
   };
+};
+
+//
+//
+//
+//
+//
+// --- CREATE PIPELINES --------------------------------------------------------
+// --- CREATE PIPELINES --------------------------------------------------------
+// --- CREATE PIPELINES --------------------------------------------------------
+//
+void LightingRenderFlowVk::CreatePipelines() {
+  using namespace BufferDefs;
+  BufferDefs::Layout layout;
+  // for a triangle
+  layout.Set<AttrTypes::Float2>();
+  m_lightingPipelineVk.Create(layout, m_renderPass.GetVkRenderPass());
+};
+
+void LightingRenderFlowVk::DestroyPipelines() {
+  m_lightingPipelineVk.Destroy();
 };
 
 //

@@ -99,11 +99,15 @@ DescriptorPoolsVk::GetPool<DescriptorPools::LightingPool>(uint32_t count) {
         .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
         .descriptorCount = 1 * count}; // Normals image + sampler
 
-    VkDescriptorPoolSize poolSizes[4]{poolSize0, poolSize1, poolSize2,
-                                      poolSize3};
+    VkDescriptorPoolSize poolSize4 = {
+        .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        .descriptorCount = 1 * count}; // Roughness + Metallic image + sampler
+
+    VkDescriptorPoolSize poolSizes[5]{poolSize0, poolSize1, poolSize2,
+                                      poolSize3, poolSize4};
 
     DPoolVk dPool{};
-    dPool.Create(poolSizes, 4, 4 * count);
+    dPool.Create(poolSizes, 5, 5 * count);
 
     m_pools[DescriptorPools::LightingPool] = dPool;
   }

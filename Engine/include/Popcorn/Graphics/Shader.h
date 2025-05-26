@@ -3,6 +3,7 @@
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
+#include "Renderer.h"
 #include "Sources.h"
 #include <fstream>
 #include <unordered_map>
@@ -78,15 +79,24 @@ public:
   };
 
 public:
-  void LoadShaders();
-  void UnloadShaders();
+  template <RendererType R> void LoadShaders();
+  template <RendererType R> void UnloadShaders();
 
-  template <ShaderFiles T> Buffer &GetShader() {
-    auto it = s_shaders.find(T);
-    if (it != s_shaders.end()) {
-      return it->second; // "Value" in hash map (std::pair)
-    } else {
-      throw std::runtime_error("Shader not found!");
+  template <RendererType R, ShaderFiles T> Buffer &GetShader() {
+    switch (R) {
+    case RendererType::Vulkan: {
+      auto it = s_shaders.find(T);
+      if (it != s_shaders.end()) {
+        return it->second;
+      } else {
+        throw std::runtime_error("Shader not found!");
+      }
+      break;
+    }
+    case RendererType::OpenGL:
+      break;
+    case RendererType::None:
+      break;
     }
   }
 

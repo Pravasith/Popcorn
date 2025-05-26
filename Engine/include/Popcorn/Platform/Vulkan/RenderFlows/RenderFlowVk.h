@@ -11,7 +11,6 @@
 #include "Popcorn/Core/Base.h"
 #include "RenderFlowDefs.h"
 #include "SamplerVk.h"
-#include "Shader.h"
 #include <cstdint>
 #include <cstring>
 #include <vector>
@@ -129,8 +128,6 @@ protected:
   //
   // ------------------------------------------------------------------------
   static uint64_t s_submeshCount;
-
-  static ShaderLibrary *s_shaderLibrary;
 };
 
 GFX_NAMESPACE_END

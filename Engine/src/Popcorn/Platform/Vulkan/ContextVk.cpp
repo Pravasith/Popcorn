@@ -1,5 +1,6 @@
 #include "ContextVk.h"
 #include "GlobalMacros.h"
+#include "Shader.h"
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -15,6 +16,7 @@ MemoryAllocatorVk *ContextVk::s_memoryAllocatorVk = nullptr;
 MemoryVk *ContextVk::s_memoryVk = nullptr;
 DescriptorLayoutsVk *ContextVk::s_descriptorLayoutsVk = nullptr;
 DescriptorPoolsVk *ContextVk::s_descriptorPoolsVk = nullptr;
+ShaderLibrary *ContextVk::s_shaderLibrary = nullptr;
 
 void ContextVk::VulkanInit(const Window &appWin) {
   s_swapchainVk->SetAppWindow(appWin);
@@ -56,6 +58,9 @@ void ContextVk::VulkanInit(const Window &appWin) {
 void ContextVk::VulkanCleanUp() {
   auto &instance = s_deviceVk->GetVkInstance();
   auto &device = s_deviceVk->GetDevice();
+
+  s_shaderLibrary->Destroy();
+  s_shaderLibrary = nullptr;
 
   s_descriptorLayoutsVk->CleanUp();
   s_descriptorLayoutsVk->Destroy();
