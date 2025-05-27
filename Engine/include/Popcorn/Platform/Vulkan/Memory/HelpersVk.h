@@ -36,7 +36,7 @@ public:
 private:
   PcBufferViews &bufferViews;
   PcBufferOffsets &bufferOffsets;
-  BasicMaterialUniform uniform;
+  BasicMaterialUniform uniform{};
 };
 
 template <> struct PcCopyUniformToMemory<Uniforms::PbrMat> {
@@ -62,7 +62,7 @@ public:
 private:
   PcBufferViews &bufferViews;
   PcBufferOffsets &bufferOffsets;
-  PbrMaterialUniform uniform;
+  PbrMaterialUniform uniform{};
 };
 
 template <> struct PcCopyUniformToMemory<Uniforms::Submesh> {
@@ -86,17 +86,23 @@ public:
 private:
   PcBufferViews &bufferViews;
   PcBufferOffsets &bufferOffsets;
-  SubmeshUniform uniform;
+  SubmeshUniform uniform{};
 };
 
 template <> struct PcCopyUniformToMemory<Uniforms::Light> {
 public:
-  PcCopyUniformToMemory(Light *light, PcBufferViews &bfrViews,
-                        PcBufferOffsets &bfrOffsets)
+  PcCopyUniformToMemory(Light *light, Camera *activeCamera,
+                        PcBufferViews &bfrViews, PcBufferOffsets &bfrOffsets)
       : bufferViews(bfrViews), bufferOffsets(bfrOffsets) {
     const LightData &lightData = light->GetLightData();
-    uniform.position = light->GetPosition();
-    uniform.direction = light->GetWorldDirection();
+
+    const glm::vec3 &worldPos = light->GetPosition();
+    const glm::vec3 &worldDir = light->GetWorldDirection();
+    const glm::mat4 &viewMatrix = activeCamera->GetViewMatrix();
+
+    uniform.viewPos =
+        glm::vec3(activeCamera->GetViewMatrix() * glm::vec4(worldPos, 1.0));
+    uniform.viewDir = glm::normalize(glm::mat3(viewMatrix) * worldDir);
     uniform.color = lightData.color;
     uniform.lightType = static_cast<float>(lightData.type);
     uniform.intensity = lightData.intensity;
@@ -116,7 +122,7 @@ public:
 private:
   PcBufferViews &bufferViews;
   PcBufferOffsets &bufferOffsets;
-  LightUniform uniform;
+  LightUniform uniform{};
 };
 
 template <> struct PcCopyUniformToMemory<Uniforms::Camera> {
@@ -124,9 +130,14 @@ public:
   PcCopyUniformToMemory(Camera *camera, PcBufferViews &bfrViews,
                         PcBufferOffsets &bfrOffsets)
       : bufferViews(bfrViews), bufferOffsets(bfrOffsets) {
-    uniform.worldMatrix = camera->GetWorldMatrix();
-    uniform.viewMatrix = camera->GetViewMatrix();
-    uniform.projMatrix = camera->GetProjectionMatrix();
+    const glm::mat4 &view = camera->GetViewMatrix();
+    const glm::mat4 &proj = camera->GetProjectionMatrix();
+    const glm::mat4 viewProj = proj * view;
+
+    uniform.viewMatrix = view;
+    uniform.projMatrix = proj;
+    uniform.viewProjMatrix = viewProj;
+    uniform.invViewProjMatrix = glm::inverse(viewProj);
   }
 
   void operator()(void *uboMapping, size_t index) {
@@ -138,7 +149,7 @@ public:
 private:
   PcBufferViews &bufferViews;
   PcBufferOffsets &bufferOffsets;
-  CameraUniform uniform;
+  CameraUniform uniform{};
 };
 
 template <> struct PcCopyUniformToMemory<Uniforms::Empty> {

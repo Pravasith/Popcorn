@@ -308,7 +308,7 @@ void LightingRenderFlowVk::CreateAndAllocDescriptors() {
 //
 void LightingRenderFlowVk::CreatePipelines() {
   using namespace BufferDefs;
-  BufferDefs::Layout layout;
+  BufferDefs::Layout layout{};
   // for a triangle
   layout.Set<AttrTypes::Float2>();
   m_lightingPipelineVk.Create(layout, m_renderPass.GetVkRenderPass());

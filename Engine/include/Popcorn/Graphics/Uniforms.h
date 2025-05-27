@@ -27,13 +27,12 @@ template <Uniforms L, size_t S> struct Uniform {
 
 struct alignas(16) CameraUniform
     : public Uniform<Uniforms::Camera,
-                     192> {    // aligned to 192B (of 256B)
-                               //
-  glm::mat4 worldMatrix{1.0f}; // 64B
-  glm::mat4 viewMatrix{1.0f};  // 64B
-  glm::mat4 projMatrix{1.0f};  // 64B
-                               //
-                               // 64B free
+                     256> {          // aligned to 256B (of 256)
+                                     //
+  glm::mat4 viewMatrix{1.0f};        // 64B
+  glm::mat4 projMatrix{1.0f};        // 64B
+  glm::mat4 viewProjMatrix{1.0f};    // 64B
+  glm::mat4 invViewProjMatrix{1.0f}; // 64B
 };
 
 struct alignas(16) SubmeshUniform
@@ -73,10 +72,10 @@ struct alignas(16) PbrMaterialUniform
 // Note: this is an SSBO in vulkan
 struct alignas(16) LightUniform
     : public Uniform<Uniforms::Light, 64> {   // aligned to 64B
-  glm::vec3 position{0.0f};                   // 12B
+  glm::vec3 viewPos{0.0f};                    // 12B
   float pad0;                                 // 4B (optional padding)
                                               //
-  glm::vec3 direction{0.0f};                  // 12B
+  glm::vec3 viewDir{0.0f};                    // 12B
   float pad1;                                 // 4B (optional padding)
                                               //
   glm::vec3 color{1.0f, 0.95f, 0.9f};         // 12B

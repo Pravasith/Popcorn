@@ -8,10 +8,13 @@
 
 HIGH PRIORITY:
 ----------------------------------------------------------------------------
-:: Pipeline creation -- light pass and final pass left
+:: Introduce worldDirection in GameObject and remove from Light & Camera
+   update it w.r.t. transformations (rot, scale)
 
+:: Pipeline creation -- light pass and final pass left - 27th May
+:: write shaders for both - light & final - 27th May
 :: Redesign Draw call - Refactor - 1 day max. - also handle framebuffer
-   resize
+   resize - 27th May
 
 :: Fix camera in GltfLoader
 :: Update camera(fov, aspect ratio, .etc) on FrameBufferResize

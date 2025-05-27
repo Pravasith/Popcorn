@@ -14,7 +14,17 @@ enum Lights {
 };
 
 struct LightData {
-  Lights type = Lights::SpotLight;
+  // Lights type = Lights::SpotLight;
+  // glm::vec3 color = glm::vec3(1.0f, 0.95f, 0.9f); // slightly warm white
+  // light float intensity =
+  //     50.0f; // glTF uses lumen-like units, ~50 is reasonable indoors
+  //
+  // float range = 15.0f; // affects attenuation; 0 = infinite in some engines
+  //
+  // float innerConeAngle = glm::radians(15.0f); // fully lit
+  // float outerConeAngle = glm::radians(30.0f); // falloff region ends here
+  //                                             //
+  Lights type = Lights::PointLight;
   glm::vec3 color = glm::vec3(1.0f, 0.95f, 0.9f); // slightly warm white light
   float intensity =
       50.0f; // glTF uses lumen-like units, ~50 is reasonable indoors

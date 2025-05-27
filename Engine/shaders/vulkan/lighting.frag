@@ -45,16 +45,18 @@ vec3 ReconstructViewPosition(vec2 uv, float depth) {
 }
 
 void main() {
+    vec2 rm = texture(roughMetalTex, fragUV).rg;
+
     vec3 albedo = texture(albedoTex, fragUV).rgb;
     float depth = texture(depthTex, fragUV).r;
     vec3 normal = normalize(texture(normalTex, fragUV).xyz * 2.0 - 1.0);
-    vec2 rm = texture(roughMetalTex, fragUV).rg;
     float roughness = rm.r;
     float metallic = rm.g;
 
     vec3 viewPos = ReconstructViewPosition(fragUV, depth);
     vec3 viewNormal = normalize(normal);
-    vec3 viewDir = normalize(camera.camPos - viewPos);
+    // vec3 viewDir = normalize(camera.camPos - viewPos);
+    vec3 viewDir = normalize(vec3(0.0) - viewPos);
 
     vec3 finalColor = vec3(0.0);
 
@@ -75,14 +77,16 @@ void main() {
             // Directional light
             lightVec = normalize(-light.direction);
         } else if (light.lightType == 2.0) {
-            // Spotlight
-            lightVec = light.position - viewPos;
-            float dist = length(lightVec);
-            lightVec /= dist;
-            float theta = dot(lightVec, normalize(-light.direction));
-            float epsilon = light.innerConeAngle - light.outerConeAngle;
-            float intensity = clamp((theta - light.outerConeAngle) / epsilon, 0.0, 1.0);
-            attenuation = intensity / (dist * dist);
+            // // Spotlight
+            // lightVec = light.position - viewPos;
+            // float dist = length(lightVec);
+            // lightVec /= dist;
+            // float theta = dot(lightVec, normalize(-light.direction));
+            // float epsilon = light.innerConeAngle - light.outerConeAngle;
+            // float intensity = clamp((theta - light.outerConeAngle) / epsilon, 0.0, 1.0);
+            // attenuation = intensity / (dist * dist);
+            // TODO: Later...
+            lightVec = normalize(-light.direction);
         }
 
         float NdotL = max(dot(viewNormal, lightVec), 0.0);
@@ -93,4 +97,3 @@ void main() {
 
     outColor = vec4(finalColor, 1.0);
 }
-

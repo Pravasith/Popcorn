@@ -10,19 +10,20 @@ GFX_NAMESPACE_BEGIN
 
 struct CameraData {
   float aspectRatio = 1.0f;
-  // swapchainWidth / (float)swapchainHeight
+  float near = 0.1f;
+  float far = 10.0f;
 };
 
 // TODO: Complete this class
 class Camera : public GameObject {
 public:
-  Camera(const CameraData &data) {
+  Camera(const CameraData &data = {1.0f, 0.1f, 10.0f}) {
     // TODO: Temp data
     m_viewMatrix =
         glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
                     glm::vec3(0.0f, 1.0f, 0.0f));
-    m_projMatrix =
-        glm::perspective(glm::radians(45.0f), data.aspectRatio, 0.1f, 10.0f);
+    m_projMatrix = glm::perspective(glm::radians(45.0f), data.aspectRatio,
+                                    data.near, data.far);
 
     m_projMatrix[1][1] *= -1;
 
