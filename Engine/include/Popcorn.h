@@ -36,10 +36,9 @@ static void DisposeScene(Scene &scene) { s_renderer->RemoveScene(&scene); };
 
 static void StartGame() {
   // TODO: Move the ownership of commandbuffers to Renderflow base class
-  s_renderer->CreateRenderingCommandBuffers();
   s_renderer->CreateRenderFlows();
-  s_renderer->PrepareRenderFlows(); // Creates attachments, renderflows
-                                    // & framebuffers
+  s_renderer->PrepareRenderFlows(); // Creates attachments, renderflows,
+                                    // framebuffers, and command buffers
   s_renderer->AssignSceneObjectsToRenderFlows(); // Sorts submeshes material
                                                  // wise & adds to renderflows
   s_renderer->CreateRenderFlowResources(); // Renderflow submeshes converted and

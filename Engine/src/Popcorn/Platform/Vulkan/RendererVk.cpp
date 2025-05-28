@@ -70,9 +70,11 @@ bool RendererVk::OnFrameBufferResize(FrameBfrResizeEvent &) {
 
 void RendererVk::CreateRenderingCommandBuffers() {
   auto *commandPoolVkStn = CommandPoolVk::Get();
+
   VkCommandBufferAllocateInfo allocInfo{};
   commandPoolVkStn->GetDefaultCommandBufferAllocInfo(allocInfo);
   allocInfo.commandBufferCount = MAX_FRAMES_IN_FLIGHT;
+
   m_drawingCommandBuffers.resize(allocInfo.commandBufferCount);
   commandPoolVkStn->AllocCommandBuffers(allocInfo,
                                         m_drawingCommandBuffers.data());
@@ -138,6 +140,8 @@ void RendererVk::PrepareRenderFlows() {
                            //   - RenderPass
                            //   - Framebuffer
   }
+
+  CreateRenderingCommandBuffers();
 };
 
 void RendererVk::CreateRenderFlowResources() {

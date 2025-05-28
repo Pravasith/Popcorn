@@ -232,7 +232,7 @@ void SwapchainVk::RecreateSwapchain(const VkRenderPass &renderPass) {
 
   CreateSwapchainImagesAndVkSwapchain();
   CreateSwapchainImageViews(device);
-  // CreateSwapchainFramebuffers(device, renderPass);
+  CreateSwapchainFramebuffers(device, renderPass);
 };
 
 GFX_NAMESPACE_END
