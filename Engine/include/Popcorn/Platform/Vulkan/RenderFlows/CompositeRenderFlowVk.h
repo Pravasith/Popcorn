@@ -57,7 +57,7 @@ private:
   PcPresentationFramebuffers m_framebuffers; // Swapchain framebuffers
 
   // Pipelines
-  CompositePipelineVk *m_compositePipeline;
+  CompositePipelineVk m_compositePipeline;
 };
 
 GFX_NAMESPACE_END

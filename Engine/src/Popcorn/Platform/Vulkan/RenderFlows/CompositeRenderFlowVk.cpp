@@ -204,6 +204,26 @@ void CompositeRenderFlowVk::CreateAndAllocDescriptors() {
                            nullptr);
   }
 };
+//
+//
+//
+//
+//
+// --- CREATE PIPELINES --------------------------------------------------------
+// --- CREATE PIPELINES --------------------------------------------------------
+// --- CREATE PIPELINES --------------------------------------------------------
+//
+void CompositeRenderFlowVk::CreatePipelines() {
+  using namespace BufferDefs;
+  BufferDefs::Layout layout{};
+  // for a triangle
+  layout.Set<AttrTypes::Float2>();
+  m_compositePipeline.Create(layout, m_renderPass.GetVkRenderPass());
+};
+
+void CompositeRenderFlowVk::DestroyPipelines() {
+  m_compositePipeline.Destroy();
+};
 
 //
 //
