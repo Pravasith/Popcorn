@@ -34,31 +34,23 @@ void RendererVk::DrawFrame(const Scene &scene) {
   ContextVk::Frame()->Draw(
       m_drawingCommandBuffers,
 
-      // Pass final paint renderpass for swapchain recreation
-      // TODO: Isolate this renderpass (move it outside basicWorkflow)
-      basicRenderFlow->GetRenderPass(),
-
-      // Update scene data lambda
+      // Swapchain invalid -- update renderflow resources
+      [&]() {
+        for (auto &renderFlow : s_renderFlows) {
+          renderFlow->OnSwapchainInvalidCb();
+        }
+      },
       [&](const uint32_t currentFrame) {
-        // TODO: Write a loop for render workflows instead
         RenderFlowVk::CopyDynamicUniformsToMemory(currentFrame);
       },
-
-      // Record draw commands lambda
       [&](const uint32_t frameIndex, const uint32_t currentFrame,
           VkCommandBuffer &currentFrameCommandBuffer) {
+        // TODO: Move this inside renderflows
         ContextVk::CommandPool()->BeginCommandBuffer(currentFrameCommandBuffer);
-        //
-        // -----------------------------------------------------------------
-        // --- RECORD ALL COMMAND BUFFERS HERE -----------------------------
-
-        // TODO: Write a loop for render workflows instead
-        basicRenderFlow->RecordRenderCommands(frameIndex, currentFrame,
-                                              currentFrameCommandBuffer);
-
-        // --- RECORD ALL COMMAND BUFFERS HERE -----------------------------
-        // -----------------------------------------------------------------
-        //
+        for (auto &renderFlow : s_renderFlows) {
+          renderFlow->Paint(frameIndex, currentFrame,
+                            currentFrameCommandBuffer);
+        }
         ContextVk::CommandPool()->EndCommandBuffer(currentFrameCommandBuffer);
       });
 };

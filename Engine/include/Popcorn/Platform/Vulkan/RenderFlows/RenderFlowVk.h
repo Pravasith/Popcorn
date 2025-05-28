@@ -45,6 +45,7 @@ public:
   virtual void CreatePipelines() = 0;
   virtual void DestroyPipelines() = 0;
 
+  virtual void OnSwapchainInvalidCb() = 0;
   virtual void Paint(const uint32_t frameIndex, const uint32_t currentFrame,
                      VkCommandBuffer &currentFrameCommandBuffer);
 

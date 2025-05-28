@@ -10,13 +10,16 @@ HIGH PRIORITY:
 ----------------------------------------------------------------------------
 :: Redesign Draw call - Refactor - 1 day max. - also handle framebuffer
    resize - 27th May
+:: Create 3 sets of command buffers  
+:: React to resize event
+:: Update camera(fov, aspect ratio, .etc) on FrameBufferResize
+
 :: Introduce worldDirection in GameObject and remove from Light & Camera
    update it w.r.t. transformations (rot, scale)
 
 :: write shaders for both - light & final - 27th May
 
 :: Fix camera in GltfLoader
-:: Update camera(fov, aspect ratio, .etc) on FrameBufferResize
 :: Write camera class properly.
 
 

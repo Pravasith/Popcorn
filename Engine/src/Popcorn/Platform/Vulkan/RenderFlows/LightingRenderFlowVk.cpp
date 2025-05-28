@@ -322,6 +322,22 @@ void LightingRenderFlowVk::DestroyPipelines() {
 //
 //
 //
+// --- RECREATE RESOURCES ------------------------------------------------------
+// --- RECREATE RESOURCES ------------------------------------------------------
+// --- RECREATE RESOURCES ------------------------------------------------------
+//
+void LightingRenderFlowVk::OnSwapchainInvalidCb() {
+  DestroyFramebuffers();
+  DestroyAttachments();
+
+  CreateAttachments();
+  CreateFramebuffers();
+};
+
+//
+//
+//
+//
 // --- CLEAN UP ----------------------------------------------------------------
 // --- CLEAN UP ----------------------------------------------------------------
 // --- CLEAN UP ----------------------------------------------------------------

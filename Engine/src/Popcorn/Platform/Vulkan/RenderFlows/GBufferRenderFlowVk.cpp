@@ -509,6 +509,22 @@ void GBufferRenderFlowVk::DestroyPipelines() {
 //
 //
 //
+// --- RECREATE RESOURCES ------------------------------------------------------
+// --- RECREATE RESOURCES ------------------------------------------------------
+// --- RECREATE RESOURCES ------------------------------------------------------
+//
+void GBufferRenderFlowVk::OnSwapchainInvalidCb() {
+  DestroyFramebuffers();
+  DestroyAttachments();
+
+  CreateAttachments();
+  CreateFramebuffers();
+};
+
+//
+//
+//
+//
 // --- CLEAN UP ----------------------------------------------------------------
 // --- CLEAN UP ----------------------------------------------------------------
 // --- CLEAN UP ----------------------------------------------------------------

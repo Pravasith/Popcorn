@@ -212,7 +212,7 @@ SwapchainVk::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities,
 //   };
 // };
 
-void SwapchainVk::RecreateSwapchain(const VkRenderPass &renderPass) {
+void SwapchainVk::RecreateSwapchainAndVkSwapchain() {
   auto &device = DeviceVk::Get()->GetDevice();
 
   uint32_t width = m_appWin->GetFramebufferSize().first,
@@ -232,7 +232,6 @@ void SwapchainVk::RecreateSwapchain(const VkRenderPass &renderPass) {
 
   CreateSwapchainImagesAndVkSwapchain();
   CreateSwapchainImageViews(device);
-  CreateSwapchainFramebuffers(device, renderPass);
 };
 
 GFX_NAMESPACE_END

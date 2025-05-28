@@ -229,6 +229,28 @@ void CompositeRenderFlowVk::DestroyPipelines() {
 //
 //
 //
+// --- RECREATE RESOURCES ------------------------------------------------------
+// --- RECREATE RESOURCES ------------------------------------------------------
+// --- RECREATE RESOURCES ------------------------------------------------------
+//
+void CompositeRenderFlowVk::OnSwapchainInvalidCb() {
+  DestroyPipelines();
+  DestroyFramebuffers();
+  DestroyRenderPass();
+  DestroyAttachments();
+
+  ContextVk::Swapchain()->RecreateSwapchainAndVkSwapchain();
+
+  CreateAttachments();
+  CreateRenderPass();
+  CreateFramebuffers();
+  CreatePipelines();
+};
+
+//
+//
+//
+//
 // --- CLEAN UP ----------------------------------------------------------------
 // --- CLEAN UP ----------------------------------------------------------------
 // --- CLEAN UP ----------------------------------------------------------------

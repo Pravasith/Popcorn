@@ -35,7 +35,7 @@ public:
 
   void CreateSwapchainImagesAndVkSwapchain();
   void CreateSwapchainImageViews(const VkDevice &);
-  void RecreateSwapchain(const VkRenderPass &renderPass);
+  void RecreateSwapchainAndVkSwapchain();
 
   [[nodiscard]] inline const VkSwapchainKHR &GetVkSwapchain() const {
     return m_swapchain;
