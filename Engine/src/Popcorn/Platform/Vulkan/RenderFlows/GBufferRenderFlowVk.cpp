@@ -7,6 +7,7 @@
 #include "FramebufferVk.h"
 #include "ImageVk.h"
 #include "Memory/MemoryVk.h"
+#include "PipelineUtilsVk.h"
 #include "Popcorn/Loaders/LoadersDefs.h"
 #include "RenderPassVk.h"
 #include <algorithm>
@@ -344,6 +345,25 @@ void GBufferRenderFlowVk::CreateFramebuffers() {
 //
 //
 //
+// --- CREATE COMMAND BUFFERS --------------------------------------------------
+// --- CREATE COMMAND BUFFERS --------------------------------------------------
+// --- CREATE COMMAND BUFFERS --------------------------------------------------
+//
+void GBufferRenderFlowVk::CreateCommandBuffers() {
+  auto *cmdPool = ContextVk::CommandPool();
+
+  VkCommandBufferAllocateInfo allocInfo{};
+  cmdPool->GetDefaultCommandBufferAllocInfo(allocInfo);
+  allocInfo.commandBufferCount = MAX_FRAMES_IN_FLIGHT;
+
+  cmdPool->AllocCommandBuffers(allocInfo, m_commandBuffers.data());
+};
+
+//
+//
+//
+//
+//
 // --- CREATE DESCRIPTORS ------------------------------------------------------
 // --- CREATE DESCRIPTORS ------------------------------------------------------
 // --- CREATE DESCRIPTORS ------------------------------------------------------
@@ -519,6 +539,48 @@ void GBufferRenderFlowVk::OnSwapchainInvalidCb() {
 
   CreateAttachments();
   CreateFramebuffers();
+};
+
+//
+//
+//
+//
+// --- PAINT -------------------------------------------------------------------
+// --- PAINT -------------------------------------------------------------------
+// --- PAINT -------------------------------------------------------------------
+void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
+                                              const uint32_t currentFrame) {
+  auto &cmdBfr = m_commandBuffers[currentFrame];
+  auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
+
+  vkResetCommandBuffer(cmdBfr, 0);
+  ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
+  VkRenderPassBeginInfo renderPassBeginInfo{};
+  RenderPassVk::GetDefaultCmdBeginRenderPassInfo(
+      m_framebuffers[currentFrame], swapchainExtent,
+      m_renderPass.GetVkRenderPass(), renderPassBeginInfo);
+
+  //
+  // --- Begin renderpass ------------------------------------------------------
+  m_renderPass.RecordBeginRenderPassCommand(cmdBfr, renderPassBeginInfo);
+
+  //
+  // --- Set viewport & scissor ------------------------------------------------
+  VkViewport viewport{};
+  VkRect2D scissor{};
+  PipelineUtilsVk::GetDefaultViewportAndScissorState(viewport, scissor,
+                                                     swapchainExtent);
+  vkCmdSetViewport(cmdBfr, 0, 1, &viewport);
+  vkCmdSetScissor(cmdBfr, 0, 1, &scissor);
+
+  //
+  // TODO: Draw here
+
+  //
+  // --- End renderpass --------------------------------------------------------
+  m_renderPass.RecordEndRenderPassCommand(cmdBfr);
+
+  ContextVk::CommandPool()->EndCommandBuffer(cmdBfr);
 };
 
 //

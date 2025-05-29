@@ -33,9 +33,15 @@ private:
   virtual void CreatePipelines() override;
   virtual void DestroyPipelines() override;
 
+  virtual void CreateCommandBuffers() override;
+  [[nodiscard]] virtual const std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT>
+  GetCommandBuffers() const override {
+    return m_commandBuffers;
+  };
+
   virtual void OnSwapchainInvalidCb() override;
-  virtual void Paint(const uint32_t frameIndex, const uint32_t currentFrame,
-                     VkCommandBuffer &currentFrameCommandBuffer) override;
+  virtual void RecordCommandBuffer(const uint32_t frameIndex,
+                                   const uint32_t currentFrame) override;
 
 private:
   struct AttachmentsVk {
@@ -59,6 +65,8 @@ private:
 
   // Pipelines
   CompositePipelineVk m_compositePipeline;
+
+  std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> m_commandBuffers{};
 };
 
 GFX_NAMESPACE_END

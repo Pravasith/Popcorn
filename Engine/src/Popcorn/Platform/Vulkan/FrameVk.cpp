@@ -39,12 +39,11 @@ void FrameVk::CreateRenderSyncObjects() {
 };
 
 void FrameVk::Draw(
-    std::vector<VkCommandBuffer> &commandBuffers,
     const std::function<void()> &swapchainInvalidCb,
     const std::function<void(const uint32_t currentFrame)> &updateSceneDataCb,
-    const std::function<void(
-        const uint32_t swapchainFrameIndex, const uint32_t currentFrame,
-        VkCommandBuffer &currentFrameCommandBuffer)> &recordDrawCommandsCb) {
+    const std::function<void(const uint32_t swapchainFrameIndex,
+                             const uint32_t currentFrame)>
+        &recordDrawCommandsCb) {
   auto &device = DeviceVk::Get()->GetDevice();
   uint32_t swapchainImageIndex;
 
@@ -85,19 +84,16 @@ void FrameVk::Draw(
   // Update Uniforms & push constants
   updateSceneDataCb(m_currentFrame);
 
-  //
-  // Reset command buffer & start recording commands to it (lambda called from
-  // the RendererVk class)
-  vkResetCommandBuffer(commandBuffers[m_currentFrame], 0);
+  recordDrawCommandsCb(swapchainImageIndex, m_currentFrame);
 
-  recordDrawCommandsCb(swapchainImageIndex, m_currentFrame,
-                       commandBuffers[m_currentFrame]);
+  // TODO: Fill out command buffers
+  std::vector<VkCommandBuffer> commandBuffers{};
 
   //
   // Submit the graphics queue with the command buffer (with recorded commands
   // in it)
   SubmitDrawCommands(
-      commandBuffers[m_currentFrame],
+      commandBuffers,
       // Semaphore: Wait for the image to be available to paint/render
       imageAvailable,
       // Semaphore: Signal when frame is rendered & ready to present to
@@ -173,7 +169,7 @@ bool FrameVk::AcquireNextSwapchainImageIndex(
   return true;
 };
 
-void FrameVk::SubmitDrawCommands(const VkCommandBuffer &commandBuffer,
+void FrameVk::SubmitDrawCommands(std::vector<VkCommandBuffer> &commandBuffers,
                                  VkSemaphore *waitSemaphores,
                                  VkSemaphore *signalSemaphores,
                                  VkFence &inFlightFence) {
@@ -191,8 +187,8 @@ void FrameVk::SubmitDrawCommands(const VkCommandBuffer &commandBuffer,
   submitInfo.waitSemaphoreCount = 1;
   submitInfo.pWaitSemaphores = waitSemaphores;
   submitInfo.pWaitDstStageMask = waitStages;
-  submitInfo.commandBufferCount = 1;
-  submitInfo.pCommandBuffers = &commandBuffer;
+  submitInfo.commandBufferCount = commandBuffers.size();
+  submitInfo.pCommandBuffers = commandBuffers.data();
   //
   // Signal the m_frameRendererdSemaphore once the frame is rendered to the
   // provided image

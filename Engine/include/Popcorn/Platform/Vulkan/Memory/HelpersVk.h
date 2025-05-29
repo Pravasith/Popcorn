@@ -97,7 +97,7 @@ public:
     const LightData &lightData = light->GetLightData();
 
     const glm::vec3 &worldPos = light->GetPosition();
-    const glm::vec3 &worldDir = light->GetWorldDirection();
+    const glm::vec3 &worldDir = light->GetLookAtDirection();
     const glm::mat4 &viewMatrix = activeCamera->GetViewMatrix();
 
     uniform.viewPos =

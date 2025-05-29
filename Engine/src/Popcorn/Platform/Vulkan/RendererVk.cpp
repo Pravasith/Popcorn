@@ -1,5 +1,4 @@
 #include "RendererVk.h"
-#include "CommandPoolVk.h"
 #include "ContextVk.h"
 #include "GameObject.h"
 #include "Material.h"
@@ -24,17 +23,7 @@ std::vector<RenderFlowVk *> RendererVk::s_renderFlows{};
 // --- PUBLIC METHODS ------------------------------------------------------
 
 void RendererVk::DrawFrame(const Scene &scene) {
-  const GBufferRenderFlowVk *gBufferRenderFlow =
-      reinterpret_cast<const GBufferRenderFlowVk *>(s_renderFlows[0]);
-  const LightingRenderFlowVk *lightingRenderFlow =
-      reinterpret_cast<const LightingRenderFlowVk *>(s_renderFlows[1]);
-  const CompositeRenderFlowVk *compositeRenderFlow =
-      reinterpret_cast<const CompositeRenderFlowVk *>(s_renderFlows[2]);
-
   ContextVk::Frame()->Draw(
-      m_drawingCommandBuffers,
-
-      // Swapchain invalid -- update renderflow resources
       [&]() {
         for (auto &renderFlow : s_renderFlows) {
           renderFlow->OnSwapchainInvalidCb();
@@ -43,15 +32,10 @@ void RendererVk::DrawFrame(const Scene &scene) {
       [&](const uint32_t currentFrame) {
         RenderFlowVk::CopyDynamicUniformsToMemory(currentFrame);
       },
-      [&](const uint32_t frameIndex, const uint32_t currentFrame,
-          VkCommandBuffer &currentFrameCommandBuffer) {
-        // TODO: Move this inside renderflows
-        ContextVk::CommandPool()->BeginCommandBuffer(currentFrameCommandBuffer);
+      [&](const uint32_t frameIndex, const uint32_t currentFrame) {
         for (auto &renderFlow : s_renderFlows) {
-          renderFlow->Paint(frameIndex, currentFrame,
-                            currentFrameCommandBuffer);
+          renderFlow->RecordCommandBuffer(frameIndex, currentFrame);
         }
-        ContextVk::CommandPool()->EndCommandBuffer(currentFrameCommandBuffer);
       });
 };
 
@@ -59,18 +43,6 @@ bool RendererVk::OnFrameBufferResize(FrameBfrResizeEvent &) {
   ContextVk::Frame()->SetFrameBufferResized(true);
   return true;
 };
-
-void RendererVk::CreateRenderingCommandBuffers() {
-  auto *commandPoolVkStn = CommandPoolVk::Get();
-
-  VkCommandBufferAllocateInfo allocInfo{};
-  commandPoolVkStn->GetDefaultCommandBufferAllocInfo(allocInfo);
-  allocInfo.commandBufferCount = MAX_FRAMES_IN_FLIGHT;
-
-  m_drawingCommandBuffers.resize(allocInfo.commandBufferCount);
-  commandPoolVkStn->AllocCommandBuffers(allocInfo,
-                                        m_drawingCommandBuffers.data());
-}
 
 //
 // -------------------------------------------------------------------------
@@ -131,9 +103,8 @@ void RendererVk::PrepareRenderFlows() {
                            //   - Attachments
                            //   - RenderPass
                            //   - Framebuffer
+                           //   - Commandbuffers
   }
-
-  CreateRenderingCommandBuffers();
 };
 
 void RendererVk::CreateRenderFlowResources() {
@@ -162,18 +133,6 @@ void RendererVk::CreateRenderFlowResources() {
   //
   // Unload shaders in the shader library
   RenderFlowVk::FreeShaders();
-
-  // TODOs:
-  // x Create VMA buffers for UBOs
-  // x Create Samplers for G-Buffer & LitScene-Buffer
-  // x Bind(write/update) buffers to descriptor sets(or descriptors?)
-  // x Copy scene updates(UBOs) via OnUpdate() to mapped bits
-
-  // x Repeat the process for other renderflows
-  // - Write lighting shaders
-  // - Finish create pipelines
-  // - Write render callback for renderflows
-  // - Blender scene yaayyy!
 };
 
 void RendererVk::AssignSceneObjectsToRenderFlows() {

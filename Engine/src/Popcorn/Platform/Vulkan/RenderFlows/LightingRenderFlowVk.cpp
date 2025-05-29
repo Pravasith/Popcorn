@@ -170,6 +170,25 @@ void LightingRenderFlowVk::CreateFramebuffers() {
   }
 };
 
+//
+//
+//
+//
+//
+// --- CREATE COMMAND BUFFERS --------------------------------------------------
+// --- CREATE COMMAND BUFFERS --------------------------------------------------
+// --- CREATE COMMAND BUFFERS --------------------------------------------------
+//
+void LightingRenderFlowVk::CreateCommandBuffers() {
+  auto *cmdPool = ContextVk::CommandPool();
+
+  VkCommandBufferAllocateInfo allocInfo{};
+  cmdPool->GetDefaultCommandBufferAllocInfo(allocInfo);
+  allocInfo.commandBufferCount = MAX_FRAMES_IN_FLIGHT;
+
+  cmdPool->AllocCommandBuffers(allocInfo, m_commandBuffers.data());
+};
+
 void LightingRenderFlowVk::CreateAndAllocDescriptors() {
   auto *pools = ContextVk::DescriptorPools();
   auto *device = ContextVk::Device();

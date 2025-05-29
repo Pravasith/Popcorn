@@ -95,27 +95,9 @@ public:
     m_renderPass = VK_NULL_HANDLE;
   };
 
-  void GetDefaultCmdBeginRenderPassInfo(const VkFramebuffer &frameBuffer,
-                                        const VkExtent2D &frameExtent,
-                                        VkRenderPassBeginInfo &renderPassInfo) {
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = m_renderPass;
-    renderPassInfo.framebuffer = frameBuffer;
-    renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = frameExtent;
-
-    static constexpr VkClearValue clearAlbedo = {{0.0f, 0.0f, 0.0f, 1.0f}};
-    static constexpr VkClearValue clearDepth = {1.0f, 0.0f};
-    static constexpr VkClearValue clearNormal = {{0.0f, 0.0f, 1.0f, 0.0f}};
-    static constexpr VkClearValue clearRoughnessMetallic = {
-        {0.0f, 0.0f, 0.0f, 0.0f}};
-
-    static constexpr std::array<VkClearValue, 4> clearValues{
-        clearAlbedo, clearDepth, clearNormal, clearRoughnessMetallic};
-
-    renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-    renderPassInfo.pClearValues = clearValues.data();
-  };
+  static void GetDefaultCmdBeginRenderPassInfo(
+      const VkFramebuffer &frameBuffer, const VkExtent2D &frameExtent,
+      const VkRenderPass &renderPass, VkRenderPassBeginInfo &renderPassInfo);
 
   void RecordBeginRenderPassCommand(
       const VkCommandBuffer &commandBuffer,

@@ -6,6 +6,7 @@
 #include <cmath>
 #include <cstdint>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/vector_float3.hpp>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -143,6 +144,10 @@ public:
     return m_worldMatrix;
   }
 
+  [[nodiscard]] const glm::vec3 &GetLookAtDirection() const {
+    return m_lookAtDir;
+  };
+
 private:
   void UpdatePositionMatrix();
   void UpdateRotationMatrix();
@@ -192,7 +197,7 @@ protected:
   glm::mat4 m_localMatrix = PC_IDENTITY_MAT4; // Local -> Parent
   glm::mat4 m_worldMatrix = PC_IDENTITY_MAT4; // Local -> World
 
-  glm::vec3 m_lookAtDir{2.0f, 2.0f, 2.0f};
+  glm::vec3 m_lookAtDir{0.f, 0.f, -1.f};
 
   bool m_worldMatrixNeedsUpdate = false;
 };

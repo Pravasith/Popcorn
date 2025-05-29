@@ -31,12 +31,11 @@ public:
   };
 
   void Draw(
-      std::vector<VkCommandBuffer> &commandBuffers,
       const std::function<void()> &swapchainInvalidCb,
       const std::function<void(const uint32_t currentFrame)> &updateSceneDataCb,
-      const std::function<void(
-          const uint32_t swapchainFrameIndex, const uint32_t currentFrame,
-          VkCommandBuffer &currentFrameCommandBuffer)> &recordDrawCommandsCb);
+      const std::function<void(const uint32_t swapchainFrameIndex,
+                               const uint32_t currentFrame)>
+          &recordDrawCommandsCb);
 
   void CreateRenderSyncObjects();
   inline void SetFrameBufferResized(bool isFrameBufferResized) {
@@ -48,7 +47,7 @@ private:
   [[nodiscard]] bool AcquireNextSwapchainImageIndex(
       uint32_t &imageIndex, VkSemaphore *signalSemaphores,
       const std::function<void()> &swapchainInvalidCb);
-  void SubmitDrawCommands(const VkCommandBuffer &commandBuffer,
+  void SubmitDrawCommands(std::vector<VkCommandBuffer> &commandBuffers,
                           VkSemaphore *waitSemaphores,
                           VkSemaphore *signalSemaphores,
                           VkFence &inFlightFence);

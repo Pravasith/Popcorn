@@ -11,6 +11,7 @@
 #include "Popcorn/Core/Base.h"
 #include "RenderFlowDefs.h"
 #include "SamplerVk.h"
+#include <array>
 #include <cstdint>
 #include <cstring>
 #include <vector>
@@ -45,9 +46,11 @@ public:
   virtual void CreatePipelines() = 0;
   virtual void DestroyPipelines() = 0;
 
+  virtual void CreateCommandBuffers() = 0;
+
   virtual void OnSwapchainInvalidCb() = 0;
-  virtual void Paint(const uint32_t frameIndex, const uint32_t currentFrame,
-                     VkCommandBuffer &currentFrameCommandBuffer);
+  virtual void RecordCommandBuffer(const uint32_t frameIndex,
+                                   const uint32_t currentFrame);
 
 private:
   virtual void CreateAttachments() = 0;
@@ -58,11 +61,15 @@ private:
   virtual void DestroyRenderPass() = 0;
   virtual void DestroyAttachments() = 0;
 
+  virtual const std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT>
+  GetCommandBuffers() const = 0;
+
 public:
   void Prepare() {
     CreateAttachments();
     CreateRenderPass();
     CreateFramebuffers();
+    CreateCommandBuffers();
   };
 
   void CleanUp() {

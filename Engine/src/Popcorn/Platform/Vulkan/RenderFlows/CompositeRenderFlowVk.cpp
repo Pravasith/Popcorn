@@ -153,6 +153,25 @@ void CompositeRenderFlowVk::CreateFramebuffers() {
 //
 //
 //
+// --- CREATE COMMAND BUFFERS --------------------------------------------------
+// --- CREATE COMMAND BUFFERS --------------------------------------------------
+// --- CREATE COMMAND BUFFERS --------------------------------------------------
+//
+void CompositeRenderFlowVk::CreateCommandBuffers() {
+  auto *cmdPool = ContextVk::CommandPool();
+
+  VkCommandBufferAllocateInfo allocInfo{};
+  cmdPool->GetDefaultCommandBufferAllocInfo(allocInfo);
+  allocInfo.commandBufferCount = MAX_FRAMES_IN_FLIGHT;
+
+  cmdPool->AllocCommandBuffers(allocInfo, m_commandBuffers.data());
+};
+
+//
+//
+//
+//
+//
 // --- CREATE DESCRIPTORS ------------------------------------------------------
 // --- CREATE DESCRIPTORS ------------------------------------------------------
 // --- CREATE DESCRIPTORS ------------------------------------------------------

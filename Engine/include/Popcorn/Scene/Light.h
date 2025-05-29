@@ -44,9 +44,6 @@ public:
     return GameObjectTypes::Light;
   };
 
-  [[nodiscard]] const glm::vec3 &GetWorldDirection() const {
-    return m_worldDirection;
-  };
   [[nodiscard]] const LightData &GetLightData() const { return m_lightData; };
 
   virtual void OnAttach() {};
@@ -54,8 +51,6 @@ public:
   // virtual void OnRender() {};
 
 private:
-  glm::vec3 m_worldDirection = glm::normalize(
-      glm::vec3(0.0f, -1.0f, -0.5f)); // pointing downward and slightly forward
   LightData m_lightData{};
 };
 

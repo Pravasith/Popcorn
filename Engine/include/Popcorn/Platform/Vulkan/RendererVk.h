@@ -39,14 +39,9 @@ public:
   void CreateVulkanContext();
   void DestroyVulkanContext();
 
-  void CreateRenderingCommandBuffers();
-
 private:
   static ContextVk *s_vulkanContext;
-
   static std::vector<RenderFlowVk *> s_renderFlows;
-
-  std::vector<VkCommandBuffer> m_drawingCommandBuffers;
 };
 
 GFX_NAMESPACE_END
