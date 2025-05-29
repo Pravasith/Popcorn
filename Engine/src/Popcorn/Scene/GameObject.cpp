@@ -2,7 +2,10 @@
 #include "GlobalMacros.h"
 #include "MathConstants.h"
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/vector_float3.hpp>
+#include <glm/ext/vector_float4.hpp>
 #include <glm/fwd.hpp>
+#include <glm/geometric.hpp>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -18,14 +21,14 @@ void GameObject::SetParent(GameObject *gameObj) {
 
   m_parent = gameObj;
   m_worldMatrixNeedsUpdate = true;
-  UpdateChildren();
+  UpdateChildrenWorldMatrixNeedsUpdateFlag();
 }
 
 void GameObject::RemoveParent() {
   if (m_parent != nullptr) {
     m_parent = nullptr;
     m_worldMatrixNeedsUpdate = true;
-    UpdateChildren();
+    UpdateChildrenWorldMatrixNeedsUpdateFlag();
   };
 };
 
@@ -37,7 +40,7 @@ void GameObject::AddChild(GameObject *gameObj) {
   }
   gameObj->m_parent = this;
   gameObj->m_worldMatrixNeedsUpdate = true;
-  gameObj->UpdateChildren();
+  gameObj->UpdateChildrenWorldMatrixNeedsUpdateFlag();
 
   m_children.push_back(gameObj);
 }
@@ -107,6 +110,7 @@ void GameObject::UpdateRotationMatrix() {
     break;
   }
 
+  UpdateLookAtDirection();
   UpdateLocalMatrix();
 }
 
@@ -145,37 +149,51 @@ void GameObject::UpdatePositionMatrix() {
 //
 // -----------------------------------------------------------------
 // --- SCALE -------------------------------------------------------
-
-template <> void GameObject::Scale<Axes::X>(float scalarValue) {
+//
+template <> void GameObject::ScaleAlongAxis<Axes::X>(float scalarValue) {
   m_scale.x *= scalarValue;
   UpdateScaleMatrix();
 };
 
-template <> void GameObject::Scale<Axes::Y>(float scalarValue) {
+template <> void GameObject::ScaleAlongAxis<Axes::Y>(float scalarValue) {
   m_scale.y *= scalarValue;
   UpdateScaleMatrix();
 };
 
-template <> void GameObject::Scale<Axes::Z>(float scalarValue) {
+template <> void GameObject::ScaleAlongAxis<Axes::Z>(float scalarValue) {
   m_scale.z *= scalarValue;
   UpdateScaleMatrix();
 };
 
-void GameObject::Scale(float scalarValue) {
+void GameObject::ScaleUniformly(float scalarValue) {
   m_scale.x *= scalarValue;
   m_scale.y *= scalarValue;
   m_scale.z *= scalarValue;
   UpdateScaleMatrix();
 };
 
-void GameObject::SetScale(glm::vec3 scale) {
-  m_scale = scale;
+void GameObject::ScaleByValue(glm::vec3 scaleVector) {
+  m_scale = scaleVector;
   UpdateScaleMatrix();
 };
 
 void GameObject::UpdateScaleMatrix() {
   m_scaleMatrix = glm::scale(PC_IDENTITY_MAT4, m_scale);
+  UpdateLookAtDirection();
   UpdateLocalMatrix();
+};
+
+//
+//
+// -----------------------------------------------------------------
+// --- LOOK AT DIRECTION -------------------------------------------
+//
+void GameObject::UpdateLookAtDirection() {
+  glm::mat4 rotScale = m_rotationMatrix * m_scaleMatrix;
+  glm::vec3 initialLookAt{0.f, 0.f, -1.f}; // facing the world -Z
+
+  m_lookAtDir =
+      glm::normalize(glm::vec3(rotScale * glm::vec4(initialLookAt, 0.f)));
 };
 
 template <GameObjectType T>

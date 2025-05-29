@@ -45,12 +45,11 @@ class GameObject {
 public:
   GameObject() { PC_PRINT("CREATED", TagType::Constr, "GameObject"); }
   virtual ~GameObject() {
-    // Safely delete children
-    for (auto child : m_children) {
+    for (auto *child : m_children) {
       child->m_parent = nullptr;
-      delete child; // Calls child's destructor, ensuring it cleans itself up
+      delete child; // Recursive
     }
-    m_children.clear(); // Avoids dangling pointers
+    m_children.clear();
 
     PC_PRINT("DESTROYED", TagType::Destr, "GameObject");
   }
@@ -122,9 +121,9 @@ public:
   void SetRotationEuler(glm::vec3 rotationEuler);
 
   // Scale
-  template <Axes T> void Scale(float scalarValue);
-  void Scale(float scalarValue);
-  void SetScale(glm::vec3 scale);
+  template <Axes T> void ScaleAlongAxis(float scalarValue);
+  void ScaleUniformly(float scalarValue);
+  void ScaleByValue(glm::vec3 scaleVector);
 
   [[nodiscard]] const glm::mat4 &GetLocalMatrix() const {
     return m_localMatrix;
@@ -133,7 +132,7 @@ public:
   void SetLocalMatrix(const glm::mat4 &mat) {
     m_localMatrix = mat;
     m_worldMatrixNeedsUpdate = true;
-    UpdateChildren();
+    UpdateChildrenWorldMatrixNeedsUpdateFlag();
   };
 
   [[nodiscard]] const glm::mat4 &GetWorldMatrix() {
@@ -148,11 +147,12 @@ private:
   void UpdatePositionMatrix();
   void UpdateRotationMatrix();
   void UpdateScaleMatrix();
+  void UpdateLookAtDirection();
 
   void UpdateLocalMatrix() {
     m_localMatrix = m_translationMatrix * m_rotationMatrix * m_scaleMatrix;
     m_worldMatrixNeedsUpdate = true;
-    UpdateChildren();
+    UpdateChildrenWorldMatrixNeedsUpdateFlag();
   };
 
   void UpdateWorldMatrix() {
@@ -166,11 +166,11 @@ private:
     m_worldMatrixNeedsUpdate = false;
   };
 
-  void UpdateChildren() {
+  void UpdateChildrenWorldMatrixNeedsUpdateFlag() {
     for (auto *child : m_children) {
       if (child) {
         child->m_worldMatrixNeedsUpdate = true;
-        child->UpdateChildren();
+        child->UpdateChildrenWorldMatrixNeedsUpdateFlag();
       }
     }
   }
@@ -181,9 +181,9 @@ protected:
 
   EulerOrder m_eulerOrder = EulerOrder::XYZ;
 
-  glm::vec3 m_position = {0, 0, 0};
-  glm::vec3 m_rotationEuler = {0, 0, 0};
-  glm::vec3 m_scale = {1, 1, 1};
+  glm::vec3 m_position{0, 0, 0};
+  glm::vec3 m_rotationEuler{0, 0, 0};
+  glm::vec3 m_scale{1, 1, 1};
 
   glm::mat4 m_translationMatrix = PC_IDENTITY_MAT4;
   glm::mat4 m_rotationMatrix = PC_IDENTITY_MAT4;
@@ -191,6 +191,8 @@ protected:
 
   glm::mat4 m_localMatrix = PC_IDENTITY_MAT4; // Local -> Parent
   glm::mat4 m_worldMatrix = PC_IDENTITY_MAT4; // Local -> World
+
+  glm::vec3 m_lookAtDir{2.0f, 2.0f, 2.0f};
 
   bool m_worldMatrixNeedsUpdate = false;
 };
