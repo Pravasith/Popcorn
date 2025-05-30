@@ -249,7 +249,7 @@ void MemoryVk::FillUbosSubmesh(PcMaterialSubmeshesMap<T> &materialSubmeshesMap,
   for (auto &[matId, submeshes] : materialSubmeshesMap) {
     for (size_t i = 0; i < submeshes.size(); ++i) {
       Submesh<T> *submesh = submeshes[i];
-      glm::mat4 &worldMatrix = submesh->GetParentMesh()->GetWorldMatrix();
+      const glm::mat4 &worldMatrix = submesh->GetParentMesh()->GetWorldMatrix();
       // Normal matrix is for maintaining the property of normal staying
       // perpendicular to the tangents of the vertex.
       glm::mat4 normalMatrix = glm::transpose(glm::inverse(worldMatrix));
@@ -519,6 +519,13 @@ MemoryVk::FillVbosIbosUbosSubmeshMaterial<MaterialTypes::BasicMat>(
 template void MemoryVk::FillVbosIbosUbosSubmeshMaterial<MaterialTypes::PbrMat>(
     PcMaterialSubmeshesMap<MaterialTypes::PbrMat> &,
     PcMaterialMap<MaterialTypes::PbrMat> &);
+
+template void MemoryVk::FillUbosSubmesh<MaterialTypes::BasicMat>(
+    PcMaterialSubmeshesMap<MaterialTypes::BasicMat> &materialSubmeshesMap,
+    const uint32_t currentFrame);
+template void MemoryVk::FillUbosSubmesh<MaterialTypes::PbrMat>(
+    PcMaterialSubmeshesMap<MaterialTypes::PbrMat> &materialSubmeshesMap,
+    const uint32_t currentFrame);
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

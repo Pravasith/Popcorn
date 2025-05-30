@@ -23,15 +23,15 @@ GFX_NAMESPACE_BEGIN
 
 class MemoryVk {
 public:
+  [[nodiscard]] const VkBuffer &GetVboVkBuffer() const { return m_vbo; };
+  [[nodiscard]] const VkBuffer &GetIboVkBuffer() const { return m_ibo; };
   [[nodiscard]] const VkBuffer &GetUboSet(uint32_t frameIndex) const {
     return m_uboSet[frameIndex];
   };
   [[nodiscard]] const PcBufferViews &GetBufferViews() const {
     return m_bufferViews;
   };
-  [[nodiscard]] const PcBufferOffsets &GetBufferOffsets() const {
-    return m_bufferOffsets;
-  };
+  [[nodiscard]] PcBufferOffsets &GetBufferOffsets() { return m_bufferOffsets; };
 
   template <MaterialTypes T>
   void ExtractOffsetsMaterialsSubmeshes(

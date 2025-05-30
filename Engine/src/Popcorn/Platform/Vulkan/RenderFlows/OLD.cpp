@@ -53,7 +53,6 @@ void GBufferRenderFlowVk::CreatePipelines() {
   // CreateBasePipeline(); // From Pipeline factory
 };
 
-
 void GBufferRenderFlowVk::CreateRenderPass() {
   //
   // ----------------------------------------------------------------
@@ -187,9 +186,9 @@ void GBufferRenderFlowVk::Paint(const uint32_t imageIndex,
       BufferVkUtils::RecordBindVkIndexBufferCommand<uint16_t>(
           commandBuffer, &m_vkIndexBuffer, m_indexBufferOffsets[i]);
 
-      VkPhysicalDeviceProperties deviceProperties;
-      vkGetPhysicalDeviceProperties(ContextVk::Device()->GetPhysicalDevice(),
-                                    &deviceProperties);
+      // VkPhysicalDeviceProperties deviceProperties;
+      // vkGetPhysicalDeviceProperties(ContextVk::Device()->GetPhysicalDevice(),
+      //                               &deviceProperties);
 
       uint32_t dynamicOffset = i * sizeof(Mesh::Uniforms);
 

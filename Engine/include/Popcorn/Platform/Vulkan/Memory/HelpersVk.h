@@ -67,8 +67,9 @@ private:
 
 template <> struct PcCopyUniformToMemory<Uniforms::Submesh> {
 public:
-  PcCopyUniformToMemory(glm::mat4 &worldMatrix, glm::mat4 &normalMatrix,
-                        PcBufferViews &bfrViews, PcBufferOffsets &bfrOffsets)
+  PcCopyUniformToMemory(const glm::mat4 &worldMatrix,
+                        const glm::mat4 &normalMatrix, PcBufferViews &bfrViews,
+                        PcBufferOffsets &bfrOffsets)
       : bufferViews(bfrViews), bufferOffsets(bfrOffsets) {
     uniform.worldMatrix = worldMatrix;
     uniform.normalMatrix = normalMatrix;
@@ -79,7 +80,7 @@ public:
     const auto &offsetTriple =
         bufferOffsets.submeshesOffsets[matId][submeshIndex];
     byte_t *dst = (byte_t *)uboMapping + bufferViews.submeshUbo.offset +
-                  offsetTriple.worldMatrixOffset;
+                  offsetTriple.uboOffset;
     memcpy(dst, &uniform, UniformDefs::SubmeshUniform::size);
   }
 
@@ -113,7 +114,7 @@ public:
   void operator()(void *ssboMapping, size_t index) {
     byte_t *lightSsboMapping =
         (byte_t *)ssboMapping + bufferViews.lightsSsbo.offset +
-        bufferOffsets.lightsWorldMatrixOffsets[index]; // aligned offset
+        bufferOffsets.lightsOffsets[index]; // aligned offset
 
     constexpr uint64_t uniformSize = UniformDefs::LightUniform::size;
     std::memcpy(lightSsboMapping, &uniform, uniformSize);
@@ -142,7 +143,7 @@ public:
 
   void operator()(void *uboMapping, size_t index) {
     byte_t *dst = (byte_t *)uboMapping + bufferViews.camerasUbo.offset +
-                  bufferOffsets.camerasWorldMatrixOffsets[index];
+                  bufferOffsets.camerasOffsets[index];
     memcpy(dst, &uniform, UniformDefs::CameraUniform::size);
   }
 
@@ -163,7 +164,7 @@ public:
 
   void operator()(void *uboMapping, size_t index) {
     byte_t *dst = (byte_t *)uboMapping + bufferViews.emptysUbo.offset +
-                  bufferOffsets.emptysWorldMatrixOffsets[index];
+                  bufferOffsets.emptysOffsets[index];
     memcpy(dst, &uniform, UniformDefs::EmptyUniform::size);
   }
 

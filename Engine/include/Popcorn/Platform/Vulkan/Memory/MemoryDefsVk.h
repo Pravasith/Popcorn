@@ -14,6 +14,7 @@ GFX_NAMESPACE_BEGIN
 // --- Typedefs ------------------------------------------------------------
 template <MaterialTypes T>
 using PcMaterialMap = std::unordered_map<MaterialHashType, Material<T> *>;
+
 using PcMaterialOffsetsMap = std::unordered_map<MaterialHashType, VkDeviceSize>;
 
 template <MaterialTypes T>
@@ -23,7 +24,7 @@ using PcMaterialSubmeshesMap =
 struct PcSubmeshOffsets {
   VkDeviceSize vboOffset = 0;
   VkDeviceSize iboOffset = 0;
-  VkDeviceSize worldMatrixOffset = 0;
+  VkDeviceSize uboOffset = 0;
 };
 
 using PcSubmeshesOffsetsMap =

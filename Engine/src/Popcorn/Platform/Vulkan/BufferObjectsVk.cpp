@@ -39,7 +39,7 @@ void VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
 // --- VULKAN BUFFER MEMORY UTILS -------------------------------------------
 // --------------------------------------------------------------------------
 
-void BufferVkUtils::RecordBindVkVertexBuffersCommand(
+void BufferVkUtils::BindVBO(
     const VkCommandBuffer &commandBuffer, VkBuffer *vkBuffer,
     VkDeviceSize *offsets, const uint32_t buffersCount) {
   vkCmdBindVertexBuffers(commandBuffer, 0, buffersCount, vkBuffer, offsets);

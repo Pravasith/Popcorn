@@ -1,5 +1,6 @@
 #include "RenderFlows/GBufferRenderFlowVk.h"
 #include "AttachmentVk.h"
+#include "BufferObjectsVk.h"
 #include "CommonVk.h"
 #include "ContextVk.h"
 #include "DescriptorLayoutsVk.h"
@@ -556,7 +557,31 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   // TODO: Optimize draw loop - heap allocations -> stack
   auto &cmdBfr = m_commandBuffers[currentFrame];
   auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
-  auto *memory = ContextVk::Memory(); // Heap allocated!!
+  auto *deviceMemory =
+      ContextVk::Memory(); // Heap allocated!! this is singleton
+
+  auto &bufferViews = deviceMemory->GetBufferViews();
+  auto &bufferOffsets = deviceMemory->GetBufferOffsets();
+
+  std::array<VkDescriptorSet, 1> cameraSets{
+      m_descriptorSetsVk.cameraSets[currentFrame],
+  };
+  std::array<VkDescriptorSet, 1> basicMatSets{
+      m_descriptorSetsVk.basicMatSets[currentFrame],
+  };
+  std::array<VkDescriptorSet, 1> pbrMatSets{
+      m_descriptorSetsVk.pbrMatSets[currentFrame],
+  };
+  std::array<VkDescriptorSet, 1> submeshSets{
+      m_descriptorSetsVk.submeshSets[currentFrame],
+  };
+
+  const VkBuffer &vertexBuffer = deviceMemory->GetVboVkBuffer();
+  const VkBuffer &indexBuffer = deviceMemory->GetIboVkBuffer();
+
+  VkBuffer vertexBuffers[]{vertexBuffer};
+  VkDeviceSize vboOffsets[]{
+      0}; // This is NOT stride, it's just the VkBuffer offset
 
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
@@ -582,39 +607,51 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   static int drawCommandCount = 0;
 #endif
 
-  std::array<VkDescriptorSet, 1> cameraSets{
-      m_descriptorSetsVk.cameraSets[currentFrame],
-  };
-  std::array<VkDescriptorSet, 1> basicMatSets{
-      m_descriptorSetsVk.basicMatSets[currentFrame],
-  };
-  std::array<VkDescriptorSet, 1> pbrMatSets{
-      m_descriptorSetsVk.pbrMatSets[currentFrame],
-  };
-
   //
   // --- Paint :D --------------------------------------------------------------
   m_basicMatPipelineVk.BindPipeline(cmdBfr);
 
-  // Camera
+  // Hardcoding 0 for camera index for now
+  // TODO: Make it dynamic later
+  uint32_t cameraOffset =
+      bufferViews.camerasUbo.offset + bufferOffsets.camerasOffsets[0];
+
+  // Descriptor set 0 - Camera
   vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
                           m_basicMatPipelineVk.GetVkPipelineLayout(), 0,
-                          cameraSets.size(), cameraSets.data(), 1, );
+                          cameraSets.size(), cameraSets.data(), 1,
+                          &cameraOffset);
 
-  vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                          m_basicMatPipelineVk.GetVkPipelineLayout(), 0,
-                          basicMatSets.size(), basicMatSets.data(), 0, nullptr);
+  for (auto &[materialHash, submeshes] : s_basicMatSubmeshesMap) {
+    uint32_t basicMatOffset = bufferViews.basicMatUbo.offset +
+                              bufferOffsets.materialOffsets[materialHash];
 
-  for (Submesh<MaterialTypes::BasicMat> *submesh :
-       s_basicMatSubmeshesMap[MaterialTypes::BasicMat]) {
-
-    std::array<VkDescriptorSet, 1> submeshSets{
-        m_descriptorSetsVk.submeshSets[currentFrame],
-    };
-
+    // Descriptor set 1 - Basic material
     vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            m_basicMatPipelineVk.GetVkPipelineLayout(), 0,
-                            submeshSets.size(), submeshSets.data(), 0, nullptr);
+                            m_basicMatPipelineVk.GetVkPipelineLayout(), 1,
+                            basicMatSets.size(), basicMatSets.data(), 1,
+                            &basicMatOffset);
+
+    uint32_t submeshIndex = 0;
+    for (Submesh<MaterialTypes::BasicMat> *submesh : submeshes) {
+      uint32_t submeshUboOffset =
+          bufferViews.submeshUbo.offset +
+          bufferOffsets.submeshesOffsets[materialHash][submeshIndex].uboOffset;
+
+      // Descriptor set 2 - Submesh
+      vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                              m_basicMatPipelineVk.GetVkPipelineLayout(), 2,
+                              submeshSets.size(), submeshSets.data(), 1,
+                              &submeshUboOffset);
+
+      BufferVkUtils::BindVBO(cmdBfr, vertexBuffers, vboOffsets, 1);
+      BufferVkUtils::BindIBO<uint32_t>(cmdBfr, indexBuffer, 0);
+
+      vkCmdDrawIndexed(cmdBfr, submesh->GetIndexBuffer()->GetCount(), 1, 0, 0,
+                       0);
+
+      ++submeshIndex;
+    }
   }
 
   //

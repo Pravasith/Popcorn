@@ -127,6 +127,7 @@ void RenderFlowVk::CopyDynamicUniformsToMemory(const uint32_t currentFrame) {
 
   memory->FillUbosSubmesh(s_basicMatSubmeshesMap, currentFrame);
   memory->FillUbosSubmesh(s_pbrMatSubmeshesMap, currentFrame);
+
   memory->FillUbosSsbosLightCameraEmpty(s_lights, s_cameras, s_emptys,
                                         currentFrame);
 };
