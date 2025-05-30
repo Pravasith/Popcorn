@@ -8,6 +8,7 @@
 #include "FramebufferVk.h"
 #include "GlobalMacros.h"
 #include "ImageVk.h"
+#include "PipelineUtilsVk.h"
 #include "RenderPassVk.h"
 #include <array>
 #include <vulkan/vulkan_core.h>
@@ -352,6 +353,55 @@ void LightingRenderFlowVk::OnSwapchainInvalidCb() {
   CreateAttachments();
   CreateFramebuffers();
 };
+
+//
+//
+//
+//
+// --- PAINT -------------------------------------------------------------------
+// --- PAINT -------------------------------------------------------------------
+// --- PAINT -------------------------------------------------------------------
+void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
+                                               const uint32_t currentFrame) {
+  // TODO: Optimize draw loop - heap allocations -> stack
+  auto &cmdBfr = m_commandBuffers[currentFrame];
+  auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
+  auto *deviceMemory =
+      ContextVk::Memory(); // Heap allocated!! this is singleton
+
+  auto &bufferViews = deviceMemory->GetBufferViews();
+  auto &bufferOffsets = deviceMemory->GetBufferOffsets();
+
+  std::array<VkDescriptorSet, 1> cameraSets{
+      // m_descriptorSetsVk.cameraSets[currentFrame],
+  };
+  std::array<VkDescriptorSet, 1> lightingSets{
+      m_descriptorSetsVk.lightingSets[currentFrame],
+
+  };
+
+  // Reset and begin recording
+  vkResetCommandBuffer(cmdBfr, 0);
+  ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
+
+  // Render pass begin
+  VkRenderPassBeginInfo renderPassBeginInfo{};
+  RenderPassVk::GetDefaultCmdBeginRenderPassInfo(
+      m_framebuffers[currentFrame], swapchainExtent,
+      m_renderPass.GetVkRenderPass(), renderPassBeginInfo);
+
+  m_renderPass.BeginRenderPass(cmdBfr, renderPassBeginInfo);
+
+  // Set viewport and scissor
+  VkViewport viewport{};
+  VkRect2D scissor{};
+  PipelineUtilsVk::GetDefaultViewportAndScissorState(viewport, scissor,
+                                                     swapchainExtent);
+  vkCmdSetViewport(cmdBfr, 0, 1, &viewport);
+  vkCmdSetScissor(cmdBfr, 0, 1, &scissor);
+
+  // TODO: Change the pipeline to accept no vertex or index buffers
+}
 
 //
 //
