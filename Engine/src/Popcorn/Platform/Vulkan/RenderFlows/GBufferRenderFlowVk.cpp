@@ -6,11 +6,14 @@
 #include "DescriptorPoolsVk.h"
 #include "FramebufferVk.h"
 #include "ImageVk.h"
+#include "MaterialTypes.h"
 #include "Memory/MemoryVk.h"
+#include "Mesh.h"
 #include "PipelineUtilsVk.h"
 #include "Popcorn/Loaders/LoadersDefs.h"
 #include "RenderPassVk.h"
 #include <algorithm>
+#include <array>
 #include <cstdint>
 #include <vector>
 #include <vulkan/vulkan_core.h>
@@ -550,8 +553,10 @@ void GBufferRenderFlowVk::OnSwapchainInvalidCb() {
 // --- PAINT -------------------------------------------------------------------
 void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
                                               const uint32_t currentFrame) {
+  // TODO: Optimize draw loop - heap allocations -> stack
   auto &cmdBfr = m_commandBuffers[currentFrame];
   auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
+  auto *memory = ContextVk::Memory(); // Heap allocated!!
 
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
@@ -562,7 +567,7 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 
   //
   // --- Begin renderpass ------------------------------------------------------
-  m_renderPass.RecordBeginRenderPassCommand(cmdBfr, renderPassBeginInfo);
+  m_renderPass.BeginRenderPass(cmdBfr, renderPassBeginInfo);
 
   //
   // --- Set viewport & scissor ------------------------------------------------
@@ -573,12 +578,48 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkCmdSetViewport(cmdBfr, 0, 1, &viewport);
   vkCmdSetScissor(cmdBfr, 0, 1, &scissor);
 
+#ifdef PC_DEBUG
+  static int drawCommandCount = 0;
+#endif
+
+  std::array<VkDescriptorSet, 1> cameraSets{
+      m_descriptorSetsVk.cameraSets[currentFrame],
+  };
+  std::array<VkDescriptorSet, 1> basicMatSets{
+      m_descriptorSetsVk.basicMatSets[currentFrame],
+  };
+  std::array<VkDescriptorSet, 1> pbrMatSets{
+      m_descriptorSetsVk.pbrMatSets[currentFrame],
+  };
+
   //
-  // TODO: Draw here
+  // --- Paint :D --------------------------------------------------------------
+  m_basicMatPipelineVk.BindPipeline(cmdBfr);
+
+  // Camera
+  vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                          m_basicMatPipelineVk.GetVkPipelineLayout(), 0,
+                          cameraSets.size(), cameraSets.data(), 1, );
+
+  vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                          m_basicMatPipelineVk.GetVkPipelineLayout(), 0,
+                          basicMatSets.size(), basicMatSets.data(), 0, nullptr);
+
+  for (Submesh<MaterialTypes::BasicMat> *submesh :
+       s_basicMatSubmeshesMap[MaterialTypes::BasicMat]) {
+
+    std::array<VkDescriptorSet, 1> submeshSets{
+        m_descriptorSetsVk.submeshSets[currentFrame],
+    };
+
+    vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            m_basicMatPipelineVk.GetVkPipelineLayout(), 0,
+                            submeshSets.size(), submeshSets.data(), 0, nullptr);
+  }
 
   //
   // --- End renderpass --------------------------------------------------------
-  m_renderPass.RecordEndRenderPassCommand(cmdBfr);
+  m_renderPass.EndRenderPass(cmdBfr);
 
   ContextVk::CommandPool()->EndCommandBuffer(cmdBfr);
 };

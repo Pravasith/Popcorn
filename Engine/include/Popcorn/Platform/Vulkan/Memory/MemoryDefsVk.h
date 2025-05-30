@@ -35,9 +35,9 @@ struct PcBufferOffsets {
   PcSubmeshesOffsetsMap submeshesOffsets{}; // aligned
   PcMaterialOffsetsMap materialOffsets{};   // aligned
 
-  std::vector<VkDeviceSize> lightsWorldMatrixOffsets{};  // aligned
-  std::vector<VkDeviceSize> camerasWorldMatrixOffsets{}; // aligned
-  std::vector<VkDeviceSize> emptysWorldMatrixOffsets{};  // aligned
+  std::vector<VkDeviceSize> lightsOffsets{};  // aligned
+  std::vector<VkDeviceSize> camerasOffsets{}; // aligned
+  std::vector<VkDeviceSize> emptysOffsets{};  // aligned
 };
 
 //

@@ -89,19 +89,19 @@ void MemoryVk::ExtractOffsetsLightsCamerasEmptys(std::vector<Light *> &lights,
   VkDeviceSize lightOffsets = 0, cameraOffsets = 0, emptyOffsets = 0;
 
   for (Light *light : lights) {
-    m_bufferOffsets.lightsWorldMatrixOffsets.push_back(lightOffsets);
+    m_bufferOffsets.lightsOffsets.push_back(lightOffsets);
     lightOffsets += PC_AlignCeil(UniformDefs::LightUniform::size,
                                  limits.minStorageBufferOffsetAlignment);
   };
 
   for (Camera *camera : cameras) {
-    m_bufferOffsets.camerasWorldMatrixOffsets.push_back(cameraOffsets);
+    m_bufferOffsets.camerasOffsets.push_back(cameraOffsets);
     cameraOffsets += PC_AlignCeil(UniformDefs::CameraUniform::size,
                                   limits.minUniformBufferOffsetAlignment);
   };
 
   for (Empty *empty : emptys) {
-    m_bufferOffsets.emptysWorldMatrixOffsets.push_back(emptyOffsets);
+    m_bufferOffsets.emptysOffsets.push_back(emptyOffsets);
     emptyOffsets += PC_AlignCeil(UniformDefs::EmptyUniform::size,
                                  limits.minUniformBufferOffsetAlignment);
   };

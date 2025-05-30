@@ -28,6 +28,7 @@ public:
 
   virtual void Create(const BufferDefs::Layout &vertexBufferLayout,
                       const VkRenderPass &renderPass) = 0;
+
   void Destroy();
 
 public:
@@ -38,8 +39,7 @@ public:
 
   using PipelineStateType = DerivePipelineCreateInfoType<T>::type;
 
-protected:
-  inline void RecordBindCmdPipelineCommand(const VkCommandBuffer &cmdBfr) {
+  inline void BindPipeline(const VkCommandBuffer &cmdBfr) {
     PC_VK_NULL_CHECK(cmdBfr)
     PC_VK_NULL_CHECK(m_pipeline)
 
@@ -50,6 +50,7 @@ protected:
     }
   };
 
+protected:
   void CreateVkPipeline(const VkDevice &device,
                         const PipelineStateType &pipelineCreateInfo,
                         const VkRenderPass &renderPass);

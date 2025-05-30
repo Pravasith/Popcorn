@@ -68,8 +68,10 @@ void BasicMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
       layouts->GetLayout<DescriptorSets::SubmeshSet>();
   VkDescriptorSetLayout &basicMatLayout =
       layouts->GetLayout<DescriptorSets::BasicMatSet>();
+
   std::array<VkDescriptorSetLayout, 3> dSetLayouts = {
       cameraLayout, submeshLayout, basicMatLayout};
+
   pipelineState.pipelineLayout.setLayoutCount = dSetLayouts.size();
   pipelineState.pipelineLayout.pSetLayouts = dSetLayouts.data();
 

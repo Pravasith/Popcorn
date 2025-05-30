@@ -2,8 +2,6 @@
 
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
-#include <array>
-#include <cstdint>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -99,14 +97,13 @@ public:
       const VkFramebuffer &frameBuffer, const VkExtent2D &frameExtent,
       const VkRenderPass &renderPass, VkRenderPassBeginInfo &renderPassInfo);
 
-  void RecordBeginRenderPassCommand(
-      const VkCommandBuffer &commandBuffer,
-      const VkRenderPassBeginInfo &renderPassBeginInfo) {
+  void BeginRenderPass(const VkCommandBuffer &commandBuffer,
+                       const VkRenderPassBeginInfo &renderPassBeginInfo) {
     vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo,
                          VK_SUBPASS_CONTENTS_INLINE);
   };
 
-  void RecordEndRenderPassCommand(const VkCommandBuffer &commandBuffer) {
+  void EndRenderPass(const VkCommandBuffer &commandBuffer) {
     vkCmdEndRenderPass(commandBuffer);
   };
 
