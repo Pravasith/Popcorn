@@ -41,8 +41,10 @@ public:
   static void AllocShaders();
   static void FreeShaders();
 
+  static void AllocGlobalDescriptors();
+
 public:
-  virtual void CreateAndAllocDescriptors() = 0; // Automatically destroyed
+  virtual void AllocLocalDescriptors() = 0; // Automatically destroyed
   virtual void CreatePipelines() = 0;
   virtual void DestroyPipelines() = 0;
 
@@ -109,6 +111,10 @@ public:
     SamplerVk frameSampler;
   };
 
+  struct DescriptorSetsVkStatic {
+    PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> cameraSets{};
+  };
+
 protected:
   //
   // Game object refs -------------------------------------------------------
@@ -136,6 +142,8 @@ protected:
   //
   // ------------------------------------------------------------------------
   static uint64_t s_submeshCount;
+
+  static DescriptorSetsVkStatic s_commonDescriptorSets;
 };
 
 GFX_NAMESPACE_END

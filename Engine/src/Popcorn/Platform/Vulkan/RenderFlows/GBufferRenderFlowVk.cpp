@@ -372,7 +372,7 @@ void GBufferRenderFlowVk::CreateCommandBuffers() {
 // --- CREATE DESCRIPTORS ------------------------------------------------------
 // --- CREATE DESCRIPTORS ------------------------------------------------------
 //
-void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
+void GBufferRenderFlowVk::AllocLocalDescriptors() {
   auto *layouts = ContextVk::DescriptorLayouts();
   auto *pools = ContextVk::DescriptorPools();
   auto *device = ContextVk::Device();
@@ -386,11 +386,6 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
   DPoolVk &gBufferPool = pools->GetPool<DescriptorPools::GBufferPool>(
       MAX_FRAMES_IN_FLIGHT); // Creates pool if it
                              // doesn't exist
-
-  VkDescriptorSetLayout &cameraLayout =
-      layouts->GetLayout<DescriptorSets::CameraSet>();
-  std::array<VkDescriptorSetLayout, maxFIF> cameraLayouts{};
-  std::fill(cameraLayouts.begin(), cameraLayouts.end(), cameraLayout);
 
   VkDescriptorSetLayout &submeshLayout =
       layouts->GetLayout<DescriptorSets::SubmeshSet>();
@@ -409,16 +404,12 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
 
   //
   // --- 4 sets each frame ---
-  // - Camera - Static UBO
   // - Submesh - Dynamic UBO
   // - BasicMat - Dynamic UBO
   // - PbrMat - Dynamic UBO
   //
   //
   // Descriptor set will be cleaned automatically when pools are destroyed
-  m_descriptorSetsVk.cameraSets =
-      gBufferPool.AllocateDescriptorSets<DescriptorSets::CameraSet, maxFIF>(
-          device->GetDevice(), cameraLayouts);
   m_descriptorSetsVk.submeshSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::SubmeshSet, maxFIF>(
           device->GetDevice(), submeshLayouts);
@@ -431,12 +422,6 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
 
   // Bind sets with buffers
   for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-    VkDescriptorBufferInfo cameraBufferInfo{};
-    cameraBufferInfo.buffer = memory->GetUboSet(i);
-    cameraBufferInfo.offset = memory->GetBufferViews().camerasUbo.offset;
-    cameraBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
-        DescriptorSets::CameraSet>(properties.limits);
-
     VkDescriptorBufferInfo submeshBufferInfo{};
     submeshBufferInfo.buffer = memory->GetUboSet(i);
     submeshBufferInfo.offset = memory->GetBufferViews().submeshUbo.offset;
@@ -455,17 +440,7 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
     pbrMatBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
         DescriptorSets::PbrMatSet>(properties.limits);
 
-    VkWriteDescriptorSet cameraWrite{};
-    cameraWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    cameraWrite.dstSet = m_descriptorSetsVk.cameraSets[i];
-    cameraWrite.dstBinding = 0;
-    cameraWrite.dstArrayElement = 0;
-    cameraWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    cameraWrite.descriptorCount = 1;
-    cameraWrite.pBufferInfo = &cameraBufferInfo;
-    cameraWrite.pImageInfo = nullptr;
-    cameraWrite.pTexelBufferView = nullptr;
-
+    // Writes
     VkWriteDescriptorSet submeshWrite{};
     submeshWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     submeshWrite.dstSet = m_descriptorSetsVk.submeshSets[i];
@@ -499,8 +474,8 @@ void GBufferRenderFlowVk::CreateAndAllocDescriptors() {
     pbrMatWrite.pImageInfo = nullptr;
     pbrMatWrite.pTexelBufferView = nullptr;
 
-    std::vector<VkWriteDescriptorSet> writes{cameraWrite, submeshWrite,
-                                             basicMatWrite, pbrMatWrite};
+    std::vector<VkWriteDescriptorSet> writes{submeshWrite, basicMatWrite,
+                                             pbrMatWrite};
 
     vkUpdateDescriptorSets(device->GetDevice(), writes.size(), writes.data(), 0,
                            nullptr);
@@ -564,7 +539,7 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   auto &bufferOffsets = deviceMemory->GetBufferOffsets();
 
   std::array<VkDescriptorSet, 1> cameraSets{
-      m_descriptorSetsVk.cameraSets[currentFrame],
+      s_commonDescriptorSets.cameraSets[currentFrame],
   };
   std::array<VkDescriptorSet, 1> basicMatSets{
       m_descriptorSetsVk.basicMatSets[currentFrame],

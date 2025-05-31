@@ -6,13 +6,17 @@
 #include <array>
 #include <cstdint>
 #include <unordered_map>
-#include <vector>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-enum DescriptorPools { GBufferPool = 1, LightingPool, CompositePool };
+enum DescriptorPools {
+  GlobalDescriptorsPool = 1,
+  GBufferPool,
+  LightingPool,
+  CompositePool
+};
 
 class DPoolVk {
   friend class DescriptorPoolsVk;

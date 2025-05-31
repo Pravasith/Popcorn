@@ -190,7 +190,7 @@ void LightingRenderFlowVk::CreateCommandBuffers() {
   cmdPool->AllocCommandBuffers(allocInfo, m_commandBuffers.data());
 };
 
-void LightingRenderFlowVk::CreateAndAllocDescriptors() {
+void LightingRenderFlowVk::AllocLocalDescriptors() {
   auto *pools = ContextVk::DescriptorPools();
   auto *device = ContextVk::Device();
   auto *memory = ContextVk::Memory();
@@ -372,10 +372,10 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   auto &bufferViews = deviceMemory->GetBufferViews();
   auto &bufferOffsets = deviceMemory->GetBufferOffsets();
 
-  // TODO: Get camera sets
   std::array<VkDescriptorSet, 1> cameraSets{
-      // m_descriptorSetsVk.cameraSets[currentFrame],
+      s_commonDescriptorSets.cameraSets[currentFrame],
   };
+
   std::array<VkDescriptorSet, 1> lightingSets{
       m_descriptorSetsVk.lightingSets[currentFrame],
   };

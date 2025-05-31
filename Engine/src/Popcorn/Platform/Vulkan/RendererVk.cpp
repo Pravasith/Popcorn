@@ -122,11 +122,12 @@ void RendererVk::CreateRenderFlowResources() {
   RenderFlowVk::AllocMemory();
   RenderFlowVk::CreateSamplers();
   RenderFlowVk::AllocShaders();
+  RenderFlowVk::AllocGlobalDescriptors();
 
   //
   // Renderflow specific descriptors & pipelines
   for (auto &renderFlow : s_renderFlows) {
-    renderFlow->CreateAndAllocDescriptors(); // Static for now
+    renderFlow->AllocLocalDescriptors(); // Static for now
     renderFlow->CreatePipelines();
   }
 

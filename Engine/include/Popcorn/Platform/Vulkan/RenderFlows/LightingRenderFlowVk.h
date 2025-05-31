@@ -30,7 +30,7 @@ private:
   virtual void DestroyRenderPass() override;
   virtual void DestroyAttachments() override;
 
-  virtual void CreateAndAllocDescriptors() override;
+  virtual void AllocLocalDescriptors() override;
   virtual void CreatePipelines() override;
   virtual void DestroyPipelines() override;
 

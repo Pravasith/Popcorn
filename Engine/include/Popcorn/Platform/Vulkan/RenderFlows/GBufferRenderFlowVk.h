@@ -31,7 +31,7 @@ private:
   virtual void DestroyFramebuffers() override;
   virtual void DestroyAttachments() override;
 
-  virtual void CreateAndAllocDescriptors() override;
+  virtual void AllocLocalDescriptors() override;
   virtual void CreatePipelines() override;
   virtual void DestroyPipelines() override;
 
@@ -54,7 +54,6 @@ private:
   };
 
   struct DescriptorSetsVk {
-    PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> cameraSets{};
     PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> submeshSets{};
     PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> basicMatSets{};
     PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> pbrMatSets{};

@@ -178,7 +178,7 @@ void CompositeRenderFlowVk::CreateCommandBuffers() {
 // --- CREATE DESCRIPTORS ------------------------------------------------------
 // --- CREATE DESCRIPTORS ------------------------------------------------------
 //
-void CompositeRenderFlowVk::CreateAndAllocDescriptors() {
+void CompositeRenderFlowVk::AllocLocalDescriptors() {
   auto *pools = ContextVk::DescriptorPools();
   auto *device = ContextVk::Device();
   auto *memory = ContextVk::Memory();

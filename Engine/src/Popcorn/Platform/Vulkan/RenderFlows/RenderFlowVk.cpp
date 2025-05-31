@@ -43,6 +43,8 @@ PcRenderFlowImages<Lighting, MAX_FRAMES_IN_FLIGHT>
     RenderFlowVk::s_lightingImages{};
 PcRenderFlowImages<Composite> RenderFlowVk::s_compositeImages{};
 
+RenderFlowVk::DescriptorSetsVkStatic RenderFlowVk::s_commonDescriptorSets{};
+
 //
 // --- METHODS -----------------------------------------------------------
 void RenderFlowVk::AllocShaders() {
@@ -77,7 +79,57 @@ void RenderFlowVk::AllocShaders() {
 void RenderFlowVk::FreeShaders() {
   ShaderLibrary *shaders = ContextVk::Shaders();
   shaders->UnloadShaders<RendererType::Vulkan>();
-};
+}
+
+void RenderFlowVk::AllocGlobalDescriptors() {
+  auto *layouts = ContextVk::DescriptorLayouts();
+  auto *pools = ContextVk::DescriptorPools();
+  auto *device = ContextVk::Device();
+  auto *memory = ContextVk::Memory();
+
+  VkPhysicalDeviceProperties properties{};
+  device->GetPhysicalDeviceProperties(properties);
+
+  DPoolVk &globalDescriptorsPool =
+      pools->GetPool<DescriptorPools::GlobalDescriptorsPool>(
+          MAX_FRAMES_IN_FLIGHT); // Creates pool if it
+                                 // doesn't exist
+  VkDescriptorSetLayout &cameraLayout =
+      layouts->GetLayout<DescriptorSets::CameraSet>();
+  std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> cameraLayouts{};
+  std::fill(cameraLayouts.begin(), cameraLayouts.end(), cameraLayout);
+
+  // Descriptor set will be cleaned automatically when pools are destroyed
+  s_commonDescriptorSets.cameraSets =
+      globalDescriptorsPool.AllocateDescriptorSets<DescriptorSets::CameraSet,
+                                                   MAX_FRAMES_IN_FLIGHT>(
+          device->GetDevice(), cameraLayouts);
+
+  // Bind sets with buffers
+  for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+    VkDescriptorBufferInfo cameraBufferInfo{};
+    cameraBufferInfo.buffer = memory->GetUboSet(i);
+    cameraBufferInfo.offset = memory->GetBufferViews().camerasUbo.offset;
+    cameraBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
+        DescriptorSets::CameraSet>(properties.limits);
+
+    VkWriteDescriptorSet cameraWrite{};
+    cameraWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    cameraWrite.dstSet = s_commonDescriptorSets.cameraSets[i];
+    cameraWrite.dstBinding = 0;
+    cameraWrite.dstArrayElement = 0;
+    cameraWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    cameraWrite.descriptorCount = 1;
+    cameraWrite.pBufferInfo = &cameraBufferInfo;
+    cameraWrite.pImageInfo = nullptr;
+    cameraWrite.pTexelBufferView = nullptr;
+
+    std::vector<VkWriteDescriptorSet> writes{cameraWrite};
+
+    vkUpdateDescriptorSets(device->GetDevice(), writes.size(), writes.data(), 0,
+                           nullptr);
+  }
+}
 
 void RenderFlowVk::AllocMemory() {
   // basicMat1 : [sm1, sm2, sm3, ... ]

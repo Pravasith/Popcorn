@@ -45,33 +45,48 @@ void DPoolVk::CleanUp() {
 //
 //
 template <>
+DPoolVk &DescriptorPoolsVk::GetPool<DescriptorPools::GlobalDescriptorsPool>(
+    uint32_t count) {
+  if (m_pools.find(DescriptorPools::GlobalDescriptorsPool) == m_pools.end()) {
+    // Camera ubo
+    VkDescriptorPoolSize poolSize0 = {
+        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+        .descriptorCount = 1 * count};
+
+    VkDescriptorPoolSize poolSizes[1]{poolSize0};
+
+    DPoolVk dPool{};
+    dPool.Create(poolSizes, 1, 1 * count);
+
+    m_pools[DescriptorPools::GlobalDescriptorsPool] = dPool;
+  };
+
+  return m_pools[DescriptorPools::GlobalDescriptorsPool];
+}
+
+template <>
 DPoolVk &
 DescriptorPoolsVk::GetPool<DescriptorPools::GBufferPool>(uint32_t count) {
   if (m_pools.find(DescriptorPools::GBufferPool) == m_pools.end()) {
-    // Camera ubo
-    VkDescriptorPoolSize poolSize0 = {.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                                      .descriptorCount = 1 * count};
-
     // BasicMat dynamic-ubo
-    VkDescriptorPoolSize poolSize1 = {
+    VkDescriptorPoolSize poolSize0 = {
         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
         .descriptorCount = 1 * count};
 
     // PbrMat dynamic-ubo
-    VkDescriptorPoolSize poolSize2 = {
+    VkDescriptorPoolSize poolSize1 = {
         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
         .descriptorCount = 1 * count};
 
     // Submesh dynamic-ubo
-    VkDescriptorPoolSize poolSize3 = {
+    VkDescriptorPoolSize poolSize2 = {
         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
         .descriptorCount = 1 * count};
 
-    VkDescriptorPoolSize poolSizes[4]{poolSize0, poolSize1, poolSize2,
-                                      poolSize3};
+    VkDescriptorPoolSize poolSizes[3]{poolSize0, poolSize1, poolSize2};
 
     DPoolVk dPool{};
-    dPool.Create(poolSizes, 4, 4 * count);
+    dPool.Create(poolSizes, 3, 3 * count);
 
     m_pools[DescriptorPools::GBufferPool] = dPool;
   }
