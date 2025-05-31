@@ -38,11 +38,16 @@ void CompositePipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
   VkVertexInputBindingDescription bindingDescription{};
   VertexBufferVk::GetDefaultVertexInputBindingDescription(vertexBufferLayout,
                                                           bindingDescription);
-  bindingDescription.binding = 0;
 
   GfxPipelineState pipelineState{};
   PipelineUtilsVk::GetDefaultGfxPipelineState(
       vertexBufferLayout, bindingDescription, pipelineState);
+
+  pipelineState.inputAssemblyState.flags = 0;
+  pipelineState.vertexInputState.vertexBindingDescriptionCount = 0;
+  pipelineState.vertexInputState.pVertexBindingDescriptions = VK_NULL_HANDLE;
+  pipelineState.vertexInputState.vertexAttributeDescriptionCount = 0;
+  pipelineState.vertexInputState.pVertexAttributeDescriptions = VK_NULL_HANDLE;
 
   auto *layouts = ContextVk::DescriptorLayouts();
   VkDescriptorSetLayout &presentLayout =

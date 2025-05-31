@@ -3,7 +3,9 @@
 #include "CommonVk.h"
 #include "ContextVk.h"
 #include "GlobalMacros.h"
+#include "PipelineUtilsVk.h"
 #include "RenderPassVk.h"
+#include <array>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -237,11 +239,11 @@ void CompositeRenderFlowVk::CreatePipelines() {
   BufferDefs::Layout layout{};
   // for a triangle
   layout.Set<AttrTypes::Float2>();
-  m_compositePipeline.Create(layout, m_renderPass.GetVkRenderPass());
+  m_compositePipelineVk.Create(layout, m_renderPass.GetVkRenderPass());
 };
 
 void CompositeRenderFlowVk::DestroyPipelines() {
-  m_compositePipeline.Destroy();
+  m_compositePipelineVk.Destroy();
 };
 
 //
@@ -264,6 +266,69 @@ void CompositeRenderFlowVk::OnSwapchainInvalidCb() {
   CreateRenderPass();
   CreateFramebuffers();
   CreatePipelines();
+};
+
+//
+//
+//
+//
+// --- PAINT -------------------------------------------------------------------
+// --- PAINT -------------------------------------------------------------------
+// --- PAINT -------------------------------------------------------------------
+void CompositeRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
+                                                const uint32_t currentFrame) {
+
+  // TODO: Optimize draw loop - heap allocations -> stack
+  auto &cmdBfr = m_commandBuffers[currentFrame];
+  auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
+  auto *deviceMemory =
+      ContextVk::Memory(); // Heap allocated!! this is singleton
+
+  auto &bufferViews = deviceMemory->GetBufferViews();
+  auto &bufferOffsets = deviceMemory->GetBufferOffsets();
+
+  std::array<VkDescriptorSet, 1> compositeSets{
+      m_descriptorSetsVk.presentSets[currentFrame]};
+
+  // Reset and begin recording
+  vkResetCommandBuffer(cmdBfr, 0);
+  ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
+
+  // Render pass begin
+  VkRenderPassBeginInfo renderPassBeginInfo{};
+  RenderPassVk::GetDefaultCmdBeginRenderPassInfo(
+      m_framebuffers[currentFrame], swapchainExtent,
+      m_renderPass.GetVkRenderPass(), renderPassBeginInfo);
+
+  m_renderPass.BeginRenderPass(cmdBfr, renderPassBeginInfo);
+
+  // Set viewport and scissor
+  VkViewport viewport{};
+  VkRect2D scissor{};
+  PipelineUtilsVk::GetDefaultViewportAndScissorState(viewport, scissor,
+                                                     swapchainExtent);
+  vkCmdSetViewport(cmdBfr, 0, 1, &viewport);
+  vkCmdSetScissor(cmdBfr, 0, 1, &scissor);
+
+#ifdef PC_DEBUG
+  static int drawCommandCount = 0;
+#endif
+
+  //
+  // --- Paint :D --------------------------------------------------------------
+  m_compositePipelineVk.BindPipeline(cmdBfr);
+
+  // Descriptor set 0 - Present set
+  vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                          m_compositePipelineVk.GetVkPipelineLayout(), 0,
+                          compositeSets.size(), compositeSets.data(), 0,
+                          nullptr);
+
+  // Full screen triangle
+  vkCmdDraw(cmdBfr, 3, 1, 0, 0);
+
+  m_renderPass.EndRenderPass(cmdBfr);
+  ContextVk::CommandPool()->EndCommandBuffer(cmdBfr);
 };
 
 //

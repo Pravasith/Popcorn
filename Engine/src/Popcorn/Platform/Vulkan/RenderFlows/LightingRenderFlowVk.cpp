@@ -372,12 +372,12 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   auto &bufferViews = deviceMemory->GetBufferViews();
   auto &bufferOffsets = deviceMemory->GetBufferOffsets();
 
+  // TODO: Get camera sets
   std::array<VkDescriptorSet, 1> cameraSets{
       // m_descriptorSetsVk.cameraSets[currentFrame],
   };
   std::array<VkDescriptorSet, 1> lightingSets{
       m_descriptorSetsVk.lightingSets[currentFrame],
-
   };
 
   // Reset and begin recording
@@ -400,7 +400,48 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkCmdSetViewport(cmdBfr, 0, 1, &viewport);
   vkCmdSetScissor(cmdBfr, 0, 1, &scissor);
 
-  // TODO: Change the pipeline to accept no vertex or index buffers
+#ifdef PC_DEBUG
+  static int drawCommandCount = 0;
+#endif
+
+  //
+  // --- Paint :D --------------------------------------------------------------
+  m_lightingPipelineVk.BindPipeline(cmdBfr);
+
+  // Hardcoding 0 for camera index for now
+  // TODO: Make it dynamic later
+  uint32_t cameraOffset =
+      bufferViews.camerasUbo.offset + bufferOffsets.camerasOffsets[0];
+
+  std::array<VkDescriptorSet, 2> allSets = {
+      cameraSets[0],
+      lightingSets[0],
+  };
+
+  std::array<uint32_t, 1> dynamicOffsets = {cameraOffset};
+
+  vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                          m_lightingPipelineVk.GetVkPipelineLayout(), 0,
+                          allSets.size(), allSets.data(), dynamicOffsets.size(),
+                          dynamicOffsets.data());
+
+  // // Descriptor set 0 - Camera
+  // vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
+  //                         m_lightingPipelineVk.GetVkPipelineLayout(), 0,
+  //                         cameraSets.size(), cameraSets.data(), 1,
+  //                         &cameraOffset);
+  //
+  // // Descriptor set 1 - Lighting(ssbo + gbuffer textures)
+  // vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
+  //                         m_lightingPipelineVk.GetVkPipelineLayout(), 1,
+  //                         lightingSets.size(), lightingSets.data(), 0,
+  //                         nullptr);
+
+  // Full screen triangle
+  vkCmdDraw(cmdBfr, 3, 1, 0, 0);
+
+  m_renderPass.EndRenderPass(cmdBfr);
+  ContextVk::CommandPool()->EndCommandBuffer(cmdBfr);
 }
 
 //

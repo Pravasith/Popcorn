@@ -8,31 +8,18 @@
 
 HIGH PRIORITY:
 ----------------------------------------------------------------------------
+:: Get camera descriptor set in lighting renderflow paint call
 :: Redesign Draw call - Refactor - 1 day max. - also handle framebuffer
    resize - 27th May
-:: Create 3 sets of command buffers  
-:: React to resize event
 :: Update camera(fov, aspect ratio, .etc) on FrameBufferResize
 
-:: Introduce worldDirection in GameObject and remove from Light & Camera
-   update it w.r.t. transformations (rot, scale)
-
-:: write shaders for both - light & final - 27th May
-
-:: Fix camera in GltfLoader
 :: Write camera class properly.
-
+:: Fix camera in GltfLoader
 
 :: Optimise space by allocating one model matrix per mesh, not per submesh
 
 
 --- DONE ---
-:: Pipeline creation -- light pass and final pass left - 27th May - done
-:: Change composite pass attachments -> retrieve from swapchain class
-   instead of making them inside composite pass -- done
-:: Duplicate attachments (count - max frame per flight each) so you can
-   use in the draw call like -
-   draw(frameNumber) { ... use(att[frameNumber]) }; -- done
 
 LOW PRIORITY:
 ----------------------------------------------------------------------------

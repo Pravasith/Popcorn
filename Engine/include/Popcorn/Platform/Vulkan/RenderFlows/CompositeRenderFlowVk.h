@@ -64,7 +64,7 @@ private:
   PcPresentationFramebuffers m_framebuffers; // Swapchain framebuffers
 
   // Pipelines
-  CompositePipelineVk m_compositePipeline;
+  CompositePipelineVk m_compositePipelineVk;
 
   std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> m_commandBuffers{};
 };
