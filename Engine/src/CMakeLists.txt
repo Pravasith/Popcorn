@@ -1,33 +1,30 @@
 set(CORE_IMPL_DIR Popcorn/Core)
+set(EVENTS_IMPL_DIR Popcorn/Events)
+set(GRAPHICS_IMPL_DIR Popcorn/Graphics)
 set(LAYERS_IMPL_DIR Popcorn/Layers)
 set(LOADERS_IMPL_DIR Popcorn/Loaders)
+set(PLATFORM_IMPL_DIR Popcorn/Platform)
+set(SCENE_IMPL_DIR Popcorn/Scene)
 
 # POPCORN LIB
 add_library(
   Popcorn
   #
-  # CORE IMPL FILES
+  # CORE
   ${CORE_IMPL_DIR}/Application.cpp
   ${CORE_IMPL_DIR}/Externs.cpp
-  #
-  # CORE LAYERS
   ${CORE_IMPL_DIR}/Layer.cpp
   ${CORE_IMPL_DIR}/LayerStack.cpp
+  ${CORE_IMPL_DIR}/Time.cpp
+  #
+  # LOADERS
   ${LAYERS_IMPL_DIR}/DebugUIOverlay.cpp
   #
   # LOADERS
-  ${LOADERS_IMPL_DIR}/GltfLoader.cpp
-  #
-  # TIME
-  ${CORE_IMPL_DIR}/Time.cpp)
+  ${LOADERS_IMPL_DIR}/GltfLoader.cpp)
 
 # -----------------------------------------------------------------------
 #
-
-set(EVENTS_IMPL_DIR Popcorn/Events)
-set(PLATFORM_IMPL_DIR Popcorn/Platform)
-set(GRAPHICS_IMPL_DIR Popcorn/Graphics)
-set(SCENE_IMPL_DIR Popcorn/Scene)
 
 # WINDOW LIB
 add_library(Window ${CORE_IMPL_DIR}/Window.cpp

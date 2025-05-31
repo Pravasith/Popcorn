@@ -80,26 +80,27 @@ find_package(glm CONFIG REQUIRED)
 
 # GLAD
 target_include_directories(
-  glad
-  PUBLIC $<BUILD_INTERFACE:${THIRD_PARTY_DIR}/glad/include>
-  PRIVATE $<INSTALL_INTERFACE:include>)
-target_precompile_headers(glad PUBLIC
+  glad PRIVATE $<BUILD_INTERFACE:${THIRD_PARTY_DIR}/glad/include>
+  # PRIVATE $<INSTALL_INTERFACE:include>
+)
+
+target_precompile_headers(glad PRIVATE
                           ${THIRD_PARTY_DIR}/glad/include/glad/glad.h)
 
 # VMA
-target_include_directories(
-  vma
-  PUBLIC $<BUILD_INTERFACE:${THIRD_PARTY_DIR}/vma>
-  PRIVATE $<INSTALL_INTERFACE:include>)
-target_precompile_headers(vma PUBLIC ${THIRD_PARTY_DIR}/vma/vk_mem_alloc.h)
+target_include_directories(vma
+                           PRIVATE $<BUILD_INTERFACE:${THIRD_PARTY_DIR}/vma>)
+target_precompile_headers(vma PRIVATE ${THIRD_PARTY_DIR}/vma/vk_mem_alloc.h)
 
 # ImGui
 target_include_directories(
   ImGui
-  PUBLIC $<BUILD_INTERFACE:${THIRD_PARTY_DIR}>
-         $<BUILD_INTERFACE:${THIRD_PARTY_DIR}/imgui>
-         $<BUILD_INTERFACE:${THIRD_PARTY_DIR}/backends>
-  PRIVATE $<INSTALL_INTERFACE:include>)
+  # PUBLIC
+  PRIVATE $<BUILD_INTERFACE:${THIRD_PARTY_DIR}>
+          $<BUILD_INTERFACE:${THIRD_PARTY_DIR}/imgui>
+          $<BUILD_INTERFACE:${THIRD_PARTY_DIR}/backends>
+  # PRIVATE $<INSTALL_INTERFACE:include>
+)
 
 # Window
 target_include_directories(
@@ -148,7 +149,8 @@ target_include_directories(
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Pipelines>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Descriptors>
-            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/RenderFlows>)
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/RenderFlows>
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Memory>)
 
 target_include_directories(
   Popcorn
@@ -158,6 +160,7 @@ target_include_directories(
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Layers>
   INTERFACE $<INSTALL_INTERFACE:include>
             $<INSTALL_INTERFACE:include/Popcorn/Core>
+            $<INSTALL_INTERFACE:include/Popcorn/Loaders>
             $<INSTALL_INTERFACE:include/Popcorn/Layers>)
 
 # DEBUG FLAGS
@@ -241,13 +244,7 @@ endif()
 install(DIRECTORY include/ DESTINATION include)
 
 install(
-  TARGETS Popcorn
-          Window
-          Graphics
-          ImGui
-          glad
-          Events
-          vma
+  TARGETS Popcorn Window Graphics glad Events vma
   EXPORT PopcornTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
