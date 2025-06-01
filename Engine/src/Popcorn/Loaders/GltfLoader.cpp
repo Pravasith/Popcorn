@@ -1,4 +1,4 @@
-#include "Popcorn/Loaders/GltfLoader.h"
+#include "GltfLoader.h"
 #include "Assert.h"
 #include "Base.h"
 #include "BufferObjects.h"
@@ -8,9 +8,9 @@
 #include "GlobalMacros.h"
 #include "Helpers.h"
 #include "Light.h"
+#include "LoadersDefs.h"
 #include "Material.h"
 #include "Mesh.h"
-#include "Popcorn/Loaders/LoadersDefs.h"
 #include "Shader.h"
 #include <cstddef>
 #include <cstdint>
@@ -121,7 +121,7 @@ void GltfLoader::SetTransformData(const tinygltf::Node &node,
     // Store TRS in the GameObject --- internally constructs a localMatrix
     gameObject.SetPosition(translation);
     gameObject.SetRotationEuler(eulerAngles);
-    gameObject.SetScale(scale);
+    gameObject.ScaleByValue(scale);
   }
 }
 

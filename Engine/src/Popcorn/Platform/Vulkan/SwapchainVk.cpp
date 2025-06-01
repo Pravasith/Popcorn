@@ -114,20 +114,6 @@ void SwapchainVk::CreateSwapchainImageViews(const VkDevice &device) {
 };
 
 void SwapchainVk::CleanUp(const VkDevice &device) {
-  if (m_swapchainFramebuffers.size() == 0) {
-    PC_ERROR("Tried to clear m_swapchainFramebuffers but size is 0!",
-             "BasicWorkFlow")
-  };
-
-  // Cleanup framebuffers
-  for (auto &framebuffer : m_swapchainFramebuffers) {
-    PC_VK_NULL_CHECK(device)
-    PC_VK_NULL_CHECK(framebuffer)
-
-    vkDestroyFramebuffer(device, framebuffer, nullptr);
-    framebuffer = VK_NULL_HANDLE;
-  };
-
   for (auto imageView : m_swapchainImageViews) {
     vkDestroyImageView(device, imageView, nullptr);
   }

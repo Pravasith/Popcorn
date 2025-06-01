@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GlobalMacros.h"
+#include "MemoryAllocatorVk.h"
 #include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
 #include <vector>

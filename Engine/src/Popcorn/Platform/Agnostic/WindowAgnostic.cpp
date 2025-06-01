@@ -1,14 +1,12 @@
 
-#include <GLFW/glfw3.h>
-#include <glad/glad.h>
-
+#include "WindowAgnostic.h"
 #include "Base.h"
 #include "GlobalMacros.h"
 #include "KeyEvent.h"
 #include "MouseEvent.h"
 #include "Utilities.h"
-#include "WindowAgnostic.h"
 #include "WindowEvent.h"
+#include <GLFW/glfw3.h>
 #include <string>
 
 ENGINE_NAMESPACE_BEGIN

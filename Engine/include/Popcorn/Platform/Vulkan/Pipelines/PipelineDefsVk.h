@@ -3,6 +3,7 @@
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Buffer.h"
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN

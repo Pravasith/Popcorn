@@ -23,9 +23,9 @@ class DPoolVk {
 
 public:
   template <DescriptorSets T, uint32_t Count>
-  [[nodiscard]] std::array<VkDescriptorSet, Count> AllocateDescriptorSets(
-      const VkDevice &device,
-      const std::array<VkDescriptorSetLayout, Count> &layouts) {
+  [[nodiscard]] std::array<VkDescriptorSet, Count>
+  AllocateDescriptorSets(const VkDevice &device,
+                         std::array<VkDescriptorSetLayout, Count> &layouts) {
     return DefaultAllocateDescriptorSets<Count>(device, layouts);
   };
 

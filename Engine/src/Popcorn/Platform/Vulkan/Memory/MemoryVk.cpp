@@ -265,10 +265,13 @@ void MemoryVk::FillUbosSsbosLightCameraEmpty(std::vector<Light *> &lights,
                                              std::vector<Camera *> &cameras,
                                              std::vector<Empty *> &emptys,
                                              const uint32_t currentFrame) {
+
   size_t i = 0;
   for (Light *light : lights) {
     PcCopyUniformToMemory<Uniforms::Light> copyUniformToMemory{
-        light, m_bufferViews, m_bufferOffsets};
+        light,
+        cameras[0], // TODO: Change the hardcoded value to dynamic in the future
+        m_bufferViews, m_bufferOffsets};
     copyUniformToMemory(m_ssboMappingSet[currentFrame], i);
     ++i;
   }
