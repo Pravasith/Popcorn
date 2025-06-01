@@ -149,6 +149,7 @@ private:
 
 private:
   static ContextVk *s_instance;
+
   static DeviceVk *s_deviceVk;
   static SurfaceVk *s_surfaceVk;
   static SwapchainVk *s_swapchainVk;

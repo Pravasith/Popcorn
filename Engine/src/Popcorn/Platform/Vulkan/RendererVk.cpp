@@ -1,13 +1,13 @@
 #include "RendererVk.h"
+#include "CompositeRenderFlowVk.h"
 #include "ContextVk.h"
+#include "GBufferRenderFlowVk.h"
 #include "GameObject.h"
+#include "LightingRenderFlowVk.h"
 #include "Material.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
-#include "RenderFlows/CompositeRenderFlowVk.h"
-#include "RenderFlows/GBufferRenderFlowVk.h"
-#include "RenderFlows/LightingRenderFlowVk.h"
-#include "RenderFlows/RenderFlowVk.h"
+#include "RenderFlowVk.h"
 #include "Shader.h"
 #include <cstring>
 #include <vulkan/vulkan_core.h>

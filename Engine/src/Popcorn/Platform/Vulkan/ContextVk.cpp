@@ -6,6 +6,8 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 // Singleton members
+ContextVk *ContextVk::s_instance = nullptr;
+
 DeviceVk *ContextVk::s_deviceVk = nullptr;
 SurfaceVk *ContextVk::s_surfaceVk = nullptr;
 SwapchainVk *ContextVk::s_swapchainVk = nullptr;

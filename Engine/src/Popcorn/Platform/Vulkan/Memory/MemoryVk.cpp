@@ -23,6 +23,9 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+MemoryVk *MemoryVk::s_instance = nullptr;
+DeviceVk *MemoryVk::s_deviceVk = nullptr;
+
 template <MaterialTypes T>
 void MemoryVk::ExtractOffsetsMaterialsSubmeshes(
     PcMaterialSubmeshesMap<T> &materialSubmeshesMap) {

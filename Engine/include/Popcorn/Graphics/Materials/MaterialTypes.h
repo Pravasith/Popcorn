@@ -18,9 +18,6 @@ enum MaterialTypes {
 template <MaterialTypes T> struct MaterialData {
   int enabledShadersMask = 0;
   bool doubleSided = false;
-
-  MaterialData();
-  virtual ~MaterialData() = 0;
 };
 
 struct BasicMaterialData : public MaterialData<MaterialTypes::BasicMat> {

@@ -196,33 +196,6 @@ void GameObject::UpdateLookAtDirection() {
       glm::normalize(glm::vec3(rotScale * glm::vec4(initialLookAt, 0.f)));
 };
 
-template <GameObjectType T>
-bool PC_ValidateAndAddGameObject(T *gameObject, std::vector<T *> &gameObjects) {
-  auto ptr = std::find(gameObjects.begin(), gameObjects.end(), gameObject);
-
-  if (ptr != gameObjects.end()) {
-    PC_WARN("GameObject already exists in the gameObject library!")
-    return false;
-  };
-
-  gameObjects.emplace_back(gameObject);
-  return true;
-};
-
-// Doesn't delete, just erases
-template <GameObjectType T>
-bool PC_ValidateAndRemoveGameObject(T *gameObject,
-                                    std::vector<T *> &gameObjects) {
-  auto ptr = std::find(gameObjects.begin(), gameObjects.end(), gameObject);
-
-  if (ptr == gameObjects.end()) {
-    PC_WARN("GameObject not found!")
-    return false;
-  };
-
-  gameObjects.erase(ptr);
-  return true;
-};
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

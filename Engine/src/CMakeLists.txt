@@ -36,6 +36,7 @@ add_library(
   #
   # MAIN
   ${GRAPHICS_IMPL_DIR}/BufferObjects.cpp
+  ${GRAPHICS_IMPL_DIR}/Material.cpp
   ${GRAPHICS_IMPL_DIR}/Mesh.cpp
   ${GRAPHICS_IMPL_DIR}/Renderer.cpp
   ${GRAPHICS_IMPL_DIR}/Shader.cpp
@@ -59,7 +60,6 @@ add_library(
   ${PLATFORM_IMPL_DIR}/Vulkan/Pipelines/MaterialPipelinesVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/Pipelines/PipelineUtilsVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/Pipelines/PipelineVk.cpp
-  #
   #
   ${PLATFORM_IMPL_DIR}/Vulkan/RenderFlows/CompositeRenderFlowVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/RenderFlows/LightingRenderFlowVk.cpp

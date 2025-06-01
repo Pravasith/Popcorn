@@ -1,6 +1,7 @@
 #include "RenderFlows/RenderFlowVk.h"
 #include "CommonVk.h"
 #include "ContextVk.h"
+#include "Popcorn/Core/Base.h"
 #include "MaterialTypes.h"
 #include "Popcorn/Core/Assert.h"
 #include "SamplerVk.h"
@@ -44,6 +45,12 @@ PcRenderFlowImages<Lighting, MAX_FRAMES_IN_FLIGHT>
 PcRenderFlowImages<Composite> RenderFlowVk::s_compositeImages{};
 
 RenderFlowVk::DescriptorSetsVkStatic RenderFlowVk::s_commonDescriptorSets{};
+
+
+RenderFlowVk::RenderFlowVk() { PC_PRINT("CREATED", TagType::Constr, "RenderFlowVk") };
+  RenderFlowVk::~RenderFlowVk() {
+    PC_PRINT("DESTROYED", TagType::Destr, "RenderFlowVk")
+  };
 
 //
 // --- METHODS -----------------------------------------------------------
@@ -193,6 +200,7 @@ void RenderFlowVk::CreateSamplers() {
 };
 
 void RenderFlowVk::DestroySamplers() { s_samplersVk.frameSampler.Destroy(); };
+
 void RenderFlowVk::FreeMemory() {
   ContextVk::Memory()->CleanUpUboSsboLocalBuffers();
   ContextVk::Memory()->CleanUpVboIboLocalBuffers();

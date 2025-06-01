@@ -6,6 +6,8 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+DescriptorPoolsVk *DescriptorPoolsVk::s_instance = nullptr;
+
 void DPoolVk::Create(VkDescriptorPoolSize *poolSizes, uint32_t poolSizesCount,
                      uint32_t maxSets) {
   if (m_pool != VK_NULL_HANDLE) {

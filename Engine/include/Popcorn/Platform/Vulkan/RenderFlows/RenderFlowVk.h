@@ -8,7 +8,6 @@
 #include "Light.h"
 #include "MaterialTypes.h"
 #include "Mesh.h"
-#include "Popcorn/Core/Base.h"
 #include "RenderFlowDefs.h"
 #include "SamplerVk.h"
 #include <array>
@@ -25,10 +24,8 @@ GFX_NAMESPACE_BEGIN
 //       - Make it platform agnostic
 class RenderFlowVk {
 public:
-  RenderFlowVk() { PC_PRINT("CREATED", TagType::Constr, "RenderFlowVk") };
-  virtual ~RenderFlowVk() {
-    PC_PRINT("DESTROYED", TagType::Destr, "RenderFlowVk")
-  };
+  RenderFlowVk(); 
+  virtual ~RenderFlowVk() ;
 
   static void AllocMemory();
   static void FreeMemory();
@@ -52,7 +49,7 @@ public:
 
   virtual void OnSwapchainInvalidCb() = 0;
   virtual void RecordCommandBuffer(const uint32_t frameIndex,
-                                   const uint32_t currentFrame);
+                                   const uint32_t currentFrame) = 0;
 
 private:
   virtual void CreateAttachments() = 0;

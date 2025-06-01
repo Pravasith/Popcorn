@@ -205,13 +205,34 @@ protected:
 template <typename T>
 concept GameObjectType = std::is_base_of<GameObject, T>::value;
 
+// UTIL FUNCTIONS -------------------------------------------------------------
 template <GameObjectType T>
-bool PC_ValidateAndAddGameObject(T *gameObject, std::vector<T *> &gameObjects);
+bool PC_ValidateAndAddGameObject(T *gameObject, std::vector<T *> &gameObjects) {
+  auto ptr = std::find(gameObjects.begin(), gameObjects.end(), gameObject);
+
+  if (ptr != gameObjects.end()) {
+    PC_WARN("GameObject already exists in the gameObject library!")
+    return false;
+  };
+
+  gameObjects.emplace_back(gameObject);
+  return true;
+};
 
 // Doesn't delete, just erases
 template <GameObjectType T>
 bool PC_ValidateAndRemoveGameObject(T *gameObject,
-                                    std::vector<T *> &gameObjects);
+                                    std::vector<T *> &gameObjects) {
+  auto ptr = std::find(gameObjects.begin(), gameObjects.end(), gameObject);
+
+  if (ptr == gameObjects.end()) {
+    PC_WARN("GameObject not found!")
+    return false;
+  };
+
+  gameObjects.erase(ptr);
+  return true;
+};
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
