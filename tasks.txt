@@ -1,0 +1,94 @@
+
+----------------------------------------------------------------------------
+-- TASKS ---- TASKS ---- TASKS ---- TASKS ---- TASKS ---- TASKS ---- TASKS -
+----------------------------------------------------------------------------
+
+:: Use in video -  https://x.com/gunsnrosesgirl3/status/1907830742106755259
+
+
+HIGH PRIORITY:
+----------------------------------------------------------------------------
+:: Get camera descriptor set in lighting renderflow paint call
+:: Redesign Draw call - Refactor - 1 day max. - also handle framebuffer
+   resize - 27th May
+:: Update camera(fov, aspect ratio, .etc) on FrameBufferResize
+
+:: Write camera class properly.
+:: Fix camera in GltfLoader
+
+:: Optimise space by allocating one model matrix per mesh, not per submesh
+
+
+--- DONE ---
+
+LOW PRIORITY:
+----------------------------------------------------------------------------
+:: Refactor Core classes (application, window) etc. to have a central access
+   point like ContextVk or PcContext
+
+:: Make all singletons stack allocated with static local variables
+   BE CAREFUL ABOUT THIS ONE ^^
+   Stack allocated local variables last until the end of the program.
+
+:: Build for windows
+
+:: Update Readme for the project
+
+:: Test minimization logic -
+   https://vulkan-tutorial.com/Drawing_a_triangle/Swap_chain_recreation
+
+:: Check Events class for perf issues
+
+:: Precompiled headers
+   Add precompiled headers to the project and in cmake
+
+
+TODO:
+-------------------------------------------------
+x. Adjust bufferViews of objects - 20 mins - DONE
+   x Set each bufferView offset (for UBOs & SSBOs)
+   x Check offsets & sizes for minBufferAlignment
+
+x. Alloc Vulkan Memory for - 20 mins - DONE
+   x. Submesh world matrices - UBO - DONE
+   x. Basic material values - UBO - DONE
+   x. Pbr material values - UBO - DONE
+   x. Camera matrix & other values - UBO - done
+   x. Empty values - UBO - done
+   x. Lights values - SSBO
+       x Allocate SSBO,
+       x Clean up ubo & ssbo
+
+x. Create samplers for gbuffer & lighting buffer - DONE
+
+-  Pass camera data into lighting renderflow - need it for lighting
+
+4. Descriptor sets allocation --
+   x Plan this before copying values
+   x Created layouts and pools to get descriptors
+   - Align vertex buffer with minVertexBufferAlignemnt
+   x basically bind memory (buffers, images & samplers) to descriptor sets
+     and get them ready for the scene updates process function
+
+x. Process scene updates - Copy buffer values --
+   x. Submesh world matrices - UBO - submesh->GetWorldMatrix()
+   x. Basic material values - UBO - materialsMap[matId]
+   x. Pbr material values - UBO - materialsMap[matId]
+   x. Camera matrix & other values - UBO - camera->GetWorldMatrix(),
+      camera->GetViewProjMatrix() ..etc
+   x. Empty values - UBO - empty->GetEmptyValues()
+   x. Lights values - SSBO - light->GetLightValues()
+
+--------------------------------------------------------------------------
+
+6. Material shaders - constexpr and static for material types
+
+8. Create shader modules
+
+7. Write shaders -
+   a. GBuffer shaders - vert & frag
+   b. Light shaders - vert & frag
+   c. Composite shaders - vert & frag
+
+6. Make pipelines ready for each renderflows
+7. Finally, the draw call

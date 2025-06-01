@@ -1,10 +1,11 @@
 #pragma once
 
 #include "GlobalMacros.h"
+#include "MaterialTypes.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Buffer.h"
-#include <algorithm>
-#include <glm/glm.hpp>
+#include "Shader.h"
+#include <unordered_map>
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
@@ -12,72 +13,40 @@ GFX_NAMESPACE_BEGIN
 
 class Mesh;
 
-enum class MaterialTypes {
-  BasicMat = 1,
-  PbrMat
-  // Add more
-};
-
-enum ShaderStages {
-  None = 0,
-  //
-  // Graphics types
-  VertexBit = 1,
-  TesselationBit = shift_l(1),
-  GeometryBit = shift_l(2),
-  FragmentBit = shift_l(3),
-  //
-  // Compute types
-  ComputeBit = shift_l(4)
-  //
-  // Ray tracing types
-  // TODO: Fill it out when time comes
-};
-
-struct MaterialData {
-  //
-  int enabledShadersMask = 0;
-  std::vector<const char *> shaderFiles{};
-
-  //
-  bool doubleSided = false;
-  // bool hasBaseColorTexture = false;
-  // bool hasNormalTexture = false;
-  // bool hasMetallicRoughnessTexture = false;
-  float metallicFactor = 1.0f;
-  float roughnessFactor = 1.0f;
-  float alphaCutoff = 0.5f;
-  glm::vec4 baseColorFactor = glm::vec4(1.0f);
-};
-
 template <MaterialTypes T> class Material {
 public:
-  static constexpr MaterialTypes materialType_value = T;
-
-  Material(MaterialData &matData) : m_materialData(matData) {
-    PC_PRINT("CREATED", TagType::Constr, "Material.h");
-    LoadShaders();
-  };
-
+  Material() { PC_PRINT("CREATED", TagType::Constr, "Material.h"); };
   virtual ~Material() { PC_PRINT("DESTROYED", TagType::Destr, "Material.h"); };
 
-  [[nodiscard]] inline std::vector<Buffer> &GetShaders() { return m_shaders; };
-  virtual void Bind() = 0;
+  static constexpr MaterialTypes type_value = T;
 
-private:
-  void LoadShaders();
+  template <ShaderStages S> static void SetShader(Buffer *spirVShaderCode) {
+    s_shaderByteCodeMap[S] = spirVShaderCode;
+  };
+
+  [[nodiscard]] static const Buffer &GetShader(ShaderStages stage) {
+    return *s_shaderByteCodeMap[stage];
+  };
+
+  [[nodiscard]] const DeriveMaterialDataType<T>::type &GetMaterialData() const {
+    return m_data;
+  };
+
+  // Shaders, uniform data (roughness, metallic etc)
+  void SetData(const DeriveMaterialDataType<T>::type &materialData) {
+    m_data = materialData;
+  };
 
 protected:
-  MaterialData &m_materialData;
-  std::vector<Buffer> m_shaders;
+  // Every Material "Type" has it's own shaders (vert, frag, ...)
+  static std::unordered_map<ShaderStages, Buffer *> s_shaderByteCodeMap;
+  DeriveMaterialDataType<T>::type m_data;
 };
 
 //
 //
 // ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-// --- UTIL FUNCTIONS ---------------------------------------------------------
-
+// --- UTIL FUNCTIONS (GLOBAL) ------------------------------------------------
 template <MaterialTypes T>
 void PC_ValidateAndAddMaterial(Material<T> *materialPtr,
                                std::vector<Material<T> *> &materials) {
@@ -105,36 +74,30 @@ void PC_ValidateAndRemoveMaterial(Material<T> *materialPtr,
 };
 
 template <MaterialTypes T>
-void PC_AddMaterialByType(Material<T> *materialPtr,
-                          std::vector<Material<T> *> &materials) {
-  switch (materialPtr->GetMaterialType()) {
-  case Popcorn::Gfx::MaterialTypes::BasicMat: {
-    PC_ValidateAndAddMaterial(materialPtr, materials);
-    break;
-  }
-  case Popcorn::Gfx::MaterialTypes::PbrMat: {
-    break;
-  }
-  default:
-    PC_WARN("material type not found") { break; }
-  }
-}
+static MaterialHashType PC_HashMaterialGroups(Material<T> *material) {
+  MaterialHashType uid = 0;
 
-template <MaterialTypes T>
-void PC_RemoveMaterialByType(Material<T> *materialPtr,
-                             std::vector<Material<T> *> &materials) {
-  switch (materialPtr->GetMaterialType()) {
-  case Popcorn::Gfx::MaterialTypes::BasicMat: {
-    PC_ValidateAndRemoveMaterial(materialPtr, materials);
-    break;
+  const auto &matData = material->GetMaterialData();
+
+  if constexpr (T == MaterialTypes::BasicMat) {
+    uid ^= PC_HashFloat(matData.baseColorFactor.x);
+    uid ^= PC_HashFloat(matData.baseColorFactor.y) >> 3;
+    uid ^= PC_HashFloat(matData.baseColorFactor.z) >> 6;
+    uid *= 2654435761u; // Knuth’s multiplicative hash
+  } else if constexpr (T == MaterialTypes::PbrMat) {
+    uid ^= PC_HashFloat(matData.baseColorFactor.x);
+    uid ^= PC_HashFloat(matData.baseColorFactor.y) >> 3;
+    uid ^= PC_HashFloat(matData.baseColorFactor.z) >> 6;
+    uid ^= PC_HashFloat(matData.metallicFactor) << 2;
+    uid ^= PC_HashFloat(matData.roughnessFactor) << 3;
+    uid ^= matData.hasBaseColorTexture ? 0x1 : 0;
+    uid ^= matData.hasNormalTexture ? 0x2 : 0;
+    uid ^= matData.hasMetallicRoughnessTexture ? 0x4 : 0;
+    uid *= 2654435761u;
   }
-  case Popcorn::Gfx::MaterialTypes::PbrMat: {
-    break;
-  }
-  default:
-    PC_WARN("material type not found") { break; }
-  }
-}
+
+  return uid;
+};
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

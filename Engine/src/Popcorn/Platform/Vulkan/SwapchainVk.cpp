@@ -1,6 +1,5 @@
 #include "SwapchainVk.h"
 #include "DeviceVk.h"
-#include "FramebuffersVk.h"
 #include "Popcorn/Core/Base.h"
 #include "SurfaceVk.h"
 #include <algorithm>
@@ -12,7 +11,7 @@ GFX_NAMESPACE_BEGIN
 
 SwapchainVk *SwapchainVk::s_instance = nullptr;
 
-void SwapchainVk::CreateSwapchain() {
+void SwapchainVk::CreateSwapchainImagesAndVkSwapchain() {
   if (m_appWin == nullptr) {
     PC_ERROR("m_appWin is nullptr", "SwapchainVk")
   };
@@ -86,7 +85,7 @@ void SwapchainVk::CreateSwapchain() {
   m_swapchainExtent = extent;
 }
 
-void SwapchainVk::CreateImageViews(const VkDevice &device) {
+void SwapchainVk::CreateSwapchainImageViews(const VkDevice &device) {
   m_swapchainImageViews.resize(m_swapchainImages.size());
 
   for (size_t i = 0; i < m_swapchainImages.size(); ++i) {
@@ -115,18 +114,6 @@ void SwapchainVk::CreateImageViews(const VkDevice &device) {
 };
 
 void SwapchainVk::CleanUp(const VkDevice &device) {
-  if (m_swapchainFramebuffers.size() == 0) {
-    PC_ERROR("Tried to clear m_swapchainFramebuffers but size is 0!",
-             "BasicWorkFlow")
-  };
-
-  auto *framebuffersVkStn = FramebuffersVk::Get();
-
-  // Cleanup framebuffers
-  for (auto &framebuffer : m_swapchainFramebuffers) {
-    framebuffersVkStn->DestroyVkFramebuffer(device, framebuffer);
-  };
-
   for (auto imageView : m_swapchainImageViews) {
     vkDestroyImageView(device, imageView, nullptr);
   }
@@ -184,33 +171,34 @@ SwapchainVk::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities,
   }
 }
 
-void SwapchainVk::CreateSwapchainFramebuffers(const VkDevice &device,
-                                              const VkRenderPass &renderPass) {
-  auto *swapchainVkStn = SwapchainVk::Get();
-  auto *framebuffersVkStn = FramebuffersVk::Get();
+// void SwapchainVk::CreateSwapchainFramebuffers(
+//     const VkDevice &device, const VkRenderPass &finalRenderPass) {
+//   auto &swapchainImgViews = GetSwapchainImageViews();
+//   auto &swapchainExtent = GetSwapchainExtent();
+//
+//   m_swapchainFramebuffers.resize(swapchainImgViews.size());
+//
+//   for (size_t i = 0; i < swapchainImgViews.size(); ++i) {
+//     VkImageView attachments[] = {swapchainImgViews[i]};
+//
+//     VkFramebufferCreateInfo createInfo{};
+//     createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+//     createInfo.renderPass = finalRenderPass;
+//     createInfo.attachmentCount = 1;
+//     createInfo.pAttachments = attachments;
+//     createInfo.width = swapchainExtent.width;
+//     createInfo.height = swapchainExtent.height;
+//     createInfo.layers = 1;
+//     createInfo.pNext = VK_NULL_HANDLE;
+//
+//     if (vkCreateFramebuffer(device, &createInfo, nullptr,
+//                             &m_swapchainFramebuffers[i]) != VK_SUCCESS) {
+//       throw std::runtime_error("failed to create framebuffer!");
+//     }
+//   };
+// };
 
-  auto &swapchainImgViews = swapchainVkStn->GetSwapchainImageViews();
-  auto &swapchainExtent = swapchainVkStn->GetSwapchainExtent();
-
-  m_swapchainFramebuffers.resize(swapchainImgViews.size());
-
-  for (size_t i = 0; i < swapchainImgViews.size(); ++i) {
-    VkImageView attachments[] = {swapchainImgViews[i]};
-
-    VkFramebufferCreateInfo createInfo{};
-    framebuffersVkStn->GetDefaultFramebufferState(createInfo);
-    createInfo.renderPass = renderPass;
-    createInfo.pAttachments = attachments;
-    createInfo.width = swapchainExtent.width;
-    createInfo.height = swapchainExtent.height;
-
-    // CREATE VK FRAMEBUFFER
-    framebuffersVkStn->CreateVkFramebuffer(device, createInfo,
-                                           m_swapchainFramebuffers[i]);
-  };
-};
-
-void SwapchainVk::RecreateSwapchain(const VkRenderPass &renderPass) {
+void SwapchainVk::RecreateSwapchainAndVkSwapchain() {
   auto &device = DeviceVk::Get()->GetDevice();
 
   uint32_t width = m_appWin->GetFramebufferSize().first,
@@ -228,9 +216,8 @@ void SwapchainVk::RecreateSwapchain(const VkRenderPass &renderPass) {
   vkDeviceWaitIdle(device);
   CleanUp(device);
 
-  CreateSwapchain();
-  CreateImageViews(device);
-  CreateSwapchainFramebuffers(device, renderPass);
+  CreateSwapchainImagesAndVkSwapchain();
+  CreateSwapchainImageViews(device);
 };
 
 GFX_NAMESPACE_END

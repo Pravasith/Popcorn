@@ -33,7 +33,7 @@ endif()
 
 set(PROJECT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(POPCORN_INCLUDE_DIR ${PROJECT_INCLUDE_DIR}/Popcorn)
-set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/third-party/platform-agnostic)
+set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/third-party)
 
 # -----------------------------------------------------------------------
 # STATIC BUILD SETTINGS
@@ -81,24 +81,31 @@ find_package(glm CONFIG REQUIRED)
 # GLAD
 target_include_directories(
   glad
-  PUBLIC $<BUILD_INTERFACE:${THIRD_PARTY_DIR}/glad/include>
-  PRIVATE $<INSTALL_INTERFACE:include>)
-target_precompile_headers(glad PUBLIC
-                          ${THIRD_PARTY_DIR}/glad/include/glad/glad.h)
+  PUBLIC $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}/glad/include>
+  PRIVATE $<INSTALL_INTERFACE:third-party>)
+target_precompile_headers(
+  glad PRIVATE ${PLATFORM_AGNOSTIC_VENDOR_DIR}/glad/include/glad/glad.h)
 
 # VMA
 target_include_directories(
-  vma
-  PUBLIC $<BUILD_INTERFACE:${THIRD_PARTY_DIR}/vma>
-  PRIVATE $<INSTALL_INTERFACE:include>)
-target_precompile_headers(vma PUBLIC ${THIRD_PARTY_DIR}/vma/vk_mem_alloc.h)
+  vma PRIVATE $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}/vma>)
+target_precompile_headers(vma PRIVATE
+                          ${PLATFORM_AGNOSTIC_VENDOR_DIR}/vma/vk_mem_alloc.h)
+
+# tinygltf
+target_include_directories(
+  tinygltf
+  PUBLIC $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}>
+         $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}/tiny-gltf>
+  INTERFACE $<INSTALL_INTERFACE:third-party>
+            $<INSTALL_INTERFACE:third-party/tiny-gltf>)
 
 # ImGui
 target_include_directories(
   ImGui
-  PUBLIC $<BUILD_INTERFACE:${THIRD_PARTY_DIR}>
-         $<BUILD_INTERFACE:${THIRD_PARTY_DIR}/imgui>
-         $<BUILD_INTERFACE:${THIRD_PARTY_DIR}/backends>
+  PUBLIC $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}>
+         $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}/imgui>
+         $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}/backends>
   PRIVATE $<INSTALL_INTERFACE:include>)
 
 # Window
@@ -132,23 +139,20 @@ target_include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Scene>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/OpenGL>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Pipelines>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Descriptors>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/RenderWorkflows>
-    #
-    # Tiny-gltf
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic>
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/third-party/platform-agnostic/tiny-gltf>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Memory>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Pipelines>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/RenderFlows>
   INTERFACE $<INSTALL_INTERFACE:include>
             $<INSTALL_INTERFACE:include/Popcorn/Graphics>
             $<INSTALL_INTERFACE:include/Popcorn/Graphics/Materials>
             $<INSTALL_INTERFACE:include/Popcorn/Scene>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/OpenGL>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan>
-            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Pipelines>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Descriptors>
-            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/RenderWorkflows>
-)
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Memory>
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Pipelines>
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/RenderFlows>)
 
 target_include_directories(
   Popcorn
@@ -158,6 +162,7 @@ target_include_directories(
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Layers>
   INTERFACE $<INSTALL_INTERFACE:include>
             $<INSTALL_INTERFACE:include/Popcorn/Core>
+            $<INSTALL_INTERFACE:include/Popcorn/Loaders>
             $<INSTALL_INTERFACE:include/Popcorn/Layers>)
 
 # DEBUG FLAGS
@@ -195,6 +200,7 @@ target_link_libraries(Graphics PUBLIC glm::glm)
 target_link_libraries(Window PRIVATE glad glfw)
 target_link_libraries(Window PRIVATE Events)
 target_link_libraries(ImGui PUBLIC glfw Vulkan::Headers Vulkan::Loader)
+target_link_libraries(Popcorn PUBLIC tinygltf)
 target_link_libraries(Popcorn PRIVATE glad glfw)
 
 target_link_libraries(Popcorn PUBLIC Graphics)
@@ -204,7 +210,7 @@ target_link_libraries(Popcorn PRIVATE Window ImGui)
 target_link_libraries(Popcorn INTERFACE glm::glm)
 target_link_libraries(Popcorn PUBLIC Events)
 
-target_compile_features(${PROJECT} PUBLIC cxx_std_17)
+target_compile_features(${PROJECT} PUBLIC cxx_std_20)
 
 # -----------------------------------------------------------------------
 # INSTALL CONFIG --- START
@@ -243,8 +249,9 @@ install(DIRECTORY include/ DESTINATION include)
 install(
   TARGETS Popcorn
           Window
-          Graphics
+          tinygltf
           ImGui
+          Graphics
           glad
           Events
           vma

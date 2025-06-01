@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GlobalMacros.h"
-#include "glm/glm.hpp"
+#include <glm/ext/matrix_float4x4.hpp>
 
 ENGINE_NAMESPACE_BEGIN
 

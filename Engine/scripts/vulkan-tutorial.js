@@ -25,7 +25,7 @@ javascript: (function () {
     .getElementsByClassName("doc_content")[0]
     .getElementsByTagName("p");
 
-  for (let i = 0; i < pTags.length; i++) {
+  for (let i = 0; i < pTags.length; ++i) {
     pTags[i].style.color = "white";
   }
 
@@ -33,7 +33,7 @@ javascript: (function () {
     .getElementsByClassName("doc_content")[0]
     .getElementsByTagName("h1");
 
-  for (let i = 0; i < h1Tags.length; i++) {
+  for (let i = 0; i < h1Tags.length; ++i) {
     h1Tags[i].style.color = "white";
   }
 
@@ -41,7 +41,7 @@ javascript: (function () {
     .getElementsByClassName("doc_content")[0]
     .getElementsByTagName("h2");
 
-  for (let i = 0; i < h2Tags.length; i++) {
+  for (let i = 0; i < h2Tags.length; ++i) {
     h2Tags[i].style.color = "white";
   }
 
@@ -49,7 +49,7 @@ javascript: (function () {
     .getElementsByClassName("doc_content")[0]
     .getElementsByTagName("h3");
 
-  for (let i = 0; i < h3Tags.length; i++) {
+  for (let i = 0; i < h3Tags.length; ++i) {
     h3Tags[i].style.color = "white";
   }
 
@@ -57,7 +57,7 @@ javascript: (function () {
     .getElementsByClassName("doc_content")[0]
     .getElementsByTagName("h4");
 
-  for (let i = 0; i < h4Tags.length; i++) {
+  for (let i = 0; i < h4Tags.length; ++i) {
     h4Tags[i].style.color = "white";
   }
 
@@ -65,7 +65,7 @@ javascript: (function () {
     .getElementsByClassName("doc_content")[0]
     .getElementsByTagName("li");
 
-  for (let i = 0; i < liTags.length; i++) {
+  for (let i = 0; i < liTags.length; ++i) {
     liTags[i].style.color = "white";
   }
 })();

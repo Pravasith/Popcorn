@@ -2,7 +2,6 @@
 
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
-#include <vector>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN

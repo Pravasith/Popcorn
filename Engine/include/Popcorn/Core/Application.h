@@ -25,7 +25,7 @@ public:
   static void Stop();
 
   static void StartGameLoop();
-  static void ProcessScenes();
+  static void CreateWorkflowResources();
   static void AddLayer(Layer *);
 
   Window &GetAppWindow() const;
@@ -65,4 +65,5 @@ private:
   static Renderer *s_renderer;
   static DebugUIOverlay *s_debugUIOverlay;
 };
+
 ENGINE_NAMESPACE_END

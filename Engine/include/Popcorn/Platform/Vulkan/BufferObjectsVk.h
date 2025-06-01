@@ -43,27 +43,27 @@ public:
   //
   // --- UTILS --------------------------------------------------------------
   static void GetDefaultVertexInputBindingDescription(
-      VkVertexInputBindingDescription &bindingDescription,
-      const BufferDefs::Layout &layout);
+      const BufferDefs::Layout &layout,
+      VkVertexInputBindingDescription &bindingDescription);
 
   static void GetDefaultVertexInputAttributeDescriptions(
-      std::vector<VkVertexInputAttributeDescription> &,
-      const BufferDefs::Layout &);
+      const BufferDefs::Layout &layout,
+      std::vector<VkVertexInputAttributeDescription> &attrDescriptions);
 
   //
   // COPY CONSTRUCTOR
   VertexBufferVk(const VertexBufferVk &other) = default;
   VertexBufferVk &operator=(const VertexBufferVk &other) = default;
 
+  //
   // MOVE CONSTRUCTOR
   VertexBufferVk(VertexBufferVk &&other) = default;
   VertexBufferVk &operator=(VertexBufferVk &&other) = default;
 
   virtual uint64_t GetSize() const override { return m_buffer.GetSize(); };
-  virtual uint64_t GetCount() const override { return m_buffer.GetCount(); };
-
-  virtual void Bind() override;
-  virtual void UnBind() override;
+  virtual uint64_t GetCount() const override {
+    return m_buffer.GetCount(m_layout.strideValue);
+  };
 };
 
 //
@@ -75,36 +75,36 @@ class BufferVkUtils {
 public:
   static void GetDefaultVkBufferState(VkBufferCreateInfo &bufferInfo,
                                       VkDeviceSize bufferSize);
-  static void AllocateVkBuffer(VkBuffer &vkBuffer,
-                               VkDeviceMemory &vkBufferMemory,
-                               const VkBufferCreateInfo &bufferInfo,
-                               const VkMemoryPropertyFlags memoryPropertyFlags);
-  static void DestroyVkBuffer(VkBuffer &vkBuffer,
-                              VkDeviceMemory &vkBufferMemory);
+  // static void AllocateVkBuffer(VkBuffer &vkBuffer,
+  //                              VkDeviceMemory &vkBufferMemory,
+  //                              const VkBufferCreateInfo &bufferInfo,
+  //                              const VkMemoryPropertyFlags
+  //                              memoryPropertyFlags);
+  // static void DestroyVkBuffer(VkBuffer &vkBuffer,
+  //                             VkDeviceMemory &vkBufferMemory);
 
-  static void *MapVkMemoryToCPU(VkDeviceMemory &vkBufferMemory,
-                                VkDeviceSize beginOffset,
-                                VkDeviceSize endOffset);
-  static void CopyBufferCPUToGPU(void *destPtr, void *srcPtr,
-                                 VkDeviceSize size);
-  static void CopyBufferGPUToGPU(VkBuffer &srcBuffer, VkBuffer &dstBuffer,
-                                 VkDeviceSize size);
-  static void UnmapVkMemoryFromCPU(VkDeviceMemory &vkBufferMemory);
+  // static void *MapVkMemoryToCPU(VkDeviceMemory &vkBufferMemory,
+  //                               VkDeviceSize beginOffset,
+  //                               VkDeviceSize endOffset);
+  // static void CopyBufferCPUToGPU(void *destPtr, void *srcPtr,
+  //                                VkDeviceSize size);
+  static void CopyStagingToMainBuffers(VkBuffer &srcBuffer, VkBuffer &dstBuffer,
+                                       VkDeviceSize size);
+  // static void UnmapVkMemoryFromCPU(VkDeviceMemory &vkBufferMemory);
 
   //
   // --- Record commands ---------------------------------------------------
-  static void RecordBindVkVertexBuffersCommand(
-      const VkCommandBuffer &commandBuffer, VkBuffer *vkVertexBuffers,
-      VkDeviceSize *offsets, const uint32_t buffersCount);
+  static void BindVBO(const VkCommandBuffer &commandBuffer,
+                      VkBuffer *vkVertexBuffers, VkDeviceSize *offsets,
+                      const uint32_t buffersCount);
 
   template <Is_Uint16_Or_Uint32_t T>
-  static void
-  RecordBindVkIndexBufferCommand(const VkCommandBuffer &commandBuffer,
-                                 VkBuffer *vkIndexBuffer, VkDeviceSize offset) {
+  static void BindIBO(const VkCommandBuffer &commandBuffer,
+                      const VkBuffer &vkIndexBuffer, VkDeviceSize offset) {
     constexpr VkIndexType bufferType = std::is_same_v<uint16_t, T>
                                            ? VK_INDEX_TYPE_UINT16
                                            : VK_INDEX_TYPE_UINT32;
-    vkCmdBindIndexBuffer(commandBuffer, *vkIndexBuffer, 0, bufferType);
+    vkCmdBindIndexBuffer(commandBuffer, vkIndexBuffer, offset, bufferType);
   };
 };
 

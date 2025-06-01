@@ -4,33 +4,43 @@
 #include <unordered_map>
 
 ENGINE_NAMESPACE_BEGIN
-//
-// --------------------------------------------------------------------------
-// ALL SOURCES ARE RELATIVE TO THE FINAL DIST BUILD BINARIES ----------------
-//
 GFX_NAMESPACE_BEGIN
 //
-// --------------------------------------------------------------------------
-// ----- GENERAL RESOURCES --------------------------------------------------
-enum class ShaderFiles { VertShaderTriangle = 1, FragShaderTriangle };
+// --- All sources are relative to the final dist build binaries ------------
 
-static std::unordered_map<ShaderFiles, const char *> PC_SHADER_SOURCE_MAP = {
-    {ShaderFiles::VertShaderTriangle, "shaders/tri_vert.spv"},
-    {ShaderFiles::FragShaderTriangle, "shaders/tri_frag.spv"},
+//
+// --- SHADERS --------------------------------------------------------------
+enum class ShaderFiles {
+  BasicMat_Vert,
+  BasicMat_Frag,
+
+  PbrMat_Vert,
+  PbrMat_Frag,
+
+  Lighting_Vert,
+  Lighting_Frag,
+
+  Composite_Vert,
+  Composite_Frag
 };
-// ----- GENERAL RESOURCES --------------------------------------------------
-// --------------------------------------------------------------------------
-//
 
-//
-// --------------------------------------------------------------------------
-// ----- VULKAN RESOURCES ---------------------------------------------------
-enum class PipelineIds {
+using PipelineShaders = std::unordered_map<ShaderFiles, const char *>;
 
+static PipelineShaders PC_SHADER_SOURCE_MAP{
+    //
+    // Material shaders
+    {ShaderFiles::BasicMat_Vert, "assets/shaders/basicMat_vert.spv"},
+    {ShaderFiles::BasicMat_Frag, "assets/shaders/basicMat_frag.spv"},
+
+    {ShaderFiles::PbrMat_Vert, "assets/shaders/pbrMat_vert.spv"},
+    {ShaderFiles::PbrMat_Frag, "assets/shaders/pbrMat_frag.spv"},
+
+    {ShaderFiles::Lighting_Vert, "assets/shaders/lighting_vert.spv"},
+    {ShaderFiles::Lighting_Frag, "assets/shaders/lighting_frag.spv"},
+
+    {ShaderFiles::Composite_Vert, "assets/shaders/composite_vert.spv"},
+    {ShaderFiles::Composite_Frag, "assets/shaders/composite_frag.spv"},
 };
-// ----- VULKAN RESOURCES ---------------------------------------------------
-// --------------------------------------------------------------------------
-//
+
 GFX_NAMESPACE_END
-
 ENGINE_NAMESPACE_END

@@ -10,7 +10,6 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-// Singleton
 class FrameVk {
 public:
   [[nodiscard]] static inline FrameVk *Get() {
@@ -32,14 +31,11 @@ public:
   };
 
   void Draw(
-      std::vector<VkCommandBuffer> &commandBuffers,
-      const VkRenderPass &finalPaintRenderPass,
-      const std::function<void(const uint32_t currentFrame)> &updateSceneData,
-      // Record Draw commands specifying the swapchain imageIndex/frameIndex(can
-      // be different from currentFrame), and the currentFrame
-      const std::function<void(
-          const uint32_t frameIndex, const uint32_t currentFrame,
-          VkCommandBuffer &currentFrameCommandBuffer)> &recordDrawCommands);
+      const std::function<void()> &swapchainInvalidCb,
+      const std::function<void(const uint32_t currentFrame)> &updateSceneDataCb,
+      const std::function<void(const uint32_t swapchainFrameIndex,
+                               const uint32_t currentFrame)>
+          &recordDrawCommandsCb);
 
   void CreateRenderSyncObjects();
   inline void SetFrameBufferResized(bool isFrameBufferResized) {
@@ -48,17 +44,16 @@ public:
   void CleanUp();
 
 private:
-  [[nodiscard]] bool
-  AcquireNextSwapchainImageIndex(uint32_t &imageIndex,
-                                 VkSemaphore *signalSemaphores,
-                                 const VkRenderPass &paintRenderPass);
-  void SubmitDrawCommands(const VkCommandBuffer &commandBuffer,
+  [[nodiscard]] bool AcquireNextSwapchainImageIndex(
+      uint32_t &imageIndex, VkSemaphore *signalSemaphores,
+      const std::function<void()> &swapchainInvalidCb);
+  void SubmitDrawCommands(std::vector<VkCommandBuffer> &commandBuffers,
                           VkSemaphore *waitSemaphores,
                           VkSemaphore *signalSemaphores,
                           VkFence &inFlightFence);
   void PresentImageToSwapchain(VkSemaphore *signalSemaphores,
                                const uint32_t &imageIndex,
-                               const VkRenderPass &paintRenderPass);
+                               const std::function<void()> &swapchainInvalidCb);
 
 private:
   FrameVk() { PC_PRINT("CREATED", TagType::Constr, "FrameVk") };

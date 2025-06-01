@@ -3,7 +3,6 @@
 #include "CommonVk.h"
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
-#include "RendererVk.h"
 #include "SurfaceVk.h"
 #include <vulkan/vulkan_core.h>
 

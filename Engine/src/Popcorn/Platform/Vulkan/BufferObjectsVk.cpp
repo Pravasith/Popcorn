@@ -3,9 +3,7 @@
 #include "CommandPoolVk.h"
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
-#include "Popcorn/Core/Helpers.h"
 #include <cstdint>
-#include <stdexcept>
 #include <vector>
 #include <vulkan/vulkan_core.h>
 
@@ -14,25 +12,17 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-void VertexBufferVk::Bind() {
-
-};
-
-void VertexBufferVk::UnBind() {
-
-};
-
 void VertexBufferVk::GetDefaultVertexInputBindingDescription(
-    VkVertexInputBindingDescription &bindingDescription,
-    const BufferDefs::Layout &layout) {
+    const BufferDefs::Layout &layout,
+    VkVertexInputBindingDescription &bindingDescription) {
   bindingDescription.binding = 0;
   bindingDescription.stride = layout.strideValue;
   bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 };
 
 void VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
-    std::vector<VkVertexInputAttributeDescription> &attrDescriptions,
-    const BufferDefs::Layout &layout) {
+    const BufferDefs::Layout &layout,
+    std::vector<VkVertexInputAttributeDescription> &attrDescriptions) {
   attrDescriptions.resize(layout.countValue);
 
   for (int i = 0; i < layout.countValue; ++i) {
@@ -49,7 +39,7 @@ void VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
 // --- VULKAN BUFFER MEMORY UTILS -------------------------------------------
 // --------------------------------------------------------------------------
 
-void BufferVkUtils::RecordBindVkVertexBuffersCommand(
+void BufferVkUtils::BindVBO(
     const VkCommandBuffer &commandBuffer, VkBuffer *vkBuffer,
     VkDeviceSize *offsets, const uint32_t buffersCount) {
   vkCmdBindVertexBuffers(commandBuffer, 0, buffersCount, vkBuffer, offsets);
@@ -63,63 +53,9 @@ void BufferVkUtils::GetDefaultVkBufferState(VkBufferCreateInfo &bufferInfo,
   bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 };
 
-void BufferVkUtils::AllocateVkBuffer(
-    VkBuffer &vkBuffer, VkDeviceMemory &vkBufferMemory,
-    const VkBufferCreateInfo &bufferInfo,
-    const VkMemoryPropertyFlags memoryPropertyFlags) {
-
-  auto *deviceVkStn = DeviceVk::Get();
-  auto &device = deviceVkStn->GetDevice();
-
-  if (vkCreateBuffer(device, &bufferInfo, nullptr, &vkBuffer) != VK_SUCCESS) {
-    std::runtime_error("Error creating  Buffer!");
-  };
-
-  //
-  // QUERY MEMORY REQIREMENTS USING device AND vkBuffer
-  VkMemoryRequirements memRequirements;
-  vkGetBufferMemoryRequirements(device, vkBuffer, &memRequirements);
-
-  //
-  // ALLOCATE MEMORY
-  // TODO: Use VMA to allocate memory
-  VkMemoryAllocateInfo allocInfo{};
-  allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-  allocInfo.allocationSize = memRequirements.size;
-  allocInfo.memoryTypeIndex = deviceVkStn->FindMemoryType(
-      memRequirements.memoryTypeBits, memoryPropertyFlags);
-
-  if (vkAllocateMemory(device, &allocInfo, nullptr, &vkBufferMemory) !=
-      VK_SUCCESS) {
-    throw std::runtime_error(
-        "Failed to allocate memory for the vertex buffer!");
-  };
-
-  //
-  // BIND MEMORY TO THE BUFFER
-  vkBindBufferMemory(device, vkBuffer, vkBufferMemory, 0);
-};
-
-void *BufferVkUtils::MapVkMemoryToCPU(VkDeviceMemory &vkBufferMemory,
-                                      VkDeviceSize beginOffset,
-                                      VkDeviceSize endOffset) {
-  auto &device = DeviceVk::Get()->GetDevice();
-
-  //
-  // FILL VERTEX BUFFER
-  void *data;
-  vkMapMemory(device, vkBufferMemory, beginOffset, endOffset, 0, &data);
-
-  return data;
-};
-
-void BufferVkUtils::CopyBufferCPUToGPU(void *destPtr, void *srcPtr,
-                                       VkDeviceSize size) {
-  memcpy(destPtr, srcPtr, (size_t)size);
-};
-
-void BufferVkUtils::CopyBufferGPUToGPU(VkBuffer &srcBuffer, VkBuffer &dstBuffer,
-                                       VkDeviceSize size) {
+void BufferVkUtils::CopyStagingToMainBuffers(VkBuffer &srcBuffer,
+                                             VkBuffer &dstBuffer,
+                                             VkDeviceSize size) {
   auto &device = DeviceVk::Get()->GetDevice();
   auto *commandPoolVkStn = CommandPoolVk::Get();
 
@@ -165,17 +101,17 @@ void BufferVkUtils::CopyBufferGPUToGPU(VkBuffer &srcBuffer, VkBuffer &dstBuffer,
                        &commandBuffer);
 };
 
-void BufferVkUtils::UnmapVkMemoryFromCPU(VkDeviceMemory &vkBufferMemory) {
-  auto &device = DeviceVk::Get()->GetDevice();
-  vkUnmapMemory(device, vkBufferMemory);
-};
-
-void BufferVkUtils::DestroyVkBuffer(VkBuffer &vkBuffer,
-                                    VkDeviceMemory &vkBufferMemory) {
-  auto &device = DeviceVk::Get()->GetDevice();
-  vkDestroyBuffer(device, vkBuffer, nullptr);
-  vkFreeMemory(device, vkBufferMemory, nullptr);
-};
+// void BufferVkUtils::UnmapVkMemoryFromCPU(VkDeviceMemory &vkBufferMemory) {
+//   auto &device = DeviceVk::Get()->GetDevice();
+//   vkUnmapMemory(device, vkBufferMemory);
+// };
+//
+// void BufferVkUtils::DestroyVkBuffer(VkBuffer &vkBuffer,
+//                                     VkDeviceMemory &vkBufferMemory) {
+//   auto &device = DeviceVk::Get()->GetDevice();
+//   vkDestroyBuffer(device, vkBuffer, nullptr);
+//   vkFreeMemory(device, vkBufferMemory, nullptr);
+// };
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

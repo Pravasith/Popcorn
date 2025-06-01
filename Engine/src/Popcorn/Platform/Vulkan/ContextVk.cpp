@@ -1,19 +1,24 @@
 #include "ContextVk.h"
 #include "GlobalMacros.h"
+#include "Shader.h"
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 // Singleton members
+ContextVk *ContextVk::s_instance = nullptr;
+
 DeviceVk *ContextVk::s_deviceVk = nullptr;
 SurfaceVk *ContextVk::s_surfaceVk = nullptr;
 SwapchainVk *ContextVk::s_swapchainVk = nullptr;
-FramebuffersVk *ContextVk::s_framebuffersVk = nullptr;
 CommandPoolVk *ContextVk::s_commandPoolVk = nullptr;
 FrameVk *ContextVk::s_frameVk = nullptr;
+FramebufferVk *ContextVk::s_framebufferVk = nullptr;
 MemoryAllocatorVk *ContextVk::s_memoryAllocatorVk = nullptr;
-DescriptorSetLayoutsVk *ContextVk::s_descriptorSetLayoutsVk = nullptr;
-DescriptorFactoryVk *ContextVk::s_descriptorFactoryVk = nullptr;
+MemoryVk *ContextVk::s_memoryVk = nullptr;
+DescriptorLayoutsVk *ContextVk::s_descriptorLayoutsVk = nullptr;
+DescriptorPoolsVk *ContextVk::s_descriptorPoolsVk = nullptr;
+ShaderLibrary *ContextVk::s_shaderLibrary = nullptr;
 
 void ContextVk::VulkanInit(const Window &appWin) {
   s_swapchainVk->SetAppWindow(appWin);
@@ -43,8 +48,8 @@ void ContextVk::VulkanInit(const Window &appWin) {
 
   //
   // CREATE SWAPCHAIN --------------------------------------------------------
-  s_swapchainVk->CreateSwapchain();
-  s_swapchainVk->CreateImageViews(device);
+  s_swapchainVk->CreateSwapchainImagesAndVkSwapchain();
+  s_swapchainVk->CreateSwapchainImageViews(device);
 
   //
   // RENDER READY ------------------------------------------------------------
@@ -56,17 +61,24 @@ void ContextVk::VulkanCleanUp() {
   auto &instance = s_deviceVk->GetVkInstance();
   auto &device = s_deviceVk->GetDevice();
 
-  // TOOD: move to workflows
-  s_descriptorFactoryVk->Destroy();
-  s_descriptorFactoryVk = nullptr;
+  s_shaderLibrary->Destroy();
+  s_shaderLibrary = nullptr;
 
-  s_descriptorSetLayoutsVk->CleanUp();
-  DescriptorSetLayoutsVk::Destroy();
-  s_descriptorSetLayoutsVk = nullptr;
+  s_descriptorLayoutsVk->CleanUp();
+  s_descriptorLayoutsVk->Destroy();
+  s_descriptorLayoutsVk = nullptr;
+
+  s_descriptorPoolsVk->CleanUp();
+  s_descriptorPoolsVk->Destroy();
+  s_descriptorPoolsVk = nullptr;
 
   s_memoryAllocatorVk->CleanUp();
   MemoryAllocatorVk::Destroy();
   s_memoryAllocatorVk = nullptr;
+
+  s_memoryVk->CleanUp();
+  MemoryVk::Destroy();
+  s_memoryVk = nullptr;
 
   s_frameVk->CleanUp();
   FrameVk::Destroy();
@@ -80,7 +92,9 @@ void ContextVk::VulkanCleanUp() {
   SwapchainVk::Destroy();
   s_swapchainVk = nullptr;
 
-  FramebuffersVk::Destroy();
+  // s_framebufferVk->CleanUp();
+  FramebufferVk::Destroy();
+  s_framebufferVk = nullptr;
 
   s_surfaceVk->CleanUp(instance);
   SurfaceVk::Destroy();

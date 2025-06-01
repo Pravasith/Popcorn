@@ -1,12 +1,14 @@
 #include "RendererVk.h"
-#include "BasicWorkflowVk.h"
-#include "CommandPoolVk.h"
+#include "CompositeRenderFlowVk.h"
 #include "ContextVk.h"
+#include "GBufferRenderFlowVk.h"
+#include "GameObject.h"
+#include "LightingRenderFlowVk.h"
 #include "Material.h"
-#include "Mesh.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
-#include "RenderWorkflowVk.h"
+#include "RenderFlowVk.h"
+#include "Shader.h"
 #include <cstring>
 #include <vulkan/vulkan_core.h>
 
@@ -14,46 +16,26 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 ContextVk *RendererVk::s_vulkanContext = nullptr;
-std::vector<RenderWorkflowVk *> RendererVk::s_renderWorkflows{};
+std::vector<RenderFlowVk *> RendererVk::s_renderFlows{};
 
 //
 // -------------------------------------------------------------------------
 // --- PUBLIC METHODS ------------------------------------------------------
 
 void RendererVk::DrawFrame(const Scene &scene) {
-  BasicRenderWorkflowVk *basicRenderWorkflow =
-      reinterpret_cast<BasicRenderWorkflowVk *>(
-          s_renderWorkflows[(int)RenderWorkflowIndices::Basic]);
-
   ContextVk::Frame()->Draw(
-      m_drawingCommandBuffers,
-
-      // Pass final paint renderpass for swapchain recreation
-      // TODO: Isolate this renderpass (move it outside basicWorkflow)
-      basicRenderWorkflow->GetRenderPass(),
-
-      // Update scene data lambda
-      [&](const uint32_t currentFrame) {
-        // TODO: Write a loop for render workflows instead
-        basicRenderWorkflow->ProcessSceneUpdates(currentFrame);
+      [&]() {
+        for (auto &renderFlow : s_renderFlows) {
+          renderFlow->OnSwapchainInvalidCb();
+        }
       },
-
-      // Record draw commands lambda
-      [&](const uint32_t frameIndex, const uint32_t currentFrame,
-          VkCommandBuffer &currentFrameCommandBuffer) {
-        ContextVk::CommandPool()->BeginCommandBuffer(currentFrameCommandBuffer);
-        //
-        // -----------------------------------------------------------------
-        // --- RECORD ALL COMMAND BUFFERS HERE -----------------------------
-
-        // TODO: Write a loop for render workflows instead
-        basicRenderWorkflow->RecordRenderCommands(frameIndex, currentFrame,
-                                                  currentFrameCommandBuffer);
-
-        // --- RECORD ALL COMMAND BUFFERS HERE -----------------------------
-        // -----------------------------------------------------------------
-        //
-        ContextVk::CommandPool()->EndCommandBuffer(currentFrameCommandBuffer);
+      [&](const uint32_t currentFrame) {
+        RenderFlowVk::CopyDynamicUniformsToMemory(currentFrame);
+      },
+      [&](const uint32_t frameIndex, const uint32_t currentFrame) {
+        for (auto &renderFlow : s_renderFlows) {
+          renderFlow->RecordCommandBuffer(frameIndex, currentFrame);
+        }
       });
 };
 
@@ -62,35 +44,18 @@ bool RendererVk::OnFrameBufferResize(FrameBfrResizeEvent &) {
   return true;
 };
 
-void RendererVk::CreateBasicCommandBuffers() {
-  auto *commandPoolVkStn = CommandPoolVk::Get();
-  VkCommandBufferAllocateInfo allocInfo{};
-  commandPoolVkStn->GetDefaultCommandBufferAllocInfo(allocInfo);
-  allocInfo.commandBufferCount = MAX_FRAMES_IN_FLIGHT;
-  m_drawingCommandBuffers.resize(allocInfo.commandBufferCount);
-  commandPoolVkStn->AllocCommandBuffers(allocInfo,
-                                        m_drawingCommandBuffers.data());
-}
-
 //
 // -------------------------------------------------------------------------
 // --- PRIVATE METHODS -----------------------------------------------------
 
 RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
-  PC_PRINT("CREATED", TagType::Constr, "RENDERER-VK");
+  PC_PRINT("CREATED", TagType::Constr, "RendererVk");
   CreateVulkanContext();
 };
 
 RendererVk::~RendererVk() {
-  // Renderflow clean ups
-  for (auto *workflow : s_renderWorkflows) {
-    workflow->CleanUp();
-    delete workflow;
-  }
-  s_renderWorkflows.clear();
-
   DestroyVulkanContext();
-  PC_PRINT("DESTROYED", TagType::Destr, "RENDERER-VULKAN");
+  PC_PRINT("DESTROYED", TagType::Destr, "RendererVk");
 };
 
 void RendererVk::CreateVulkanContext() {
@@ -100,70 +65,128 @@ void RendererVk::CreateVulkanContext() {
 
 void RendererVk::DestroyVulkanContext() {
   s_vulkanContext->VulkanCleanUp();
-  s_vulkanContext->Destroy();
+  ContextVk::Destroy();
   s_vulkanContext = nullptr;
 };
 
 //
 // ---------------------------------------------------------------------------
 // --- RENDER WORKFLOWS ------------------------------------------------------
-void RendererVk::CreateRenderWorkflows() {
-  BasicRenderWorkflowVk *basicRendererWorkflow = new BasicRenderWorkflowVk;
-  s_renderWorkflows.push_back(basicRendererWorkflow);
+void RendererVk::CreateRenderFlows() {
+  s_renderFlows.emplace_back(new GBufferRenderFlowVk());
+  s_renderFlows.emplace_back(new LightingRenderFlowVk());
+  s_renderFlows.emplace_back(new CompositeRenderFlowVk());
+};
 
+void RendererVk::DestroyRenderFlows() {
+  for (auto &renderFlow : s_renderFlows) {
+    renderFlow->DestroyPipelines();
+  }
+
+  ShaderLibrary::Destroy();
+
+  RenderFlowVk::DestroySamplers();
+  RenderFlowVk::FreeMemory();
+
+  for (auto &renderFlow : s_renderFlows) {
+    renderFlow->CleanUp();
+    delete renderFlow;
+    renderFlow = nullptr;
+  }
+  s_renderFlows.clear();
+};
+
+void RendererVk::PrepareRenderFlows() {
+  for (auto &renderFlow : s_renderFlows) {
+    PC_WARN("Preparing renderflow...")
+    renderFlow->Prepare(); // Creates Vulkan:
+                           //   - Attachments
+                           //   - RenderPass
+                           //   - Framebuffer
+                           //   - Commandbuffers
+  }
+};
+
+void RendererVk::CreateRenderFlowResources() {
   //
   // CREATE WORKFLOW RESOURCES -----------------------------------------------
   PC_WARN("Expensive initialization operation: Creating workflow Vulkan "
-          "resources! Should only be done once per workflow object init.")
-  for (auto &renderWorkflow : s_renderWorkflows) {
-    renderWorkflow->CreateRenderPass();
-    renderWorkflow->CreateFramebuffers();
-  }
-};
+          "resources! Should only be done once")
 
-// Sort materials, allocate descriptor sets, vk buffers, index buffers &
-// create pipelines
-void RendererVk::CreateResources() {
+  //
   // Create VMA Allocator
-  ContextVk::MemoryAllocator()->CreateVMAAllocator();
+  ContextVk::MemoryAllocator()->CreateVMAAllocator(); // Automatically destroyed
 
-  for (auto &renderWorkflow : s_renderWorkflows) {
-    // Loops through all meshes & creates a contiguous Vulkan buffer memory for
-    // each workflow -- each workflow has one VkBuffer & one VkDeviceMemory each
-    renderWorkflow->AllocateVkVertexBuffers();    // VMA - Extract from meshes
-    renderWorkflow->AllocateVkIndexBuffers();     // VMA - Extract from meshes
-    renderWorkflow->AllocateVkUniformBuffers();   // VMA - Extract from -
-                                                  // 1. Camera
-                                                  // 2. Mesh
-                                                  // 3. Mesh material
-    renderWorkflow->CreateDescriptorSetLayouts(); // Done
-    renderWorkflow->CreateDescriptorPool();       // Move to factory
-    renderWorkflow->CreateDescriptorSets();       // Move to factory
-    renderWorkflow->CreatePipelines();            // ALMOST DONE
+  //
+  // Allocate memory, samplers & load shaders in the shader library
+  RenderFlowVk::AllocMemory();
+  RenderFlowVk::CreateSamplers();
+  RenderFlowVk::AllocShaders();
+  RenderFlowVk::AllocGlobalDescriptors();
+
+  //
+  // Renderflow specific descriptors & pipelines
+  for (auto &renderFlow : s_renderFlows) {
+    renderFlow->AllocLocalDescriptors(); // Static for now
+    renderFlow->CreatePipelines();
   }
+
+  //
+  // Unload shaders in the shader library
+  RenderFlowVk::FreeShaders();
 };
 
-void RendererVk::AddMeshToWorkflow(Mesh *mesh) {
-  BasicRenderWorkflowVk *basicRenderWorkflow =
-      reinterpret_cast<BasicRenderWorkflowVk *>(
-          s_renderWorkflows[(int)RenderWorkflowIndices::Basic]);
-  basicRenderWorkflow->AddMeshToWorkflow(mesh);
-};
-
-RenderWorkflowVk *
-RendererVk::GetRenderWorkflow(const RenderWorkflowIndices index) {
-  return s_renderWorkflows[(int)index];
-};
-
-void RendererVk::ProcessScenes() {
+void RendererVk::AssignSceneObjectsToRenderFlows() {
   for (auto &scene : m_sceneLibrary.GetScenes()) {
-    for (auto &node : scene->GetNodes()) {
-      if (node->GetType() == GameObjectTypes::Mesh) {
-        auto *meshPtr = (Mesh *)node;
-        AddMeshToWorkflow(meshPtr);
-      };
+    for (auto &node : scene->GetGameObjects()) {
+      ProcessGameObjectNode(node); // Recursive
     };
   };
+};
+
+void RendererVk::ProcessGameObjectNode(GameObject *node) { // Recursive
+  switch (node->GetGameObjectType()) {
+  case Popcorn::Gfx::GameObjectTypes::Mesh: //
+  {
+    auto *mesh = static_cast<Mesh *>(node);
+    for (auto &basicSubmesh : mesh->GetSubmeshes<MaterialTypes::BasicMat>()) {
+      RenderFlowVk::RegisterMaterialAndSubmesh(&basicSubmesh);
+    };
+    for (auto &pbrSubmesh : mesh->GetSubmeshes<MaterialTypes::PbrMat>()) {
+      RenderFlowVk::RegisterMaterialAndSubmesh(&pbrSubmesh);
+    };
+  } break;
+
+  case Popcorn::Gfx::GameObjectTypes::Camera: //
+  {
+    auto *camera = static_cast<Camera *>(node);
+    RenderFlowVk::AddCamera(camera);
+  }
+  // Add Camera (to extract projection & view matrices)
+  break;
+
+  case Popcorn::Gfx::GameObjectTypes::Empty: // Workflows have nothing to do
+                                             // with this type as of now
+  {
+    auto *empty = static_cast<Empty *>(node);
+    RenderFlowVk::AddEmpty(empty);
+  } break;
+
+  case Popcorn::Gfx::GameObjectTypes::Light: //
+  {
+    auto *light = static_cast<Light *>(node);
+    RenderFlowVk::AddLight(light);
+  } break;
+
+  case Popcorn::Gfx::GameObjectTypes::None: //
+  {
+    PC_ERROR("Wrong gameObject type", "RendererVk")
+  } break;
+  }
+
+  for (auto &child : node->GetChildren()) {
+    ProcessGameObjectNode(child); // Recursive
+  }
 };
 
 GFX_NAMESPACE_END

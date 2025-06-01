@@ -260,7 +260,11 @@ bool DeviceVk::IsDeviceSuitable(const VkPhysicalDevice &device,
                         !swapchainSupport.presentModes.empty();
   }
 
-  return indices.isComplete() && extensionsSupported && swapchainAdequate;
+  VkPhysicalDeviceFeatures supportedFeatures;
+  vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
+
+  return indices.isComplete() && extensionsSupported && swapchainAdequate &&
+         supportedFeatures.samplerAnisotropy;
 }
 
 QueueFamilyIndices
@@ -320,6 +324,7 @@ void DeviceVk::CreateLogicalDevice(const VkSurfaceKHR &surface) {
   //
 
   VkPhysicalDeviceFeatures deviceFeatures{};
+  deviceFeatures.samplerAnisotropy = VK_TRUE;
 
   VkDeviceCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

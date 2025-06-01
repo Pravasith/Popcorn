@@ -1,7 +1,7 @@
 #include "FrameVk.h"
+#include "CommonVk.h"
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
-#include "RendererVk.h"
 #include "SwapchainVk.h"
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
@@ -15,11 +15,9 @@ void FrameVk::CreateRenderSyncObjects() {
   auto *deviceVkStn = DeviceVk::Get();
   auto &device = deviceVkStn->GetDevice();
 
-  constexpr uint32_t maxFramesInFlight = RendererVk::MAX_FRAMES_IN_FLIGHT;
-
-  m_imageAvailableSemaphores.resize(maxFramesInFlight);
-  m_frameRenderedSemaphores.resize(maxFramesInFlight);
-  m_inFlightFences.resize(maxFramesInFlight);
+  m_imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+  m_frameRenderedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+  m_inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
   VkSemaphoreCreateInfo semaphoreInfo{};
   semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -28,7 +26,7 @@ void FrameVk::CreateRenderSyncObjects() {
   fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
   fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-  for (int i = 0; i < maxFramesInFlight; ++i) {
+  for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
     if (vkCreateSemaphore(device, &semaphoreInfo, nullptr,
                           &m_imageAvailableSemaphores[i]) != VK_SUCCESS ||
         vkCreateSemaphore(device, &semaphoreInfo, nullptr,
@@ -41,12 +39,11 @@ void FrameVk::CreateRenderSyncObjects() {
 };
 
 void FrameVk::Draw(
-    std::vector<VkCommandBuffer> &commandBuffers,
-    const VkRenderPass &finalPaintRenderPass,
-    const std::function<void(const uint32_t currentFrame)> &updateSceneData,
-    const std::function<
-        void(const uint32_t frameIndex, const uint32_t currentFrame,
-             VkCommandBuffer &currentFrameCommandBuffer)> &recordDrawCommands) {
+    const std::function<void()> &swapchainInvalidCb,
+    const std::function<void(const uint32_t currentFrame)> &updateSceneDataCb,
+    const std::function<void(const uint32_t swapchainFrameIndex,
+                             const uint32_t currentFrame)>
+        &recordDrawCommandsCb) {
   auto &device = DeviceVk::Get()->GetDevice();
   uint32_t swapchainImageIndex;
 
@@ -68,33 +65,35 @@ void FrameVk::Draw(
       // Semaphore: Signal when image is acquired & ready for render
       imageAvailable,
       // Final paint renderpass for swapchain recreation
-      finalPaintRenderPass);
+      swapchainInvalidCb);
 
   //
   // In case of resize (or invalid swapchain to be precise), we return and
   // continue from the next frame
-  if (!isImageAcquired)
+  if (!isImageAcquired) {
+    vkDeviceWaitIdle(device); // Wait for all operations to finish before
+                              // recreating swapchain
+    vkResetFences(device, 1, &m_inFlightFences[m_currentFrame]);
     return;
+  }
 
   // Once done, we reset the fence to in-flight mode
   vkResetFences(device, 1, &m_inFlightFences[m_currentFrame]);
 
   //
   // Update Uniforms & push constants
-  updateSceneData(m_currentFrame);
+  updateSceneDataCb(m_currentFrame);
 
-  //
-  // Reset command buffer & start recording commands to it (lambda called from
-  // the RendererVk class)
-  vkResetCommandBuffer(commandBuffers[m_currentFrame], 0);
-  recordDrawCommands(swapchainImageIndex, m_currentFrame,
-                     commandBuffers[m_currentFrame]);
+  recordDrawCommandsCb(swapchainImageIndex, m_currentFrame);
+
+  // TODO: Fill out command buffers
+  std::vector<VkCommandBuffer> commandBuffers{};
 
   //
   // Submit the graphics queue with the command buffer (with recorded commands
   // in it)
   SubmitDrawCommands(
-      commandBuffers[m_currentFrame],
+      commandBuffers,
       // Semaphore: Wait for the image to be available to paint/render
       imageAvailable,
       // Semaphore: Signal when frame is rendered & ready to present to
@@ -108,23 +107,23 @@ void FrameVk::Draw(
   // the swapchain
   PresentImageToSwapchain(
       // Semaphore: Wait for the frame to be fully rendered before presenting
-      frameRendered,
-      // Image index
-      swapchainImageIndex,
-      // Final paint renderpass for swapchain recreation
-      finalPaintRenderPass);
+      frameRendered, swapchainImageIndex, swapchainInvalidCb);
 
   //
   // Wait until all the commandBuffers are executed before moving to the next
   // steps after the gameloop in the program (usually cleanup)
-  vkDeviceWaitIdle(device);
+  // vkDeviceWaitIdle(device); // DON'T NEED THIS. DEFEATS THE PURPOSE OF DOUBLE
+  // BUFFERING
 
-  m_currentFrame = (m_currentFrame + 1) % RendererVk::MAX_FRAMES_IN_FLIGHT;
+  //
+  // +1 because we're setting it to next frame, the current frame has already
+  // been processed
+  m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 };
 
-void FrameVk::PresentImageToSwapchain(VkSemaphore *signalSemaphores,
-                                      const uint32_t &imageIndex,
-                                      const VkRenderPass &paintRenderPass) {
+void FrameVk::PresentImageToSwapchain(
+    VkSemaphore *signalSemaphores, const uint32_t &imageIndex,
+    const std::function<void()> &swapchainInvalidCb) {
   VkPresentInfoKHR presentInfo{};
   presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
@@ -143,7 +142,7 @@ void FrameVk::PresentImageToSwapchain(VkSemaphore *signalSemaphores,
   if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
       m_framebufferResized) {
     m_framebufferResized = false;
-    SwapchainVk::Get()->RecreateSwapchain(paintRenderPass);
+    swapchainInvalidCb();
   } else if (result != VK_SUCCESS) {
     throw std::runtime_error("failed to present swap chain image!");
   }
@@ -151,7 +150,7 @@ void FrameVk::PresentImageToSwapchain(VkSemaphore *signalSemaphores,
 
 bool FrameVk::AcquireNextSwapchainImageIndex(
     uint32_t &imageIndex, VkSemaphore *signalSemaphores,
-    const VkRenderPass &paintRenderPass) {
+    const std::function<void()> &swapchainInvalidCb) {
   auto &device = DeviceVk::Get()->GetDevice();
   auto &swapchain = SwapchainVk::Get()->GetVkSwapchain();
 
@@ -160,10 +159,8 @@ bool FrameVk::AcquireNextSwapchainImageIndex(
                             VK_NULL_HANDLE, &imageIndex);
 
   if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-    auto *swapchainVkStn = SwapchainVk::Get();
-
-    swapchainVkStn->RecreateSwapchain(paintRenderPass);
-
+    vkDeviceWaitIdle(device);
+    swapchainInvalidCb();
     return false;
   } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
     throw std::runtime_error("failed to acquire swap chain image!");
@@ -172,7 +169,7 @@ bool FrameVk::AcquireNextSwapchainImageIndex(
   return true;
 };
 
-void FrameVk::SubmitDrawCommands(const VkCommandBuffer &commandBuffer,
+void FrameVk::SubmitDrawCommands(std::vector<VkCommandBuffer> &commandBuffers,
                                  VkSemaphore *waitSemaphores,
                                  VkSemaphore *signalSemaphores,
                                  VkFence &inFlightFence) {
@@ -190,8 +187,8 @@ void FrameVk::SubmitDrawCommands(const VkCommandBuffer &commandBuffer,
   submitInfo.waitSemaphoreCount = 1;
   submitInfo.pWaitSemaphores = waitSemaphores;
   submitInfo.pWaitDstStageMask = waitStages;
-  submitInfo.commandBufferCount = 1;
-  submitInfo.pCommandBuffers = &commandBuffer;
+  submitInfo.commandBufferCount = commandBuffers.size();
+  submitInfo.pCommandBuffers = commandBuffers.data();
   //
   // Signal the m_frameRendererdSemaphore once the frame is rendered to the
   // provided image
@@ -207,7 +204,7 @@ void FrameVk::SubmitDrawCommands(const VkCommandBuffer &commandBuffer,
 void FrameVk::CleanUp() {
   auto &device = DeviceVk::Get()->GetDevice();
 
-  for (int i = 0; i < RendererVk::MAX_FRAMES_IN_FLIGHT; ++i) {
+  for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
     vkDestroySemaphore(device, m_imageAvailableSemaphores[i], nullptr);
     vkDestroySemaphore(device, m_frameRenderedSemaphores[i], nullptr);
     vkDestroyFence(device, m_inFlightFences[i], nullptr);

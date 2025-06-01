@@ -55,25 +55,6 @@ public:
   };
 
   static void
-  GetDefaultAttachmentDescription(VkAttachmentDescription &attachment) {
-    // Color attachment
-    attachment.format = VK_FORMAT_B8G8R8A8_SRGB; // Ex. Swapchain image format
-    attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-  };
-
-  static void GetAttachmentRef(VkAttachmentReference &attachmentRef,
-                               const uint32_t attachmentIndex) {
-    attachmentRef.attachment = attachmentIndex;
-    attachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-  };
-
-  static void
   GetDefaultSubpassDescription(VkSubpassDescription &subpassDescription) {
     subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpassDescription.colorAttachmentCount = 1;
@@ -109,29 +90,20 @@ public:
     PC_VK_NULL_CHECK(m_renderPass)
 
     vkDestroyRenderPass(device, m_renderPass, nullptr);
+    m_renderPass = VK_NULL_HANDLE;
   };
 
-  void GetDefaultCmdBeginRenderPassInfo(const VkFramebuffer &frameBuffer,
-                                        const VkExtent2D &frameExtent,
-                                        VkRenderPassBeginInfo &renderPassInfo) {
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = m_renderPass;
-    renderPassInfo.framebuffer = frameBuffer;
-    renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = frameExtent;
-    VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
-    renderPassInfo.clearValueCount = 1;
-    renderPassInfo.pClearValues = &clearColor;
-  };
+  static void GetDefaultCmdBeginRenderPassInfo(
+      const VkFramebuffer &frameBuffer, const VkExtent2D &frameExtent,
+      const VkRenderPass &renderPass, VkRenderPassBeginInfo &renderPassInfo);
 
-  void RecordBeginRenderPassCommand(
-      const VkCommandBuffer &commandBuffer,
-      const VkRenderPassBeginInfo &renderPassBeginInfo) {
+  void BeginRenderPass(const VkCommandBuffer &commandBuffer,
+                       const VkRenderPassBeginInfo &renderPassBeginInfo) {
     vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo,
                          VK_SUBPASS_CONTENTS_INLINE);
   };
 
-  void RecordEndRenderPassCommand(const VkCommandBuffer &commandBuffer) {
+  void EndRenderPass(const VkCommandBuffer &commandBuffer) {
     vkCmdEndRenderPass(commandBuffer);
   };
 

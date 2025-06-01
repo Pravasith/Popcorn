@@ -1,9 +1,17 @@
-#include "Popcorn/Loaders/GltfLoader.h"
+#include "GltfLoader.h"
 #include "Assert.h"
 #include "Base.h"
 #include "BufferObjects.h"
+#include "Camera.h"
+#include "Empty.h"
+#include "GameObject.h"
 #include "GlobalMacros.h"
 #include "Helpers.h"
+#include "Light.h"
+#include "LoadersDefs.h"
+#include "Material.h"
+#include "Mesh.h"
+#include "Shader.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -12,6 +20,13 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+//
+//
+//
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// --- PUBLIC METHODS ----------------------------------------------------------
+//
 bool GltfLoader::LoadFromFile(const std::string &filename,
                               tinygltf::Model &model) {
   tinygltf::TinyGLTF loader;
@@ -36,84 +51,268 @@ bool GltfLoader::LoadFromFile(const std::string &filename,
   return ret;
 };
 
-std::vector<Mesh *>
-GltfLoader::ExtractGltfMeshes(const tinygltf::Model &model) {
-  std::vector<Mesh *> meshes;
-
-  for (const auto &node : model.nodes) {
-    ProcessGLTFNode(model, node, glm::mat4(1.0f), meshes);
+void GltfLoader::ExtractModelData(const tinygltf::Model &model,
+                                  std::vector<GameObject *> &gameObjects) {
+  for (auto &node : model.nodes) {
+    GameObject *gameObject = ConvertGltfNodeToGameObject(model, node);
+    gameObjects.push_back(gameObject);
   }
-
-  return meshes;
 };
 
-void GltfLoader::ProcessGLTFNode(const tinygltf::Model &model,
-                                 const tinygltf::Node &node,
-                                 const glm::mat4 &parentMatrix,
-                                 std::vector<Mesh *> &meshes) {
-  // Calculate current node's transformation matrix
-  glm::mat4 nodeMatrix = glm::mat4(1.0f);
+//
+//
+//
+//
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// --- CONVERSION UTILS --------------------------------------------------------
+//
+GameObject *
+GltfLoader::ConvertGltfNodeToGameObject(const tinygltf::Model &model,
+                                        const tinygltf::Node &gltfNode) {
+  GameObject *gameObject = CreateGameObjectByType(model, gltfNode);
+  SetTransformData(gltfNode, *gameObject);
 
+  for (int child : gltfNode.children) {
+    GameObject *childGameObj =
+        ConvertGltfNodeToGameObject(model, model.nodes[child]);
+    gameObject->AddChild(childGameObj);
+  }
+
+  return gameObject;
+}
+
+void GltfLoader::SetTransformData(const tinygltf::Node &node,
+                                  GameObject &gameObject) {
+
+  // TODO: Decompose matrix to TRS for animations
+  auto outMatrix = glm::mat4(1.0f);
+
+  // Node has an explicit transformation matrix, set it directly.
   if (!node.matrix.empty()) {
-    // Node has an explicit matrix
-    nodeMatrix = glm::make_mat4(node.matrix.data());
+    // TODO: Warning --- in this cases (usually on shear/uneven scale
+    // operations, Blender exports a nodeMatrix instead of transformations.
+    // Handle this later by decomposition. Or just don't use such objects for
+    // animations.
+    outMatrix = glm::make_mat4(node.matrix.data());
+    gameObject.SetLocalMatrix(outMatrix);
   } else {
-    // Apply TRS components
+    // Apply TRS components separately
+    glm::vec3 translation(0.0f);
+    glm::vec3 scale(1.0f);
+    glm::vec3 eulerAngles(0.0f); // Euler angles in radians
+
     if (!node.translation.empty()) {
-      nodeMatrix = glm::translate(nodeMatrix, glm::vec3(node.translation[0],
-                                                        node.translation[1],
-                                                        node.translation[2]));
+      translation = glm::vec3(node.translation[0], node.translation[1],
+                              node.translation[2]);
     }
 
     if (!node.rotation.empty()) {
-      glm::quat q(node.rotation[3], node.rotation[0], node.rotation[1],
-                  node.rotation[2]);
-      nodeMatrix *= glm::mat4_cast(q);
+      glm::quat rotationQuat(node.rotation[3], node.rotation[0],
+                             node.rotation[1], node.rotation[2]);
+      eulerAngles =
+          glm::eulerAngles(rotationQuat); // Convert quaternion to Euler angles
     }
 
     if (!node.scale.empty()) {
-      nodeMatrix = glm::scale(
-          nodeMatrix, glm::vec3(node.scale[0], node.scale[1], node.scale[2]));
+      scale = glm::vec3(node.scale[0], node.scale[1], node.scale[2]);
     }
-  }
 
-  glm::mat4 worldMatrix = parentMatrix * nodeMatrix;
-
-  // Process mesh if this node has one
-  if (node.mesh >= 0 && node.mesh < model.meshes.size()) {
-    const auto &gltfMesh = model.meshes[node.mesh];
-
-    // gltfMesh.primitives are submeshes
-    for (const auto &primitive : gltfMesh.primitives) {
-      VertexBuffer *vertexBuffer;
-      IndexBuffer<uint16_t> *indexBuffer;
-      Mesh::Uniforms uniform;
-
-      // Extract vertex data
-      // TODO: for tomorrow: transfer the vertexbuffer ownership to Mesh &
-      // handle cleanup logic in the Mesh
-      vertexBuffer = ExtractVertexBuffer(model, primitive);
-
-      // Extract index data
-      indexBuffer = ExtractIndexBuffer(model, primitive);
-
-      // Extract material
-      // if (primitive.material >= 0) {
-      //   extractMaterialData(model, model.materials[primitive.material],
-      //                       extractedMesh.material);
-      // }
-      Mesh *mesh = new Mesh(vertexBuffer, indexBuffer);
-      mesh->SetModelMatrix(worldMatrix);
-
-      meshes.push_back(mesh);
-    }
-  }
-
-  // Process child nodes
-  for (int child : node.children) {
-    ProcessGLTFNode(model, model.nodes[child], worldMatrix, meshes);
+    // Store TRS in the GameObject --- internally constructs a localMatrix
+    gameObject.SetPosition(translation);
+    gameObject.SetRotationEuler(eulerAngles);
+    gameObject.ScaleByValue(scale);
   }
 }
+
+GameObject *GltfLoader::CreateGameObjectByType(const tinygltf::Model &model,
+                                               const tinygltf::Node &node) {
+  if (node.mesh >= 0 && node.mesh < model.meshes.size()) {
+    Mesh *mesh = new Mesh();
+    ExtractMeshData(model, node, *mesh);
+    return mesh;
+  } else if (node.camera >= 0) {
+    // Make this abstract
+    Camera *camera = new Camera();
+    // TODO: Handle camera later
+    return camera;
+  } else if (node.extensions.find("KHR_lights_punctual") !=
+             node.extensions.end()) {
+    // Light node (requires KHR_lights_punctual extension)
+    Light *light = new Light();
+    return light;
+
+    // } else if (
+    //     // Is Node referenced in any skin.joints array (typically write a
+    //     function
+    //     // to resolve the bool)
+    //     false) {
+    //   // Bone/Joint node (part of skeletal hierarchy)
+    //   // TYPE = Bone
+    //   // TYPE = Joint
+    // } else if (node.extensions.find("EXT_mesh_gpu_instancing") !=
+    //            node.extensions.end()) {
+    //   // GPU-instanced mesh node
+    //   // TYPE = Mesh but instanced
+    // } else if (!node.translation.empty() || !node.rotation.empty() ||
+    //            !node.scale.empty() || !node.matrix.empty()) {
+    //   // Transform (empty) node (only affects hierarchy)
+    //   // TYPE = Transform (Empty)
+    // } else if (!node.extensions.empty()) {
+    //   // Node with unspecified extensions (vendor-specific)
+    //   // NO TYPE -- HANDLE THIS
+  } else {
+    // Undefined node (no properties, rare but valid)
+    // NO TYPE -- HANDLE THIS
+    return new Empty();
+  }
+};
+
+//
+//
+//
+//
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// --- MESH UTILS --------------------------------------------------------------
+//
+void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
+                                 const tinygltf::Node &gltfNode, Mesh &mesh) {
+  // MESH TYPE
+  const auto &gltfMesh = model.meshes[gltfNode.mesh];
+
+  // gltfMesh.primitives are submeshes
+  for (const auto &primitive : gltfMesh.primitives) {
+    VertexBuffer *vbo;
+    IndexBuffer<uint32_t> *ibo;
+
+    // Extract vertex buffer
+    vbo = ExtractVertexBuffer(model, primitive);
+
+    // Extract index buffer
+    ibo = ExtractIndexBuffer(model, primitive);
+
+    // Extract material data
+    if (primitive.material >= 0) {
+      auto &gltfMaterial = model.materials[primitive.material];
+      MaterialTypes matType = GetGltfMaterialType(gltfMaterial);
+
+      switch (matType) {
+      case MaterialTypes::PbrMat: {
+        Material<MaterialTypes::PbrMat> *mat =
+            new Material<MaterialTypes::PbrMat>();
+        mat->SetData(
+            ExtractMaterialData<MaterialTypes::PbrMat>(model, gltfMaterial));
+        // mat->SetShader(ShaderStages::VertexBit,
+        //                GfxContext::Shaders()
+        //                    ->GetInbuiltShader<ShaderFiles::PbrMat_Vert>());
+        // mat->SetShader(ShaderStages::FragmentBit,
+        //                GfxContext::Shaders()
+        //                    ->GetInbuiltShader<ShaderFiles::PbrMat_Frag>());
+        mesh.AddSubmesh(vbo, ibo, mat);
+        break;
+      }
+      case MaterialTypes::BasicMat: {
+        Material<MaterialTypes::BasicMat> *mat =
+            new Material<MaterialTypes::BasicMat>();
+        mat->SetData(
+            ExtractMaterialData<MaterialTypes::BasicMat>(model, gltfMaterial));
+        // mat->SetShader(ShaderStages::VertexBit,
+        //                GfxContext::Shaders()
+        //                    ->GetInbuiltShader<ShaderFiles::BasicMat_Vert>());
+        // mat->SetShader(ShaderStages::FragmentBit,
+        //                GfxContext::Shaders()
+        //                    ->GetInbuiltShader<ShaderFiles::BasicMat_Frag>());
+        mesh.AddSubmesh(vbo, ibo, mat);
+        break;
+      }
+      default:
+        PC_ERROR("Wrong material type!", "GltfLoader")
+      }
+    } else {
+      // Fallback to basic material
+      Material<MaterialTypes::BasicMat> *mat =
+          new Material<MaterialTypes::BasicMat>();
+      mesh.AddSubmesh(vbo, ibo, mat);
+    };
+  }
+};
+
+//
+//
+//
+//
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// --- MATERIAL UTILS ----------------------------------------------------------
+//
+template <MaterialTypes T>
+DeriveMaterialDataType<T>::type
+GltfLoader::ExtractMaterialData(const tinygltf::Model &model,
+                                const tinygltf::Material &material) {
+  typename DeriveMaterialDataType<T>::type materialData;
+  const auto &gltfMatData = material.pbrMetallicRoughness;
+
+  materialData.doubleSided = false;
+
+  // Shaders mask
+  materialData.enabledShadersMask =
+      ShaderStages::VertexBit | ShaderStages::FragmentBit;
+
+  if constexpr (T == MaterialTypes::PbrMat) {
+    // Add shader byte code
+    materialData.baseColorFactor = glm::vec4(
+        gltfMatData.baseColorFactor[0], gltfMatData.baseColorFactor[1],
+        gltfMatData.baseColorFactor[2], gltfMatData.baseColorFactor[3]);
+    materialData.metallicFactor = gltfMatData.metallicFactor;
+    materialData.roughnessFactor = gltfMatData.roughnessFactor;
+    materialData.hasNormalTexture = material.normalTexture.index != -1;
+    materialData.hasMetallicRoughnessTexture =
+        gltfMatData.metallicRoughnessTexture.index != -1;
+  } else {
+    // DEFAULTS TO BASIC MATERIAL
+    // Add shader byte code
+    materialData.baseColorFactor = glm::vec4(
+        gltfMatData.baseColorFactor[0], gltfMatData.baseColorFactor[1],
+        gltfMatData.baseColorFactor[2], gltfMatData.baseColorFactor[3]);
+  }
+
+  // // Add shader files based on material type
+  // data->shaderFiles =
+  //     isPBR ? std::vector<const char *>{"pbr.vert", "pbr.frag"}
+  //           : std::vector<const char *>{"basic.vert", "basic.frag"};
+  //
+  return materialData;
+}
+
+MaterialTypes
+GltfLoader::GetGltfMaterialType(const tinygltf::Material &material) {
+  const auto &pbr = material.pbrMetallicRoughness;
+
+  // Determine material type
+  bool isPBR = pbr.metallicFactor > 0.0f || pbr.roughnessFactor > 0.0f ||
+               material.normalTexture.index != -1 ||
+               material.occlusionTexture.index != -1;
+
+  if (isPBR) {
+    return MaterialTypes::PbrMat;
+  } else {
+    return MaterialTypes::BasicMat;
+  };
+}
+
+//
+// Random thought: Valora is a sick name for a videogame character
+//
+
+//
+//
+//
+//
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// --- PRIMITIVE UTILS ---------------------------------------------------------
+//
 
 VertexBuffer *
 GltfLoader::ExtractVertexBuffer(const tinygltf::Model &model,
@@ -201,55 +400,55 @@ GltfLoader::ExtractVertexBuffer(const tinygltf::Model &model,
   vertices->Allocate(vertexCount * totalAttrByteSize);
   {
     using BufferDefs::AttrTypes;
-    vertices->SetLayout<AttrTypes::Float3,    // Position
-                        AttrTypes::Float3,    // Normal
-                        AttrTypes::Float2>(); // UV
+    // vertices->SetLayout<AttrTypes::Float3,    // Position
+    //                     AttrTypes::Float3,    // Normal
+    //                     AttrTypes::Float2>(); // UV
+
+    vertices->SetLayout(GltfVertexBufferLayout);
   }
 
   for (size_t i = 0; i < vertexCount; ++i) {
-    auto *verticesBuffer = vertices->GetBufferData() + i * totalAttrByteSize;
+    size_t baseOffset = i * totalAttrByteSize;
     size_t cpyOffset = 0;
 
     const byte_t *pos =
         reinterpret_cast<const byte_t *>(posData + i * posStride);
-    memcpy(verticesBuffer + cpyOffset, pos, posByteSize);
+    vertices->Fill(pos, posByteSize, baseOffset + cpyOffset);
     cpyOffset += posByteSize;
 
     if (normData) {
       const byte_t *norm =
           reinterpret_cast<const byte_t *>(normData + i * normStride);
-      memcpy(verticesBuffer + cpyOffset, norm, normByteSize);
+      vertices->Fill(norm, normByteSize, baseOffset + cpyOffset);
       cpyOffset += normByteSize;
     } else {
       const float defaultNormal[3] = {0, 0, 0};
-      memcpy(verticesBuffer + cpyOffset, defaultNormal, normByteSize);
+      vertices->Fill(defaultNormal, normByteSize, baseOffset + cpyOffset);
+      cpyOffset += normByteSize;
     }
 
     if (uvData) {
       const byte_t *uv =
           reinterpret_cast<const byte_t *>(uvData + i * uvStride);
-      memcpy(verticesBuffer + cpyOffset, uv, uvByteSize);
+      vertices->Fill(uv, uvByteSize, baseOffset + cpyOffset);
       cpyOffset += uvByteSize;
     } else {
       const float defaultUV[2] = {0, 0};
-      memcpy(verticesBuffer + cpyOffset, defaultUV, uvByteSize);
+      vertices->Fill(defaultUV, uvByteSize, baseOffset + cpyOffset);
+      cpyOffset += uvByteSize;
     }
   }
 
   return vertices;
 }
 
-IndexBuffer<uint16_t> *
+IndexBuffer<uint32_t> *
 GltfLoader::ExtractIndexBuffer(const tinygltf::Model &model,
                                const tinygltf::Primitive &primitive) {
   PC_ASSERT(primitive.indices >= 0, "Primitive has no indices");
 
   const auto &indexAccessor = model.accessors[primitive.indices];
   const size_t indexCount = indexAccessor.count;
-
-  // Allocate index buffer
-  IndexBuffer<uint16_t> *indices = new IndexBuffer<uint16_t>();
-  indices->Allocate(indexCount);
 
   const auto &indexView = model.bufferViews[indexAccessor.bufferView];
   const auto &gltfIndexBuffer = model.buffers[indexView.buffer];
@@ -259,6 +458,11 @@ GltfLoader::ExtractIndexBuffer(const tinygltf::Model &model,
 
   // Handle stride (distance between indices in bytes)
   size_t stride = indexView.byteStride;
+
+  // Allocate index buffer
+  IndexBuffer<uint32_t> *indices = new IndexBuffer<uint32_t>();
+  indices->Allocate(indexCount);
+
   if (stride == 0) {
     // Default stride based on component type
     switch (indexAccessor.componentType) {
@@ -275,29 +479,26 @@ GltfLoader::ExtractIndexBuffer(const tinygltf::Model &model,
     }
   }
 
-  // Convert indices to 16-bit
+  // Convert indices to 32-bit
   for (size_t i = 0; i < indexCount; ++i) {
-    const byte_t *src = srcData + i * stride;
-    uint32_t index;
+    const size_t offset = i * stride;
+    const byte_t *src = srcData + offset;
 
+    uint32_t indexValue = 0;
     switch (indexAccessor.componentType) {
     case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
-      memcpy(&index, src, sizeof(uint16_t));
+      indexValue = *reinterpret_cast<const uint16_t *>(src);
       break;
     case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
-      memcpy(&index, src, sizeof(uint32_t));
-      if (index > 0xFFFF) {
-        PC_ERROR("32-bit index exceeds 16-bit limit", "GltfLoader");
-        delete indices;
-        return nullptr;
-      }
+      indexValue = *reinterpret_cast<const uint32_t *>(src);
       break;
     default:
+      PC_ERROR("Unsupported index type - conversion", "GltfLoader");
       delete indices;
       return nullptr;
     }
 
-    indices->GetBufferData()[i] = static_cast<uint16_t>(index);
+    indices->GetBufferData()[i] = indexValue;
   }
 
   return indices;

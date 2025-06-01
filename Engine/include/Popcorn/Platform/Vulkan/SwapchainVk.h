@@ -33,34 +33,29 @@ public:
 
   inline void SetAppWindow(const Window &appWindow) { m_appWin = &appWindow; };
 
-  void CreateSwapchain();
-  void RecreateSwapchain(const VkRenderPass &renderPass);
-  void CreateImageViews(const VkDevice &);
+  void CreateSwapchainImagesAndVkSwapchain();
+  void CreateSwapchainImageViews(const VkDevice &);
+  void RecreateSwapchainAndVkSwapchain();
 
   [[nodiscard]] inline const VkSwapchainKHR &GetVkSwapchain() const {
     return m_swapchain;
   };
-
   [[nodiscard]] inline const VkExtent2D &GetSwapchainExtent() const {
     return m_swapchainExtent;
   };
-
   [[nodiscard]] inline const VkFormat &GetSwapchainImageFormat() const {
     return m_swapchainImageFormat;
   };
 
-  [[nodiscard]] inline const std::vector<VkImageView> &
-  GetSwapchainImageViews() const {
+  [[nodiscard]] inline std::vector<VkImage> &GetSwapchainImages() {
+    return m_swapchainImages;
+  };
+  [[nodiscard]] inline std::vector<VkImageView> &GetSwapchainImageViews() {
     return m_swapchainImageViews;
   };
 
-  [[nodiscard]] inline const std::vector<VkFramebuffer> &
-  GetSwapchainFramebuffers() const {
-    return m_swapchainFramebuffers;
-  };
-
-  void CreateSwapchainFramebuffers(const VkDevice &device,
-                                   const VkRenderPass &renderPass);
+  // void CreateSwapchainFramebuffers(const VkDevice &device,
+  //                                  const VkRenderPass &finalRenderPass);
 
   void CleanUp(const VkDevice &);
 
@@ -97,7 +92,6 @@ private:
 
   std::vector<VkImage> m_swapchainImages;
   std::vector<VkImageView> m_swapchainImageViews;
-  std::vector<VkFramebuffer> m_swapchainFramebuffers;
 };
 
 GFX_NAMESPACE_END

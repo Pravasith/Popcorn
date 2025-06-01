@@ -4,115 +4,218 @@
 #include "GameObject.h"
 #include "GlobalMacros.h"
 #include "Material.h"
+#include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
 #include <cstdint>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <vector>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+//
+// ----------------------------------------------------------------------------
+// --- UTILS ------------------------------------------------------------------
+template <MaterialTypes T>
+[[nodiscard]] uint32_t PC_GetHashedSubmeshId(VertexBuffer *vertexBuffer,
+                                             IndexBuffer<uint32_t> *indexBuffer,
+                                             Material<T> *material) {
+  uintptr_t vAddr = reinterpret_cast<uintptr_t>(vertexBuffer);
+  uintptr_t iAddr = reinterpret_cast<uintptr_t>(indexBuffer);
+  uintptr_t mAddr = reinterpret_cast<uintptr_t>(material);
+
+  return static_cast<uint32_t>((vAddr ^ (iAddr >> 3) ^ (mAddr >> 6)) *
+                               2654435761u); // Knuth's golden ratio
+}
+
+//
+//
+//
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// --- SUBMESH ----------------------------------------------------------------
+//
+template <MaterialTypes T> class Submesh {
+public:
+  Submesh(Mesh *parentMesh, VertexBuffer *vbo, IndexBuffer<uint32_t> *ibo,
+          Material<T> *mat)
+      : m_parentMesh(parentMesh), m_vertexBuffer(vbo), m_indexBuffer(ibo),
+        m_material(mat) {
+    PC_PRINT("CREATED", TagType::Constr, "Submesh");
+    m_id = PC_GetHashedSubmeshId(vbo, ibo, mat);
+  }
+  ~Submesh() {
+    Cleanup();
+    PC_PRINT("DESTROYED", TagType::Destr, "Submesh");
+  }
+
+  [[nodiscard]] Material<T> *GetMaterial() const { return m_material; };
+  [[nodiscard]] Mesh *GetParentMesh() const { return m_parentMesh; };
+
+  static constexpr MaterialTypes type_value = T;
+
+  [[nodiscard]] VertexBuffer *GetVertexBuffer() { return m_vertexBuffer; };
+  [[nodiscard]] IndexBuffer<uint32_t> *GetIndexBuffer() {
+    return m_indexBuffer;
+  };
+
+  // DELETE COPY CONSTRUCTOR AND ASSIGNMENT
+  // Because this class deletes vbo, ibo, and mat data, disabling copy avoids
+  // dangling pointers
+  Submesh(const Submesh &) = delete;
+  Submesh &operator=(const Submesh &) = delete;
+
+  //
+  // --- MOVE CONSTRUCTOR -----------------------------------------------------
+  Submesh(Submesh &&other) noexcept
+      : m_parentMesh(other.m_parentMesh), m_vertexBuffer(other.m_vertexBuffer),
+        m_indexBuffer(other.m_indexBuffer), m_material(other.m_material),
+        m_id(other.m_id) {
+    other.m_parentMesh = nullptr;
+    other.m_vertexBuffer = nullptr;
+    other.m_indexBuffer = nullptr;
+    other.m_material = nullptr;
+  }
+
+  //
+  // --- MOVE ASSIGNMENT ------------------------------------------------------
+  Submesh &operator=(Submesh &&other) noexcept {
+    if (this != &other) {
+      Cleanup();
+
+      m_parentMesh = other.m_parentMesh;
+      m_vertexBuffer = other.m_vertexBuffer;
+      m_indexBuffer = other.m_indexBuffer;
+      m_material = other.m_material;
+      m_id = other.m_id;
+
+      other.m_parentMesh = nullptr;
+      other.m_vertexBuffer = nullptr;
+      other.m_indexBuffer = nullptr;
+      other.m_material = nullptr;
+    }
+    return *this;
+  }
+
+  [[nodiscard]] uint32_t GetId() const { return m_id; }
+
+private:
+  void Cleanup() {
+    if (m_vertexBuffer)
+      delete m_vertexBuffer;
+    if (m_indexBuffer)
+      delete m_indexBuffer;
+    if (m_material)
+      delete m_material;
+  }
+
+  Mesh *m_parentMesh = nullptr;
+  VertexBuffer *m_vertexBuffer = nullptr;
+  IndexBuffer<uint32_t> *m_indexBuffer = nullptr;
+  Material<T> *m_material = nullptr;
+  uint32_t m_id = 0;
+};
+
+//
+//
+//
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// --- MESH -------------------------------------------------------------------
+//
 class Mesh : public GameObject {
 public:
-  struct Uniforms {
-    alignas(16) glm::mat4 modelMatrix; // Model matrix
-  };
-
-  struct Spec {
-    bool enableIndexBuffers = false;
-  };
-
   // TODO: Handle the case of duplicating meshes & materials
-  // TODO: Add submeshes & multiple material support
   // TODO: Make m_indexBuffer a variant
-  Mesh(VertexBuffer *vertexBuffer, IndexBuffer<uint16_t> *indexBuffer)
-      : m_vertexBuffer(vertexBuffer), m_indexBuffer(indexBuffer),
-        m_uniformBuffer() {
-    if (indexBuffer != nullptr) {
-      m_spec.enableIndexBuffers = true;
-    };
+  Mesh() { PC_PRINT("CREATED", TagType::Constr, "MESH"); };
+  virtual ~Mesh() { PC_PRINT("DESTROYED", TagType::Destr, "MESH"); };
 
-    m_uniformBuffer.modelMatrix = m_matrix;
-    PC_PRINT("CREATED", TagType::Constr, "MESH");
-  };
-  ~Mesh() {
-    // TODO: Add clean up logic
-    delete m_vertexBuffer;
-    m_vertexBuffer = nullptr;
-
-    delete m_indexBuffer;
-    m_indexBuffer = nullptr;
-
-    m_basicMaterials.clear();
-
-    PC_PRINT("DESTROYED", TagType::Destr, "MESH");
-  };
-
-  void Set(const Spec &spec) {
-    ValidateMembersWithSpec(spec);
-    m_spec.enableIndexBuffers = spec.enableIndexBuffers;
-  };
-
-  void SetModelMatrix(glm::mat4 modelMatrix) { m_matrix = modelMatrix; };
-
-  void ValidateMembersWithSpec(const Spec &spec);
-
-  virtual void OnAttach() override;
-  virtual void OnUpdate() override;
-  virtual void OnRender() override;
-
-  virtual constexpr GameObjectTypes GetType() const override {
+  virtual constexpr GameObjectTypes GetGameObjectType() const override {
     return GameObjectTypes::Mesh;
   };
 
+  // [[nodiscard]] inline UniformDefs::SubmeshUniform &GetMeshUniforms() {
+  //   return m_uniform;
+  // };
+
   template <MaterialTypes T>
-  [[nodiscard]] inline std::vector<Material<T> *> &GetMaterialsByType() {
+  void AddSubmesh(VertexBuffer *vbo, IndexBuffer<uint32_t> *ibo,
+                  Material<T> *mat) {
+    PC_ASSERT(vbo && ibo && mat, "Submesh parameter(s) nullptr");
+
     if constexpr (T == MaterialTypes::BasicMat) {
-      return m_basicMaterials;
-    }
+      for (auto &submesh : m_basicSubmeshes) {
+        if (submesh.GetId() == PC_GetHashedSubmeshId(vbo, ibo, mat)) {
+          PC_WARN("Identical submesh already exists in Mesh")
+          return;
+        };
+      }
 
-    // TODO: Add other materials
-    else if constexpr (T == MaterialTypes::PbrMat) {
-      return {};
+      m_basicSubmeshes.emplace_back(this, vbo, ibo, mat);
+    } else if constexpr (T == MaterialTypes::PbrMat) {
+      for (auto &submesh : m_pbrSubmeshes) {
+        if (submesh.GetId() == PC_GetHashedSubmeshId(vbo, ibo, mat)) {
+          PC_WARN("Identical submesh already exists in Mesh")
+          return;
+        };
+      }
+
+      m_pbrSubmeshes.emplace_back(this, vbo, ibo, mat);
     } else {
-      PC_ERROR("Material type not found!", "Mesh")
-      return {};
+      // Rest material types...
     }
   };
 
-  template <MaterialTypes T> void AttachMaterial(Material<T> *materialPtr) {
-    PC_AddMaterialByType(materialPtr, m_basicMaterials);
-  }
-
-  template <MaterialTypes T> void DetachMaterial(Material<T> *materialPtr) {
-    PC_RemoveMaterialByType(materialPtr, m_basicMaterials);
-  }
-
-  [[nodiscard]] inline VertexBuffer &GetVertexBuffer() const {
-    return *m_vertexBuffer;
-  };
-
-  // TODO: Change this to variant return type
-  [[nodiscard]] inline IndexBuffer<uint16_t> &GetIndexBuffer() const {
-    if (m_indexBuffer == nullptr) {
-      PC_ERROR("Trying to get a null m_indexBuffer", "Mesh");
+  template <MaterialTypes T>
+  [[nodiscard]]
+  std::vector<Submesh<T>> &GetSubmeshes() {
+    if constexpr (T == MaterialTypes::BasicMat) {
+      return m_basicSubmeshes;
+    } else if constexpr (T == MaterialTypes::PbrMat) {
+      return m_pbrSubmeshes;
     };
-    return *m_indexBuffer;
   };
-
-  [[nodiscard]] inline Uniforms &GetUniformBuffer() { return m_uniformBuffer; };
 
 protected:
-  VertexBuffer *m_vertexBuffer;
-  IndexBuffer<uint16_t> *m_indexBuffer = nullptr;
-  Uniforms m_uniformBuffer;
+  std::vector<Submesh<MaterialTypes::BasicMat>> m_basicSubmeshes;
+  std::vector<Submesh<MaterialTypes::PbrMat>> m_pbrSubmeshes;
+};
 
-  // TODO: Add other materials
-  std::vector<Material<MaterialTypes::BasicMat> *> m_basicMaterials;
+//
+//
+//
+//
+//
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// --- UTIL FUNCTIONS (GLOBAL) ------------------------------------------------
+template <MaterialTypes T>
+bool PC_ValidateAndAddSubmesh(Submesh<T> *submesh,
+                              std::vector<Submesh<T> *> &submeshes) {
+  auto ptr = std::find(submeshes.begin(), submeshes.end(), submesh);
 
-  Spec m_spec;
+  if (ptr != submeshes.end()) {
+    PC_WARN("Submesh already exists in the submesh library!")
+    return false;
+  };
+
+  submeshes.emplace_back(submesh);
+  return true;
+};
+
+template <MaterialTypes T>
+bool PC_ValidateAndRemoveSubmesh(Submesh<T> *submesh,
+                                 std::vector<Submesh<T> *> &submeshes) {
+  auto ptr = std::find(submeshes.begin(), submeshes.end(), submesh);
+
+  if (ptr == submeshes.end()) {
+    PC_WARN("Submesh not found!")
+    return false;
+  };
+
+  submeshes.erase(ptr);
+  return true;
 };
 
 GFX_NAMESPACE_END

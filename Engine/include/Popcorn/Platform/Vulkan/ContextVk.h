@@ -1,14 +1,16 @@
 #pragma once
 
 #include "CommandPoolVk.h"
-#include "DescriptorFactoryVk.h"
-#include "DescriptorsVk.h"
+#include "DescriptorLayoutsVk.h"
+#include "DescriptorPoolsVk.h"
 #include "DeviceVk.h"
 #include "FrameVk.h"
-#include "FramebuffersVk.h"
+#include "FramebufferVk.h"
 #include "GlobalMacros.h"
-#include "MemoryAllocatorVk.h"
+#include "Memory/MemoryAllocatorVk.h"
+#include "Memory/MemoryVk.h"
 #include "Popcorn/Core/Window.h"
+#include "Shader.h"
 #include "SurfaceVk.h"
 #include "SwapchainVk.h"
 
@@ -36,9 +38,6 @@ public:
     };
   };
 
-  void VulkanInit(const Window &appWin);
-  void VulkanCleanUp();
-
   static DeviceVk *Device() {
     if (!s_deviceVk) {
       throw std::runtime_error("DeviceVk is null");
@@ -57,14 +56,8 @@ public:
     if (!s_swapchainVk) {
       throw std::runtime_error("SwapchainVk is null");
     }
-    return s_swapchainVk;
-  }
 
-  static FramebuffersVk *Framebuffers() {
-    if (!s_framebuffersVk) {
-      throw std::runtime_error("FramebuffersVk is null");
-    }
-    return s_framebuffersVk;
+    return s_swapchainVk;
   }
 
   static CommandPoolVk *CommandPool() {
@@ -81,6 +74,13 @@ public:
     return s_frameVk;
   }
 
+  static FramebufferVk *Framebuffer() {
+    if (!s_framebufferVk) {
+      throw std::runtime_error("FramebufferVk is null");
+    }
+    return s_framebufferVk;
+  }
+
   static MemoryAllocatorVk *MemoryAllocator() {
     if (!s_memoryAllocatorVk) {
       throw std::runtime_error("MemoryAllocatorVk is null");
@@ -88,19 +88,37 @@ public:
     return s_memoryAllocatorVk;
   }
 
-  static DescriptorSetLayoutsVk *DescriptorSetLayouts() {
-    if (!s_descriptorSetLayoutsVk) {
-      throw std::runtime_error("DescriptorSetLayoutsVk is null");
+  static MemoryVk *Memory() {
+    if (!s_memoryVk) {
+      throw std::runtime_error("MemoryVk is null");
     }
-    return s_descriptorSetLayoutsVk;
+    return s_memoryVk;
   }
 
-  static DescriptorFactoryVk *DescriptorFactory() {
-    if (!s_descriptorFactoryVk) {
-      throw std::runtime_error("DescriptorFactoryVk is null");
+  static DescriptorPoolsVk *DescriptorPools() {
+    if (!s_descriptorPoolsVk) {
+      throw std::runtime_error("DescriptorPoolsVk is null");
     }
-    return s_descriptorFactoryVk;
+    return s_descriptorPoolsVk;
   }
+
+  static DescriptorLayoutsVk *DescriptorLayouts() {
+    if (!s_descriptorLayoutsVk) {
+      throw std::runtime_error("DescriptorLayoutsVk is null");
+    }
+    return s_descriptorLayoutsVk;
+  }
+
+  // Same function in the OpenGl context too
+  static ShaderLibrary *Shaders() {
+    if (!s_shaderLibrary) {
+      throw std::runtime_error("ShaderLibrary is null");
+    }
+    return s_shaderLibrary;
+  }
+
+  void VulkanInit(const Window &appWin);
+  void VulkanCleanUp();
 
 private:
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
@@ -116,28 +134,33 @@ private:
     s_deviceVk = DeviceVk::Get();
     s_surfaceVk = SurfaceVk::Get();
     s_swapchainVk = SwapchainVk::Get();
-    s_framebuffersVk = FramebuffersVk::Get();
     s_commandPoolVk = CommandPoolVk::Get();
     s_frameVk = FrameVk::Get();
-    // TOOD: move to workflows
-    s_descriptorSetLayoutsVk = DescriptorSetLayoutsVk::Get();
+    s_framebufferVk = FramebufferVk::Get();
     s_memoryAllocatorVk = MemoryAllocatorVk::Get();
-    s_descriptorFactoryVk = DescriptorFactoryVk::Get();
+    s_memoryVk = MemoryVk::Get();
+    s_descriptorPoolsVk = DescriptorPoolsVk::Get();
+    s_descriptorLayoutsVk = DescriptorLayoutsVk::Get();
+    s_shaderLibrary = ShaderLibrary::Get();
+
     PC_PRINT("CREATED", TagType::Constr, "ContextVk.h")
   };
   ~ContextVk() { PC_PRINT("DESTROYED", TagType::Destr, "ContextVk.h") };
 
 private:
   static ContextVk *s_instance;
+
   static DeviceVk *s_deviceVk;
   static SurfaceVk *s_surfaceVk;
   static SwapchainVk *s_swapchainVk;
-  static FramebuffersVk *s_framebuffersVk;
   static CommandPoolVk *s_commandPoolVk;
   static FrameVk *s_frameVk;
+  static FramebufferVk *s_framebufferVk;
+  static MemoryVk *s_memoryVk;
   static MemoryAllocatorVk *s_memoryAllocatorVk;
-  static DescriptorSetLayoutsVk *s_descriptorSetLayoutsVk;
-  static DescriptorFactoryVk *s_descriptorFactoryVk;
+  static DescriptorPoolsVk *s_descriptorPoolsVk;
+  static DescriptorLayoutsVk *s_descriptorLayoutsVk;
+  static ShaderLibrary *s_shaderLibrary;
 };
 
 GFX_NAMESPACE_END

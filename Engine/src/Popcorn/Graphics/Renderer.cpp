@@ -31,13 +31,7 @@ void Renderer::Init(const Window &appWin) {
   };
 
   if (s_type == RendererType::Vulkan) {
-    s_instance = new RendererVk(appWin);
-
-    RendererVk *vkRenderer = static_cast<RendererVk *>(s_instance);
-    vkRenderer->VulkanInit();
-    vkRenderer->CreateRenderWorkflows();
-    vkRenderer->CreateBasicCommandBuffers();
-
+    s_instance = new RendererVk(appWin); // Creates Vulkan context
   } else if (s_type == RendererType::OpenGL) {
     s_instance = new RendererOpenGL(appWin);
   } else {

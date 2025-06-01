@@ -1,10 +1,10 @@
 #!/bin/bash
 
 src_dir="$PWD"
-sh_src_dir="$src_dir/assets/shaders"
+sh_src_dir="$src_dir/shaders/vulkan"
 
-sh_dest_dir_lnx="$src_dir/dist/linux/bin/shaders"
-sh_dest_dir_win="$src_dir/dist/windows/bin/shaders"
+sh_dest_dir_lnx="$src_dir/dist/linux/bin/assets/shaders"
+sh_dest_dir_win="$src_dir/dist/windows/bin/assets/shaders"
 
 sh_list=$(ls "$sh_src_dir"/*.vert "$sh_src_dir"/*.frag)
 
