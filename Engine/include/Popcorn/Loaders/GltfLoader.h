@@ -1,16 +1,11 @@
 #pragma once
 
+#include "BufferObjects.h"
 #include "GameObject.h"
+#include "GlobalMacros.h"
 #include "Material.h"
 #include "Mesh.h"
 #include <cstdint>
-#ifndef TINYGLTF_IMPLEMENTATION
-#define TINYGLTF_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#endif
-#include "BufferObjects.h"
-#include "GlobalMacros.h"
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <tiny_gltf.h>

@@ -1,4 +1,4 @@
-set(PLATFORM_AGNOSTIC_DIR platform-agnostic)
+set(PLATFORM_AGNOSTIC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/platform-agnostic)
 
 add_library(glad ${PLATFORM_AGNOSTIC_DIR}/glad/src/glad.c)
 
@@ -15,3 +15,5 @@ add_library(
   ${PLATFORM_AGNOSTIC_DIR}/imgui/backends/imgui_impl_glfw.cpp)
 
 add_library(vma ${PLATFORM_AGNOSTIC_DIR}/vma/vk_mem_alloc.cpp)
+
+add_library(tinygltf ${PLATFORM_AGNOSTIC_DIR}/tiny-gltf/tiny_gltf.cc)

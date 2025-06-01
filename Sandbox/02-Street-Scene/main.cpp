@@ -1,17 +1,14 @@
+#include <BufferObjects.h>
 #include <Material.h>
+#include <Mesh.h>
 #include <Popcorn.h>
 #include <Popcorn/Core/Base.h>
-#include <Popcorn/Graphics/BufferObjects.h>
-#include <Popcorn/Graphics/Materials/BasicMaterial.h>
-#include <Popcorn/Graphics/Mesh.h>
-#include <Popcorn/Graphics/Renderer.h>
-#include <Popcorn/Scene/Scene.h>
+#include <Renderer.h>
+#include <Scene.h>
 #include <Sources.h>
 #include <TimeEvent.h>
-#include <cstdint>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
-#include <vector>
 
 using namespace Popcorn;
 class BlenderScene : public Scene {};
@@ -41,7 +38,7 @@ public:
 
   virtual void OnRender() override {
     // Draws all scenes
-    Popcorn::Context::RenderScenes();
+    // Popcorn::Context::RenderScenes();
   };
 
   virtual bool OnEvent(Event &e) override { return false; };

@@ -95,8 +95,8 @@ target_precompile_headers(vma PRIVATE
 # tinygltf
 target_include_directories(
   tinygltf
-  INTERFACE $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}>
-            $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}/tiny-gltf>
+  PUBLIC $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}>
+         $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}/tiny-gltf>
   INTERFACE $<INSTALL_INTERFACE:third-party>
             $<INSTALL_INTERFACE:third-party/tiny-gltf>)
 
@@ -200,8 +200,8 @@ target_link_libraries(Graphics PUBLIC glm::glm)
 target_link_libraries(Window PRIVATE glad glfw)
 target_link_libraries(Window PRIVATE Events)
 target_link_libraries(ImGui PUBLIC glfw Vulkan::Headers Vulkan::Loader)
-target_link_libraries(Popcorn PRIVATE glad glfw)
 target_link_libraries(Popcorn PUBLIC tinygltf)
+target_link_libraries(Popcorn PRIVATE glad glfw)
 
 target_link_libraries(Popcorn PUBLIC Graphics)
 target_link_libraries(Popcorn PRIVATE Window ImGui)

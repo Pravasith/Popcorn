@@ -3,8 +3,8 @@
 #include "Application.h"
 #include "Assert.h"
 #include "GlobalMacros.h"
+#include "GltfLoader.h"
 #include "Layer.h"
-#include "Popcorn/Loaders/GltfLoader.h"
 #include "Scene.h"
 
 ENGINE_NAMESPACE_BEGIN
