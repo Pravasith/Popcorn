@@ -29,7 +29,7 @@ void Scene::AddGameObject(GameObject *node) {
   auto it = std::find(m_nodes.begin(), m_nodes.end(), node);
   if (it == m_nodes.end()) {
     m_nodes.push_back(node);
-    node->OnAttach();
+    // node->OnAttach();
   } else {
     PC_WARN("GameObject " << node << " already added")
   };

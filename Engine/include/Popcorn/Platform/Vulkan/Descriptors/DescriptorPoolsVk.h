@@ -29,12 +29,11 @@ public:
     return DefaultAllocateDescriptorSets<Count>(device, layouts);
   };
 
-  //
-  // --- UTILS -------------------------------------------------------------
-private:
   DPoolVk() { PC_PRINT("CREATED", TagType::Constr, "DPoolVk.h") }
   ~DPoolVk() { PC_PRINT("DESTROYED", TagType::Destr, "DPoolVk.h") }
 
+private:
+  // --- UTILS -------------------------------------------------------------
   void Create(VkDescriptorPoolSize *poolSizes, uint32_t poolSizesCount,
               uint32_t maxSets);
   void CleanUp();
