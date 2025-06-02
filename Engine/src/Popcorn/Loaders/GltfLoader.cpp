@@ -196,7 +196,20 @@ void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
     // Extract vertex buffer
     vbo = ExtractVertexBuffer(model, primitive);
 
-    // vbo->PrintBuffer<>();
+    struct VertexTemp {
+      glm::vec3 pos;
+      glm::vec3 normal;
+      glm::vec2 uv;
+      std::string Print() {
+        std::stringstream ss;
+        ss << pos.x << ", " << pos.y << ", " << pos.z << "; " << normal.r
+           << ", " << normal.g << ", " << normal.b << "; " << uv.x << ", "
+           << uv.y;
+        return ss.str();
+      };
+    };
+
+    vbo->PrintBuffer<VertexTemp>();
 
     // Extract index buffer
     ibo = ExtractIndexBuffer(model, primitive);
