@@ -3,14 +3,14 @@
 src_dir="$PWD"
 sh_src_dir="$src_dir/shaders/vulkan"
 
-sh_dest_dir_lnx="$src_dir/dist/linux/bin/assets/shaders"
-sh_dest_dir_win="$src_dir/dist/windows/bin/assets/shaders"
+sh_dest_dir_lnx="$src_dir/dist/linux/assets/shaders"
+sh_dest_dir_win="$src_dir/dist/windows/assets/shaders"
 
 sh_list=$(ls "$sh_src_dir"/*.vert "$sh_src_dir"/*.frag)
 
 for file in $sh_list; do
     # The $ sign inside sed only matches the end of the string
-    new_fpath=$(ls "$file" | sed -e 's/.vert$/_vert.spv/' -e 's/.frag$/_frag.spv/')
+    new_fpath=$(echo "$file" | sed -e 's/.vert$/_vert.spv/' -e 's/.frag$/_frag.spv/')
     glslc "$file" -o "$new_fpath"
 
 if [[ ! -r "$new_fpath" ]]; then

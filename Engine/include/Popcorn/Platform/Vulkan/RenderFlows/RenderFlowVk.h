@@ -24,8 +24,8 @@ GFX_NAMESPACE_BEGIN
 //       - Make it platform agnostic
 class RenderFlowVk {
 public:
-  RenderFlowVk(); 
-  virtual ~RenderFlowVk() ;
+  RenderFlowVk();
+  virtual ~RenderFlowVk();
 
   static void AllocMemory();
   static void FreeMemory();

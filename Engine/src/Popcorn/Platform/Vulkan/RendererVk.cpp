@@ -97,6 +97,9 @@ void RendererVk::DestroyRenderFlows() {
 };
 
 void RendererVk::PrepareRenderFlows() {
+  // Create VMA Allocator
+  ContextVk::MemoryAllocator()->CreateVMAAllocator(); // Automatically destroyed
+
   for (auto &renderFlow : s_renderFlows) {
     PC_WARN("Preparing renderflow...")
     renderFlow->Prepare(); // Creates Vulkan:
@@ -112,10 +115,6 @@ void RendererVk::CreateRenderFlowResources() {
   // CREATE WORKFLOW RESOURCES -----------------------------------------------
   PC_WARN("Expensive initialization operation: Creating workflow Vulkan "
           "resources! Should only be done once")
-
-  //
-  // Create VMA Allocator
-  ContextVk::MemoryAllocator()->CreateVMAAllocator(); // Automatically destroyed
 
   //
   // Allocate memory, samplers & load shaders in the shader library

@@ -20,15 +20,16 @@ public:
   ~GameLayer() { PC_PRINT("DESTROYED", TagType::Destr, "GAME-LAYER") };
 
   virtual void OnAttach() override {
-    Popcorn::Context::ConvertGltfToScene("assets/models/blenderModel.gltf",
-                                         scene);
+    Popcorn::Context::ConvertGltfToScene(
+        "../../../assets/models/blenderModelX.gltf", scene);
     Popcorn::Context::RegisterScene(scene);
   };
 
   virtual void OnDetach() override {
     // TODO: Delete scene -- and all it's heap allocated children
     // Client is the sole owner of all GameObject resources
-    Popcorn::Context::DisposeScene(scene);
+
+    // Popcorn::Context::DisposeScene(scene);
   };
 
   virtual void OnUpdate(TimeEvent &e) override {
@@ -53,6 +54,7 @@ int main(int argc, char **argv) {
   auto gameLayer = new GameLayer();
   Popcorn::Context::AddLayer(gameLayer);
   Popcorn::Context::StartGame();
+
   Popcorn::Context::EndContext();
 
   return 0;

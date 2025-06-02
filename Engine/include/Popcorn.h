@@ -17,6 +17,7 @@ using Model = tinygltf::Model;
 
 static void BeginContext() {
   Application::Start();
+
   s_application = &Application::Get();
   s_renderer = Renderer::Create<RendererType::Vulkan>(
       s_application
