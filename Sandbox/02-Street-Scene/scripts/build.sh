@@ -7,10 +7,6 @@ read -p "Are you compiling for Linux or Windows? (Enter 'L' for Linux or 'W' for
 platform=$(echo "$platform" | tr '[:upper:]' '[:lower:]')
 src_dir="$PWD"
 
-assets_dir="$src_dir/assets"
-shaders_dir="$src_dir/assets/shaders"
-
-
 # Check the user input and print a message accordingly
 if [ "$platform" = "l" ]; then
     echo "You are compiling for Linux."
@@ -47,15 +43,28 @@ if [ "$platform" = "l" ]; then
 
     cp compile_commands.json "$src_dir"/compile_commands.json
     cmake --build . --target install
-    # make
+
+    # Copy shaders from Popcorn dist to Sandbox bin
+    shader_src="$src_dir/../../Engine/dist/linux/assets/shaders"
+    shader_dest="$install_dir/assets/shaders"
+
+    echo "Copying shaders from $shader_src to $shader_dest"
+    mkdir -p "$shader_dest"
+    cp -r "$shader_src/"* "$shader_dest/"
+
+    echo -e "\033[36mShaders copied to Sandbox assets directory (Linux)\033[0m"
+
+    # Copy models to dist folder
+    models_src="$src_dir/assets/models"
+    models_dest="$install_dir/assets/models"
+
+    echo "Copying models from $models_src to $models_dest"
+    mkdir -p "$models_dest"
+    cp -r "$models_src/"* "$models_dest/"
+
+    echo -e "\033[36mModels copied to Sandbox assets directory (Linux)\033[0m"
 
     echo $PWD
-    cd $src_dir
-
-    echo "Compiling shaders..."
-
-    # Compile shaders
-    ./scripts/compile-shaders.sh
 
     echo -e "\033[32mProgram compiled successfully for linux\033[0m"
 
@@ -95,19 +104,31 @@ elif [ "$platform" = "w" ]; then
         # -D CMAKE_BUILD_TYPE=Release \
 
     cmake --build . --target install
-    # make
+
+    # Copy shaders from Popcorn dist to Sandbox bin
+    shader_src="$src_dir/../../Engine/dist/windows/assets/shaders"
+    shader_dest="$install_dir/assets/shaders"
+
+    echo "Copying shaders from $shader_src to $shader_dest"
+    mkdir -p "$shader_dest"
+    cp -r "$shader_src/"* "$shader_dest/"
+
+    echo -e "\033[36mShaders copied to Sandbox assets directory (Windows)\033[0m"
+
+    # Copy models to dist folder
+    models_src="$src_dir/assets/models"
+    models_dest="$install_dir/assets/models"
+    mkdir -p "$models_dest"
+    cp -r "$models_src/"* "$models_dest/"
+
+    echo -e "\033[36mModels copied to Sandbox assets directory (Windows)\033[0m"
 
     echo $PWD
-    cd $src_dir
-
-    echo "Compiling shaders..."
-
-    # Compile shaders
-    ./scripts/compile-shaders.sh
-
 
     echo -e "\033[32mProgram compiled successfully for windows\033[0m"
 
 else
     echo "Invalid input. Please enter 'L' for Linux or 'W' for Windows."
 fi
+
+cd $src_dir

@@ -20,5 +20,5 @@ fi
     mkdir -p "$sh_dest_dir_win"
 
     cp "$new_fpath" "$sh_dest_dir_lnx"
-    cp "$new_fpath" "$sh_dest_dir_win"
+    mv "$new_fpath" "$sh_dest_dir_win"
 done

@@ -246,6 +246,13 @@ endif()
 # Popcorn headers
 install(DIRECTORY include/ DESTINATION include)
 
+# Shader files
+install(
+  DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dist/linux/bin/assets/shaders/
+  DESTINATION dist/linux/shaders
+  FILES_MATCHING
+  PATTERN "*.spv")
+
 install(
   TARGETS Popcorn
           Window
