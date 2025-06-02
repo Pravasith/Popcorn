@@ -66,28 +66,28 @@ void GBufferRenderFlowVk::CreateAttachments() {
   //
   //
   // --- Create g-buffer images ------------------------------------------------
-  VkImageCreateInfo albedoImageInfo;
+  VkImageCreateInfo albedoImageInfo{};
   ImageVk::GetDefaultImageCreateInfo(albedoImageInfo, width, height,
                                      albedoFormat);
   albedoImageInfo.format = albedoFormat;
   albedoImageInfo.usage =
       VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
-  VkImageCreateInfo depthImageInfo;
+  VkImageCreateInfo depthImageInfo{};
   ImageVk::GetDefaultImageCreateInfo(depthImageInfo, width, height,
                                      depthFormat);
   depthImageInfo.format = depthFormat;
   depthImageInfo.usage =
       VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
-  VkImageCreateInfo normalImageInfo;
+  VkImageCreateInfo normalImageInfo{};
   ImageVk::GetDefaultImageCreateInfo(normalImageInfo, width, height,
                                      normalFormat);
   normalImageInfo.format = normalFormat;
   normalImageInfo.usage =
       VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
-  VkImageCreateInfo roughnessMetallicImageInfo;
+  VkImageCreateInfo roughnessMetallicImageInfo{};
   ImageVk::GetDefaultImageCreateInfo(roughnessMetallicImageInfo, width, height,
                                      roughnessMetallicFormat);
   roughnessMetallicImageInfo.format = roughnessMetallicFormat;

@@ -33,15 +33,22 @@ bool GltfLoader::LoadFromFile(const std::string &filename,
   std::string err;
   std::string warn;
 
-  bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, filename) ||
-             loader.LoadBinaryFromFile(&model, &err, &warn, filename);
+  bool ret = false;
+  if (filename.ends_with(".gltf")) {
+    ret = loader.LoadASCIIFromFile(&model, &err, &warn, filename);
+  } else if (filename.ends_with(".glb")) {
+    ret = loader.LoadBinaryFromFile(&model, &err, &warn, filename);
+  } else {
+    PC_ERROR("Unsupported file extension: " + filename, "GltfLoader");
+    return false;
+  }
 
   if (!warn.empty()) {
-    PC_WARN(warn)
+    PC_WARN(warn);
   }
 
   if (!err.empty()) {
-    PC_ERROR(err, "GltfLoader")
+    PC_ERROR(err, "GltfLoader");
   }
 
   if (!ret) {
@@ -49,7 +56,7 @@ bool GltfLoader::LoadFromFile(const std::string &filename,
   }
 
   return ret;
-};
+}
 
 void GltfLoader::ExtractModelData(const tinygltf::Model &model,
                                   std::vector<GameObject *> &gameObjects) {

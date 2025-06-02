@@ -23,6 +23,9 @@ void ImageVk::GetDefaultImageCreateInfo(VkImageCreateInfo &imageInfo,
       VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
   imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
   imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+
+  imageInfo.pNext = nullptr;
+  imageInfo.flags = 0;
 };
 
 void ImageVk::CreateVmaImage(const VkImageCreateInfo &imageCreateInfo,
