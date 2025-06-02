@@ -196,6 +196,8 @@ void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
     // Extract vertex buffer
     vbo = ExtractVertexBuffer(model, primitive);
 
+    // vbo->PrintBuffer<>();
+
     // Extract index buffer
     ibo = ExtractIndexBuffer(model, primitive);
 
