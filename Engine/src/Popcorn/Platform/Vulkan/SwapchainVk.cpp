@@ -114,9 +114,6 @@ void SwapchainVk::CreateSwapchainImageViews(const VkDevice &device) {
 };
 
 void SwapchainVk::CleanUp(const VkDevice &device) {
-  for (auto imageView : m_swapchainImageViews) {
-    vkDestroyImageView(device, imageView, nullptr);
-  }
 
   vkDestroySwapchainKHR(device, m_swapchain, nullptr);
 };

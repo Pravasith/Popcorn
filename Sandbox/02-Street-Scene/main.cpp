@@ -34,12 +34,11 @@ public:
 
   virtual void OnUpdate(TimeEvent &e) override {
     // mesh->RotateZ(glm::radians(90.f) * e.GetDeltaS());
-    // triScene.Update();
   };
 
   virtual void OnRender() override {
     // Draws all scenes
-    // Popcorn::Context::RenderScenes();
+    Popcorn::Context::RenderScenes(scene);
   };
 
   virtual bool OnEvent(Event &e) override { return false; };
