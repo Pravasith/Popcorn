@@ -64,7 +64,7 @@ DPoolVk &DescriptorPoolsVk::GetPool<DescriptorPools::GlobalDescriptorsPool>(
     DPoolVk dPool{};
     dPool.Create(poolSizes, 1, 1 * count);
 
-    m_pools[DescriptorPools::GlobalDescriptorsPool] = dPool;
+    m_pools[DescriptorPools::GlobalDescriptorsPool] = std::move(dPool);
   };
 
   return m_pools[DescriptorPools::GlobalDescriptorsPool];
@@ -94,7 +94,7 @@ DescriptorPoolsVk::GetPool<DescriptorPools::GBufferPool>(uint32_t count) {
     DPoolVk dPool{};
     dPool.Create(poolSizes, 3, 3 * count);
 
-    m_pools[DescriptorPools::GBufferPool] = dPool;
+    m_pools[DescriptorPools::GBufferPool] = std::move(dPool);
   }
 
   return m_pools[DescriptorPools::GBufferPool];
@@ -130,7 +130,7 @@ DescriptorPoolsVk::GetPool<DescriptorPools::LightingPool>(uint32_t count) {
     DPoolVk dPool{};
     dPool.Create(poolSizes, 5, 5 * count);
 
-    m_pools[DescriptorPools::LightingPool] = dPool;
+    m_pools[DescriptorPools::LightingPool] = std::move(dPool);
   }
 
   return m_pools[DescriptorPools::LightingPool];
@@ -150,7 +150,7 @@ DescriptorPoolsVk::GetPool<DescriptorPools::CompositePool>(uint32_t count) {
     DPoolVk dPool{};
     dPool.Create(poolSizes, 1, 1 * count);
 
-    m_pools[DescriptorPools::CompositePool] = dPool;
+    m_pools[DescriptorPools::CompositePool] = std::move(dPool);
   }
 
   return m_pools[DescriptorPools::CompositePool];

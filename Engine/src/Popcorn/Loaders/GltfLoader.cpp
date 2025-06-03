@@ -318,10 +318,12 @@ GltfLoader::GetGltfMaterialType(const tinygltf::Material &material) {
                material.occlusionTexture.index != -1;
 
   if (isPBR) {
+    PC_PRINT("PBR Mat", TagType::Print, "GltfLoader.cpp")
     return MaterialTypes::PbrMat;
   } else {
+    PC_PRINT("Basic Mat", TagType::Print, "GltfLoader.cpp")
     return MaterialTypes::BasicMat;
-  };
+  }
 }
 
 //

@@ -28,6 +28,9 @@ public:
   [[nodiscard]] const VkBuffer &GetUboSet(uint32_t frameIndex) const {
     return m_uboSet[frameIndex];
   };
+  [[nodiscard]] const VkBuffer &GetSsboSet(uint32_t frameIndex) const {
+    return m_ssboSet[frameIndex];
+  };
   [[nodiscard]] const PcBufferViews &GetBufferViews() const {
     return m_bufferViews;
   };

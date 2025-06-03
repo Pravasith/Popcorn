@@ -215,7 +215,7 @@ void LightingRenderFlowVk::AllocDescriptorsLocal() {
 
   for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
     VkDescriptorBufferInfo lightBufferInfo{};
-    lightBufferInfo.buffer = memory->GetUboSet(i);
+    lightBufferInfo.buffer = memory->GetSsboSet(i);
     lightBufferInfo.offset = memory->GetBufferViews().lightsSsbo.offset;
     lightBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
         DescriptorSets::LightingSet>(properties.limits);

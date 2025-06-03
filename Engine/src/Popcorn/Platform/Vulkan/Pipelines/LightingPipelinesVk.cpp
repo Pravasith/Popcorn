@@ -1,7 +1,6 @@
 #include "PipelineDefsVk.h"
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include "BufferObjectsVk.h"
 #include "ContextVk.h"
 #include "GlobalMacros.h"
 #include "LightingPipelinesVk.h"
@@ -35,13 +34,12 @@ void LightingPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
   SetShaderStagesMask(ShaderStages::VertexBit | ShaderStages::FragmentBit);
   CreateShaderStageCreateInfos(shaderModules);
 
-  VkVertexInputBindingDescription bindingDescription{};
-  VertexBufferVk::GetDefaultVertexInputBindingDescription(vertexBufferLayout,
-                                                          bindingDescription);
+  std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments{};
+  colorBlendAttachments.resize(1);
 
   GfxPipelineState pipelineState{};
-  PipelineUtilsVk::GetDefaultGfxPipelineState(
-      vertexBufferLayout, bindingDescription, pipelineState);
+  PipelineUtilsVk::GetDefaultGfxPipelineState(vertexBufferLayout, pipelineState,
+                                              colorBlendAttachments);
 
   pipelineState.inputAssemblyState.flags = 0;
   pipelineState.vertexInputState.vertexBindingDescriptionCount = 0;

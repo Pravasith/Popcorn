@@ -39,9 +39,12 @@ void CompositePipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
   VertexBufferVk::GetDefaultVertexInputBindingDescription(vertexBufferLayout,
                                                           bindingDescription);
 
+  std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments{};
+  colorBlendAttachments.resize(1);
+
   GfxPipelineState pipelineState{};
-  PipelineUtilsVk::GetDefaultGfxPipelineState(
-      vertexBufferLayout, bindingDescription, pipelineState);
+  PipelineUtilsVk::GetDefaultGfxPipelineState(vertexBufferLayout, pipelineState,
+                                              colorBlendAttachments);
 
   pipelineState.inputAssemblyState.flags = 0;
   pipelineState.vertexInputState.vertexBindingDescriptionCount = 0;

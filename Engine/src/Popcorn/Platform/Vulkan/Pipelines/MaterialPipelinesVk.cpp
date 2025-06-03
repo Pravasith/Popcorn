@@ -47,9 +47,24 @@ void BasicMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
                                                           bindingDescription);
   bindingDescription.binding = 0;
 
+  std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
+  VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
+      vertexBufferLayout, attributeDescriptions);
+
+  std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments{};
+  colorBlendAttachments.resize(3);
+
   GfxPipelineState pipelineState{};
-  PipelineUtilsVk::GetDefaultGfxPipelineState(
-      vertexBufferLayout, bindingDescription, pipelineState);
+  PipelineUtilsVk::GetDefaultGfxPipelineState(vertexBufferLayout, pipelineState,
+                                              colorBlendAttachments);
+
+  pipelineState.vertexInputState.vertexBindingDescriptionCount = 1;
+  pipelineState.vertexInputState.vertexAttributeDescriptionCount =
+      static_cast<uint32_t>(attributeDescriptions.size());
+  pipelineState.vertexInputState.pVertexBindingDescriptions =
+      &bindingDescription;
+  pipelineState.vertexInputState.pVertexAttributeDescriptions =
+      attributeDescriptions.data();
 
   pipelineState.depthStencilState.depthTestEnable = VK_TRUE;
   pipelineState.depthStencilState.depthWriteEnable = VK_TRUE;
@@ -115,9 +130,24 @@ void PbrMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
                                                           bindingDescription);
   bindingDescription.binding = 0;
 
+  std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
+  VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
+      vertexBufferLayout, attributeDescriptions);
+
+  std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments{};
+  colorBlendAttachments.resize(3);
+
   GfxPipelineState pipelineState{};
-  PipelineUtilsVk::GetDefaultGfxPipelineState(
-      vertexBufferLayout, bindingDescription, pipelineState);
+  PipelineUtilsVk::GetDefaultGfxPipelineState(vertexBufferLayout, pipelineState,
+                                              colorBlendAttachments);
+
+  pipelineState.vertexInputState.vertexBindingDescriptionCount = 1;
+  pipelineState.vertexInputState.vertexAttributeDescriptionCount =
+      static_cast<uint32_t>(attributeDescriptions.size());
+  pipelineState.vertexInputState.pVertexBindingDescriptions =
+      &bindingDescription;
+  pipelineState.vertexInputState.pVertexAttributeDescriptions =
+      attributeDescriptions.data();
 
   pipelineState.depthStencilState.depthTestEnable = VK_TRUE;
   pipelineState.depthStencilState.depthWriteEnable = VK_TRUE;

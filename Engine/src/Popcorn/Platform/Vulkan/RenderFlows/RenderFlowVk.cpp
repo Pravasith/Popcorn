@@ -102,6 +102,7 @@ void RenderFlowVk::AllocDescriptorsGlobal() {
       pools->GetPool<DescriptorPools::GlobalDescriptorsPool>(
           MAX_FRAMES_IN_FLIGHT); // Creates pool if it
                                  // doesn't exist
+
   VkDescriptorSetLayout &cameraLayout =
       layouts->GetLayout<DescriptorSets::CameraSet>();
   std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> cameraLayouts{};

@@ -176,13 +176,6 @@ void MemoryVk::CalculateUboSsboBaseOffsets() {
   bufferViewOffset += pbrMatUboSize;
   m_bufferViews.pbrMatUbo.alignedSize = pbrMatUboSize;
 
-  m_bufferViews.lightsSsbo.offset = bufferViewOffset;
-  VkDeviceSize lightsSsboSize =
-      PC_AlignCeil(m_bufferViews.lightsSsbo.alignedSize,
-                   limits.minStorageBufferOffsetAlignment);
-  bufferViewOffset += lightsSsboSize;
-  m_bufferViews.lightsSsbo.alignedSize = lightsSsboSize;
-
   m_bufferViews.camerasUbo.offset = bufferViewOffset;
   VkDeviceSize camerasUboSize =
       PC_AlignCeil(m_bufferViews.camerasUbo.alignedSize,
@@ -196,6 +189,15 @@ void MemoryVk::CalculateUboSsboBaseOffsets() {
                    limits.minUniformBufferOffsetAlignment);
   bufferViewOffset += emptysUboSize;
   m_bufferViews.emptysUbo.alignedSize = emptysUboSize;
+
+  // Defaulting for ssbo
+  bufferViewOffset = 0;
+  m_bufferViews.lightsSsbo.offset = bufferViewOffset;
+  VkDeviceSize lightsSsboSize =
+      PC_AlignCeil(m_bufferViews.lightsSsbo.alignedSize,
+                   limits.minStorageBufferOffsetAlignment);
+  bufferViewOffset += lightsSsboSize;
+  m_bufferViews.lightsSsbo.alignedSize = lightsSsboSize;
 
   // clang-format off
   PC_PRINT(

@@ -48,7 +48,7 @@ private:
 
 #if PC_DEBUG
     m_setsAllocated += Count;
-    if (m_setsAllocated >= m_maxSets) {
+    if (m_setsAllocated > m_maxSets) {
       PC_ERROR("Pool reached maximum set capacity of " << m_maxSets << ".",
                "DPoolVk");
     }
@@ -81,7 +81,6 @@ private:
 
 // TODO: Make it a growable pool
 class DescriptorPoolsVk {
-
 public:
   template <DescriptorPools T> [[nodiscard]] DPoolVk &GetPool(uint32_t count);
   void CleanUp();
