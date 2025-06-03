@@ -1,9 +1,9 @@
-#include "RenderFlows/RenderFlowVk.h"
+#include "RenderFlowVk.h"
 #include "CommonVk.h"
 #include "ContextVk.h"
-#include "Popcorn/Core/Base.h"
 #include "MaterialTypes.h"
 #include "Popcorn/Core/Assert.h"
+#include "Popcorn/Core/Base.h"
 #include "SamplerVk.h"
 #include "Shader.h"
 #include "Sources.h"
@@ -46,11 +46,12 @@ PcRenderFlowImages<Composite> RenderFlowVk::s_compositeImages{};
 
 RenderFlowVk::DescriptorSetsVkStatic RenderFlowVk::s_commonDescriptorSets{};
 
-
-RenderFlowVk::RenderFlowVk() { PC_PRINT("CREATED", TagType::Constr, "RenderFlowVk") };
-  RenderFlowVk::~RenderFlowVk() {
-    PC_PRINT("DESTROYED", TagType::Destr, "RenderFlowVk")
-  };
+RenderFlowVk::RenderFlowVk() {
+  PC_PRINT("CREATED", TagType::Constr, "RenderFlowVk")
+};
+RenderFlowVk::~RenderFlowVk() {
+  PC_PRINT("DESTROYED", TagType::Destr, "RenderFlowVk")
+};
 
 //
 // --- METHODS -----------------------------------------------------------
@@ -88,7 +89,7 @@ void RenderFlowVk::FreeShaders() {
   shaders->UnloadShaders<RendererType::Vulkan>();
 }
 
-void RenderFlowVk::AllocGlobalDescriptors() {
+void RenderFlowVk::AllocDescriptorsGlobal() {
   auto *layouts = ContextVk::DescriptorLayouts();
   auto *pools = ContextVk::DescriptorPools();
   auto *device = ContextVk::Device();
@@ -125,7 +126,7 @@ void RenderFlowVk::AllocGlobalDescriptors() {
     cameraWrite.dstSet = s_commonDescriptorSets.cameraSets[i];
     cameraWrite.dstBinding = 0;
     cameraWrite.dstArrayElement = 0;
-    cameraWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    cameraWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     cameraWrite.descriptorCount = 1;
     cameraWrite.pBufferInfo = &cameraBufferInfo;
     cameraWrite.pImageInfo = nullptr;

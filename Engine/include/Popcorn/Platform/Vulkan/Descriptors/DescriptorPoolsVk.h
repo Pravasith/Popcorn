@@ -26,6 +26,8 @@ public:
   [[nodiscard]] std::array<VkDescriptorSet, Count>
   AllocateDescriptorSets(const VkDevice &device,
                          std::array<VkDescriptorSetLayout, Count> &layouts) {
+    PC_WARN("Allocating " << (int)T << " set(s) " << Count << " of "
+                          << m_maxSets)
     return DefaultAllocateDescriptorSets<Count>(device, layouts);
   };
 

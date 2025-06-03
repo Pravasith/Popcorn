@@ -14,7 +14,7 @@ VkDescriptorSetLayout &
 DescriptorLayoutsVk::GetLayout<DescriptorSets::CameraSet>() {
   if (!m_layouts[DescriptorSets::CameraSet]) {
     VkDescriptorSetLayoutBinding binding{};
-    binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     binding.binding = 0;
     binding.stageFlags =
         VK_SHADER_STAGE_VERTEX_BIT |  // Gbuffer pass vertex shader

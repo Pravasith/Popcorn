@@ -1,5 +1,7 @@
 #include "DescriptorPoolsVk.h"
 #include "ContextVk.h"
+#include "Popcorn/Core/Base.h"
+#include "Popcorn/Core/Helpers.h"
 #include <stdexcept>
 #include <vulkan/vulkan_core.h>
 
@@ -49,6 +51,8 @@ void DPoolVk::CleanUp() {
 template <>
 DPoolVk &DescriptorPoolsVk::GetPool<DescriptorPools::GlobalDescriptorsPool>(
     uint32_t count) {
+  PC_PRINT("HERE", TagType::Print, "DPoolVk")
+
   if (m_pools.find(DescriptorPools::GlobalDescriptorsPool) == m_pools.end()) {
     // Camera ubo
     VkDescriptorPoolSize poolSize0 = {

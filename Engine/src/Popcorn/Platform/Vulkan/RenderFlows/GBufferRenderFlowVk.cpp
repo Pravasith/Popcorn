@@ -372,7 +372,7 @@ void GBufferRenderFlowVk::CreateCommandBuffers() {
 // --- CREATE DESCRIPTORS ------------------------------------------------------
 // --- CREATE DESCRIPTORS ------------------------------------------------------
 //
-void GBufferRenderFlowVk::AllocLocalDescriptors() {
+void GBufferRenderFlowVk::AllocDescriptorsLocal() {
   auto *layouts = ContextVk::DescriptorLayouts();
   auto *pools = ContextVk::DescriptorPools();
   auto *device = ContextVk::Device();

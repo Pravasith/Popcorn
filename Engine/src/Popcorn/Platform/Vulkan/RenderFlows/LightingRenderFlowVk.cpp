@@ -191,7 +191,7 @@ void LightingRenderFlowVk::CreateCommandBuffers() {
   cmdPool->AllocCommandBuffers(allocInfo, m_commandBuffers.data());
 };
 
-void LightingRenderFlowVk::AllocLocalDescriptors() {
+void LightingRenderFlowVk::AllocDescriptorsLocal() {
   auto *pools = ContextVk::DescriptorPools();
   auto *device = ContextVk::Device();
   auto *memory = ContextVk::Memory();

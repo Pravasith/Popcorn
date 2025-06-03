@@ -95,23 +95,44 @@ void MemoryVk::ExtractOffsetsLightsCamerasEmptys(std::vector<Light *> &lights,
     m_bufferOffsets.lightsOffsets.push_back(lightOffsets);
     lightOffsets += PC_AlignCeil(UniformDefs::LightUniform::size,
                                  limits.minStorageBufferOffsetAlignment);
-  };
+  }
 
   for (Camera *camera : cameras) {
     m_bufferOffsets.camerasOffsets.push_back(cameraOffsets);
     cameraOffsets += PC_AlignCeil(UniformDefs::CameraUniform::size,
                                   limits.minUniformBufferOffsetAlignment);
-  };
+  }
 
   for (Empty *empty : emptys) {
     m_bufferOffsets.emptysOffsets.push_back(emptyOffsets);
     emptyOffsets += PC_AlignCeil(UniformDefs::EmptyUniform::size,
                                  limits.minUniformBufferOffsetAlignment);
-  };
+  }
 
-  m_bufferViews.lightsSsbo = {0, lightOffsets};
-  m_bufferViews.camerasUbo = {0, cameraOffsets};
-  m_bufferViews.emptysUbo = {0, emptyOffsets};
+  // Save total accumulated buffer size. Size only. Not offset.
+  m_bufferViews.lightsSsbo = {0, lightOffsets};  // Saving final size
+  m_bufferViews.camerasUbo = {0, cameraOffsets}; // Saving final size
+  m_bufferViews.emptysUbo = {0, emptyOffsets};   // Saving final size
+
+  PC_PRINT("Lights: " << lights.size() << " Cameras: " << cameras.size()
+                      << "Emptys: " << emptys.size(),
+           TagType::Print, "HERE")
+  for (int i = 0; i < lights.size(); ++i) {
+    PC_PRINT(" " << i << ": " << m_bufferOffsets.lightsOffsets[i] << "  ",
+             TagType::Print, "Light")
+  }
+
+  // for (Camera *camera : cameras) {
+  //   m_bufferOffsets.camerasOffsets.push_back(cameraOffsets);
+  //   cameraOffsets += PC_AlignCeil(UniformDefs::CameraUniform::size,
+  //                                 limits.minUniformBufferOffsetAlignment);
+  // }
+  //
+  // for (Empty *empty : emptys) {
+  //   m_bufferOffsets.emptysOffsets.push_back(emptyOffsets);
+  //   emptyOffsets += PC_AlignCeil(UniformDefs::EmptyUniform::size,
+  //                                limits.minUniformBufferOffsetAlignment);
+  // };
 };
 
 void MemoryVk::AlignVboIboBufferViews() {

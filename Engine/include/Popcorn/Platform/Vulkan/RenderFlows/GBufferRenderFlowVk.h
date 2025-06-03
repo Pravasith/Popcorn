@@ -31,7 +31,7 @@ private:
   virtual void DestroyFramebuffers() override;
   virtual void DestroyAttachments() override;
 
-  virtual void AllocLocalDescriptors() override;
+  virtual void AllocDescriptorsLocal() override;
   virtual void CreatePipelines() override;
   virtual void DestroyPipelines() override;
 

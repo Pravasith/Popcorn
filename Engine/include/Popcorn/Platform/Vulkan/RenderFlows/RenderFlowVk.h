@@ -38,10 +38,10 @@ public:
   static void AllocShaders();
   static void FreeShaders();
 
-  static void AllocGlobalDescriptors();
+  static void AllocDescriptorsGlobal();
 
 public:
-  virtual void AllocLocalDescriptors() = 0; // Automatically destroyed
+  virtual void AllocDescriptorsLocal() = 0; // Automatically destroyed
   virtual void CreatePipelines() = 0;
   virtual void DestroyPipelines() = 0;
 
