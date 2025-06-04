@@ -29,6 +29,7 @@ void DPoolVk::Create(VkDescriptorPoolSize *poolSizes, uint32_t poolSizesCount,
     throw std::runtime_error("Descriptor pool not created!!");
   }
 
+  PC_WARN("Created Pool with Max sets: " << maxSets)
   m_maxSets = maxSets;
 }
 
@@ -92,6 +93,9 @@ DescriptorPoolsVk::GetPool<DescriptorPools::GBufferPool>(uint32_t count) {
     VkDescriptorPoolSize poolSizes[3]{poolSize0, poolSize1, poolSize2};
 
     DPoolVk dPool{};
+    // 3 * count bc each set uses a separate descriptor each (and it's not the
+    // case with lighting pool - where 1 lighting set uses all descriptors in
+    // one set)
     dPool.Create(poolSizes, 3, 3 * count);
 
     m_pools[DescriptorPools::GBufferPool] = std::move(dPool);
@@ -128,7 +132,7 @@ DescriptorPoolsVk::GetPool<DescriptorPools::LightingPool>(uint32_t count) {
                                       poolSize3, poolSize4};
 
     DPoolVk dPool{};
-    dPool.Create(poolSizes, 5, 5 * count);
+    dPool.Create(poolSizes, 5, count);
 
     m_pools[DescriptorPools::LightingPool] = std::move(dPool);
   }

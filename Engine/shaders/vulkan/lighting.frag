@@ -1,13 +1,5 @@
 #version 450
 
-layout(set = 0, binding = 0) uniform CameraUBO {
-    mat4 view;
-    mat4 proj;
-    mat4 viewProj;
-    mat4 invViewProj;
-    // vec3 camPos;
-} camera;
-
 struct LightUniform {
     vec3 position;
     float pad0;
@@ -24,6 +16,13 @@ struct LightUniform {
     float outerConeAngle;
 };
 
+layout(set = 0, binding = 0) uniform CameraUBO {
+    mat4 view;
+    mat4 proj;
+    mat4 viewProj;
+    mat4 invViewProj;
+    // vec3 camPos;
+} camera;
 
 layout(set = 1, binding = 0) readonly buffer LightBuffer {
     LightUniform lights[];
