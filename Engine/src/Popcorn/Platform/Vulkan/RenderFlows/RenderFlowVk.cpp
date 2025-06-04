@@ -113,14 +113,23 @@ void RenderFlowVk::AllocDescriptorsGlobal() {
       globalDescriptorsPool.AllocateDescriptorSets<DescriptorSets::CameraSet,
                                                    MAX_FRAMES_IN_FLIGHT>(
           device->GetDevice(), cameraLayouts);
+}
+
+void RenderFlowVk::UpdateDescriptorSetsGlobal() {
+  auto *device = ContextVk::Device();
+  auto *memory = ContextVk::Memory();
+
+  VkPhysicalDeviceProperties properties{};
+  device->GetPhysicalDeviceProperties(properties);
 
   // Bind sets with buffers
   for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
     VkDescriptorBufferInfo cameraBufferInfo{};
     cameraBufferInfo.buffer = memory->GetUboSet(i);
     cameraBufferInfo.offset = memory->GetBufferViews().camerasUbo.offset;
-    cameraBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
-        DescriptorSets::CameraSet>(properties.limits);
+    cameraBufferInfo.range = memory->GetBufferViews().camerasUbo.alignedSize;
+    // DescriptorLayoutsVk::GetDescriptorBufferRange<
+    // DescriptorSets::CameraSet>(properties.limits);
 
     VkWriteDescriptorSet cameraWrite{};
     cameraWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

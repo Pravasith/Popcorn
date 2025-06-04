@@ -203,6 +203,7 @@ void FrameVk::SubmitDrawCommands(std::vector<VkCommandBuffer> &commandBuffers,
 
 void FrameVk::CleanUp() {
   auto &device = DeviceVk::Get()->GetDevice();
+  vkDeviceWaitIdle(device);
 
   for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
     vkDestroySemaphore(device, m_imageAvailableSemaphores[i], nullptr);

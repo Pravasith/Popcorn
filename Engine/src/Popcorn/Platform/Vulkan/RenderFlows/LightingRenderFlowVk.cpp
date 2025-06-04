@@ -193,10 +193,8 @@ void LightingRenderFlowVk::CreateCommandBuffers() {
 
 void LightingRenderFlowVk::AllocDescriptorsLocal() {
   auto *pools = ContextVk::DescriptorPools();
-  auto *device = ContextVk::Device();
-  auto *memory = ContextVk::Memory();
-  VkPhysicalDeviceProperties properties{};
-  device->GetPhysicalDeviceProperties(properties);
+  // VkPhysicalDeviceProperties properties{};
+  // device->GetPhysicalDeviceProperties(properties);
 
   VkDescriptorSetLayout &lightingLayout =
       ContextVk::DescriptorLayouts()->GetLayout<DescriptorSets::LightingSet>();
@@ -212,6 +210,11 @@ void LightingRenderFlowVk::AllocDescriptorsLocal() {
       lightsPool.AllocateDescriptorSets<DescriptorSets::LightingSet,
                                         MAX_FRAMES_IN_FLIGHT>(
           ContextVk::Device()->GetDevice(), lightingLayouts);
+};
+
+void LightingRenderFlowVk::UpdateDescriptorSetsLocal() {
+  auto *memory = ContextVk::Memory();
+  auto *device = ContextVk::Device();
 
   for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
     VkDescriptorBufferInfo lightBufferInfo{};
@@ -319,7 +322,7 @@ void LightingRenderFlowVk::AllocDescriptorsLocal() {
     vkUpdateDescriptorSets(device->GetDevice(), writes.size(), writes.data(), 0,
                            nullptr);
   };
-};
+}
 
 //
 //
@@ -356,6 +359,8 @@ void LightingRenderFlowVk::OnSwapchainInvalidCb() {
 
   CreateAttachments();
   CreateFramebuffers();
+
+  UpdateDescriptorSetsLocal();
 };
 
 //

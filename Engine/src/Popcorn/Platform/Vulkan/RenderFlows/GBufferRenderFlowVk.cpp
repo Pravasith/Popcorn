@@ -376,7 +376,6 @@ void GBufferRenderFlowVk::AllocDescriptorsLocal() {
   auto *layouts = ContextVk::DescriptorLayouts();
   auto *pools = ContextVk::DescriptorPools();
   auto *device = ContextVk::Device();
-  auto *memory = ContextVk::Memory();
 
   VkPhysicalDeviceProperties properties{};
   device->GetPhysicalDeviceProperties(properties);
@@ -419,6 +418,11 @@ void GBufferRenderFlowVk::AllocDescriptorsLocal() {
   m_descriptorSetsVk.pbrMatSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::PbrMatSet, maxFIF>(
           device->GetDevice(), pbrMatLayouts);
+};
+
+void GBufferRenderFlowVk::UpdateDescriptorSetsLocal() {
+  auto *memory = ContextVk::Memory();
+  auto *device = ContextVk::Device();
 
   // Bind sets with buffers
   for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
@@ -521,6 +525,8 @@ void GBufferRenderFlowVk::OnSwapchainInvalidCb() {
 
   CreateAttachments();
   CreateFramebuffers();
+
+  UpdateDescriptorSetsLocal();
 };
 
 //

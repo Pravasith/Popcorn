@@ -124,10 +124,14 @@ void RendererVk::CreateRenderFlowResources() {
   RenderFlowVk::CreateSamplers();
   RenderFlowVk::AllocShaders();
   RenderFlowVk::AllocDescriptorsGlobal();
+  RenderFlowVk::UpdateDescriptorSetsGlobal(); // descriptor writes ->
+                                              // vkUpdateDescriptorSets
 
   // Renderflow specific descriptors & pipelines
   for (auto &renderFlow : s_renderFlows) {
-    renderFlow->AllocDescriptorsLocal(); // Static for now
+    renderFlow->AllocDescriptorsLocal();     // Static for now
+    renderFlow->UpdateDescriptorSetsLocal(); // descriptor writes ->
+                                             // vkUpdateDescriptorSets
     renderFlow->CreatePipelines();
   }
 

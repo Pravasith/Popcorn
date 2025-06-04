@@ -32,6 +32,8 @@ private:
   virtual void DestroyAttachments() override;
 
   virtual void AllocDescriptorsLocal() override;
+  virtual void UpdateDescriptorSetsLocal() override;
+
   virtual void CreatePipelines() override;
   virtual void DestroyPipelines() override;
 

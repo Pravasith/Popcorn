@@ -184,11 +184,10 @@ void CompositeRenderFlowVk::CreateCommandBuffers() {
 //
 void CompositeRenderFlowVk::AllocDescriptorsLocal() {
   auto *pools = ContextVk::DescriptorPools();
-  auto *device = ContextVk::Device();
-  auto *memory = ContextVk::Memory();
+  // auto *memory = ContextVk::Memory();
 
-  VkPhysicalDeviceProperties properties{};
-  device->GetPhysicalDeviceProperties(properties);
+  // VkPhysicalDeviceProperties properties{};
+  // device->GetPhysicalDeviceProperties(properties);
 
   VkDescriptorSetLayout &compositeLayout =
       ContextVk::DescriptorLayouts()->GetLayout<DescriptorSets::PresentSet>();
@@ -204,6 +203,10 @@ void CompositeRenderFlowVk::AllocDescriptorsLocal() {
       compositePool.AllocateDescriptorSets<DescriptorSets::PresentSet,
                                            MAX_FRAMES_IN_FLIGHT>(
           ContextVk::Device()->GetDevice(), compositeLayouts);
+};
+
+void CompositeRenderFlowVk::UpdateDescriptorSetsLocal() {
+  auto *device = ContextVk::Device();
 
   for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
     VkDescriptorImageInfo lightImageInfo{};
@@ -229,6 +232,7 @@ void CompositeRenderFlowVk::AllocDescriptorsLocal() {
                            nullptr);
   }
 };
+
 //
 //
 //
@@ -269,6 +273,8 @@ void CompositeRenderFlowVk::OnSwapchainInvalidCb() {
   CreateAttachments();
   CreateRenderPass();
   CreateFramebuffers();
+
+  UpdateDescriptorSetsLocal();
   CreatePipelines();
 };
 
