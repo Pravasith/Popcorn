@@ -350,13 +350,15 @@ void CompositeRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 // --- CLEAN UP ----------------------------------------------------------------
 //
 void CompositeRenderFlowVk::DestroyFramebuffers() {
-  for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+  for (size_t i = 0; i < m_framebuffers.size(); ++i) {
     if (m_framebuffers[i] != VK_NULL_HANDLE) {
       FramebufferVk::DestroyVkFramebuffer(ContextVk::Device()->GetDevice(),
                                           m_framebuffers[i]);
       m_framebuffers[i] = VK_NULL_HANDLE;
     }
   }
+
+  m_framebuffers.clear();
 };
 
 void CompositeRenderFlowVk::DestroyRenderPass() {
