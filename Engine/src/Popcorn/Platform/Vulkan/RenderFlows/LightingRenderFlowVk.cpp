@@ -217,8 +217,11 @@ void LightingRenderFlowVk::AllocDescriptorsLocal() {
     VkDescriptorBufferInfo lightBufferInfo{};
     lightBufferInfo.buffer = memory->GetSsboSet(i);
     lightBufferInfo.offset = memory->GetBufferViews().lightsSsbo.offset;
-    lightBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
-        DescriptorSets::LightingSet>(properties.limits);
+    lightBufferInfo.range = memory->GetBufferViews().lightsSsbo.alignedSize;
+    PC_WARN("Lights SSBO - frame " << i << ": " << lightBufferInfo.range
+                                   << " range.")
+    // DescriptorLayoutsVk::GetDescriptorBufferRange<
+    // DescriptorSets::LightingSet>(properties.limits);
 
     VkDescriptorImageInfo albedoImageInfo{};
     albedoImageInfo.imageView =
@@ -411,8 +414,7 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 
   // Hardcoding 0 for camera index for now
   // TODO: Make it dynamic later
-  uint32_t cameraOffset =
-      bufferViews.camerasUbo.offset + bufferOffsets.camerasOffsets[0];
+  uint32_t cameraOffset = bufferOffsets.camerasOffsets[0];
 
   std::array<VkDescriptorSet, 2> allSets = {
       cameraSets[0],
@@ -421,6 +423,7 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 
   std::array<uint32_t, 1> dynamicOffsets = {cameraOffset};
 
+  // Binding 2 sets in one go. Same as doing separately (commented code below)
   vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
                           m_lightingPipelineVk.GetVkPipelineLayout(), 0,
                           allSets.size(), allSets.data(), dynamicOffsets.size(),

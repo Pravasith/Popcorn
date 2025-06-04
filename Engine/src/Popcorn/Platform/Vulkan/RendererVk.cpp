@@ -25,6 +25,8 @@ std::vector<RenderFlowVk *> RendererVk::s_renderFlows{};
 void RendererVk::DrawFrame(const Scene &scene) {
   ContextVk::Frame()->Draw(
       [&]() {
+        PC_WARN("Swapchain invalid called")
+        RenderFlowVk::AllocShaders();
         for (auto &renderFlow : s_renderFlows) {
           renderFlow->OnSwapchainInvalidCb();
         }

@@ -46,6 +46,10 @@ void CompositeRenderFlowVk::CreateAttachments() {
     presentImageAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     presentImageAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
+    PC_WARN("PRESENT IMAGE ATTACHMENT: " << presentImageAttachment.initialLayout
+                                         << " | "
+                                         << presentImageAttachment.finalLayout)
+
     m_attachmentsVk.presentAttachments[i].SetImageVk(
         &m_imagesVk.swapchainImages[i]);
     m_attachmentsVk.presentAttachments[i].SetAttachmentDescription(

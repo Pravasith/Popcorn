@@ -425,20 +425,23 @@ void GBufferRenderFlowVk::AllocDescriptorsLocal() {
     VkDescriptorBufferInfo submeshBufferInfo{};
     submeshBufferInfo.buffer = memory->GetUboSet(i);
     submeshBufferInfo.offset = memory->GetBufferViews().submeshUbo.offset;
-    submeshBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
-        DescriptorSets::SubmeshSet>(properties.limits);
+    submeshBufferInfo.range = memory->GetBufferViews().submeshUbo.alignedSize;
+    // DescriptorLayoutsVk::GetDescriptorBufferRange<
+    //     DescriptorSets::SubmeshSet>(properties.limits);
 
     VkDescriptorBufferInfo basicMatBufferInfo{};
     basicMatBufferInfo.buffer = memory->GetUboSet(i);
     basicMatBufferInfo.offset = memory->GetBufferViews().basicMatUbo.offset;
-    basicMatBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
-        DescriptorSets::BasicMatSet>(properties.limits);
+    basicMatBufferInfo.range = memory->GetBufferViews().basicMatUbo.alignedSize;
+    // DescriptorLayoutsVk::GetDescriptorBufferRange<
+    // DescriptorSets::BasicMatSet>(properties.limits);
 
     VkDescriptorBufferInfo pbrMatBufferInfo{};
     pbrMatBufferInfo.buffer = memory->GetUboSet(i);
     pbrMatBufferInfo.offset = memory->GetBufferViews().pbrMatUbo.offset;
-    pbrMatBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
-        DescriptorSets::PbrMatSet>(properties.limits);
+    pbrMatBufferInfo.range = memory->GetBufferViews().pbrMatUbo.alignedSize;
+    // DescriptorLayoutsVk::GetDescriptorBufferRange<
+    // DescriptorSets::PbrMatSet>(properties.limits);
 
     // Writes
     VkWriteDescriptorSet submeshWrite{};
@@ -588,8 +591,7 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 
   // Hardcoding 0 for camera index for now
   // TODO: Make it dynamic later
-  uint32_t cameraOffset =
-      bufferViews.camerasUbo.offset + bufferOffsets.camerasOffsets[0];
+  uint32_t cameraOffset = bufferOffsets.camerasOffsets[0];
 
   // Descriptor set 0 - Camera
   vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -598,8 +600,7 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
                           &cameraOffset);
 
   for (auto &[materialHash, submeshes] : s_basicMatSubmeshesMap) {
-    uint32_t basicMatOffset = bufferViews.basicMatUbo.offset +
-                              bufferOffsets.materialOffsets[materialHash];
+    uint32_t basicMatOffset = bufferOffsets.materialOffsets[materialHash];
 
     // Descriptor set 1 - Basic material
     vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -610,7 +611,6 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
     uint32_t submeshIndex = 0;
     for (Submesh<MaterialTypes::BasicMat> *submesh : submeshes) {
       uint32_t submeshUboOffset =
-          bufferViews.submeshUbo.offset +
           bufferOffsets.submeshesOffsets[materialHash][submeshIndex].uboOffset;
 
       // Descriptor set 2 - Submesh
