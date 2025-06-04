@@ -307,7 +307,7 @@ void CompositeRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   // Render pass begin
   VkRenderPassBeginInfo renderPassBeginInfo{};
   RenderPassVk::GetDefaultCmdBeginRenderPassInfo(
-      m_framebuffers[currentFrame], swapchainExtent,
+      m_framebuffers[frameIndex], swapchainExtent,
       m_renderPass.GetVkRenderPass(), renderPassBeginInfo);
 
   m_renderPass.BeginRenderPass(cmdBfr, renderPassBeginInfo);

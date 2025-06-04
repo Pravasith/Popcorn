@@ -47,7 +47,7 @@ private:
 
 private:
   struct AttachmentsVk {
-    PcPresentationAttachments presentAttachments{}; // Not used for now
+    PcPresentationAttachments presentAttachments{};
   };
 
   struct DescriptorSetsVk {
