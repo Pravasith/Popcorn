@@ -290,6 +290,7 @@ void CompositeRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 
   // TODO: Optimize draw loop - heap allocations -> stack
   auto &cmdBfr = m_commandBuffers[currentFrame];
+
   auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
   auto *deviceMemory =
       ContextVk::Memory(); // Heap allocated!! this is singleton

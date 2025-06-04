@@ -37,8 +37,9 @@ private:
   virtual void DestroyPipelines() override;
 
   virtual void CreateCommandBuffers() override;
-  [[nodiscard]] virtual const std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT>
-  GetCommandBuffers() const override {
+
+  [[nodiscard]] virtual std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> &
+  GetCommandBuffers() override {
     return m_commandBuffers;
   };
 

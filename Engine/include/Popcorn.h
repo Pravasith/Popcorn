@@ -47,11 +47,15 @@ static void StartGame() {
   s_application->StartGameLoop();          // Starts game loop
 };
 
-static void RenderScenes(Scene &scene) { s_renderer->DrawFrame(scene); };
+static void RenderScenes(Scene &scene) {
+  // FrameVk Draw
+  s_renderer->DrawFrame(scene);
+};
 
 static void EndContext() {
   s_renderer->DestroyRenderFlows();
   s_renderer = nullptr;
+
   Application::Stop();
 }
 

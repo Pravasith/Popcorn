@@ -2,6 +2,7 @@
 
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include "RenderFlowDefs.h"
 #include <cstdint>
 #include <functional>
 #include <vector>
@@ -35,7 +36,8 @@ public:
       const std::function<void(const uint32_t currentFrame)> &updateSceneDataCb,
       const std::function<void(const uint32_t swapchainFrameIndex,
                                const uint32_t currentFrame)>
-          &recordDrawCommandsCb);
+          &recordDrawCommandsCb,
+      PcRenderFlowCmdBuffersMap &renderFlowCmdBuffersMap);
 
   void CreateRenderSyncObjects();
   inline void SetFrameBufferResized(bool isFrameBufferResized) {

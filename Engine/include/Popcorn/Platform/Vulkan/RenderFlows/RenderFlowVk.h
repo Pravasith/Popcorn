@@ -54,6 +54,9 @@ public:
   virtual void RecordCommandBuffer(const uint32_t frameIndex,
                                    const uint32_t currentFrame) = 0;
 
+  virtual std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> &
+  GetCommandBuffers() = 0;
+
 private:
   virtual void CreateAttachments() = 0;
   virtual void CreateRenderPass() = 0;
@@ -62,9 +65,6 @@ private:
   virtual void DestroyFramebuffers() = 0;
   virtual void DestroyRenderPass() = 0;
   virtual void DestroyAttachments() = 0;
-
-  virtual const std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT>
-  GetCommandBuffers() const = 0;
 
 public:
   void Prepare() {

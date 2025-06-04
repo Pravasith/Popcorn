@@ -41,6 +41,7 @@ public:
 private:
   static ContextVk *s_vulkanContext;
   static std::vector<RenderFlowVk *> s_renderFlows;
+  static PcRenderFlowCmdBuffersMap s_renderFlowCmdBuffers;
 };
 
 GFX_NAMESPACE_END

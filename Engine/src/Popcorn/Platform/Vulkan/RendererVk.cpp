@@ -7,9 +7,11 @@
 #include "Material.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
+#include "RenderFlowDefs.h"
 #include "RenderFlowVk.h"
 #include "Shader.h"
 #include <cstring>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -18,14 +20,18 @@ GFX_NAMESPACE_BEGIN
 ContextVk *RendererVk::s_vulkanContext = nullptr;
 std::vector<RenderFlowVk *> RendererVk::s_renderFlows{};
 
+PcRenderFlowCmdBuffersMap RendererVk::s_renderFlowCmdBuffers;
+
 //
 // -------------------------------------------------------------------------
 // --- PUBLIC METHODS ------------------------------------------------------
 
 void RendererVk::DrawFrame(const Scene &scene) {
+
   ContextVk::Frame()->Draw(
       [&]() {
-        PC_WARN("Swapchain invalid called")
+        vkDeviceWaitIdle(ContextVk::Device()->GetDevice());
+
         RenderFlowVk::AllocShaders();
         for (auto &renderFlow : s_renderFlows) {
           renderFlow->OnSwapchainInvalidCb();
@@ -38,7 +44,8 @@ void RendererVk::DrawFrame(const Scene &scene) {
         for (auto &renderFlow : s_renderFlows) {
           renderFlow->RecordCommandBuffer(frameIndex, currentFrame);
         }
-      });
+      },
+      s_renderFlowCmdBuffers);
 };
 
 bool RendererVk::OnFrameBufferResize(FrameBfrResizeEvent &) {
@@ -110,6 +117,15 @@ void RendererVk::PrepareRenderFlows() {
                            //   - Framebuffer
                            //   - Commandbuffers
   }
+
+  s_renderFlowCmdBuffers[RenderFlows::GBuffer] =
+      &s_renderFlows[0]->GetCommandBuffers();
+
+  s_renderFlowCmdBuffers[RenderFlows::Lighting] =
+      &s_renderFlows[1]->GetCommandBuffers();
+
+  s_renderFlowCmdBuffers[RenderFlows::Composite] =
+      &s_renderFlows[2]->GetCommandBuffers();
 };
 
 void RendererVk::CreateRenderFlowResources() {

@@ -10,6 +10,7 @@
 #include <array>
 #include <cstdint>
 #include <glm/fwd.hpp>
+#include <unordered_map>
 #include <vector>
 #include <vulkan/vulkan_core.h>
 
@@ -69,6 +70,10 @@ template <> struct PcRenderFlowImages<RenderFlows::Composite> {
   std::vector<ImageVk> swapchainImages{};
   // std::vector<ImageVk> postFxImage1{}; // PostFx images - potentially
 };
+
+using PcRenderFlowCmdBuffersMap =
+    std::unordered_map<RenderFlows,
+                       std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> *>;
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
