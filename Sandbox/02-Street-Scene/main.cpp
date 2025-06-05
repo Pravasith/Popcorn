@@ -51,6 +51,7 @@ int main(int argc, char **argv) {
   Popcorn::Context::BeginContext();
 
   auto gameLayer = new GameLayer();
+
   Popcorn::Context::AddLayer(gameLayer);
   Popcorn::Context::StartGame();
 

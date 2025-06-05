@@ -13,9 +13,10 @@ GFX_NAMESPACE_BEGIN
 
 class LightingRenderFlowVk : public RenderFlowVk {
 public:
-  LightingRenderFlowVk() {
-    PC_PRINT("CREATED", TagType::Constr, "LightingRenderFlowVk")
-  };
+  LightingRenderFlowVk()
+      : m_imagesVk(s_lightingImages), m_dependencyImages(s_gBufferImages) {
+          PC_PRINT("CREATED", TagType::Constr, "LightingRenderFlowVk")
+        };
 
   virtual ~LightingRenderFlowVk() override {
     PC_PRINT("DESTROYED", TagType::Destr, "LightingRenderflowVk")
@@ -56,10 +57,9 @@ private:
     PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> lightingSets{};
   };
 
-  PcRenderFlowImages<RenderFlows::Lighting, MAX_FRAMES_IN_FLIGHT> &m_imagesVk =
-      s_lightingImages;
+  PcRenderFlowImages<RenderFlows::Lighting, MAX_FRAMES_IN_FLIGHT> &m_imagesVk;
   PcRenderFlowImages<RenderFlows::GBuffer, MAX_FRAMES_IN_FLIGHT>
-      &m_dependencyImages = s_gBufferImages;
+      &m_dependencyImages;
 
   AttachmentsVk m_attachmentsVk{};
   DescriptorSetsVk m_descriptorSetsVk{};

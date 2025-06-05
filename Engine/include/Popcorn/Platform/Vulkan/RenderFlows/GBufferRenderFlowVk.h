@@ -14,9 +14,10 @@ GFX_NAMESPACE_BEGIN
 
 class GBufferRenderFlowVk : public RenderFlowVk {
 public:
-  GBufferRenderFlowVk() {
-    PC_PRINT("CREATED", TagType::Constr, "GBufferRenderFlowVk")
-  };
+  GBufferRenderFlowVk()
+      : m_imagesVk(s_gBufferImages) {
+          PC_PRINT("CREATED", TagType::Constr, "GBufferRenderFlowVk")
+        };
 
   virtual ~GBufferRenderFlowVk() override {
     PC_PRINT("DESTROYED", TagType::Destr, "GBufferRenderflowVk")
@@ -62,8 +63,7 @@ private:
     PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> pbrMatSets{};
   };
 
-  PcRenderFlowImages<RenderFlows::GBuffer, MAX_FRAMES_IN_FLIGHT> &m_imagesVk =
-      s_gBufferImages;
+  PcRenderFlowImages<RenderFlows::GBuffer, MAX_FRAMES_IN_FLIGHT> &m_imagesVk;
 
   AttachmentsVk m_attachmentsVk{};
   DescriptorSetsVk m_descriptorSetsVk{};

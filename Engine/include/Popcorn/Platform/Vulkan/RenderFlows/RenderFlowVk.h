@@ -133,7 +133,8 @@ protected:
   // Images
   static PcRenderFlowImages<GBuffer, MAX_FRAMES_IN_FLIGHT> s_gBufferImages;
   static PcRenderFlowImages<Lighting, MAX_FRAMES_IN_FLIGHT> s_lightingImages;
-  static PcRenderFlowImages<Composite> s_compositeImages;
+  static PcRenderFlowImages<Composite>
+      s_compositeImages; // this is a vector, and the others above are arrays
 
   //
   // Samplers ---------------------------------------------------------------

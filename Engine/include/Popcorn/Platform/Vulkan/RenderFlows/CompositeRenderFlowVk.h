@@ -12,9 +12,10 @@ GFX_NAMESPACE_BEGIN
 
 class CompositeRenderFlowVk : public RenderFlowVk {
 public:
-  CompositeRenderFlowVk() {
-    PC_PRINT("CREATED", TagType::Constr, "CompositeRenderFlowVk")
-  };
+  CompositeRenderFlowVk()
+      : m_imagesVk(s_compositeImages), m_dependencyImages(s_lightingImages) {
+          PC_PRINT("CREATED", TagType::Constr, "CompositeRenderFlowVk")
+        };
 
   virtual ~CompositeRenderFlowVk() override {
     PC_PRINT("DESTROYED", TagType::Destr, "CompositeRenderflowVk")
@@ -55,10 +56,9 @@ private:
     PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> presentSets{};
   };
 
+  PcRenderFlowImages<RenderFlows::Composite> &m_imagesVk;
   PcRenderFlowImages<RenderFlows::Lighting, MAX_FRAMES_IN_FLIGHT>
-      &m_dependencyImages = s_lightingImages;
-
-  PcRenderFlowImages<RenderFlows::Composite> &m_imagesVk = s_compositeImages;
+      &m_dependencyImages;
 
   AttachmentsVk m_attachmentsVk{};
   DescriptorSetsVk m_descriptorSetsVk{};
