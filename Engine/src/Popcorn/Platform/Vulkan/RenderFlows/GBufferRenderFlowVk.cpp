@@ -34,21 +34,17 @@ void GBufferRenderFlowVk::CreateAttachments() {
   const auto &width = swapchainExtent.width;
   const auto &height = swapchainExtent.height;
 
-  // VK_FORMAT_R8G8B8A8_UNORM;
   std::vector<VkFormat> albedoCandidates = {VK_FORMAT_R8G8B8A8_UNORM,
                                             VK_FORMAT_B8G8R8A8_UNORM};
-  // VK_FORMAT_D32_SFLOAT
   std::vector<VkFormat> depthCandidates = {VK_FORMAT_D32_SFLOAT,
                                            VK_FORMAT_D32_SFLOAT_S8_UINT,
                                            VK_FORMAT_D24_UNORM_S8_UINT};
-  // VK_FORMAT_R16G16B16A16_SFLOAT
   std::vector<VkFormat> normalCandidates = {
-      VK_FORMAT_R16G16B16A16_SFLOAT, // Preferred (high precision normals)
+      VK_FORMAT_R16G16B16A16_SFLOAT, // high precision normals
       VK_FORMAT_R8G8B8A8_UNORM       // Fallback (low precision)
   };
-
-  // VK_FORMAT_R8G8_UNORM;
-  std::vector<VkFormat> roughnessMetallicCandidates = {VK_FORMAT_R8G8_UNORM};
+  std::vector<VkFormat> roughnessMetallicCandidates = {
+      VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_B8G8R8A8_UNORM};
 
   VkFormat albedoFormat =
       ImageVk::FindSupportedFormat(albedoCandidates, VK_IMAGE_TILING_OPTIMAL,

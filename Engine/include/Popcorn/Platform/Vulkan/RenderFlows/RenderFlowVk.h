@@ -68,6 +68,8 @@ private:
 
 public:
   void Prepare() {
+    PC_WARN("Preparing Renderflow............................")
+
     CreateAttachments();
     CreateRenderPass();
     CreateFramebuffers();

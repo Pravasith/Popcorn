@@ -1,5 +1,6 @@
 #include "CompositeRenderFlowVk.h"
 #include "AttachmentVk.h"
+#include "BarrierVk.h"
 #include "CommonVk.h"
 #include "ContextVk.h"
 #include "GlobalMacros.h"
@@ -304,6 +305,20 @@ void CompositeRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   // Reset and begin recording
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
+
+  // Place barrier to transition image
+  VkImageMemoryBarrier barrier{};
+  BarrierUtilsVk::GetDefaultImageBarrierInfo(
+      m_dependencyImages.lightImages[currentFrame].GetVkImage(),
+      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
+      barrier);
+  barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+  barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+  vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                       VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0,
+                       nullptr, 1, &barrier);
 
   // Render pass begin
   VkRenderPassBeginInfo renderPassBeginInfo{};

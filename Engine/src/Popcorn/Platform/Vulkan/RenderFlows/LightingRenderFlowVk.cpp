@@ -1,5 +1,6 @@
 #include "RenderFlows/LightingRenderFlowVk.h"
 #include "AttachmentVk.h"
+#include "BarrierVk.h"
 #include "BufferObjects.h"
 #include "CommonVk.h"
 #include "ContextVk.h"
@@ -393,6 +394,56 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
 
+  // Place barrier to transition image
+  VkImageMemoryBarrier albedoBarrier{}, depthBarrier{}, normalBarrier{},
+      roughnessMetallicBarrier{};
+
+  auto hasStencil =
+      m_dependencyImages.depthImages[currentFrame].FormatHasStencilComponent();
+
+  BarrierUtilsVk::GetDefaultImageBarrierInfo(
+      m_dependencyImages.albedoImages[currentFrame].GetVkImage(),
+      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
+      albedoBarrier);
+  BarrierUtilsVk::GetDefaultImageBarrierInfo(
+      m_dependencyImages.depthImages[currentFrame].GetVkImage(),
+      hasStencil ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+                 : VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+      hasStencil ? VK_IMAGE_ASPECT_STENCIL_BIT | VK_IMAGE_ASPECT_DEPTH_BIT
+                 : VK_IMAGE_ASPECT_DEPTH_BIT,
+      depthBarrier);
+  depthBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+  depthBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+  BarrierUtilsVk::GetDefaultImageBarrierInfo(
+      m_dependencyImages.normalImages[currentFrame].GetVkImage(),
+      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
+      normalBarrier);
+  BarrierUtilsVk::GetDefaultImageBarrierInfo(
+      m_dependencyImages.roughnessMetallicImages[currentFrame].GetVkImage(),
+      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
+      roughnessMetallicBarrier);
+
+  std::array<VkImageMemoryBarrier, 3> colorImageBarriers{
+      albedoBarrier, normalBarrier, roughnessMetallicBarrier};
+  std::array<VkImageMemoryBarrier, 1> depthImageBarriers{depthBarrier};
+
+  for (auto &barrier : colorImageBarriers) {
+    barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+  }
+
+  vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                       VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0,
+                       nullptr, 3, colorImageBarriers.data());
+
+  vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+                       VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0,
+                       nullptr, 1, depthImageBarriers.data());
+
   // Render pass begin
   VkRenderPassBeginInfo renderPassBeginInfo{};
   RenderPassVk::GetDefaultCmdBeginRenderPassInfo(
@@ -422,8 +473,8 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   uint32_t cameraOffset = bufferOffsets.camerasOffsets[0];
 
   std::array<VkDescriptorSet, 2> allSets = {
-      cameraSets[0],
-      lightingSets[0],
+      cameraSets[currentFrame],
+      lightingSets[currentFrame],
   };
 
   std::array<uint32_t, 1> dynamicOffsets = {cameraOffset};
