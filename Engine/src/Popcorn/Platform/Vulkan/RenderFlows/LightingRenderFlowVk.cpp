@@ -395,6 +395,20 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
 
   // Place barrier to transition image
+  VkImageMemoryBarrier barrier{};
+  BarrierUtilsVk::GetDefaultImageBarrierInfo(
+      m_imagesVk.lightImages[currentFrame].GetVkImage(),
+      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
+      barrier);
+  barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+  barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+  vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                       VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0,
+                       nullptr, 0, nullptr, 1, &barrier);
+
+  // Place barrier to transition image
   VkImageMemoryBarrier albedoBarrier{}, depthBarrier{}, normalBarrier{},
       roughnessMetallicBarrier{};
 
@@ -410,7 +424,7 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
       m_dependencyImages.depthImages[currentFrame].GetVkImage(),
       hasStencil ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
                  : VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+      VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL,
       hasStencil ? VK_IMAGE_ASPECT_STENCIL_BIT | VK_IMAGE_ASPECT_DEPTH_BIT
                  : VK_IMAGE_ASPECT_DEPTH_BIT,
       depthBarrier);

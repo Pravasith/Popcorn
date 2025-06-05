@@ -1,5 +1,6 @@
 #include "RenderFlows/GBufferRenderFlowVk.h"
 #include "AttachmentVk.h"
+#include "BarrierVk.h"
 #include "BufferObjectsVk.h"
 #include "CommonVk.h"
 #include "ContextVk.h"
@@ -565,6 +566,57 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
+  //
+  // Place barrier to transition image
+  VkImageMemoryBarrier albedoBarrier{}, depthBarrier{}, normalBarrier{},
+      roughnessMetallicBarrier{};
+
+  // Albedo
+  BarrierUtilsVk::GetDefaultImageBarrierInfo(
+      m_imagesVk.albedoImages[currentFrame].GetVkImage(),
+      VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+      VK_IMAGE_ASPECT_COLOR_BIT, albedoBarrier);
+
+  // Normal
+  BarrierUtilsVk::GetDefaultImageBarrierInfo(
+      m_imagesVk.normalImages[currentFrame].GetVkImage(),
+      VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+      VK_IMAGE_ASPECT_COLOR_BIT, normalBarrier);
+
+  // RoughnessMetallic
+  BarrierUtilsVk::GetDefaultImageBarrierInfo(
+      m_imagesVk.roughnessMetallicImages[currentFrame].GetVkImage(),
+      VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+      VK_IMAGE_ASPECT_COLOR_BIT, roughnessMetallicBarrier);
+
+  // Depth
+  BarrierUtilsVk::GetDefaultImageBarrierInfo(
+      m_imagesVk.depthImages[currentFrame].GetVkImage(),
+      VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+      VK_IMAGE_ASPECT_DEPTH_BIT, depthBarrier);
+
+  std::array<VkImageMemoryBarrier, 3> colorBarriers = {
+      albedoBarrier, normalBarrier, roughnessMetallicBarrier};
+
+  for (auto &barrier : colorBarriers) {
+    barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+  }
+  depthBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+  depthBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+  vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                       VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0,
+                       nullptr, 0, nullptr, colorBarriers.size(),
+                       colorBarriers.data());
+
+  vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                       VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, 0, 0,
+                       nullptr, 0, nullptr, 1, &depthBarrier);
+
+  //
+  // Renderpass ----------------------------------------------------------------
+
   VkRenderPassBeginInfo renderPassBeginInfo{};
   RenderPassVk::GetDefaultCmdBeginRenderPassInfo(
       m_framebuffers[currentFrame], swapchainExtent,
