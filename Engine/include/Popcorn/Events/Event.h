@@ -2,6 +2,7 @@
 
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include "Popcorn/Core/Helpers.h"
 #include <string>
 #include <sys/types.h>
 
@@ -28,7 +29,11 @@ enum class EventType {
   MouseScrolled,
 
   // Time Events
-  TimeCPUClockUnit // One second passed
+  TimeCPUClockUnit, // One second passed
+
+  // Vulkan Events
+  ImageVkLayoutInitialToFinal,
+  ImageVkLayoutFinalToInitial
 };
 
 enum class EventCategory {
@@ -37,7 +42,8 @@ enum class EventCategory {
   WindowEvent = shift_l(2),
   KeyboardEvent = shift_l(3),
   MouseEvent = shift_l(4),
-  TimeEvent = shift_l(5)
+  TimeEvent = shift_l(5),
+  VulkanEvent = shift_l(6)
 };
 
 // HASH DEFINE START ----------------------------------------------------------

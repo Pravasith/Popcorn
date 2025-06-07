@@ -194,15 +194,19 @@ elseif(BUILD_FOR_MACOS)
 endif()
 
 target_link_libraries(vma PUBLIC Vulkan::Headers Vulkan::Loader)
-target_link_libraries(Graphics PRIVATE Vulkan::Headers Vulkan::Loader glfw vma)
+target_link_libraries(ImGui PUBLIC glfw Vulkan::Headers Vulkan::Loader)
+
+target_link_libraries(Events PRIVATE Vulkan::Headers)
+
+target_link_libraries(Graphics PRIVATE Events Vulkan::Headers Vulkan::Loader
+                                       glfw vma)
 target_link_libraries(Graphics PUBLIC glm::glm)
 
 target_link_libraries(Window PRIVATE glad glfw)
 target_link_libraries(Window PRIVATE Events)
-target_link_libraries(ImGui PUBLIC glfw Vulkan::Headers Vulkan::Loader)
+
 target_link_libraries(Popcorn PUBLIC tinygltf)
 target_link_libraries(Popcorn PRIVATE glad glfw)
-
 target_link_libraries(Popcorn PUBLIC Graphics)
 target_link_libraries(Popcorn PRIVATE Window ImGui)
 

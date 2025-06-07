@@ -524,6 +524,8 @@ void GBufferRenderFlowVk::OnSwapchainInvalidCb() {
   CreateFramebuffers();
 
   UpdateDescriptorSetsLocal();
+
+  m_isFrameOne = true;
 };
 
 //
@@ -566,33 +568,43 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
+
   //
   // Place barrier to transition image
   VkImageMemoryBarrier albedoBarrier{}, depthBarrier{}, normalBarrier{},
       roughnessMetallicBarrier{};
 
+  const VkImageLayout initialFrame =
+      m_isFrameOne ? VK_IMAGE_LAYOUT_UNDEFINED
+                   : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+  bool depthHasStencilComponent =
+      m_imagesVk.depthImages[currentFrame].FormatHasStencilComponent();
+
   // Albedo
   BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_imagesVk.albedoImages[currentFrame].GetVkImage(),
-      VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-      VK_IMAGE_ASPECT_COLOR_BIT, albedoBarrier);
+      m_imagesVk.albedoImages[currentFrame].GetVkImage(), initialFrame,
+      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
+      albedoBarrier);
 
   // Normal
   BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_imagesVk.normalImages[currentFrame].GetVkImage(),
-      VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-      VK_IMAGE_ASPECT_COLOR_BIT, normalBarrier);
+      m_imagesVk.normalImages[currentFrame].GetVkImage(), initialFrame,
+      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
+      normalBarrier);
 
   // RoughnessMetallic
   BarrierUtilsVk::GetDefaultImageBarrierInfo(
       m_imagesVk.roughnessMetallicImages[currentFrame].GetVkImage(),
-      VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+      initialFrame, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
       VK_IMAGE_ASPECT_COLOR_BIT, roughnessMetallicBarrier);
 
   // Depth
   BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_imagesVk.depthImages[currentFrame].GetVkImage(),
-      VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+      m_imagesVk.depthImages[currentFrame].GetVkImage(), initialFrame,
+      depthHasStencilComponent
+          ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+          : VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
       VK_IMAGE_ASPECT_DEPTH_BIT, depthBarrier);
 
   std::array<VkImageMemoryBarrier, 3> colorBarriers = {
@@ -613,6 +625,8 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
                        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, 0, 0,
                        nullptr, 0, nullptr, 1, &depthBarrier);
+
+  m_isFrameOne = false;
 
   //
   // Renderpass ----------------------------------------------------------------

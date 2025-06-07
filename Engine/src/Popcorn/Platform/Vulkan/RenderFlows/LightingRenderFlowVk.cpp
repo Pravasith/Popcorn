@@ -362,6 +362,8 @@ void LightingRenderFlowVk::OnSwapchainInvalidCb() {
   CreateFramebuffers();
 
   UpdateDescriptorSetsLocal();
+
+  m_isFrameOne = true;
 };
 
 //
@@ -394,11 +396,14 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
 
+  const VkImageLayout initialFrame =
+      m_isFrameOne ? VK_IMAGE_LAYOUT_UNDEFINED
+                   : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
   // Place barrier to transition image
   VkImageMemoryBarrier barrier{};
   BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_imagesVk.lightImages[currentFrame].GetVkImage(),
-      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+      m_imagesVk.lightImages[currentFrame].GetVkImage(), initialFrame,
       VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
       barrier);
   barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
@@ -457,6 +462,8 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
                        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0,
                        nullptr, 1, depthImageBarriers.data());
+
+  m_isFrameOne = false;
 
   // Render pass begin
   VkRenderPassBeginInfo renderPassBeginInfo{};

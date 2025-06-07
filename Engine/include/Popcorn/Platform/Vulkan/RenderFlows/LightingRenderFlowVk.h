@@ -71,6 +71,8 @@ private:
   LightingPipelineVk m_lightingPipelineVk;
 
   std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> m_commandBuffers{};
+
+  bool m_isFrameOne = true;
 };
 
 GFX_NAMESPACE_END
