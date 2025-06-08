@@ -46,7 +46,7 @@ public:
                                       VkImageTiling tiling,
                                       VkFormatFeatureFlags features);
 
-  bool FormatHasStencilComponent() {
+  const bool FormatHasStencilComponent() const {
     PC_ASSERT(m_format != VK_FORMAT_UNDEFINED, "m_format is null");
     return m_format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
            m_format == VK_FORMAT_D24_UNORM_S8_UINT;

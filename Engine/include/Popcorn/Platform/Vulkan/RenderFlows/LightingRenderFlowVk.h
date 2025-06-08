@@ -15,8 +15,9 @@ class LightingRenderFlowVk : public RenderFlowVk {
 public:
   LightingRenderFlowVk()
       : m_imagesVk(s_lightingImages), m_dependencyImages(s_gBufferImages) {
-          PC_PRINT("CREATED", TagType::Constr, "LightingRenderFlowVk")
-        };
+    m_isFirstTimeInFrame.fill(true);
+    PC_PRINT("CREATED", TagType::Constr, "LightingRenderFlowVk")
+  };
 
   virtual ~LightingRenderFlowVk() override {
     PC_PRINT("DESTROYED", TagType::Destr, "LightingRenderflowVk")
@@ -71,8 +72,7 @@ private:
   LightingPipelineVk m_lightingPipelineVk;
 
   std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> m_commandBuffers{};
-
-  bool m_isFrameOne = true;
+  std::array<bool, MAX_FRAMES_IN_FLIGHT> m_isFirstTimeInFrame{};
 };
 
 GFX_NAMESPACE_END

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BarrierVk.h"
 #include "CommonVk.h"
 #include "GlobalMacros.h"
 #include "MaterialPipelinesVk.h"
@@ -63,6 +64,13 @@ private:
     PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> pbrMatSets{};
   };
 
+  struct ImageBarriersVk {
+    PcFramesColorImageBarriers albedoBarriers;
+    PcFramesDepthImageBarriers depthBarriers;
+    PcFramesColorImageBarriers normalBarriers;
+    PcFramesColorImageBarriers roughnessMetallicBarriers;
+  };
+
   PcRenderFlowImages<RenderFlows::GBuffer, MAX_FRAMES_IN_FLIGHT> &m_imagesVk;
 
   AttachmentsVk m_attachmentsVk{};
@@ -75,7 +83,8 @@ private:
   PbrMatPipelineVk m_pbrMatPipelineVk;
 
   std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> m_commandBuffers{};
-  bool m_isFrameOne = true;
+
+  ImageBarriersVk m_imageBarriers;
 };
 
 GFX_NAMESPACE_END

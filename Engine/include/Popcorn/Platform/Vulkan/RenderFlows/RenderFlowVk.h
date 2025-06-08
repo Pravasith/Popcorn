@@ -110,7 +110,8 @@ public:
 
 public:
   struct SamplersVk {
-    SamplerVk frameSampler;
+    SamplerVk colorSampler;
+    SamplerVk depthSampler;
   };
 
   struct DescriptorSetsVkStatic {

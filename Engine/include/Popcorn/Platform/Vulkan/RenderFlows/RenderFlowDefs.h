@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AttachmentVk.h"
+#include "BarrierVk.h"
 #include "CommonVk.h"
 #include "GlobalMacros.h"
 #include "ImageVk.h"
@@ -74,6 +75,14 @@ template <> struct PcRenderFlowImages<RenderFlows::Composite> {
 using PcRenderFlowCmdBuffersMap =
     std::unordered_map<RenderFlows,
                        std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> *>;
+
+using PcFramesColorImageBarriers =
+    std::array<ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>,
+               MAX_FRAMES_IN_FLIGHT>;
+
+using PcFramesDepthImageBarriers =
+    std::array<ImageBarrierVk<LayoutTransitions::DepthAttachmentToShaderRead>,
+               MAX_FRAMES_IN_FLIGHT>;
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

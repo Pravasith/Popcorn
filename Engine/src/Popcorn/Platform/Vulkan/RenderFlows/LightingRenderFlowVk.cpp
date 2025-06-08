@@ -230,13 +230,13 @@ void LightingRenderFlowVk::UpdateDescriptorSetsLocal() {
     VkDescriptorImageInfo albedoImageInfo{};
     albedoImageInfo.imageView =
         m_dependencyImages.albedoImages[i].GetVkImageView();
-    albedoImageInfo.sampler = s_samplersVk.frameSampler.GetVkSampler();
+    albedoImageInfo.sampler = s_samplersVk.colorSampler.GetVkSampler();
     albedoImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
     VkDescriptorImageInfo depthImageInfo{};
     depthImageInfo.imageView =
         m_dependencyImages.depthImages[i].GetVkImageView();
-    depthImageInfo.sampler = s_samplersVk.frameSampler.GetVkSampler();
+    depthImageInfo.sampler = s_samplersVk.depthSampler.GetVkSampler();
     depthImageInfo.imageLayout =
         m_dependencyImages.depthImages[i].FormatHasStencilComponent()
             ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
@@ -245,14 +245,14 @@ void LightingRenderFlowVk::UpdateDescriptorSetsLocal() {
     VkDescriptorImageInfo normalImageInfo{};
     normalImageInfo.imageView =
         m_dependencyImages.normalImages[i].GetVkImageView();
-    normalImageInfo.sampler = s_samplersVk.frameSampler.GetVkSampler();
+    normalImageInfo.sampler = s_samplersVk.colorSampler.GetVkSampler();
     normalImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
     VkDescriptorImageInfo roughnessMetallicImageInfo{};
     roughnessMetallicImageInfo.imageView =
         m_dependencyImages.roughnessMetallicImages[i].GetVkImageView();
     roughnessMetallicImageInfo.sampler =
-        s_samplersVk.frameSampler.GetVkSampler();
+        s_samplersVk.colorSampler.GetVkSampler();
     roughnessMetallicImageInfo.imageLayout =
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
@@ -364,6 +364,7 @@ void LightingRenderFlowVk::OnSwapchainInvalidCb() {
   UpdateDescriptorSetsLocal();
 
   m_isFrameOne = true;
+  // m_firstFrameUsed[currentFrame] = true;
 };
 
 //
@@ -396,74 +397,22 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
 
-  const VkImageLayout initialFrame =
-      m_isFrameOne ? VK_IMAGE_LAYOUT_UNDEFINED
-                   : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+  VkImageLayout initialLightImageLayout =
+      m_firstFrameUsed[currentFrame] ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                                     : VK_IMAGE_LAYOUT_UNDEFINED;
 
   // Place barrier to transition image
-  VkImageMemoryBarrier barrier{};
+  VkImageMemoryBarrier lightImageBarrier{};
   BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_imagesVk.lightImages[currentFrame].GetVkImage(), initialFrame,
-      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
-      barrier);
-  barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-  barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+      m_imagesVk.lightImages[currentFrame].GetVkImage(),
+      initialLightImageLayout, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+      VK_IMAGE_ASPECT_COLOR_BIT, lightImageBarrier);
+  lightImageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+  lightImageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
   vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
                        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0,
-                       nullptr, 0, nullptr, 1, &barrier);
-
-  // Place barrier to transition image
-  VkImageMemoryBarrier albedoBarrier{}, depthBarrier{}, normalBarrier{},
-      roughnessMetallicBarrier{};
-
-  auto hasStencil =
-      m_dependencyImages.depthImages[currentFrame].FormatHasStencilComponent();
-
-  BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_dependencyImages.albedoImages[currentFrame].GetVkImage(),
-      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
-      albedoBarrier);
-  BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_dependencyImages.depthImages[currentFrame].GetVkImage(),
-      hasStencil ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-                 : VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-      VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL,
-      hasStencil ? VK_IMAGE_ASPECT_STENCIL_BIT | VK_IMAGE_ASPECT_DEPTH_BIT
-                 : VK_IMAGE_ASPECT_DEPTH_BIT,
-      depthBarrier);
-  depthBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-  depthBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-  BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_dependencyImages.normalImages[currentFrame].GetVkImage(),
-      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
-      normalBarrier);
-  BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_dependencyImages.roughnessMetallicImages[currentFrame].GetVkImage(),
-      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
-      roughnessMetallicBarrier);
-
-  std::array<VkImageMemoryBarrier, 3> colorImageBarriers{
-      albedoBarrier, normalBarrier, roughnessMetallicBarrier};
-  std::array<VkImageMemoryBarrier, 1> depthImageBarriers{depthBarrier};
-
-  for (auto &barrier : colorImageBarriers) {
-    barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-  }
-
-  vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                       VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0,
-                       nullptr, 3, colorImageBarriers.data());
-
-  vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
-                       VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0,
-                       nullptr, 1, depthImageBarriers.data());
-
-  m_isFrameOne = false;
+                       nullptr, 0, nullptr, 1, &lightImageBarrier);
 
   // Render pass begin
   VkRenderPassBeginInfo renderPassBeginInfo{};
@@ -522,7 +471,22 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkCmdDraw(cmdBfr, 3, 1, 0, 0);
 
   m_renderPass.EndRenderPass(cmdBfr);
+
+  BarrierUtilsVk::GetDefaultImageBarrierInfo(
+      m_imagesVk.lightImages[currentFrame].GetVkImage(),
+      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
+      lightImageBarrier);
+  lightImageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+  lightImageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+  vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                       VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0,
+                       nullptr, 1, &lightImageBarrier);
+
   ContextVk::CommandPool()->EndCommandBuffer(cmdBfr);
+
+  m_firstFrameUsed[currentFrame] = true;
 }
 
 //

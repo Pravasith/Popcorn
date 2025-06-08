@@ -27,7 +27,6 @@ PcRenderFlowCmdBuffersMap RendererVk::s_renderFlowCmdBuffers;
 // --- PUBLIC METHODS ------------------------------------------------------
 
 void RendererVk::DrawFrame(const Scene &scene) {
-
   ContextVk::Frame()->Draw(
       [&]() {
         vkDeviceWaitIdle(ContextVk::Device()->GetDevice());

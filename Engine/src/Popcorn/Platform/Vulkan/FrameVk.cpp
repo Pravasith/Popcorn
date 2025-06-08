@@ -92,9 +92,9 @@ void FrameVk::Draw(
   auto &lightingCmdBfrs = *renderFlowCmdBuffersMap[RenderFlows::Lighting];
   auto &compositeCmdBfrs = *renderFlowCmdBuffersMap[RenderFlows::Composite];
 
-  std::vector<VkCommandBuffer> commandBuffers{
-      gBufferCmdBfrs[m_currentFrame], lightingCmdBfrs[m_currentFrame],
-      compositeCmdBfrs[m_currentFrame]}; // is this safe?
+  std::vector<VkCommandBuffer> commandBuffers{gBufferCmdBfrs[m_currentFrame],
+                                              lightingCmdBfrs[m_currentFrame],
+                                              compositeCmdBfrs[m_currentFrame]};
 
   //
   // Submit the graphics queue with the command buffer (with recorded commands

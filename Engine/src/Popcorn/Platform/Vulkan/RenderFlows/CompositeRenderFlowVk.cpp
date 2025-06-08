@@ -213,7 +213,7 @@ void CompositeRenderFlowVk::UpdateDescriptorSetsLocal() {
     VkDescriptorImageInfo lightImageInfo{};
     lightImageInfo.imageView =
         m_dependencyImages.lightImages[i].GetVkImageView();
-    lightImageInfo.sampler = s_samplersVk.frameSampler.GetVkSampler();
+    lightImageInfo.sampler = s_samplersVk.colorSampler.GetVkSampler();
     lightImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
     VkWriteDescriptorSet lightWrite{};

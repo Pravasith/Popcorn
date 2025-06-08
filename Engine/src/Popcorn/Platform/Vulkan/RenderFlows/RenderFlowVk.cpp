@@ -203,14 +203,28 @@ void RenderFlowVk::CopyDynamicUniformsToMemory(const uint32_t currentFrame) {
 };
 
 void RenderFlowVk::CreateSamplers() {
-  VkSamplerCreateInfo samplerInfo{};
-  SamplerVk::GetDefaultSamplerCreateInfoValues(samplerInfo);
-  samplerInfo.magFilter = VK_FILTER_NEAREST;
-  samplerInfo.minFilter = VK_FILTER_NEAREST;
-  s_samplersVk.frameSampler.Create(samplerInfo);
+  // Color sampler
+  VkSamplerCreateInfo colorSamplerInfo{};
+  SamplerVk::GetDefaultSamplerCreateInfoValues(colorSamplerInfo);
+  colorSamplerInfo.magFilter = VK_FILTER_NEAREST;
+  colorSamplerInfo.minFilter = VK_FILTER_NEAREST;
+  s_samplersVk.colorSampler.Create(colorSamplerInfo);
+
+  // Depth sampler
+  VkSamplerCreateInfo depthSamplerInfo{};
+  SamplerVk::GetDefaultSamplerCreateInfoValues(depthSamplerInfo);
+  depthSamplerInfo.compareEnable = VK_FALSE; // No shadow comparison
+  depthSamplerInfo.magFilter = VK_FILTER_NEAREST;
+  depthSamplerInfo.minFilter = VK_FILTER_NEAREST;
+  depthSamplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  depthSamplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  depthSamplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  depthSamplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+  depthSamplerInfo.unnormalizedCoordinates = VK_FALSE;
+  s_samplersVk.depthSampler.Create(depthSamplerInfo);
 };
 
-void RenderFlowVk::DestroySamplers() { s_samplersVk.frameSampler.Destroy(); };
+void RenderFlowVk::DestroySamplers() { s_samplersVk.colorSampler.Destroy(); };
 
 void RenderFlowVk::FreeMemory() {
   ContextVk::Memory()->CleanUpUboSsboLocalBuffers();

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GlobalMacros.h"
+#include "ImageVk.h"
 #include "Popcorn/Core/Base.h"
 #include <vulkan/vulkan_core.h>
 
@@ -33,6 +34,46 @@ public:
     barrier.subresourceRange.baseArrayLayer = 0;
     barrier.subresourceRange.layerCount = 1;
   };
+};
+
+enum LayoutTransitions {
+  ColorAttachmentToShaderRead = 1,
+  DepthAttachmentToShaderRead,
+  ColorAttachmentToPresentSrc
+};
+
+enum LayoutTransitionDirection { Forward, Backward };
+
+template <LayoutTransitions T> class ImageBarrierVk {
+public:
+  ImageBarrierVk() { PC_PRINT("CREATED", TagType::Constr, "ImageBarrierVk.h") };
+  ~ImageBarrierVk() {
+    PC_PRINT("DESTROYED", TagType::Destr, "ImageBarrierVk.h")
+  };
+
+  void Init(const ImageVk *imageVk) {
+    m_imageVk = imageVk;
+    Create();
+  };
+  void RecordBarrierCommand(const VkCommandBuffer &cmdBfr);
+
+  [[nodiscard]] const LayoutTransitionDirection &GetDirection() {
+    return m_direction;
+  };
+
+  void ReverseDirection() {
+    m_direction = m_direction == Forward ? Backward : Forward;
+    Create();
+  };
+
+private:
+  void Create();
+
+private:
+  VkImageMemoryBarrier m_imageBarrier{};
+  const ImageVk *m_imageVk = nullptr;
+
+  LayoutTransitionDirection m_direction = LayoutTransitionDirection::Forward;
 };
 
 GFX_NAMESPACE_END
