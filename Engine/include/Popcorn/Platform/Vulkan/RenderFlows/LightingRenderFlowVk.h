@@ -58,6 +58,10 @@ private:
     PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> lightingSets{};
   };
 
+  struct ImageBarriersVk {
+    PcFramesColorImageBarriers lightBarriers;
+  };
+
   PcRenderFlowImages<RenderFlows::Lighting, MAX_FRAMES_IN_FLIGHT> &m_imagesVk;
   PcRenderFlowImages<RenderFlows::GBuffer, MAX_FRAMES_IN_FLIGHT>
       &m_dependencyImages;
@@ -73,6 +77,8 @@ private:
 
   std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> m_commandBuffers{};
   std::array<bool, MAX_FRAMES_IN_FLIGHT> m_isFirstTimeInFrame{};
+
+  ImageBarriersVk m_imageBarriers;
 };
 
 GFX_NAMESPACE_END

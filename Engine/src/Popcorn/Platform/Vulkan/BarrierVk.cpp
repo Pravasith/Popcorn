@@ -37,7 +37,6 @@ void ImageBarrierVk<LayoutTransitions::DepthAttachmentToShaderRead>::Create() {
     aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
 
   VkImageLayout initialLayout, finalLayout;
-
   VkAccessFlags srcAccessMask, dstAccessMask;
 
   if (m_direction == LayoutTransitionDirection::Forward) {
@@ -48,9 +47,7 @@ void ImageBarrierVk<LayoutTransitions::DepthAttachmentToShaderRead>::Create() {
                              : VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
 
     srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-    dstAccessMask =
-        VK_ACCESS_SHADER_READ_BIT; // I also enabled depth testing in the
-                                   // gbuffer should I add anything else here?
+    dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
   } else {
     initialLayout = hasStencil ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
                                : VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
@@ -59,8 +56,6 @@ void ImageBarrierVk<LayoutTransitions::DepthAttachmentToShaderRead>::Create() {
 
     srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
     dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-    // I also enabled depth testing in the
-    // gbuffer should I add anything else here?
   }
 
   BarrierUtilsVk::GetDefaultImageBarrierInfo(m_imageVk->GetVkImage(),

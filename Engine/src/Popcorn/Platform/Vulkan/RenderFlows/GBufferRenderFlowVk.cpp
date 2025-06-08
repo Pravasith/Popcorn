@@ -1,6 +1,5 @@
-#include "RenderFlows/GBufferRenderFlowVk.h"
+#include "GBufferRenderFlowVk.h"
 #include "AttachmentVk.h"
-#include "BarrierVk.h"
 #include "BufferObjectsVk.h"
 #include "CommonVk.h"
 #include "ContextVk.h"
@@ -12,6 +11,7 @@
 #include "Memory/MemoryVk.h"
 #include "Mesh.h"
 #include "PipelineUtilsVk.h"
+#include "Popcorn/Core/Base.h"
 #include "Popcorn/Loaders/LoadersDefs.h"
 #include "RenderPassVk.h"
 #include <algorithm>
@@ -152,8 +152,8 @@ void GBufferRenderFlowVk::CreateAttachments() {
     VkAttachmentDescription albedoAttachment{};
     AttachmentVk::GetDefaultAttachmentDescription(albedoAttachment);
     albedoAttachment.format = albedoFormat;
-    albedoAttachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-    albedoAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    albedoAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    albedoAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     albedoAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     albedoAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
@@ -163,12 +163,15 @@ void GBufferRenderFlowVk::CreateAttachments() {
     depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     depthAttachment.finalLayout =
         depthImage.FormatHasStencilComponent()
-            ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
-            : VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+            ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+            : VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
     depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    PC_WARN(depthImage.FormatHasStencilComponent()
+            << ": Format has stencil component??")
+
     depthAttachment.stencilLoadOp = depthImage.FormatHasStencilComponent()
-                                        ? VK_ATTACHMENT_LOAD_OP_DONT_CARE
+                                        ? VK_ATTACHMENT_LOAD_OP_CLEAR
                                         : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     depthAttachment.stencilStoreOp = depthImage.FormatHasStencilComponent()
                                          ? VK_ATTACHMENT_STORE_OP_STORE
@@ -178,7 +181,7 @@ void GBufferRenderFlowVk::CreateAttachments() {
     AttachmentVk::GetDefaultAttachmentDescription(normalAttachment);
     normalAttachment.format = normalFormat;
     normalAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    normalAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    normalAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     normalAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     normalAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
@@ -187,7 +190,7 @@ void GBufferRenderFlowVk::CreateAttachments() {
     roughnessMetallicAttachment.format = roughnessMetallicFormat;
     roughnessMetallicAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     roughnessMetallicAttachment.finalLayout =
-        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     roughnessMetallicAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     roughnessMetallicAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
@@ -524,8 +527,6 @@ void GBufferRenderFlowVk::OnSwapchainInvalidCb() {
   CreateFramebuffers();
 
   UpdateDescriptorSetsLocal();
-
-  m_isFrameOne = true;
 };
 
 //
@@ -568,69 +569,6 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
-
-  //
-  // Place barrier to transition image
-  VkImageMemoryBarrier albedoBarrier{}, depthBarrier{}, normalBarrier{},
-      roughnessMetallicBarrier{};
-
-  bool depthHasStencilComponent =
-      m_imagesVk.depthImages[currentFrame].FormatHasStencilComponent();
-
-  VkImageLayout initialColorLayout =
-      m_isFrameOne ? VK_IMAGE_LAYOUT_UNDEFINED
-                   : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-  VkImageLayout initialDepthLayout =
-      m_isFrameOne ? VK_IMAGE_LAYOUT_UNDEFINED
-                   : (depthHasStencilComponent
-                          ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
-                          : VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL);
-
-  // Albedo
-  BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_imagesVk.albedoImages[currentFrame].GetVkImage(), initialColorLayout,
-      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
-      albedoBarrier);
-
-  // Normal
-  BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_imagesVk.normalImages[currentFrame].GetVkImage(), initialColorLayout,
-      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
-      normalBarrier);
-
-  // RoughnessMetallic
-  BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_imagesVk.roughnessMetallicImages[currentFrame].GetVkImage(),
-      initialColorLayout, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-      VK_IMAGE_ASPECT_COLOR_BIT, roughnessMetallicBarrier);
-
-  // Depth
-  BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_imagesVk.depthImages[currentFrame].GetVkImage(), initialDepthLayout,
-      depthHasStencilComponent
-          ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-          : VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-      VK_IMAGE_ASPECT_DEPTH_BIT, depthBarrier);
-
-  std::array<VkImageMemoryBarrier, 3> colorBarriers = {
-      albedoBarrier, normalBarrier, roughnessMetallicBarrier};
-
-  for (auto &barrier : colorBarriers) {
-    barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-    barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-  }
-  depthBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-  depthBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-
-  vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-                       VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0,
-                       nullptr, 0, nullptr, colorBarriers.size(),
-                       colorBarriers.data());
-
-  vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-                       VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, 0, 0,
-                       nullptr, 0, nullptr, 1, &depthBarrier);
 
   //
   // Renderpass ----------------------------------------------------------------
@@ -704,56 +642,6 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   //
   // --- End renderpass --------------------------------------------------------
   m_renderPass.EndRenderPass(cmdBfr);
-
-  BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_imagesVk.albedoImages[currentFrame].GetVkImage(),
-      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
-      albedoBarrier);
-
-  BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_imagesVk.depthImages[currentFrame].GetVkImage(),
-      depthHasStencilComponent
-          ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-          : VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-      depthHasStencilComponent ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
-                               : VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL,
-      depthHasStencilComponent
-          ? VK_IMAGE_ASPECT_STENCIL_BIT | VK_IMAGE_ASPECT_DEPTH_BIT
-          : VK_IMAGE_ASPECT_DEPTH_BIT,
-      depthBarrier);
-  depthBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-  depthBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-
-  BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_imagesVk.normalImages[currentFrame].GetVkImage(),
-      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
-      normalBarrier);
-  BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_imagesVk.roughnessMetallicImages[currentFrame].GetVkImage(),
-      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
-      roughnessMetallicBarrier);
-
-  std::array<VkImageMemoryBarrier, 3> colorImageBarriers{
-      albedoBarrier, normalBarrier, roughnessMetallicBarrier};
-  std::array<VkImageMemoryBarrier, 1> depthImageBarriers{depthBarrier};
-
-  for (auto &barrier : colorImageBarriers) {
-    barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-  }
-
-  vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                       VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0,
-                       nullptr, 3, colorImageBarriers.data());
-
-  vkCmdPipelineBarrier(cmdBfr,
-                       VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                           VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
-                       VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0,
-                       nullptr, 1, depthImageBarriers.data());
 
   ContextVk::CommandPool()->EndCommandBuffer(cmdBfr);
 };

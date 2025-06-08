@@ -1,6 +1,5 @@
 #pragma once
 
-#include "BarrierVk.h"
 #include "CommonVk.h"
 #include "GlobalMacros.h"
 #include "MaterialPipelinesVk.h"

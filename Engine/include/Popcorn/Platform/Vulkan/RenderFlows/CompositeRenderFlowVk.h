@@ -56,6 +56,10 @@ private:
     PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> presentSets{};
   };
 
+  struct ImageBarriersVk {
+    PcFramesColorImageBarriers presentBarriers;
+  };
+
   PcRenderFlowImages<RenderFlows::Composite> &m_imagesVk;
   PcRenderFlowImages<RenderFlows::Lighting, MAX_FRAMES_IN_FLIGHT>
       &m_dependencyImages;
