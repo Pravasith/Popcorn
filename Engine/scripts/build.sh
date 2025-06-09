@@ -8,10 +8,6 @@ platform=$(echo "$platform" | tr '[:upper:]' '[:lower:]')
 src_dir="$PWD"
 
 
-# Compile shaders
-cd $src_dir
-echo "Compiling shaders..."
-./compile-shaders.sh
 
 # Check the user input and print a message accordingly
 if [ "$platform" = "l" ]; then
@@ -100,3 +96,9 @@ elif [ "$platform" = "w" ]; then
 else
     echo "Invalid input. Please enter 'L' for Linux or 'W' for Windows."
 fi
+
+
+# Compile shaders
+cd $src_dir
+echo "Compiling shaders..."
+./scripts/compile-shaders.sh
