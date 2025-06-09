@@ -78,6 +78,26 @@ void LightingRenderFlowVk::CreateAttachments() {
 //
 //
 //
+// --- IMAGE BARRIERS  ---------------------------------------------------------
+// --- IMAGE BARRIERS  ---------------------------------------------------------
+// --- IMAGE BARRIERS  ---------------------------------------------------------
+//
+void LightingRenderFlowVk::CreateImageBarriers() {
+  // For AFTER the current renderpass and BEFORE the next renderpass
+  // Color/depth attachment -> shader read format
+  for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+    ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
+        &lightBarrier = m_imageBarriers.lightBarriers[i];
+
+    lightBarrier.Init(&m_imagesVk.lightImages[i]);
+  }
+}
+
+//
+//
+//
+//
+//
 // --- CREATE RENDER PASS ------------------------------------------------------
 // --- CREATE RENDER PASS ------------------------------------------------------
 // --- CREATE RENDER PASS ------------------------------------------------------
@@ -359,12 +379,10 @@ void LightingRenderFlowVk::OnSwapchainInvalidCb() {
   DestroyAttachments();
 
   CreateAttachments();
+  CreateImageBarriers();
   CreateFramebuffers();
 
   UpdateDescriptorSetsLocal();
-
-  m_isFrameOne = true;
-  // m_firstFrameUsed[currentFrame] = true;
 };
 
 //
@@ -397,22 +415,9 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
 
-  VkImageLayout initialLightImageLayout =
-      m_firstFrameUsed[currentFrame] ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-                                     : VK_IMAGE_LAYOUT_UNDEFINED;
-
-  // Place barrier to transition image
-  VkImageMemoryBarrier lightImageBarrier{};
-  BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_imagesVk.lightImages[currentFrame].GetVkImage(),
-      initialLightImageLayout, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-      VK_IMAGE_ASPECT_COLOR_BIT, lightImageBarrier);
-  lightImageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-  lightImageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-  vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-                       VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0,
-                       nullptr, 0, nullptr, 1, &lightImageBarrier);
+  // vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+  //                      VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0,
+  //                      nullptr, 0, nullptr, 1, &lightImageBarrier);
 
   // Render pass begin
   VkRenderPassBeginInfo renderPassBeginInfo{};
@@ -472,21 +477,19 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 
   m_renderPass.EndRenderPass(cmdBfr);
 
-  BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_imagesVk.lightImages[currentFrame].GetVkImage(),
-      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
-      lightImageBarrier);
-  lightImageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-  lightImageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-  vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                       VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0,
-                       nullptr, 1, &lightImageBarrier);
+  // BarrierUtilsVk::GetDefaultImageBarrierInfo(
+  //     m_imagesVk.lightImages[currentFrame].GetVkImage(),
+  //     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+  //     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
+  //     lightImageBarrier);
+  // lightImageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+  // lightImageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+  //
+  // vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+  //                      VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr,
+  //                      0, nullptr, 1, &lightImageBarrier);
 
   ContextVk::CommandPool()->EndCommandBuffer(cmdBfr);
-
-  m_firstFrameUsed[currentFrame] = true;
 }
 
 //

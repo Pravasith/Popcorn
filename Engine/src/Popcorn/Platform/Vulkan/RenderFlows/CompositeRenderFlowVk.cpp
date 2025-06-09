@@ -63,6 +63,29 @@ void CompositeRenderFlowVk::CreateAttachments() {
 //
 //
 //
+// --- IMAGE BARRIERS  ---------------------------------------------------------
+// --- IMAGE BARRIERS  ---------------------------------------------------------
+// --- IMAGE BARRIERS  ---------------------------------------------------------
+//
+void CompositeRenderFlowVk::CreateImageBarriers() {
+  auto &swapchainImgViews = ContextVk::Swapchain()->GetSwapchainImageViews();
+  m_imageBarriers.presentBarriers.resize(swapchainImgViews.size());
+
+  // For AFTER the current renderpass and BEFORE the next renderpass
+  // Color/depth attachment -> shader read format
+  for (int i = 0; i < swapchainImgViews.size(); ++i) {
+    ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
+        &presentBarrier = m_imageBarriers.presentBarriers[i];
+
+    presentBarrier.Init(&m_imagesVk.swapchainImages[i]);
+  }
+}
+
+//
+//
+//
+//
+//
 // --- CREATE RENDER PASS ------------------------------------------------------
 // --- CREATE RENDER PASS ------------------------------------------------------
 // --- CREATE RENDER PASS ------------------------------------------------------
@@ -272,6 +295,7 @@ void CompositeRenderFlowVk::OnSwapchainInvalidCb() {
   ContextVk::Swapchain()->RecreateSwapchainAndVkSwapchain();
 
   CreateAttachments();
+  CreateImageBarriers();
   CreateRenderPass();
   CreateFramebuffers();
 

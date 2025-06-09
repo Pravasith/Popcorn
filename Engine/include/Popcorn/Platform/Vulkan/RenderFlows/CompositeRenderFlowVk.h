@@ -23,6 +23,7 @@ public:
 
 private:
   virtual void CreateAttachments() override;
+  virtual void CreateImageBarriers() override;
   virtual void CreateRenderPass() override;
   virtual void CreateFramebuffers() override;
 
@@ -57,7 +58,7 @@ private:
   };
 
   struct ImageBarriersVk {
-    PcFramesColorImageBarriers presentBarriers;
+    PcPresentationImageBarriers presentBarriers;
   };
 
   PcRenderFlowImages<RenderFlows::Composite> &m_imagesVk;
@@ -74,6 +75,8 @@ private:
   CompositePipelineVk m_compositePipelineVk;
 
   std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> m_commandBuffers{};
+
+  ImageBarriersVk m_imageBarriers;
 };
 
 GFX_NAMESPACE_END

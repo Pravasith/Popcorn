@@ -48,8 +48,6 @@ public:
   virtual void CreatePipelines() = 0;
   virtual void DestroyPipelines() = 0;
 
-  virtual void CreateCommandBuffers() = 0;
-
   virtual void OnSwapchainInvalidCb() = 0;
   virtual void RecordCommandBuffer(const uint32_t frameIndex,
                                    const uint32_t currentFrame) = 0;
@@ -59,8 +57,11 @@ public:
 
 private:
   virtual void CreateAttachments() = 0;
+  virtual void CreateImageBarriers() = 0;
   virtual void CreateRenderPass() = 0;
   virtual void CreateFramebuffers() = 0;
+
+  virtual void CreateCommandBuffers() = 0;
 
   virtual void DestroyFramebuffers() = 0;
   virtual void DestroyRenderPass() = 0;
@@ -71,6 +72,7 @@ public:
     PC_WARN("Preparing Renderflow............................")
 
     CreateAttachments();
+    CreateImageBarriers();
     CreateRenderPass();
     CreateFramebuffers();
     CreateCommandBuffers();

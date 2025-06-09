@@ -1,5 +1,6 @@
 #include "GBufferRenderFlowVk.h"
 #include "AttachmentVk.h"
+#include "BarrierVk.h"
 #include "BufferObjectsVk.h"
 #include "CommonVk.h"
 #include "ContextVk.h"
@@ -209,7 +210,36 @@ void GBufferRenderFlowVk::CreateAttachments() {
     m_attachmentsVk.roughnessMetallicAttachments[i].SetAttachmentDescription(
         roughnessMetallicAttachment);
   }
-};
+}
+
+//
+//
+//
+//
+//
+// --- IMAGE BARRIERS  ---------------------------------------------------------
+// --- IMAGE BARRIERS  ---------------------------------------------------------
+// --- IMAGE BARRIERS  ---------------------------------------------------------
+//
+void GBufferRenderFlowVk::CreateImageBarriers() {
+  // For AFTER the current renderpass and BEFORE the next renderpass
+  // Color/depth attachment -> shader read format
+  for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+    ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
+        &albedoBarrier = m_imageBarriers.albedoBarriers[i];
+    ImageBarrierVk<LayoutTransitions::DepthAttachmentToShaderRead>
+        &depthBarrier = m_imageBarriers.depthBarriers[i];
+    ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
+        &normalBarrier = m_imageBarriers.normalBarriers[i];
+    ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead> &
+        roughnessMetallicBarrier = m_imageBarriers.roughnessMetallicBarriers[i];
+
+    albedoBarrier.Init(&m_imagesVk.albedoImages[i]);
+    depthBarrier.Init(&m_imagesVk.depthImages[i]);
+    normalBarrier.Init(&m_imagesVk.normalImages[i]);
+    roughnessMetallicBarrier.Init(&m_imagesVk.roughnessMetallicImages[i]);
+  }
+}
 
 //
 //
@@ -275,23 +305,15 @@ void GBufferRenderFlowVk::CreateRenderPass() {
 
   //
   // --- Dependencies ----------------------------------------------------------
+  // Albedo: undef -> Color attachment | -->  Shader read(Not incl.)
+  // Depth: undef -> Depth attachment | --> Shader read(Not incl.)
   VkSubpassDependency dependency{};
   dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
   dependency.dstSubpass = 0;
-  //
-  // We're taking into consideration the prev frame's stages for the same
-  // gbuffer pass (not previous light/postfx... etc renderpasses/subpasses). The
-  // depth, color writes need to finish in the prev's gbuffer pass before we
-  // start writing depth/color writes in the current frame. Remember -
-  // MaxFramesPerFlight number of frames run in parallel.
-  dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                            VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+  dependency.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
   dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                            VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-  dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-                             VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+                            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+  dependency.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
   dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
                              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
   dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
@@ -524,6 +546,7 @@ void GBufferRenderFlowVk::OnSwapchainInvalidCb() {
   DestroyAttachments();
 
   CreateAttachments();
+  CreateImageBarriers();
   CreateFramebuffers();
 
   UpdateDescriptorSetsLocal();
@@ -643,6 +666,20 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   // --- End renderpass --------------------------------------------------------
   m_renderPass.EndRenderPass(cmdBfr);
 
+  //
+  // --- Transition image layouts for next pass --------------------------------
+  const ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
+      &albedoBarrier = m_imageBarriers.albedoBarriers[currentFrame];
+  const ImageBarrierVk<LayoutTransitions::DepthAttachmentToShaderRead>
+      &depthBarrier = m_imageBarriers.depthBarriers[currentFrame];
+  const ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
+      &normalBarrier = m_imageBarriers.normalBarriers[currentFrame];
+  const ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
+      &roughnessMetallicBarrier =
+          m_imageBarriers.roughnessMetallicBarriers[currentFrame];
+
+  //
+  // --- End command buffer ----------------------------------------------------
   ContextVk::CommandPool()->EndCommandBuffer(cmdBfr);
 };
 

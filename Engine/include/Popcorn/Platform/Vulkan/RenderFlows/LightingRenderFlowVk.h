@@ -25,6 +25,7 @@ public:
 
 private:
   virtual void CreateAttachments() override;
+  virtual void CreateImageBarriers() override;
   virtual void CreateRenderPass() override;
   virtual void CreateFramebuffers() override;
 

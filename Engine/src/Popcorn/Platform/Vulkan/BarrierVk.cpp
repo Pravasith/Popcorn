@@ -16,6 +16,9 @@ void ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>::Create() {
         m_imageBarrier);
     m_imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
     m_imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+    m_syncStages.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    m_syncStages.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
   } else {
     BarrierUtilsVk::GetDefaultImageBarrierInfo(
         m_imageVk->GetVkImage(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
@@ -24,6 +27,9 @@ void ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>::Create() {
 
     m_imageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
     m_imageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+    m_syncStages.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    m_syncStages.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
   }
 }
 
@@ -48,6 +54,9 @@ void ImageBarrierVk<LayoutTransitions::DepthAttachmentToShaderRead>::Create() {
 
     srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
     dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+    m_syncStages.srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    m_syncStages.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
   } else {
     initialLayout = hasStencil ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
                                : VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
@@ -56,6 +65,9 @@ void ImageBarrierVk<LayoutTransitions::DepthAttachmentToShaderRead>::Create() {
 
     srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
     dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+    m_syncStages.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    m_syncStages.dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
   }
 
   BarrierUtilsVk::GetDefaultImageBarrierInfo(m_imageVk->GetVkImage(),
@@ -76,6 +88,9 @@ void ImageBarrierVk<LayoutTransitions::ColorAttachmentToPresentSrc>::Create() {
 
   m_imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
   m_imageBarrier.dstAccessMask = 0;
+
+  m_syncStages.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  m_syncStages.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 }
 
 GFX_NAMESPACE_END

@@ -44,6 +44,11 @@ enum LayoutTransitions {
 
 enum LayoutTransitionDirection { Forward, Backward };
 
+struct PipelineStagesSyncInfo {
+  VkPipelineStageFlags srcStageMask = 0; 
+  VkPipelineStageFlags dstStageMask = 0;
+};
+
 template <LayoutTransitions T> class ImageBarrierVk {
 public:
   ImageBarrierVk() { PC_PRINT("CREATED", TagType::Constr, "ImageBarrierVk.h") };
@@ -72,6 +77,8 @@ private:
 private:
   VkImageMemoryBarrier m_imageBarrier{};
   const ImageVk *m_imageVk = nullptr;
+
+  PipelineStagesSyncInfo m_syncStages;
 
   LayoutTransitionDirection m_direction = LayoutTransitionDirection::Forward;
 };

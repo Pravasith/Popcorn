@@ -8,9 +8,9 @@
 
 HIGH PRIORITY:
 ----------------------------------------------------------------------------
-:: Get camera descriptor set in lighting renderflow paint call
-:: Redesign Draw call - Refactor - 1 day max. - also handle framebuffer
-   resize - 27th May
+:: Fix attachments (formats) in lighting & composite renderflows
+:: Fix barriers in lighting & composite renderflows
+
 :: Update camera(fov, aspect ratio, .etc) on FrameBufferResize
 
 :: Write camera class properly.

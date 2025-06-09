@@ -112,6 +112,7 @@ void RendererVk::PrepareRenderFlows() {
     PC_WARN("Preparing renderflow...")
     renderFlow->Prepare(); // Creates Vulkan:
                            //   - Attachments
+                           //   - ImageBarriers
                            //   - RenderPass
                            //   - Framebuffer
                            //   - Commandbuffers
