@@ -471,6 +471,7 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead> &lightBarrier =
       m_imageBarriers.lightBarriers[currentFrame];
   lightBarrier.RecordBarrierCommand(cmdBfr);
+
   //
   // --- End command buffer ----------------------------------------------------
   ContextVk::CommandPool()->EndCommandBuffer(cmdBfr);

@@ -51,25 +51,30 @@ struct PipelineStagesSyncInfo {
 
 template <LayoutTransitions T> class ImageBarrierVk {
 public:
-  ImageBarrierVk() { PC_PRINT("CREATED", TagType::Constr, "ImageBarrierVk.h") };
+  ImageBarrierVk() { PC_PRINT("CREATED", TagType::Constr, "ImageBarrierVk.h") }
   ~ImageBarrierVk() {
     PC_PRINT("DESTROYED", TagType::Destr, "ImageBarrierVk.h")
-  };
+  }
 
   void Init(const ImageVk *imageVk) {
     m_imageVk = imageVk;
     Create();
-  };
-  void RecordBarrierCommand(const VkCommandBuffer &commandBuffer);
+  }
+
+  void RecordBarrierCommand(const VkCommandBuffer &commandBuffer) {
+    vkCmdPipelineBarrier(commandBuffer, m_syncStages.srcStageMask,
+                         m_syncStages.dstStageMask, 0, 0, nullptr, 0, nullptr,
+                         1, &m_imageBarrier);
+  }
 
   [[nodiscard]] const LayoutTransitionDirection &GetDirection() {
     return m_direction;
-  };
+  }
 
   void ReverseDirection() {
     m_direction = m_direction == Forward ? Backward : Forward;
     Create();
-  };
+  }
 
 private:
   void Create();

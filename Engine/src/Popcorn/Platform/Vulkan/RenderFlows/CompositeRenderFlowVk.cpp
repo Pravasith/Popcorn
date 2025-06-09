@@ -71,7 +71,7 @@ void CompositeRenderFlowVk::CreateImageBarriers() {
   // For AFTER the current renderpass and BEFORE the next renderpass
   // Color/depth attachment -> shader read format
   for (int i = 0; i < swapchainImgViews.size(); ++i) {
-    ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
+    ImageBarrierVk<LayoutTransitions::ColorAttachmentToPresentSrc>
         &presentBarrier = m_imageBarriers.presentBarriers[i];
 
     presentBarrier.Init(&m_imagesVk.swapchainImages[i]);
@@ -121,7 +121,7 @@ void CompositeRenderFlowVk::CreateRenderPass() {
   dependency.dstSubpass = 0;
   dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
   dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-  dependency.srcAccessMask = 0;
+  dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
   dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
   dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
