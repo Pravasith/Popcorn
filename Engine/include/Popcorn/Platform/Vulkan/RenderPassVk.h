@@ -2,6 +2,7 @@
 
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -95,7 +96,8 @@ public:
 
   static void GetDefaultCmdBeginRenderPassInfo(
       const VkFramebuffer &frameBuffer, const VkExtent2D &frameExtent,
-      const VkRenderPass &renderPass, VkRenderPassBeginInfo &renderPassInfo);
+      const VkRenderPass &renderPass, std::vector<VkClearValue> &clearValues,
+      VkRenderPassBeginInfo &renderPassInfo);
 
   void BeginRenderPass(const VkCommandBuffer &commandBuffer,
                        const VkRenderPassBeginInfo &renderPassBeginInfo) {

@@ -596,10 +596,19 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   //
   // Renderpass ----------------------------------------------------------------
 
+  // TODO: Move outside
+  VkClearValue clearAlbedo = {{1.0f, 0.0f, 0.0f, 1.0f}};
+  VkClearValue clearDepth = {1.0f, 0.0f};
+  VkClearValue clearNormal = {{0.0f, 0.0f, 1.0f, 0.0f}};
+  VkClearValue clearRoughnessMetallic = {{0.0f, 0.0f, 0.0f, 0.0f}};
+
+  std::vector<VkClearValue> clearValues{clearAlbedo, clearDepth, clearNormal,
+                                        clearRoughnessMetallic};
+
   VkRenderPassBeginInfo renderPassBeginInfo{};
   RenderPassVk::GetDefaultCmdBeginRenderPassInfo(
       m_framebuffers[currentFrame], swapchainExtent,
-      m_renderPass.GetVkRenderPass(), renderPassBeginInfo);
+      m_renderPass.GetVkRenderPass(), clearValues, renderPassBeginInfo);
 
   //
   // --- Begin renderpass ------------------------------------------------------
