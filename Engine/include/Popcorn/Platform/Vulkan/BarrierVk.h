@@ -45,7 +45,7 @@ enum LayoutTransitions {
 enum LayoutTransitionDirection { Forward, Backward };
 
 struct PipelineStagesSyncInfo {
-  VkPipelineStageFlags srcStageMask = 0; 
+  VkPipelineStageFlags srcStageMask = 0;
   VkPipelineStageFlags dstStageMask = 0;
 };
 
@@ -60,7 +60,7 @@ public:
     m_imageVk = imageVk;
     Create();
   };
-  void RecordBarrierCommand(const VkCommandBuffer &cmdBfr);
+  void RecordBarrierCommand(const VkCommandBuffer &commandBuffer);
 
   [[nodiscard]] const LayoutTransitionDirection &GetDirection() {
     return m_direction;

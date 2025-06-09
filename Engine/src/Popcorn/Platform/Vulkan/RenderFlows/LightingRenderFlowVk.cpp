@@ -65,7 +65,7 @@ void LightingRenderFlowVk::CreateAttachments() {
     AttachmentVk::GetDefaultAttachmentDescription(lightImageAttachment);
     lightImageAttachment.format = lightFormat;
     lightImageAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    lightImageAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    lightImageAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
     m_attachmentsVk.lightAttachments[i].SetImageVk(&lightImageRef);
     m_attachmentsVk.lightAttachments[i].SetAttachmentDescription(
@@ -134,17 +134,10 @@ void LightingRenderFlowVk::CreateRenderPass() {
   VkSubpassDependency dependency{};
   dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
   dependency.dstSubpass = 0;
-  dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                            VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT |
-                            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-  dependency.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT |
-                            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-  dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-                             VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-  dependency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT |
-                             VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-                             VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
-                             VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+  dependency.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+  dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  dependency.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+  dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
   dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
   //
@@ -415,10 +408,6 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
 
-  // vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-  //                      VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0,
-  //                      nullptr, 0, nullptr, 1, &lightImageBarrier);
-
   // Render pass begin
   VkRenderPassBeginInfo renderPassBeginInfo{};
   RenderPassVk::GetDefaultCmdBeginRenderPassInfo(
@@ -477,18 +466,13 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 
   m_renderPass.EndRenderPass(cmdBfr);
 
-  // BarrierUtilsVk::GetDefaultImageBarrierInfo(
-  //     m_imagesVk.lightImages[currentFrame].GetVkImage(),
-  //     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-  //     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
-  //     lightImageBarrier);
-  // lightImageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-  // lightImageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
   //
-  // vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-  //                      VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr,
-  //                      0, nullptr, 1, &lightImageBarrier);
-
+  // --- Transition image layouts for next pass --------------------------------
+  ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead> &lightBarrier =
+      m_imageBarriers.lightBarriers[currentFrame];
+  lightBarrier.RecordBarrierCommand(cmdBfr);
+  //
+  // --- End command buffer ----------------------------------------------------
   ContextVk::CommandPool()->EndCommandBuffer(cmdBfr);
 }
 

@@ -87,10 +87,20 @@ void ImageBarrierVk<LayoutTransitions::ColorAttachmentToPresentSrc>::Create() {
       m_imageBarrier);
 
   m_imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-  m_imageBarrier.dstAccessMask = 0;
+  m_imageBarrier.dstAccessMask = 0; // Not a pipeline stage. We are not writing
+                                    // or reading at all, we are presenting.
 
   m_syncStages.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-  m_syncStages.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+  m_syncStages.dstStageMask =
+      VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT; // 1. Not a pipeline stage. We are
+                                            // not writing or reading at all, we
+                                            // are presenting.
+                                            //
+                                            // 2. Zero is not valid. So we say
+                                            // the bottom of the pipe needs to
+                                            // wait for the srcStage to finish
+                                            // (which in this case is
+                                            // color_att._output).
 }
 
 GFX_NAMESPACE_END

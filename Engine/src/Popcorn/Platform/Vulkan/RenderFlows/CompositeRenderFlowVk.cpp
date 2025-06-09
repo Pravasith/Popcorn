@@ -45,11 +45,8 @@ void CompositeRenderFlowVk::CreateAttachments() {
     AttachmentVk::GetDefaultAttachmentDescription(presentImageAttachment);
     presentImageAttachment.format = format;
     presentImageAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    presentImageAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-    PC_WARN("PRESENT IMAGE ATTACHMENT: " << presentImageAttachment.initialLayout
-                                         << " | "
-                                         << presentImageAttachment.finalLayout)
+    presentImageAttachment.finalLayout =
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
     m_attachmentsVk.presentAttachments[i].SetImageVk(
         &m_imagesVk.swapchainImages[i]);
@@ -123,9 +120,9 @@ void CompositeRenderFlowVk::CreateRenderPass() {
   dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
   dependency.dstSubpass = 0;
   dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-  dependency.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-  dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-  dependency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+  dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  dependency.srcAccessMask = 0;
+  dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
   dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
   //
@@ -330,20 +327,6 @@ void CompositeRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
 
-  // Place barrier to transition image
-  VkImageMemoryBarrier barrier{};
-  BarrierUtilsVk::GetDefaultImageBarrierInfo(
-      m_dependencyImages.lightImages[currentFrame].GetVkImage(),
-      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT,
-      barrier);
-  barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-  barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-  vkCmdPipelineBarrier(cmdBfr, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                       VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0,
-                       nullptr, 1, &barrier);
-
   // Render pass begin
   VkRenderPassBeginInfo renderPassBeginInfo{};
   RenderPassVk::GetDefaultCmdBeginRenderPassInfo(
@@ -378,6 +361,15 @@ void CompositeRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkCmdDraw(cmdBfr, 3, 1, 0, 0);
 
   m_renderPass.EndRenderPass(cmdBfr);
+
+  //
+  // --- Transition image layouts for next pass --------------------------------
+  ImageBarrierVk<LayoutTransitions::ColorAttachmentToPresentSrc>
+      &presentBarrier = m_imageBarriers.presentBarriers[currentFrame];
+  presentBarrier.RecordBarrierCommand(cmdBfr);
+
+  //
+  // --- End command buffer ----------------------------------------------------
   ContextVk::CommandPool()->EndCommandBuffer(cmdBfr);
 };
 

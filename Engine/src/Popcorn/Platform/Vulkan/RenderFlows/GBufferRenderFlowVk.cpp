@@ -668,15 +668,20 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 
   //
   // --- Transition image layouts for next pass --------------------------------
-  const ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
+  ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
       &albedoBarrier = m_imageBarriers.albedoBarriers[currentFrame];
-  const ImageBarrierVk<LayoutTransitions::DepthAttachmentToShaderRead>
-      &depthBarrier = m_imageBarriers.depthBarriers[currentFrame];
-  const ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
+  ImageBarrierVk<LayoutTransitions::DepthAttachmentToShaderRead> &depthBarrier =
+      m_imageBarriers.depthBarriers[currentFrame];
+  ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
       &normalBarrier = m_imageBarriers.normalBarriers[currentFrame];
-  const ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
+  ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
       &roughnessMetallicBarrier =
           m_imageBarriers.roughnessMetallicBarriers[currentFrame];
+
+  albedoBarrier.RecordBarrierCommand(cmdBfr);
+  depthBarrier.RecordBarrierCommand(cmdBfr);
+  normalBarrier.RecordBarrierCommand(cmdBfr);
+  roughnessMetallicBarrier.RecordBarrierCommand(cmdBfr);
 
   //
   // --- End command buffer ----------------------------------------------------

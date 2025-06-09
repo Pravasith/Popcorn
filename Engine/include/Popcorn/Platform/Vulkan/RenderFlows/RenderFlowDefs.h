@@ -80,12 +80,12 @@ using PcFramesColorImageBarriers =
     std::array<ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>,
                MAX_FRAMES_IN_FLIGHT>;
 
-using PcPresentationImageBarriers =
-    std::vector<ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>>;
-
 using PcFramesDepthImageBarriers =
     std::array<ImageBarrierVk<LayoutTransitions::DepthAttachmentToShaderRead>,
                MAX_FRAMES_IN_FLIGHT>;
+
+using PcPresentationImageBarriers =
+    std::vector<ImageBarrierVk<LayoutTransitions::ColorAttachmentToPresentSrc>>;
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
