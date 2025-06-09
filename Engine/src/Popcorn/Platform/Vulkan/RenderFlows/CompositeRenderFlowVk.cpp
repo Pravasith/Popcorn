@@ -367,7 +367,7 @@ void CompositeRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   //
   // --- Transition image layouts for next pass --------------------------------
   ImageBarrierVk<LayoutTransitions::ColorAttachmentToPresentSrc>
-      &presentBarrier = m_imageBarriers.presentBarriers[currentFrame];
+      &presentBarrier = m_imageBarriers.presentBarriers[frameIndex];
   presentBarrier.RecordBarrierCommand(cmdBfr);
 
   //
