@@ -409,11 +409,8 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
       "CAMERA SET: " << (void *)s_commonDescriptorSets.cameraSets[currentFrame],
       TagType::Print, "CHECK")
 
-  std::array<VkDescriptorSet, 1> cameraSets{
-      s_commonDescriptorSets.cameraSets[currentFrame]};
-
-  std::array<VkDescriptorSet, 1> lightingSets{
-      m_descriptorSetsVk.lightingSets[currentFrame]};
+  VkDescriptorSet &cameraSet = s_commonDescriptorSets.cameraSets[currentFrame];
+  VkDescriptorSet &lightingSet = m_descriptorSetsVk.lightingSets[currentFrame];
 
   // Reset and begin recording
   vkResetCommandBuffer(cmdBfr, 0);
@@ -447,18 +444,14 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   // TODO: Make it dynamic later
   uint32_t cameraOffset = bufferOffsets.camerasOffsets[0];
 
-  std::array<VkDescriptorSet, 2> allSets = {
-      cameraSets[currentFrame],
-      lightingSets[currentFrame],
-  };
+  std::array<VkDescriptorSet, 2> allSets = {cameraSet, lightingSet};
 
   std::array<uint32_t, 1> dynamicOffsets = {cameraOffset};
 
-  PC_PRINT("BINDING cameraSets[" << currentFrame
-                                 << "] = " << (void *)cameraSets[currentFrame],
+  PC_PRINT("BINDING cameraSets[" << currentFrame << "] = " << (void *)cameraSet,
            TagType::Print, "DEBUG");
-  PC_PRINT("BINDING lightingSets["
-               << currentFrame << "] = " << (void *)lightingSets[currentFrame],
+  PC_PRINT("BINDING lightingSets[" << currentFrame
+                                   << "] = " << (void *)lightingSet,
            TagType::Print, "DEBUG");
 
   // Binding 2 sets in one go. Same as doing separately (commented code below)
