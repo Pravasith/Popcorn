@@ -4,6 +4,7 @@
 #include "MaterialTypes.h"
 #include "Popcorn/Core/Assert.h"
 #include "Popcorn/Core/Base.h"
+#include "Popcorn/Core/Helpers.h"
 #include "SamplerVk.h"
 #include "Shader.h"
 #include "Sources.h"
@@ -113,6 +114,12 @@ void RenderFlowVk::AllocDescriptorsGlobal() {
       globalDescriptorsPool.AllocateDescriptorSets<DescriptorSets::CameraSet,
                                                    MAX_FRAMES_IN_FLIGHT>(
           device->GetDevice(), cameraLayouts);
+
+  for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+    PC_PRINT("ALLOCATED cameraSets["
+                 << i << "] = " << (void *)s_commonDescriptorSets.cameraSets[i],
+             TagType::Print, "GLOBAL DSET")
+  }
 }
 
 void RenderFlowVk::UpdateDescriptorSetsGlobal() {

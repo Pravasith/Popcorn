@@ -10,6 +10,7 @@
 #include "GlobalMacros.h"
 #include "ImageVk.h"
 #include "PipelineUtilsVk.h"
+#include "Popcorn/Core/Helpers.h"
 #include "RenderPassVk.h"
 #include <array>
 #include <vulkan/vulkan_core.h>
@@ -66,6 +67,8 @@ void LightingRenderFlowVk::CreateAttachments() {
     lightImageAttachment.format = lightFormat;
     lightImageAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     lightImageAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    lightImageAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    lightImageAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
     m_attachmentsVk.lightAttachments[i].SetImageVk(&lightImageRef);
     m_attachmentsVk.lightAttachments[i].SetAttachmentDescription(
@@ -224,6 +227,12 @@ void LightingRenderFlowVk::AllocDescriptorsLocal() {
       lightsPool.AllocateDescriptorSets<DescriptorSets::LightingSet,
                                         MAX_FRAMES_IN_FLIGHT>(
           ContextVk::Device()->GetDevice(), lightingLayouts);
+
+  for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+    PC_PRINT("ALLOCATED lightingSets["
+                 << i << "] = " << (void *)m_descriptorSetsVk.lightingSets[i],
+             TagType::Print, "LOCAL DSETS");
+  }
 };
 
 void LightingRenderFlowVk::UpdateDescriptorSetsLocal() {
@@ -396,13 +405,15 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   auto &bufferViews = deviceMemory->GetBufferViews();
   auto &bufferOffsets = deviceMemory->GetBufferOffsets();
 
+  PC_PRINT(
+      "CAMERA SET: " << (void *)s_commonDescriptorSets.cameraSets[currentFrame],
+      TagType::Print, "CHECK")
+
   std::array<VkDescriptorSet, 1> cameraSets{
-      s_commonDescriptorSets.cameraSets[currentFrame],
-  };
+      s_commonDescriptorSets.cameraSets[currentFrame]};
 
   std::array<VkDescriptorSet, 1> lightingSets{
-      m_descriptorSetsVk.lightingSets[currentFrame],
-  };
+      m_descriptorSetsVk.lightingSets[currentFrame]};
 
   // Reset and begin recording
   vkResetCommandBuffer(cmdBfr, 0);
@@ -442,6 +453,13 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   };
 
   std::array<uint32_t, 1> dynamicOffsets = {cameraOffset};
+
+  PC_PRINT("BINDING cameraSets[" << currentFrame
+                                 << "] = " << (void *)cameraSets[currentFrame],
+           TagType::Print, "DEBUG");
+  PC_PRINT("BINDING lightingSets["
+               << currentFrame << "] = " << (void *)lightingSets[currentFrame],
+           TagType::Print, "DEBUG");
 
   // Binding 2 sets in one go. Same as doing separately (commented code below)
   vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,

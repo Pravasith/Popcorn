@@ -47,6 +47,8 @@ void CompositeRenderFlowVk::CreateAttachments() {
     presentImageAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     presentImageAttachment.finalLayout =
         VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    presentImageAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    presentImageAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
     m_attachmentsVk.presentAttachments[i].SetImageVk(
         &m_imagesVk.swapchainImages[i]);
@@ -65,12 +67,12 @@ void CompositeRenderFlowVk::CreateAttachments() {
 // --- IMAGE BARRIERS  ---------------------------------------------------------
 //
 void CompositeRenderFlowVk::CreateImageBarriers() {
-  auto &swapchainImgViews = ContextVk::Swapchain()->GetSwapchainImageViews();
-  m_imageBarriers.presentBarriers.resize(swapchainImgViews.size());
+  auto &swapchainImages = ContextVk::Swapchain()->GetSwapchainImages();
+  m_imageBarriers.presentBarriers.resize(swapchainImages.size());
 
   // For AFTER the current renderpass and BEFORE the next renderpass
   // Color/depth attachment -> shader read format
-  for (int i = 0; i < swapchainImgViews.size(); ++i) {
+  for (int i = 0; i < swapchainImages.size(); ++i) {
     ImageBarrierVk<LayoutTransitions::ColorAttachmentToPresentSrc>
         &presentBarrier = m_imageBarriers.presentBarriers[i];
 
