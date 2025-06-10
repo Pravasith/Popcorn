@@ -8,8 +8,7 @@
 
 HIGH PRIORITY:
 ----------------------------------------------------------------------------
-:: Fix attachments (formats) in lighting & composite renderflows
-:: Fix barriers in lighting & composite renderflows
+:: Fix the ones marked - TEMP_DEBUG
 
 :: Update camera(fov, aspect ratio, .etc) on FrameBufferResize
 

@@ -76,15 +76,16 @@ void BasicMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
   pipelineState.depthStencilState.front = {};
   pipelineState.depthStencilState.back = {};
 
+  // TEMP_DEBUG
   pipelineState.rasterizationState.cullMode = VK_CULL_MODE_NONE;
 
   auto *layouts = ContextVk::DescriptorLayouts();
   VkDescriptorSetLayout &cameraLayout =
       layouts->GetLayout<DescriptorSets::CameraSet>();
-  VkDescriptorSetLayout &submeshLayout =
-      layouts->GetLayout<DescriptorSets::SubmeshSet>();
   VkDescriptorSetLayout &basicMatLayout =
       layouts->GetLayout<DescriptorSets::BasicMatSet>();
+  VkDescriptorSetLayout &submeshLayout =
+      layouts->GetLayout<DescriptorSets::SubmeshSet>();
 
   std::array<VkDescriptorSetLayout, 3> dSetLayouts = {
       cameraLayout, basicMatLayout, submeshLayout};
@@ -161,24 +162,27 @@ void PbrMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
   pipelineState.depthStencilState.front = {};
   pipelineState.depthStencilState.back = {};
 
+  // TEMP_DEBUG
   pipelineState.rasterizationState.cullMode = VK_CULL_MODE_NONE;
 
   auto *layouts = ContextVk::DescriptorLayouts();
   VkDescriptorSetLayout &cameraLayout =
       layouts->GetLayout<DescriptorSets::CameraSet>();
-  VkDescriptorSetLayout &submeshLayout =
-      layouts->GetLayout<DescriptorSets::SubmeshSet>();
   VkDescriptorSetLayout &pbrMatLayout =
       layouts->GetLayout<DescriptorSets::PbrMatSet>();
+  VkDescriptorSetLayout &submeshLayout =
+      layouts->GetLayout<DescriptorSets::SubmeshSet>();
   std::array<VkDescriptorSetLayout, 3> dSetLayouts = {
       cameraLayout, pbrMatLayout, submeshLayout};
+
+  // Pipeline Layout (descriptor set layout data)
   pipelineState.pipelineLayout.setLayoutCount = dSetLayouts.size();
   pipelineState.pipelineLayout.pSetLayouts = dSetLayouts.data();
 
   CreatePipelineLayout(device, pipelineState.pipelineLayout);
   CreateVkPipeline(device, pipelineState, renderPass);
 
-  // DESTROY SHADER MODULES
+  // Destroy shader modules
   PC_DestroyShaderModule(device, vertShaderModule);
   PC_DestroyShaderModule(device, fragShaderModule);
 };

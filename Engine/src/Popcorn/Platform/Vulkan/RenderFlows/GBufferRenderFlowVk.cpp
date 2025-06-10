@@ -586,10 +586,6 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   const VkBuffer &vertexBuffer = deviceMemory->GetVboVkBuffer();
   const VkBuffer &indexBuffer = deviceMemory->GetIboVkBuffer();
 
-  VkBuffer vertexBuffers[]{vertexBuffer};
-  VkDeviceSize vboOffsets[]{
-      0}; // This is NOT stride, it's just the VkBuffer offset
-
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
 
@@ -597,9 +593,9 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   // Renderpass ----------------------------------------------------------------
 
   // TODO: Move outside
-  VkClearValue clearAlbedo = {{1.0f, 0.0f, 0.0f, 1.0f}};
-  VkClearValue clearDepth = {1.0f, 0.0f};
-  VkClearValue clearNormal = {{0.0f, 0.0f, 1.0f, 0.0f}};
+  VkClearValue clearAlbedo = {{0.0f, 0.0f, 0.0f, 1.0f}};
+  VkClearValue clearDepth = {{1.0f}};
+  VkClearValue clearNormal = {{0.0f, 0.0f, 0.0f, 0.0f}};
   VkClearValue clearRoughnessMetallic = {{0.0f, 0.0f, 0.0f, 0.0f}};
 
   std::vector<VkClearValue> clearValues{clearAlbedo, clearDepth, clearNormal,
@@ -629,6 +625,13 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 
   //
   // --- Paint :D --------------------------------------------------------------
+  //
+  VkBuffer vertexBuffers[]{vertexBuffer};
+  VkDeviceSize vboOffsets[]{
+      0}; // This is NOT stride, it's just the VkBuffer offset
+  BufferVkUtils::BindVBO(cmdBfr, vertexBuffers, vboOffsets, 1);
+  BufferVkUtils::BindIBO<uint32_t>(cmdBfr, indexBuffer, 0);
+
   m_basicMatPipelineVk.BindPipeline(cmdBfr);
 
   // Hardcoding 0 for camera index for now
@@ -661,11 +664,17 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
                               submeshSets.size(), submeshSets.data(), 1,
                               &submeshUboOffset);
 
-      BufferVkUtils::BindVBO(cmdBfr, vertexBuffers, vboOffsets, 1);
-      BufferVkUtils::BindIBO<uint32_t>(cmdBfr, indexBuffer, 0);
+      uint32_t indexCount = submesh->GetIndexBuffer()->GetCount();
+      uint32_t firstIndex =
+          bufferOffsets.submeshesOffsets[materialHash][submeshIndex].iboOffset /
+          sizeof(uint32_t);
+      int32_t vertexOffset = 0;
 
-      vkCmdDrawIndexed(cmdBfr, submesh->GetIndexBuffer()->GetCount(), 1, 0, 0,
-                       0);
+      uint32_t firstIndexVal = submesh->GetIndexBuffer()->GetBufferData()[0];
+      // printf("BASIC First index value: %u\n",
+      //        firstIndexVal); // Should be 0 for all submeshes
+
+      vkCmdDrawIndexed(cmdBfr, indexCount, 1, firstIndex, vertexOffset, 0);
 
       ++submeshIndex;
     }
@@ -676,7 +685,7 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   for (auto &[materialHash, submeshes] : s_pbrMatSubmeshesMap) {
     uint32_t pbrMatOffset = bufferOffsets.materialOffsets[materialHash];
 
-    // Descriptor set 3 - Pbr material
+    // Descriptor set 1 - Pbr material
     vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
                             m_pbrMatPipelineVk.GetVkPipelineLayout(), 1,
                             pbrMatSets.size(), pbrMatSets.data(), 1,
@@ -684,8 +693,12 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 
     uint32_t submeshIndex = 0;
     for (Submesh<MaterialTypes::PbrMat> *submesh : submeshes) {
+
       uint32_t submeshUboOffset =
           bufferOffsets.submeshesOffsets[materialHash][submeshIndex].uboOffset;
+
+      uint32_t submeshVboOffset =
+          bufferOffsets.submeshesOffsets[materialHash][submeshIndex].vboOffset;
 
       // Descriptor set 2 - Submesh
       vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -693,11 +706,19 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
                               submeshSets.size(), submeshSets.data(), 1,
                               &submeshUboOffset);
 
-      BufferVkUtils::BindVBO(cmdBfr, vertexBuffers, vboOffsets, 1);
-      BufferVkUtils::BindIBO<uint32_t>(cmdBfr, indexBuffer, 0);
+      uint32_t indexCount = submesh->GetIndexBuffer()->GetCount();
+      uint32_t firstIndex =
+          bufferOffsets.submeshesOffsets[materialHash][submeshIndex].iboOffset /
+          sizeof(uint32_t);
+      int32_t vertexOffset = 0;
+      // bufferOffsets.submeshesOffsets[materialHash][submeshIndex].vboOffset /
+      // GltfVertexBufferLayout.strideValue;
 
-      vkCmdDrawIndexed(cmdBfr, submesh->GetIndexBuffer()->GetCount(), 1, 0, 0,
-                       0);
+      uint32_t firstIndexVal = submesh->GetIndexBuffer()->GetBufferData()[0];
+      // printf("PBR First index value: %u\n",
+      //        firstIndexVal); // Should be 0 for all submeshes
+      //
+      vkCmdDrawIndexed(cmdBfr, indexCount, 1, firstIndex, vertexOffset, 0);
 
       ++submeshIndex;
     }

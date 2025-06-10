@@ -21,11 +21,12 @@ layout(set = 2, binding = 0) uniform ObjectUBO {
 } object;
 
 void main() {
+    // World space
     vec4 vertexPos = object.modelMatrix * vec4(inPosition, 1.0);
-
+    // Clip space position
     gl_Position = camera.proj * camera.view * vertexPos;
 
-    fragPosition = vertexPos.xyz;
+    fragPosition = vertexPos.xyz; // TEMP_DEBUG: not used (fragPos)
     fragNormal = normalize(mat3(object.normalMatrix) * inNormal);
     fragUV = inUV;
 }

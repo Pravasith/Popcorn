@@ -27,7 +27,6 @@ layout(set = 0, binding = 0) uniform CameraUBO {
 layout(set = 1, binding = 0) readonly buffer LightBuffer {
     LightUniform lights[];
 };
-
 layout(set = 1, binding = 1) uniform sampler2D albedoTex;
 layout(set = 1, binding = 2) uniform sampler2D depthTex;
 layout(set = 1, binding = 3) uniform sampler2D normalTex;
@@ -94,5 +93,10 @@ void main() {
         finalColor += diffuse * attenuation;
     }
 
-    outColor = vec4(finalColor, 1.0);
+    // outColor = vec4(finalColor, 1.0);
+    // outColor = vec4(.0, depth, depth, 1.);
+    outColor = vec4(normal.xyz, 1.);
+    // outColor = vec4(albedo.xyz, 1.);
+
+    // outColor = vec4(1.);
 }

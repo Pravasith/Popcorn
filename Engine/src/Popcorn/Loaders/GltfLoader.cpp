@@ -196,6 +196,9 @@ void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
     // Extract vertex buffer
     vbo = ExtractVertexBuffer(model, primitive);
 
+    // Extract index buffer
+    ibo = ExtractIndexBuffer(model, primitive);
+
     struct VertexTemp {
       glm::vec3 pos;
       glm::vec3 normal;
@@ -212,8 +215,15 @@ void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
     // Print vertex buffer
     vbo->PrintBuffer<VertexTemp>();
 
-    // Extract index buffer
-    ibo = ExtractIndexBuffer(model, primitive);
+    const uint32_t *indices =
+        reinterpret_cast<const uint32_t *>(ibo->GetBufferData());
+    std::cout << "Index Buffer: ";
+    for (size_t i = 0; i < ibo->GetCount(); ++i) {
+      std::cout << indices[i];
+      if (i < ibo->GetCount() - 1)
+        std::cout << ", ";
+    }
+    std::cout << std::endl;
 
     // Extract material data
     if (primitive.material >= 0) {
@@ -482,15 +492,19 @@ GltfLoader::ExtractIndexBuffer(const tinygltf::Model &model,
                           indexAccessor.byteOffset;
 
   // Handle stride (distance between indices in bytes)
-  size_t stride = indexView.byteStride;
+  // size_t stride = indexView.byteStride;
+  size_t stride = 0;
 
   // Allocate index buffer
   IndexBuffer<uint32_t> *indices = new IndexBuffer<uint32_t>();
-  indices->Allocate(indexCount);
+  indices->Allocate(indexCount * sizeof(uint32_t));
 
   if (stride == 0) {
     // Default stride based on component type
     switch (indexAccessor.componentType) {
+    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+      stride = sizeof(uint8_t);
+      break;
     case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
       stride = sizeof(uint16_t);
       break;
@@ -511,6 +525,9 @@ GltfLoader::ExtractIndexBuffer(const tinygltf::Model &model,
 
     uint32_t indexValue = 0;
     switch (indexAccessor.componentType) {
+    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+      indexValue = *reinterpret_cast<const uint8_t *>(src);
+      break;
     case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
       indexValue = *reinterpret_cast<const uint16_t *>(src);
       break;
@@ -523,7 +540,8 @@ GltfLoader::ExtractIndexBuffer(const tinygltf::Model &model,
       return nullptr;
     }
 
-    indices->GetBufferData()[i] = indexValue;
+    uint32_t *dst = reinterpret_cast<uint32_t *>(indices->GetBufferData());
+    dst[i] = indexValue;
   }
 
   return indices;
