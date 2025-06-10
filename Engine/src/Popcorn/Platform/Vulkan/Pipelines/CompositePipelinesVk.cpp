@@ -1,4 +1,6 @@
 #include "PipelineDefsVk.h"
+#include "Popcorn/Core/Buffer.h"
+#include "Popcorn/Core/Helpers.h"
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include "BufferObjectsVk.h"
@@ -25,6 +27,8 @@ void CompositePipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
       &shaders->GetShader<RendererType::Vulkan, ShaderFiles::Composite_Vert>();
   Buffer *fragShaderBuffer =
       &shaders->GetShader<RendererType::Vulkan, ShaderFiles::Composite_Frag>();
+
+  PC_WARN("SIZE --------------------" << vertShaderBuffer->GetSize())
 
   auto vertShaderModule = PC_CreateShaderModule(device, *vertShaderBuffer);
   auto fragShaderModule = PC_CreateShaderModule(device, *fragShaderBuffer);

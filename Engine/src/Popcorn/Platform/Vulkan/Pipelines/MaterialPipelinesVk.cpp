@@ -76,6 +76,8 @@ void BasicMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
   pipelineState.depthStencilState.front = {};
   pipelineState.depthStencilState.back = {};
 
+  pipelineState.rasterizationState.cullMode = VK_CULL_MODE_NONE;
+
   auto *layouts = ContextVk::DescriptorLayouts();
   VkDescriptorSetLayout &cameraLayout =
       layouts->GetLayout<DescriptorSets::CameraSet>();
@@ -85,7 +87,7 @@ void BasicMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
       layouts->GetLayout<DescriptorSets::BasicMatSet>();
 
   std::array<VkDescriptorSetLayout, 3> dSetLayouts = {
-      cameraLayout, submeshLayout, basicMatLayout};
+      cameraLayout, basicMatLayout, submeshLayout};
 
   pipelineState.pipelineLayout.setLayoutCount = dSetLayouts.size();
   pipelineState.pipelineLayout.pSetLayouts = dSetLayouts.data();
@@ -159,15 +161,17 @@ void PbrMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
   pipelineState.depthStencilState.front = {};
   pipelineState.depthStencilState.back = {};
 
+  pipelineState.rasterizationState.cullMode = VK_CULL_MODE_NONE;
+
   auto *layouts = ContextVk::DescriptorLayouts();
   VkDescriptorSetLayout &cameraLayout =
       layouts->GetLayout<DescriptorSets::CameraSet>();
   VkDescriptorSetLayout &submeshLayout =
       layouts->GetLayout<DescriptorSets::SubmeshSet>();
-  VkDescriptorSetLayout &basicMatLayout =
+  VkDescriptorSetLayout &pbrMatLayout =
       layouts->GetLayout<DescriptorSets::PbrMatSet>();
   std::array<VkDescriptorSetLayout, 3> dSetLayouts = {
-      cameraLayout, submeshLayout, basicMatLayout};
+      cameraLayout, pbrMatLayout, submeshLayout};
   pipelineState.pipelineLayout.setLayoutCount = dSetLayouts.size();
   pipelineState.pipelineLayout.pSetLayouts = dSetLayouts.data();
 

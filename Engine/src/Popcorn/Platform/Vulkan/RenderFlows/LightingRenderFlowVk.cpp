@@ -10,7 +10,6 @@
 #include "GlobalMacros.h"
 #include "ImageVk.h"
 #include "PipelineUtilsVk.h"
-#include "Popcorn/Core/Helpers.h"
 #include "RenderPassVk.h"
 #include <array>
 #include <vulkan/vulkan_core.h>
@@ -406,7 +405,7 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
 
-  VkClearValue clearColor = {{1.0f, 1.0f, 0.0f, 1.0f}};
+  VkClearValue clearColor = {{0.0f, 1.0f, 0.0f, 1.0f}};
   std::vector<VkClearValue> clearValues{clearColor};
 
   // Render pass begin

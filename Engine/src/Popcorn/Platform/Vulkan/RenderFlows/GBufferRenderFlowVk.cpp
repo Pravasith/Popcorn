@@ -671,6 +671,38 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
     }
   }
 
+  m_pbrMatPipelineVk.BindPipeline(cmdBfr);
+
+  for (auto &[materialHash, submeshes] : s_pbrMatSubmeshesMap) {
+    uint32_t pbrMatOffset = bufferOffsets.materialOffsets[materialHash];
+
+    // Descriptor set 3 - Pbr material
+    vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            m_pbrMatPipelineVk.GetVkPipelineLayout(), 1,
+                            pbrMatSets.size(), pbrMatSets.data(), 1,
+                            &pbrMatOffset);
+
+    uint32_t submeshIndex = 0;
+    for (Submesh<MaterialTypes::PbrMat> *submesh : submeshes) {
+      uint32_t submeshUboOffset =
+          bufferOffsets.submeshesOffsets[materialHash][submeshIndex].uboOffset;
+
+      // Descriptor set 2 - Submesh
+      vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                              m_pbrMatPipelineVk.GetVkPipelineLayout(), 2,
+                              submeshSets.size(), submeshSets.data(), 1,
+                              &submeshUboOffset);
+
+      BufferVkUtils::BindVBO(cmdBfr, vertexBuffers, vboOffsets, 1);
+      BufferVkUtils::BindIBO<uint32_t>(cmdBfr, indexBuffer, 0);
+
+      vkCmdDrawIndexed(cmdBfr, submesh->GetIndexBuffer()->GetCount(), 1, 0, 0,
+                       0);
+
+      ++submeshIndex;
+    }
+  }
+
   //
   // --- End renderpass --------------------------------------------------------
   m_renderPass.EndRenderPass(cmdBfr);

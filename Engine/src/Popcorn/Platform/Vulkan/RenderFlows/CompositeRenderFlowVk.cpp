@@ -329,7 +329,7 @@ void CompositeRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
 
-  VkClearValue clearColor = {{1.0f, 0.0f, 0.0f, 1.0f}};
+  VkClearValue clearColor = {{1.0f, 0.0f, 1.0f, 1.0f}};
   std::vector<VkClearValue> clearValues{clearColor};
 
   // Render pass begin
