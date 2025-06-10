@@ -60,6 +60,8 @@ public:
   Renderer(Renderer &&) = delete;
   Renderer &operator=(const Renderer &&) = delete;
 
+  void PrintScenes() { m_sceneLibrary.PrintScenes(); };
+
 protected:
   Renderer(const Window &);
   virtual ~Renderer();

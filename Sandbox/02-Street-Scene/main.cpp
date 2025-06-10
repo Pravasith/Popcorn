@@ -20,8 +20,7 @@ public:
   ~GameLayer() { PC_PRINT("DESTROYED", TagType::Destr, "GAME-LAYER") };
 
   virtual void OnAttach() override {
-    Popcorn::Context::ConvertGltfToScene("../assets/models/blenderSceneX.gltf",
-                                         scene);
+    Popcorn::Context::ConvertGltfToScene("../assets/models/cubes.gltf", scene);
     Popcorn::Context::RegisterScene(scene);
   };
 
