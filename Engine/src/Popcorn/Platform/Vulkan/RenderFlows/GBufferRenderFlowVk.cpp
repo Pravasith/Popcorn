@@ -13,6 +13,7 @@
 #include "Mesh.h"
 #include "PipelineUtilsVk.h"
 #include "Popcorn/Core/Base.h"
+#include "Popcorn/Core/Helpers.h"
 #include "Popcorn/Loaders/LoadersDefs.h"
 #include "RenderPassVk.h"
 #include <algorithm>
@@ -589,8 +590,10 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
 
+#ifdef PC_DEBUG
   // TEMP_DEBUG
   {
+
     struct VertexTemp {
       glm::vec3 pos;
       glm::vec3 normal;
@@ -684,6 +687,45 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
       }
     }
   }
+
+#endif
+
+#ifdef PC_DEBUG
+  {
+    auto *deviceMemory = ContextVk::Memory();
+    auto *vmaAllocator = ContextVk::MemoryAllocator()->GetVMAAllocator();
+    VkDevice device = ContextVk::Device()->GetDevice();
+    VkCommandPool cmdPool = ContextVk::CommandPool()->GetVkCommandPool();
+    VkQueue queue = ContextVk::Device()->GetGraphicsQueue();
+
+    auto *debugMemory = ContextVk::DebugDeviceMemory();
+
+    VkBuffer &vbo = deviceMemory->GetVboVkBuffer();
+    VkBuffer &ibo = deviceMemory->GetIboVkBuffer();
+
+    VkDeviceSize vboSize = bufferViews.submeshVbo.alignedSize;
+    VkDeviceSize iboSize = bufferViews.submeshIbo.alignedSize;
+
+    PC_PRINT("SubmeshVbo size: " << vboSize, TagType::Print, "Paint")
+    PC_PRINT("SubmeshIbo size: " << iboSize, TagType::Print, "Paint")
+
+    std::cout << "\n=== FULL VBO BUFFER ===\n";
+    void *vboData = debugMemory->CreateStagingBuffer(device, vmaAllocator, vbo,
+                                                     vboSize, cmdPool, queue);
+    // debugMemory->PrintVmaBuffer(vboSize);
+
+    std::cout << "\n=== FULL IBO BUFFER ===\n";
+    void *iboData = debugMemory->CreateStagingBuffer(device, vmaAllocator, ibo,
+                                                     iboSize, cmdPool, queue);
+    // debugMemory->PrintVmaBuffer(vboSize);
+
+    debugMemory->PrintRawGpuVertexDataFromBytes(vboData, vboSize, iboData,
+                                                iboSize);
+
+    // debugMemory->DestroyStagingBuffer(vmaAllocator);
+    // debugMemory->DestroyStagingBuffer(vmaAllocator);
+  }
+#endif
 
   //
   // Renderpass ----------------------------------------------------------------

@@ -31,13 +31,16 @@ public:
     };
   };
 
-  void CreateStagingBuffer(VmaAllocator &vmaAllocator, VkDeviceSize size);
+  [[nodiscard]] void* CreateStagingBuffer(VkDevice &device, VmaAllocator &vmaAllocator,
+                           VkBuffer &srcBuffer, VkDeviceSize size,
+                           VkCommandPool &commandPool, VkQueue &queue);
+  void DestroyStagingBuffer(VmaAllocator &allocator);
   void CopyBuffer(VkBuffer &srcBuffer, VkBuffer &dstBuffer, VkDeviceSize size,
                   VkDevice &device, VkCommandPool &commandPool, VkQueue &queue);
 
-  void PrintVmaBuffer(VkDevice &device, VmaAllocator &allocator,
-                      VkBuffer &srcBuffer, VkDeviceSize size,
-                      VkCommandPool &commandPool, VkQueue &queue);
+  void PrintVmaBuffer(VkDeviceSize size);
+  void PrintRawGpuVertexDataFromBytes(const void *rawVboData, size_t vboSize,
+                                      const void *rawIboData, size_t iboSize);
 
 private:
   DebugDeviceMemoryVk() {
@@ -57,6 +60,8 @@ private:
 
 private:
   static DebugDeviceMemoryVk *s_instance;
+
+  void *m_data = nullptr;
 
   VkBuffer m_stagingBuffer;
   VmaAllocation m_stagingAllocation;

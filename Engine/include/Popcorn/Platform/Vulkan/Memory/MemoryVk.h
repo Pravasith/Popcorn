@@ -25,6 +25,10 @@ class MemoryVk {
 public:
   [[nodiscard]] const VkBuffer &GetVboVkBuffer() const { return m_vbo; };
   [[nodiscard]] const VkBuffer &GetIboVkBuffer() const { return m_ibo; };
+
+  [[nodiscard]] VkBuffer &GetVboVkBuffer() { return m_vbo; };
+  [[nodiscard]] VkBuffer &GetIboVkBuffer() { return m_ibo; };
+
   [[nodiscard]] const VkBuffer &GetUboSet(uint32_t frameIndex) const {
     return m_uboSet[frameIndex];
   };

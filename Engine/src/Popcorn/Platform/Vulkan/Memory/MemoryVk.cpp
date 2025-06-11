@@ -36,7 +36,9 @@ void MemoryVk::ExtractOffsetsMaterialsSubmeshes(
   VkDeviceSize alignment = properties.limits.minUniformBufferOffsetAlignment;
 
   // temps
-  VkDeviceSize vboOffset = 0, iboOffset = 0, submeshUboOffset = 0;
+  VkDeviceSize vboOffset = m_bufferViews.submeshVbo.alignedSize,
+               iboOffset = m_bufferViews.submeshIbo.alignedSize,
+               submeshUboOffset = 0;
   VkDeviceSize basicMatOffset = 0, pbrMatOffset = 0;
 
   for (auto &[matId, submeshes] : materialSubmeshesMap) {
@@ -76,9 +78,18 @@ void MemoryVk::ExtractOffsetsMaterialsSubmeshes(
     m_bufferViews.pbrMatUbo = {0, pbrMatOffset};
   }
 
-  m_bufferViews.submeshVbo += {0, vboOffset};
-  m_bufferViews.submeshIbo += {0, iboOffset};
-  m_bufferViews.submeshUbo += {0, submeshUboOffset};
+  m_bufferViews.submeshVbo = {0, vboOffset};
+  m_bufferViews.submeshIbo = {0, iboOffset};
+
+  m_bufferViews.submeshUbo = {0, submeshUboOffset};
+
+  PC_PRINT("VBO OFFSET _____ " << vboOffset << " BfrView size: "
+                               << m_bufferViews.submeshVbo.alignedSize,
+           TagType::Print, "MemVk")
+
+  PC_PRINT("IBO OFFSET _____ " << iboOffset << " BfrView size: "
+                               << m_bufferViews.submeshIbo.alignedSize,
+           TagType::Print, "MemVk")
 }
 
 void MemoryVk::ExtractOffsetsLightsCamerasEmptys(std::vector<Light *> &lights,
@@ -257,7 +268,20 @@ void MemoryVk::FillVbosIbosUbosSubmeshMaterial(
       // VBOs ---------------------------------------------------------------
       const BufferDefs::Layout &vboLayout =
           submesh->GetVertexBuffer()->GetLayout();
-      const VkDeviceSize vboSize = vboLayout.countValue * vboLayout.strideValue;
+      const VkDeviceSize vboSize =
+          submesh->GetVertexBuffer()->GetCount() * vboLayout.strideValue;
+
+      PC_PRINT("MAT " << matId << " SUBMESH[" << i << "]", TagType::Print,
+               "MemoryVk")
+      PC_PRINT("  Vertex Count: " << submesh->GetVertexBuffer()->GetCount(),
+               TagType::Print, "MemoryVk")
+      PC_PRINT("  Stride: " << vboLayout.strideValue, TagType::Print,
+               "MemoryVk")
+      PC_PRINT("  Total VBO bytes: " << vboSize, TagType::Print, "MemoryVk")
+      PC_PRINT("  VBO offset: "
+                   << m_bufferOffsets.submeshesOffsets[matId][i].vboOffset,
+               TagType::Print, "MemoryVk")
+
       memcpy((byte_t *)m_vboStagingMapping +
                  m_bufferOffsets.submeshesOffsets[matId][i].vboOffset,
              submesh->GetVertexBuffer()->GetBufferData(), (size_t)vboSize);
@@ -398,6 +422,11 @@ void MemoryVk::AllocSubmeshVboIboLocal() {
   VmaAllocationCreateInfo vboMainVmaInfo{};
   vboMainVmaInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 
+#ifdef PC_DEBUG
+  vboMainInfo.usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+  vboMainVmaInfo.usage = VMA_MEMORY_USAGE_AUTO;
+#endif
+
   VkResult vboResult = vmaCreateBuffer(
       ContextVk::MemoryAllocator()->GetVMAAllocator(), &vboMainInfo,
       &vboMainVmaInfo, &m_vbo, &m_vboAlloc, nullptr);
@@ -415,6 +444,11 @@ void MemoryVk::AllocSubmeshVboIboLocal() {
 
   VmaAllocationCreateInfo iboMainVmaInfo{};
   iboMainVmaInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+
+#ifdef PC_DEBUG
+  iboMainInfo.usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+  iboMainVmaInfo.usage = VMA_MEMORY_USAGE_AUTO;
+#endif
 
   VkResult iboResult = vmaCreateBuffer(
       ContextVk::MemoryAllocator()->GetVMAAllocator(), &iboMainInfo,
