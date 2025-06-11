@@ -593,10 +593,10 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   // Renderpass ----------------------------------------------------------------
 
   // TODO: Move outside
-  VkClearValue clearAlbedo = {{0.0f, 0.0f, 0.0f, 1.0f}};
+  VkClearValue clearAlbedo = {{0.0f, 1.0f, 0.0f, 1.0f}};
   VkClearValue clearDepth = {{1.0f}};
-  VkClearValue clearNormal = {{0.0f, 0.0f, 0.0f, 0.0f}};
-  VkClearValue clearRoughnessMetallic = {{0.0f, 0.0f, 0.0f, 0.0f}};
+  VkClearValue clearNormal = {{1.0f, 0.0f, 0.0f, 0.0f}};
+  VkClearValue clearRoughnessMetallic = {{1.0f, 1.0f, 0.0f, 0.0f}};
 
   std::vector<VkClearValue> clearValues{clearAlbedo, clearDepth, clearNormal,
                                         clearRoughnessMetallic};
@@ -638,6 +638,8 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   // TODO: Make it dynamic later
   uint32_t cameraOffset = bufferOffsets.camerasOffsets[0];
 
+  PC_WARN("CAMERA OFFSET " << cameraOffset)
+
   // Descriptor set 0 - Camera
   vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
                           m_basicMatPipelineVk.GetVkPipelineLayout(), 0,
@@ -674,55 +676,65 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
       // printf("BASIC First index value: %u\n",
       //        firstIndexVal); // Should be 0 for all submeshes
 
-      vkCmdDrawIndexed(cmdBfr, indexCount, 1, firstIndex, vertexOffset, 0);
+      PC_WARN("BasicMat submesh Draw: indexCount : firstIndex : vertexOffset ::"
+              << indexCount << " : " << firstIndex << " : " << vertexOffset);
+
+      // vkCmdDrawIndexed(cmdBfr, indexCount, 1, firstIndex, vertexOffset, 0);
 
       ++submeshIndex;
     }
   }
 
-  m_pbrMatPipelineVk.BindPipeline(cmdBfr);
+  vkCmdDraw(cmdBfr, 3, 1, 0, 0);
 
-  for (auto &[materialHash, submeshes] : s_pbrMatSubmeshesMap) {
-    uint32_t pbrMatOffset = bufferOffsets.materialOffsets[materialHash];
-
-    // Descriptor set 1 - Pbr material
-    vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            m_pbrMatPipelineVk.GetVkPipelineLayout(), 1,
-                            pbrMatSets.size(), pbrMatSets.data(), 1,
-                            &pbrMatOffset);
-
-    uint32_t submeshIndex = 0;
-    for (Submesh<MaterialTypes::PbrMat> *submesh : submeshes) {
-
-      uint32_t submeshUboOffset =
-          bufferOffsets.submeshesOffsets[materialHash][submeshIndex].uboOffset;
-
-      uint32_t submeshVboOffset =
-          bufferOffsets.submeshesOffsets[materialHash][submeshIndex].vboOffset;
-
-      // Descriptor set 2 - Submesh
-      vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                              m_pbrMatPipelineVk.GetVkPipelineLayout(), 2,
-                              submeshSets.size(), submeshSets.data(), 1,
-                              &submeshUboOffset);
-
-      uint32_t indexCount = submesh->GetIndexBuffer()->GetCount();
-      uint32_t firstIndex =
-          bufferOffsets.submeshesOffsets[materialHash][submeshIndex].iboOffset /
-          sizeof(uint32_t);
-      int32_t vertexOffset = 0;
-      // bufferOffsets.submeshesOffsets[materialHash][submeshIndex].vboOffset /
-      // GltfVertexBufferLayout.strideValue;
-
-      uint32_t firstIndexVal = submesh->GetIndexBuffer()->GetBufferData()[0];
-      // printf("PBR First index value: %u\n",
-      //        firstIndexVal); // Should be 0 for all submeshes
-      //
-      vkCmdDrawIndexed(cmdBfr, indexCount, 1, firstIndex, vertexOffset, 0);
-
-      ++submeshIndex;
-    }
-  }
+  // m_pbrMatPipelineVk.BindPipeline(cmdBfr);
+  //
+  // for (auto &[materialHash, submeshes] : s_pbrMatSubmeshesMap) {
+  //   uint32_t pbrMatOffset = bufferOffsets.materialOffsets[materialHash];
+  //
+  //   // Descriptor set 1 - Pbr material
+  //   vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
+  //                           m_pbrMatPipelineVk.GetVkPipelineLayout(), 1,
+  //                           pbrMatSets.size(), pbrMatSets.data(), 1,
+  //                           &pbrMatOffset);
+  //
+  //   uint32_t submeshIndex = 0;
+  //   for (Submesh<MaterialTypes::PbrMat> *submesh : submeshes) {
+  //
+  //     uint32_t submeshUboOffset =
+  //         bufferOffsets.submeshesOffsets[materialHash][submeshIndex].uboOffset;
+  //
+  //     uint32_t submeshVboOffset =
+  //         bufferOffsets.submeshesOffsets[materialHash][submeshIndex].vboOffset;
+  //
+  //     // Descriptor set 2 - Submesh
+  //     vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
+  //                             m_pbrMatPipelineVk.GetVkPipelineLayout(), 2,
+  //                             submeshSets.size(), submeshSets.data(), 1,
+  //                             &submeshUboOffset);
+  //
+  //     uint32_t indexCount = submesh->GetIndexBuffer()->GetCount();
+  //     uint32_t firstIndex =
+  //         bufferOffsets.submeshesOffsets[materialHash][submeshIndex].iboOffset
+  //         / sizeof(uint32_t);
+  //     int32_t vertexOffset = 0;
+  //     // bufferOffsets.submeshesOffsets[materialHash][submeshIndex].vboOffset
+  //     /
+  //     // GltfVertexBufferLayout.strideValue;
+  //
+  //     // uint32_t firstIndexVal =
+  //     submesh->GetIndexBuffer()->GetBufferData()[0];
+  //     // printf("PBR First index value: %u\n",
+  //     //        firstIndexVal); // Should be 0 for all submeshes
+  //     //
+  //     PC_WARN("PbrMat submesh Draw: indexCount : firstIndex : vertexOffset
+  //     ::"
+  //             << indexCount << " : " << firstIndex << " : " << vertexOffset);
+  //     vkCmdDrawIndexed(cmdBfr, indexCount, 1, firstIndex, vertexOffset, 0);
+  //
+  //     ++submeshIndex;
+  //   }
+  // }
 
   //
   // --- End renderpass --------------------------------------------------------

@@ -271,6 +271,58 @@ void MemoryVk::FillVbosIbosUbosSubmeshMaterial(
              indexBuffer->GetBufferData(), (size_t)iboSize);
     }
   };
+
+  struct VertexTemp {
+    glm::vec3 pos;
+    glm::vec3 normal;
+    glm::vec2 uv;
+    std::string Print() {
+      std::stringstream ss;
+      ss << pos.x << ", " << pos.y << ", " << pos.z << "; " << normal.r << ", "
+         << normal.g << ", " << normal.b << "; " << uv.x << ", " << uv.y;
+      return ss.str();
+    };
+  };
+
+  // Print buffer values here (vbo & ibo)
+  for (auto &[matId, submeshes] : materialSubmeshesMap) {
+    // ... your existing uniform upload code here ...
+
+    for (int i = 0; i < submeshes.size(); ++i) {
+      Submesh<T> *submesh = submeshes[i];
+
+      // VBO print
+      VertexTemp *vertices = reinterpret_cast<VertexTemp *>(
+          submesh->GetVertexBuffer()->GetBufferData());
+      size_t vertexCount = submesh->GetVertexBuffer()->GetCount();
+
+      std::cout << "Material " << matId << " Submesh " << i << " VBO ("
+                << vertexCount << " vertices):\n";
+
+      for (size_t v = 0; v < vertexCount; ++v) {
+        std::cout << "  Vertex " << v << ": pos=(" << vertices[v].pos[0] << ", "
+                  << vertices[v].pos[1] << ", " << vertices[v].pos[2]
+                  << "), normal=(" << vertices[v].normal[0] << ", "
+                  << vertices[v].normal[1] << ", " << vertices[v].normal[2]
+                  << "), uv=(" << vertices[v].uv[0] << ", " << vertices[v].uv[1]
+                  << ")\n";
+      }
+
+      // IBO print
+      uint32_t *indices = reinterpret_cast<uint32_t *>(
+          submesh->GetIndexBuffer()->GetBufferData());
+      size_t indexCount = submesh->GetIndexBuffer()->GetCount();
+
+      std::cout << "Material " << matId << " Submesh " << i << " IBO ("
+                << indexCount << " indices):\n  ";
+      for (size_t idx = 0; idx < indexCount; ++idx) {
+        std::cout << indices[idx];
+        if (idx + 1 < indexCount)
+          std::cout << " ";
+      }
+      std::cout << std::endl;
+    }
+  }
 };
 
 template <MaterialTypes T>
