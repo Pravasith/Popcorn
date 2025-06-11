@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CommandPoolVk.h"
+#include "Debug/DebugMemoryVk.h"
 #include "DescriptorLayoutsVk.h"
 #include "DescriptorPoolsVk.h"
 #include "DeviceVk.h"
@@ -117,6 +118,15 @@ public:
     return s_shaderLibrary;
   }
 
+#ifdef PC_DEBUG
+  static DebugDeviceMemoryVk *DebugDeviceMemory() {
+    if (!s_debugDeviceMemoryVk) {
+      throw std::runtime_error("DebugDeviceMemory is null");
+    }
+    return s_debugDeviceMemoryVk;
+  }
+#endif
+
   void VulkanInit(const Window &appWin);
   void VulkanCleanUp();
 
@@ -143,6 +153,10 @@ private:
     s_descriptorLayoutsVk = DescriptorLayoutsVk::Get();
     s_shaderLibrary = ShaderLibrary::Get();
 
+#ifdef PC_DEBUG
+    s_debugDeviceMemoryVk = DebugDeviceMemoryVk::Get();
+#endif
+
     PC_PRINT("CREATED", TagType::Constr, "ContextVk.h")
   };
   ~ContextVk() { PC_PRINT("DESTROYED", TagType::Destr, "ContextVk.h") };
@@ -161,6 +175,10 @@ private:
   static DescriptorPoolsVk *s_descriptorPoolsVk;
   static DescriptorLayoutsVk *s_descriptorLayoutsVk;
   static ShaderLibrary *s_shaderLibrary;
+
+#ifdef PC_DEBUG
+  static DebugDeviceMemoryVk *s_debugDeviceMemoryVk;
+#endif
 };
 
 GFX_NAMESPACE_END

@@ -49,6 +49,9 @@ add_library(
   ${PLATFORM_IMPL_DIR}/OpenGL/RendererOpenGL.cpp
   #
   # VULKAN CLASSES
+  #
+  ${PLATFORM_IMPL_DIR}/Vulkan/Debug/DebugMemoryVk.cpp
+  #
   ${PLATFORM_IMPL_DIR}/Vulkan/Descriptors/DescriptorLayoutsVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/Descriptors/DescriptorPoolsVk.cpp
   #

@@ -139,6 +139,7 @@ target_include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Scene>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/OpenGL>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Debug>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Descriptors>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Memory>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Pipelines>
@@ -149,6 +150,7 @@ target_include_directories(
             $<INSTALL_INTERFACE:include/Popcorn/Scene>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/OpenGL>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan>
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Debug>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Descriptors>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Memory>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Pipelines>
