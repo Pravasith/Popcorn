@@ -731,7 +731,7 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   // Renderpass ----------------------------------------------------------------
 
   // TODO: Move outside
-  VkClearValue clearAlbedo = {{0.0f, 1.0f, 0.0f, 1.0f}};
+  VkClearValue clearAlbedo = {{0.1f, 0.1f, 0.1f, 1.0f}};
   VkClearValue clearDepth = {{1.0f}};
   VkClearValue clearNormal = {{.0f, 0.0f, 1.f, 0.0f}};
   VkClearValue clearRoughnessMetallic = {{1.0f, 1.0f, 0.0f, 0.0f}};
@@ -814,8 +814,9 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 
       uint32_t firstIndexVal = submesh->GetIndexBuffer()->GetBufferData()[0];
 
-      PC_WARN("BasicMat submesh Draw: indexCount : firstIndex : vertexOffset ::"
-              << indexCount << " : " << firstIndex << " : " << vertexOffset);
+      // PC_WARN("BasicMat submesh Draw: indexCount : firstIndex : vertexOffset
+      //         ::"
+      //         << indexCount << " : " << firstIndex << " : " << vertexOffset);
 
       vkCmdDrawIndexed(cmdBfr, indexCount, 1, firstIndex, vertexOffset, 0);
 
@@ -824,6 +825,12 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   }
 
   m_pbrMatPipelineVk.BindPipeline(cmdBfr);
+
+  // Descriptor set 0 - Camera
+  vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                          m_pbrMatPipelineVk.GetVkPipelineLayout(), 0,
+                          cameraSets.size(), cameraSets.data(), 1,
+                          &cameraOffset);
 
   for (auto &[materialHash, submeshes] : s_pbrMatSubmeshesMap) {
     uint32_t pbrMatOffset = bufferOffsets.materialOffsets[materialHash];
@@ -836,12 +843,8 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 
     uint32_t submeshIndex = 0;
     for (Submesh<MaterialTypes::PbrMat> *submesh : submeshes) {
-
       uint32_t submeshUboOffset =
           bufferOffsets.submeshesOffsets[materialHash][submeshIndex].uboOffset;
-
-      uint32_t submeshVboOffset =
-          bufferOffsets.submeshesOffsets[materialHash][submeshIndex].vboOffset;
 
       // Descriptor set 2 - Submesh
       vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -857,10 +860,13 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
           bufferOffsets.submeshesOffsets[materialHash][submeshIndex].vboOffset /
           GltfVertexBufferLayout.strideValue;
 
+      PC_WARN(GltfVertexBufferLayout.strideValue)
+
       uint32_t firstIndexVal = submesh->GetIndexBuffer()->GetBufferData()[0];
 
       PC_WARN("PbrMat submesh Draw: indexCount : firstIndex : vertexOffset ::"
               << indexCount << " : " << firstIndex << " : " << vertexOffset);
+
       vkCmdDrawIndexed(cmdBfr, indexCount, 1, firstIndex, vertexOffset, 0);
 
       ++submeshIndex;

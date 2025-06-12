@@ -19,16 +19,6 @@ void main() {
     outRoughnessMetallic = vec4(0.0, 0.0, 0.0, 0.0);
 }
 
-// Descriptors OR Geometry
-// 1. DSets -
-//       Location match dsets
-//       Check layouts
-//       Cpu side memory
-//       Gpu side memory
-//
-// 2. Geo -
-//       Check offsets - vbo, ibo & ubo
-//       Material ubos
 
 
 // #version 450

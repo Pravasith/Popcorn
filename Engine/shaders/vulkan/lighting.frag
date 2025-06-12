@@ -94,12 +94,12 @@ void main() {
     }
 
     // outColor = vec4(finalColor, 1.0);
-    // outColor = vec4(.0, depth, depth, 1.); // cyan
-    vec3 normalColor = normal * 0.5 + 0.5;
-    outColor = vec4(normalColor, 1.0); // cyan
+    // outColor = vec4(depth, depth, depth, 1.); // cyan
+    // vec3 normalColor = normal * 0.5 + 0.5;
+    // outColor = vec4(normalColor, 1.0); // cyan
 
     // outColor = vec4(normal, 1.);
-    // outColor = vec4(albedo.xyz, 1.);// green
+    outColor = vec4(albedo.xyz, 1.);// green
     // outColor = vec4(rm.xy, 0., 1.);
 
     // outColor = vec4(1.);
