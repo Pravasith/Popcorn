@@ -76,9 +76,6 @@ void BasicMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
   pipelineState.depthStencilState.front = {};
   pipelineState.depthStencilState.back = {};
 
-  // TEMP_DEBUG
-  pipelineState.rasterizationState.cullMode = VK_CULL_MODE_NONE;
-
   auto *layouts = ContextVk::DescriptorLayouts();
   VkDescriptorSetLayout &cameraLayout =
       layouts->GetLayout<DescriptorSets::CameraSet>();
@@ -162,9 +159,6 @@ void PbrMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
   pipelineState.depthStencilState.stencilTestEnable = VK_FALSE;
   pipelineState.depthStencilState.front = {};
   pipelineState.depthStencilState.back = {};
-
-  // TEMP_DEBUG
-  pipelineState.rasterizationState.cullMode = VK_CULL_MODE_NONE;
 
   auto *layouts = ContextVk::DescriptorLayouts();
   VkDescriptorSetLayout &cameraLayout =

@@ -426,12 +426,6 @@ void GBufferRenderFlowVk::AllocDescriptorsLocal() {
   std::fill(pbrMatLayouts.begin(), pbrMatLayouts.end(), pbrMatLayout);
 
   //
-  // --- 4 sets each frame ---
-  // - Submesh - Dynamic UBO
-  // - BasicMat - Dynamic UBO
-  // - PbrMat - Dynamic UBO
-  //
-  //
   // Descriptor set will be cleaned automatically when pools are destroyed
   m_descriptorSetsVk.submeshSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::SubmeshSet, maxFIF>(
@@ -448,28 +442,35 @@ void GBufferRenderFlowVk::UpdateDescriptorSetsLocal() {
   auto *memory = ContextVk::Memory();
   auto *device = ContextVk::Device();
 
+  VkPhysicalDeviceProperties properties;
+
+  device->GetPhysicalDeviceProperties(properties);
+
   // Bind sets with buffers
   for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
     VkDescriptorBufferInfo submeshBufferInfo{};
     submeshBufferInfo.buffer = memory->GetUboSet(i);
     submeshBufferInfo.offset = memory->GetBufferViews().submeshUbo.offset;
-    submeshBufferInfo.range = memory->GetBufferViews().submeshUbo.alignedSize;
-    // DescriptorLayoutsVk::GetDescriptorBufferRange<
-    //     DescriptorSets::SubmeshSet>(properties.limits);
+    submeshBufferInfo.range =
+        // memory->GetBufferViews().submeshUbo.alignedSize;
+        DescriptorLayoutsVk::GetDescriptorBufferRange<
+            DescriptorSets::SubmeshSet>(properties.limits);
 
     VkDescriptorBufferInfo basicMatBufferInfo{};
     basicMatBufferInfo.buffer = memory->GetUboSet(i);
     basicMatBufferInfo.offset = memory->GetBufferViews().basicMatUbo.offset;
-    basicMatBufferInfo.range = memory->GetBufferViews().basicMatUbo.alignedSize;
-    // DescriptorLayoutsVk::GetDescriptorBufferRange<
-    // DescriptorSets::BasicMatSet>(properties.limits);
+    basicMatBufferInfo.range =
+        // memory->GetBufferViews().basicMatUbo.alignedSize;
+        DescriptorLayoutsVk::GetDescriptorBufferRange<
+            DescriptorSets::BasicMatSet>(properties.limits);
 
     VkDescriptorBufferInfo pbrMatBufferInfo{};
     pbrMatBufferInfo.buffer = memory->GetUboSet(i);
     pbrMatBufferInfo.offset = memory->GetBufferViews().pbrMatUbo.offset;
-    pbrMatBufferInfo.range = memory->GetBufferViews().pbrMatUbo.alignedSize;
-    // DescriptorLayoutsVk::GetDescriptorBufferRange<
-    // DescriptorSets::PbrMatSet>(properties.limits);
+    pbrMatBufferInfo.range =
+        // memory->GetBufferViews().pbrMatUbo.alignedSize;
+        DescriptorLayoutsVk::GetDescriptorBufferRange<
+            DescriptorSets::PbrMatSet>(properties.limits);
 
     // Writes
     VkWriteDescriptorSet submeshWrite{};
@@ -706,7 +707,7 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
       vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
                               m_pbrMatPipelineVk.GetVkPipelineLayout(), 2,
                               submeshSets.size(), submeshSets.data(), 1,
-                              &submeshUboOffset);
+                              &submeshUboOffset); // Somethings wrong here
 
       uint32_t indexCount = submesh->GetIndexBuffer()->GetCount();
       uint32_t firstIndex =

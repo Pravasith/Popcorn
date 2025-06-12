@@ -437,7 +437,6 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   uint32_t cameraOffset = bufferOffsets.camerasOffsets[0];
 
   std::array<VkDescriptorSet, 2> allSets = {cameraSet, lightingSet};
-
   std::array<uint32_t, 1> dynamicOffsets = {cameraOffset};
 
   // Binding 2 sets in one go. Same as doing separately (commented code below)

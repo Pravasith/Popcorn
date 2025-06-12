@@ -40,8 +40,7 @@ void MemoryVk::ExtractOffsetsMaterialsSubmeshes(
                iboOffset = m_bufferViews.submeshIbo.alignedSize,
                submeshUboOffset = m_bufferViews.submeshUbo.alignedSize;
 
-  VkDeviceSize basicMatOffset = m_bufferViews.basicMatUbo.alignedSize,
-               pbrMatOffset = m_bufferViews.pbrMatUbo.alignedSize;
+  VkDeviceSize basicMatOffset = 0, pbrMatOffset = 0;
 
   for (auto &[matId, submeshes] : materialSubmeshesMap) {
     //
