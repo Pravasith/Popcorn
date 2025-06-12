@@ -125,18 +125,6 @@ void MemoryVk::ExtractOffsetsLightsCamerasEmptys(std::vector<Light *> &lights,
     PC_PRINT(" " << i << ": " << m_bufferOffsets.lightsOffsets[i] << "  ",
              TagType::Print, "Light")
   }
-
-  // for (Camera *camera : cameras) {
-  //   m_bufferOffsets.camerasOffsets.push_back(cameraOffsets);
-  //   cameraOffsets += PC_AlignCeil(UniformDefs::CameraUniform::size,
-  //                                 limits.minUniformBufferOffsetAlignment);
-  // }
-  //
-  // for (Empty *empty : emptys) {
-  //   m_bufferOffsets.emptysOffsets.push_back(emptyOffsets);
-  //   emptyOffsets += PC_AlignCeil(UniformDefs::EmptyUniform::size,
-  //                                limits.minUniformBufferOffsetAlignment);
-  // };
 };
 
 void MemoryVk::AlignVboIboBufferViews() {
@@ -263,17 +251,6 @@ void MemoryVk::FillVbosIbosUbosSubmeshMaterial(
           submesh->GetVertexBuffer()->GetLayout();
       const VkDeviceSize vboSize =
           submesh->GetVertexBuffer()->GetCount() * vboLayout.strideValue;
-
-      PC_PRINT("MAT " << matId << " SUBMESH[" << i << "]", TagType::Print,
-               "MemoryVk")
-      PC_PRINT("  Vertex Count: " << submesh->GetVertexBuffer()->GetCount(),
-               TagType::Print, "MemoryVk")
-      PC_PRINT("  Stride: " << vboLayout.strideValue, TagType::Print,
-               "MemoryVk")
-      PC_PRINT("  Total VBO bytes: " << vboSize, TagType::Print, "MemoryVk")
-      PC_PRINT("  VBO offset: "
-                   << m_bufferOffsets.submeshesOffsets[matId][i].vboOffset,
-               TagType::Print, "MemoryVk")
 
       memcpy((byte_t *)m_vboStagingMapping +
                  m_bufferOffsets.submeshesOffsets[matId][i].vboOffset,

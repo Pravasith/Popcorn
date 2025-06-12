@@ -237,8 +237,6 @@ void LightingRenderFlowVk::UpdateDescriptorSetsLocal() {
     lightBufferInfo.buffer = memory->GetSsboSet(i);
     lightBufferInfo.offset = memory->GetBufferViews().lightsSsbo.offset;
     lightBufferInfo.range = memory->GetBufferViews().lightsSsbo.alignedSize;
-    PC_WARN("Lights SSBO - frame " << i << ": " << lightBufferInfo.range
-                                   << " range.")
     // DescriptorLayoutsVk::GetDescriptorBufferRange<
     // DescriptorSets::LightingSet>(properties.limits);
 

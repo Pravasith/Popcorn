@@ -225,7 +225,10 @@ void RenderFlowVk::CreateSamplers() {
   s_samplersVk.depthSampler.Create(depthSamplerInfo);
 };
 
-void RenderFlowVk::DestroySamplers() { s_samplersVk.colorSampler.Destroy(); };
+void RenderFlowVk::DestroySamplers() {
+  s_samplersVk.colorSampler.Destroy();
+  s_samplersVk.depthSampler.Destroy();
+};
 
 void RenderFlowVk::FreeMemory() {
   ContextVk::Memory()->CleanUpUboSsboLocalBuffers();

@@ -28,8 +28,6 @@ void CompositePipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
   Buffer *fragShaderBuffer =
       &shaders->GetShader<RendererType::Vulkan, ShaderFiles::Composite_Frag>();
 
-  PC_WARN("SIZE --------------------" << vertShaderBuffer->GetSize())
-
   auto vertShaderModule = PC_CreateShaderModule(device, *vertShaderBuffer);
   auto fragShaderModule = PC_CreateShaderModule(device, *fragShaderBuffer);
 

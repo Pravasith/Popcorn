@@ -170,8 +170,6 @@ void GBufferRenderFlowVk::CreateAttachments() {
             : VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
     depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    PC_WARN(depthImage.FormatHasStencilComponent()
-            << ": Format has stencil component??")
 
     depthAttachment.stencilLoadOp = depthImage.FormatHasStencilComponent()
                                         ? VK_ATTACHMENT_LOAD_OP_CLEAR

@@ -44,7 +44,6 @@ void RendererVk::DrawFrame(const Scene &scene) {
         for (auto &renderFlow : s_renderFlows) {
           renderFlow->RecordCommandBuffer(frameIndex, currentFrame);
         }
-        PC_PRINT("RENDERFLOW EXEC COUNT: " << ++i, TagType::Print, "RendererVk")
       },
       s_renderFlowCmdBuffers);
 };
@@ -89,6 +88,8 @@ void RendererVk::CreateRenderFlows() {
 };
 
 void RendererVk::DestroyRenderFlows() {
+  vkDeviceWaitIdle(ContextVk::Device()->GetDevice());
+
   for (auto &renderFlow : s_renderFlows) {
     renderFlow->DestroyPipelines();
   }
