@@ -147,6 +147,7 @@ GameObject *GltfLoader::CreateGameObjectByType(const tinygltf::Model &model,
              node.extensions.end()) {
     // Light node (requires KHR_lights_punctual extension)
     Light *light = new Light();
+    ExtractLightsData(model, node, light);
     return light;
 
     // } else if (
@@ -174,6 +175,66 @@ GameObject *GltfLoader::CreateGameObjectByType(const tinygltf::Model &model,
     return new Empty();
   }
 };
+
+void GltfLoader::ExtractLightsData(const tinygltf::Model &model,
+                                   const tinygltf::Node &node, Light *light) {
+  // Safety check
+  if (node.extensions.find("KHR_lights_punctual") == node.extensions.end())
+    return;
+
+  const auto &ext = node.extensions.at("KHR_lights_punctual");
+
+  if (!ext.Has("light"))
+    return; // no valid light index
+
+  int lightIndex = ext.Get("light").Get<int>();
+  if (lightIndex < 0 || lightIndex >= model.lights.size())
+    return;
+
+  const auto &gltfLight = model.lights[lightIndex];
+
+  LightData data{};
+
+  // Type
+  if (gltfLight.type == "point") {
+    data.type = Lights::PointLight;
+  } else if (gltfLight.type == "spot") {
+    data.type = Lights::SpotLight;
+  } else if (gltfLight.type == "directional") {
+    data.type = Lights::DirectionalLight;
+  } else {
+    PC_WARN("Unknown light type: " << gltfLight.type);
+    data.type = Lights::PointLight; // default fallback
+  }
+
+  // Color
+  if (!gltfLight.color.empty() && gltfLight.color.size() == 3) {
+    data.color = glm::vec3(static_cast<float>(gltfLight.color[0]),
+                           static_cast<float>(gltfLight.color[1]),
+                           static_cast<float>(gltfLight.color[2]));
+  }
+
+  // Intensity
+  data.intensity = static_cast<float>(gltfLight.intensity); // default is 1.0
+
+  // Range
+  if (gltfLight.range >= 0.0) {
+    data.range = static_cast<float>(gltfLight.range);
+  }
+
+  // Spot angles (only if spot light)
+  if (data.type == Lights::SpotLight) {
+    const auto &spot = gltfLight.spot;
+    data.innerConeAngle = spot.innerConeAngle >= 0.0
+                              ? static_cast<float>(spot.innerConeAngle)
+                              : glm::radians(15.0f);
+    data.outerConeAngle = spot.outerConeAngle >= 0.0
+                              ? static_cast<float>(spot.outerConeAngle)
+                              : glm::radians(30.0f);
+  }
+
+  light->SetLightData(data);
+}
 
 //
 //

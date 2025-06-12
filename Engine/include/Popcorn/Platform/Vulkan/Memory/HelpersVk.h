@@ -99,11 +99,9 @@ public:
 
     const glm::vec3 &worldPos = light->GetPosition();
     const glm::vec3 &worldDir = light->GetLookAtDirection();
-    const glm::mat4 &viewMatrix = activeCamera->GetViewMatrix();
 
-    uniform.viewPos =
-        glm::vec3(activeCamera->GetViewMatrix() * glm::vec4(worldPos, 1.0));
-    uniform.viewDir = glm::normalize(glm::mat3(viewMatrix) * worldDir);
+    uniform.worldPos = worldPos;
+    uniform.worldDir = worldDir;
     uniform.color = lightData.color;
     uniform.lightType = static_cast<float>(lightData.type);
     uniform.intensity = lightData.intensity;

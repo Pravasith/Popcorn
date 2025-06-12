@@ -72,10 +72,10 @@ struct alignas(16) PbrMaterialUniform
 // Note: this is an SSBO in vulkan
 struct alignas(16) LightUniform
     : public Uniform<Uniforms::Light, 64> {   // aligned to 64B
-  glm::vec3 viewPos{0.0f};                    // 12B
+  glm::vec3 worldPos{0.0f};                   // 12B
   float pad0;                                 // 4B (optional padding)
                                               //
-  glm::vec3 viewDir{0.0f};                    // 12B
+  glm::vec3 worldDir{0.0f};                   // 12B
   float pad1;                                 // 4B (optional padding)
                                               //
   glm::vec3 color{1.0f, 0.95f, 0.9f};         // 12B

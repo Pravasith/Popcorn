@@ -300,6 +300,33 @@ void MemoryVk::FillUbosSsbosLightCameraEmpty(std::vector<Light *> &lights,
     ++i;
   }
 
+  // std::cout << "====== Copied Light SSBO Contents ======" << std::endl;
+  //
+  // for (size_t j = 0; j < i; ++j) {
+  //   // Offset for each light (aligned)
+  //   const size_t offset =
+  //       m_bufferViews.lightsSsbo.offset + m_bufferOffsets.lightsOffsets[j];
+  //
+  //   // Reinterpret memory at offset
+  //   const LightUniform *l = reinterpret_cast<const LightUniform *>(
+  //       reinterpret_cast<const byte_t *>(m_ssboMappingSet[currentFrame]) +
+  //       offset);
+  //
+  //   std::cout << "Light " << j << ":\n";
+  //   std::cout << "  View Position     : (" << l->worldPos.x << ", "
+  //             << l->worldPos.y << ", " << l->worldPos.z << ")\n";
+  //   std::cout << "  View Direction    : (" << l->worldDir.x << ", "
+  //             << l->worldDir.y << ", " << l->worldDir.z << ")\n";
+  //   std::cout << "  Color             : (" << l->color.r << ", " <<
+  //   l->color.g
+  //             << ", " << l->color.b << ")\n";
+  //   std::cout << "  Type              : " << l->lightType << "\n";
+  //   std::cout << "  Intensity         : " << l->intensity << "\n";
+  //   std::cout << "  Inner Cone Angle  : " << l->innerConeAngle << " rad\n";
+  //   std::cout << "  Outer Cone Angle  : " << l->outerConeAngle << " rad\n";
+  //   std::cout << "-------------------------------------------\n";
+  // }
+
   i = 0;
   for (Camera *camera : cameras) {
     PcCopyUniformToMemory<Uniforms::Camera> copyUniformToMemory{

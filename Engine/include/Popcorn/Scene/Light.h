@@ -37,7 +37,12 @@ struct LightData {
 
 class Light : public GameObject {
 public:
-  Light() { PC_PRINT("CREATED", TagType::Constr, "Light"); }
+  Light() {
+    PC_PRINT("CREATED", TagType::Constr, "Light");
+    // TEMP_DEBUG
+    m_lightData.intensity = 5.0f;
+    // m_lightData.range = 5.0f;
+  }
   ~Light() { PC_PRINT("DESTROYED", TagType::Destr, "Light"); }
 
   virtual constexpr GameObjectTypes GetGameObjectType() const override {
@@ -45,6 +50,15 @@ public:
   };
 
   [[nodiscard]] const LightData &GetLightData() const { return m_lightData; };
+
+  void SetLightData(LightData &data) {
+    m_lightData.type = data.type;
+    m_lightData.color = data.color;
+    m_lightData.intensity = data.intensity;
+    m_lightData.range = data.range;
+    m_lightData.innerConeAngle = data.innerConeAngle;
+    m_lightData.outerConeAngle = data.outerConeAngle;
+  }
 
   virtual void OnAttach() {};
   // virtual void OnUpdate() {};
