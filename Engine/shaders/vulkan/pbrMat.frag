@@ -25,8 +25,7 @@ layout(set = 1, binding = 0) uniform PbrMaterialUBO {
 
 void main() {
     outAlbedo = material.baseColor;
-    // outNormal = vec4(normalize(fragNormal), 0.0);
-    outNormal = vec4(1., 1., 0., 0.0);
+    outNormal = vec4(normalize(fragNormal), 0.0);
     outRoughnessMetallic =
         vec4(material.roughness, material.metallic, 0.0, 0.0);
 }

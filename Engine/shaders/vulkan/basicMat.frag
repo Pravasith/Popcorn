@@ -15,7 +15,6 @@ layout(set = 1, binding = 0) uniform BasicMatUBO {
 void main() {
     outAlbedo = material.baseColor;
     outNormal = vec4(normalize(fragNormal), 0.0);
-    // outNormal = vec4(1., 1., 0., 0.0);
     outRoughnessMetallic = vec4(0.0, 0.0, 0.0, 0.0);
 }
 

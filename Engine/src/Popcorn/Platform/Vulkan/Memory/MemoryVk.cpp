@@ -83,14 +83,6 @@ void MemoryVk::ExtractOffsetsMaterialsSubmeshes(
   m_bufferViews.submeshIbo = {0, iboOffset};
 
   m_bufferViews.submeshUbo = {0, submeshUboOffset};
-
-  PC_PRINT("VBO OFFSET _____ " << vboOffset << " BfrView size: "
-                               << m_bufferViews.submeshVbo.alignedSize,
-           TagType::Print, "MemVk")
-
-  PC_PRINT("IBO OFFSET _____ " << iboOffset << " BfrView size: "
-                               << m_bufferViews.submeshIbo.alignedSize,
-           TagType::Print, "MemVk")
 }
 
 void MemoryVk::ExtractOffsetsLightsCamerasEmptys(std::vector<Light *> &lights,
