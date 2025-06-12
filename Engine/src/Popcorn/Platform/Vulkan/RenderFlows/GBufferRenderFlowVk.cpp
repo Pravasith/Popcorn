@@ -4,6 +4,7 @@
 #include "BufferObjectsVk.h"
 #include "CommonVk.h"
 #include "ContextVk.h"
+#include "DebugMemoryVk.h"
 #include "DescriptorLayoutsVk.h"
 #include "DescriptorPoolsVk.h"
 #include "FramebufferVk.h"
@@ -590,143 +591,6 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
 
-#ifdef PC_DEBUG
-  // TEMP_DEBUG
-  {
-
-    struct VertexTemp {
-      glm::vec3 pos;
-      glm::vec3 normal;
-      glm::vec2 uv;
-      std::string Print() {
-        std::stringstream ss;
-        ss << pos.x << ", " << pos.y << ", " << pos.z << "; " << normal.r
-           << ", " << normal.g << ", " << normal.b << "; " << uv.x << ", "
-           << uv.y;
-        return ss.str();
-      };
-    };
-
-    // Print buffer values here (vbo & ibo)
-    for (auto &[matId, submeshes] : s_basicMatSubmeshesMap) {
-      // ... your existing uniform upload code here ...
-
-      for (int i = 0; i < submeshes.size(); ++i) {
-        Submesh<MaterialTypes::BasicMat> *submesh = submeshes[i];
-
-        // VBO print
-        VertexTemp *vertices = reinterpret_cast<VertexTemp *>(
-            submesh->GetVertexBuffer()->GetBufferData());
-        size_t vertexCount = submesh->GetVertexBuffer()->GetCount();
-
-        std::cout << "Material " << matId << " Submesh " << i << " VBO ("
-                  << vertexCount << " vertices):\n";
-
-        for (size_t v = 0; v < vertexCount; ++v) {
-          std::cout << "  Vertex " << v << ": pos=(" << vertices[v].pos[0]
-                    << ", " << vertices[v].pos[1] << ", " << vertices[v].pos[2]
-                    << "), normal=(" << vertices[v].normal[0] << ", "
-                    << vertices[v].normal[1] << ", " << vertices[v].normal[2]
-                    << "), uv=(" << vertices[v].uv[0] << ", "
-                    << vertices[v].uv[1] << ")\n";
-        }
-
-        // IBO print
-        uint32_t *indices = reinterpret_cast<uint32_t *>(
-            submesh->GetIndexBuffer()->GetBufferData());
-        size_t indexCount = submesh->GetIndexBuffer()->GetCount();
-
-        std::cout << "Basic Material " << matId << " Submesh " << i << " IBO ("
-                  << indexCount << " indices):\n  ";
-        for (size_t idx = 0; idx < indexCount; ++idx) {
-          std::cout << indices[idx];
-          if (idx + 1 < indexCount)
-            std::cout << " ";
-        }
-        std::cout << std::endl;
-      }
-    }
-
-    // Print buffer values here (vbo & ibo)
-    for (auto &[matId, submeshes] : s_pbrMatSubmeshesMap) {
-      // ... your existing uniform upload code here ...
-
-      for (int i = 0; i < submeshes.size(); ++i) {
-        Submesh<MaterialTypes::PbrMat> *submesh = submeshes[i];
-
-        // VBO print
-        VertexTemp *vertices = reinterpret_cast<VertexTemp *>(
-            submesh->GetVertexBuffer()->GetBufferData());
-        size_t vertexCount = submesh->GetVertexBuffer()->GetCount();
-
-        std::cout << "Material " << matId << " Submesh " << i << " VBO ("
-                  << vertexCount << " vertices):\n";
-
-        for (size_t v = 0; v < vertexCount; ++v) {
-          std::cout << "  Vertex " << v << ": pos=(" << vertices[v].pos[0]
-                    << ", " << vertices[v].pos[1] << ", " << vertices[v].pos[2]
-                    << "), normal=(" << vertices[v].normal[0] << ", "
-                    << vertices[v].normal[1] << ", " << vertices[v].normal[2]
-                    << "), uv=(" << vertices[v].uv[0] << ", "
-                    << vertices[v].uv[1] << ")\n";
-        }
-
-        // IBO print
-        uint32_t *indices = reinterpret_cast<uint32_t *>(
-            submesh->GetIndexBuffer()->GetBufferData());
-        size_t indexCount = submesh->GetIndexBuffer()->GetCount();
-
-        std::cout << "Pbr Material " << matId << " Submesh " << i << " IBO ("
-                  << indexCount << " indices):\n  ";
-        for (size_t idx = 0; idx < indexCount; ++idx) {
-          std::cout << indices[idx];
-          if (idx + 1 < indexCount)
-            std::cout << " ";
-        }
-        std::cout << std::endl;
-      }
-    }
-  }
-
-#endif
-
-#ifdef PC_DEBUG
-  {
-    auto *deviceMemory = ContextVk::Memory();
-    auto *vmaAllocator = ContextVk::MemoryAllocator()->GetVMAAllocator();
-    VkDevice device = ContextVk::Device()->GetDevice();
-    VkCommandPool cmdPool = ContextVk::CommandPool()->GetVkCommandPool();
-    VkQueue queue = ContextVk::Device()->GetGraphicsQueue();
-
-    auto *debugMemory = ContextVk::DebugDeviceMemory();
-
-    VkBuffer &vbo = deviceMemory->GetVboVkBuffer();
-    VkBuffer &ibo = deviceMemory->GetIboVkBuffer();
-
-    VkDeviceSize vboSize = bufferViews.submeshVbo.alignedSize;
-    VkDeviceSize iboSize = bufferViews.submeshIbo.alignedSize;
-
-    PC_PRINT("SubmeshVbo size: " << vboSize, TagType::Print, "Paint")
-    PC_PRINT("SubmeshIbo size: " << iboSize, TagType::Print, "Paint")
-
-    std::cout << "\n=== FULL VBO BUFFER ===\n";
-    void *vboData = debugMemory->CreateStagingBuffer(device, vmaAllocator, vbo,
-                                                     vboSize, cmdPool, queue);
-    // debugMemory->PrintVmaBuffer(vboSize);
-
-    std::cout << "\n=== FULL IBO BUFFER ===\n";
-    void *iboData = debugMemory->CreateStagingBuffer(device, vmaAllocator, ibo,
-                                                     iboSize, cmdPool, queue);
-    // debugMemory->PrintVmaBuffer(vboSize);
-
-    debugMemory->PrintRawGpuVertexDataFromBytes(vboData, vboSize, iboData,
-                                                iboSize);
-
-    // debugMemory->DestroyStagingBuffer(vmaAllocator);
-    // debugMemory->DestroyStagingBuffer(vmaAllocator);
-  }
-#endif
-
   //
   // Renderpass ----------------------------------------------------------------
 
@@ -810,14 +674,6 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
           bufferOffsets.submeshesOffsets[materialHash][submeshIndex].vboOffset /
           GltfVertexBufferLayout.strideValue;
 
-      PC_WARN(GltfVertexBufferLayout.strideValue)
-
-      uint32_t firstIndexVal = submesh->GetIndexBuffer()->GetBufferData()[0];
-
-      // PC_WARN("BasicMat submesh Draw: indexCount : firstIndex : vertexOffset
-      //         ::"
-      //         << indexCount << " : " << firstIndex << " : " << vertexOffset);
-
       vkCmdDrawIndexed(cmdBfr, indexCount, 1, firstIndex, vertexOffset, 0);
 
       ++submeshIndex;
@@ -860,13 +716,6 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
           bufferOffsets.submeshesOffsets[materialHash][submeshIndex].vboOffset /
           GltfVertexBufferLayout.strideValue;
 
-      PC_WARN(GltfVertexBufferLayout.strideValue)
-
-      uint32_t firstIndexVal = submesh->GetIndexBuffer()->GetBufferData()[0];
-
-      PC_WARN("PbrMat submesh Draw: indexCount : firstIndex : vertexOffset ::"
-              << indexCount << " : " << firstIndex << " : " << vertexOffset);
-
       vkCmdDrawIndexed(cmdBfr, indexCount, 1, firstIndex, vertexOffset, 0);
 
       ++submeshIndex;
@@ -897,7 +746,56 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   //
   // --- End command buffer ----------------------------------------------------
   ContextVk::CommandPool()->EndCommandBuffer(cmdBfr);
-};
+}
+
+//
+//
+//
+//
+// --- HELPERS -----------------------------------------------------------------
+// --- HELPERS -----------------------------------------------------------------
+// --- HELPERS -----------------------------------------------------------------
+//
+#ifdef PC_DEBUG
+void GBufferRenderFlowVk::PrintVboIbo() {
+  auto *deviceMemory = ContextVk::Memory();
+  auto *vmaAllocator = ContextVk::MemoryAllocator()->GetVMAAllocator();
+  VkDevice device = ContextVk::Device()->GetDevice();
+  VkCommandPool cmdPool = ContextVk::CommandPool()->GetVkCommandPool();
+  VkQueue queue = ContextVk::Device()->GetGraphicsQueue();
+
+  DebugDeviceMemoryVk vboDeviceMemory;
+  DebugDeviceMemoryVk iboDeviceMemory;
+
+  VkBuffer &vbo = deviceMemory->GetVboVkBuffer();
+  VkBuffer &ibo = deviceMemory->GetIboVkBuffer();
+
+  auto &bufferViews = deviceMemory->GetBufferViews();
+  auto &bufferOffsets = deviceMemory->GetBufferOffsets();
+
+  VkDeviceSize vboSize = bufferViews.submeshVbo.alignedSize;
+  VkDeviceSize iboSize = bufferViews.submeshIbo.alignedSize;
+
+  PC_PRINT("SubmeshVbo size: " << vboSize, TagType::Print, "Paint")
+  PC_PRINT("SubmeshIbo size: " << iboSize, TagType::Print, "Paint")
+
+  std::cout << "\n=== FULL VBO BUFFER ===\n";
+  void *vboData = vboDeviceMemory.CreateStagingBuffer(device, vmaAllocator, vbo,
+                                                      vboSize, cmdPool, queue);
+  // debugMemory->PrintVmaBuffer(vboSize);
+
+  std::cout << "\n=== FULL IBO BUFFER ===\n";
+  void *iboData = iboDeviceMemory.CreateStagingBuffer(device, vmaAllocator, ibo,
+                                                      iboSize, cmdPool, queue);
+  // debugMemory->PrintVmaBuffer(vboSize);
+
+  DebugDeviceMemoryVk::PrintRawGpuVertexDataFromBytes(vboData, vboSize, iboData,
+                                                      iboSize);
+
+  vboDeviceMemory.DestroyStagingBuffer(vmaAllocator);
+  iboDeviceMemory.DestroyStagingBuffer(vmaAllocator);
+}
+#endif
 
 //
 //

@@ -44,8 +44,11 @@ static void StartGame() {
                                                  // wise & adds to renderflows
   s_renderer->CreateRenderFlowResources(); // Renderflow submeshes converted and
                                            // copied to vulkan memory objects
-
+#ifdef PC_DEBUG
   s_renderer->PrintScenes();
+  // s_renderer->DebugPreGameLoop();
+#endif
+
   s_application->StartGameLoop(); // Starts game loop
 };
 

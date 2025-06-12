@@ -20,10 +20,6 @@ DescriptorLayoutsVk *ContextVk::s_descriptorLayoutsVk = nullptr;
 DescriptorPoolsVk *ContextVk::s_descriptorPoolsVk = nullptr;
 ShaderLibrary *ContextVk::s_shaderLibrary = nullptr;
 
-#ifdef PC_DEBUG
-DebugDeviceMemoryVk *ContextVk::s_debugDeviceMemoryVk = nullptr;
-#endif
-
 void ContextVk::VulkanInit(const Window &appWin) {
   s_swapchainVk->SetAppWindow(appWin);
   GLFWwindow *osWindow = static_cast<GLFWwindow *>(appWin.GetOSWindow());
@@ -110,11 +106,6 @@ void ContextVk::VulkanCleanUp() {
   s_deviceVk->CleanUp();
   DeviceVk::Destroy();
   s_deviceVk = nullptr;
-
-#ifdef PC_DEBUG
-  s_debugDeviceMemoryVk->Destroy();
-  s_debugDeviceMemoryVk = nullptr;
-#endif
 };
 
 GFX_NAMESPACE_END

@@ -42,6 +42,11 @@ public:
   static void UpdateDescriptorSetsGlobal();
 
 public:
+#ifdef PC_DEBUG
+  virtual void PrintVboIbo() {};
+#endif
+
+public:
   virtual void AllocDescriptorsLocal() = 0; // Automatically destroyed
   virtual void UpdateDescriptorSetsLocal() = 0;
 

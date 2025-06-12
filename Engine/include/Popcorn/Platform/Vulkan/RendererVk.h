@@ -33,6 +33,8 @@ public:
 
   virtual bool OnFrameBufferResize(FrameBfrResizeEvent &) override;
 
+  virtual void DebugPreGameLoop() override;
+
   // Sets up devices, configure swapchains, creates depth buffers
   // also allocates command pools
   void CreateVulkanContext();

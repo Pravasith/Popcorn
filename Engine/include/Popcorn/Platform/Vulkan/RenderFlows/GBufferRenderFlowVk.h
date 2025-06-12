@@ -23,6 +23,10 @@ public:
     PC_PRINT("DESTROYED", TagType::Destr, "GBufferRenderflowVk")
   };
 
+#ifdef PC_DEBUG
+  virtual void PrintVboIbo() override;
+#endif
+
 private:
   virtual void CreateAttachments() override;
   virtual void CreateImageBarriers() override;

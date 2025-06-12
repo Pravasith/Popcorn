@@ -199,31 +199,31 @@ void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
     // Extract index buffer
     ibo = ExtractIndexBuffer(model, primitive);
 
-    struct VertexTemp {
-      glm::vec3 pos;
-      glm::vec3 normal;
-      glm::vec2 uv;
-      std::string Print() {
-        std::stringstream ss;
-        ss << pos.x << ", " << pos.y << ", " << pos.z << "; " << normal.r
-           << ", " << normal.g << ", " << normal.b << "; " << uv.x << ", "
-           << uv.y;
-        return ss.str();
-      };
-    };
+    // struct VertexTemp {
+    //   glm::vec3 pos;
+    //   glm::vec3 normal;
+    //   glm::vec2 uv;
+    //   std::string Print() {
+    //     std::stringstream ss;
+    //     ss << pos.x << ", " << pos.y << ", " << pos.z << "; " << normal.r
+    //        << ", " << normal.g << ", " << normal.b << "; " << uv.x << ", "
+    //        << uv.y;
+    //     return ss.str();
+    //   };
+    // };
+    //
+    // // Print vertex buffer
+    // vbo->PrintBuffer<VertexTemp>();
 
-    // Print vertex buffer
-    vbo->PrintBuffer<VertexTemp>();
-
-    const uint32_t *indices =
-        reinterpret_cast<const uint32_t *>(ibo->GetBufferData());
-    std::cout << "Index Buffer: ";
-    for (size_t i = 0; i < ibo->GetCount(); ++i) {
-      std::cout << indices[i];
-      if (i < ibo->GetCount() - 1)
-        std::cout << ", ";
-    }
-    std::cout << std::endl;
+    // const uint32_t *indices =
+    //     reinterpret_cast<const uint32_t *>(ibo->GetBufferData());
+    // std::cout << "Index Buffer: ";
+    // for (size_t i = 0; i < ibo->GetCount(); ++i) {
+    //   std::cout << indices[i];
+    //   if (i < ibo->GetCount() - 1)
+    //     std::cout << ", ";
+    // }
+    // std::cout << std::endl;
 
     // Extract material data
     if (primitive.material >= 0) {

@@ -9,8 +9,6 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-DebugDeviceMemoryVk *DebugDeviceMemoryVk::s_instance = nullptr;
-
 void *DebugDeviceMemoryVk::CreateStagingBuffer(
     VkDevice &device, VmaAllocator &vmaAllocator, VkBuffer &srcBuffer,
     VkDeviceSize size, VkCommandPool &commandPool, VkQueue &queue) {

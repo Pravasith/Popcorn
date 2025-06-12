@@ -40,9 +40,11 @@ void RendererVk::DrawFrame(const Scene &scene) {
         RenderFlowVk::CopyDynamicUniformsToMemory(currentFrame);
       },
       [&](const uint32_t frameIndex, const uint32_t currentFrame) {
+        int i = 0;
         for (auto &renderFlow : s_renderFlows) {
           renderFlow->RecordCommandBuffer(frameIndex, currentFrame);
         }
+        PC_PRINT("RENDERFLOW EXEC COUNT: " << ++i, TagType::Print, "RendererVk")
       },
       s_renderFlowCmdBuffers);
 };
@@ -155,6 +157,14 @@ void RendererVk::CreateRenderFlowResources() {
   // Unload shaders in the shader library
   RenderFlowVk::FreeShaders();
 };
+
+#ifdef PC_DEBUG
+void RendererVk::DebugPreGameLoop() {
+  for (auto &renderFlow : s_renderFlows) {
+    renderFlow->PrintVboIbo();
+  }
+}
+#endif
 
 void RendererVk::AssignSceneObjectsToRenderFlows() {
   for (auto &scene : m_sceneLibrary.GetScenes()) {

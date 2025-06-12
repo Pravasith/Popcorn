@@ -34,7 +34,7 @@ public:
     }
   }
 
-  void PrintScenes() {
+  void PrintScenes() const {
     PC_PRINT("Printing Scenes: ------------------------ \n", TagType::Print,
              "SceneLib");
 

@@ -44,11 +44,8 @@ public:
   virtual void PrepareRenderFlows() = 0;
 
   virtual void AssignSceneObjectsToRenderFlows() = 0;
-
   virtual void CreateRenderFlowResources() = 0;
-
   virtual void ProcessGameObjectNode(GameObject *node) = 0;
-
   virtual void DrawFrame(const Scene &scene) = 0;
 
   // Utils
@@ -60,7 +57,10 @@ public:
   Renderer(Renderer &&) = delete;
   Renderer &operator=(const Renderer &&) = delete;
 
-  void PrintScenes() { m_sceneLibrary.PrintScenes(); };
+#ifdef PC_DEBUG
+  void PrintScenes() const { m_sceneLibrary.PrintScenes(); };
+  virtual void DebugPreGameLoop() {};
+#endif
 
 protected:
   Renderer(const Window &);
