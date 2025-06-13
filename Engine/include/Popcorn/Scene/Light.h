@@ -26,8 +26,7 @@ struct LightData {
   //                                             //
   Lights type = Lights::PointLight;
   glm::vec3 color = glm::vec3(1.0f, 0.95f, 0.9f); // slightly warm white light
-  float intensity =
-      50.0f; // glTF uses lumen-like units, ~50 is reasonable indoors
+  float intensity = 50.0f;                        // Watts
 
   float range = 15.0f; // affects attenuation; 0 = infinite in some engines
 
@@ -40,7 +39,7 @@ public:
   Light() {
     PC_PRINT("CREATED", TagType::Constr, "Light");
     // TEMP_DEBUG
-    m_lightData.intensity = 5.0f;
+    // m_lightData.intensity = 5.0f;
     // m_lightData.range = 5.0f;
   }
   ~Light() { PC_PRINT("DESTROYED", TagType::Destr, "Light"); }

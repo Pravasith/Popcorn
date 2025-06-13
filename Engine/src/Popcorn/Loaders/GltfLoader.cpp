@@ -192,20 +192,7 @@ void GltfLoader::ExtractLightsData(const tinygltf::Model &model,
     return;
 
   const auto &gltfLight = model.lights[lightIndex];
-
   LightData data{};
-
-  // Type
-  if (gltfLight.type == "point") {
-    data.type = Lights::PointLight;
-  } else if (gltfLight.type == "spot") {
-    data.type = Lights::SpotLight;
-  } else if (gltfLight.type == "directional") {
-    data.type = Lights::DirectionalLight;
-  } else {
-    PC_WARN("Unknown light type: " << gltfLight.type);
-    data.type = Lights::PointLight; // default fallback
-  }
 
   // Color
   if (!gltfLight.color.empty() && gltfLight.color.size() == 3) {
@@ -231,6 +218,28 @@ void GltfLoader::ExtractLightsData(const tinygltf::Model &model,
     data.outerConeAngle = spot.outerConeAngle >= 0.0
                               ? static_cast<float>(spot.outerConeAngle)
                               : glm::radians(30.0f);
+  }
+
+  // Type
+  if (gltfLight.type == "point") {
+    constexpr float PC_POINT_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR =
+        54.3514f;
+    // TEMP_DEBUG -
+    data.intensity /= PC_POINT_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR;
+    data.type = Lights::PointLight;
+    PC_WARN("POINT INTENSITY " << data.intensity)
+  } else if (gltfLight.type == "spot") {
+    data.type = Lights::SpotLight;
+  } else if (gltfLight.type == "directional") {
+    data.type = Lights::DirectionalLight;
+    // TEMP_DEBUG -
+    constexpr float PC_DIR_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR =
+        100.0f * 6.83f;
+    data.intensity /= PC_DIR_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR;
+    PC_WARN("DIR LIGHT INTENSITY " << data.intensity)
+  } else {
+    PC_WARN("Unknown light type: " << gltfLight.type);
+    data.type = Lights::PointLight; // default fallback
   }
 
   light->SetLightData(data);

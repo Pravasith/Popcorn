@@ -104,7 +104,8 @@ public:
     uniform.worldDir = worldDir;
     uniform.color = lightData.color;
     uniform.lightType = static_cast<float>(lightData.type);
-    uniform.intensity = lightData.intensity;
+    uniform.intensity =
+        lightData.intensity; // TEMP_DEBUG ~ treating intensity as power
     uniform.innerConeAngle = lightData.innerConeAngle;
     uniform.outerConeAngle = lightData.outerConeAngle;
   }

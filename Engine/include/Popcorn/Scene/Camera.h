@@ -18,9 +18,10 @@ struct CameraData {
 // TODO: Complete this class
 class Camera : public GameObject {
 public:
-  Camera(const CameraData &data = {1.0f, 0.1f, 10.0f}) {
+  Camera(const CameraData &data = {1.0f, 0.01f, 100.0f}) {
+    float x = 9.0f;
     m_viewMatrix = glm::lookAt(
-        glm::vec3(2.0f, 2.0f, 2.0f), // Eye position(camera/object world pos)
+        glm::vec3(x, x, x), // Eye position(camera/object world pos)
         // glm::vec3(7.35889, 4.95831, 6.92579),
         glm::vec3(0.0f, 0.0f, 0.0f), // Target point to look at(world pos)
         glm::vec3(0.0f, 1.0f, 0.0f)  // Up direction (world up -- Y+)

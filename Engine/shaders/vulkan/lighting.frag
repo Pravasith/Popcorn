@@ -11,7 +11,7 @@ struct LightUniform {
     float pad2;
 
     float lightType;
-    float intensity;
+    float intensity; // TEMP_DEBUG ~ treating as power
     float innerConeAngle;
     float outerConeAngle;
 };
@@ -61,11 +61,12 @@ void main() {
     for (uint i = 0; i < lights.length(); ++i) {
         LightUniform light = lights[i];
         // TEMP_DEBUG
-        // vec3 lightColor = light.color * light.intensity;
-        vec3 lightColor = light.color * light.intensity * 0.002;
+        vec3 lightColor = light.color * light.intensity * 0.5;
 
         vec3 lightVec;
-        float attenuation = .1;
+        // TEMP_DEBUG
+        // float attenuation = 1.0;
+        float attenuation = .5;
 
         if (light.lightType == 0.0) {
             // Point light
