@@ -1,8 +1,10 @@
-#include "RenderFlows/GBufferRenderFlowVk.h"
+#include "GBufferRenderFlowVk.h"
 #include "AttachmentVk.h"
+#include "BarrierVk.h"
 #include "BufferObjectsVk.h"
 #include "CommonVk.h"
 #include "ContextVk.h"
+#include "DebugMemoryVk.h"
 #include "DescriptorLayoutsVk.h"
 #include "DescriptorPoolsVk.h"
 #include "FramebufferVk.h"
@@ -11,6 +13,8 @@
 #include "Memory/MemoryVk.h"
 #include "Mesh.h"
 #include "PipelineUtilsVk.h"
+#include "Popcorn/Core/Base.h"
+#include "Popcorn/Core/Helpers.h"
 #include "Popcorn/Loaders/LoadersDefs.h"
 #include "RenderPassVk.h"
 #include <algorithm>
@@ -34,21 +38,17 @@ void GBufferRenderFlowVk::CreateAttachments() {
   const auto &width = swapchainExtent.width;
   const auto &height = swapchainExtent.height;
 
-  // VK_FORMAT_R8G8B8A8_UNORM;
   std::vector<VkFormat> albedoCandidates = {VK_FORMAT_R8G8B8A8_UNORM,
                                             VK_FORMAT_B8G8R8A8_UNORM};
-  // VK_FORMAT_D32_SFLOAT
   std::vector<VkFormat> depthCandidates = {VK_FORMAT_D32_SFLOAT,
                                            VK_FORMAT_D32_SFLOAT_S8_UINT,
                                            VK_FORMAT_D24_UNORM_S8_UINT};
-  // VK_FORMAT_R16G16B16A16_SFLOAT
   std::vector<VkFormat> normalCandidates = {
-      VK_FORMAT_R16G16B16A16_SFLOAT, // Preferred (high precision normals)
+      VK_FORMAT_R16G16B16A16_SFLOAT, // high precision normals
       VK_FORMAT_R8G8B8A8_UNORM       // Fallback (low precision)
   };
-
-  // VK_FORMAT_R8G8_UNORM;
-  std::vector<VkFormat> roughnessMetallicCandidates = {VK_FORMAT_R8G8_UNORM};
+  std::vector<VkFormat> roughnessMetallicCandidates = {
+      VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_B8G8R8A8_UNORM};
 
   VkFormat albedoFormat =
       ImageVk::FindSupportedFormat(albedoCandidates, VK_IMAGE_TILING_OPTIMAL,
@@ -66,28 +66,28 @@ void GBufferRenderFlowVk::CreateAttachments() {
   //
   //
   // --- Create g-buffer images ------------------------------------------------
-  VkImageCreateInfo albedoImageInfo;
+  VkImageCreateInfo albedoImageInfo{};
   ImageVk::GetDefaultImageCreateInfo(albedoImageInfo, width, height,
                                      albedoFormat);
   albedoImageInfo.format = albedoFormat;
   albedoImageInfo.usage =
       VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
-  VkImageCreateInfo depthImageInfo;
+  VkImageCreateInfo depthImageInfo{};
   ImageVk::GetDefaultImageCreateInfo(depthImageInfo, width, height,
                                      depthFormat);
   depthImageInfo.format = depthFormat;
   depthImageInfo.usage =
       VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
-  VkImageCreateInfo normalImageInfo;
+  VkImageCreateInfo normalImageInfo{};
   ImageVk::GetDefaultImageCreateInfo(normalImageInfo, width, height,
                                      normalFormat);
   normalImageInfo.format = normalFormat;
   normalImageInfo.usage =
       VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
-  VkImageCreateInfo roughnessMetallicImageInfo;
+  VkImageCreateInfo roughnessMetallicImageInfo{};
   ImageVk::GetDefaultImageCreateInfo(roughnessMetallicImageInfo, width, height,
                                      roughnessMetallicFormat);
   roughnessMetallicImageInfo.format = roughnessMetallicFormat;
@@ -156,7 +156,7 @@ void GBufferRenderFlowVk::CreateAttachments() {
     AttachmentVk::GetDefaultAttachmentDescription(albedoAttachment);
     albedoAttachment.format = albedoFormat;
     albedoAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    albedoAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    albedoAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     albedoAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     albedoAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
@@ -166,12 +166,13 @@ void GBufferRenderFlowVk::CreateAttachments() {
     depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     depthAttachment.finalLayout =
         depthImage.FormatHasStencilComponent()
-            ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
-            : VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+            ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+            : VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
     depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
     depthAttachment.stencilLoadOp = depthImage.FormatHasStencilComponent()
-                                        ? VK_ATTACHMENT_LOAD_OP_DONT_CARE
+                                        ? VK_ATTACHMENT_LOAD_OP_CLEAR
                                         : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     depthAttachment.stencilStoreOp = depthImage.FormatHasStencilComponent()
                                          ? VK_ATTACHMENT_STORE_OP_STORE
@@ -181,7 +182,7 @@ void GBufferRenderFlowVk::CreateAttachments() {
     AttachmentVk::GetDefaultAttachmentDescription(normalAttachment);
     normalAttachment.format = normalFormat;
     normalAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    normalAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    normalAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     normalAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     normalAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
@@ -190,7 +191,7 @@ void GBufferRenderFlowVk::CreateAttachments() {
     roughnessMetallicAttachment.format = roughnessMetallicFormat;
     roughnessMetallicAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     roughnessMetallicAttachment.finalLayout =
-        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     roughnessMetallicAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     roughnessMetallicAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
@@ -209,7 +210,36 @@ void GBufferRenderFlowVk::CreateAttachments() {
     m_attachmentsVk.roughnessMetallicAttachments[i].SetAttachmentDescription(
         roughnessMetallicAttachment);
   }
-};
+}
+
+//
+//
+//
+//
+//
+// --- IMAGE BARRIERS  ---------------------------------------------------------
+// --- IMAGE BARRIERS  ---------------------------------------------------------
+// --- IMAGE BARRIERS  ---------------------------------------------------------
+//
+void GBufferRenderFlowVk::CreateImageBarriers() {
+  // For AFTER the current renderpass and BEFORE the next renderpass
+  // Color/depth attachment -> shader read format
+  for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+    ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
+        &albedoBarrier = m_imageBarriers.albedoBarriers[i];
+    ImageBarrierVk<LayoutTransitions::DepthAttachmentToShaderRead>
+        &depthBarrier = m_imageBarriers.depthBarriers[i];
+    ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
+        &normalBarrier = m_imageBarriers.normalBarriers[i];
+    ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead> &
+        roughnessMetallicBarrier = m_imageBarriers.roughnessMetallicBarriers[i];
+
+    albedoBarrier.Init(&m_imagesVk.albedoImages[i]);
+    depthBarrier.Init(&m_imagesVk.depthImages[i]);
+    normalBarrier.Init(&m_imagesVk.normalImages[i]);
+    roughnessMetallicBarrier.Init(&m_imagesVk.roughnessMetallicImages[i]);
+  }
+}
 
 //
 //
@@ -275,23 +305,15 @@ void GBufferRenderFlowVk::CreateRenderPass() {
 
   //
   // --- Dependencies ----------------------------------------------------------
+  // Albedo: undef -> Color attachment | -->  Shader read(Not incl.)
+  // Depth: undef -> Depth attachment | --> Shader read(Not incl.)
   VkSubpassDependency dependency{};
   dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
   dependency.dstSubpass = 0;
-  //
-  // We're taking into consideration the prev frame's stages for the same
-  // gbuffer pass (not previous light/postfx... etc renderpasses/subpasses). The
-  // depth, color writes need to finish in the prev's gbuffer pass before we
-  // start writing depth/color writes in the current frame. Remember -
-  // MaxFramesPerFlight number of frames run in parallel.
-  dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                            VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+  dependency.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
   dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                            VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-  dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-                             VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+                            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+  dependency.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
   dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
                              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
   dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
@@ -372,11 +394,10 @@ void GBufferRenderFlowVk::CreateCommandBuffers() {
 // --- CREATE DESCRIPTORS ------------------------------------------------------
 // --- CREATE DESCRIPTORS ------------------------------------------------------
 //
-void GBufferRenderFlowVk::AllocLocalDescriptors() {
+void GBufferRenderFlowVk::AllocDescriptorsLocal() {
   auto *layouts = ContextVk::DescriptorLayouts();
   auto *pools = ContextVk::DescriptorPools();
   auto *device = ContextVk::Device();
-  auto *memory = ContextVk::Memory();
 
   VkPhysicalDeviceProperties properties{};
   device->GetPhysicalDeviceProperties(properties);
@@ -403,12 +424,6 @@ void GBufferRenderFlowVk::AllocLocalDescriptors() {
   std::fill(pbrMatLayouts.begin(), pbrMatLayouts.end(), pbrMatLayout);
 
   //
-  // --- 4 sets each frame ---
-  // - Submesh - Dynamic UBO
-  // - BasicMat - Dynamic UBO
-  // - PbrMat - Dynamic UBO
-  //
-  //
   // Descriptor set will be cleaned automatically when pools are destroyed
   m_descriptorSetsVk.submeshSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::SubmeshSet, maxFIF>(
@@ -419,26 +434,41 @@ void GBufferRenderFlowVk::AllocLocalDescriptors() {
   m_descriptorSetsVk.pbrMatSets =
       gBufferPool.AllocateDescriptorSets<DescriptorSets::PbrMatSet, maxFIF>(
           device->GetDevice(), pbrMatLayouts);
+};
+
+void GBufferRenderFlowVk::UpdateDescriptorSetsLocal() {
+  auto *memory = ContextVk::Memory();
+  auto *device = ContextVk::Device();
+
+  VkPhysicalDeviceProperties properties;
+
+  device->GetPhysicalDeviceProperties(properties);
 
   // Bind sets with buffers
   for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
     VkDescriptorBufferInfo submeshBufferInfo{};
     submeshBufferInfo.buffer = memory->GetUboSet(i);
     submeshBufferInfo.offset = memory->GetBufferViews().submeshUbo.offset;
-    submeshBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
-        DescriptorSets::SubmeshSet>(properties.limits);
+    submeshBufferInfo.range =
+        // memory->GetBufferViews().submeshUbo.alignedSize;
+        DescriptorLayoutsVk::GetDescriptorBufferRange<
+            DescriptorSets::SubmeshSet>(properties.limits);
 
     VkDescriptorBufferInfo basicMatBufferInfo{};
     basicMatBufferInfo.buffer = memory->GetUboSet(i);
     basicMatBufferInfo.offset = memory->GetBufferViews().basicMatUbo.offset;
-    basicMatBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
-        DescriptorSets::BasicMatSet>(properties.limits);
+    basicMatBufferInfo.range =
+        // memory->GetBufferViews().basicMatUbo.alignedSize;
+        DescriptorLayoutsVk::GetDescriptorBufferRange<
+            DescriptorSets::BasicMatSet>(properties.limits);
 
     VkDescriptorBufferInfo pbrMatBufferInfo{};
     pbrMatBufferInfo.buffer = memory->GetUboSet(i);
     pbrMatBufferInfo.offset = memory->GetBufferViews().pbrMatUbo.offset;
-    pbrMatBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
-        DescriptorSets::PbrMatSet>(properties.limits);
+    pbrMatBufferInfo.range =
+        // memory->GetBufferViews().pbrMatUbo.alignedSize;
+        DescriptorLayoutsVk::GetDescriptorBufferRange<
+            DescriptorSets::PbrMatSet>(properties.limits);
 
     // Writes
     VkWriteDescriptorSet submeshWrite{};
@@ -517,7 +547,10 @@ void GBufferRenderFlowVk::OnSwapchainInvalidCb() {
   DestroyAttachments();
 
   CreateAttachments();
+  CreateImageBarriers();
   CreateFramebuffers();
+
+  UpdateDescriptorSetsLocal();
 };
 
 //
@@ -554,16 +587,25 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   const VkBuffer &vertexBuffer = deviceMemory->GetVboVkBuffer();
   const VkBuffer &indexBuffer = deviceMemory->GetIboVkBuffer();
 
-  VkBuffer vertexBuffers[]{vertexBuffer};
-  VkDeviceSize vboOffsets[]{
-      0}; // This is NOT stride, it's just the VkBuffer offset
-
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
+
+  //
+  // Renderpass ----------------------------------------------------------------
+
+  // TODO: Move outside
+  VkClearValue clearAlbedo = {{0.0f, 0.0f, 0.0f, 1.0f}};
+  VkClearValue clearDepth = {{1.0f}};
+  VkClearValue clearNormal = {{0.0f, 0.0f, 0.0f, 0.0f}};
+  VkClearValue clearRoughnessMetallic = {{0.0f, 0.0f, 0.0f, 0.0f}};
+
+  std::vector<VkClearValue> clearValues{clearAlbedo, clearDepth, clearNormal,
+                                        clearRoughnessMetallic};
+
   VkRenderPassBeginInfo renderPassBeginInfo{};
   RenderPassVk::GetDefaultCmdBeginRenderPassInfo(
       m_framebuffers[currentFrame], swapchainExtent,
-      m_renderPass.GetVkRenderPass(), renderPassBeginInfo);
+      m_renderPass.GetVkRenderPass(), clearValues, renderPassBeginInfo);
 
   //
   // --- Begin renderpass ------------------------------------------------------
@@ -584,12 +626,18 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 
   //
   // --- Paint :D --------------------------------------------------------------
+  //
+  VkBuffer vertexBuffers[]{vertexBuffer};
+  VkDeviceSize vboOffsets[]{
+      0}; // This is NOT stride, it's just the VkBuffer offset
+  BufferVkUtils::BindVBO(cmdBfr, vertexBuffers, vboOffsets, 1);
+  BufferVkUtils::BindIBO<uint32_t>(cmdBfr, indexBuffer, 0);
+
   m_basicMatPipelineVk.BindPipeline(cmdBfr);
 
   // Hardcoding 0 for camera index for now
   // TODO: Make it dynamic later
-  uint32_t cameraOffset =
-      bufferViews.camerasUbo.offset + bufferOffsets.camerasOffsets[0];
+  uint32_t cameraOffset = bufferOffsets.camerasOffsets[0];
 
   // Descriptor set 0 - Camera
   vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -598,8 +646,7 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
                           &cameraOffset);
 
   for (auto &[materialHash, submeshes] : s_basicMatSubmeshesMap) {
-    uint32_t basicMatOffset = bufferViews.basicMatUbo.offset +
-                              bufferOffsets.materialOffsets[materialHash];
+    uint32_t basicMatOffset = bufferOffsets.materialOffsets[materialHash];
 
     // Descriptor set 1 - Basic material
     vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -610,7 +657,6 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
     uint32_t submeshIndex = 0;
     for (Submesh<MaterialTypes::BasicMat> *submesh : submeshes) {
       uint32_t submeshUboOffset =
-          bufferViews.submeshUbo.offset +
           bufferOffsets.submeshesOffsets[materialHash][submeshIndex].uboOffset;
 
       // Descriptor set 2 - Submesh
@@ -619,11 +665,57 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
                               submeshSets.size(), submeshSets.data(), 1,
                               &submeshUboOffset);
 
-      BufferVkUtils::BindVBO(cmdBfr, vertexBuffers, vboOffsets, 1);
-      BufferVkUtils::BindIBO<uint32_t>(cmdBfr, indexBuffer, 0);
+      uint32_t indexCount = submesh->GetIndexBuffer()->GetCount();
+      uint32_t firstIndex =
+          bufferOffsets.submeshesOffsets[materialHash][submeshIndex].iboOffset /
+          sizeof(uint32_t);
+      int32_t vertexOffset =
+          bufferOffsets.submeshesOffsets[materialHash][submeshIndex].vboOffset /
+          GltfVertexBufferLayout.strideValue;
 
-      vkCmdDrawIndexed(cmdBfr, submesh->GetIndexBuffer()->GetCount(), 1, 0, 0,
-                       0);
+      vkCmdDrawIndexed(cmdBfr, indexCount, 1, firstIndex, vertexOffset, 0);
+
+      ++submeshIndex;
+    }
+  }
+
+  m_pbrMatPipelineVk.BindPipeline(cmdBfr);
+
+  // Descriptor set 0 - Camera
+  vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                          m_pbrMatPipelineVk.GetVkPipelineLayout(), 0,
+                          cameraSets.size(), cameraSets.data(), 1,
+                          &cameraOffset);
+
+  for (auto &[materialHash, submeshes] : s_pbrMatSubmeshesMap) {
+    uint32_t pbrMatOffset = bufferOffsets.materialOffsets[materialHash];
+
+    // Descriptor set 1 - Pbr material
+    vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            m_pbrMatPipelineVk.GetVkPipelineLayout(), 1,
+                            pbrMatSets.size(), pbrMatSets.data(), 1,
+                            &pbrMatOffset);
+
+    uint32_t submeshIndex = 0;
+    for (Submesh<MaterialTypes::PbrMat> *submesh : submeshes) {
+      uint32_t submeshUboOffset =
+          bufferOffsets.submeshesOffsets[materialHash][submeshIndex].uboOffset;
+
+      // Descriptor set 2 - Submesh
+      vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                              m_pbrMatPipelineVk.GetVkPipelineLayout(), 2,
+                              submeshSets.size(), submeshSets.data(), 1,
+                              &submeshUboOffset); // Somethings wrong here
+
+      uint32_t indexCount = submesh->GetIndexBuffer()->GetCount();
+      uint32_t firstIndex =
+          bufferOffsets.submeshesOffsets[materialHash][submeshIndex].iboOffset /
+          sizeof(uint32_t);
+      int32_t vertexOffset =
+          bufferOffsets.submeshesOffsets[materialHash][submeshIndex].vboOffset /
+          GltfVertexBufferLayout.strideValue;
+
+      vkCmdDrawIndexed(cmdBfr, indexCount, 1, firstIndex, vertexOffset, 0);
 
       ++submeshIndex;
     }
@@ -633,8 +725,76 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   // --- End renderpass --------------------------------------------------------
   m_renderPass.EndRenderPass(cmdBfr);
 
+  //
+  // --- Transition image layouts for next pass --------------------------------
+  ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
+      &albedoBarrier = m_imageBarriers.albedoBarriers[currentFrame];
+  ImageBarrierVk<LayoutTransitions::DepthAttachmentToShaderRead> &depthBarrier =
+      m_imageBarriers.depthBarriers[currentFrame];
+  ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
+      &normalBarrier = m_imageBarriers.normalBarriers[currentFrame];
+  ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
+      &roughnessMetallicBarrier =
+          m_imageBarriers.roughnessMetallicBarriers[currentFrame];
+
+  albedoBarrier.RecordBarrierCommand(cmdBfr);
+  depthBarrier.RecordBarrierCommand(cmdBfr);
+  normalBarrier.RecordBarrierCommand(cmdBfr);
+  roughnessMetallicBarrier.RecordBarrierCommand(cmdBfr);
+
+  //
+  // --- End command buffer ----------------------------------------------------
   ContextVk::CommandPool()->EndCommandBuffer(cmdBfr);
-};
+}
+
+//
+//
+//
+//
+// --- HELPERS -----------------------------------------------------------------
+// --- HELPERS -----------------------------------------------------------------
+// --- HELPERS -----------------------------------------------------------------
+//
+#ifdef PC_DEBUG
+void GBufferRenderFlowVk::PrintVboIbo() {
+  auto *deviceMemory = ContextVk::Memory();
+  auto *vmaAllocator = ContextVk::MemoryAllocator()->GetVMAAllocator();
+  VkDevice device = ContextVk::Device()->GetDevice();
+  VkCommandPool cmdPool = ContextVk::CommandPool()->GetVkCommandPool();
+  VkQueue queue = ContextVk::Device()->GetGraphicsQueue();
+
+  DebugDeviceMemoryVk vboDeviceMemory;
+  DebugDeviceMemoryVk iboDeviceMemory;
+
+  VkBuffer &vbo = deviceMemory->GetVboVkBuffer();
+  VkBuffer &ibo = deviceMemory->GetIboVkBuffer();
+
+  auto &bufferViews = deviceMemory->GetBufferViews();
+  auto &bufferOffsets = deviceMemory->GetBufferOffsets();
+
+  VkDeviceSize vboSize = bufferViews.submeshVbo.alignedSize;
+  VkDeviceSize iboSize = bufferViews.submeshIbo.alignedSize;
+
+  PC_PRINT("SubmeshVbo size: " << vboSize, TagType::Print, "Paint")
+  PC_PRINT("SubmeshIbo size: " << iboSize, TagType::Print, "Paint")
+
+  std::cout << "\n=== FULL VBO BUFFER ===\n";
+  void *vboData = vboDeviceMemory.CreateStagingBuffer(device, vmaAllocator, vbo,
+                                                      vboSize, cmdPool, queue);
+  // debugMemory->PrintVmaBuffer(vboSize);
+
+  std::cout << "\n=== FULL IBO BUFFER ===\n";
+  void *iboData = iboDeviceMemory.CreateStagingBuffer(device, vmaAllocator, ibo,
+                                                      iboSize, cmdPool, queue);
+  // debugMemory->PrintVmaBuffer(vboSize);
+
+  DebugDeviceMemoryVk::PrintRawGpuVertexDataFromBytes(vboData, vboSize, iboData,
+                                                      iboSize);
+
+  vboDeviceMemory.DestroyStagingBuffer(vmaAllocator);
+  iboDeviceMemory.DestroyStagingBuffer(vmaAllocator);
+}
+#endif
 
 //
 //

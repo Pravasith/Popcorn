@@ -114,9 +114,6 @@ void SwapchainVk::CreateSwapchainImageViews(const VkDevice &device) {
 };
 
 void SwapchainVk::CleanUp(const VkDevice &device) {
-  for (auto imageView : m_swapchainImageViews) {
-    vkDestroyImageView(device, imageView, nullptr);
-  }
 
   vkDestroySwapchainKHR(device, m_swapchain, nullptr);
 };
@@ -170,33 +167,6 @@ SwapchainVk::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities,
     return actualExtent;
   }
 }
-
-// void SwapchainVk::CreateSwapchainFramebuffers(
-//     const VkDevice &device, const VkRenderPass &finalRenderPass) {
-//   auto &swapchainImgViews = GetSwapchainImageViews();
-//   auto &swapchainExtent = GetSwapchainExtent();
-//
-//   m_swapchainFramebuffers.resize(swapchainImgViews.size());
-//
-//   for (size_t i = 0; i < swapchainImgViews.size(); ++i) {
-//     VkImageView attachments[] = {swapchainImgViews[i]};
-//
-//     VkFramebufferCreateInfo createInfo{};
-//     createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-//     createInfo.renderPass = finalRenderPass;
-//     createInfo.attachmentCount = 1;
-//     createInfo.pAttachments = attachments;
-//     createInfo.width = swapchainExtent.width;
-//     createInfo.height = swapchainExtent.height;
-//     createInfo.layers = 1;
-//     createInfo.pNext = VK_NULL_HANDLE;
-//
-//     if (vkCreateFramebuffer(device, &createInfo, nullptr,
-//                             &m_swapchainFramebuffers[i]) != VK_SUCCESS) {
-//       throw std::runtime_error("failed to create framebuffer!");
-//     }
-//   };
-// };
 
 void SwapchainVk::RecreateSwapchainAndVkSwapchain() {
   auto &device = DeviceVk::Get()->GetDevice();

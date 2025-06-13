@@ -47,9 +47,24 @@ void BasicMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
                                                           bindingDescription);
   bindingDescription.binding = 0;
 
+  std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
+  VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
+      vertexBufferLayout, attributeDescriptions);
+
+  std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments{};
+  colorBlendAttachments.resize(3);
+
   GfxPipelineState pipelineState{};
-  PipelineUtilsVk::GetDefaultGfxPipelineState(
-      vertexBufferLayout, bindingDescription, pipelineState);
+  PipelineUtilsVk::GetDefaultGfxPipelineState(vertexBufferLayout, pipelineState,
+                                              colorBlendAttachments);
+
+  pipelineState.vertexInputState.vertexBindingDescriptionCount = 1;
+  pipelineState.vertexInputState.vertexAttributeDescriptionCount =
+      static_cast<uint32_t>(attributeDescriptions.size());
+  pipelineState.vertexInputState.pVertexBindingDescriptions =
+      &bindingDescription;
+  pipelineState.vertexInputState.pVertexAttributeDescriptions =
+      attributeDescriptions.data();
 
   pipelineState.depthStencilState.depthTestEnable = VK_TRUE;
   pipelineState.depthStencilState.depthWriteEnable = VK_TRUE;
@@ -64,14 +79,15 @@ void BasicMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
   auto *layouts = ContextVk::DescriptorLayouts();
   VkDescriptorSetLayout &cameraLayout =
       layouts->GetLayout<DescriptorSets::CameraSet>();
-  VkDescriptorSetLayout &submeshLayout =
-      layouts->GetLayout<DescriptorSets::SubmeshSet>();
   VkDescriptorSetLayout &basicMatLayout =
       layouts->GetLayout<DescriptorSets::BasicMatSet>();
+  VkDescriptorSetLayout &submeshLayout =
+      layouts->GetLayout<DescriptorSets::SubmeshSet>();
 
   std::array<VkDescriptorSetLayout, 3> dSetLayouts = {
-      cameraLayout, submeshLayout, basicMatLayout};
+      cameraLayout, basicMatLayout, submeshLayout};
 
+  // Pipeline Layout (descriptor set layout data)
   pipelineState.pipelineLayout.setLayoutCount = dSetLayouts.size();
   pipelineState.pipelineLayout.pSetLayouts = dSetLayouts.data();
 
@@ -115,9 +131,24 @@ void PbrMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
                                                           bindingDescription);
   bindingDescription.binding = 0;
 
+  std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
+  VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
+      vertexBufferLayout, attributeDescriptions);
+
+  std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments{};
+  colorBlendAttachments.resize(3);
+
   GfxPipelineState pipelineState{};
-  PipelineUtilsVk::GetDefaultGfxPipelineState(
-      vertexBufferLayout, bindingDescription, pipelineState);
+  PipelineUtilsVk::GetDefaultGfxPipelineState(vertexBufferLayout, pipelineState,
+                                              colorBlendAttachments);
+
+  pipelineState.vertexInputState.vertexBindingDescriptionCount = 1;
+  pipelineState.vertexInputState.vertexAttributeDescriptionCount =
+      static_cast<uint32_t>(attributeDescriptions.size());
+  pipelineState.vertexInputState.pVertexBindingDescriptions =
+      &bindingDescription;
+  pipelineState.vertexInputState.pVertexAttributeDescriptions =
+      attributeDescriptions.data();
 
   pipelineState.depthStencilState.depthTestEnable = VK_TRUE;
   pipelineState.depthStencilState.depthWriteEnable = VK_TRUE;
@@ -132,19 +163,22 @@ void PbrMatPipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
   auto *layouts = ContextVk::DescriptorLayouts();
   VkDescriptorSetLayout &cameraLayout =
       layouts->GetLayout<DescriptorSets::CameraSet>();
+  VkDescriptorSetLayout &pbrMatLayout =
+      layouts->GetLayout<DescriptorSets::PbrMatSet>();
   VkDescriptorSetLayout &submeshLayout =
       layouts->GetLayout<DescriptorSets::SubmeshSet>();
-  VkDescriptorSetLayout &basicMatLayout =
-      layouts->GetLayout<DescriptorSets::PbrMatSet>();
+
   std::array<VkDescriptorSetLayout, 3> dSetLayouts = {
-      cameraLayout, submeshLayout, basicMatLayout};
+      cameraLayout, pbrMatLayout, submeshLayout};
+
+  // Pipeline Layout (descriptor set layout data)
   pipelineState.pipelineLayout.setLayoutCount = dSetLayouts.size();
   pipelineState.pipelineLayout.pSetLayouts = dSetLayouts.data();
 
   CreatePipelineLayout(device, pipelineState.pipelineLayout);
   CreateVkPipeline(device, pipelineState, renderPass);
 
-  // DESTROY SHADER MODULES
+  // Destroy shader modules
   PC_DestroyShaderModule(device, vertShaderModule);
   PC_DestroyShaderModule(device, fragShaderModule);
 };

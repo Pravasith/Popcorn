@@ -3,6 +3,7 @@
 #include "BufferObjects.h"
 #include "GameObject.h"
 #include "GlobalMacros.h"
+#include "Light.h"
 #include "Material.h"
 #include "Mesh.h"
 #include <cstdint>
@@ -41,6 +42,9 @@ private:
   // --- MESH UTILS ------------------------------------------------------------
   static void ExtractMeshData(const tinygltf::Model &model,
                               const tinygltf::Node &gltfNode, Mesh &mesh);
+  static void ExtractLightsData(const tinygltf::Model &model,
+                                const tinygltf::Node &node, Light *light);
+
   [[nodiscard]] static VertexBuffer *
   ExtractVertexBuffer(const tinygltf::Model &model,
                       const tinygltf::Primitive &primitive);

@@ -2,6 +2,7 @@
 #include "CommonVk.h"
 #include "DeviceVk.h"
 #include "GlobalMacros.h"
+#include "RenderFlowDefs.h"
 #include "SwapchainVk.h"
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
@@ -43,7 +44,8 @@ void FrameVk::Draw(
     const std::function<void(const uint32_t currentFrame)> &updateSceneDataCb,
     const std::function<void(const uint32_t swapchainFrameIndex,
                              const uint32_t currentFrame)>
-        &recordDrawCommandsCb) {
+        &recordDrawCommandsCb,
+    PcRenderFlowCmdBuffersMap &renderFlowCmdBuffersMap) {
   auto &device = DeviceVk::Get()->GetDevice();
   uint32_t swapchainImageIndex;
 
@@ -86,8 +88,13 @@ void FrameVk::Draw(
 
   recordDrawCommandsCb(swapchainImageIndex, m_currentFrame);
 
-  // TODO: Fill out command buffers
-  std::vector<VkCommandBuffer> commandBuffers{};
+  auto &gBufferCmdBfrs = *renderFlowCmdBuffersMap[RenderFlows::GBuffer];
+  auto &lightingCmdBfrs = *renderFlowCmdBuffersMap[RenderFlows::Lighting];
+  auto &compositeCmdBfrs = *renderFlowCmdBuffersMap[RenderFlows::Composite];
+
+  std::vector<VkCommandBuffer> commandBuffers{gBufferCmdBfrs[m_currentFrame],
+                                              lightingCmdBfrs[m_currentFrame],
+                                              compositeCmdBfrs[m_currentFrame]};
 
   //
   // Submit the graphics queue with the command buffer (with recorded commands
@@ -203,6 +210,7 @@ void FrameVk::SubmitDrawCommands(std::vector<VkCommandBuffer> &commandBuffers,
 
 void FrameVk::CleanUp() {
   auto &device = DeviceVk::Get()->GetDevice();
+  vkDeviceWaitIdle(device);
 
   for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
     vkDestroySemaphore(device, m_imageAvailableSemaphores[i], nullptr);

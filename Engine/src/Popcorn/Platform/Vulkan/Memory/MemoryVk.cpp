@@ -36,7 +36,10 @@ void MemoryVk::ExtractOffsetsMaterialsSubmeshes(
   VkDeviceSize alignment = properties.limits.minUniformBufferOffsetAlignment;
 
   // temps
-  VkDeviceSize vboOffset = 0, iboOffset = 0, submeshUboOffset = 0;
+  VkDeviceSize vboOffset = m_bufferViews.submeshVbo.alignedSize,
+               iboOffset = m_bufferViews.submeshIbo.alignedSize,
+               submeshUboOffset = m_bufferViews.submeshUbo.alignedSize;
+
   VkDeviceSize basicMatOffset = 0, pbrMatOffset = 0;
 
   for (auto &[matId, submeshes] : materialSubmeshesMap) {
@@ -76,9 +79,10 @@ void MemoryVk::ExtractOffsetsMaterialsSubmeshes(
     m_bufferViews.pbrMatUbo = {0, pbrMatOffset};
   }
 
-  m_bufferViews.submeshVbo += {0, vboOffset};
-  m_bufferViews.submeshIbo += {0, iboOffset};
-  m_bufferViews.submeshUbo += {0, submeshUboOffset};
+  m_bufferViews.submeshVbo = {0, vboOffset};
+  m_bufferViews.submeshIbo = {0, iboOffset};
+
+  m_bufferViews.submeshUbo = {0, submeshUboOffset};
 }
 
 void MemoryVk::ExtractOffsetsLightsCamerasEmptys(std::vector<Light *> &lights,
@@ -95,23 +99,32 @@ void MemoryVk::ExtractOffsetsLightsCamerasEmptys(std::vector<Light *> &lights,
     m_bufferOffsets.lightsOffsets.push_back(lightOffsets);
     lightOffsets += PC_AlignCeil(UniformDefs::LightUniform::size,
                                  limits.minStorageBufferOffsetAlignment);
-  };
+  }
 
   for (Camera *camera : cameras) {
     m_bufferOffsets.camerasOffsets.push_back(cameraOffsets);
     cameraOffsets += PC_AlignCeil(UniformDefs::CameraUniform::size,
                                   limits.minUniformBufferOffsetAlignment);
-  };
+  }
 
   for (Empty *empty : emptys) {
     m_bufferOffsets.emptysOffsets.push_back(emptyOffsets);
     emptyOffsets += PC_AlignCeil(UniformDefs::EmptyUniform::size,
                                  limits.minUniformBufferOffsetAlignment);
-  };
+  }
 
-  m_bufferViews.lightsSsbo = {0, lightOffsets};
-  m_bufferViews.camerasUbo = {0, cameraOffsets};
-  m_bufferViews.emptysUbo = {0, emptyOffsets};
+  // Save total accumulated buffer size. Size only. Not offset.
+  m_bufferViews.lightsSsbo = {0, lightOffsets};  // Saving final size
+  m_bufferViews.camerasUbo = {0, cameraOffsets}; // Saving final size
+  m_bufferViews.emptysUbo = {0, emptyOffsets};   // Saving final size
+
+  PC_PRINT("Lights: " << lights.size() << " Cameras: " << cameras.size()
+                      << "Emptys: " << emptys.size(),
+           TagType::Print, "HERE")
+  for (int i = 0; i < lights.size(); ++i) {
+    PC_PRINT(" " << i << ": " << m_bufferOffsets.lightsOffsets[i] << "  ",
+             TagType::Print, "Light")
+  }
 };
 
 void MemoryVk::AlignVboIboBufferViews() {
@@ -134,40 +147,46 @@ void MemoryVk::CalculateUboSsboBaseOffsets() {
 
   VkDeviceSize bufferViewOffset = 0;
 
+  VkDeviceSize minAlignment = limits.minUniformBufferOffsetAlignment;
+  PC_WARN("MIN UBO ALIGNMENT: " << minAlignment);
+
   m_bufferViews.submeshUbo.offset = bufferViewOffset;
   VkDeviceSize submeshUboSize =
-      PC_AlignCeil(m_bufferViews.submeshUbo.alignedSize,
-                   limits.minUniformBufferOffsetAlignment);
+      PC_AlignCeil(m_bufferViews.submeshUbo.alignedSize, minAlignment);
   bufferViewOffset += submeshUboSize;
   m_bufferViews.submeshUbo.alignedSize = submeshUboSize;
 
   m_bufferViews.basicMatUbo.offset = bufferViewOffset;
   VkDeviceSize basicMatUboSize =
-      PC_AlignCeil(m_bufferViews.basicMatUbo.alignedSize,
-                   limits.minUniformBufferOffsetAlignment);
+      PC_AlignCeil(m_bufferViews.basicMatUbo.alignedSize, minAlignment);
   bufferViewOffset += basicMatUboSize;
   m_bufferViews.basicMatUbo.alignedSize = basicMatUboSize;
 
   m_bufferViews.pbrMatUbo.offset = bufferViewOffset;
   VkDeviceSize pbrMatUboSize =
-      PC_AlignCeil(m_bufferViews.pbrMatUbo.alignedSize,
-                   limits.minUniformBufferOffsetAlignment);
+      PC_AlignCeil(m_bufferViews.pbrMatUbo.alignedSize, minAlignment);
   bufferViewOffset += pbrMatUboSize;
   m_bufferViews.pbrMatUbo.alignedSize = pbrMatUboSize;
 
   m_bufferViews.camerasUbo.offset = bufferViewOffset;
   VkDeviceSize camerasUboSize =
-      PC_AlignCeil(m_bufferViews.camerasUbo.alignedSize,
-                   limits.minUniformBufferOffsetAlignment);
+      PC_AlignCeil(m_bufferViews.camerasUbo.alignedSize, minAlignment);
   bufferViewOffset += camerasUboSize;
   m_bufferViews.camerasUbo.alignedSize = camerasUboSize;
 
   m_bufferViews.emptysUbo.offset = bufferViewOffset;
   VkDeviceSize emptysUboSize =
-      PC_AlignCeil(m_bufferViews.emptysUbo.alignedSize,
-                   limits.minUniformBufferOffsetAlignment);
+      PC_AlignCeil(m_bufferViews.emptysUbo.alignedSize, minAlignment);
   bufferViewOffset += emptysUboSize;
   m_bufferViews.emptysUbo.alignedSize = emptysUboSize;
+
+  // Defaulting for ssbo
+  bufferViewOffset = 0;
+  m_bufferViews.lightsSsbo.offset = bufferViewOffset;
+  VkDeviceSize lightsSsboSize =
+      PC_AlignCeil(m_bufferViews.lightsSsbo.alignedSize, minAlignment);
+  bufferViewOffset += lightsSsboSize;
+  m_bufferViews.lightsSsbo.alignedSize = lightsSsboSize;
 
   // clang-format off
   PC_PRINT(
@@ -230,7 +249,9 @@ void MemoryVk::FillVbosIbosUbosSubmeshMaterial(
       // VBOs ---------------------------------------------------------------
       const BufferDefs::Layout &vboLayout =
           submesh->GetVertexBuffer()->GetLayout();
-      const VkDeviceSize vboSize = vboLayout.countValue * vboLayout.strideValue;
+      const VkDeviceSize vboSize =
+          submesh->GetVertexBuffer()->GetCount() * vboLayout.strideValue;
+
       memcpy((byte_t *)m_vboStagingMapping +
                  m_bufferOffsets.submeshesOffsets[matId][i].vboOffset,
              submesh->GetVertexBuffer()->GetBufferData(), (size_t)vboSize);
@@ -278,6 +299,33 @@ void MemoryVk::FillUbosSsbosLightCameraEmpty(std::vector<Light *> &lights,
     copyUniformToMemory(m_ssboMappingSet[currentFrame], i);
     ++i;
   }
+
+  // std::cout << "====== Copied Light SSBO Contents ======" << std::endl;
+  //
+  // for (size_t j = 0; j < i; ++j) {
+  //   // Offset for each light (aligned)
+  //   const size_t offset =
+  //       m_bufferViews.lightsSsbo.offset + m_bufferOffsets.lightsOffsets[j];
+  //
+  //   // Reinterpret memory at offset
+  //   const LightUniform *l = reinterpret_cast<const LightUniform *>(
+  //       reinterpret_cast<const byte_t *>(m_ssboMappingSet[currentFrame]) +
+  //       offset);
+  //
+  //   std::cout << "Light " << j << ":\n";
+  //   std::cout << "  View Position     : (" << l->worldPos.x << ", "
+  //             << l->worldPos.y << ", " << l->worldPos.z << ")\n";
+  //   std::cout << "  View Direction    : (" << l->worldDir.x << ", "
+  //             << l->worldDir.y << ", " << l->worldDir.z << ")\n";
+  //   std::cout << "  Color             : (" << l->color.r << ", " <<
+  //   l->color.g
+  //             << ", " << l->color.b << ")\n";
+  //   std::cout << "  Type              : " << l->lightType << "\n";
+  //   std::cout << "  Intensity         : " << l->intensity << "\n";
+  //   std::cout << "  Inner Cone Angle  : " << l->innerConeAngle << " rad\n";
+  //   std::cout << "  Outer Cone Angle  : " << l->outerConeAngle << " rad\n";
+  //   std::cout << "-------------------------------------------\n";
+  // }
 
   i = 0;
   for (Camera *camera : cameras) {
@@ -371,6 +419,11 @@ void MemoryVk::AllocSubmeshVboIboLocal() {
   VmaAllocationCreateInfo vboMainVmaInfo{};
   vboMainVmaInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 
+#ifdef PC_DEBUG
+  vboMainInfo.usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+  vboMainVmaInfo.usage = VMA_MEMORY_USAGE_AUTO;
+#endif
+
   VkResult vboResult = vmaCreateBuffer(
       ContextVk::MemoryAllocator()->GetVMAAllocator(), &vboMainInfo,
       &vboMainVmaInfo, &m_vbo, &m_vboAlloc, nullptr);
@@ -388,6 +441,11 @@ void MemoryVk::AllocSubmeshVboIboLocal() {
 
   VmaAllocationCreateInfo iboMainVmaInfo{};
   iboMainVmaInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+
+#ifdef PC_DEBUG
+  iboMainInfo.usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+  iboMainVmaInfo.usage = VMA_MEMORY_USAGE_AUTO;
+#endif
 
   VkResult iboResult = vmaCreateBuffer(
       ContextVk::MemoryAllocator()->GetVMAAllocator(), &iboMainInfo,

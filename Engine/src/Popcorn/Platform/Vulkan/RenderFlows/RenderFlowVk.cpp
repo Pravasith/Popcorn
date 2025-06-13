@@ -1,9 +1,10 @@
-#include "RenderFlows/RenderFlowVk.h"
+#include "RenderFlowVk.h"
 #include "CommonVk.h"
 #include "ContextVk.h"
-#include "Popcorn/Core/Base.h"
 #include "MaterialTypes.h"
 #include "Popcorn/Core/Assert.h"
+#include "Popcorn/Core/Base.h"
+#include "Popcorn/Core/Helpers.h"
 #include "SamplerVk.h"
 #include "Shader.h"
 #include "Sources.h"
@@ -46,11 +47,12 @@ PcRenderFlowImages<Composite> RenderFlowVk::s_compositeImages{};
 
 RenderFlowVk::DescriptorSetsVkStatic RenderFlowVk::s_commonDescriptorSets{};
 
-
-RenderFlowVk::RenderFlowVk() { PC_PRINT("CREATED", TagType::Constr, "RenderFlowVk") };
-  RenderFlowVk::~RenderFlowVk() {
-    PC_PRINT("DESTROYED", TagType::Destr, "RenderFlowVk")
-  };
+RenderFlowVk::RenderFlowVk() {
+  PC_PRINT("CREATED", TagType::Constr, "RenderFlowVk")
+};
+RenderFlowVk::~RenderFlowVk() {
+  PC_PRINT("DESTROYED", TagType::Destr, "RenderFlowVk")
+};
 
 //
 // --- METHODS -----------------------------------------------------------
@@ -88,7 +90,7 @@ void RenderFlowVk::FreeShaders() {
   shaders->UnloadShaders<RendererType::Vulkan>();
 }
 
-void RenderFlowVk::AllocGlobalDescriptors() {
+void RenderFlowVk::AllocDescriptorsGlobal() {
   auto *layouts = ContextVk::DescriptorLayouts();
   auto *pools = ContextVk::DescriptorPools();
   auto *device = ContextVk::Device();
@@ -101,6 +103,7 @@ void RenderFlowVk::AllocGlobalDescriptors() {
       pools->GetPool<DescriptorPools::GlobalDescriptorsPool>(
           MAX_FRAMES_IN_FLIGHT); // Creates pool if it
                                  // doesn't exist
+
   VkDescriptorSetLayout &cameraLayout =
       layouts->GetLayout<DescriptorSets::CameraSet>();
   std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> cameraLayouts{};
@@ -111,21 +114,30 @@ void RenderFlowVk::AllocGlobalDescriptors() {
       globalDescriptorsPool.AllocateDescriptorSets<DescriptorSets::CameraSet,
                                                    MAX_FRAMES_IN_FLIGHT>(
           device->GetDevice(), cameraLayouts);
+}
+
+void RenderFlowVk::UpdateDescriptorSetsGlobal() {
+  auto *device = ContextVk::Device();
+  auto *memory = ContextVk::Memory();
+
+  VkPhysicalDeviceProperties properties{};
+  device->GetPhysicalDeviceProperties(properties);
 
   // Bind sets with buffers
   for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
     VkDescriptorBufferInfo cameraBufferInfo{};
     cameraBufferInfo.buffer = memory->GetUboSet(i);
     cameraBufferInfo.offset = memory->GetBufferViews().camerasUbo.offset;
-    cameraBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
-        DescriptorSets::CameraSet>(properties.limits);
+    cameraBufferInfo.range = memory->GetBufferViews().camerasUbo.alignedSize;
+    // DescriptorLayoutsVk::GetDescriptorBufferRange<
+    // DescriptorSets::CameraSet>(properties.limits);
 
     VkWriteDescriptorSet cameraWrite{};
     cameraWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     cameraWrite.dstSet = s_commonDescriptorSets.cameraSets[i];
     cameraWrite.dstBinding = 0;
     cameraWrite.dstArrayElement = 0;
-    cameraWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    cameraWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     cameraWrite.descriptorCount = 1;
     cameraWrite.pBufferInfo = &cameraBufferInfo;
     cameraWrite.pImageInfo = nullptr;
@@ -192,14 +204,31 @@ void RenderFlowVk::CopyDynamicUniformsToMemory(const uint32_t currentFrame) {
 };
 
 void RenderFlowVk::CreateSamplers() {
-  VkSamplerCreateInfo samplerInfo{};
-  SamplerVk::GetDefaultSamplerCreateInfoValues(samplerInfo);
-  samplerInfo.magFilter = VK_FILTER_NEAREST;
-  samplerInfo.minFilter = VK_FILTER_NEAREST;
-  s_samplersVk.frameSampler.Create(samplerInfo);
+  // Color sampler
+  VkSamplerCreateInfo colorSamplerInfo{};
+  SamplerVk::GetDefaultSamplerCreateInfoValues(colorSamplerInfo);
+  colorSamplerInfo.magFilter = VK_FILTER_NEAREST;
+  colorSamplerInfo.minFilter = VK_FILTER_NEAREST;
+  s_samplersVk.colorSampler.Create(colorSamplerInfo);
+
+  // Depth sampler
+  VkSamplerCreateInfo depthSamplerInfo{};
+  SamplerVk::GetDefaultSamplerCreateInfoValues(depthSamplerInfo);
+  depthSamplerInfo.compareEnable = VK_FALSE; // No shadow comparison
+  depthSamplerInfo.magFilter = VK_FILTER_NEAREST;
+  depthSamplerInfo.minFilter = VK_FILTER_NEAREST;
+  depthSamplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  depthSamplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  depthSamplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  depthSamplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+  depthSamplerInfo.unnormalizedCoordinates = VK_FALSE;
+  s_samplersVk.depthSampler.Create(depthSamplerInfo);
 };
 
-void RenderFlowVk::DestroySamplers() { s_samplersVk.frameSampler.Destroy(); };
+void RenderFlowVk::DestroySamplers() {
+  s_samplersVk.colorSampler.Destroy();
+  s_samplersVk.depthSampler.Destroy();
+};
 
 void RenderFlowVk::FreeMemory() {
   ContextVk::Memory()->CleanUpUboSsboLocalBuffers();

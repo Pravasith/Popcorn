@@ -33,6 +33,8 @@ public:
 
   virtual bool OnFrameBufferResize(FrameBfrResizeEvent &) override;
 
+  virtual void DebugPreGameLoop() override;
+
   // Sets up devices, configure swapchains, creates depth buffers
   // also allocates command pools
   void CreateVulkanContext();
@@ -41,6 +43,7 @@ public:
 private:
   static ContextVk *s_vulkanContext;
   static std::vector<RenderFlowVk *> s_renderFlows;
+  static PcRenderFlowCmdBuffersMap s_renderFlowCmdBuffers;
 };
 
 GFX_NAMESPACE_END

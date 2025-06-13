@@ -112,8 +112,14 @@ bool Application::OnUpdate(TimeEvent &e) {
 bool Application::OnClockTick(TimeEvent &e) {
   Window::OnUpdate(e);
 
+  //
+  // ---------------------------------------------------------------------
+  // --- Frame render ----------------------------------------------------
   s_layerStack->UpdateLayers(e);
   s_layerStack->RenderLayers();
+  // --- Frame render ----------------------------------------------------
+  // ---------------------------------------------------------------------
+  //
 
   return true;
 };

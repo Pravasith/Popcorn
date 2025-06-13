@@ -1,5 +1,6 @@
 #include "CompositeRenderFlowVk.h"
 #include "AttachmentVk.h"
+#include "BarrierVk.h"
 #include "CommonVk.h"
 #include "ContextVk.h"
 #include "GlobalMacros.h"
@@ -44,12 +45,38 @@ void CompositeRenderFlowVk::CreateAttachments() {
     AttachmentVk::GetDefaultAttachmentDescription(presentImageAttachment);
     presentImageAttachment.format = format;
     presentImageAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    presentImageAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    presentImageAttachment.finalLayout =
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    presentImageAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    presentImageAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
     m_attachmentsVk.presentAttachments[i].SetImageVk(
         &m_imagesVk.swapchainImages[i]);
     m_attachmentsVk.presentAttachments[i].SetAttachmentDescription(
         presentImageAttachment);
+  }
+}
+
+//
+//
+//
+//
+//
+// --- IMAGE BARRIERS  ---------------------------------------------------------
+// --- IMAGE BARRIERS  ---------------------------------------------------------
+// --- IMAGE BARRIERS  ---------------------------------------------------------
+//
+void CompositeRenderFlowVk::CreateImageBarriers() {
+  auto &swapchainImages = ContextVk::Swapchain()->GetSwapchainImages();
+  m_imageBarriers.presentBarriers.resize(swapchainImages.size());
+
+  // For AFTER the current renderpass and BEFORE the next renderpass
+  // Color/depth attachment -> shader read format
+  for (int i = 0; i < swapchainImages.size(); ++i) {
+    ImageBarrierVk<LayoutTransitions::ColorAttachmentToPresentSrc>
+        &presentBarrier = m_imageBarriers.presentBarriers[i];
+
+    presentBarrier.Init(&m_imagesVk.swapchainImages[i]);
   }
 }
 
@@ -95,9 +122,9 @@ void CompositeRenderFlowVk::CreateRenderPass() {
   dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
   dependency.dstSubpass = 0;
   dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-  dependency.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+  dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
   dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-  dependency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+  dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
   dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
   //
@@ -178,13 +205,12 @@ void CompositeRenderFlowVk::CreateCommandBuffers() {
 // --- CREATE DESCRIPTORS ------------------------------------------------------
 // --- CREATE DESCRIPTORS ------------------------------------------------------
 //
-void CompositeRenderFlowVk::AllocLocalDescriptors() {
+void CompositeRenderFlowVk::AllocDescriptorsLocal() {
   auto *pools = ContextVk::DescriptorPools();
-  auto *device = ContextVk::Device();
-  auto *memory = ContextVk::Memory();
+  // auto *memory = ContextVk::Memory();
 
-  VkPhysicalDeviceProperties properties{};
-  device->GetPhysicalDeviceProperties(properties);
+  // VkPhysicalDeviceProperties properties{};
+  // device->GetPhysicalDeviceProperties(properties);
 
   VkDescriptorSetLayout &compositeLayout =
       ContextVk::DescriptorLayouts()->GetLayout<DescriptorSets::PresentSet>();
@@ -200,12 +226,16 @@ void CompositeRenderFlowVk::AllocLocalDescriptors() {
       compositePool.AllocateDescriptorSets<DescriptorSets::PresentSet,
                                            MAX_FRAMES_IN_FLIGHT>(
           ContextVk::Device()->GetDevice(), compositeLayouts);
+};
+
+void CompositeRenderFlowVk::UpdateDescriptorSetsLocal() {
+  auto *device = ContextVk::Device();
 
   for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
     VkDescriptorImageInfo lightImageInfo{};
     lightImageInfo.imageView =
         m_dependencyImages.lightImages[i].GetVkImageView();
-    lightImageInfo.sampler = s_samplersVk.frameSampler.GetVkSampler();
+    lightImageInfo.sampler = s_samplersVk.colorSampler.GetVkSampler();
     lightImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
     VkWriteDescriptorSet lightWrite{};
@@ -225,6 +255,7 @@ void CompositeRenderFlowVk::AllocLocalDescriptors() {
                            nullptr);
   }
 };
+
 //
 //
 //
@@ -263,8 +294,11 @@ void CompositeRenderFlowVk::OnSwapchainInvalidCb() {
   ContextVk::Swapchain()->RecreateSwapchainAndVkSwapchain();
 
   CreateAttachments();
+  CreateImageBarriers();
   CreateRenderPass();
   CreateFramebuffers();
+
+  UpdateDescriptorSetsLocal();
   CreatePipelines();
 };
 
@@ -280,6 +314,7 @@ void CompositeRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 
   // TODO: Optimize draw loop - heap allocations -> stack
   auto &cmdBfr = m_commandBuffers[currentFrame];
+
   auto &swapchainExtent = ContextVk::Swapchain()->GetSwapchainExtent();
   auto *deviceMemory =
       ContextVk::Memory(); // Heap allocated!! this is singleton
@@ -294,11 +329,14 @@ void CompositeRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
 
+  VkClearValue clearColor = {{1.0f, 0.0f, 1.0f, 1.0f}};
+  std::vector<VkClearValue> clearValues{clearColor};
+
   // Render pass begin
   VkRenderPassBeginInfo renderPassBeginInfo{};
   RenderPassVk::GetDefaultCmdBeginRenderPassInfo(
-      m_framebuffers[currentFrame], swapchainExtent,
-      m_renderPass.GetVkRenderPass(), renderPassBeginInfo);
+      m_framebuffers[frameIndex], swapchainExtent,
+      m_renderPass.GetVkRenderPass(), clearValues, renderPassBeginInfo);
 
   m_renderPass.BeginRenderPass(cmdBfr, renderPassBeginInfo);
 
@@ -328,6 +366,15 @@ void CompositeRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkCmdDraw(cmdBfr, 3, 1, 0, 0);
 
   m_renderPass.EndRenderPass(cmdBfr);
+
+  //
+  // --- Transition image layouts for next pass --------------------------------
+  ImageBarrierVk<LayoutTransitions::ColorAttachmentToPresentSrc>
+      &presentBarrier = m_imageBarriers.presentBarriers[frameIndex];
+  presentBarrier.RecordBarrierCommand(cmdBfr);
+
+  //
+  // --- End command buffer ----------------------------------------------------
   ContextVk::CommandPool()->EndCommandBuffer(cmdBfr);
 };
 
@@ -340,13 +387,15 @@ void CompositeRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 // --- CLEAN UP ----------------------------------------------------------------
 //
 void CompositeRenderFlowVk::DestroyFramebuffers() {
-  for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+  for (size_t i = 0; i < m_framebuffers.size(); ++i) {
     if (m_framebuffers[i] != VK_NULL_HANDLE) {
       FramebufferVk::DestroyVkFramebuffer(ContextVk::Device()->GetDevice(),
                                           m_framebuffers[i]);
       m_framebuffers[i] = VK_NULL_HANDLE;
     }
   }
+
+  m_framebuffers.clear();
 };
 
 void CompositeRenderFlowVk::DestroyRenderPass() {

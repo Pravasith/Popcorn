@@ -11,9 +11,11 @@ layout(location = 2) out vec2 fragUV;
 layout(set = 0, binding = 0) uniform CameraUBO {
     mat4 view;
     mat4 proj;
+    mat4 viewProj;
+    mat4 invViewProj;
 } camera;
 
-layout(set = 1, binding = 0) uniform ObjectUBO {
+layout(set = 2, binding = 0) uniform ObjectUBO {
     mat4 modelMatrix;
     mat4 normalMatrix;
 } object;

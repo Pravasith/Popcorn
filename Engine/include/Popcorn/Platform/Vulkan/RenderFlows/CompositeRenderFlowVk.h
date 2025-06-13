@@ -12,9 +12,10 @@ GFX_NAMESPACE_BEGIN
 
 class CompositeRenderFlowVk : public RenderFlowVk {
 public:
-  CompositeRenderFlowVk() {
-    PC_PRINT("CREATED", TagType::Constr, "CompositeRenderFlowVk")
-  };
+  CompositeRenderFlowVk()
+      : m_imagesVk(s_compositeImages), m_dependencyImages(s_lightingImages) {
+          PC_PRINT("CREATED", TagType::Constr, "CompositeRenderFlowVk")
+        };
 
   virtual ~CompositeRenderFlowVk() override {
     PC_PRINT("DESTROYED", TagType::Destr, "CompositeRenderflowVk")
@@ -22,6 +23,7 @@ public:
 
 private:
   virtual void CreateAttachments() override;
+  virtual void CreateImageBarriers() override;
   virtual void CreateRenderPass() override;
   virtual void CreateFramebuffers() override;
 
@@ -29,13 +31,16 @@ private:
   virtual void DestroyRenderPass() override;
   virtual void DestroyAttachments() override;
 
-  virtual void AllocLocalDescriptors() override;
+  virtual void AllocDescriptorsLocal() override;
+  virtual void UpdateDescriptorSetsLocal() override;
+
   virtual void CreatePipelines() override;
   virtual void DestroyPipelines() override;
 
   virtual void CreateCommandBuffers() override;
-  [[nodiscard]] virtual const std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT>
-  GetCommandBuffers() const override {
+
+  [[nodiscard]] virtual std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> &
+  GetCommandBuffers() override {
     return m_commandBuffers;
   };
 
@@ -45,17 +50,20 @@ private:
 
 private:
   struct AttachmentsVk {
-    PcPresentationAttachments presentAttachments{}; // Not used for now
+    PcPresentationAttachments presentAttachments{};
   };
 
   struct DescriptorSetsVk {
     PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> presentSets{};
   };
 
-  PcRenderFlowImages<RenderFlows::Lighting, MAX_FRAMES_IN_FLIGHT>
-      &m_dependencyImages = s_lightingImages;
+  struct ImageBarriersVk {
+    PcPresentationImageBarriers presentBarriers;
+  };
 
-  PcRenderFlowImages<RenderFlows::Composite> &m_imagesVk = s_compositeImages;
+  PcRenderFlowImages<RenderFlows::Composite> &m_imagesVk;
+  PcRenderFlowImages<RenderFlows::Lighting, MAX_FRAMES_IN_FLIGHT>
+      &m_dependencyImages;
 
   AttachmentsVk m_attachmentsVk{};
   DescriptorSetsVk m_descriptorSetsVk{};
@@ -67,6 +75,8 @@ private:
   CompositePipelineVk m_compositePipelineVk;
 
   std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> m_commandBuffers{};
+
+  ImageBarriersVk m_imageBarriers;
 };
 
 GFX_NAMESPACE_END

@@ -26,6 +26,20 @@ public:
   [[nodiscard]] std::array<VkDescriptorSet, Count>
   AllocateDescriptorSets(const VkDevice &device,
                          std::array<VkDescriptorSetLayout, Count> &layouts) {
+    const char *setName = "UnknownSet";
+    // clang-format off
+        switch ((int)T) {
+          case 1: setName = "CameraSet"; break;
+          case 2: setName = "BasicMatSet"; break;
+          case 3: setName = "PbrMatSet"; break;
+          case 4: setName = "SubmeshSet"; break;
+          case 5: setName = "LightingSet"; break;
+          case 6: setName = "PresentSet"; break;
+        }
+    // clang-format on
+
+    PC_WARN("Allocating " << setName << " set(s): " << Count << " of "
+                          << m_maxSets)
     return DefaultAllocateDescriptorSets<Count>(device, layouts);
   };
 
@@ -46,7 +60,8 @@ private:
 
 #if PC_DEBUG
     m_setsAllocated += Count;
-    if (m_setsAllocated >= m_maxSets) {
+    PC_WARN("Allocating " << m_setsAllocated << " of " << m_maxSets)
+    if (m_setsAllocated > m_maxSets) {
       PC_ERROR("Pool reached maximum set capacity of " << m_maxSets << ".",
                "DPoolVk");
     }
@@ -79,7 +94,6 @@ private:
 
 // TODO: Make it a growable pool
 class DescriptorPoolsVk {
-
 public:
   template <DescriptorPools T> [[nodiscard]] DPoolVk &GetPool(uint32_t count);
   void CleanUp();

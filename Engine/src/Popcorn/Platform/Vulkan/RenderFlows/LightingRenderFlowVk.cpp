@@ -1,5 +1,6 @@
 #include "RenderFlows/LightingRenderFlowVk.h"
 #include "AttachmentVk.h"
+#include "BarrierVk.h"
 #include "BufferObjects.h"
 #include "CommonVk.h"
 #include "ContextVk.h"
@@ -33,7 +34,7 @@ void LightingRenderFlowVk::CreateAttachments() {
                                    VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT);
   //
   // --- Create Images ---------------------------------------------------------
-  VkImageCreateInfo lightImageInfo;
+  VkImageCreateInfo lightImageInfo{};
   ImageVk::GetDefaultImageCreateInfo(lightImageInfo, swapchainExtent.width,
                                      swapchainExtent.height, lightFormat);
   lightImageInfo.format = lightFormat;
@@ -64,11 +65,33 @@ void LightingRenderFlowVk::CreateAttachments() {
     AttachmentVk::GetDefaultAttachmentDescription(lightImageAttachment);
     lightImageAttachment.format = lightFormat;
     lightImageAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    lightImageAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    lightImageAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    lightImageAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    lightImageAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
     m_attachmentsVk.lightAttachments[i].SetImageVk(&lightImageRef);
     m_attachmentsVk.lightAttachments[i].SetAttachmentDescription(
         lightImageAttachment);
+  }
+}
+
+//
+//
+//
+//
+//
+// --- IMAGE BARRIERS  ---------------------------------------------------------
+// --- IMAGE BARRIERS  ---------------------------------------------------------
+// --- IMAGE BARRIERS  ---------------------------------------------------------
+//
+void LightingRenderFlowVk::CreateImageBarriers() {
+  // For AFTER the current renderpass and BEFORE the next renderpass
+  // Color/depth attachment -> shader read format
+  for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+    ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
+        &lightBarrier = m_imageBarriers.lightBarriers[i];
+
+    lightBarrier.Init(&m_imagesVk.lightImages[i]);
   }
 }
 
@@ -113,16 +136,10 @@ void LightingRenderFlowVk::CreateRenderPass() {
   VkSubpassDependency dependency{};
   dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
   dependency.dstSubpass = 0;
-  dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                            VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT |
-                            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-  dependency.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-  dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-                             VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-  dependency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT |
-                             VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-                             VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
-                             VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+  dependency.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+  dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  dependency.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+  dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
   dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
   //
@@ -190,12 +207,10 @@ void LightingRenderFlowVk::CreateCommandBuffers() {
   cmdPool->AllocCommandBuffers(allocInfo, m_commandBuffers.data());
 };
 
-void LightingRenderFlowVk::AllocLocalDescriptors() {
+void LightingRenderFlowVk::AllocDescriptorsLocal() {
   auto *pools = ContextVk::DescriptorPools();
-  auto *device = ContextVk::Device();
-  auto *memory = ContextVk::Memory();
-  VkPhysicalDeviceProperties properties{};
-  device->GetPhysicalDeviceProperties(properties);
+  // VkPhysicalDeviceProperties properties{};
+  // device->GetPhysicalDeviceProperties(properties);
 
   VkDescriptorSetLayout &lightingLayout =
       ContextVk::DescriptorLayouts()->GetLayout<DescriptorSets::LightingSet>();
@@ -211,24 +226,31 @@ void LightingRenderFlowVk::AllocLocalDescriptors() {
       lightsPool.AllocateDescriptorSets<DescriptorSets::LightingSet,
                                         MAX_FRAMES_IN_FLIGHT>(
           ContextVk::Device()->GetDevice(), lightingLayouts);
+};
+
+void LightingRenderFlowVk::UpdateDescriptorSetsLocal() {
+  auto *memory = ContextVk::Memory();
+  auto *device = ContextVk::Device();
 
   for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
     VkDescriptorBufferInfo lightBufferInfo{};
-    lightBufferInfo.buffer = memory->GetUboSet(i);
+    lightBufferInfo.buffer = memory->GetSsboSet(i);
     lightBufferInfo.offset = memory->GetBufferViews().lightsSsbo.offset;
-    lightBufferInfo.range = DescriptorLayoutsVk::GetDescriptorBufferRange<
-        DescriptorSets::LightingSet>(properties.limits);
+    lightBufferInfo.range = memory->GetBufferViews().lightsSsbo.alignedSize;
+
+    // DescriptorLayoutsVk::GetDescriptorBufferRange<
+    // DescriptorSets::LightingSet>(properties.limits);
 
     VkDescriptorImageInfo albedoImageInfo{};
     albedoImageInfo.imageView =
         m_dependencyImages.albedoImages[i].GetVkImageView();
-    albedoImageInfo.sampler = s_samplersVk.frameSampler.GetVkSampler();
+    albedoImageInfo.sampler = s_samplersVk.colorSampler.GetVkSampler();
     albedoImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
     VkDescriptorImageInfo depthImageInfo{};
     depthImageInfo.imageView =
         m_dependencyImages.depthImages[i].GetVkImageView();
-    depthImageInfo.sampler = s_samplersVk.frameSampler.GetVkSampler();
+    depthImageInfo.sampler = s_samplersVk.depthSampler.GetVkSampler();
     depthImageInfo.imageLayout =
         m_dependencyImages.depthImages[i].FormatHasStencilComponent()
             ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
@@ -237,14 +259,14 @@ void LightingRenderFlowVk::AllocLocalDescriptors() {
     VkDescriptorImageInfo normalImageInfo{};
     normalImageInfo.imageView =
         m_dependencyImages.normalImages[i].GetVkImageView();
-    normalImageInfo.sampler = s_samplersVk.frameSampler.GetVkSampler();
+    normalImageInfo.sampler = s_samplersVk.colorSampler.GetVkSampler();
     normalImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
     VkDescriptorImageInfo roughnessMetallicImageInfo{};
     roughnessMetallicImageInfo.imageView =
         m_dependencyImages.roughnessMetallicImages[i].GetVkImageView();
     roughnessMetallicImageInfo.sampler =
-        s_samplersVk.frameSampler.GetVkSampler();
+        s_samplersVk.colorSampler.GetVkSampler();
     roughnessMetallicImageInfo.imageLayout =
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
@@ -315,7 +337,7 @@ void LightingRenderFlowVk::AllocLocalDescriptors() {
     vkUpdateDescriptorSets(device->GetDevice(), writes.size(), writes.data(), 0,
                            nullptr);
   };
-};
+}
 
 //
 //
@@ -351,7 +373,10 @@ void LightingRenderFlowVk::OnSwapchainInvalidCb() {
   DestroyAttachments();
 
   CreateAttachments();
+  CreateImageBarriers();
   CreateFramebuffers();
+
+  UpdateDescriptorSetsLocal();
 };
 
 //
@@ -372,10 +397,12 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   auto &bufferViews = deviceMemory->GetBufferViews();
   auto &bufferOffsets = deviceMemory->GetBufferOffsets();
 
+  VkDescriptorSet &cameraSet = s_commonDescriptorSets.cameraSets[currentFrame];
+  VkDescriptorSet &lightingSet = m_descriptorSetsVk.lightingSets[currentFrame];
+
   std::array<VkDescriptorSet, 1> cameraSets{
       s_commonDescriptorSets.cameraSets[currentFrame],
   };
-
   std::array<VkDescriptorSet, 1> lightingSets{
       m_descriptorSetsVk.lightingSets[currentFrame],
   };
@@ -384,11 +411,14 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkResetCommandBuffer(cmdBfr, 0);
   ContextVk::CommandPool()->BeginCommandBuffer(cmdBfr);
 
+  VkClearValue clearColor = {{0.0f, 1.0f, 0.0f, 1.0f}};
+  std::vector<VkClearValue> clearValues{clearColor};
+
   // Render pass begin
   VkRenderPassBeginInfo renderPassBeginInfo{};
   RenderPassVk::GetDefaultCmdBeginRenderPassInfo(
       m_framebuffers[currentFrame], swapchainExtent,
-      m_renderPass.GetVkRenderPass(), renderPassBeginInfo);
+      m_renderPass.GetVkRenderPass(), clearValues, renderPassBeginInfo);
 
   m_renderPass.BeginRenderPass(cmdBfr, renderPassBeginInfo);
 
@@ -410,16 +440,13 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 
   // Hardcoding 0 for camera index for now
   // TODO: Make it dynamic later
-  uint32_t cameraOffset =
-      bufferViews.camerasUbo.offset + bufferOffsets.camerasOffsets[0];
+  uint32_t cameraOffset = bufferOffsets.camerasOffsets[0];
 
-  std::array<VkDescriptorSet, 2> allSets = {
-      cameraSets[0],
-      lightingSets[0],
-  };
-
+  std::array<VkDescriptorSet, 2> allSets = {cameraSet, lightingSet};
   std::array<uint32_t, 1> dynamicOffsets = {cameraOffset};
 
+  // Binding 2 sets in one go. Same as doing separately (commented code
+  // below)
   vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
                           m_lightingPipelineVk.GetVkPipelineLayout(), 0,
                           allSets.size(), allSets.data(), dynamicOffsets.size(),
@@ -441,6 +468,15 @@ void LightingRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   vkCmdDraw(cmdBfr, 3, 1, 0, 0);
 
   m_renderPass.EndRenderPass(cmdBfr);
+
+  //
+  // --- Transition image layouts for next pass --------------------------------
+  ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead> &lightBarrier =
+      m_imageBarriers.lightBarriers[currentFrame];
+  lightBarrier.RecordBarrierCommand(cmdBfr);
+
+  //
+  // --- End command buffer ----------------------------------------------------
   ContextVk::CommandPool()->EndCommandBuffer(cmdBfr);
 }
 

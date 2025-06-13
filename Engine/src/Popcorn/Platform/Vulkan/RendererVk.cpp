@@ -7,9 +7,11 @@
 #include "Material.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Helpers.h"
+#include "RenderFlowDefs.h"
 #include "RenderFlowVk.h"
 #include "Shader.h"
 #include <cstring>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -18,6 +20,8 @@ GFX_NAMESPACE_BEGIN
 ContextVk *RendererVk::s_vulkanContext = nullptr;
 std::vector<RenderFlowVk *> RendererVk::s_renderFlows{};
 
+PcRenderFlowCmdBuffersMap RendererVk::s_renderFlowCmdBuffers;
+
 //
 // -------------------------------------------------------------------------
 // --- PUBLIC METHODS ------------------------------------------------------
@@ -25,6 +29,9 @@ std::vector<RenderFlowVk *> RendererVk::s_renderFlows{};
 void RendererVk::DrawFrame(const Scene &scene) {
   ContextVk::Frame()->Draw(
       [&]() {
+        vkDeviceWaitIdle(ContextVk::Device()->GetDevice());
+
+        RenderFlowVk::AllocShaders();
         for (auto &renderFlow : s_renderFlows) {
           renderFlow->OnSwapchainInvalidCb();
         }
@@ -33,10 +40,12 @@ void RendererVk::DrawFrame(const Scene &scene) {
         RenderFlowVk::CopyDynamicUniformsToMemory(currentFrame);
       },
       [&](const uint32_t frameIndex, const uint32_t currentFrame) {
+        int i = 0;
         for (auto &renderFlow : s_renderFlows) {
           renderFlow->RecordCommandBuffer(frameIndex, currentFrame);
         }
-      });
+      },
+      s_renderFlowCmdBuffers);
 };
 
 bool RendererVk::OnFrameBufferResize(FrameBfrResizeEvent &) {
@@ -79,6 +88,8 @@ void RendererVk::CreateRenderFlows() {
 };
 
 void RendererVk::DestroyRenderFlows() {
+  vkDeviceWaitIdle(ContextVk::Device()->GetDevice());
+
   for (auto &renderFlow : s_renderFlows) {
     renderFlow->DestroyPipelines();
   }
@@ -97,14 +108,27 @@ void RendererVk::DestroyRenderFlows() {
 };
 
 void RendererVk::PrepareRenderFlows() {
+  // Create VMA Allocator
+  ContextVk::MemoryAllocator()->CreateVMAAllocator(); // Automatically destroyed
+
   for (auto &renderFlow : s_renderFlows) {
     PC_WARN("Preparing renderflow...")
     renderFlow->Prepare(); // Creates Vulkan:
                            //   - Attachments
+                           //   - ImageBarriers
                            //   - RenderPass
                            //   - Framebuffer
                            //   - Commandbuffers
   }
+
+  s_renderFlowCmdBuffers[RenderFlows::GBuffer] =
+      &s_renderFlows[0]->GetCommandBuffers();
+
+  s_renderFlowCmdBuffers[RenderFlows::Lighting] =
+      &s_renderFlows[1]->GetCommandBuffers();
+
+  s_renderFlowCmdBuffers[RenderFlows::Composite] =
+      &s_renderFlows[2]->GetCommandBuffers();
 };
 
 void RendererVk::CreateRenderFlowResources() {
@@ -114,20 +138,19 @@ void RendererVk::CreateRenderFlowResources() {
           "resources! Should only be done once")
 
   //
-  // Create VMA Allocator
-  ContextVk::MemoryAllocator()->CreateVMAAllocator(); // Automatically destroyed
-
-  //
   // Allocate memory, samplers & load shaders in the shader library
   RenderFlowVk::AllocMemory();
   RenderFlowVk::CreateSamplers();
   RenderFlowVk::AllocShaders();
-  RenderFlowVk::AllocGlobalDescriptors();
+  RenderFlowVk::AllocDescriptorsGlobal();
+  RenderFlowVk::UpdateDescriptorSetsGlobal(); // descriptor writes ->
+                                              // vkUpdateDescriptorSets
 
-  //
   // Renderflow specific descriptors & pipelines
   for (auto &renderFlow : s_renderFlows) {
-    renderFlow->AllocLocalDescriptors(); // Static for now
+    renderFlow->AllocDescriptorsLocal();     // Static for now
+    renderFlow->UpdateDescriptorSetsLocal(); // descriptor writes ->
+                                             // vkUpdateDescriptorSets
     renderFlow->CreatePipelines();
   }
 
@@ -135,6 +158,14 @@ void RendererVk::CreateRenderFlowResources() {
   // Unload shaders in the shader library
   RenderFlowVk::FreeShaders();
 };
+
+#ifdef PC_DEBUG
+void RendererVk::DebugPreGameLoop() {
+  for (auto &renderFlow : s_renderFlows) {
+    renderFlow->PrintVboIbo();
+  }
+}
+#endif
 
 void RendererVk::AssignSceneObjectsToRenderFlows() {
   for (auto &scene : m_sceneLibrary.GetScenes()) {

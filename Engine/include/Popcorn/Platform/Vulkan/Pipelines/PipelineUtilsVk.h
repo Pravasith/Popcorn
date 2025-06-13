@@ -15,8 +15,8 @@ class PipelineUtilsVk {
 public:
   static void GetDefaultGfxPipelineState(
       const BufferDefs::Layout &vertexBufferLayout,
-      const VkVertexInputBindingDescription &bindingDescription,
-      GfxPipelineState &pipelineState);
+      GfxPipelineState &pipelineState,
+      std::vector<VkPipelineColorBlendAttachmentState> &colorBlendAttachments);
 
   static void
   GetDefaultDynamicState(VkPipelineDynamicStateCreateInfo &dynamicState);
@@ -44,14 +44,14 @@ public:
                                     const VkExtent2D &swapchainExtent);
 
   static void GetDefaultColorBlendingState(
-      VkPipelineColorBlendStateCreateInfo &colorBlendState);
+      VkPipelineColorBlendStateCreateInfo &colorBlendState,
+      std::vector<VkPipelineColorBlendAttachmentState> &colorBlendAttachments);
 
   static void GetDefaultPipelineLayoutCreateInfo(
       VkPipelineLayoutCreateInfo &pipelineLayoutCreateInfo);
 
 private:
   static std::vector<VkDynamicState> s_dynamicStatesDefault;
-  static VkPipelineColorBlendAttachmentState s_colorBlendAttachmentDefault;
 };
 
 GFX_NAMESPACE_END

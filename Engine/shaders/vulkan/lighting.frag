@@ -1,13 +1,5 @@
 #version 450
 
-layout(set = 0, binding = 0) uniform CameraUBO {
-    mat4 view;
-    mat4 proj;
-    mat4 viewProj;
-    mat4 invViewProj;
-    // vec3 camPos;
-} camera;
-
 struct LightUniform {
     vec3 position;
     float pad0;
@@ -19,16 +11,22 @@ struct LightUniform {
     float pad2;
 
     float lightType;
-    float intensity;
+    float intensity; // TEMP_DEBUG ~ treating as power
     float innerConeAngle;
     float outerConeAngle;
 };
 
+layout(set = 0, binding = 0) uniform CameraUBO {
+    mat4 view;
+    mat4 proj;
+    mat4 viewProj;
+    mat4 invViewProj;
+    // vec3 camPos;
+} camera;
 
 layout(set = 1, binding = 0) readonly buffer LightBuffer {
     LightUniform lights[];
 };
-
 layout(set = 1, binding = 1) uniform sampler2D albedoTex;
 layout(set = 1, binding = 2) uniform sampler2D depthTex;
 layout(set = 1, binding = 3) uniform sampler2D normalTex;
@@ -53,32 +51,35 @@ void main() {
     float roughness = rm.r;
     float metallic = rm.g;
 
-    vec3 viewPos = ReconstructViewPosition(fragUV, depth);
-    vec3 viewNormal = normalize(normal);
-    // vec3 viewDir = normalize(camera.camPos - viewPos);
-    vec3 viewDir = normalize(vec3(0.0) - viewPos);
+    vec3 worldPos = ReconstructViewPosition(fragUV, depth);
+    vec3 worldNormal = normalize(normal);
+    // // vec3 viewDir = normalize(camera.camPos - worldPos);
+    // vec3 viewDir = normalize(vec3(0.0) - worldPos);
 
     vec3 finalColor = vec3(0.0);
 
     for (uint i = 0; i < lights.length(); ++i) {
         LightUniform light = lights[i];
-        vec3 lightColor = light.color * light.intensity;
+        // TEMP_DEBUG
+        vec3 lightColor = light.color * light.intensity * 0.5;
 
         vec3 lightVec;
-        float attenuation = 1.0;
+        // TEMP_DEBUG
+        // float attenuation = 1.0;
+        float attenuation = .5;
 
         if (light.lightType == 0.0) {
             // Point light
-            lightVec = light.position - viewPos;
+            lightVec = light.position - worldPos;
             float dist = length(lightVec);
-            attenuation = 1.0 / (dist * dist);
+            attenuation = attenuation / (dist * dist);
             lightVec /= dist;
         } else if (light.lightType == 1.0) {
             // Directional light
             lightVec = normalize(-light.direction);
         } else if (light.lightType == 2.0) {
             // // Spotlight
-            // lightVec = light.position - viewPos;
+            // lightVec = light.position - worldPos;
             // float dist = length(lightVec);
             // lightVec /= dist;
             // float theta = dot(lightVec, normalize(-light.direction));
@@ -89,11 +90,23 @@ void main() {
             lightVec = normalize(-light.direction);
         }
 
-        float NdotL = max(dot(viewNormal, lightVec), 0.0);
+        float NdotL = max(dot(worldNormal, lightVec), 0.0);
         vec3 diffuse = albedo * lightColor * NdotL;
+        // TEMP_DEBUG
+        diffuse += 0.01;
 
         finalColor += diffuse * attenuation;
     }
 
     outColor = vec4(finalColor, 1.0);
 }
+
+    // outColor = vec4(depth, depth, depth, 1.); // cyan
+    // vec3 normalColor = normal * 0.5 + 0.5;
+    // outColor = vec4(normalColor, 1.0); // cyan
+
+    // outColor = vec4(normal, 1.);
+    // outColor = vec4(albedo.xyz, 1.);// green
+    // outColor = vec4(rm.xy, 0., 1.);
+
+    // outColor = vec4(1.);

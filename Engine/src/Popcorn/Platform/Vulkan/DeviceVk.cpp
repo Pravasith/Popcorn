@@ -302,6 +302,22 @@ DeviceVk::FindQueueFamilies(const VkPhysicalDevice &device,
   return indices;
 }
 
+bool DeviceVk::QueryAndEnableDepthStencilLayoutFeature(
+    DeviceVk::FeatureChain &outFeatures) {
+  outFeatures.depthStencilFeatures.sType =
+      VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SEPARATE_DEPTH_STENCIL_LAYOUTS_FEATURES;
+  outFeatures.features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+  outFeatures.features2.pNext = &outFeatures.depthStencilFeatures;
+
+  vkGetPhysicalDeviceFeatures2(m_physicalDevice, &outFeatures.features2);
+
+  if (outFeatures.depthStencilFeatures.separateDepthStencilLayouts) {
+    outFeatures.depthStencilFeatures.separateDepthStencilLayouts = VK_TRUE;
+    return true;
+  }
+  return false;
+}
+
 /** -------------------------------------------------------------------
  *  ------ LOGICAL DEVICE ---------------------------------------------
  *  ------------------------------------------------------------------- */
@@ -332,7 +348,9 @@ void DeviceVk::CreateLogicalDevice(const VkSurfaceKHR &surface) {
   createInfo.queueCreateInfoCount =
       static_cast<uint32_t>(queueCreateInfos.size());
 
-  createInfo.pEnabledFeatures = &deviceFeatures;
+  // createInfo.pEnabledFeatures = &deviceFeatures;
+  createInfo.pEnabledFeatures = nullptr;
+
   createInfo.enabledExtensionCount =
       static_cast<uint32_t>(m_deviceExtensions.size());
   createInfo.ppEnabledExtensionNames = m_deviceExtensions.data();
@@ -345,10 +363,19 @@ void DeviceVk::CreateLogicalDevice(const VkSurfaceKHR &surface) {
     createInfo.enabledLayerCount = 0;
   }
 
+  FeatureChain featureChain{};
+  bool separateDepthStencilLayoutsSupported =
+      QueryAndEnableDepthStencilLayoutFeature(featureChain);
+
+  featureChain.features2.features = deviceFeatures;
+  createInfo.pNext = &featureChain.features2;
+
   if (vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device) !=
       VK_SUCCESS) {
     throw std::runtime_error("failed to create logical device!");
   }
+
+  m_separateDepthStencilLayoutsSupported = separateDepthStencilLayoutsSupported;
 
   vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0,
                    &m_graphicsQueue);

@@ -55,6 +55,9 @@ void ContextVk::VulkanInit(const Window &appWin) {
   // RENDER READY ------------------------------------------------------------
   s_commandPoolVk->CreateCommandPool();
   s_frameVk->CreateRenderSyncObjects();
+
+  //
+  // DEBUGGING INITS ---------------------------------------------------------
 };
 
 void ContextVk::VulkanCleanUp() {

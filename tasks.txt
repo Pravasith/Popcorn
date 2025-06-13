@@ -8,14 +8,14 @@
 
 HIGH PRIORITY:
 ----------------------------------------------------------------------------
-:: Get camera descriptor set in lighting renderflow paint call
-:: Redesign Draw call - Refactor - 1 day max. - also handle framebuffer
-   resize - 27th May
+:: Fix the ones marked - TEMP_DEBUG
+
 :: Update camera(fov, aspect ratio, .etc) on FrameBufferResize
 
 :: Write camera class properly.
 :: Fix camera in GltfLoader
 
+:: Create a CommandBufferVk class (right now it's raw from CommandPoolsVk)
 :: Optimise space by allocating one model matrix per mesh, not per submesh
 
 

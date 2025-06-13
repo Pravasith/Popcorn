@@ -24,8 +24,8 @@ GFX_NAMESPACE_BEGIN
 //       - Make it platform agnostic
 class RenderFlowVk {
 public:
-  RenderFlowVk(); 
-  virtual ~RenderFlowVk() ;
+  RenderFlowVk();
+  virtual ~RenderFlowVk();
 
   static void AllocMemory();
   static void FreeMemory();
@@ -38,34 +38,46 @@ public:
   static void AllocShaders();
   static void FreeShaders();
 
-  static void AllocGlobalDescriptors();
+  static void AllocDescriptorsGlobal();
+  static void UpdateDescriptorSetsGlobal();
 
 public:
-  virtual void AllocLocalDescriptors() = 0; // Automatically destroyed
+#ifdef PC_DEBUG
+  virtual void PrintVboIbo() {};
+#endif
+
+public:
+  virtual void AllocDescriptorsLocal() = 0; // Automatically destroyed
+  virtual void UpdateDescriptorSetsLocal() = 0;
+
   virtual void CreatePipelines() = 0;
   virtual void DestroyPipelines() = 0;
-
-  virtual void CreateCommandBuffers() = 0;
 
   virtual void OnSwapchainInvalidCb() = 0;
   virtual void RecordCommandBuffer(const uint32_t frameIndex,
                                    const uint32_t currentFrame) = 0;
 
+  virtual std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> &
+  GetCommandBuffers() = 0;
+
 private:
   virtual void CreateAttachments() = 0;
+  virtual void CreateImageBarriers() = 0;
   virtual void CreateRenderPass() = 0;
   virtual void CreateFramebuffers() = 0;
+
+  virtual void CreateCommandBuffers() = 0;
 
   virtual void DestroyFramebuffers() = 0;
   virtual void DestroyRenderPass() = 0;
   virtual void DestroyAttachments() = 0;
 
-  virtual const std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT>
-  GetCommandBuffers() const = 0;
-
 public:
   void Prepare() {
+    PC_WARN("Preparing Renderflow............................")
+
     CreateAttachments();
+    CreateImageBarriers();
     CreateRenderPass();
     CreateFramebuffers();
     CreateCommandBuffers();
@@ -105,7 +117,8 @@ public:
 
 public:
   struct SamplersVk {
-    SamplerVk frameSampler;
+    SamplerVk colorSampler;
+    SamplerVk depthSampler;
   };
 
   struct DescriptorSetsVkStatic {
@@ -130,7 +143,8 @@ protected:
   // Images
   static PcRenderFlowImages<GBuffer, MAX_FRAMES_IN_FLIGHT> s_gBufferImages;
   static PcRenderFlowImages<Lighting, MAX_FRAMES_IN_FLIGHT> s_lightingImages;
-  static PcRenderFlowImages<Composite> s_compositeImages;
+  static PcRenderFlowImages<Composite>
+      s_compositeImages; // this is a vector, and the others above are arrays
 
   //
   // Samplers ---------------------------------------------------------------

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GlobalMacros.h"
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 
@@ -41,7 +42,7 @@ static void PC_Print(const std::string &msg, const TagType tag,
 
   ss << lvl << " ";
 
-  for (int i = 0; i < PC_print_lvl; ++i) {
+  for (int i = 0; i < std::min(PC_print_lvl, 10); ++i) {
     ss << "| ";
   }
 

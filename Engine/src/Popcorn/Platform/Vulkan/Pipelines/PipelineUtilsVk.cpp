@@ -5,24 +5,15 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+std::vector<VkDynamicState> PipelineUtilsVk::s_dynamicStatesDefault{
+    VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
+
 void PipelineUtilsVk::GetDefaultGfxPipelineState(
     const BufferDefs::Layout &vertexBufferLayout,
-    const VkVertexInputBindingDescription &bindingDescription,
-    GfxPipelineState &pipelineState) {
+    GfxPipelineState &pipelineState,
+    std::vector<VkPipelineColorBlendAttachmentState> &colorBlendAttachments) {
   PipelineUtilsVk::GetDefaultDynamicState(pipelineState.dynamicState);
   PipelineUtilsVk::GetDefaultVertexInputState(pipelineState.vertexInputState);
-
-  std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
-  VertexBufferVk::GetDefaultVertexInputAttributeDescriptions(
-      vertexBufferLayout, attributeDescriptions);
-  pipelineState.vertexInputState.vertexBindingDescriptionCount = 1;
-  pipelineState.vertexInputState.vertexAttributeDescriptionCount =
-      static_cast<uint32_t>(attributeDescriptions.size());
-  pipelineState.vertexInputState.pVertexBindingDescriptions =
-      &bindingDescription;
-  pipelineState.vertexInputState.pVertexAttributeDescriptions =
-      attributeDescriptions.data();
-
   PipelineUtilsVk::GetDefaultInputAssemblyState(
       pipelineState.inputAssemblyState);
   PipelineUtilsVk::GetDefaultViewportState(pipelineState.viewportState);
@@ -33,15 +24,10 @@ void PipelineUtilsVk::GetDefaultGfxPipelineState(
       pipelineState.depthStencilState); // Disabled
 
   PipelineUtilsVk::GetDefaultColorBlendingState(
-      pipelineState.colorBlendState); // Disabled
+      pipelineState.colorBlendState, colorBlendAttachments); // Disabled
   PipelineUtilsVk::GetDefaultPipelineLayoutCreateInfo(
       pipelineState.pipelineLayout); // Disabled
 };
-
-std::vector<VkDynamicState> PipelineUtilsVk::s_dynamicStatesDefault{
-    VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
-VkPipelineColorBlendAttachmentState
-    PipelineUtilsVk::s_colorBlendAttachmentDefault{};
 
 void PipelineUtilsVk::GetDefaultInputAssemblyState(
     VkPipelineInputAssemblyStateCreateInfo &inputAssemblyState) {
@@ -106,6 +92,7 @@ void PipelineUtilsVk::GetDefaultRasterizationState(
   rasterizationState.polygonMode = VK_POLYGON_MODE_FILL;
   rasterizationState.lineWidth = 1.0f;
   rasterizationState.cullMode = VK_CULL_MODE_BACK_BIT;
+  // rasterizationState.cullMode = VK_CULL_MODE_NONE;
   rasterizationState.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 
   rasterizationState.depthBiasEnable = VK_FALSE;
@@ -134,35 +121,35 @@ void PipelineUtilsVk::GetDefaultVertexInputState(
 };
 
 void PipelineUtilsVk::GetDefaultColorBlendingState(
-    VkPipelineColorBlendStateCreateInfo &colorBlending) {
+    VkPipelineColorBlendStateCreateInfo &colorBlendState,
+    std::vector<VkPipelineColorBlendAttachmentState> &colorBlendAttachments) {
+  for (uint32_t i = 0; i < colorBlendAttachments.size(); ++i) {
+    colorBlendAttachments[i].colorWriteMask =
+        VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+        VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    colorBlendAttachments[i].blendEnable = VK_FALSE;
+    colorBlendAttachments[i].srcColorBlendFactor =
+        VK_BLEND_FACTOR_ONE; // Optional
+    colorBlendAttachments[i].dstColorBlendFactor =
+        VK_BLEND_FACTOR_ZERO;                                // Optional
+    colorBlendAttachments[i].colorBlendOp = VK_BLEND_OP_ADD; // Optional
+    colorBlendAttachments[i].srcAlphaBlendFactor =
+        VK_BLEND_FACTOR_ONE; // Optional
+    colorBlendAttachments[i].dstAlphaBlendFactor =
+        VK_BLEND_FACTOR_ZERO;                                // Optional
+    colorBlendAttachments[i].alphaBlendOp = VK_BLEND_OP_ADD; // Optional
+  }
 
-  // Per framebuffer
-  // VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-  s_colorBlendAttachmentDefault.colorWriteMask =
-      VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-      VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-  s_colorBlendAttachmentDefault.blendEnable = VK_FALSE;
-  s_colorBlendAttachmentDefault.srcColorBlendFactor =
-      VK_BLEND_FACTOR_ONE; // Optional
-  s_colorBlendAttachmentDefault.dstColorBlendFactor =
-      VK_BLEND_FACTOR_ZERO;                                     // Optional
-  s_colorBlendAttachmentDefault.colorBlendOp = VK_BLEND_OP_ADD; // Optional
-  s_colorBlendAttachmentDefault.srcAlphaBlendFactor =
-      VK_BLEND_FACTOR_ONE; // Optional
-  s_colorBlendAttachmentDefault.dstAlphaBlendFactor =
-      VK_BLEND_FACTOR_ZERO;                                     // Optional
-  s_colorBlendAttachmentDefault.alphaBlendOp = VK_BLEND_OP_ADD; // Optional
-
-  colorBlending.sType =
+  colorBlendState.sType =
       VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-  colorBlending.logicOpEnable = VK_FALSE;
-  colorBlending.logicOp = VK_LOGIC_OP_COPY; // Optional
-  colorBlending.attachmentCount = 1;
-  colorBlending.pAttachments = &s_colorBlendAttachmentDefault;
-  colorBlending.blendConstants[0] = 0.0f; // Optional
-  colorBlending.blendConstants[1] = 0.0f; // Optional
-  colorBlending.blendConstants[2] = 0.0f; // Optional
-  colorBlending.blendConstants[3] = 0.0f; // Optional
+  colorBlendState.logicOpEnable = VK_FALSE;
+  colorBlendState.logicOp = VK_LOGIC_OP_COPY; // Optional
+  colorBlendState.attachmentCount = colorBlendAttachments.size();
+  colorBlendState.pAttachments = colorBlendAttachments.data();
+  colorBlendState.blendConstants[0] = 0.0f; // Optional
+  colorBlendState.blendConstants[1] = 0.0f; // Optional
+  colorBlendState.blendConstants[2] = 0.0f; // Optional
+  colorBlendState.blendConstants[3] = 0.0f; // Optional
 };
 
 void PipelineUtilsVk::GetDefaultPipelineLayoutCreateInfo(

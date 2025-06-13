@@ -139,6 +139,7 @@ target_include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Scene>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/OpenGL>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Debug>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Descriptors>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Memory>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Pipelines>
@@ -149,6 +150,7 @@ target_include_directories(
             $<INSTALL_INTERFACE:include/Popcorn/Scene>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/OpenGL>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan>
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Debug>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Descriptors>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Memory>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Pipelines>
@@ -194,15 +196,19 @@ elseif(BUILD_FOR_MACOS)
 endif()
 
 target_link_libraries(vma PUBLIC Vulkan::Headers Vulkan::Loader)
-target_link_libraries(Graphics PRIVATE Vulkan::Headers Vulkan::Loader glfw vma)
+target_link_libraries(ImGui PUBLIC glfw Vulkan::Headers Vulkan::Loader)
+
+target_link_libraries(Events PRIVATE Vulkan::Headers)
+
+target_link_libraries(Graphics PRIVATE Events Vulkan::Headers Vulkan::Loader
+                                       glfw vma)
 target_link_libraries(Graphics PUBLIC glm::glm)
 
 target_link_libraries(Window PRIVATE glad glfw)
 target_link_libraries(Window PRIVATE Events)
-target_link_libraries(ImGui PUBLIC glfw Vulkan::Headers Vulkan::Loader)
+
 target_link_libraries(Popcorn PUBLIC tinygltf)
 target_link_libraries(Popcorn PRIVATE glad glfw)
-
 target_link_libraries(Popcorn PUBLIC Graphics)
 target_link_libraries(Popcorn PRIVATE Window ImGui)
 
@@ -245,6 +251,13 @@ endif()
 
 # Popcorn headers
 install(DIRECTORY include/ DESTINATION include)
+
+# Shader files
+install(
+  DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dist/linux/bin/assets/shaders/
+  DESTINATION dist/linux/shaders
+  FILES_MATCHING
+  PATTERN "*.spv")
 
 install(
   TARGETS Popcorn

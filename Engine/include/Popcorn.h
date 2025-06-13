@@ -17,6 +17,7 @@ using Model = tinygltf::Model;
 
 static void BeginContext() {
   Application::Start();
+
   s_application = &Application::Get();
   s_renderer = Renderer::Create<RendererType::Vulkan>(
       s_application
@@ -43,14 +44,23 @@ static void StartGame() {
                                                  // wise & adds to renderflows
   s_renderer->CreateRenderFlowResources(); // Renderflow submeshes converted and
                                            // copied to vulkan memory objects
-  s_application->StartGameLoop();          // Starts game loop
+#ifdef PC_DEBUG
+  s_renderer->PrintScenes();
+  // s_renderer->DebugPreGameLoop();
+#endif
+
+  s_application->StartGameLoop(); // Starts game loop
 };
 
-static void RenderScenes(Scene &scene) { s_renderer->DrawFrame(scene); };
+static void RenderScenes(Scene &scene) {
+  // FrameVk Draw
+  s_renderer->DrawFrame(scene);
+};
 
 static void EndContext() {
   s_renderer->DestroyRenderFlows();
   s_renderer = nullptr;
+
   Application::Stop();
 }
 

@@ -13,7 +13,9 @@ GFX_NAMESPACE_BEGIN
 
 class LightingRenderFlowVk : public RenderFlowVk {
 public:
-  LightingRenderFlowVk() {
+  LightingRenderFlowVk()
+      : m_imagesVk(s_lightingImages), m_dependencyImages(s_gBufferImages) {
+    m_isFirstTimeInFrame.fill(true);
     PC_PRINT("CREATED", TagType::Constr, "LightingRenderFlowVk")
   };
 
@@ -23,6 +25,7 @@ public:
 
 private:
   virtual void CreateAttachments() override;
+  virtual void CreateImageBarriers() override;
   virtual void CreateRenderPass() override;
   virtual void CreateFramebuffers() override;
 
@@ -30,13 +33,16 @@ private:
   virtual void DestroyRenderPass() override;
   virtual void DestroyAttachments() override;
 
-  virtual void AllocLocalDescriptors() override;
+  virtual void AllocDescriptorsLocal() override;
+  virtual void UpdateDescriptorSetsLocal() override;
+
   virtual void CreatePipelines() override;
   virtual void DestroyPipelines() override;
 
   virtual void CreateCommandBuffers() override;
-  [[nodiscard]] virtual const std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT>
-  GetCommandBuffers() const override {
+
+  [[nodiscard]] virtual std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> &
+  GetCommandBuffers() override {
     return m_commandBuffers;
   };
 
@@ -53,10 +59,13 @@ private:
     PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> lightingSets{};
   };
 
-  PcRenderFlowImages<RenderFlows::Lighting, MAX_FRAMES_IN_FLIGHT> &m_imagesVk =
-      s_lightingImages;
+  struct ImageBarriersVk {
+    PcFramesColorImageBarriers lightBarriers;
+  };
+
+  PcRenderFlowImages<RenderFlows::Lighting, MAX_FRAMES_IN_FLIGHT> &m_imagesVk;
   PcRenderFlowImages<RenderFlows::GBuffer, MAX_FRAMES_IN_FLIGHT>
-      &m_dependencyImages = s_gBufferImages;
+      &m_dependencyImages;
 
   AttachmentsVk m_attachmentsVk{};
   DescriptorSetsVk m_descriptorSetsVk{};
@@ -68,6 +77,9 @@ private:
   LightingPipelineVk m_lightingPipelineVk;
 
   std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> m_commandBuffers{};
+  std::array<bool, MAX_FRAMES_IN_FLIGHT> m_isFirstTimeInFrame{};
+
+  ImageBarriersVk m_imageBarriers;
 };
 
 GFX_NAMESPACE_END

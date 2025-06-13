@@ -54,9 +54,6 @@ public:
     return m_swapchainImageViews;
   };
 
-  // void CreateSwapchainFramebuffers(const VkDevice &device,
-  //                                  const VkRenderPass &finalRenderPass);
-
   void CleanUp(const VkDevice &);
 
 private:

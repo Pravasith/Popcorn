@@ -49,6 +49,9 @@ add_library(
   ${PLATFORM_IMPL_DIR}/OpenGL/RendererOpenGL.cpp
   #
   # VULKAN CLASSES
+  #
+  ${PLATFORM_IMPL_DIR}/Vulkan/Debug/DebugMemoryVk.cpp
+  #
   ${PLATFORM_IMPL_DIR}/Vulkan/Descriptors/DescriptorLayoutsVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/Descriptors/DescriptorPoolsVk.cpp
   #
@@ -71,6 +74,7 @@ add_library(
   ${PLATFORM_IMPL_DIR}/Vulkan/ContextVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/DeviceVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/FrameVk.cpp
+  ${PLATFORM_IMPL_DIR}/Vulkan/BarrierVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/FramebufferVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/ImageVk.cpp
   ${PLATFORM_IMPL_DIR}/Vulkan/RenderPassVk.cpp

@@ -33,15 +33,22 @@ bool GltfLoader::LoadFromFile(const std::string &filename,
   std::string err;
   std::string warn;
 
-  bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, filename) ||
-             loader.LoadBinaryFromFile(&model, &err, &warn, filename);
+  bool ret = false;
+  if (filename.ends_with(".gltf")) {
+    ret = loader.LoadASCIIFromFile(&model, &err, &warn, filename);
+  } else if (filename.ends_with(".glb")) {
+    ret = loader.LoadBinaryFromFile(&model, &err, &warn, filename);
+  } else {
+    PC_ERROR("Unsupported file extension: " + filename, "GltfLoader");
+    return false;
+  }
 
   if (!warn.empty()) {
-    PC_WARN(warn)
+    PC_WARN(warn);
   }
 
   if (!err.empty()) {
-    PC_ERROR(err, "GltfLoader")
+    PC_ERROR(err, "GltfLoader");
   }
 
   if (!ret) {
@@ -49,7 +56,7 @@ bool GltfLoader::LoadFromFile(const std::string &filename,
   }
 
   return ret;
-};
+}
 
 void GltfLoader::ExtractModelData(const tinygltf::Model &model,
                                   std::vector<GameObject *> &gameObjects) {
@@ -140,6 +147,7 @@ GameObject *GltfLoader::CreateGameObjectByType(const tinygltf::Model &model,
              node.extensions.end()) {
     // Light node (requires KHR_lights_punctual extension)
     Light *light = new Light();
+    ExtractLightsData(model, node, light);
     return light;
 
     // } else if (
@@ -168,6 +176,75 @@ GameObject *GltfLoader::CreateGameObjectByType(const tinygltf::Model &model,
   }
 };
 
+void GltfLoader::ExtractLightsData(const tinygltf::Model &model,
+                                   const tinygltf::Node &node, Light *light) {
+  // Safety check
+  if (node.extensions.find("KHR_lights_punctual") == node.extensions.end())
+    return;
+
+  const auto &ext = node.extensions.at("KHR_lights_punctual");
+
+  if (!ext.Has("light"))
+    return; // no valid light index
+
+  int lightIndex = ext.Get("light").Get<int>();
+  if (lightIndex < 0 || lightIndex >= model.lights.size())
+    return;
+
+  const auto &gltfLight = model.lights[lightIndex];
+  LightData data{};
+
+  // Color
+  if (!gltfLight.color.empty() && gltfLight.color.size() == 3) {
+    data.color = glm::vec3(static_cast<float>(gltfLight.color[0]),
+                           static_cast<float>(gltfLight.color[1]),
+                           static_cast<float>(gltfLight.color[2]));
+  }
+
+  // Intensity
+  data.intensity = static_cast<float>(gltfLight.intensity); // default is 1.0
+
+  // Range
+  if (gltfLight.range >= 0.0) {
+    data.range = static_cast<float>(gltfLight.range);
+  }
+
+  // Spot angles (only if spot light)
+  if (data.type == Lights::SpotLight) {
+    const auto &spot = gltfLight.spot;
+    data.innerConeAngle = spot.innerConeAngle >= 0.0
+                              ? static_cast<float>(spot.innerConeAngle)
+                              : glm::radians(15.0f);
+    data.outerConeAngle = spot.outerConeAngle >= 0.0
+                              ? static_cast<float>(spot.outerConeAngle)
+                              : glm::radians(30.0f);
+  }
+
+  // Type
+  if (gltfLight.type == "point") {
+    constexpr float PC_POINT_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR =
+        54.3514f;
+    // TEMP_DEBUG -
+    data.intensity /= PC_POINT_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR;
+    data.type = Lights::PointLight;
+    PC_WARN("POINT INTENSITY " << data.intensity)
+  } else if (gltfLight.type == "spot") {
+    data.type = Lights::SpotLight;
+  } else if (gltfLight.type == "directional") {
+    data.type = Lights::DirectionalLight;
+    // TEMP_DEBUG -
+    constexpr float PC_DIR_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR =
+        100.0f * 6.83f;
+    data.intensity /= PC_DIR_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR;
+    PC_WARN("DIR LIGHT INTENSITY " << data.intensity)
+  } else {
+    PC_WARN("Unknown light type: " << gltfLight.type);
+    data.type = Lights::PointLight; // default fallback
+  }
+
+  light->SetLightData(data);
+}
+
 //
 //
 //
@@ -191,6 +268,32 @@ void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
 
     // Extract index buffer
     ibo = ExtractIndexBuffer(model, primitive);
+
+    // struct VertexTemp {
+    //   glm::vec3 pos;
+    //   glm::vec3 normal;
+    //   glm::vec2 uv;
+    //   std::string Print() {
+    //     std::stringstream ss;
+    //     ss << pos.x << ", " << pos.y << ", " << pos.z << "; " << normal.r
+    //        << ", " << normal.g << ", " << normal.b << "; " << uv.x << ", "
+    //        << uv.y;
+    //     return ss.str();
+    //   };
+    // };
+    //
+    // // Print vertex buffer
+    // vbo->PrintBuffer<VertexTemp>();
+
+    // const uint32_t *indices =
+    //     reinterpret_cast<const uint32_t *>(ibo->GetBufferData());
+    // std::cout << "Index Buffer: ";
+    // for (size_t i = 0; i < ibo->GetCount(); ++i) {
+    //   std::cout << indices[i];
+    //   if (i < ibo->GetCount() - 1)
+    //     std::cout << ", ";
+    // }
+    // std::cout << std::endl;
 
     // Extract material data
     if (primitive.material >= 0) {
@@ -295,10 +398,12 @@ GltfLoader::GetGltfMaterialType(const tinygltf::Material &material) {
                material.occlusionTexture.index != -1;
 
   if (isPBR) {
+    PC_PRINT("PBR Mat", TagType::Print, "GltfLoader.cpp")
     return MaterialTypes::PbrMat;
   } else {
+    PC_PRINT("Basic Mat", TagType::Print, "GltfLoader.cpp")
     return MaterialTypes::BasicMat;
-  };
+  }
 }
 
 //
@@ -457,15 +562,19 @@ GltfLoader::ExtractIndexBuffer(const tinygltf::Model &model,
                           indexAccessor.byteOffset;
 
   // Handle stride (distance between indices in bytes)
-  size_t stride = indexView.byteStride;
+  // size_t stride = indexView.byteStride;
+  size_t stride = 0;
 
   // Allocate index buffer
   IndexBuffer<uint32_t> *indices = new IndexBuffer<uint32_t>();
-  indices->Allocate(indexCount);
+  indices->Allocate(indexCount * sizeof(uint32_t));
 
   if (stride == 0) {
     // Default stride based on component type
     switch (indexAccessor.componentType) {
+    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+      stride = sizeof(uint8_t);
+      break;
     case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
       stride = sizeof(uint16_t);
       break;
@@ -486,6 +595,9 @@ GltfLoader::ExtractIndexBuffer(const tinygltf::Model &model,
 
     uint32_t indexValue = 0;
     switch (indexAccessor.componentType) {
+    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+      indexValue = *reinterpret_cast<const uint8_t *>(src);
+      break;
     case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
       indexValue = *reinterpret_cast<const uint16_t *>(src);
       break;
@@ -498,7 +610,8 @@ GltfLoader::ExtractIndexBuffer(const tinygltf::Model &model,
       return nullptr;
     }
 
-    indices->GetBufferData()[i] = indexValue;
+    uint32_t *dst = reinterpret_cast<uint32_t *>(indices->GetBufferData());
+    dst[i] = indexValue;
   }
 
   return indices;

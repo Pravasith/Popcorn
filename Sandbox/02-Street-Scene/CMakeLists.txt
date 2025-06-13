@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-set(PROJECT Triangle)
+set(PROJECT LitScene)
 project(${PROJECT} VERSION 1.0.0)
 message("Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
 

@@ -33,8 +33,8 @@ void PipelineVk<PipelineTypes::GraphicsType>::CreateVkPipeline(
   pipelineInfo.pInputAssemblyState = &createInfo.inputAssemblyState;
   pipelineInfo.pViewportState = &createInfo.viewportState;
   pipelineInfo.pRasterizationState = &createInfo.rasterizationState;
-  // pipelineInfo.pDepthStencilState = &createInfo.depthStencilState;
-  pipelineInfo.pDepthStencilState = nullptr;
+  pipelineInfo.pDepthStencilState = &createInfo.depthStencilState;
+  // pipelineInfo.pDepthStencilState = nullptr;
   pipelineInfo.pMultisampleState = &createInfo.multisampleState;
   pipelineInfo.pColorBlendState = &createInfo.colorBlendState;
   pipelineInfo.pDynamicState = &createInfo.dynamicState;

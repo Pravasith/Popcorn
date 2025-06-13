@@ -1,4 +1,6 @@
 #include "PipelineDefsVk.h"
+#include "Popcorn/Core/Buffer.h"
+#include "Popcorn/Core/Helpers.h"
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include "BufferObjectsVk.h"
@@ -39,9 +41,12 @@ void CompositePipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
   VertexBufferVk::GetDefaultVertexInputBindingDescription(vertexBufferLayout,
                                                           bindingDescription);
 
+  std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments{};
+  colorBlendAttachments.resize(1);
+
   GfxPipelineState pipelineState{};
-  PipelineUtilsVk::GetDefaultGfxPipelineState(
-      vertexBufferLayout, bindingDescription, pipelineState);
+  PipelineUtilsVk::GetDefaultGfxPipelineState(vertexBufferLayout, pipelineState,
+                                              colorBlendAttachments);
 
   pipelineState.inputAssemblyState.flags = 0;
   pipelineState.vertexInputState.vertexBindingDescriptionCount = 0;
