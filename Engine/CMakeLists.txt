@@ -88,7 +88,10 @@ target_precompile_headers(
 
 # VMA
 target_include_directories(
-  vma PRIVATE $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}/vma>)
+  vma
+  PUBLIC $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}/vma>
+  INTERFACE $<INSTALL_INTERFACE:third-party/vma>)
+
 target_precompile_headers(vma PRIVATE
                           ${PLATFORM_AGNOSTIC_VENDOR_DIR}/vma/vk_mem_alloc.h)
 
