@@ -30,7 +30,7 @@ public:
     // Popcorn::Context::DisposeScene(scene);
   };
   virtual void OnUpdate(TimeEvent &e) override {
-    building->RotateEuler<Axes::Y>(glm::radians(2.f) * e.GetDeltaS());
+    building->RotateEuler<Axes::Y>(glm::radians(20.f) * e.GetDeltaS());
   };
   virtual void OnRender() override {
     // Draws all scenes

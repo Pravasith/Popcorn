@@ -6,6 +6,7 @@
 #include "Light.h"
 #include "MaterialTypes.h"
 #include "Memory/MemoryDefsVk.h"
+#include "Popcorn/Core/Base.h"
 #include "Uniforms.h"
 #include <vulkan/vulkan_core.h>
 
@@ -97,6 +98,10 @@ public:
       : bufferViews(bfrViews), bufferOffsets(bfrOffsets) {
     const LightData &lightData = light->GetLightData();
     const glm::vec3 &worldPos = light->GetPosition();
+
+    // PC_WARN("LIGHT POSITION BEFORE COPY " << worldPos.x << ", " << worldPos.y
+    //                                       << ", " << worldPos.z)
+
     // TODO: change direction (currently hardcoded)
     const glm::vec3 &worldDir = light->GetLookAtDirection();
 

@@ -15,16 +15,6 @@
 				{
 					"color":[
 						1,
-						1,
-						1
-					],
-					"intensity":683,
-					"type":"directional",
-					"name":"Light"
-				},
-				{
-					"color":[
-						1,
 						0.011645207181572914,
 						0
 					],
@@ -51,6 +41,16 @@
 					"intensity":5435.141306588225,
 					"type":"point",
 					"name":"Point.004"
+				},
+				{
+					"color":[
+						1,
+						0,
+						0.010428889654576778
+					],
+					"intensity":27175.70653294113,
+					"type":"point",
+					"name":"Point.005"
 				}
 			]
 		}
@@ -72,25 +72,6 @@
 		}
 	],
 	"nodes":[
-		{
-			"extensions":{
-				"KHR_lights_punctual":{
-					"light":0
-				}
-			},
-			"name":"Light",
-			"rotation":[
-				-0.34300366044044495,
-				0.46262332797050476,
-				0.5103394389152527,
-				0.6386563181877136
-			],
-			"translation":[
-				95.59513092041016,
-				186.71463012695312,
-				126.93673706054688
-			]
-		},
 		{
 			"camera":0,
 			"name":"Camera",
@@ -121,7 +102,7 @@
 		{
 			"extensions":{
 				"KHR_lights_punctual":{
-					"light":1
+					"light":0
 				}
 			},
 			"name":"Point.001",
@@ -140,7 +121,7 @@
 		{
 			"extensions":{
 				"KHR_lights_punctual":{
-					"light":2
+					"light":1
 				}
 			},
 			"name":"Point.002",
@@ -159,7 +140,7 @@
 		{
 			"extensions":{
 				"KHR_lights_punctual":{
-					"light":3
+					"light":2
 				}
 			},
 			"name":"Point.003",
@@ -173,6 +154,25 @@
 				8.471220016479492,
 				55.226036071777344,
 				34.907684326171875
+			]
+		},
+		{
+			"extensions":{
+				"KHR_lights_punctual":{
+					"light":3
+				}
+			},
+			"name":"Point.004",
+			"rotation":[
+				-0.7071068286895752,
+				0,
+				0,
+				0.7071068286895752
+			],
+			"translation":[
+				-2.065143585205078,
+				100.99078369140625,
+				-24.517345428466797
 			]
 		}
 	],
