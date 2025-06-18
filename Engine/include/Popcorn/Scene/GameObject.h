@@ -201,7 +201,9 @@ protected:
   glm::mat4 m_localMatrix = PC_IDENTITY_MAT4; // Local -> Parent
   glm::mat4 m_worldMatrix = PC_IDENTITY_MAT4; // Local -> World
 
-  glm::vec3 m_lookAtDir{0.f, 0.f, -1.f};
+  // TEMP_DEBUG
+  glm::vec3 m_lookAtDir{-1.f, -1.f, -1.f};
+  // glm::vec3 m_lookAtDir{0.f, 0.f, -1.f};
 
   bool m_worldMatrixNeedsUpdate = false;
 };

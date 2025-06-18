@@ -595,7 +595,9 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
 
   // TODO: Move outside
   VkClearValue clearAlbedo = {{0.0f, 0.0f, 0.0f, 1.0f}};
-  VkClearValue clearDepth = {{1.0f}};
+  VkClearValue clearDepth{};
+  clearDepth.depthStencil.depth = 1.0f;
+  clearDepth.depthStencil.stencil = 0;
   VkClearValue clearNormal = {{0.0f, 0.0f, 0.0f, 0.0f}};
   VkClearValue clearRoughnessMetallic = {{0.0f, 0.0f, 0.0f, 0.0f}};
 

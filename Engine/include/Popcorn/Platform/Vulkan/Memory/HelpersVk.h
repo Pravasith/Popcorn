@@ -1,12 +1,14 @@
 #pragma once
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+
 #include "Camera.h"
 #include "Empty.h"
 #include "GlobalMacros.h"
 #include "Light.h"
 #include "MaterialTypes.h"
 #include "Memory/MemoryDefsVk.h"
-#include "Popcorn/Core/Base.h"
 #include "Uniforms.h"
 #include <vulkan/vulkan_core.h>
 

@@ -58,13 +58,27 @@ bool GltfLoader::LoadFromFile(const std::string &filename,
   return ret;
 }
 
+// void GltfLoader::ExtractModelData(const tinygltf::Model &model,
+//                                   std::vector<GameObject *> &gameObjects) {
+//   for (auto &node : model.nodes) {
+//     GameObject *gameObject = ConvertGltfNodeToGameObject(model, node);
+//     gameObjects.push_back(gameObject);
+//   }
+// };
+
 void GltfLoader::ExtractModelData(const tinygltf::Model &model,
                                   std::vector<GameObject *> &gameObjects) {
-  for (auto &node : model.nodes) {
-    GameObject *gameObject = ConvertGltfNodeToGameObject(model, node);
+  // pick the default scene (or fall back to scene 0)
+  int sceneIndex = model.defaultScene >= 0 ? model.defaultScene : 0;
+  const tinygltf::Scene &scene = model.scenes[sceneIndex];
+
+  // only iterate root nodes
+  for (int nodeIndex : scene.nodes) {
+    GameObject *gameObject =
+        ConvertGltfNodeToGameObject(model, model.nodes[nodeIndex]);
     gameObjects.push_back(gameObject);
   }
-};
+}
 
 //
 //
@@ -225,12 +239,14 @@ void GltfLoader::ExtractLightsData(const tinygltf::Model &model,
   // Type
   if (gltfLight.type == "point") {
     constexpr float PC_POINT_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR =
-        // 54.3514f;
-        1.0f;
+        54.3514f;
+    // 1.0f;
     // TEMP_DEBUG -
     data.intensity /= PC_POINT_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR;
     data.type = Lights::PointLight;
+    data.range = 50.0f;
     PC_WARN("POINT INTENSITY " << data.intensity)
+    PC_WARN("POINT RANGE" << data.range << " " << gltfLight.range)
     PC_WARN("POINT LIGHT POS " << light->GetPosition().x << ", "
                                << light->GetPosition().y << ", "
                                << light->GetPosition().z << "\n ")
@@ -240,8 +256,8 @@ void GltfLoader::ExtractLightsData(const tinygltf::Model &model,
     data.type = Lights::DirectionalLight;
     // TEMP_DEBUG -
     constexpr float PC_DIR_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR =
-        100.0f * 6.83f;
-    // 100.0f;
+        // 100.0f * 6.83f;
+        100.0f;
     // 1.0f;
     data.intensity /= PC_DIR_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR;
     PC_WARN("DIR LIGHT INTENSITY " << data.intensity)

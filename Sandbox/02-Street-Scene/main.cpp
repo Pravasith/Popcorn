@@ -22,8 +22,12 @@ public:
     // scene);
     Popcorn::Context::ConvertGltfToScene("../assets/models/planet-scene.gltf",
                                          scene);
+    // Popcorn::Context::ConvertGltfToScene("../assets/models/light-test.gltf",
+    //                                      scene);
     Popcorn::Context::RegisterScene(scene);
     building = scene.FindObjectByName("building");
+    // building->Translate(100.f, Axes::Z);
+    // building = scene.FindObjectByName("Point.003");
   };
 
   virtual void OnDetach() override {
