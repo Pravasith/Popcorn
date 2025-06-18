@@ -96,8 +96,8 @@ public:
                         PcBufferViews &bfrViews, PcBufferOffsets &bfrOffsets)
       : bufferViews(bfrViews), bufferOffsets(bfrOffsets) {
     const LightData &lightData = light->GetLightData();
-
     const glm::vec3 &worldPos = light->GetPosition();
+    // TODO: change direction (currently hardcoded)
     const glm::vec3 &worldDir = light->GetLookAtDirection();
 
     uniform.worldPos = worldPos;

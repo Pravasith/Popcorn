@@ -29,6 +29,7 @@ void Scene::AddGameObject(GameObject *node) {
   auto it = std::find(m_nodes.begin(), m_nodes.end(), node);
   if (it == m_nodes.end()) {
     m_nodes.push_back(node);
+    m_gameObjectsByName[node->name] = node;
     // node->OnAttach();
   } else {
     PC_WARN("GameObject " << node << " already added")
@@ -39,6 +40,7 @@ void Scene::RemoveGameObject(GameObject *node) {
   auto it = std::find(m_nodes.begin(), m_nodes.end(), node);
   if (it != m_nodes.end()) {
     m_nodes.erase(it);
+    m_gameObjectsByName.erase(node->name);
   } else {
     PC_WARN("GameObject " << node << " not found in the scene library")
   };

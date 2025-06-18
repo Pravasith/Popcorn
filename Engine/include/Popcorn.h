@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "Assert.h"
+#include "GameObject.h"
 #include "GlobalMacros.h"
 #include "GltfLoader.h"
 #include "Layer.h"
@@ -78,10 +79,26 @@ static void EndContext() {
 //   return *s_application;
 // };
 
+static void FillNamedLookUpMap(Scene &scene, GameObject *node) {
+  if (node == nullptr) {
+    PC_WARN("node is nullptr")
+    return;
+  }
+  scene.AddGameObjectToNamedLookUp(node->name, node);
+
+  for (GameObject *child : node->GetChildren()) {
+    FillNamedLookUpMap(scene, child);
+  }
+}
+
 static void ConvertGltfToScene(const std::string &filename, Scene &scene) {
   tinygltf::Model model;
   GltfLoader::LoadFromFile(filename, model);
   GltfLoader::ExtractModelData(model, scene.GetGameObjects());
+
+  for (GameObject *gameObj : scene.GetGameObjects()) {
+    FillNamedLookUpMap(scene, gameObj);
+  }
 };
 
 CTX_NAMESPACE_END

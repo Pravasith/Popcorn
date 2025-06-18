@@ -10,6 +10,7 @@
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <string>
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
@@ -43,6 +44,9 @@ enum class EulerOrder {
 enum class Transforms { Translate = 1, Rotate, Scale, Shear, Reflect };
 
 class GameObject {
+public:
+  std::string name;
+
 public:
   GameObject() { PC_PRINT("CREATED", TagType::Constr, "GameObject"); }
   virtual ~GameObject() {

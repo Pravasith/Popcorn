@@ -78,6 +78,8 @@ GameObject *
 GltfLoader::ConvertGltfNodeToGameObject(const tinygltf::Model &model,
                                         const tinygltf::Node &gltfNode) {
   GameObject *gameObject = CreateGameObjectByType(model, gltfNode);
+  gameObject->name = gltfNode.name;
+
   SetTransformData(gltfNode, *gameObject);
 
   for (int child : gltfNode.children) {
@@ -223,11 +225,15 @@ void GltfLoader::ExtractLightsData(const tinygltf::Model &model,
   // Type
   if (gltfLight.type == "point") {
     constexpr float PC_POINT_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR =
-        54.3514f;
+        // 54.3514f;
+        1.0f;
     // TEMP_DEBUG -
     data.intensity /= PC_POINT_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR;
     data.type = Lights::PointLight;
     PC_WARN("POINT INTENSITY " << data.intensity)
+    PC_WARN("POINT LIGHT POS " << light->GetPosition().x << ", "
+                               << light->GetPosition().y << ", "
+                               << light->GetPosition().z << "\n ")
   } else if (gltfLight.type == "spot") {
     data.type = Lights::SpotLight;
   } else if (gltfLight.type == "directional") {
@@ -235,8 +241,13 @@ void GltfLoader::ExtractLightsData(const tinygltf::Model &model,
     // TEMP_DEBUG -
     constexpr float PC_DIR_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR =
         100.0f * 6.83f;
+    // 100.0f;
+    // 1.0f;
     data.intensity /= PC_DIR_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR;
     PC_WARN("DIR LIGHT INTENSITY " << data.intensity)
+    PC_WARN("DIR LIGHT POS " << light->GetPosition().x << ", "
+                             << light->GetPosition().y << ", "
+                             << light->GetPosition().z << "\n ")
   } else {
     PC_WARN("Unknown light type: " << gltfLight.type);
     data.type = Lights::PointLight; // default fallback

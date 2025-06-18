@@ -35,11 +35,27 @@ layout(set = 1, binding = 4) uniform sampler2D roughMetalTex;
 layout(location = 0) in vec2 fragUV;
 layout(location = 0) out vec4 outColor;
 
-// Utility: reconstruct view-space position from depth
-vec3 ReconstructViewPosition(vec2 uv, float depth) {
-    vec4 clip = vec4(uv * 2.0 - 1.0, depth, 1.0);
-    vec4 view = camera.invViewProj * clip;
-    return view.xyz / view.w;
+
+vec3 ReconstructWorldSpace(vec2 uv, float depth) {
+    // Reconstruct clip space
+    // float z = depth * 2.0 - 1.0; // Convert depth [0, 1] → NDC z [-1, 1]
+
+    // float z = depth;
+    // vec4 clip = vec4(uv * 2.0 - 1.0, z, 1.0);
+    //
+    // // Reconstruct world space
+    // vec4 world = camera.invViewProj * clip;
+    // world /= world.w;
+    //
+    // return world.xyz;
+
+    float z = texture(depthTex, fragUV).r;       // Vulkan depth [0,1]
+    // float ndcZ = z * 2.0 - 1.0;                   // Convert to NDC z
+    float ndcZ = z;
+    vec4 clipPos = vec4(fragUV * 2.0 - 1.0, ndcZ, 1.0);
+    vec4 worldPosH = camera.invViewProj * clipPos;
+    vec3 worldPos = worldPosH.xyz / worldPosH.w;
+    return worldPos;
 }
 
 void main() {
@@ -51,29 +67,31 @@ void main() {
     float roughness = rm.r;
     float metallic = rm.g;
 
-    vec3 worldPos = ReconstructViewPosition(fragUV, depth);
+    vec3 worldPos =  ReconstructWorldSpace(fragUV, depth);
     vec3 worldNormal = normalize(normal);
     // // vec3 viewDir = normalize(camera.camPos - worldPos);
-    // vec3 viewDir = normalize(vec3(0.0) - worldPos);
+    vec3 viewDir = normalize(vec3(300.) - worldPos);
 
     vec3 finalColor = vec3(0.0);
+        vec3 lightVec;
 
     for (uint i = 0; i < lights.length(); ++i) {
         LightUniform light = lights[i];
-        // TEMP_DEBUG
-        vec3 lightColor = light.color * light.intensity * 0.5;
+        vec3 lightColor = light.color * light.intensity;
+        vec3 lPos = light.position;
 
-        vec3 lightVec;
+        // vec3 lightVec;
         // TEMP_DEBUG
-        // float attenuation = 1.0;
-        float attenuation = .5;
+        float attenuation = 1.0;
+        // float attenuation = .5;
 
         if (light.lightType == 0.0) {
             // Point light
-            lightVec = light.position - worldPos;
+            lightVec = vec3(lPos.x, lPos.y, lPos.z) - worldPos;
             float dist = length(lightVec);
             attenuation = attenuation / (dist * dist);
-            lightVec /= dist;
+            // lightVec /= dist;
+            lightVec = normalize(lightVec);
         } else if (light.lightType == 1.0) {
             // Directional light
             lightVec = normalize(-light.direction);
@@ -93,20 +111,31 @@ void main() {
         float NdotL = max(dot(worldNormal, lightVec), 0.0);
         vec3 diffuse = albedo * lightColor * NdotL;
         // TEMP_DEBUG
-        diffuse += 0.01;
-
+        float ambient = 0.1;
+        diffuse *= ambient;
         finalColor += diffuse * attenuation;
+
+        // float NdotL = max(dot(worldNormal, lightVec), 0.0);
+        // vec3 diffuse = albedo * lightColor * NdotL;
+        // --- NEW: Add specular term (Blinn-Phong) using viewDir ---
+        // vec3 halfwayDir = normalize(lightVec + viewDir);
+        // float specular = pow(max(dot(worldNormal, halfwayDir), 0.0), 32.0);
+        // vec3 specularColor = lightColor * specular * (1.0 - roughness);
+        // // Combine results
+        // finalColor += (diffuse + specularColor) * attenuation;
     }
 
     outColor = vec4(finalColor, 1.0);
-}
 
-    // outColor = vec4(depth, depth, depth, 1.); // cyan
+    // outColor = vec4(lightVec * 0.5 + 0.5, 1.0);
+    //     float NdotL = max(dot(normal, lightVec), 0.0);
+    // outColor = vec4(vec3(NdotL * 0.5 + 0.5), 1.0);
+
     // vec3 normalColor = normal * 0.5 + 0.5;
-    // outColor = vec4(normalColor, 1.0); // cyan
-
+    // outColor = vec4(normalColor, 1.0);
     // outColor = vec4(normal, 1.);
-    // outColor = vec4(albedo.xyz, 1.);// green
-    // outColor = vec4(rm.xy, 0., 1.);
 
-    // outColor = vec4(1.);
+    // vec3 posColor = worldPos * 0.5 + 0.5;
+    // outColor = vec4(posColor, 1.0);
+    // outColor = vec4(worldPos, 1.);
+}
