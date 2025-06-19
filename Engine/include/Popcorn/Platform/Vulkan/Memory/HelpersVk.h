@@ -1,5 +1,8 @@
 #pragma once
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+
 #include "Camera.h"
 #include "Empty.h"
 #include "GlobalMacros.h"
@@ -96,8 +99,12 @@ public:
                         PcBufferViews &bfrViews, PcBufferOffsets &bfrOffsets)
       : bufferViews(bfrViews), bufferOffsets(bfrOffsets) {
     const LightData &lightData = light->GetLightData();
-
     const glm::vec3 &worldPos = light->GetPosition();
+
+    // PC_WARN("LIGHT POSITION BEFORE COPY " << worldPos.x << ", " << worldPos.y
+    //                                       << ", " << worldPos.z)
+
+    // TODO: change direction (currently hardcoded)
     const glm::vec3 &worldDir = light->GetLookAtDirection();
 
     uniform.worldPos = worldPos;

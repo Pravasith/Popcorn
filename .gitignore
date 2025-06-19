@@ -11,6 +11,9 @@ Engine/common_logs.txt
 # Triangle - so fuzzy finder does not find it
 /Sandbox/01-Triangle/
 
+# Assets
+**/assets/
+
 # Prerequisites
 *.d
 

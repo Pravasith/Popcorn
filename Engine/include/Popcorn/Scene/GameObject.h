@@ -10,6 +10,7 @@
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <string>
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
@@ -43,6 +44,9 @@ enum class EulerOrder {
 enum class Transforms { Translate = 1, Rotate, Scale, Shear, Reflect };
 
 class GameObject {
+public:
+  std::string name;
+
 public:
   GameObject() { PC_PRINT("CREATED", TagType::Constr, "GameObject"); }
   virtual ~GameObject() {
@@ -197,7 +201,9 @@ protected:
   glm::mat4 m_localMatrix = PC_IDENTITY_MAT4; // Local -> Parent
   glm::mat4 m_worldMatrix = PC_IDENTITY_MAT4; // Local -> World
 
-  glm::vec3 m_lookAtDir{0.f, 0.f, -1.f};
+  // TEMP_DEBUG
+  glm::vec3 m_lookAtDir{-1.f, -1.f, -1.f};
+  // glm::vec3 m_lookAtDir{0.f, 0.f, -1.f};
 
   bool m_worldMatrixNeedsUpdate = false;
 };

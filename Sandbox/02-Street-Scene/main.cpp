@@ -1,4 +1,5 @@
 #include <BufferObjects.h>
+#include <GameObject.h>
 #include <Material.h>
 #include <Mesh.h>
 #include <Popcorn.h>
@@ -12,38 +13,38 @@
 
 using namespace Popcorn;
 class BlenderScene : public Scene {};
-
 class GameLayer : public Layer {
-
 public:
   GameLayer() { PC_PRINT("CREATED", TagType::Constr, "GAME-LAYER") };
   ~GameLayer() { PC_PRINT("DESTROYED", TagType::Destr, "GAME-LAYER") };
-
   virtual void OnAttach() override {
-    Popcorn::Context::ConvertGltfToScene("../assets/models/light2.gltf", scene);
+    // Popcorn::Context::ConvertGltfToScene("../assets/models/light2.gltf",
+    // scene);
+    Popcorn::Context::ConvertGltfToScene("../assets/models/planet-scene.gltf",
+                                         scene);
+    // Popcorn::Context::ConvertGltfToScene("../assets/models/light-test.gltf",
+    //                                      scene);
     Popcorn::Context::RegisterScene(scene);
+    building = scene.FindObjectByName("building");
+    // building->Translate(100.f, Axes::Z);
+    // building = scene.FindObjectByName("Point.003");
   };
 
   virtual void OnDetach() override {
-    // TODO: Delete scene -- and all it's heap allocated children
-    // Client is the sole owner of all GameObject resources
-
     // Popcorn::Context::DisposeScene(scene);
   };
-
   virtual void OnUpdate(TimeEvent &e) override {
-    // mesh->RotateZ(glm::radians(90.f) * e.GetDeltaS());
+    building->RotateEuler<Axes::Y>(glm::radians(20.f) * e.GetDeltaS());
   };
-
   virtual void OnRender() override {
     // Draws all scenes
     Popcorn::Context::RenderScenes(scene);
   };
-
   virtual bool OnEvent(Event &e) override { return false; };
 
 private:
   BlenderScene scene;
+  GameObject *building = nullptr;
 };
 
 int main(int argc, char **argv) {

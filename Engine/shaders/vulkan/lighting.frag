@@ -3,15 +3,12 @@
 struct LightUniform {
     vec3 position;
     float pad0;
-
     vec3 direction;
     float pad1;
-
     vec3 color;
     float pad2;
-
     float lightType;
-    float intensity; // TEMP_DEBUG ~ treating as power
+    float intensity;
     float innerConeAngle;
     float outerConeAngle;
 };
@@ -21,7 +18,6 @@ layout(set = 0, binding = 0) uniform CameraUBO {
     mat4 proj;
     mat4 viewProj;
     mat4 invViewProj;
-    // vec3 camPos;
 } camera;
 
 layout(set = 1, binding = 0) readonly buffer LightBuffer {
@@ -35,78 +31,87 @@ layout(set = 1, binding = 4) uniform sampler2D roughMetalTex;
 layout(location = 0) in vec2 fragUV;
 layout(location = 0) out vec4 outColor;
 
-// Utility: reconstruct view-space position from depth
-vec3 ReconstructViewPosition(vec2 uv, float depth) {
-    vec4 clip = vec4(uv * 2.0 - 1.0, depth, 1.0);
-    vec4 view = camera.invViewProj * clip;
-    return view.xyz / view.w;
+    // float ndcZ = depth * 2.0 - 1.0; // Convert to NDC z
+    // vec4 clipPos = vec4(uv * 2.0 - 1.0, ndcZ, 1.0);
+
+vec3 ReconstructWorldSpace(vec2 uv, float depth) {
+    vec4 clipPos = vec4(uv * 2.0 - 1.0, depth, 1.0);
+    vec4 worldPosH = camera.invViewProj * clipPos;
+    return worldPosH.xyz / worldPosH.w;
 }
 
 void main() {
-    vec2 rm = texture(roughMetalTex, fragUV).rg;
+    float depth = texture(depthTex, fragUV).r;
 
     vec3 albedo = texture(albedoTex, fragUV).rgb;
-    float depth = texture(depthTex, fragUV).r;
     vec3 normal = normalize(texture(normalTex, fragUV).xyz * 2.0 - 1.0);
+    vec2 rm = texture(roughMetalTex, fragUV).rg;
+
     float roughness = rm.r;
     float metallic = rm.g;
 
-    vec3 worldPos = ReconstructViewPosition(fragUV, depth);
-    vec3 worldNormal = normalize(normal);
-    // // vec3 viewDir = normalize(camera.camPos - worldPos);
-    // vec3 viewDir = normalize(vec3(0.0) - worldPos);
+    vec3 worldPos = ReconstructWorldSpace(fragUV, depth);
 
     vec3 finalColor = vec3(0.0);
 
+    // // tweak these to suit your 1000×1000 scene
+    // const float c = 1.0;
+    // const float l = 0.01;
+    // const float q = 0.00002;
+
     for (uint i = 0; i < lights.length(); ++i) {
         LightUniform light = lights[i];
-        // TEMP_DEBUG
-        vec3 lightColor = light.color * light.intensity * 0.5;
-
         vec3 lightVec;
-        // TEMP_DEBUG
-        // float attenuation = 1.0;
-        float attenuation = .5;
+        float attenuation = 1.0;
 
         if (light.lightType == 0.0) {
             // Point light
             lightVec = light.position - worldPos;
             float dist = length(lightVec);
-            attenuation = attenuation / (dist * dist);
-            lightVec /= dist;
+            // if (dist > 50.0)      // dead outside your desired radius
+            //     continue;
+            attenuation = 1.0 / (dist * dist + 1.0); // Avoid div by zero
+            lightVec = normalize(lightVec);
         } else if (light.lightType == 1.0) {
             // Directional light
             lightVec = normalize(-light.direction);
         } else if (light.lightType == 2.0) {
-            // // Spotlight
-            // lightVec = light.position - worldPos;
-            // float dist = length(lightVec);
-            // lightVec /= dist;
-            // float theta = dot(lightVec, normalize(-light.direction));
-            // float epsilon = light.innerConeAngle - light.outerConeAngle;
-            // float intensity = clamp((theta - light.outerConeAngle) / epsilon, 0.0, 1.0);
-            // attenuation = intensity / (dist * dist);
-            // TODO: Later...
+            // Simplified spotlight for now
             lightVec = normalize(-light.direction);
         }
 
-        float NdotL = max(dot(worldNormal, lightVec), 0.0);
-        vec3 diffuse = albedo * lightColor * NdotL;
-        // TEMP_DEBUG
-        diffuse += 0.01;
+        float NdotL = max(dot(normal, lightVec), 0.0);
 
-        finalColor += diffuse * attenuation;
+
+        vec3 lightColor = light.color * light.intensity;
+        vec3 diffuse = albedo * lightColor * NdotL;
+        // vec3 diffuse = albedo * lightColor;
+
+        finalColor += diffuse * attenuation * 0.1;
     }
 
+    finalColor += albedo * 0.05; // Ambient
     outColor = vec4(finalColor, 1.0);
 }
 
-    // outColor = vec4(depth, depth, depth, 1.); // cyan
-    // vec3 normalColor = normal * 0.5 + 0.5;
-    // outColor = vec4(normalColor, 1.0); // cyan
+// float near = 0.1;
+// float far = 1000.0;
+//
+// float d = texture(depthTex, fragUV).r;
+// float linearDepth = (near * far) /
+//     (far - d * (far - near));
+// float dVis = clamp(linearDepth / far, 0.0, 1.0);
+// outColor = vec4(vec3(1.0 - dVis), 1.0);  // Near = white
 
-    // outColor = vec4(normal, 1.);
-    // outColor = vec4(albedo.xyz, 1.);// green
-    // outColor = vec4(rm.xy, 0., 1.);
+// float d = texture(depthTex, fragUV).r;
+// float c = pow(1.0 - d, 40.0); // exaggerates contrast near the camera
+// outColor = vec4(vec3(c), 1.0);
 
-    // outColor = vec4(1.);
+// vec3 testPos = ReconstructWorldSpace(fragUV, depth);
+// outColor = vec4((testPos + vec3(10.0)) / 20.0, 1.0); // Normalized for view
+
+// float NdotL = max(dot(normal, lightVec), 0.0);
+// outColor = vec4(vec3(NdotL), 1.0);
+
+// outColor = vec4(vec3(texture(depthTex, fragUV).r), 1.0);
+// outColor = vec4(vec3(texture(albedoTex, fragUV)), 1.0);
