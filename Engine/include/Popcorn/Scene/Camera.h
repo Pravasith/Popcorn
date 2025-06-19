@@ -25,10 +25,10 @@ public:
   Camera(const CameraData &data = {1.0f, .1f, 2000.0f}) {
     // TODO: Hardcoding for now, make it dynamic later
 
-    float x = 400.0f;
+    float x = 180.0f;
     m_viewMatrix = glm::lookAt(
-        glm::vec3(x, x, x),          // Eye position(camera/object world pos)
-        glm::vec3(0.0f, 0.0f, 0.0f), // Target point to look at(world pos)
+        glm::vec3(x, 150, -x),       // Eye position(camera/object world pos)
+        glm::vec3(0.0f, 5.0f, 0.0f), // Target point to look at(world pos)
         glm::vec3(0.0f, 1.0f, 0.0f)  // Up direction (world up -- Y+)
     );
     m_projMatrix = glm::perspectiveRH_ZO(glm::radians(45.0f), data.aspectRatio,
