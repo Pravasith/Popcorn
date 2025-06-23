@@ -161,6 +161,7 @@ private:
   void UpdateLocalMatrix() {
     m_localMatrix = m_translationMatrix * m_rotationMatrix * m_scaleMatrix;
     m_worldMatrixNeedsUpdate = true;
+
     UpdateChildrenWorldMatrixNeedsUpdateFlag();
   };
 
@@ -201,17 +202,23 @@ protected:
   glm::mat4 m_localMatrix = PC_IDENTITY_MAT4; // Local -> Parent
   glm::mat4 m_worldMatrix = PC_IDENTITY_MAT4; // Local -> World
 
-  // TEMP_DEBUG
-  glm::vec3 m_lookAtDir{-1.f, -1.f, -1.f};
-  // glm::vec3 m_lookAtDir{0.f, 0.f, -1.f};
+  glm::vec3 m_lookAtDir{0.f, 0.f, -1.f}; // towards the screen
 
   bool m_worldMatrixNeedsUpdate = false;
+
+protected:
+  static constexpr glm::vec3 s_upDir{0.f, 1.f, 0.f}; // +Y up
 };
 
 template <typename T>
 concept GameObjectType = std::is_base_of<GameObject, T>::value;
 
+//
+//
 // UTIL FUNCTIONS -------------------------------------------------------------
+// UTIL FUNCTIONS -------------------------------------------------------------
+// UTIL FUNCTIONS -------------------------------------------------------------
+//
 template <GameObjectType T>
 bool PC_ValidateAndAddGameObject(T *gameObject, std::vector<T *> &gameObjects) {
   auto ptr = std::find(gameObjects.begin(), gameObjects.end(), gameObject);

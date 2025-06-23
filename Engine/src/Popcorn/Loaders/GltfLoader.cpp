@@ -157,6 +157,7 @@ GameObject *GltfLoader::CreateGameObjectByType(const tinygltf::Model &model,
   } else if (node.camera >= 0) {
     // Make this abstract
     Camera *camera = new Camera();
+    // ExtractCameraData(model, node, camera);
     // TODO: Handle camera later
     return camera;
   } else if (node.extensions.find("KHR_lights_punctual") !=

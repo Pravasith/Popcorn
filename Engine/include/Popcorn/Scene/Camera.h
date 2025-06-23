@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glm/gtc/quaternion.hpp>
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
@@ -13,18 +14,17 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-struct CameraData {
-  float aspectRatio = 1.0f;
-  float near = 0.1f;
-  float far = 1000.0f;
-};
-
 // TODO: Complete this class
 class Camera : public GameObject {
 public:
-  Camera(const CameraData &data = {1.0f, .1f, 2000.0f}) {
-    // TODO: Hardcoding for now, make it dynamic later
+  struct CameraData {
+    float aspectRatio = 1.0f;
+    float near = 0.1f;
+    float far = 1000.0f;
+  };
 
+public:
+  Camera(const CameraData &data = {1.0f, .1f, 2000.0f}) {
     float x = 180.0f;
     m_viewMatrix = glm::lookAt(
         glm::vec3(x, 150, -x),       // Eye position(camera/object world pos)
@@ -44,6 +44,19 @@ public:
     return m_projMatrix;
   };
 
+  void UpdateViewProjMatrix() {
+    m_viewMatrix = glm::lookAt(
+        m_position,                        // world pos
+        m_position + GetLookAtDirection(), // Target point to look at(world pos)
+        s_upDir                            // Up direction (world up -- Y+)
+    );
+
+    // m_projMatrix = glm::perspectiveRH_ZO(glm::radians(45.0f),
+    // data.aspectRatio,
+    //                                      data.near, data.far);
+    // m_projMatrix[1][1] *= -1;
+  };
+
   virtual constexpr GameObjectTypes GetGameObjectType() const override {
     return GameObjectTypes::Camera;
   };
@@ -55,6 +68,8 @@ public:
 private:
   glm::mat4 m_viewMatrix{1.f};
   glm::mat4 m_projMatrix{1.f};
+
+  bool m_viewProjMatrixNeedsUpdate = false;
 };
 
 GFX_NAMESPACE_END

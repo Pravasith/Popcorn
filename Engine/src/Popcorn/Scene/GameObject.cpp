@@ -88,22 +88,22 @@ void GameObject::UpdateRotationMatrix() {
 
   switch (m_eulerOrder) {
   case EulerOrder::XYZ:
-    m_rotationMatrix = rotX * rotY * rotZ; // X → Y → Z
+    m_rotationMatrix = rotX * rotY * rotZ;
     break;
   case EulerOrder::XZY:
-    m_rotationMatrix = rotX * rotZ * rotY; // X → Z → Y
+    m_rotationMatrix = rotX * rotZ * rotY;
     break;
   case EulerOrder::YXZ:
-    m_rotationMatrix = rotY * rotX * rotZ; // Y → X → Z
+    m_rotationMatrix = rotY * rotX * rotZ;
     break;
   case EulerOrder::YZX:
-    m_rotationMatrix = rotY * rotZ * rotX; // Y → Z → X
+    m_rotationMatrix = rotY * rotZ * rotX;
     break;
   case EulerOrder::ZXY:
-    m_rotationMatrix = rotZ * rotX * rotY; // Z → X → Y
+    m_rotationMatrix = rotZ * rotX * rotY;
     break;
   case EulerOrder::ZYX:
-    m_rotationMatrix = rotZ * rotY * rotX; // Z → Y → X
+    m_rotationMatrix = rotZ * rotY * rotX;
     break;
   default: // XYZ
     m_rotationMatrix = rotX * rotY * rotZ;
@@ -195,7 +195,6 @@ void GameObject::UpdateLookAtDirection() {
   m_lookAtDir =
       glm::normalize(glm::vec3(rotScale * glm::vec4(initialLookAt, 0.f)));
 };
-
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

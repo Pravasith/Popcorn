@@ -5,14 +5,34 @@
 
 :: Use in video -  https://x.com/gunsnrosesgirl3/status/1907830742106755259
 
+:: MY NON-NEGOTIABLES ::
+---------------------
+---------------------
+---------------------
+:: DISCIPLINE. CONSISTENCY.
+:: WORK HARDER THAN EVER BEFORE.
+:: FUCK DISTRACTIONS. FIX YOUR FUCKING ATTENTION SPAN.
+:: FIX YOUR FOCUS.
+:: IMMERSE YOURSELF. PUSH YOURSELF.
+:: THIS IS MY LAST CHANCE. DON'T BLOW IT.
+:: EVERY SECOND COUNTS.
+:: OPEN THE GATES OF YOUR MIND TO THE WORLD.
+:: NO SOCIAL MEDIA DURING THE FIRST 6 HOURS OF THE DAY. INCL. DISCORD.
+
 
 HIGH PRIORITY:
 ----------------------------------------------------------------------------
-:: Fix the ones marked - TEMP_DEBUG
+:: Update camera - no modelling before this.
+:: Write camera class properly.
+:: Work out the math for view proj matrix.
+:: Freya's video on Bezier curves.
 
+:: Fix resize bugs
 :: Update camera(fov, aspect ratio, .etc) on FrameBufferResize
 
-:: Write camera class properly.
+:: Fix the ones marked - TEMP_DEBUG
+
+
 :: Fix camera in GltfLoader
 
 :: Create a CommandBufferVk class (right now it's raw from CommandPoolsVk)
