@@ -18,19 +18,32 @@ GFX_NAMESPACE_BEGIN
 class Camera : public GameObject {
 public:
   struct CameraData {
+    float fov = 45.f;
     float aspectRatio = 1.0f;
     float near = 0.1f;
     float far = 1000.0f;
   };
 
 public:
-  Camera(const CameraData &data = {1.0f, .1f, 2000.0f}) {
+  Camera(const CameraData &data = {45.f, 1.0f, .1f, 1000.0f}) {
     float x = 180.0f;
     m_viewMatrix = glm::lookAt(
         glm::vec3(x, 150, -x),       // Eye position(camera/object world pos)
         glm::vec3(0.0f, 5.0f, 0.0f), // Target point to look at(world pos)
         glm::vec3(0.0f, 1.0f, 0.0f)  // Up direction (world up -- Y+)
     );
+
+    /**
+     * Projection matrix info from learnOpenGl.com
+     * -----------------------------------------------------------------------
+     * 1. The proj matrix maps a given camera frustum range from view space to
+     *    clip space.
+     * 2. It also manipulates the W coord of the view space position in such a
+     *    way that the further away vertices (not pixels!) have a bigger value
+     *    so that during perspective division, they (further away vertices)
+     *    shrink their coords more!
+     * */
+
     m_projMatrix = glm::perspectiveRH_ZO(glm::radians(45.0f), data.aspectRatio,
                                          data.near, data.far);
     m_projMatrix[1][1] *= -1;
@@ -46,7 +59,7 @@ public:
 
   void UpdateViewProjMatrix() {
     m_viewMatrix = glm::lookAt(
-        m_position,                        // world pos
+        m_position,                        // Camera world pos
         m_position + GetLookAtDirection(), // Target point to look at(world pos)
         s_upDir                            // Up direction (world up -- Y+)
     );
