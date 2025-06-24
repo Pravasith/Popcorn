@@ -21,6 +21,7 @@ layout(set = 2, binding = 0) uniform ObjectUBO {
 } object;
 
 void main() {
+    // inPosition is the local space position
     vec4 vertexPos = object.modelMatrix * vec4(inPosition, 1.0);
 
     gl_Position = camera.proj * camera.view * vertexPos;
