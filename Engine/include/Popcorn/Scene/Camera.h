@@ -57,7 +57,7 @@ public:
     return m_projMatrix;
   };
 
-  void UpdateViewProjMatrix() {
+  void UpdateViewMatrix() {
     m_viewMatrix = glm::lookAt(
         m_position,                        // Camera world pos
         m_position + GetLookAtDirection(), // Target point to look at(world pos)
