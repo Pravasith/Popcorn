@@ -45,7 +45,7 @@ public:
 
 protected:
   float m_degree = 1.0f; // linear
-  float m_t = 0.0f;      // 'the' parameter. t as in p(t)
+  float m_t = 0.0f;      // 'the' parameter. t as in p(t); t E [0, 1]
 };
 
 //
