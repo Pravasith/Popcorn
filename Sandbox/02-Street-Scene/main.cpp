@@ -28,6 +28,50 @@ public:
     building = scene.FindObjectByName("building");
     // building->Translate(100.f, Axes::Z);
     // building = scene.FindObjectByName("Point.003");
+
+    //
+    // --- BEFORE GAME LOOP ---------------------------------------------------
+    // --- BEFORE GAME LOOP ---------------------------------------------------
+    //
+    // --- time rail/track ---
+    // TimeRail powerJumpRail {
+    //     1000.0f, // duration (ms)
+    //     BezierCurve{{.1,.2}, {.2,.4}, {.5,.8}, {1.,1.}}, // Or a spline
+    // };
+    //
+    // --- time stations (can be src, dst, or layover stations)
+    // TimeStation powerJumpBegin<StationTypes::Source>{powerJumpRail};
+    // TimeStation powerJumpMiddle<StationTypes::Layover, .6f>{powerJumpRail};
+    // TimeStation powerJumpEnd<StationTypes::Destination>{powerJumpRail};
+    //
+    // Animation::AddTimeStations(powerJumpBegin, powerJumpEnd);
+    //
+
+    // --- INSIDE GAME LOOP ---------------------------------------------------
+    // --- INSIDE GAME LOOP ---------------------------------------------------
+    //
+    // --- time trains (somewhere in an event handler)
+    // OnCharacterJump() {
+    //     ...
+    //     TimeTrain powerJumpTrain{
+    //          powerJumpBegin,
+    //          powerJumpMiddle,
+    //          powerJumpEnd
+    //     };
+    //
+    //     --- Two animation property objs board at the 'powerJumpBegin'
+    //     --- station
+    //     powerJumpTrain.Board(character.position, powerJumpBegin);
+    //     powerJumpTrain.Board(camera01.rotation.y, powerJumpBegin);
+    //
+    //     --- An animation property gets off at a station
+    //     powerJumpTrain.GetOff(camera01.rotation.y, powerJumpMiddle);
+    //
+    //     powerJumpTrain.StartJourney();
+    //
+    //     --- you can end prematurely too like this:
+    //     --- powerJumpTrain.EndJourney(0.5f);
+    // }
   };
 
   virtual void OnDetach() override {
