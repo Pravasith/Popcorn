@@ -28,6 +28,7 @@ public:
     building = scene.FindObjectByName("building");
     // building->Translate(100.f, Axes::Z);
     // building = scene.FindObjectByName("Point.003");
+    //
 
     //
     // --- BEFORE GAME LOOP ---------------------------------------------------
@@ -59,18 +60,31 @@ public:
     //          powerJumpEnd
     //     };
     //
+    //     AnimationProperty characterPos {
+    //          character.position,   // obj to animate
+    //          vec3(.2f,.2f,.2f),    // start value
+    //          vec3(10.f,10.f,12.f), // end value
+    //     };
+    //
+    //     AnimationProperty mainCameraRotY {
+    //          camera01.rotation.y,   // obj to animate
+    //          vec3(.2f,.2f,.2f),    // start value
+    //          vec3(10.f,10.f,12.f), // end value
+    //     };
+    //
     //     --- Two animation property objs board at the 'powerJumpBegin'
     //     --- station
-    //     powerJumpTrain.Board(character.position, powerJumpBegin);
-    //     powerJumpTrain.Board(camera01.rotation.y, powerJumpBegin);
+    //     powerJumpTrain.Board(characterPos, powerJumpBegin);
+    //     powerJumpTrain.Board(mainCameraRotY, powerJumpBegin);
     //
-    //     --- An animation property gets off at a station
-    //     powerJumpTrain.GetOff(camera01.rotation.y, powerJumpMiddle);
+    //     --- An animation property gets off at a station (explicit)
+    //     powerJumpTrain.GetOff(mainCameraRotY, powerJumpMiddle);
     //
     //     powerJumpTrain.StartJourney();
     //
     //     --- you can end prematurely too like this:
     //     --- powerJumpTrain.EndJourney(0.5f);
+    //     --- all trains end journey after reaching the end station
     // }
   };
 
