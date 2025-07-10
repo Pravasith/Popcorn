@@ -9,30 +9,60 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-template <CurveType T, ValidCurveParamType ParamType> class Curve {
+//
+// -------------------------------------------------------------------
+// --- CURVE ---------------------------------------------------------
+//
+template <ValidCurveParamType T> class Curve {
 public:
-  Curve() { PC_PRINT("CREATED", TagType::Constr, "Curve") };
-  ~Curve() { PC_PRINT("DESTROYED", TagType::Destr, "Curve") };
+  Curve() = default;
+  virtual ~Curve() = default;
 
-  float GetValueAt_Fast(float t) {
-    if constexpr (T == CurveType::Linear) {
-    } else if constexpr (T == CurveType::Bezier) {
-    } else if constexpr (T == CurveType::Hermite) {
-    }
-  };
-  double GetValueAt_Slow(float t) {
-    if constexpr (T == CurveType::Linear) {
-      LinearInfo<ParamType> &curveInfo = m_curveInfo;
-      return (1 - t) * curveInfo.p0 + t * curveInfo.p1;
-    } else if constexpr (T == CurveType::Bezier) {
-    } else if constexpr (T == CurveType::Hermite) {
-    }
-  };
+  // TODO: Check for out of bounds (0 < t < 1)
+  virtual float GetValueAt_Fast(float t) = 0;
+  virtual double GetValueAt_Slow(float t) = 0;
 
-protected:
-  typename DeriveCurveInfoType<T, ParamType>::type m_curveInfo;
+  // return (1 - t) * curveInfo.p0 + t * curveInfo.p1;
 };
 
+//
+// -------------------------------------------------------------------
+// --- BEZIER CURVE --------------------------------------------------
+//
+template <ValidCurveParamType T> class BezierCurve : public Curve<T> {
+public:
+  BezierCurve(const BezierInfo<T> &bezierCreateInfo)
+      : m_data(bezierCreateInfo) {};
+  virtual ~BezierCurve() override;
+
+  virtual float GetValueAt_Fast(float t) override final;
+  virtual double GetValueAt_Slow(float t) override final;
+
+private:
+  BezierInfo<T> m_data;
+};
+
+//
+// -------------------------------------------------------------------
+// --- HERMITE CURVE -------------------------------------------------
+//
+template <ValidCurveParamType T> class HermiteCurve : public Curve<T> {
+public:
+  HermiteCurve(const HermiteInfo<T> &bezierCreateInfo)
+      : m_data(bezierCreateInfo) {};
+  virtual ~HermiteCurve() override;
+
+  virtual float GetValueAt_Fast(float t) override final;
+  virtual double GetValueAt_Slow(float t) override final;
+
+private:
+  HermiteInfo<T> m_data;
+};
+
+//
+// -------------------------------------------------------------------
+// --- SPLINE --------------------------------------------------------
+//
 template <SplineType V, ValidCurveParamType ParamType> class Spline {
 public:
   static constexpr SplineType typeValue = V;
@@ -45,8 +75,14 @@ protected:
   float m_globalT = 0.0f; // 'the' parameter. t as in p(t)
 
   // TODO: Change CurveType based on SplineType
-  std::vector<Curve<CurveType::Bezier, ParamType> *> m_knots{};
+  std::vector<Curve<ParamType> *> m_curveSegments{};
 };
+
+//
+// -------------------------------------------------------------------
+// --- POLYCURVE -----------------------------------------------------
+//
+// Contains Spline,
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

@@ -37,15 +37,14 @@ public:
     // --- time rail/track ---
     // TimeRail powerJumpRail {
     //     1000.0f, // duration (ms)
+    // };
+    //
+    // AnimationRoute powerJumpAnimRoute {
+    //     1000.0f, // t 'duration' (ms)
     //     BezierCurve{{.1,.2}, {.2,.4}, {.5,.8}, {1.,1.}}, // Or a spline
     // };
     //
-    // --- time stations (can be src, dst, or layover stations)
-    // TimeStation powerJumpBegin<StationTypes::Source>{powerJumpRail};
-    // TimeStation powerJumpMiddle<StationTypes::Layover, .6f>{powerJumpRail};
-    // TimeStation powerJumpEnd<StationTypes::Destination>{powerJumpRail};
-    //
-    // Animation::AddTimeStations(powerJumpBegin, powerJumpEnd);
+    // AnimationRoute::AddStations(0.2f, 0.5f);
     //
 
     // --- INSIDE GAME LOOP ---------------------------------------------------
