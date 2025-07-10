@@ -72,8 +72,6 @@ public:
   ~Spline() { PC_PRINT("DESTROYED", TagType::Destr, "Spline") };
 
 protected:
-  float m_globalT = 0.0f; // 'the' parameter. t as in p(t)
-
   // TODO: Change CurveType based on SplineType
   std::vector<Curve<ParamType> *> m_curveSegments{};
 };
