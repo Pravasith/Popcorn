@@ -73,8 +73,10 @@ public:
     //
     //     --- Two animation property objs board at the 'powerJumpBegin'
     //     --- station
-    //     powerJumpTrain.Board(characterPos, powerJumpBegin);
-    //     powerJumpTrain.Board(mainCameraRotY, powerJumpBegin);
+    //     powerJumpTrain.SchedulePassengers(
+    //          {characterPos, 0.1, 0.8}, // (vec3, station)
+    //          {mainCameraRotY, 0.7, 0.8} // (float, station)
+    //     );
     //
     //     --- An animation property gets off at a station (explicit)
     //     powerJumpTrain.GetOff(mainCameraRotY, powerJumpMiddle);
