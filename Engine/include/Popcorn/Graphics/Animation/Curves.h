@@ -181,10 +181,10 @@ public:
     return x * t + m_coefficients[0];
   };
   virtual T GetValueAt_Slow(float t) const override final {
-
     assert(0.0f <= t && t <= 1.0f);
 
-    // Hermite basis direct formula plug in -- ref -
+    // Hermite basis direct formula plug in (Hermite basis functions as
+    // "weights" for barycentric coordinates) -- ref -
     // https://www.gamemath.com/book/curves.html#hermite_basis
 
     float tt = t * t;
@@ -205,16 +205,42 @@ public:
     return p0 * h00 + v0 * h10 + p1 * h01 + v1 * h11;
   };
 
-  virtual T GetFirstDerivativeAt_Fast(float t) const override final {};
-  virtual T GetFirstDerivativeAt_Slow(float t) const override final {};
+  virtual T GetFirstDerivativeAt_Fast(float t) const override final {
+    assert(0.0f <= t && t <= 1.0f);
+
+    T d = 3 * m_coefficients[3];       // 3*c3
+    d = d * t + 2 * m_coefficients[2]; // 3*c3*t + 2*c2
+    return d * t +                     // (3*c3*t + 2*c2)*t
+           m_coefficients[1];          // + c1
+  };
+  virtual T GetFirstDerivativeAt_Slow(float t) const override final {
+    assert(t >= 0 && t <= 1);
+
+    // Derivating the Hermite basis functions and using them instead of the
+    // exact Hermite basis functions (like in GetValueAt_Slow function above)
+
+    float tt = t * t;
+
+    // basis‐derivatives:
+    float dh00 = 6 * tt - 6 * t;
+    float dh10 = 3 * tt - 4 * t + 1;
+    float dh01 = -6 * tt + 6 * t;
+    float dh11 = 3 * tt - 2 * t;
+
+    const T &p0 = m_hermiteValues[0];
+    const T &v0 = m_hermiteValues[1];
+    const T &v1 = m_hermiteValues[2];
+    const T &p1 = m_hermiteValues[3];
+
+    // blend:
+    return p0 * dh00 + v0 * dh10 + p1 * dh01 + v1 * dh11;
+  };
 
 private:
   static constexpr uint16_t s_degree = 3;
 
   T m_hermiteValues[4]; // Hermite values (p0, v0, v1, p1)
   T m_coefficients[4];  // cubic polynomial co-efficients
-
-  CurveInfoHermiteForm<T> m_curveInfo;
 };
 
 //
