@@ -47,10 +47,10 @@ template <ParametericFunctionOutputType T> struct CurveInfoBezierForm {
 };
 
 template <ParametericFunctionOutputType T> struct CurveInfoHermiteForm {
-  T p1;
+  T p0;
+  T v0;
   T v1;
-  T v2;
-  T p2;
+  T p1;
 };
 
 template <CurveForm T, ParametericFunctionOutputType P>
