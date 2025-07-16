@@ -1,28 +1,23 @@
 #pragma once
 
-#include "Animation/CurvesDefs.h"
+#include "Animation/AnimationDefs.h"
 #include "Curves.h"
 #include "GlobalMacros.h"
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/vector_float2.hpp>
 #include <glm/ext/vector_float3.hpp>
+#include <string>
 #include <unordered_map>
 #include <variant>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+using CurveType = std::variant<Curve<float>, Curve<glm::vec2>, Curve<glm::vec3>,
+                               Curve<glm::vec4>>;
 using CurvePtrType =
-    const std::variant<const Curve<float> *, const Curve<double> *,
-                       const Curve<glm::vec3> *, const Curve<glm::vec2> *,
-                       const Curve<glm::mat4> *
-                       // TODO: Add more as needed
-                       >;
-
-using CurveType = std::variant<Curve<float>, Curve<double>, Curve<glm::vec3>,
-                               Curve<glm::vec2>, Curve<glm::mat4>
-                               // TODO: Add more as needed
-                               >;
+    const std::variant<const Curve<float> *, const Curve<glm::vec2> *,
+                       const Curve<glm::vec3> *, const Curve<glm::vec4> *>;
 
 class CurveFactory {
 public:
@@ -32,7 +27,7 @@ public:
   };
 
   // TODO: Fill out
-  template <CurveForm T, ValidCurveParamType P>
+  template <CurveForm T, CurveValueType P>
   static void MakeCurve(DeriveCurveInfoType<T, P> curveInfo) {
     if constexpr (T == CurveForm::Linear) {
       CurveInfoLinearForm<P> &info = curveInfo;

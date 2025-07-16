@@ -1,18 +1,15 @@
 #pragma once
 
-#include "CurvesDefs.h"
+#include "AnimationDefs.h"
 #include "GlobalMacros.h"
-#include "Popcorn/Core/Base.h"
 #include <cassert>
 #include <glm/detail/qualifier.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
-#include <string>
-#include <vector>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-template <ParametericFunctionOutputType T>
+template <CurveValueType T>
 static inline constexpr T PC_Lerp(const T &p0, const T &p1, float t) {
   return p0 + (p1 - p0) * t;
 };
@@ -21,7 +18,7 @@ static inline constexpr T PC_Lerp(const T &p0, const T &p1, float t) {
 // -------------------------------------------------------------------
 // --- CURVE ---------------------------------------------------------
 //
-template <ParametericFunctionOutputType T = float> class Curve {
+template <CurveValueType T = float> class Curve {
 public:
   Curve() = default;
   virtual ~Curve() = default;
@@ -40,7 +37,7 @@ public:
 // -------------------------------------------------------------------
 // --- LINEAR CURVE --------------------------------------------------
 //
-template <ParametericFunctionOutputType T> class LinearCurve : public Curve<T> {
+template <CurveValueType T> class LinearCurve : public Curve<T> {
 public:
   LinearCurve(const CurveInfoLinearForm<T> &curveInfo)
       : m_curveInfo(curveInfo) {};
@@ -72,7 +69,7 @@ private:
 // -------------------------------------------------------------------
 // --- BEZIER CURVE --------------------------------------------------
 //
-template <ParametericFunctionOutputType T> class BezierCurve : public Curve<T> {
+template <CurveValueType T> class BezierCurve : public Curve<T> {
 public:
   BezierCurve(const CurveInfoBezierForm<T> &info)
       : // Bezier control points
@@ -155,8 +152,7 @@ private:
 // -------------------------------------------------------------------
 // --- HERMITE CURVE -------------------------------------------------
 //
-template <ParametericFunctionOutputType T>
-class HermiteCurve : public Curve<T> {
+template <CurveValueType T> class HermiteCurve : public Curve<T> {
 public:
   HermiteCurve(const CurveInfoHermiteForm<T> &curveInfo)
       : // Hermite values (p0, v0, v1, p1)
@@ -242,29 +238,6 @@ private:
   T m_hermiteValues[4]; // Hermite values (p0, v0, v1, p1)
   T m_coefficients[4];  // cubic polynomial co-efficients
 };
-
-//
-// -------------------------------------------------------------------
-// --- SPLINE --------------------------------------------------------
-//
-template <SplineForm V, ParametericFunctionOutputType ParamType> class Spline {
-public:
-  static constexpr SplineForm typeValue = V;
-
-public:
-  Spline() { PC_PRINT("CREATED", TagType::Constr, "Spline") };
-  ~Spline() { PC_PRINT("DESTROYED", TagType::Destr, "Spline") };
-
-protected:
-  // TODO: Change CurveType based on SplineType
-  std::vector<Curve<ParamType> *> m_curveSegments{};
-};
-
-//
-// -------------------------------------------------------------------
-// --- POLYCURVE -----------------------------------------------------
-//
-// Contains Spline,
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

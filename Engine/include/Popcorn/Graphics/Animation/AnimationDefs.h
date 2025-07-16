@@ -21,7 +21,7 @@ enum SplineForm {
 };
 
 template <typename U>
-concept ParametericFunctionOutputType =
+concept CurveValueType =
     std::same_as<U, float> || std::same_as<U, glm::vec2> ||
     std::same_as<U, glm::vec3> || std::same_as<U, glm::vec4>;
 
@@ -34,40 +34,36 @@ concept ParametericFunctionOutputType =
 //       { a * b } -> std::convertible_to<T>;
 //     };
 
-template <ParametericFunctionOutputType T> struct CurveInfoLinearForm {
+template <CurveValueType T> struct CurveInfoLinearForm {
   T p0;
   T p1;
 };
 
-template <ParametericFunctionOutputType T> struct CurveInfoBezierForm {
+template <CurveValueType T> struct CurveInfoBezierForm {
   T b0;
   T b1;
   T b2;
   T b3;
 };
 
-template <ParametericFunctionOutputType T> struct CurveInfoHermiteForm {
+template <CurveValueType T> struct CurveInfoHermiteForm {
   T p0;
   T v0;
   T v1;
   T p1;
 };
 
-template <CurveForm T, ParametericFunctionOutputType P>
-struct DeriveCurveInfoType;
+template <CurveForm T, CurveValueType P> struct DeriveCurveInfoType;
 
-template <ParametericFunctionOutputType P>
-struct DeriveCurveInfoType<CurveForm::Linear, P> {
+template <CurveValueType P> struct DeriveCurveInfoType<CurveForm::Linear, P> {
   using type = CurveInfoLinearForm<P>;
 };
 
-template <ParametericFunctionOutputType P>
-struct DeriveCurveInfoType<CurveForm::Bezier, P> {
+template <CurveValueType P> struct DeriveCurveInfoType<CurveForm::Bezier, P> {
   using type = CurveInfoBezierForm<P>;
 };
 
-template <ParametericFunctionOutputType P>
-struct DeriveCurveInfoType<CurveForm::Hermite, P> {
+template <CurveValueType P> struct DeriveCurveInfoType<CurveForm::Hermite, P> {
   using type = CurveInfoHermiteForm<P>;
 };
 
