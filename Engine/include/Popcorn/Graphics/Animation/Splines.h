@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AnimationDefs.h"
+#include "Animation/AnimationDefs.h"
 #include "Curves.h"
 #include "GlobalMacros.h"
 #include "MathConstants.h"
@@ -16,6 +16,14 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+//
+//
+// -------------------------------------------------------------------
+// --- MANUAL SPLINES ------------------------------------------------
+// --- MANUAL SPLINES ------------------------------------------------
+// --- MANUAL SPLINES ------------------------------------------------
+// -------------------------------------------------------------------
+//
 template <CurveValueType T> struct SplineSegment {
   Curve<T> *curve;
 
@@ -23,7 +31,7 @@ template <CurveValueType T> struct SplineSegment {
   // t goes through this (reparameterizationCurve) first, and then the result
   // value will be used in GetValueAt & GetDerivativeAt functions of the 'curve'
   //
-  // NOTE: just degree 3 for now bc curves are currently designed as cubic, add
+  // TODO: just degree 3 for now bc curves are currently designed as cubic, add
   // quadratic & others later.
   Curve<float> *reparameterizationCurve = nullptr;
 
@@ -173,14 +181,39 @@ protected:
 };
 
 //
+//
+// -------------------------------------------------------------------
+// --- AUTOMATIC SPLINES ---------------------------------------------
+// --- AUTOMATIC SPLINES ---------------------------------------------
+// --- AUTOMATIC SPLINES ---------------------------------------------
+// -------------------------------------------------------------------
+
+//
 // -------------------------------------------------------------------
 // --- B-SPLINE ------------------------------------------------------
 //
+
+template <CurveValueType T> class BSpline : Spline<T> {
+public:
+  BSpline() {}
+  ~BSpline() {}
+
+private:
+  std::vector<CurveInfoBezierForm<T>> m_knots;
+};
 
 //
 // -------------------------------------------------------------------
 // --- CATMULL-ROM-SPLINE --------------------------------------------
 //
 
+template <CurveValueType T> class CatmullRomSpline : Spline<T> {
+public:
+  CatmullRomSpline() {}
+  ~CatmullRomSpline() {}
+
+private:
+  std::vector<CurveInfoBezierForm<T>> m_knots;
+};
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

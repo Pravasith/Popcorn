@@ -9,16 +9,16 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-enum CurveForm {
-  Linear,
-  Hermite,
-  Bezier,
-};
-
-enum SplineForm {
-  CatmullRom,
-  BSpline,
-};
+// enum CurveForm {
+//   Linear,
+//   Hermite,
+//   Bezier,
+// };
+//
+// enum SplineForm {
+//   CatmullRomType,
+//   BSplineType,
+// };
 
 template <typename U>
 concept CurveValueType =
@@ -53,19 +53,19 @@ template <CurveValueType T> struct CurveInfoHermiteForm {
   T p1;
 };
 
-template <CurveForm T, CurveValueType P> struct DeriveCurveInfoType;
-
-template <CurveValueType P> struct DeriveCurveInfoType<CurveForm::Linear, P> {
-  using type = CurveInfoLinearForm<P>;
-};
-
-template <CurveValueType P> struct DeriveCurveInfoType<CurveForm::Bezier, P> {
-  using type = CurveInfoBezierForm<P>;
-};
-
-template <CurveValueType P> struct DeriveCurveInfoType<CurveForm::Hermite, P> {
-  using type = CurveInfoHermiteForm<P>;
-};
+// template <CurveForm T, CurveValueType P> struct DeriveCurveInfoType;
+//
+// template <CurveValueType P> struct DeriveCurveInfoType<CurveForm::Linear, P> {
+//   using type = CurveInfoLinearForm<P>;
+// };
+//
+// template <CurveValueType P> struct DeriveCurveInfoType<CurveForm::Bezier, P> {
+//   using type = CurveInfoBezierForm<P>;
+// };
+//
+// template <CurveValueType P> struct DeriveCurveInfoType<CurveForm::Hermite, P> {
+//   using type = CurveInfoHermiteForm<P>;
+// };
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
