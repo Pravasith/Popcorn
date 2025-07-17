@@ -4,6 +4,7 @@
 #include "Curves.h"
 #include "GlobalMacros.h"
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <initializer_list>
 #include <stdexcept>
@@ -33,20 +34,34 @@ template <CurveValueType T> struct SplineSegment {
 //
 template <CurveValueType T> class Spline {
 public:
-public:
-  Spline() = default;
-  virtual ~Spline() = default;
-
-  void AddSegments(std::initializer_list<SplineSegment<T>> segs) {
+  Spline(std::initializer_list<SplineSegment<T>> segs) : m_segments(segs) {
     for (auto const &sg : segs)
       assert(sg.curve != nullptr);
 
-    // Note: Duplicates are allowed, don't refactor
-    m_segments.insert(m_segments.end(), segs.begin(), segs.end());
-
     std::sort(m_segments.begin(), m_segments.end(),
               [](auto const &a, auto const &b) { return a.t0 < b.t0; });
+
+    // Ensure invariants:
+    // 1. No duplicates - No two adjacent segments are exactly same
+    // 2. Continuous segment (avoid gaps or overlaps) - The t0 of set si should
+    //    match with t1 of set si-1
+    // 3. The 1st element of set s0 is 0 & 2nd element of set sn-1 is 1
+
+    for (int i = 1; i < m_segments.size(); ++i) {
+      // 1st assertion
+      assert((m_segments[i].t0 != m_segments[i - 1].t0) &&
+             (m_segments[i].t1 != m_segments[i - 1].t1));
+
+      // 2nd assertion
+      assert(m_segments[i].t0 == m_segments[i - 1].t1);
+    }
+
+    // 3rd assertion
+    assert(m_segments.front().t0 == 0.0f);
+    assert(m_segments.back().t1 == 1.0f);
   };
+
+  virtual ~Spline() = default;
 
   virtual T GetValueAt_Fast(float t) const {
     auto [u, segmentPtr] = GetLocalParameterAndSegment(t);
