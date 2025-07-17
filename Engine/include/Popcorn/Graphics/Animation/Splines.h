@@ -5,6 +5,7 @@
 #include "GlobalMacros.h"
 #include <algorithm>
 #include <cmath>
+#include <initializer_list>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -35,6 +36,17 @@ public:
 public:
   Spline() = default;
   virtual ~Spline() = default;
+
+  void AddSegments(std::initializer_list<SplineSegment<T>> segs) {
+    for (auto const &sg : segs)
+      assert(sg.curve != nullptr);
+
+    // Note: Duplicates are allowed, don't refactor
+    m_segments.insert(m_segments.end(), segs.begin(), segs.end());
+
+    std::sort(m_segments.begin(), m_segments.end(),
+              [](auto const &a, auto const &b) { return a.t0 < b.t0; });
+  };
 
   virtual T GetValueAt_Fast(float t) const {
     auto [u, segmentPtr] = GetLocalParameterAndSegment(t);
@@ -110,6 +122,16 @@ protected:
 protected:
   std::vector<SplineSegment<T>> m_segments{};
 };
+
+//
+// -------------------------------------------------------------------
+// --- B-SPLINE ------------------------------------------------------
+//
+
+//
+// -------------------------------------------------------------------
+// --- CATMULL-ROM-SPLINE --------------------------------------------
+//
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
