@@ -42,65 +42,26 @@ template <CurveValueType T> struct SplineSegment {
 // -------------------------------------------------------------------
 // --- SPLINE --------------------------------------------------------
 //
+//
+// About 'explicit' from ChatGPT:
+//
+// Marking the constructor explicit prevents unintended, implicit conversions
+// from an initializer list into a Spline. Without explicit, you could
+// accidentally write something like:
+//
+// Spline<float> s = { {&curveA, nullptr, 0.0f, 0.5f}, ... };
+//
+// and the compiler would silently interpret the braced list as a call to your
+// one‑argument constructor. Making it explicit means you must write:
+//
+// Spline<float> s{ {&curveA, nullptr, 0.0f, 0.5f}, ... };
+// or
+// Spline<float> s( { {&curveA, nullptr, 0.0f, 0.5f}, ... } );
+//
 template <CurveValueType T> class Spline {
 public:
-  //
-  // About 'explicit' from ChatGPT:
-  //
-  // Marking the constructor explicit prevents unintended, implicit conversions
-  // from an initializer list into a Spline. Without explicit, you could
-  // accidentally write something like:
-  //
-  // Spline<float> s = { {&curveA, nullptr, 0.0f, 0.5f}, ... };
-  //
-  // and the compiler would silently interpret the braced list as a call to your
-  // one‑argument constructor. Making it explicit means you must write:
-  //
-  // Spline<float> s{ {&curveA, nullptr, 0.0f, 0.5f}, ... };
-  // or
-  // Spline<float> s( { {&curveA, nullptr, 0.0f, 0.5f}, ... } );
-  //
   explicit Spline(std::initializer_list<SplineSegment<T>> segs) {
-    m_segments.reserve(segs.size());
-    m_segments.insert(m_segments.end(), segs.begin(), segs.end());
-
-    for (auto const &sg : segs)
-      assert(sg.curve != nullptr);
-
-    std::sort(m_segments.begin(), m_segments.end(),
-              [](auto const &a, auto const &b) { return a.t0 < b.t0; });
-
-    // Ensure invariants:
-    // 1. No duplicates - No two adjacent segments are exactly same
-    // 2. Continuous segment (avoid gaps or overlaps) - The t0 of set si should
-    //    match with t1 of set si-1
-    // 3. The 1st element of set s0 is 0 & 2nd element of set sn-1 is 1
-
-    for (size_t i = 1; i < m_segments.size(); ++i) {
-      const auto &prev = m_segments[i - 1];
-      const auto &cur = m_segments[i];
-
-      // 1st assertion
-      assert(!(std::fabs(cur.t0 - prev.t0) < PC_EPS &&
-               std::fabs(cur.t1 - prev.t1) < PC_EPS) &&
-             "Duplicate SplineSegment interval");
-
-      // 2nd assertion
-      assert(std::fabs(cur.t0 - prev.t1) < PC_EPS &&
-             "Gap or overlap between adjacent segments");
-    }
-
-    // 3rd assertion
-    assert(std::fabs(m_segments.front().t0 - 0.0f) < PC_EPS &&
-           "Spline should start at t=0.0f"); // avoid floating point comparision
-                                             // error, instead of --
-                                             // assert(m_segments.front().t0 ==
-                                             // 0.0f);
-    assert(
-        std::fabs(m_segments.back().t1 - 1.0f) < PC_EPS &&
-        "Spline should end at t=1.0f"); // avoid floating point comparision,
-                                        // instead of --
-                                        // assert(m_segments.back().t1 == 1.0f);
+    AddSegments(segs);
   };
 
   virtual ~Spline() = default;
@@ -153,6 +114,55 @@ public:
   }
 
 protected:
+  Spline() = default;
+
+private:
+  void AddSegments(std::initializer_list<SplineSegment<T>> segs) {
+    assert(segs.size() > 0);
+
+    for (auto const &sg : segs)
+      assert(sg.curve != nullptr);
+
+    // Ensure invariants:
+    // 1. No duplicates - No two adjacent segments are exactly same
+    // 2. Continuous segment (avoid gaps or overlaps) - The t0 of set si should
+    //    match with t1 of set si-1
+    // 3. The 1st element of set s0 is 0 & 2nd element of set sn-1 is 1
+
+    for (size_t i = 1; i < m_segments.size(); ++i) {
+      const auto &prev = m_segments[i - 1];
+      const auto &cur = m_segments[i];
+
+      // 1st assertion
+      assert(!(std::fabs(cur.t0 - prev.t0) < PC_EPS &&
+               std::fabs(cur.t1 - prev.t1) < PC_EPS) &&
+             "Duplicate SplineSegment interval");
+
+      // 2nd assertion
+      assert(std::fabs(cur.t0 - prev.t1) < PC_EPS &&
+             "Gap or overlap between adjacent segments");
+    }
+
+    // 3rd assertion
+    assert(std::fabs(m_segments.front().t0 - 0.0f) < PC_EPS &&
+           "Spline should start at t=0.0f"); // avoid floating point comparision
+                                             // error, instead of --
+                                             // assert(m_segments.front().t0 ==
+                                             // 0.0f);
+    assert(
+        std::fabs(m_segments.back().t1 - 1.0f) < PC_EPS &&
+        "Spline should end at t=1.0f"); // avoid floating point comparision,
+                                        // instead of --
+                                        // assert(m_segments.back().t1 == 1.0f);
+
+    m_segments.reserve(segs.size());
+    m_segments.insert(m_segments.end(), segs.begin(), segs.end());
+
+    std::sort(m_segments.begin(), m_segments.end(),
+              [](auto const &a, auto const &b) { return a.t0 < b.t0; });
+  };
+
+private:
   std::pair<float, const SplineSegment<T> *>
   GetLocalParameterAndSegment(float t) const {
     t = std::clamp(
@@ -200,13 +210,14 @@ protected:
 // --- B-SPLINE ------------------------------------------------------
 //
 
-template <CurveValueType T> class BSpline : Spline<T> {
+// TODO: Later
+template <CurveValueType T> class BSpline : public Spline<T> {
 public:
   BSpline() {}
-  ~BSpline() {}
+  virtual ~BSpline() {}
 
 private:
-  std::vector<CurveInfoBezierForm<T>> m_knots;
+  std::vector<T> m_knots;
 };
 
 //
@@ -214,13 +225,29 @@ private:
 // --- CATMULL-ROM-SPLINE --------------------------------------------
 //
 
-template <CurveValueType T> class CatmullRomSpline : Spline<T> {
+template <CurveValueType T> class CatmullRomSpline : public Spline<T> {
+  using Spline<T>::m_segments;
+
 public:
-  CatmullRomSpline() {}
-  ~CatmullRomSpline() {}
+  CatmullRomSpline(std::initializer_list<T> knots) {
+    assert(knots.size() > 0);
+
+    std::sort(knots.begin(), knots.end(),
+              [&](const T &knot0, const T &knot1) { return knot0 < knot1; });
+
+    for (size_t i = 1; i < knots.size(); ++i) {
+      assert(std::fabs(knots[i - 1] - knots[i]) > PC_EPS);
+    }
+
+    for (size_t i = 0; i < knots.size(); ++i) {
+      // TODO: Finish
+    }
+  }
+  virtual ~CatmullRomSpline() override {};
 
 private:
-  std::vector<CurveInfoBezierForm<T>> m_knots;
+  std::vector<T> m_knots;
 };
+
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
