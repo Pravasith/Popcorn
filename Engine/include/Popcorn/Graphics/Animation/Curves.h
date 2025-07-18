@@ -29,6 +29,16 @@ public:
   virtual T GetFirstDerivativeAt_Fast(float t) const = 0;
   virtual T GetFirstDerivativeAt_Slow(float t) const = 0;
 
+  template <CurveInfoForms F> DeriveCurveInfoType<F, T> GetCurveInfoAs() const {
+    if constexpr (F == CurveInfoForms::LinearForm) {
+      // Convert to linear
+    } else if constexpr (F == CurveInfoForms::BezierForm) {
+      // Convert to Bezier
+    } else if constexpr (F == CurveInfoForms::HermiteForm) {
+      // Convert to Hermite
+    }
+  };
+
   // virtual T GetSecondDerivativeAt_Fast(float t) const = 0;
   // virtual T GetSecondDerivativeAt_Slow(float t) const = 0;
 };

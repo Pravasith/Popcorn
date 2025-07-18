@@ -106,6 +106,8 @@ public:
   virtual ~Spline() = default;
 
   virtual T GetValueAt_Fast(float t) const {
+    assert(m_segments.size() != 0 && "No segments defined");
+
     auto [u, segmentPtr] = GetLocalParameterAndSegment(t);
 
     if (segmentPtr->reparameterizationCurve) {
@@ -116,6 +118,8 @@ public:
   }
 
   virtual T GetValueAt_Slow(float t) const {
+    assert(m_segments.size() != 0 && "No segments defined");
+
     auto [u, segmentPtr] = GetLocalParameterAndSegment(t);
 
     if (segmentPtr->reparameterizationCurve) {
@@ -126,6 +130,7 @@ public:
   }
 
   virtual T GetFirstDerivativeAt_Fast(float t) const {
+    assert(m_segments.size() != 0 && "No segments defined");
 
     auto [u, segmentPtr] = GetLocalParameterAndSegment(t);
 
@@ -136,6 +141,8 @@ public:
     return segmentPtr->curve->GetFirstDerivativeAt_Fast(u);
   }
   virtual T GetFirstDerivativeAt_Slow(float t) const {
+    assert(m_segments.size() != 0 && "No segments defined");
+
     auto [u, segmentPtr] = GetLocalParameterAndSegment(t);
 
     if (segmentPtr->reparameterizationCurve) {
