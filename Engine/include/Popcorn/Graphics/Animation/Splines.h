@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Animation/AnimationDefs.h"
+#include "ContextGfx.h"
 #include "Curves.h"
 #include "GlobalMacros.h"
 #include "MathConstants.h"
@@ -10,6 +11,7 @@
 #include <cstddef>
 #include <initializer_list>
 #include <stdexcept>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -230,14 +232,25 @@ template <CurveValueType T> class CatmullRomSpline : public Spline<T> {
   using Spline<T>::m_segments;
 
 public:
-  CatmullRomSpline(std::vector<Knot<T>> &&knots) {
+  CatmullRomSpline(std::vector<Knot<T>> &&knots,
+                   const std::string &splineName) {
     assert(knots.size() > 0);
-    // CreateSegments() checks other segments anyway so no need to reassert the
+    // CreateSegments() checks assertions anyway so no need to reassert the
     // parameter conditions
 
     std::vector<SplineSegment<T>> segments{};
 
     for (size_t i = 0; i < knots.size(); ++i) {
+      CurveInfoBezierForm<T> controlPts;
+      controlPts.b0 = knots[i].valueAtT;
+      controlPts.b1 = knots[i].valueAtT;
+      controlPts.b2 = knots[i].valueAtT;
+      controlPts.b3 = knots[i].valueAtT;
+
+      ContextGfx::AppCurves->MakeCurve("cm_rom_spline_curve_" +
+                                           std::to_string(i) + "_" + splineName,
+                                       controlPts);
+
       // Create curves
       segments.emplace_back({
 

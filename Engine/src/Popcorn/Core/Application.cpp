@@ -1,5 +1,6 @@
 #include "Application.h"
 #include "Base.h"
+#include "ContextGfx.h"
 #include "DebugUIOverlay.h"
 #include "Renderer.h"
 
@@ -16,7 +17,10 @@ Application::Application() : Subscriber("Application") {
 };
 
 Application::~Application() {
+  ContextGfx::Destroy();
+
   Time::Destroy();
+
   // LAYERS ARE DELETED INTERNALLY IN THE LAYERSTACK DESTRUCTOR
   delete s_layerStack;
   s_layerStack = nullptr;
@@ -49,6 +53,9 @@ void Application::Start() {
     s_layerStack = new LayerStack();
     s_time = Time::Create();
     s_time->Subscribe(s_instance);
+
+    // Init graphics
+    ContextGfx::Get();
 
     // OVERLAYS - EXAMPLE
     // s_debugUIOverlay = new DebugUIOverlay();
