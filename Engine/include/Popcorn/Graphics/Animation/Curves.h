@@ -18,7 +18,7 @@ static inline constexpr T PC_Lerp(const T &p0, const T &p1, float t) {
 // -------------------------------------------------------------------
 // --- CURVE ---------------------------------------------------------
 //
-template <CurveValueType T = float> class Curve {
+template <CurveValueType T> class Curve {
 public:
   Curve() = default;
   virtual ~Curve() = default;
@@ -51,7 +51,14 @@ template <CurveValueType T> class LinearCurve : public Curve<T> {
 public:
   LinearCurve(const CurveInfoLinearForm<T> &curveInfo)
       : m_curveInfo(curveInfo) {};
-  virtual ~LinearCurve() override = default;
+  //
+  // NOTE: Removing custom destructor here bc:
+  // 1. No need for one
+  // 2. If you use custom dtor, even if it's assigned as "default", compiler
+  // still assumes user defined move ctors, and it won't default to it's
+  // implicit move/copy ctors/assignment operators.
+  //
+  // virtual ~LinearCurve() override = default;
 
   virtual T GetValueAt_Fast(float t) const override final {
     assert(0.0f <= t && t <= 1.0f);
@@ -90,7 +97,14 @@ public:
         m_coefficients{info.b0, -3 * info.b0 + 3 * info.b1,
                        3 * info.b0 - 6 * info.b1 + 3 * info.b2,
                        -info.b0 + 3 * info.b1 - 3 * info.b2 + info.b3} {};
-  virtual ~BezierCurve() override = default;
+  //
+  // NOTE: Removing custom destructor here bc:
+  // 1. No need for one
+  // 2. If you use custom dtor, even if it's assigned as "default", compiler
+  // still assumes user defined move ctors, and it won't default to it's
+  // implicit move/copy ctors/assignment operators.
+  //
+  // virtual ~BezierCurve() override = default;
 
   // Berstein basis implementation
   virtual T GetValueAt_Fast(float t) const override final {
@@ -175,7 +189,14 @@ public:
                            3 * curveInfo.p1,
                        2 * curveInfo.p0 + curveInfo.v0 + curveInfo.v1 -
                            2 * curveInfo.p1} {};
-  virtual ~HermiteCurve() override = default;
+  //
+  // NOTE: Removing custom destructor here bc:
+  // 1. No need for one
+  // 2. If you use custom dtor, even if it's assigned as "default", compiler
+  // still assumes user defined move ctors, and it won't default to it's
+  // implicit move/copy ctors/assignment operators.
+  //
+  // virtual ~HermiteCurve() override = default;
 
   virtual T GetValueAt_Fast(float t) const override final {
     assert(0.0f <= t && t <= 1.0f);

@@ -22,8 +22,9 @@ enum CurveInfoForms {
 
 template <typename U>
 concept CurveValueType =
-    std::same_as<U, float> || std::same_as<U, glm::vec2> ||
-    std::same_as<U, glm::vec3> || std::same_as<U, glm::vec4>;
+    std::same_as<U, float> || std::same_as<U, double> ||
+    std::same_as<U, glm::vec2> || std::same_as<U, glm::vec3> ||
+    std::same_as<U, glm::vec4>;
 
 // template <typename T>
 // concept ParametericFunctionOutputType =
@@ -68,6 +69,15 @@ struct DeriveCurveInfoType<CurveInfoForms::BezierForm, P> {
 template <CurveValueType P>
 struct DeriveCurveInfoType<CurveInfoForms::HermiteForm, P> {
   using type = CurveInfoHermiteForm<P>;
+};
+
+//
+// ----------------------------------------------------------------------------
+// --- Spline defs ------------------------------------------------------------
+
+template <CurveValueType T> struct Knot {
+  T valueAtT;
+  float t = .0f; // [0, 1]
 };
 
 GFX_NAMESPACE_END

@@ -34,7 +34,6 @@ template <CurveValueType T> struct SplineSegment {
   // TODO: just degree 3 for now bc curves are currently designed as cubic, add
   // quadratic & others later.
   Curve<float> *reparameterizationCurve = nullptr;
-
   float t0 = 0.0f, t1 = 1.0f; // segment start & end in terms of t
 };
 
@@ -59,9 +58,14 @@ template <CurveValueType T> struct SplineSegment {
 // Spline<float> s( { {&curveA, nullptr, 0.0f, 0.5f}, ... } );
 //
 template <CurveValueType T> class Spline {
+protected:
+  // Default ctor not for making base Spline objects, but only for the derived
+  // classes to use so they can build the custom segments from m_knots.
+  Spline() = default;
+
 public:
   explicit Spline(std::initializer_list<SplineSegment<T>> segs) {
-    AddSegments(segs);
+    CreateSegments(segs);
   };
 
   virtual ~Spline() = default;
@@ -114,10 +118,7 @@ public:
   }
 
 protected:
-  Spline() = default;
-
-private:
-  void AddSegments(std::initializer_list<SplineSegment<T>> segs) {
+  void CreateSegments(std::initializer_list<SplineSegment<T>> segs) {
     assert(segs.size() > 0);
 
     for (auto const &sg : segs)
@@ -229,24 +230,24 @@ template <CurveValueType T> class CatmullRomSpline : public Spline<T> {
   using Spline<T>::m_segments;
 
 public:
-  CatmullRomSpline(std::initializer_list<T> knots) {
+  CatmullRomSpline(std::vector<Knot<T>> &&knots) {
     assert(knots.size() > 0);
+    // CreateSegments() checks other segments anyway so no need to reassert the
+    // parameter conditions
 
-    std::sort(knots.begin(), knots.end(),
-              [&](const T &knot0, const T &knot1) { return knot0 < knot1; });
-
-    for (size_t i = 1; i < knots.size(); ++i) {
-      assert(std::fabs(knots[i - 1] - knots[i]) > PC_EPS);
-    }
+    std::vector<SplineSegment<T>> segments{};
 
     for (size_t i = 0; i < knots.size(); ++i) {
-      // TODO: Finish
+      // Create curves
+      segments.emplace_back({
+
+      });
     }
   }
   virtual ~CatmullRomSpline() override {};
 
 private:
-  std::vector<T> m_knots;
+  std::vector<Knot<T>> m_knots;
 };
 
 GFX_NAMESPACE_END
