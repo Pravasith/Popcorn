@@ -234,22 +234,36 @@ template <CurveValueType T> class CatmullRomSpline : public Spline<T> {
 public:
   CatmullRomSpline(std::vector<Knot<T>> &&knots,
                    const std::string &splineName) {
-    assert(knots.size() > 0);
+    if (knots.size() < 3) {
+      throw std::runtime_error("Knots size should atleast 3. If you only have "
+                               "2 knots, use a Curve instead.");
+    }
+
     // CreateSegments() checks assertions anyway so no need to reassert the
     // parameter conditions
 
     std::vector<SplineSegment<T>> segments{};
 
-    for (size_t i = 0; i < knots.size(); ++i) {
-      CurveInfoBezierForm<T> controlPts;
-      controlPts.b0 = knots[i].valueAtT;
-      controlPts.b1 = knots[i].valueAtT;
-      controlPts.b2 = knots[i].valueAtT;
-      controlPts.b3 = knots[i].valueAtT;
+    // TODO: Handle first & last knot
 
-      ContextGfx::AppCurves->MakeCurve("cm_rom_spline_curve_" +
-                                           std::to_string(i) + "_" + splineName,
-                                       controlPts);
+    for (size_t i = 1; i < knots.size() - 1; ++i) {
+      CurveInfoHermiteForm<T> curveInfoHermite;
+
+      T kCurr = knots[i].valueAtT;
+      T kPrev = knots[i - 1].valueAtT;
+      T kNext = knots[i + 1].valueAtT;
+
+      T outVelocity = 0.5f * (kNext - kPrev);
+      // c1 continuity
+
+      // curveInfoHermite.p0 = kCurr;
+      // curveInfoHermite.v0 = outVelocity;
+      // curveInfoHermite.v1 = outVelocity;
+      // curveInfoHermite.p1 = kNext;
+
+      // const Curve<T> *curve = ContextGfx::AppCurves->MakeCurve(
+      //     "cm_rom_spline_curve_" + std::to_string(i) + "_" + splineName,
+      //     controlPts);
 
       // Create curves
       segments.emplace_back({

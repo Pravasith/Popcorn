@@ -5,6 +5,7 @@
 #include "Popcorn/Core/Base.h"
 #include <array>
 #include <cstdint>
+#include <map>
 #include <unordered_map>
 #include <vulkan/vulkan_core.h>
 
@@ -134,7 +135,7 @@ private:
 
 private:
   static DescriptorPoolsVk *s_instance;
-  std::unordered_map<DescriptorPools, DPoolVk> m_pools{};
+  std::map<DescriptorPools, DPoolVk> m_pools{};
 };
 
 GFX_NAMESPACE_END

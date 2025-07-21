@@ -4,6 +4,7 @@
 #include "Curves.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include <map>
 #include <variant>
 
 ENGINE_NAMESPACE_BEGIN
@@ -46,28 +47,43 @@ public:
   };
 
 public:
-  template <CurveInfoForms T, CurveValueType P>
-  void MakeCurve(const std::string &name,
-                 const DeriveCurveInfoType<T, P> &curveInfo) {
+  template <CurveValueType P>
+  [[nodiscard]] const Curve<P> *
+  MakeCurve(const std::string &name, const CurveInfoLinearForm<P> &curveInfo) {
     if (m_curveLibrary.contains(name)) {
       throw std::runtime_error("Curve already exists: " + name);
     }
 
-    if constexpr (T == CurveInfoForms::LinearForm) {
-      CurveInfoLinearForm<P> &info = curveInfo;
-      LinearCurve<P> curve(curveInfo);
-      m_curveLibrary[name] = curve;
+    LinearCurve<P> curve(curveInfo);
+    m_curveLibrary[name] = curve;
 
-    } else if constexpr (T == CurveInfoForms::BezierForm) {
-      CurveInfoBezierForm<P> &info = curveInfo;
-      BezierCurve<P> curve(curveInfo);
-      m_curveLibrary[name] = curve;
+    return GetCurve<P>(name);
+  }
 
-    } else if constexpr (T == CurveInfoForms::HermiteForm) {
-      CurveInfoHermiteForm<P> &info = curveInfo;
-      HermiteCurve<P> curve(curveInfo);
-      m_curveLibrary[name] = curve;
+  template <CurveValueType P>
+  [[nodiscard]] const Curve<P> *
+  MakeCurve(const std::string &name, const CurveInfoBezierForm<P> &curveInfo) {
+    if (m_curveLibrary.contains(name)) {
+      throw std::runtime_error("Curve already exists: " + name);
     }
+
+    BezierCurve<P> curve(curveInfo);
+    m_curveLibrary[name] = curve;
+
+    return GetCurve<P>(name);
+  }
+
+  template <CurveValueType P>
+  [[nodiscard]] const Curve<P> *
+  MakeCurve(const std::string &name, const CurveInfoHermiteForm<P> &curveInfo) {
+    if (m_curveLibrary.contains(name)) {
+      throw std::runtime_error("Curve already exists: " + name);
+    }
+
+    HermiteCurve<P> curve(curveInfo);
+    m_curveLibrary[name] = curve;
+
+    return GetCurve<P>(name);
   }
 
   template <CurveValueType P>
@@ -101,7 +117,11 @@ private:
 
 private:
   static CurveFactory *s_instance;
-  std::unordered_map<std::string, CurveType> m_curveLibrary;
+
+  // Using map instead of unordered map bc map is more stable. When the buckets
+  // qty increases, it reallocates leading to dangling ptrs (if object is later
+  // accessed by ptr)
+  std::map<std::string, CurveType> m_curveLibrary;
 };
 
 GFX_NAMESPACE_END

@@ -6,6 +6,7 @@
 #include "Renderer.h"
 #include "Sources.h"
 #include <fstream>
+#include <map>
 #include <unordered_map>
 
 ENGINE_NAMESPACE_BEGIN
@@ -115,7 +116,7 @@ private:
 private:
   bool m_shadersLoaded = false;
   static ShaderLibrary *s_instance;
-  static std::unordered_map<ShaderFiles, Buffer> s_shaders;
+  static std::map<ShaderFiles, Buffer> s_shaders;
 };
 
 GFX_NAMESPACE_END
