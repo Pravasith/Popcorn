@@ -9,6 +9,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstddef>
+#include <cstring>
 #include <initializer_list>
 #include <stdexcept>
 #include <string>
@@ -174,8 +175,8 @@ protected:
 private:
   std::pair<float, const SplineSegment<T> *>
   GetLocalParameterAndSegment(float t) const {
-    t = std::clamp(
-        t, 0.0f, 1.0f); // guarantee t in [0,1], to avoid floating point errors
+    t = std::clamp(t, 0.0f, 1.0f); // guarantee t in [0,1], to avoid floating
+                                   // point error values like 0.99999 or 1.0001
 
     assert(0.0f <= t && 1.0f >= t);
     assert(!m_segments.empty());
@@ -237,26 +238,53 @@ template <CurveValueType T> class CatmullRomSpline : public Spline<T> {
   using Spline<T>::m_segments;
 
 public:
-  CatmullRomSpline(std::vector<Knot<T>> &&knots, const std::string &splineName,
+  CatmullRomSpline(const std::vector<Knot<T>> &knots,
+                   const std::string &splineName,
                    const Curve<float> *reparameterizationCurve = nullptr) {
     if (knots.size() < 3) {
       throw std::runtime_error("Knots size should atleast 3. If you only have "
                                "2 knots, use a Curve instead.");
     }
 
-    m_knots = std::move(knots);
+    // NOTE: CreateSegments() checks other needed assertions anyway so no need
+    // to reassert the parameter conditions
 
-    // CreateSegments() checks assertions anyway so no need to reassert the
-    // parameter conditions
+    // First & last knots are "created" by linear extrapolations of the
+    // natural-endpoint tangents. Hence 2 extra "phantom" knots.
+    m_knots.reserve(knots.size() + 2);
 
-    // TODO: Add first & last knots
+    // --- minus 1th (phantom)knot ---
+    {
+      const auto &P0 = knots[0].valueAtT;
+      const auto &P1 = knots[1].valueAtT;
+
+      m_knots.push_back({
+          P0 + (P0 - P1), // valueAtT(natural tangent at t=0)
+          knots[0].t      // t value
+      });
+    }
+
+    // --- 0th to (n-1)th knots ---
+    m_knots.insert(m_knots.end(), knots.begin(), knots.end());
+
+    // --- nth(phantom) knot ---
+    {
+      size_t N = knots.size();
+
+      const auto &Pn1 = knots[N - 1].valueAtT;
+      const auto &Pn2 = knots[N - 2].valueAtT;
+
+      m_knots.push_back({
+          Pn1 + (Pn1 - Pn2), // valueAtT(natural tangent at t=1)
+          knots[N - 1].t     // t value
+      });
+    }
 
     // At this point, the spline has atleast 5 knots(min 3 + first & last)
     assert(m_knots.size() > 4);
     m_segments.reserve(m_knots.size() - 3);
 
-    for (size_t i = 1; i < m_knots.size() - 2; ++i) {
-      CurveInfoHermiteForm<T> curveInfoHermite;
+    for (size_t i = 1; i + 2 < m_knots.size(); ++i) {
 
       T &k_i_minus1 = m_knots[i - 1].valueAtT;
       T &k_i = m_knots[i].valueAtT;
@@ -267,15 +295,15 @@ public:
       T outVelocityAt_k_i = 0.5f * (k_i_plus1 - k_i_minus1);
       T inVelocityAt_k_i_plus1 = 0.5f * (k_i_plus2 - k_i);
 
+      // create Hermite curve
+      CurveInfoHermiteForm<T> curveInfoHermite;
       curveInfoHermite.p0 = k_i;
       curveInfoHermite.v0 = outVelocityAt_k_i;
       curveInfoHermite.v1 = inVelocityAt_k_i_plus1;
       curveInfoHermite.p1 = k_i_plus1;
 
-      // curve
       const Curve<T> *curve = ContextGfx::AppCurves->MakeCurve(
-          "cm_rom_spline_curve_" + std::to_string(i) + "_" + splineName,
-          curveInfoHermite);
+          splineName + "_span" + std::to_string(i), curveInfoHermite);
 
       // segments
       m_segments.emplace_back({
