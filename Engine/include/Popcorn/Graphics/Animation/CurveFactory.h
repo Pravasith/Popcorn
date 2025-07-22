@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Animation/AnimationDefs.h"
+#include "CurveDefs.h"
 #include "Curves.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
@@ -10,23 +10,8 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-using CurveType = std::variant<
-    // float
-    LinearCurve<float>, BezierCurve<float>, HermiteCurve<float>,
-
-    // double
-    LinearCurve<double>, BezierCurve<double>, HermiteCurve<double>,
-
-    // vec2
-    LinearCurve<glm::vec2>, BezierCurve<glm::vec2>, HermiteCurve<glm::vec2>,
-
-    // vec3
-    LinearCurve<glm::vec3>, BezierCurve<glm::vec3>, HermiteCurve<glm::vec3>,
-
-    // vec4
-    LinearCurve<glm::vec4>, BezierCurve<glm::vec4>, HermiteCurve<glm::vec4>>;
-
 class CurveFactory {
+
 public:
   [[nodiscard]] inline static CurveFactory *Get() {
     if (s_instance) {
@@ -47,6 +32,12 @@ public:
   };
 
 public:
+  // template <CurveValueType P>
+  // [[nodiscard]] const Curve<P> *
+  // MakeSpline(const std::string &name, const CurveInfoLinearForm<P>
+  // &curveInfo) {
+  // }
+
   template <CurveValueType P>
   [[nodiscard]] const Curve<P> *
   MakeCurve(const std::string &name, const CurveInfoLinearForm<P> &curveInfo) {
@@ -114,6 +105,19 @@ private:
   // DELETE THE MOVE CONSTRUCTOR AND MOVE ASSIGNMENT OPERATOR
   CurveFactory(CurveFactory &&) = delete;
   CurveFactory &operator=(CurveFactory &&) = delete;
+
+private:
+  using CurveType = std::variant<
+      // float
+      LinearCurve<float>, BezierCurve<float>, HermiteCurve<float>,
+      // double
+      LinearCurve<double>, BezierCurve<double>, HermiteCurve<double>,
+      // vec2
+      LinearCurve<glm::vec2>, BezierCurve<glm::vec2>, HermiteCurve<glm::vec2>,
+      // vec3
+      LinearCurve<glm::vec3>, BezierCurve<glm::vec3>, HermiteCurve<glm::vec3>,
+      // vec4
+      LinearCurve<glm::vec4>, BezierCurve<glm::vec4>, HermiteCurve<glm::vec4>>;
 
 private:
   static CurveFactory *s_instance;

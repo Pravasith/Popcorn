@@ -71,14 +71,5 @@ struct DeriveCurveInfoType<CurveInfoForms::HermiteForm, P> {
   using type = CurveInfoHermiteForm<P>;
 };
 
-//
-// ----------------------------------------------------------------------------
-// --- Spline defs ------------------------------------------------------------
-
-template <CurveValueType T> struct Knot {
-  T valueAtT;
-  float t = .0f; // [0, 1]
-};
-
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

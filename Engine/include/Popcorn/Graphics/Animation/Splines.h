@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Animation/AnimationDefs.h"
+#include "Animation/CurveDefs.h"
 #include "ContextGfx.h"
 #include "Curves.h"
 #include "GlobalMacros.h"
@@ -18,16 +18,13 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-//
-//
-// -------------------------------------------------------------------
-// --- MANUAL SPLINES ------------------------------------------------
-// --- MANUAL SPLINES ------------------------------------------------
-// --- MANUAL SPLINES ------------------------------------------------
-// -------------------------------------------------------------------
-//
+template <CurveValueType T> struct Knot {
+  T valueAtT;
+  float t = .0f; // [0, 1]
+};
+
 template <CurveValueType T> struct SplineSegment {
-  Curve<T> *curve;
+  const Curve<T> *curve;
 
   // --- Reparameterization ---
   // t goes through this (reparameterizationCurve) first, and then the result
@@ -35,9 +32,18 @@ template <CurveValueType T> struct SplineSegment {
   //
   // TODO: just degree 3 for now bc curves are currently designed as cubic, add
   // quadratic & others later.
-  Curve<float> *reparameterizationCurve = nullptr;
+  const Curve<float> *reparameterizationCurve = nullptr;
   float t0 = 0.0f, t1 = 1.0f; // segment start & end in terms of t
 };
+
+//
+//
+// -------------------------------------------------------------------
+// --- MANUAL SPLINES ------------------------------------------------
+// --- MANUAL SPLINES ------------------------------------------------
+// --- MANUAL SPLINES ------------------------------------------------
+// -------------------------------------------------------------------
+//
 
 //
 // -------------------------------------------------------------------
@@ -217,7 +223,6 @@ protected:
 template <CurveValueType T> class BSpline : public Spline<T> {
 public:
   BSpline() {}
-  virtual ~BSpline() {}
 
 private:
   std::vector<T> m_knots;
@@ -232,46 +237,55 @@ template <CurveValueType T> class CatmullRomSpline : public Spline<T> {
   using Spline<T>::m_segments;
 
 public:
-  CatmullRomSpline(std::vector<Knot<T>> &&knots,
-                   const std::string &splineName) {
+  CatmullRomSpline(std::vector<Knot<T>> &&knots, const std::string &splineName,
+                   const Curve<float> *reparameterizationCurve = nullptr) {
     if (knots.size() < 3) {
       throw std::runtime_error("Knots size should atleast 3. If you only have "
                                "2 knots, use a Curve instead.");
     }
 
+    m_knots = std::move(knots);
+
     // CreateSegments() checks assertions anyway so no need to reassert the
     // parameter conditions
 
-    std::vector<SplineSegment<T>> segments{};
+    // TODO: Add first & last knots
 
-    // TODO: Handle first & last knot
+    // At this point, the spline has atleast 5 knots(min 3 + first & last)
+    assert(m_knots.size() > 4);
+    m_segments.reserve(m_knots.size() - 3);
 
-    for (size_t i = 1; i < knots.size() - 1; ++i) {
+    for (size_t i = 1; i < m_knots.size() - 2; ++i) {
       CurveInfoHermiteForm<T> curveInfoHermite;
 
-      T kCurr = knots[i].valueAtT;
-      T kPrev = knots[i - 1].valueAtT;
-      T kNext = knots[i + 1].valueAtT;
+      T &k_i_minus1 = m_knots[i - 1].valueAtT;
+      T &k_i = m_knots[i].valueAtT;
+      T &k_i_plus1 = m_knots[i + 1].valueAtT;
+      T &k_i_plus2 = m_knots[i + 2].valueAtT;
 
-      T outVelocity = 0.5f * (kNext - kPrev);
       // c1 continuity
+      T outVelocityAt_k_i = 0.5f * (k_i_plus1 - k_i_minus1);
+      T inVelocityAt_k_i_plus1 = 0.5f * (k_i_plus2 - k_i);
 
-      // curveInfoHermite.p0 = kCurr;
-      // curveInfoHermite.v0 = outVelocity;
-      // curveInfoHermite.v1 = outVelocity;
-      // curveInfoHermite.p1 = kNext;
+      curveInfoHermite.p0 = k_i;
+      curveInfoHermite.v0 = outVelocityAt_k_i;
+      curveInfoHermite.v1 = inVelocityAt_k_i_plus1;
+      curveInfoHermite.p1 = k_i_plus1;
 
-      // const Curve<T> *curve = ContextGfx::AppCurves->MakeCurve(
-      //     "cm_rom_spline_curve_" + std::to_string(i) + "_" + splineName,
-      //     controlPts);
+      // curve
+      const Curve<T> *curve = ContextGfx::AppCurves->MakeCurve(
+          "cm_rom_spline_curve_" + std::to_string(i) + "_" + splineName,
+          curveInfoHermite);
 
-      // Create curves
-      segments.emplace_back({
-
+      // segments
+      m_segments.emplace_back({
+          curve,                   // curve ptr
+          reparameterizationCurve, // reparameterization
+          m_knots[i].t,            // t0
+          m_knots[i + 1].t,        // t1
       });
     }
   }
-  virtual ~CatmullRomSpline() override {};
 
 private:
   std::vector<Knot<T>> m_knots;

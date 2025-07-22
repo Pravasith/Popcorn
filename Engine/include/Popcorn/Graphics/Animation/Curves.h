@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AnimationDefs.h"
+#include "CurveDefs.h"
 #include "GlobalMacros.h"
 #include <cassert>
 #include <glm/detail/qualifier.hpp>
