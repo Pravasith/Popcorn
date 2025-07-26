@@ -25,14 +25,9 @@ template <CurveValueType T> struct Knot {
 };
 
 template <CurveValueType T> struct SplineSegment {
-  const Curve<T> *curve;
-
-  // --- Reparameterization ---
-  // t goes through this (reparameterizationCurve) first, and then the result
-  // value will be used in GetValueAt & GetDerivativeAt functions of the 'curve'
-  //
   // TODO: just degree 3 for now bc curves are currently designed as cubic, add
   // quadratic & others later.
+  const Curve<T> *curve;
   const Curve<float> *reparameterizationCurve = nullptr;
   float t0 = 0.0f, t1 = 1.0f; // segment start & end in terms of t
 };

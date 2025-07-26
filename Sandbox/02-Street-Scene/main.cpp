@@ -41,6 +41,7 @@ public:
     //
     // AnimationRoute powerJumpAnimRoute {
     //     1000.0f, // t 'duration' (ms)
+    //     vec3, vec2, float, float
     //     BezierCurve{{.1,.2}, {.2,.4}, {.5,.8}, {1.,1.}}, // Or a spline
     // };
     //
@@ -92,9 +93,11 @@ public:
   virtual void OnDetach() override {
     // Popcorn::Context::DisposeScene(scene);
   };
+
   virtual void OnUpdate(TimeEvent &e) override {
     building->RotateEuler<Axes::Y>(glm::radians(20.f) * e.GetDeltaS());
   };
+
   virtual void OnRender() override {
     // Draws all scenes
     Popcorn::Context::RenderScenes(scene);
