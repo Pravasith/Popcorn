@@ -11,8 +11,8 @@ GFX_NAMESPACE_BEGIN
 
 class GRAPHICS {
 public:
-  GRAPHICS() { PC_PRINT("CREATED", TagType::Constr, "GRAPHICS.h") };
-  ~GRAPHICS() { PC_PRINT("DESTROYED", TagType::Destr, "GRAPHICS.h") };
+  GRAPHICS() { PC_PRINT("CREATED", TagType::Constr, "GRAPHICS") };
+  ~GRAPHICS() { PC_PRINT("DESTROYED", TagType::Destr, "GRAPHICS") };
 
 private:
 };
@@ -26,8 +26,8 @@ ENGINE_NAMESPACE_BEGIN
 
 class EXAMPLE {
 public:
-  EXAMPLE() { PC_PRINT("CREATED", TagType::Constr, "EXAMPLE.h") };
-  ~EXAMPLE() { PC_PRINT("DESTROYED", TagType::Destr, "EXAMPLE.h") };
+  EXAMPLE() { PC_PRINT("CREATED", TagType::Constr, "EXAMPLE") };
+  ~EXAMPLE() { PC_PRINT("DESTROYED", TagType::Destr, "EXAMPLE") };
 
 private:
 };
@@ -59,8 +59,8 @@ public:
   };
 
 private:
-  SINGLETON() { PC_PRINT("CREATED", TagType::Constr, "SINGLETON.h") };
-  ~SINGLETON() { PC_PRINT("DESTROYED", TagType::Destr, "SINGLETON.h") };
+  SINGLETON() { PC_PRINT("CREATED", TagType::Constr, "SINGLETON") };
+  ~SINGLETON() { PC_PRINT("DESTROYED", TagType::Destr, "SINGLETON") };
 
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
   SINGLETON(const SINGLETON &) = delete;
