@@ -94,9 +94,9 @@ public:
         // Coefficients (cubic monomial form)
         // Cubic bezier -> monomial form conversion, ref -
         // https://www.gamemath.com/book/curves.html#cubic_bezier_monomial_form
-        m_coefficients{info.b0, -3 * info.b0 + 3 * info.b1,
-                       3 * info.b0 - 6 * info.b1 + 3 * info.b2,
-                       -info.b0 + 3 * info.b1 - 3 * info.b2 + info.b3} {};
+        m_coefficients{info.b0, -3.f * info.b0 + 3.f * info.b1,
+                       3.f * info.b0 - 6.f * info.b1 + 3.f * info.b2,
+                       -info.b0 + 3.f * info.b1 - 3.f * info.b2 + info.b3} {};
   //
   // NOTE: Removing custom destructor here bc:
   // 1. No need for one
@@ -185,10 +185,10 @@ public:
         // Cubic hermite -> monomial form conversion, ref -
         // https://www.gamemath.com/book/curves.html#hermite_to_monomial_first
         m_coefficients{curveInfo.p0, curveInfo.v0,
-                       -3 * curveInfo.p0 - 2 * curveInfo.v0 - curveInfo.v1 +
-                           3 * curveInfo.p1,
-                       2 * curveInfo.p0 + curveInfo.v0 + curveInfo.v1 -
-                           2 * curveInfo.p1} {};
+                       -3.f * curveInfo.p0 - 2.f * curveInfo.v0 - curveInfo.v1 +
+                           3.f * curveInfo.p1,
+                       2.f * curveInfo.p0 + curveInfo.v0 + curveInfo.v1 -
+                           2.f * curveInfo.p1} {};
   //
   // NOTE: Removing custom destructor here bc:
   // 1. No need for one
@@ -218,9 +218,9 @@ public:
     float ttt = tt * t;
 
     // Hermite basis functions
-    float h00 = 2 * ttt - 3 * tt + 1;
-    float h10 = ttt - 2 * tt + t;
-    float h01 = -2 * ttt + 3 * tt;
+    float h00 = 2.f * ttt - 3.f * tt + 1.f;
+    float h10 = ttt - 2.f * tt + t;
+    float h01 = -2.f * ttt + 3.f * tt;
     float h11 = ttt - tt;
 
     // m_hermiteValues = { p0, v0, v1, p1 }
@@ -235,10 +235,10 @@ public:
   virtual T GetFirstDerivativeAt_Fast(float t) const override final {
     assert(0.0f <= t && t <= 1.0f);
 
-    T d = 3 * m_coefficients[3];       // 3*c3
-    d = d * t + 2 * m_coefficients[2]; // 3*c3*t + 2*c2
-    return d * t +                     // (3*c3*t + 2*c2)*t
-           m_coefficients[1];          // + c1
+    T d = 3.f * m_coefficients[3];       // 3*c3
+    d = d * t + 2.f * m_coefficients[2]; // 3*c3*t + 2*c2
+    return d * t +                       // (3*c3*t + 2*c2)*t
+           m_coefficients[1];            // + c1
   };
   virtual T GetFirstDerivativeAt_Slow(float t) const override final {
     assert(t >= 0 && t <= 1);
@@ -249,10 +249,10 @@ public:
     float tt = t * t;
 
     // basis‐derivatives:
-    float dh00 = 6 * tt - 6 * t;
-    float dh10 = 3 * tt - 4 * t + 1;
-    float dh01 = -6 * tt + 6 * t;
-    float dh11 = 3 * tt - 2 * t;
+    float dh00 = 6.f * tt - 6.f * t;
+    float dh10 = 3.f * tt - 4.f * t + 1.f;
+    float dh01 = -6.f * tt + 6.f * t;
+    float dh11 = 3.f * tt - 2.f * t;
 
     const T &p0 = m_hermiteValues[0];
     const T &v0 = m_hermiteValues[1];

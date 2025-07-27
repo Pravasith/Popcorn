@@ -8,7 +8,7 @@ GFX_NAMESPACE_BEGIN
 
 ShaderLibrary *ShaderLibrary::s_instance = nullptr;
 
-std::unordered_map<ShaderFiles, Buffer> ShaderLibrary::s_shaders{};
+std::map<ShaderFiles, Buffer> ShaderLibrary::s_shaders{};
 
 template <> void ShaderLibrary::LoadShaders<RendererType::Vulkan>() {
   if (m_shadersLoaded) {

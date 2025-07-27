@@ -28,6 +28,15 @@ public:
     building = scene.FindObjectByName("building");
     // building->Translate(100.f, Axes::Z);
     // building = scene.FindObjectByName("Point.003");
+    // Animatable Objects ...
+    // arm.l, arm.r, leg.f, leg.b
+    // properties
+    //
+    // --- Jump animation ---
+    //
+    // arm animation
+    // leg animation
+    // body animation
     //
 
     //

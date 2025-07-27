@@ -10,15 +10,16 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-// TODO: Spline default ctor should take in Knots by default, not spline
-// segments
-
 template <typename U>
 concept PassengerType = CurveValueType<U>; // just an alias
 
-template <PassengerType T> struct TimeRail {
+template <PassengerType T> class TimeRail {
+  TimeRail() {
+
+  };
+
   std::vector<Knot<T>> keyframe;
-  // TODO: With the knots, construct Catmull-Rom
+  // TODO: With the knots (keyframes), construct Catmull-Rom
   // TODO: Overload with Custom curve/spline option (for Blender-imported
   //       curves, or self created individual curves)
   // TODO: Create JSON-Popcorn spline converter

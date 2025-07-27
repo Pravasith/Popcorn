@@ -36,10 +36,7 @@ public:
     };
   };
 
-  const CurveFactory *AppCurves = []() -> const CurveFactory * {
-    assert(s_curveFactory && "Oops, forgot to init CurveFactory?");
-    return s_curveFactory;
-  }();
+  const CurveFactory *AppCurves = s_curveFactory;
 
 private:
   void GraphicsInit();

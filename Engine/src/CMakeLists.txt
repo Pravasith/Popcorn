@@ -40,6 +40,7 @@ add_library(
   ${GRAPHICS_IMPL_DIR}/Mesh.cpp
   ${GRAPHICS_IMPL_DIR}/Renderer.cpp
   ${GRAPHICS_IMPL_DIR}/Shader.cpp
+  ${GRAPHICS_IMPL_DIR}/ContextGfx.cpp
   ${GRAPHICS_IMPL_DIR}/Animation/CurveFactory.cpp
   #
   # SCENE
