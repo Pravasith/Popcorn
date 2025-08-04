@@ -26,11 +26,12 @@ public:
 
 public:
   Camera(const CameraData &data = {45.f, 1.0f, .1f, 1000.0f}) {
-    float x = 180.0f;
+    float x = 1.0f;
+
     m_viewMatrix = glm::lookAt(
-        glm::vec3(x, 150, -x),       // Eye position(camera/object world pos)
-        glm::vec3(0.0f, 5.0f, 0.0f), // Target point to look at(world pos)
-        glm::vec3(0.0f, 1.0f, 0.0f)  // Up direction (world up -- Y+)
+        glm::vec3(x - 0.4, x - 0.4, x), // Eye position(camera/object world pos)
+        glm::vec3(0.0f, 0.0f, 0.0f),    // Target point to look at(world pos)
+        glm::vec3(0.0f, 1.0f, 0.0f)     // Up direction (world up -- Y+)
     );
 
     /**
