@@ -3,13 +3,11 @@
 #include "GlobalMacros.h"
 #include "MathConstants.h"
 #include "Popcorn/Core/Base.h"
+#include "Transforms.h"
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/ext/vector_float3.hpp>
-#include <glm/fwd.hpp>
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -30,22 +28,7 @@ enum class GameObjectTypes {
   Light,
 };
 
-enum class Axes { X = 1, Y, Z };
-
-enum class EulerOrder {
-  XYZ = 1,
-  XZY,
-  YXZ,
-  YZX,
-  ZXY,
-  ZYX,
-};
-
-enum class Transforms { Translate = 1, Rotate, Scale, Shear, Reflect };
-
 class GameObject {
-public:
-  std::string name;
 
 public:
   GameObject() { PC_PRINT("CREATED", TagType::Constr, "GameObject"); }
@@ -65,14 +48,26 @@ public:
 
   // MOVE CONSTRUCTOR
   GameObject(GameObject &&other) noexcept {
+    // Delete existing children(if any)
+    for (auto child : m_children)
+      delete child;
+    m_children.clear();
+
+    // Move on children obj, copy parent ptr
+    if (other.m_parent) { // replace parent's old child ptr with new child ptr
+      auto &siblings = other.m_parent->m_children;
+      auto it = std::find(siblings.begin(), siblings.end(), &other);
+      if (it != siblings.end()) {
+        *it = this;
+      }
+    }
     m_parent = other.m_parent;
     m_children = std::move(other.m_children);
-    m_position = other.m_position;
-    m_rotationEuler = other.m_rotationEuler;
-    m_translationMatrix = other.m_translationMatrix;
-    m_rotationMatrix = other.m_rotationMatrix;
-    m_localMatrix = other.m_localMatrix;
-    m_worldMatrix = other.m_worldMatrix;
+
+    m_name = std::move(other.m_name);
+
+    // Transform data
+    m_transformData = std::move(other.m_transformData);
 
     other.m_parent = nullptr;
     other.m_children.clear();
@@ -81,18 +76,25 @@ public:
   // MOVE ASSIGNMENT
   GameObject &operator=(GameObject &&other) noexcept {
     if (this != &other) {
+      // Delete existing children(if any)
       for (auto child : m_children)
         delete child;
       m_children.clear();
 
+      // Move on children obj, copy parent ptr
+      if (other.m_parent) { // replace parent's old child ptr with new child ptr
+        auto &siblings = other.m_parent->m_children;
+        auto it = std::find(siblings.begin(), siblings.end(), &other);
+        if (it != siblings.end()) {
+          *it = this;
+        }
+      }
       m_parent = other.m_parent;
       m_children = std::move(other.m_children);
-      m_position = other.m_position;
-      m_rotationEuler = other.m_rotationEuler;
-      m_translationMatrix = other.m_translationMatrix;
-      m_rotationMatrix = other.m_rotationMatrix;
-      m_localMatrix = other.m_localMatrix;
-      m_worldMatrix = other.m_worldMatrix;
+      m_name = std::move(other.m_name);
+
+      // Transform data
+      m_transformData = std::move(other.m_transformData);
 
       other.m_parent = nullptr;
       other.m_children.clear();
@@ -102,6 +104,7 @@ public:
 
   virtual constexpr GameObjectTypes GetGameObjectType() const = 0;
 
+  // TODO: Design this properly
   virtual void OnUpdate() {};
   virtual void OnRender() {};
   virtual void OnEvent() {};
@@ -110,101 +113,97 @@ public:
     return m_children;
   }
 
-  void SetParent(GameObject *gameObj);
-  void RemoveParent();
   void AddChild(GameObject *gameObj);
-  void DeleteChild(GameObject *gameObj);
+  // void DeleteChild(GameObject *gameObj);
 
+  //
+  // ----------------------------------------------------------------------
+  // --- Transforms -------------------------------------------------------
   // Translation
-  void Translate(float signedDistance, Axes axis);
-  void SetPosition(glm::vec3 pos);
-  [[nodiscard]] const glm::vec3 &GetPosition() const { return m_position; };
+  inline void Translate(float signedDistance, Axes axis) {
+    m_transformData.Translate(signedDistance, axis);
+  };
+  void SetPosition(glm::vec3 pos) { m_transformData.SetPosition(pos); };
+  [[nodiscard]] const glm::vec3 &GetPosition() const {
+    return m_transformData.m_position;
+  };
 
   // Rotation
-  void SetEulerOrder(EulerOrder order) { m_eulerOrder = order; };
-  template <Axes T> void RotateEuler(float radians);
-  void SetRotationEuler(glm::vec3 rotationEuler);
+  void SetEulerOrder(EulerOrder order) {
+    m_transformData.SetEulerOrder(order);
+  };
+  template <Axes T> void RotateEuler(float radians) {
+    m_transformData.RotateEuler<T>(radians);
+  };
+  void SetRotationEuler(glm::vec3 rotationEuler) {
+    m_transformData.SetRotationEuler(rotationEuler);
+  };
 
   // Scale
-  template <Axes T> void ScaleAlongAxis(float scalarValue);
-  void ScaleUniformly(float scalarValue);
-  void ScaleByValue(glm::vec3 scaleVector);
+  template <Axes T> void ScaleAlongAxis(float scalarValue) {
+    m_transformData.ScaleAlongAxis<T>(scalarValue);
+  };
+  void ScaleUniformly(float scalarValue) {
+    m_transformData.ScaleUniformly(scalarValue);
+  };
+  void ScaleByValue(glm::vec3 scaleVector) {
+    m_transformData.ScaleByValue(scaleVector);
+  };
 
   [[nodiscard]] const glm::mat4 &GetLocalMatrix() const {
-    return m_localMatrix;
+    return m_transformData.m_localMatrix;
   }
 
   void SetLocalMatrix(const glm::mat4 &mat) {
-    m_localMatrix = mat;
-    m_worldMatrixNeedsUpdate = true;
+    m_transformData.SetLocalMatrix(mat);
     UpdateChildrenWorldMatrixNeedsUpdateFlag();
   };
 
   [[nodiscard]] const glm::mat4 &GetWorldMatrix() {
-    if (m_worldMatrixNeedsUpdate) {
-      UpdateWorldMatrix(); // Recursive -- internally calls child's
-                           // GetWorldMatrix()
-    };
-    return m_worldMatrix;
+    glm::mat4 parentWorldMatrix = PC_IDENTITY_MAT4;
+    if (m_parent) {
+      parentWorldMatrix = m_parent->GetWorldMatrix();
+    }
+
+    if (m_transformData.m_worldMatrixNeedsUpdate) {
+      m_transformData.UpdateWorldMatrix(parentWorldMatrix);
+    }
+
+    return m_transformData.m_worldMatrix;
   }
 
-  [[nodiscard]] const glm::vec3 &GetLookAtDirection() const {
-    return m_lookAtDir;
-  };
-
-private:
-  void UpdatePositionMatrix();
-  void UpdateRotationMatrix();
-  void UpdateScaleMatrix();
-  void UpdateLookAtDirection();
-
   void UpdateLocalMatrix() {
-    m_localMatrix = m_translationMatrix * m_rotationMatrix * m_scaleMatrix;
-    m_worldMatrixNeedsUpdate = true;
-
+    m_transformData.UpdateLocalMatrix();
     UpdateChildrenWorldMatrixNeedsUpdateFlag();
   };
 
-  void UpdateWorldMatrix() {
-    if (m_parent) {
-      m_worldMatrix = m_parent->GetWorldMatrix() * m_localMatrix;
-    } else {
-      m_worldMatrix =
-          m_localMatrix; // Root object uses local matrix as world matrix
-    }
-
-    m_worldMatrixNeedsUpdate = false;
+  [[nodiscard]] const glm::vec3 &GetLookAtDirection() const {
+    return m_transformData.m_lookAtDir;
   };
 
   void UpdateChildrenWorldMatrixNeedsUpdateFlag() {
     for (auto *child : m_children) {
       if (child) {
-        child->m_worldMatrixNeedsUpdate = true;
+        child->m_transformData.m_worldMatrixNeedsUpdate = true;
         child->UpdateChildrenWorldMatrixNeedsUpdateFlag();
       }
     }
   }
 
+  void SetName(const std::string &name) { m_name = name; }
+  const std::string &GetName() const {
+    if (m_name.length() == 0) {
+      throw std::runtime_error("GameObject name not set");
+    }
+    return m_name;
+  }
+
 protected:
+  std::string m_name;
   GameObject *m_parent = nullptr;
   std::vector<GameObject *> m_children;
 
-  EulerOrder m_eulerOrder = EulerOrder::XYZ;
-
-  glm::vec3 m_position{0, 0, 0};
-  glm::vec3 m_rotationEuler{0, 0, 0};
-  glm::vec3 m_scale{1, 1, 1};
-
-  glm::mat4 m_translationMatrix = PC_IDENTITY_MAT4;
-  glm::mat4 m_rotationMatrix = PC_IDENTITY_MAT4;
-  glm::mat4 m_scaleMatrix = PC_IDENTITY_MAT4;
-
-  glm::mat4 m_localMatrix = PC_IDENTITY_MAT4; // Local -> Parent
-  glm::mat4 m_worldMatrix = PC_IDENTITY_MAT4; // Local -> World
-
-  glm::vec3 m_lookAtDir{0.f, 0.f, -1.f}; // towards the screen
-
-  bool m_worldMatrixNeedsUpdate = false;
+  Transformations m_transformData;
 
 protected:
   static constexpr glm::vec3 s_upDir{0.f, 1.f, 0.f}; // +Y up

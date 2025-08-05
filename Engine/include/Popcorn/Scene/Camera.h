@@ -26,12 +26,13 @@ public:
 
 public:
   Camera(const CameraData &data = {45.f, 1.0f, .1f, 1000.0f}) {
-    float x = 1.0f;
+    float x = 0.8f;
 
     m_viewMatrix = glm::lookAt(
-        glm::vec3(x - 0.4, x - 0.4, x), // Eye position(camera/object world pos)
-        glm::vec3(0.0f, 0.0f, 0.0f),    // Target point to look at(world pos)
-        glm::vec3(0.0f, 1.0f, 0.0f)     // Up direction (world up -- Y+)
+        glm::vec3(0, 0.2,
+                  x),                // Eye position(camera/object world pos)
+        glm::vec3(0.0f, 0.0f, 0.0f), // Target point to look at(world pos)
+        glm::vec3(0.0f, 1.0f, 0.0f)  // Up direction (world up -- Y+)
     );
 
     /**
@@ -60,9 +61,10 @@ public:
 
   void UpdateViewMatrix() {
     m_viewMatrix = glm::lookAt(
-        m_position,                        // Camera world pos
-        m_position + GetLookAtDirection(), // Target point to look at(world pos)
-        s_upDir                            // Up direction (world up -- Y+)
+        m_transformData.m_position, // Camera world pos
+        m_transformData.m_position +
+            GetLookAtDirection(), // Target point to look at(world pos)
+        s_upDir                   // Up direction (world up -- Y+)
     );
 
     // m_projMatrix = glm::perspectiveRH_ZO(glm::radians(45.0f),

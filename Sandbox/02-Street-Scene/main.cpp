@@ -12,7 +12,7 @@
 #include <glm/glm.hpp>
 
 using namespace Popcorn;
-class BlenderScene : public Scene {};
+class BlenderScene : public Scene {}; // Game Objects are owned by Scene
 class GameLayer : public Layer {
 public:
   GameLayer() { PC_PRINT("CREATED", TagType::Constr, "GAME-LAYER") };
@@ -27,6 +27,7 @@ public:
     //                                      scene);
     Popcorn::Context::RegisterScene(scene);
     building = scene.FindObjectByName("building");
+
     // building->Translate(100.f, Axes::Z);
     // building = scene.FindObjectByName("Point.003");
     // Animatable Objects ...

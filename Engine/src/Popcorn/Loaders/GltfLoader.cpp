@@ -92,7 +92,7 @@ GameObject *
 GltfLoader::ConvertGltfNodeToGameObject(const tinygltf::Model &model,
                                         const tinygltf::Node &gltfNode) {
   GameObject *gameObject = CreateGameObjectByType(model, gltfNode);
-  gameObject->name = gltfNode.name;
+  gameObject->SetName(gltfNode.name);
 
   SetTransformData(gltfNode, *gameObject);
 
@@ -130,6 +130,7 @@ void GltfLoader::SetTransformData(const tinygltf::Node &node,
                               node.translation[2]);
     }
 
+    // TODO: Use Quaternion Angles
     if (!node.rotation.empty()) {
       glm::quat rotationQuat(node.rotation[3], node.rotation[0],
                              node.rotation[1], node.rotation[2]);

@@ -34,7 +34,7 @@ static void AddLayer(Layer *layer) {
 };
 
 static void RegisterScene(Scene &scene) { s_renderer->AddScene(&scene); };
-static void DisposeScene(Scene &scene) { s_renderer->RemoveScene(&scene); };
+static void UnregisterScene(Scene &scene) { s_renderer->RemoveScene(&scene); };
 
 static void StartGame() {
   // TODO: Move the ownership of commandbuffers to Renderflow base class
@@ -84,7 +84,7 @@ static void FillNamedLookUpMap(Scene &scene, GameObject *node) {
     PC_WARN("node is nullptr")
     return;
   }
-  scene.AddGameObjectToNamedLookUp(node->name, node);
+  scene.AddGameObjectToNamedLookUp(node->GetName(), node);
 
   for (GameObject *child : node->GetChildren()) {
     FillNamedLookUpMap(scene, child);
