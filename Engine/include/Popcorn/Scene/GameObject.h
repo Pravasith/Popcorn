@@ -29,10 +29,9 @@ enum class GameObjectTypes {
 };
 
 class GameObject {
-
 public:
   GameObject() { PC_PRINT("CREATED", TagType::Constr, "GameObject"); }
-  virtual ~GameObject() {
+  virtual ~GameObject() noexcept {
     for (auto *child : m_children) {
       child->m_parent = nullptr;
       delete child; // Recursive
@@ -40,95 +39,38 @@ public:
     m_children.clear();
 
     PC_PRINT("DESTROYED", TagType::Destr, "GameObject");
-  }
-
-  // Prevent accidental copies (dangerous due to raw pointers)
-  GameObject(const GameObject &) = delete;
-  GameObject &operator=(const GameObject &) = delete;
-
-  // MOVE CONSTRUCTOR
-  GameObject(GameObject &&other) noexcept {
-    // Delete existing children(if any)
-    for (auto child : m_children)
-      delete child;
-    m_children.clear();
-
-    // Move on children obj, copy parent ptr
-    if (other.m_parent) { // replace parent's old child ptr with new child ptr
-      auto &siblings = other.m_parent->m_children;
-      auto it = std::find(siblings.begin(), siblings.end(), &other);
-      if (it != siblings.end()) {
-        *it = this;
-      }
-    }
-    m_parent = other.m_parent;
-    m_children = std::move(other.m_children);
-
-    m_name = std::move(other.m_name);
-
-    // Transform data
-    m_transformData = std::move(other.m_transformData);
-
-    other.m_parent = nullptr;
-    other.m_children.clear();
-  }
-
-  // MOVE ASSIGNMENT
-  GameObject &operator=(GameObject &&other) noexcept {
-    if (this != &other) {
-      // Delete existing children(if any)
-      for (auto child : m_children)
-        delete child;
-      m_children.clear();
-
-      // Move on children obj, copy parent ptr
-      if (other.m_parent) { // replace parent's old child ptr with new child ptr
-        auto &siblings = other.m_parent->m_children;
-        auto it = std::find(siblings.begin(), siblings.end(), &other);
-        if (it != siblings.end()) {
-          *it = this;
-        }
-      }
-      m_parent = other.m_parent;
-      m_children = std::move(other.m_children);
-      m_name = std::move(other.m_name);
-
-      // Transform data
-      m_transformData = std::move(other.m_transformData);
-
-      other.m_parent = nullptr;
-      other.m_children.clear();
-    }
-    return *this;
-  }
+  };
 
   virtual constexpr GameObjectTypes GetGameObjectType() const = 0;
+  [[nodiscard]] const std::vector<GameObject *> &GetChildren() const {
+    return m_children;
+  }
+
+  void AddChild(GameObject *child);
+  void DetachChild(GameObject *child);
+  // TODO: Decide to add this or not
+  // void DeleteChild(GameObject *gameObj);
 
   // TODO: Design this properly
   virtual void OnUpdate() {};
   virtual void OnRender() {};
   virtual void OnEvent() {};
 
-  [[nodiscard]] const std::vector<GameObject *> GetChildren() const {
-    return m_children;
-  }
-
-  void AddChild(GameObject *gameObj);
-  // void DeleteChild(GameObject *gameObj);
-
   //
-  // ----------------------------------------------------------------------
-  // --- Transforms -------------------------------------------------------
-  // Translation
+  // --- Translation -------------------------------------------------------
+  //
   inline void Translate(float signedDistance, Axes axis) {
     m_transformData.Translate(signedDistance, axis);
   };
+
   void SetPosition(glm::vec3 pos) { m_transformData.SetPosition(pos); };
   [[nodiscard]] const glm::vec3 &GetPosition() const {
     return m_transformData.m_position;
   };
 
-  // Rotation
+  //
+  // --- Rotation ----------------------------------------------------------
+  //
   void SetEulerOrder(EulerOrder order) {
     m_transformData.SetEulerOrder(order);
   };
@@ -139,7 +81,9 @@ public:
     m_transformData.SetRotationEuler(rotationEuler);
   };
 
-  // Scale
+  //
+  // --- Scale -------------------------------------------------------------
+  //
   template <Axes T> void ScaleAlongAxis(float scalarValue) {
     m_transformData.ScaleAlongAxis<T>(scalarValue);
   };
@@ -154,11 +98,16 @@ public:
     return m_transformData.m_localMatrix;
   }
 
+  //
+  // Warning: only to be used in GltfLoader(internally). Shouldn't be used
+  // directly by the user. Unless the user knows what they're doing.
   void SetLocalMatrix(const glm::mat4 &mat) {
     m_transformData.SetLocalMatrix(mat);
     UpdateChildrenWorldMatrixNeedsUpdateFlag();
   };
 
+  //
+  // GetWorldMatrix() mutates internal cache.
   [[nodiscard]] const glm::mat4 &GetWorldMatrix() {
     glm::mat4 parentWorldMatrix = PC_IDENTITY_MAT4;
     if (m_parent) {
@@ -190,12 +139,88 @@ public:
     }
   }
 
-  void SetName(const std::string &name) { m_name = name; }
+  void SetName(const std::string &name) {
+    if (m_name.length() != 0) {
+      throw std::runtime_error("Object can only be named once");
+    }
+    m_name = name;
+  }
   const std::string &GetName() const {
     if (m_name.length() == 0) {
       throw std::runtime_error("GameObject name not set");
     }
     return m_name;
+  }
+
+public:
+  // Prevent accidental copies (dangerous due to raw pointers)
+  // TODO: Decide to even allow moves
+  GameObject(const GameObject &) = delete;
+  GameObject &operator=(const GameObject &) = delete;
+
+  // MOVE CONSTRUCTOR
+  GameObject(GameObject &&other) noexcept {
+    // Delete existing children(if any)
+    for (GameObject *child : m_children)
+      delete child;
+    m_children.clear();
+
+    // Move on children obj, copy parent ptr
+    if (other.m_parent) { // replace parent's old child ptr with new child ptr
+      auto &siblings = other.m_parent->m_children;
+      auto it = std::find(siblings.begin(), siblings.end(), &other);
+      if (it != siblings.end()) {
+        *it = this;
+      }
+    }
+    m_parent = other.m_parent;
+    m_children = std::move(other.m_children);
+
+    // Update children's parent
+    for (GameObject *child : m_children)
+      child->m_parent = this;
+
+    m_name = std::move(other.m_name);
+
+    // Transform data
+    m_transformData = std::move(other.m_transformData);
+
+    other.m_parent = nullptr;
+    other.m_children.clear();
+  }
+
+  // MOVE ASSIGNMENT
+  GameObject &operator=(GameObject &&other) noexcept {
+    if (this != &other) {
+      // Delete existing children(if any)
+      for (GameObject *child : m_children)
+        delete child;
+      m_children.clear();
+
+      // Move on children obj, copy parent ptr
+      if (other.m_parent) { // replace parent's old child ptr with new child ptr
+        auto &siblings = other.m_parent->m_children;
+        auto it = std::find(siblings.begin(), siblings.end(), &other);
+        if (it != siblings.end()) {
+          *it = this;
+        }
+      }
+      m_parent = other.m_parent;
+      m_children = std::move(other.m_children);
+
+      // Update children's parent
+      for (GameObject *child : m_children)
+        child->m_parent = this;
+
+      m_name = std::move(other.m_name);
+
+      // Transform data
+      m_transformData = std::move(other.m_transformData);
+
+      other.m_parent = nullptr;
+      other.m_children.clear();
+    }
+    return *this;
   }
 
 protected:
@@ -229,7 +254,7 @@ bool PC_ValidateAndAddGameObject(T *gameObject, std::vector<T *> &gameObjects) {
 
   gameObjects.emplace_back(gameObject);
   return true;
-};
+}
 
 // Doesn't delete, just erases
 template <GameObjectType T>
@@ -244,7 +269,7 @@ bool PC_ValidateAndRemoveGameObject(T *gameObject,
 
   gameObjects.erase(ptr);
   return true;
-};
+}
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
