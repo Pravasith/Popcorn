@@ -277,4 +277,5 @@ void RenderFlowVk::UnregisterMaterialAndSubmesh(Submesh<T> *submesh) {
   }
 };
 
-GFX_NAMESPACE_END ENGINE_NAMESPACE_END
+GFX_NAMESPACE_END
+ENGINE_NAMESPACE_END

@@ -11,7 +11,6 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 class CurveFactory {
-
 public:
   [[nodiscard]] inline static CurveFactory *Get() {
     if (s_instance) {

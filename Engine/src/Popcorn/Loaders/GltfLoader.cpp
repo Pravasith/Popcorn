@@ -143,9 +143,9 @@ void GltfLoader::SetTransformData(const tinygltf::Node &node,
     }
 
     // Store TRS in the GameObject --- internally constructs a localMatrix
-    gameObject.SetPosition(translation);
-    gameObject.SetRotationEuler(eulerAngles);
-    gameObject.ScaleByValue(scale);
+    gameObject.TranslateLocal(translation);
+    gameObject.RotateLocalEuler(eulerAngles);
+    gameObject.ScaleLocal(scale);
   }
 }
 

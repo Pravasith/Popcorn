@@ -14,7 +14,7 @@ GFX_NAMESPACE_BEGIN
 
 enum class Axes { X = 1, Y, Z };
 
-enum class Transforms { Translate = 1, Rotate, Scale, Shear, Reflect };
+// enum class Transforms { Translate = 1, Rotate, Scale, Shear, Reflect };
 
 enum class EulerOrder {
   XYZ = 1,
@@ -27,121 +27,30 @@ enum class EulerOrder {
 
 class Transformations {
 public:
-  void SetPosition(glm::vec3 pos) {
-    m_position = pos;
-    UpdatePositionMatrix();
-  }
+  // --- positioning ----------------------------------------------------------
+  void TranslateLocal(const glm::vec3 &targetPos);
+  template <Axes T> void TranslateLocal(float signedDistance);
+  void UpdatePositionMatrix();
 
-  void Translate(float signedDistance, Axes axis) {
-    switch (axis) {
-    case Axes::X:
-      m_position.x += signedDistance;
-      break;
-    case Axes::Y:
-      m_position.y += signedDistance;
-      break;
-    case Axes::Z:
-      m_position.z += signedDistance;
-      break;
-    }
-
-    UpdatePositionMatrix();
-  };
-
-  void UpdatePositionMatrix() {
-    m_translationMatrix = glm::translate(PC_IDENTITY_MAT4, m_position);
-    UpdateLocalMatrix();
-  }
-
+  // --- rotations ------------------------------------------------------------
   void SetEulerOrder(EulerOrder order) { m_eulerOrder = order; };
+  void RotateLocalEuler(const glm::vec3 &rotationEuler);
+  template <Axes T> void RotateLocalEuler(float radians);
+  void UpdateRotationMatrix();
 
-  template <Axes T> void RotateEuler(float radians) {
-    if constexpr (T == Axes::X) {
-      m_rotationEuler.x += radians;
-    } else if constexpr (T == Axes::Y) {
-      m_rotationEuler.y += radians;
-    } else if constexpr (T == Axes::Z) {
-      m_rotationEuler.z += radians;
-    }
-    UpdateRotationMatrix();
-  }
+  // --- scaling --------------------------------------------------------------
+  template <Axes T> void ScaleLocal(float scalarValue);
+  void ScaleLocal(float scalarValue);
+  void ScaleLocal(const glm::vec3 &scaleVector);
+  void UpdateScaleMatrix();
 
-  void SetRotationEuler(glm::vec3 rotationEuler) {
-    m_rotationEuler = rotationEuler;
-    UpdateRotationMatrix();
-  };
-
-  void UpdateLocalMatrix() {
-    m_localMatrix = m_translationMatrix * m_rotationMatrix * m_scaleMatrix;
-    m_worldMatrixNeedsUpdate = true;
-  };
-
-  void UpdateRotationMatrix() {
-    auto rotX = glm::rotate(PC_IDENTITY_MAT4, m_rotationEuler.x, {1, 0, 0});
-    auto rotY = glm::rotate(PC_IDENTITY_MAT4, m_rotationEuler.y, {0, 1, 0});
-    auto rotZ = glm::rotate(PC_IDENTITY_MAT4, m_rotationEuler.z, {0, 0, 1});
-
-    switch (m_eulerOrder) {
-    case EulerOrder::XYZ:
-      m_rotationMatrix = rotX * rotY * rotZ;
-      break;
-    case EulerOrder::XZY:
-      m_rotationMatrix = rotX * rotZ * rotY;
-      break;
-    case EulerOrder::YXZ:
-      m_rotationMatrix = rotY * rotX * rotZ;
-      break;
-    case EulerOrder::YZX:
-      m_rotationMatrix = rotY * rotZ * rotX;
-      break;
-    case EulerOrder::ZXY:
-      m_rotationMatrix = rotZ * rotX * rotY;
-      break;
-    case EulerOrder::ZYX:
-      m_rotationMatrix = rotZ * rotY * rotX;
-      break;
-    default: // XYZ
-      m_rotationMatrix = rotX * rotY * rotZ;
-      break;
-    }
-
-    UpdateLookAtDirection();
-    UpdateLocalMatrix();
-  }
-
-  template <Axes T> void ScaleAlongAxis(float scalarValue) {
-    if constexpr (T == Axes::X) {
-      m_scale.x *= scalarValue;
-    } else if constexpr (T == Axes::Y) {
-      m_scale.y *= scalarValue;
-    } else if constexpr (T == Axes::Z) {
-      m_scale.z *= scalarValue;
-    }
-    UpdateScaleMatrix();
-  };
-
-  void ScaleUniformly(float scalarValue) {
-    m_scale.x *= scalarValue;
-    m_scale.y *= scalarValue;
-    m_scale.z *= scalarValue;
-    UpdateScaleMatrix();
-  };
-
-  void ScaleByValue(glm::vec3 scaleVector) {
-    m_scale = scaleVector;
-    UpdateScaleMatrix();
-  };
-
-  void SetLocalMatrix(const glm::mat4 &mat) {
-    m_localMatrix = mat;
-    m_worldMatrixNeedsUpdate = true;
-  };
+  void UpdateLocalMatrix();
+  void SetLocalMatrix(const glm::mat4 &mat);
 
   // update world matrix wrt parent
-  void UpdateWorldMatrix(const glm::mat4 &parentWorldMatrix) {
-    m_worldMatrix = parentWorldMatrix * m_localMatrix;
-    m_worldMatrixNeedsUpdate = false;
-  };
+  void UpdateWorldMatrix(const glm::mat4 &parentWorldMatrix);
+  void SetWorldMatrixNeedsUpdate(bool val) { m_worldMatrixNeedsUpdate = val; }
+  void UpdateLookAtDirection();
 
 public:
   Transformations() = default;
@@ -192,22 +101,6 @@ public:
     return *this;
   };
 
-  void SetWorldMatrixNeedsUpdate(bool val) { m_worldMatrixNeedsUpdate = val; }
-
-  void UpdateScaleMatrix() {
-    m_scaleMatrix = glm::scale(PC_IDENTITY_MAT4, m_scale);
-    UpdateLookAtDirection();
-    UpdateLocalMatrix();
-  };
-
-  void UpdateLookAtDirection() {
-    glm::mat4 rotScale = m_rotationMatrix * m_scaleMatrix;
-    glm::vec3 initialLookAt{0.f, 0.f, -1.f}; // facing the world -Z
-
-    m_lookAtDir =
-        glm::normalize(glm::vec3(rotScale * glm::vec4(initialLookAt, 0.f)));
-  };
-
 public:
   EulerOrder m_eulerOrder = EulerOrder::XYZ;
 
@@ -226,6 +119,19 @@ public:
 
   bool m_worldMatrixNeedsUpdate = false;
 };
+
+//
+template <> void Transformations::TranslateLocal<Axes::X>(float);
+template <> void Transformations::TranslateLocal<Axes::Y>(float);
+template <> void Transformations::TranslateLocal<Axes::Z>(float);
+
+template <> void Transformations::RotateLocalEuler<Axes::X>(float);
+template <> void Transformations::RotateLocalEuler<Axes::Y>(float);
+template <> void Transformations::RotateLocalEuler<Axes::Z>(float);
+
+template <> void Transformations::ScaleLocal<Axes::X>(float);
+template <> void Transformations::ScaleLocal<Axes::Y>(float);
+template <> void Transformations::ScaleLocal<Axes::Z>(float);
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

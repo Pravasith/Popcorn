@@ -48,55 +48,49 @@ public:
 
   void AddChild(GameObject *child);
   void DetachChild(GameObject *child);
-  // TODO: Decide to add this or not
-  // void DeleteChild(GameObject *gameObj);
 
   // TODO: Design this properly
   virtual void OnUpdate() {};
   virtual void OnRender() {};
   virtual void OnEvent() {};
 
-  //
-  // --- Translation -------------------------------------------------------
-  //
-  inline void Translate(float signedDistance, Axes axis) {
-    m_transformData.Translate(signedDistance, axis);
-  };
-
-  void SetPosition(glm::vec3 pos) { m_transformData.SetPosition(pos); };
   [[nodiscard]] const glm::vec3 &GetPosition() const {
     return m_transformData.m_position;
-  };
-
-  //
-  // --- Rotation ----------------------------------------------------------
-  //
-  void SetEulerOrder(EulerOrder order) {
-    m_transformData.SetEulerOrder(order);
-  };
-  template <Axes T> void RotateEuler(float radians) {
-    m_transformData.RotateEuler<T>(radians);
-  };
-  void SetRotationEuler(glm::vec3 rotationEuler) {
-    m_transformData.SetRotationEuler(rotationEuler);
-  };
-
-  //
-  // --- Scale -------------------------------------------------------------
-  //
-  template <Axes T> void ScaleAlongAxis(float scalarValue) {
-    m_transformData.ScaleAlongAxis<T>(scalarValue);
-  };
-  void ScaleUniformly(float scalarValue) {
-    m_transformData.ScaleUniformly(scalarValue);
-  };
-  void ScaleByValue(glm::vec3 scaleVector) {
-    m_transformData.ScaleByValue(scaleVector);
-  };
-
+  }
   [[nodiscard]] const glm::mat4 &GetLocalMatrix() const {
     return m_transformData.m_localMatrix;
   }
+
+  //
+  // --- Translation -------------------------------------------------------
+  template <Axes T> void TranslateLocal(float signedDistance) {
+    m_transformData.TranslateLocal<T>(signedDistance);
+  }
+  void TranslateLocal(const glm::vec3 &pos) {
+    m_transformData.TranslateLocal(pos);
+  }
+
+  //
+  // --- Rotation ----------------------------------------------------------
+  void SetEulerOrder(EulerOrder order) { m_transformData.SetEulerOrder(order); }
+  void RotateLocalEuler(const glm::vec3 &rotationEuler) {
+    m_transformData.RotateLocalEuler(rotationEuler);
+  }
+  template <Axes T> void RotateLocalEuler(float radians) {
+    m_transformData.RotateLocalEuler<T>(radians);
+  }
+
+  //
+  // --- Scale -------------------------------------------------------------
+  template <Axes T> void ScaleLocal(float scalarValue) {
+    m_transformData.ScaleLocal<T>(scalarValue);
+  };
+  void ScaleLocal(float scalarValue) {
+    m_transformData.ScaleLocal(scalarValue);
+  };
+  void ScaleLocal(glm::vec3 scaleVector) {
+    m_transformData.ScaleLocal(scaleVector);
+  };
 
   //
   // Warning: only to be used in GltfLoader(internally). Shouldn't be used
