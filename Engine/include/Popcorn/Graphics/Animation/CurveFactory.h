@@ -4,11 +4,32 @@
 #include "Curves.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include <cstdint>
+#include <glm/ext/vector_float2.hpp>
 #include <map>
 #include <variant>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
+
+using CurveHashType = uint32_t;
+
+template <CurveValueType T> class CurveBank {
+public:
+  CurveBank() = default;
+
+  // CreateCurve if it doesn't exist
+  const LinearCurve<T> &GetCurve(const CurveInfoLinearForm<T> &curveInfo);
+  const BezierCurve<T> &GetCurve(const CurveInfoBezierForm<T> &curveInfo);
+  const HermiteCurve<T> &GetCurve(const CurveInfoHermiteForm<T> &curveInfo);
+
+  const Curve<T> *GetCurvePtr(CurveHashType);
+
+private:
+  std::map<CurveHashType, LinearCurve<T>> m_linearCurves;
+  std::map<CurveHashType, BezierCurve<T>> m_bezierCurves;
+  std::map<CurveHashType, HermiteCurve<T>> m_hermiteCurves;
+};
 
 class CurveFactory {
 public:
@@ -121,10 +142,21 @@ private:
 private:
   static CurveFactory *s_instance;
 
+  // Curve<float> *curveFloat;
+  // Curve<glm::vec2> *curveVec2;
+  // Curve<glm::vec3> *curveVec3;
+  // Curve<glm::vec4> *curveVec4;
+
   // Using map instead of unordered map bc map is more stable. When the buckets
   // qty increases, it reallocates leading to dangling ptrs (if object is later
   // accessed by ptr)
   std::map<std::string, CurveType> m_curveLibrary;
+
+  CurveBank<float> m_floatCurves;
+  CurveBank<double> m_doubleCurves;
+  CurveBank<glm::vec2> m_vec2Curves;
+  CurveBank<glm::vec3> m_vec3Curves;
+  CurveBank<glm::vec4> m_vec4Curves;
 };
 
 GFX_NAMESPACE_END

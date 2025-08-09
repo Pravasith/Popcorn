@@ -27,6 +27,8 @@ public:
   [[nodiscard]] std::array<VkDescriptorSet, Count>
   AllocateDescriptorSets(const VkDevice &device,
                          std::array<VkDescriptorSetLayout, Count> &layouts) {
+
+#ifdef PC_DEBUG
     const char *setName = "UnknownSet";
     // clang-format off
         switch ((int)T) {
@@ -41,6 +43,8 @@ public:
 
     PC_WARN("Allocating " << setName << " set(s): " << Count << " of "
                           << m_maxSets)
+#endif
+
     return DefaultAllocateDescriptorSets<Count>(device, layouts);
   };
 
