@@ -4,7 +4,6 @@
 #include "Curves.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
-#include <cstdint>
 #include <glm/ext/vector_float2.hpp>
 #include <map>
 #include <type_traits>
@@ -12,37 +11,37 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-using CurveHashType = uint32_t;
-
 template <CurveValueType T> class CurveBank {
 public:
   CurveBank() = default;
 
-  static CurveHashType &HashCurveInfo(const CurveInfoLinearForm<T> &curveInfo) {
+  static CurveHashType HashCurveInfo(const CurveInfoLinearForm<T> &curveInfo) {
     // MixElements
   }
-  static CurveHashType &HashCurveInfo(const CurveInfoBezierForm<T> &curveInfo) {
+  static CurveHashType HashCurveInfo(const CurveInfoBezierForm<T> &curveInfo) {
     // MixElements
   }
-  static CurveHashType &
-  HashCurveInfo(const CurveInfoHermiteForm<T> &curveInfo) {
+  static CurveHashType HashCurveInfo(const CurveInfoHermiteForm<T> &curveInfo) {
     // MixElements
   }
 
+#define GET_INSERT_CURVE_PTR(CURVE_CONTAINER)                                  \
+  const CurveHashType curveHash = HashCurveInfo(curveInfo);                    \
+  auto [it, _isInserted] =                                                     \
+      (CURVE_CONTAINER).try_emplace(curveHash, curveInfo);                     \
+  return &it->second; // it is an iterator of std::pair<Key, Val>s
+
   // Creates curve if it doesn't exist
-  const LinearCurve<T> *
-  GetCurvePtr(const CurveInfoLinearForm<T> &curveInfo) const {
-    // GetCurveHash(curveInfo)
+  const LinearCurve<T> *GetCurvePtr(const CurveInfoLinearForm<T> &curveInfo) {
+    GET_INSERT_CURVE_PTR(m_linearCurves)
   }
   // Creates curve if it doesn't exist
-  const BezierCurve<T> *
-  GetCurvePtr(const CurveInfoBezierForm<T> &curveInfo) const {
-    // GetCurveHash(curveInfo)
+  const BezierCurve<T> *GetCurvePtr(const CurveInfoBezierForm<T> &curveInfo) {
+    GET_INSERT_CURVE_PTR(m_bezierCurves)
   }
   // Creates curve if it doesn't exist
-  const HermiteCurve<T> *
-  GetCurvePtr(const CurveInfoHermiteForm<T> &curveInfo) const {
-    // GetCurveHash(curveInfo)
+  const HermiteCurve<T> *GetCurvePtr(const CurveInfoHermiteForm<T> &curveInfo) {
+    GET_INSERT_CURVE_PTR(m_hermiteCurves)
   }
 
 private:

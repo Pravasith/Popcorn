@@ -39,6 +39,8 @@ public:
     }
   };
 
+protected:
+  CurveHashType m_curveId;
   // virtual T GetSecondDerivativeAt_Fast(float t) const = 0;
   // virtual T GetSecondDerivativeAt_Slow(float t) const = 0;
 };

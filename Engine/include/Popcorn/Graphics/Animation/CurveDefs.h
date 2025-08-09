@@ -2,6 +2,7 @@
 
 #include "GlobalMacros.h"
 #include <concepts>
+#include <cstdint>
 #include <glm/ext/vector_float2.hpp>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/ext/vector_float4.hpp>
@@ -70,6 +71,8 @@ template <CurveValueType P>
 struct DeriveCurveInfoType<CurveInfoForms::HermiteForm, P> {
   using type = CurveInfoHermiteForm<P>;
 };
+
+using CurveHashType = uint64_t;
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
