@@ -297,8 +297,9 @@ public:
       curveInfoHermite.v1 = inVelocityAt_k_i_plus1;
       curveInfoHermite.p1 = k_i_plus1;
 
-      const Curve<T> *curve = ContextGfx::AppCurves->MakeCurve(
-          splineName + "_span" + std::to_string(i), curveInfoHermite);
+      const Curve<T> *curve = ContextGfx::AppCurves->GetCurvePtr(
+          // splineName + "_span" + std::to_string(i),
+          curveInfoHermite);
 
       // segments
       m_segments.emplace_back({

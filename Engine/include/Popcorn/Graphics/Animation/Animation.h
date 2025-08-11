@@ -1,48 +1,67 @@
 #pragma once
 
-#include "Animation/CurveDefs.h"
-#include "Animation/Splines.h"
+#include "Curves.h"
+#include "Event.h"
 #include "GlobalMacros.h"
+#include "Subscriber.h"
+#include "TimeEvent.h"
+#include <variant>
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-template <CurveValueType T> class TimeRail {
-  TimeRail();
-  ~TimeRail();
+using KeyframesCurvePtr =
+    std::variant<const Curve<float> *, const Curve<double> *,
+                 const Curve<glm::vec2> *, const Curve<glm::vec3> *,
+                 const Curve<glm::vec4> *>;
 
-  std::vector<Knot<T>> keyframe;
-
-  // TODO: With the knots (keyframes), construct Catmull-Rom
-  // TODO: Overload with Custom curve/spline option (for Blender-imported
-  //       curves, or self created individual curves)
-  // TODO: Create JSON-Popcorn spline converter
+struct TimeTrain {
+  KeyframesCurvePtr keyframesCurve;
+  float boardStn = 0.0f;
+  float destStn = 0.1f;
 };
 
-// class AnimationTrack {
-// public:
-//   AnimationTrack(float durationMs = 500.0f, std::vector<TimeTrain>
-//   &timeTrains)
-//       : m_durationMs(durationMs), m_timeTrains(timeTrains) {};
-//   ~AnimationTrack() = default;
-//
-// public:
-// private:
-//   float m_elapsedT = 0.0f;
-//   const float m_durationMs;
-//   std::vector<float> m_timeRails;
-// };
+class AnimationTrack : public Subscriber {
+public:
+  AnimationTrack() = default;
+  ~AnimationTrack() = default;
 
-// void AddTimeRails() {
-//   // TODO: Check for duplicates in m_timeStations
-//   // TODO: Sort and add to m_timeStations
-// };
+  void Play(double durationInSecs) {
+    m_duration = durationInSecs;
+    m_isPlaying = true;
+  };
 
-// template <ValidCurveParamType T>
-// void AddTimeRail(const TimeRail<T> *timeRailPtr) {
-//   m_timeRails.emplace_back(timeRailPtr);
-// };
+private:
+  bool OnUpdate(TimeEvent &e) {
+    if ((m_elapsedTimeS += e.GetDeltaS()) < m_duration) {
+      // TODO: Morph obj props acc. to curve data
+    } else {
+      m_isPlaying = false;
+    }
+    return true;
+  };
+
+  void OnEvent(Event &e) override {
+    if (!m_isPlaying) {
+      return;
+    }
+
+    EventDispatcher dispatcher{e};
+    dispatcher.Dispatch<TimeEvent>(PC_BIND_EVENT_FUNC(TimeEvent, OnUpdate));
+  };
+
+public:
+private:
+  double m_duration = 0.0;
+  double m_elapsedTimeS = 0.0;
+  std::vector<TimeTrain> m_timeTrains;
+
+  bool m_isPlaying = false;
+
+  // TODO: parent stuff
+  std::vector<AnimationTrack *> m_children;
+};
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END
