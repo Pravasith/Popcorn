@@ -9,24 +9,31 @@ GFX_NAMESPACE_BEGIN
 // --- TRANSLATION --------------------------------------------------------
 //
 void Transformations::TranslateLocal(const glm::vec3 &targetPos) {
-  m_position = targetPos;
-  UpdatePositionMatrix();
+  // m_position = targetPos;
+  m_position2.Set(targetPos, [&]() { UpdatePositionMatrix(); });
+  // UpdatePositionMatrix();
 }
 
 template <>
 void Transformations::TranslateLocal<Axes::X>(float signedDistance) {
-  m_position.x += signedDistance;
-  UpdatePositionMatrix();
+  m_position2.AddComponent<0>(signedDistance,
+                              [&]() { UpdatePositionMatrix(); });
+  // m_position.x += signedDistance;
+  // UpdatePositionMatrix();
 }
 template <>
 void Transformations::TranslateLocal<Axes::Y>(float signedDistance) {
-  m_position.y += signedDistance;
-  UpdatePositionMatrix();
+  m_position2.AddComponent<1>(signedDistance,
+                              [&]() { UpdatePositionMatrix(); });
+  // m_position.y += signedDistance;
+  // UpdatePositionMatrix();
 }
 template <>
 void Transformations::TranslateLocal<Axes::Z>(float signedDistance) {
-  m_position.z += signedDistance;
-  UpdatePositionMatrix();
+  m_position2.AddComponent<2>(signedDistance,
+                              [&]() { UpdatePositionMatrix(); });
+  // m_position.z += signedDistance;
+  // UpdatePositionMatrix();
 }
 
 //
@@ -87,7 +94,9 @@ template <> void Transformations::ScaleLocal<Axes::Z>(float scalarValue) {
 // --- MATRIX STUFF -------------------------------------------------------
 //
 void Transformations::UpdatePositionMatrix() {
-  m_translationMatrix = glm::translate(PC_IDENTITY_MAT4, m_position);
+  // m_translationMatrix = glm::translate(PC_IDENTITY_MAT4, m_position);
+  m_translationMatrix =
+      glm::translate(PC_IDENTITY_MAT4, m_position2.GetValue());
   UpdateLocalMatrix();
 }
 
@@ -147,11 +156,12 @@ void Transformations::UpdateWorldMatrix(const glm::mat4 &parentWorldMatrix) {
 };
 
 void Transformations::UpdateLookAtDirection() {
-  glm::mat4 rotScale = m_rotationMatrix * m_scaleMatrix;
+  // glm::mat4 rotMat = m_rotationMatrix;
   glm::vec3 initialLookAt{0.f, 0.f, -1.f}; // facing the world -Z
 
   m_lookAtDir =
-      glm::normalize(glm::vec3(rotScale * glm::vec4(initialLookAt, 0.f)));
+      // glm::normalize(glm::vec3(rotMat * glm::vec4(initialLookAt, 0.f)));
+      glm::normalize(glm::mat3(m_rotationMatrix) * initialLookAt);
 };
 
 GFX_NAMESPACE_END

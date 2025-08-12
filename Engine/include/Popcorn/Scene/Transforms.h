@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Animation.h"
 #include "GlobalMacros.h"
 #include "MathConstants.h"
 #include <glm/ext/matrix_float4x4.hpp>
@@ -12,99 +13,59 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-enum class Axes { X = 1, Y, Z };
-
+// clang-format off
 // enum class Transforms { Translate = 1, Rotate, Scale, Shear, Reflect };
-
-enum class EulerOrder {
-  XYZ = 1,
-  XZY,
-  YXZ,
-  YZX,
-  ZXY,
-  ZYX,
-};
+enum class Axes { X = 0, Y = 1, Z = 2, W = 3 };
+enum class EulerOrder { XYZ = 1, XZY, YXZ, YZX, ZXY, ZYX };
+// clang-format on
 
 class Transformations {
 public:
+  // --- animations -----------------------------------------------------------
+  void LinkAnimatableProperty();
+
   // --- positioning ----------------------------------------------------------
   void TranslateLocal(const glm::vec3 &targetPos);
   template <Axes T> void TranslateLocal(float signedDistance);
-  void UpdatePositionMatrix();
 
   // --- rotations ------------------------------------------------------------
   void SetEulerOrder(EulerOrder order) { m_eulerOrder = order; };
   void RotateLocalEuler(const glm::vec3 &rotationEuler);
   template <Axes T> void RotateLocalEuler(float radians);
-  void UpdateRotationMatrix();
 
   // --- scaling --------------------------------------------------------------
   template <Axes T> void ScaleLocal(float scalarValue);
   void ScaleLocal(float scalarValue);
   void ScaleLocal(const glm::vec3 &scaleVector);
-  void UpdateScaleMatrix();
 
-  void UpdateLocalMatrix();
-  void SetLocalMatrix(const glm::mat4 &mat);
-
-  // update world matrix wrt parent
-  void UpdateWorldMatrix(const glm::mat4 &parentWorldMatrix);
+  // --- matrix stuff ---------------------------------------------------------
+  void SetLocalMatrix(const glm::mat4 &mat); // only for GltfLoader
   void SetWorldMatrixNeedsUpdate(bool val) { m_worldMatrixNeedsUpdate = val; }
+  //
+  void UpdatePositionMatrix();
+  void UpdateRotationMatrix();
+  void UpdateScaleMatrix();
+  void UpdateLocalMatrix();
+  void UpdateWorldMatrix(const glm::mat4 &parentWorldMatrix);
+
+  // --- lookAt stuff ---------------------------------------------------------
   void UpdateLookAtDirection();
 
 public:
   Transformations() = default;
   ~Transformations() = default;
 
-public:
   Transformations(const Transformations &) = delete;
   Transformations &operator=(const Transformations &) = delete;
-
-  Transformations(Transformations &&other) noexcept {
-    m_eulerOrder = other.m_eulerOrder;
-
-    m_position = other.m_position;
-    m_rotationEuler = other.m_rotationEuler;
-    m_scale = other.m_scale;
-
-    m_translationMatrix = other.m_translationMatrix;
-    m_rotationMatrix = other.m_rotationMatrix;
-    m_scaleMatrix = other.m_scaleMatrix;
-
-    m_localMatrix = other.m_localMatrix;
-    m_worldMatrix = other.m_worldMatrix;
-
-    m_lookAtDir = other.m_lookAtDir;
-
-    m_worldMatrixNeedsUpdate = other.m_worldMatrixNeedsUpdate;
-  };
-
-  Transformations &operator=(Transformations &&other) noexcept {
-    if (this != &other) {
-      m_eulerOrder = other.m_eulerOrder;
-
-      m_position = other.m_position;
-      m_rotationEuler = other.m_rotationEuler;
-      m_scale = other.m_scale;
-
-      m_translationMatrix = other.m_translationMatrix;
-      m_rotationMatrix = other.m_rotationMatrix;
-      m_scaleMatrix = other.m_scaleMatrix;
-
-      m_localMatrix = other.m_localMatrix;
-      m_worldMatrix = other.m_worldMatrix;
-
-      m_lookAtDir = other.m_lookAtDir;
-
-      m_worldMatrixNeedsUpdate = other.m_worldMatrixNeedsUpdate;
-    };
-    return *this;
-  };
+  Transformations(Transformations &&other) = default;
+  Transformations &operator=(Transformations &&other) = default;
 
 public:
   EulerOrder m_eulerOrder = EulerOrder::XYZ;
 
-  glm::vec3 m_position{0, 0, 0};
+  AnimationProperty<glm::vec3> m_position2{0, 0, 0};
+
+  // glm::vec3 m_position{0, 0, 0};
   glm::vec3 m_rotationEuler{0, 0, 0};
   glm::vec3 m_scale{1, 1, 1};
 
