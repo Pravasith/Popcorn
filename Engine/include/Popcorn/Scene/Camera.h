@@ -61,8 +61,8 @@ public:
 
   void UpdateViewMatrix() {
     m_viewMatrix = glm::lookAt(
-        m_transformData.m_position, // Camera world pos
-        m_transformData.m_position +
+        m_transformData.m_position.GetValue(), // Camera world pos
+        m_transformData.m_position.GetValue() +
             GetLookAtDirection(), // Target point to look at(world pos)
         s_upDir                   // Up direction (world up -- Y+)
     );

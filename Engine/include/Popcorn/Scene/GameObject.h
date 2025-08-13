@@ -55,7 +55,7 @@ public:
   virtual void OnEvent() {};
 
   [[nodiscard]] const glm::vec3 &GetPosition() const {
-    return m_transformData.m_position;
+    return m_transformData.m_position.GetValue();
   }
   [[nodiscard]] const glm::mat4 &GetLocalMatrix() const {
     return m_transformData.m_localMatrix;
