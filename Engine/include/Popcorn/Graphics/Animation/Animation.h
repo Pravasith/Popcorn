@@ -7,7 +7,7 @@
 #include "MathConstants.h"
 #include "Subscriber.h"
 #include "TimeEvent.h"
-#include <functional>
+#include <cstddef>
 #include <glm/ext/vector_float2.hpp>
 #include <type_traits>
 #include <utility>
@@ -17,6 +17,7 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+enum class Axes { X = 0, Y = 1, Z = 2, W = 3 };
 template <typename T>
 concept IsFloatDoubleInt = std::is_same_v<T, float> || std::is_same_v<T, int> ||
                            std::is_same_v<T, double>;
@@ -31,26 +32,65 @@ public:
 
   [[nodiscard]] const T &GetValue() const { return m_value; };
 
-  void Set(const T &value) noexcept { m_value = value; };
-  template <typename F> void Set(const T &value, F &&onSet) noexcept {
+#define BLOCK_IF_ANIMATING_ALREADY                                             \
+  do {                                                                         \
+    if (m_isAnimating) {                                                       \
+      PC_WARN(                                                                 \
+          "Operation not performed because an animation is already running "   \
+          "on this property")                                                  \
+      return;                                                                  \
+    }                                                                          \
+  } while (0);
+  void Set(const T &value) noexcept {
+    BLOCK_IF_ANIMATING_ALREADY
+    m_value = value;
+  }
+  template <typename F> void Set(const T &value, F &&onSet) {
+    BLOCK_IF_ANIMATING_ALREADY
     m_value = value;
     std::forward<F>(onSet)();
-  };
+  }
 
-  template <std::size_t I> void AddComponent(float value) noexcept {
+  template <Axes A> void AddComponent(float value) noexcept {
     static_assert(!std::is_same_v<T, float> && !std::is_same_v<T, double> &&
                   "Cannot add component on a scalar value");
+    constexpr size_t I = (size_t)A;
     static_assert(I < T::length(), "component index out of range for this T");
+    BLOCK_IF_ANIMATING_ALREADY
     m_value[I] += value;
   }
-  template <std::size_t I, typename F>
-  void AddComponent(float value, F &&onAdd) noexcept {
+  template <Axes A, typename F> void AddComponent(float value, F &&onAdd) {
     static_assert(!std::is_same_v<T, float> && !std::is_same_v<T, double> &&
                   "Cannot add component on a scalar value");
+    constexpr size_t I = (size_t)A;
     static_assert(I < T::length(), "component index out of range for this T");
+    BLOCK_IF_ANIMATING_ALREADY
     m_value[I] += value;
     std::forward<F>(onAdd)();
   }
+
+  template <Axes A> void MultiplyComponent(float value) noexcept {
+    static_assert(!std::is_same_v<T, float> && !std::is_same_v<T, double> &&
+                  "Cannot multiply component on a scalar value");
+    constexpr size_t I = (size_t)A;
+    static_assert(I < T::length(), "component index out of range for this T");
+    BLOCK_IF_ANIMATING_ALREADY
+    m_value[I] *= value;
+  }
+  template <Axes A, typename F>
+  void MultiplyComponent(float value, F &&onMultiply) {
+    static_assert(!std::is_same_v<T, float> && !std::is_same_v<T, double> &&
+                  "Cannot multiply component on a scalar value");
+    constexpr size_t I = (size_t)A;
+    static_assert(I < T::length(), "component index out of range for this T");
+    BLOCK_IF_ANIMATING_ALREADY
+    m_value[I] *= value;
+    std::forward<F>(onMultiply)();
+  }
+#undef BLOCK_IF_ANIMATING_ALREADY
+
+private:
+  void SetIsAnimating(bool isAnimating) { m_isAnimating = isAnimating; }
 
 private:
   bool m_isAnimating = false;

@@ -32,6 +32,7 @@ public:
   // Creates curve if it doesn't exist
   const HermiteCurve<T> *GetCurvePtr(const CurveInfoHermiteForm<T> &curveInfo){
       GET_INSERT_CURVE_PTR(m_hermiteCurves)}
+#undef GET_INSERT_CURVE_PTR
 
 #define HASH_CURVE_BODY                                                        \
   do {                                                                         \
@@ -98,6 +99,7 @@ public:
   static CurveHashType HashCurveInfo(const CurveInfoHermiteForm<T> &curveInfo) {
     HASH_CURVE_BODY
   }
+#undef HASH_CURVE_BODY
 
 private:
   // Not using unordered_map bc we're accessing curves with ptrs

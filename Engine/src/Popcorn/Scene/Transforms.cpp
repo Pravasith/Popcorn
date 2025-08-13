@@ -9,31 +9,23 @@ GFX_NAMESPACE_BEGIN
 // --- TRANSLATION --------------------------------------------------------
 //
 void Transformations::TranslateLocal(const glm::vec3 &targetPos) {
-  // m_position = targetPos;
-  m_position2.Set(targetPos, [&]() { UpdatePositionMatrix(); });
-  // UpdatePositionMatrix();
+  m_position.Set(targetPos, [&]() { UpdatePositionMatrix(); });
 }
 
 template <>
 void Transformations::TranslateLocal<Axes::X>(float signedDistance) {
-  m_position2.AddComponent<0>(signedDistance,
-                              [&]() { UpdatePositionMatrix(); });
-  // m_position.x += signedDistance;
-  // UpdatePositionMatrix();
+  m_position.AddComponent<Axes::X>(signedDistance,
+                                   [&]() { UpdatePositionMatrix(); });
 }
 template <>
 void Transformations::TranslateLocal<Axes::Y>(float signedDistance) {
-  m_position2.AddComponent<1>(signedDistance,
-                              [&]() { UpdatePositionMatrix(); });
-  // m_position.y += signedDistance;
-  // UpdatePositionMatrix();
+  m_position.AddComponent<Axes::Y>(signedDistance,
+                                   [&]() { UpdatePositionMatrix(); });
 }
 template <>
 void Transformations::TranslateLocal<Axes::Z>(float signedDistance) {
-  m_position2.AddComponent<2>(signedDistance,
-                              [&]() { UpdatePositionMatrix(); });
-  // m_position.z += signedDistance;
-  // UpdatePositionMatrix();
+  m_position.AddComponent<Axes::Z>(signedDistance,
+                                   [&]() { UpdatePositionMatrix(); });
 }
 
 //
@@ -41,21 +33,20 @@ void Transformations::TranslateLocal<Axes::Z>(float signedDistance) {
 // --- ROTATION -----------------------------------------------------------
 //
 void Transformations::RotateLocalEuler(const glm::vec3 &rotationEuler) {
-  m_rotationEuler = rotationEuler;
-  UpdateRotationMatrix();
+  m_rotationEuler.Set(rotationEuler, [&]() { UpdateRotationMatrix(); });
 };
 
 template <> void Transformations::RotateLocalEuler<Axes::X>(float radians) {
-  m_rotationEuler.x += radians;
-  UpdateRotationMatrix();
+  m_rotationEuler.AddComponent<Axes::X>(radians,
+                                        [&]() { UpdateRotationMatrix(); });
 }
 template <> void Transformations::RotateLocalEuler<Axes::Y>(float radians) {
-  m_rotationEuler.y += radians;
-  UpdateRotationMatrix();
+  m_rotationEuler.AddComponent<Axes::Y>(radians,
+                                        [&]() { UpdateRotationMatrix(); });
 }
 template <> void Transformations::RotateLocalEuler<Axes::Z>(float radians) {
-  m_rotationEuler.z += radians;
-  UpdateRotationMatrix();
+  m_rotationEuler.AddComponent<Axes::Z>(radians,
+                                        [&]() { UpdateRotationMatrix(); });
 }
 
 //
@@ -63,30 +54,27 @@ template <> void Transformations::RotateLocalEuler<Axes::Z>(float radians) {
 // --- SCALE --------------------------------------------------------------
 //
 void Transformations::ScaleLocal(float scalarValue) {
-  m_scale.x *= scalarValue;
-  m_scale.y *= scalarValue;
-  m_scale.z *= scalarValue;
-  UpdateScaleMatrix();
+  m_scale.MultiplyComponent<Axes::X>(scalarValue);
+  m_scale.MultiplyComponent<Axes::Y>(scalarValue);
+  m_scale.MultiplyComponent<Axes::Z>(scalarValue,
+                                     [&]() { UpdateScaleMatrix(); });
 }
 
 void Transformations::ScaleLocal(const glm::vec3 &scaleVector) {
-  m_scale = scaleVector;
-  UpdateScaleMatrix();
+  m_scale.Set(scaleVector, [&]() { UpdateScaleMatrix(); });
 }
 
 template <> void Transformations::ScaleLocal<Axes::X>(float scalarValue) {
-  m_scale.x *= scalarValue;
-  UpdateScaleMatrix();
+  m_scale.MultiplyComponent<Axes::X>(scalarValue,
+                                     [&]() { UpdateScaleMatrix(); });
 }
-
 template <> void Transformations::ScaleLocal<Axes::Y>(float scalarValue) {
-  m_scale.y *= scalarValue;
-  UpdateScaleMatrix();
+  m_scale.MultiplyComponent<Axes::Y>(scalarValue,
+                                     [&]() { UpdateScaleMatrix(); });
 }
-
 template <> void Transformations::ScaleLocal<Axes::Z>(float scalarValue) {
-  m_scale.z *= scalarValue;
-  UpdateScaleMatrix();
+  m_scale.MultiplyComponent<Axes::Z>(scalarValue,
+                                     [&]() { UpdateScaleMatrix(); });
 }
 
 //
@@ -94,16 +82,17 @@ template <> void Transformations::ScaleLocal<Axes::Z>(float scalarValue) {
 // --- MATRIX STUFF -------------------------------------------------------
 //
 void Transformations::UpdatePositionMatrix() {
-  // m_translationMatrix = glm::translate(PC_IDENTITY_MAT4, m_position);
-  m_translationMatrix =
-      glm::translate(PC_IDENTITY_MAT4, m_position2.GetValue());
+  m_translationMatrix = glm::translate(PC_IDENTITY_MAT4, m_position.GetValue());
   UpdateLocalMatrix();
 }
 
 void Transformations::UpdateRotationMatrix() {
-  auto rotX = glm::rotate(PC_IDENTITY_MAT4, m_rotationEuler.x, {1, 0, 0});
-  auto rotY = glm::rotate(PC_IDENTITY_MAT4, m_rotationEuler.y, {0, 1, 0});
-  auto rotZ = glm::rotate(PC_IDENTITY_MAT4, m_rotationEuler.z, {0, 0, 1});
+  auto rotX =
+      glm::rotate(PC_IDENTITY_MAT4, m_rotationEuler.GetValue().x, {1, 0, 0});
+  auto rotY =
+      glm::rotate(PC_IDENTITY_MAT4, m_rotationEuler.GetValue().y, {0, 1, 0});
+  auto rotZ =
+      glm::rotate(PC_IDENTITY_MAT4, m_rotationEuler.GetValue().z, {0, 0, 1});
 
   switch (m_eulerOrder) {
   case EulerOrder::XYZ:
@@ -134,7 +123,7 @@ void Transformations::UpdateRotationMatrix() {
 }
 
 void Transformations::UpdateScaleMatrix() {
-  m_scaleMatrix = glm::scale(PC_IDENTITY_MAT4, m_scale);
+  m_scaleMatrix = glm::scale(PC_IDENTITY_MAT4, m_scale.GetValue());
   UpdateLookAtDirection();
   UpdateLocalMatrix();
 };

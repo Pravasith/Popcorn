@@ -15,7 +15,6 @@ GFX_NAMESPACE_BEGIN
 
 // clang-format off
 // enum class Transforms { Translate = 1, Rotate, Scale, Shear, Reflect };
-enum class Axes { X = 0, Y = 1, Z = 2, W = 3 };
 enum class EulerOrder { XYZ = 1, XZY, YXZ, YZX, ZXY, ZYX };
 // clang-format on
 
@@ -63,11 +62,9 @@ public:
 public:
   EulerOrder m_eulerOrder = EulerOrder::XYZ;
 
-  AnimationProperty<glm::vec3> m_position2{0, 0, 0};
-
-  // glm::vec3 m_position{0, 0, 0};
-  glm::vec3 m_rotationEuler{0, 0, 0};
-  glm::vec3 m_scale{1, 1, 1};
+  AnimationProperty<glm::vec3> m_position{0, 0, 0};
+  AnimationProperty<glm::vec3> m_rotationEuler{0, 0, 0};
+  AnimationProperty<glm::vec3> m_scale{1, 1, 1};
 
   glm::mat4 m_translationMatrix = PC_IDENTITY_MAT4;
   glm::mat4 m_rotationMatrix = PC_IDENTITY_MAT4;
