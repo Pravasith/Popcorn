@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Animation.h"
+#include "AnimationProperty.h"
 #include "GlobalMacros.h"
 #include "MathConstants.h"
 #include <glm/ext/matrix_float4x4.hpp>

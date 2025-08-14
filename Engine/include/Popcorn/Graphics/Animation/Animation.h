@@ -1,16 +1,13 @@
 #pragma once
 
-#include "CurveDefs.h"
-#include "Curves.h"
+#include "AnimationProperty.h"
 #include "Event.h"
 #include "GlobalMacros.h"
 #include "MathConstants.h"
-#include "Splines.h"
 #include "Subscriber.h"
 #include "TimeEvent.h"
 #include <algorithm>
 #include <cstddef>
-#include <type_traits>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -18,100 +15,25 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-enum class Axes { X = 0, Y = 1, Z = 2, W = 3 };
-template <typename T>
-concept IsFloatDoubleInt = std::is_same_v<T, float> || std::is_same_v<T, int> ||
-                           std::is_same_v<T, double>;
+using AnimationPropertyPtr =
+    std::variant<AnimationProperty<float> *, AnimationProperty<double> *,
+                 AnimationProperty<glm::vec2> *, AnimationProperty<glm::vec3> *,
+                 AnimationProperty<glm::vec4> *>;
 
-// Owned by classes like GameObject & Material
-template <CurveValueType T> class AnimationProperty {
-public:
-  explicit AnimationProperty(const T &value) : m_value(value) {};
-  template <IsFloatDoubleInt... Args>
-  explicit AnimationProperty(Args &&...args)
-      : m_value(std::forward<Args>(args)...){};
+using CurvePtr =
+    std::variant<Curve<float> *, Curve<double> *, Curve<glm::vec2> *,
+                 Curve<glm::vec3> *, Curve<glm::vec4> *>;
 
-  [[nodiscard]] const T &GetValue() const { return m_value; };
-
-#define BLOCK_IF_ANIMATING_ALREADY                                             \
-  do {                                                                         \
-    if (m_isAnimating) {                                                       \
-      PC_WARN(                                                                 \
-          "Operation not performed because an animation is already running "   \
-          "on this property")                                                  \
-      return;                                                                  \
-    }                                                                          \
-  } while (0);
-  void Set(const T &value) noexcept {
-    BLOCK_IF_ANIMATING_ALREADY
-    m_value = value;
-  }
-  template <typename F> void Set(const T &value, F &&onSet) {
-    BLOCK_IF_ANIMATING_ALREADY
-    m_value = value;
-    std::forward<F>(onSet)();
-  }
-
-  template <Axes A> void AddComponent(float value) noexcept {
-    static_assert(!std::is_same_v<T, float> && !std::is_same_v<T, double> &&
-                  "Cannot add component on a scalar value");
-    constexpr size_t I = (size_t)A;
-    static_assert(I < T::length(), "component index out of range for this T");
-    BLOCK_IF_ANIMATING_ALREADY
-    m_value[I] += value;
-  }
-  template <Axes A, typename F> void AddComponent(float value, F &&afterAdd) {
-    static_assert(!std::is_same_v<T, float> && !std::is_same_v<T, double> &&
-                  "Cannot add component on a scalar value");
-    constexpr size_t I = (size_t)A;
-    static_assert(I < T::length(), "component index out of range for this T");
-    BLOCK_IF_ANIMATING_ALREADY
-    m_value[I] += value;
-    std::forward<F>(afterAdd)();
-  }
-
-  template <Axes A> void MultiplyComponent(float value) noexcept {
-    static_assert(!std::is_same_v<T, float> && !std::is_same_v<T, double> &&
-                  "Cannot multiply component on a scalar value");
-    constexpr size_t I = (size_t)A;
-    static_assert(I < T::length(), "component index out of range for this T");
-    BLOCK_IF_ANIMATING_ALREADY
-    m_value[I] *= value;
-  }
-  template <Axes A, typename F>
-  void MultiplyComponent(float value, F &&afterMultiply) {
-    static_assert(!std::is_same_v<T, float> && !std::is_same_v<T, double> &&
-                  "Cannot multiply component on a scalar value");
-    constexpr size_t I = (size_t)A;
-    static_assert(I < T::length(), "component index out of range for this T");
-    BLOCK_IF_ANIMATING_ALREADY
-    m_value[I] *= value;
-    std::forward<F>(afterMultiply)();
-  }
-#undef BLOCK_IF_ANIMATING_ALREADY
-
-private:
-  void SetIsAnimating(bool isAnimating) { m_isAnimating = isAnimating; }
-
-private:
-  bool m_isAnimating = false;
-  T m_value;
-};
-
-template <CurveValueType T> struct CurveBinding {
-  AnimationProperty<T> *animationProperty;
-  std::variant<const Curve<T> *, const Spline<T> *> curveOrSpline;
-};
-
-using CurveBindingVariant =
-    std::variant<CurveBinding<float>, CurveBinding<double>,
-                 CurveBinding<glm::vec2>, CurveBinding<glm::vec3>,
-                 CurveBinding<glm::vec4>>;
+using SplinePtr =
+    std::variant<Spline<float> *, Spline<double> *, Spline<glm::vec2> *,
+                 Spline<glm::vec3> *, Spline<glm::vec4> *>;
 
 struct TimeTrain {
-  CurveBindingVariant curveBinding;
+  AnimationPropertyPtr passenger;
   float boardStn = 0.0f;
   float destStn = 1.0f;
+  TimeTrain(CurvePtr) {}
+  TimeTrain(SplinePtr) {}
 };
 
 class AnimationTrack : public Subscriber {
@@ -194,17 +116,7 @@ private:
 
         double t = GetNormalizedElapsedSecs();
 
-        if (t < board)
-          return true;
-        if (t > dest)
-          continue;
-
-        if (t >= board && t <= dest) {
-          // TODO: Animate
-        }
-
         // TODO:
-        //
         // auto &animatable = tt.timetrain->curveBinding.animatable;
         // animatable->Animate<X>(
         //      tt.keysCurve->ValueAt(m_elapsedTimeS));
