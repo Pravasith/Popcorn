@@ -46,21 +46,6 @@ template <CurveValueType T> struct SplineSegment {
 // --- SPLINE --------------------------------------------------------
 //
 //
-// About 'explicit' from ChatGPT:
-//
-// Marking the constructor explicit prevents unintended, implicit conversions
-// from an initializer list into a Spline. Without explicit, you could
-// accidentally write something like:
-//
-// Spline<float> s = { {&curveA, nullptr, 0.0f, 0.5f}, ... };
-//
-// and the compiler would silently interpret the braced list as a call to your
-// one‑argument constructor. Making it explicit means you must write:
-//
-// Spline<float> s{ {&curveA, nullptr, 0.0f, 0.5f}, ... };
-// or
-// Spline<float> s( { {&curveA, nullptr, 0.0f, 0.5f}, ... } );
-//
 template <CurveValueType T> class Spline {
 protected:
   // Default ctor not for making base Spline objects, but only for the derived

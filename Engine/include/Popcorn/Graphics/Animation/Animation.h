@@ -4,11 +4,11 @@
 #include "Curves.h"
 #include "Event.h"
 #include "GlobalMacros.h"
-#include "MathConstants.h"
+#include "Splines.h"
 #include "Subscriber.h"
 #include "TimeEvent.h"
+#include <algorithm>
 #include <cstddef>
-#include <glm/ext/vector_float2.hpp>
 #include <type_traits>
 #include <utility>
 #include <variant>
@@ -59,14 +59,14 @@ public:
     BLOCK_IF_ANIMATING_ALREADY
     m_value[I] += value;
   }
-  template <Axes A, typename F> void AddComponent(float value, F &&onAdd) {
+  template <Axes A, typename F> void AddComponent(float value, F &&afterAdd) {
     static_assert(!std::is_same_v<T, float> && !std::is_same_v<T, double> &&
                   "Cannot add component on a scalar value");
     constexpr size_t I = (size_t)A;
     static_assert(I < T::length(), "component index out of range for this T");
     BLOCK_IF_ANIMATING_ALREADY
     m_value[I] += value;
-    std::forward<F>(onAdd)();
+    std::forward<F>(afterAdd)();
   }
 
   template <Axes A> void MultiplyComponent(float value) noexcept {
@@ -78,14 +78,14 @@ public:
     m_value[I] *= value;
   }
   template <Axes A, typename F>
-  void MultiplyComponent(float value, F &&onMultiply) {
+  void MultiplyComponent(float value, F &&afterMultiply) {
     static_assert(!std::is_same_v<T, float> && !std::is_same_v<T, double> &&
                   "Cannot multiply component on a scalar value");
     constexpr size_t I = (size_t)A;
     static_assert(I < T::length(), "component index out of range for this T");
     BLOCK_IF_ANIMATING_ALREADY
     m_value[I] *= value;
-    std::forward<F>(onMultiply)();
+    std::forward<F>(afterMultiply)();
   }
 #undef BLOCK_IF_ANIMATING_ALREADY
 
@@ -98,8 +98,8 @@ private:
 };
 
 template <CurveValueType T> struct CurveBinding {
-  AnimationProperty<T> *animatable;
-  const Curve<T> *keysCurve;
+  AnimationProperty<T> *animationProperty;
+  std::variant<const Curve<T> *, const Spline<T> *> curve;
 };
 
 using CurveBindingVariant =
@@ -118,6 +118,32 @@ public:
   AnimationTrack() = default;
   ~AnimationTrack() = default;
 
+  void Sort() {
+    std::sort(m_timeTrains.begin(), m_timeTrains.end(),
+              [](const TimeTrain &a, const TimeTrain &b) {
+                if (a.boardStn < b.boardStn)
+                  return true;
+                else if (a.boardStn > b.boardStn)
+                  return false;
+                else
+                  return a.destStn < b.destStn;
+              });
+  }
+
+  void Insert(TimeTrain timeTrain) {
+    // list is already sorted at this point
+    auto cmp = [](const TimeTrain &a, const TimeTrain &b) {
+      if (a.boardStn != b.boardStn)
+        return a.boardStn < b.boardStn;
+      else
+        return a.destStn < b.destStn;
+    };
+    auto pos = std::upper_bound(m_timeTrains.begin(), m_timeTrains.end(),
+                                timeTrain, cmp);
+
+    m_timeTrains.insert(pos, timeTrain);
+  }
+
   void Play(double durationInSecs) {
     m_durationS = durationInSecs;
     m_isPlaying = true;
@@ -128,15 +154,6 @@ public:
     m_durationS = durationInSecs;
     m_isPlaying = true;
     m_onPlayFinishCb = &onFinishCb;
-  };
-
-  void Play(double durationInSecs,
-            const std::function<void(AnimationTrack *)> &onFinishCb,
-            const std::function<void(AnimationTrack *)> &inProgressCb) {
-    m_durationS = durationInSecs;
-    m_isPlaying = true;
-    m_onPlayFinishCb = &onFinishCb;
-    m_inPlayProgressCb = &inProgressCb;
   };
 
   void OnEvent(Event &e) override {
@@ -155,51 +172,37 @@ private:
     m_durationS = 0.0;                                                         \
     m_onPlayFinishCb = nullptr;                                                \
   } while (0);
-
   bool OnUpdate(TimeEvent &e) {
-    if ((m_elapsedTimeS += e.GetDeltaS()) <= m_durationS) {
+    if ((m_elapsedTimeS += e.GetDeltaS()) < m_durationS) {
       // TODO: Morph obj props acc. to curve data
       for (const TimeTrain &tt : m_timeTrains) {
         // TODO:
         // auto &animatable = tt.timetrain->curveBinding.animatable;
         // animatable->Animate<X>(
         //      tt.keysCurve->ValueAt(m_elapsedTimeS));
-        //
-        //
-      }
-
-      if (m_inPlayProgressCb) {
-        (*m_inPlayProgressCb)(this);
-      }
-
-      if (m_durationS - m_elapsedTimeS < PC_EPS) {
-        // done playing
-        if (m_onPlayFinishCb) {
-          (*m_onPlayFinishCb)(this);
-        }
-        RESET_PROPS
       }
     } else {
-      // just in-case the epsilon code block above gets skipped
+      if (m_onPlayFinishCb) {
+        (*m_onPlayFinishCb)(this);
+      }
       RESET_PROPS
     }
-
     return true;
   };
+#undef RESET_PROPS
 
-public:
 private:
   bool m_isPlaying = false;
   double m_durationS = 0.0;
   double m_elapsedTimeS = 0.0;
   const std::function<void(AnimationTrack *)> *m_onPlayFinishCb = nullptr;
-  const std::function<void(AnimationTrack *)> *m_inPlayProgressCb = nullptr;
 
 private:
   std::vector<TimeTrain> m_timeTrains;
 
   // TODO: parent stuff
   std::vector<AnimationTrack *> m_children;
+  std::unordered_map<float, size_t> m_boardStnIndicesMap;
 };
 
 GFX_NAMESPACE_END
