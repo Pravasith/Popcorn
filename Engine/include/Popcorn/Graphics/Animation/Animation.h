@@ -4,6 +4,7 @@
 #include "Curves.h"
 #include "Event.h"
 #include "GlobalMacros.h"
+#include "MathConstants.h"
 #include "Splines.h"
 #include "Subscriber.h"
 #include "TimeEvent.h"
@@ -99,7 +100,7 @@ private:
 
 template <CurveValueType T> struct CurveBinding {
   AnimationProperty<T> *animationProperty;
-  std::variant<const Curve<T> *, const Spline<T> *> curve;
+  std::variant<const Curve<T> *, const Spline<T> *> curveOrSpline;
 };
 
 using CurveBindingVariant =
@@ -115,9 +116,46 @@ struct TimeTrain {
 
 class AnimationTrack : public Subscriber {
 public:
-  AnimationTrack() = default;
+  AnimationTrack(std::vector<TimeTrain> &&timetrains)
+      : m_timeTrains(std::move(timetrains)) {
+    Sort();
+  }
   ~AnimationTrack() = default;
 
+  void Insert(TimeTrain timeTrain) {
+    // list is already sorted at this point
+    auto cmp = [](const TimeTrain &a, const TimeTrain &b) {
+      if (a.boardStn != b.boardStn)
+        return a.boardStn < b.boardStn;
+      else
+        return a.destStn < b.destStn;
+    };
+    auto pos = std::upper_bound(m_timeTrains.begin(), m_timeTrains.end(),
+                                timeTrain, cmp);
+    m_timeTrains.insert(pos, timeTrain);
+  }
+
+  void Play(double durationInSecs) {
+    m_durationS = durationInSecs;
+    m_isPlaying = true;
+  }
+
+  void Play(double durationInSecs,
+            std::function<void(AnimationTrack *)> onFinishCb) {
+    m_durationS = durationInSecs;
+    m_isPlaying = true;
+    m_onPlayFinishCb = std::move(onFinishCb);
+  }
+
+  void OnEvent(Event &e) override {
+    if (!m_isPlaying) {
+      return;
+    }
+    EventDispatcher dispatcher{e};
+    dispatcher.Dispatch<TimeEvent>(PC_BIND_EVENT_FUNC(TimeEvent, OnUpdate));
+  }
+
+private:
   void Sort() {
     std::sort(m_timeTrains.begin(), m_timeTrains.end(),
               [](const TimeTrain &a, const TimeTrain &b) {
@@ -130,39 +168,14 @@ public:
               });
   }
 
-  void Insert(TimeTrain timeTrain) {
-    // list is already sorted at this point
-    auto cmp = [](const TimeTrain &a, const TimeTrain &b) {
-      if (a.boardStn != b.boardStn)
-        return a.boardStn < b.boardStn;
-      else
-        return a.destStn < b.destStn;
-    };
-    auto pos = std::upper_bound(m_timeTrains.begin(), m_timeTrains.end(),
-                                timeTrain, cmp);
-
-    m_timeTrains.insert(pos, timeTrain);
-  }
-
-  void Play(double durationInSecs) {
-    m_durationS = durationInSecs;
-    m_isPlaying = true;
-  };
-
-  void Play(double durationInSecs,
-            const std::function<void(AnimationTrack *)> &onFinishCb) {
-    m_durationS = durationInSecs;
-    m_isPlaying = true;
-    m_onPlayFinishCb = &onFinishCb;
-  };
-
-  void OnEvent(Event &e) override {
-    if (!m_isPlaying) {
-      return;
+  inline double GetNormalizedElapsedSecs() const {
+    assert(m_durationS > 0);
+    if (m_elapsedTimeS - m_durationS < PC_EPS) {
+      return 1.0;
     }
-    EventDispatcher dispatcher{e};
-    dispatcher.Dispatch<TimeEvent>(PC_BIND_EVENT_FUNC(TimeEvent, OnUpdate));
-  };
+
+    return m_elapsedTimeS / m_durationS;
+  }
 
 private:
 #define RESET_PROPS                                                            \
@@ -172,18 +185,33 @@ private:
     m_durationS = 0.0;                                                         \
     m_onPlayFinishCb = nullptr;                                                \
   } while (0);
+
   bool OnUpdate(TimeEvent &e) {
     if ((m_elapsedTimeS += e.GetDeltaS()) < m_durationS) {
-      // TODO: Morph obj props acc. to curve data
       for (const TimeTrain &tt : m_timeTrains) {
+        auto &board = tt.boardStn;
+        auto &dest = tt.destStn;
+
+        double t = GetNormalizedElapsedSecs();
+
+        if (t < board)
+          return true;
+        if (t > dest)
+          continue;
+
+        if (t >= board && t <= dest) {
+          // TODO: Animate
+        }
+
         // TODO:
+        //
         // auto &animatable = tt.timetrain->curveBinding.animatable;
         // animatable->Animate<X>(
         //      tt.keysCurve->ValueAt(m_elapsedTimeS));
       }
     } else {
       if (m_onPlayFinishCb) {
-        (*m_onPlayFinishCb)(this);
+        (m_onPlayFinishCb)(this);
       }
       RESET_PROPS
     }
@@ -195,7 +223,8 @@ private:
   bool m_isPlaying = false;
   double m_durationS = 0.0;
   double m_elapsedTimeS = 0.0;
-  const std::function<void(AnimationTrack *)> *m_onPlayFinishCb = nullptr;
+
+  std::function<void(AnimationTrack *)> m_onPlayFinishCb;
 
 private:
   std::vector<TimeTrain> m_timeTrains;
