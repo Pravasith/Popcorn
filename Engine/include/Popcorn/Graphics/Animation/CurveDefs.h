@@ -22,7 +22,7 @@ enum CurveInfoForms {
 // };
 
 template <typename U>
-concept CurveValueType =
+concept CurveFormType =
     std::same_as<U, float> || std::same_as<U, double> ||
     std::same_as<U, glm::vec2> || std::same_as<U, glm::vec3> ||
     std::same_as<U, glm::vec4>;
@@ -36,38 +36,38 @@ concept CurveValueType =
 //       { a * b } -> std::convertible_to<T>;
 //     };
 
-template <CurveValueType T> struct CurveInfoLinearForm {
+template <CurveFormType T> struct CurveInfoLinearForm {
   T p0;
   T p1;
 };
 
-template <CurveValueType T> struct CurveInfoBezierForm {
+template <CurveFormType T> struct CurveInfoBezierForm {
   T b0;
   T b1;
   T b2;
   T b3;
 };
 
-template <CurveValueType T> struct CurveInfoHermiteForm {
+template <CurveFormType T> struct CurveInfoHermiteForm {
   T p0;
   T v0;
   T v1;
   T p1;
 };
 
-template <CurveInfoForms T, CurveValueType P> struct DeriveCurveInfoType;
+template <CurveInfoForms T, CurveFormType P> struct DeriveCurveInfoType;
 
-template <CurveValueType P>
+template <CurveFormType P>
 struct DeriveCurveInfoType<CurveInfoForms::LinearForm, P> {
   using type = CurveInfoLinearForm<P>;
 };
 
-template <CurveValueType P>
+template <CurveFormType P>
 struct DeriveCurveInfoType<CurveInfoForms::BezierForm, P> {
   using type = CurveInfoBezierForm<P>;
 };
 
-template <CurveValueType P>
+template <CurveFormType P>
 struct DeriveCurveInfoType<CurveInfoForms::HermiteForm, P> {
   using type = CurveInfoHermiteForm<P>;
 };

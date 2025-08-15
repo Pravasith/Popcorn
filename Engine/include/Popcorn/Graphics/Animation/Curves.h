@@ -9,7 +9,7 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-template <CurveValueType T>
+template <CurveFormType T>
 static inline constexpr T PC_Lerp(const T &p0, const T &p1, float t) {
   return p0 + (p1 - p0) * t;
 };
@@ -18,7 +18,10 @@ static inline constexpr T PC_Lerp(const T &p0, const T &p1, float t) {
 // -------------------------------------------------------------------
 // --- CURVE ---------------------------------------------------------
 //
-template <CurveValueType T> class Curve {
+template <CurveFormType T> class Curve {
+public:
+  using value_type = T;
+
 public:
   Curve() = default;
   virtual ~Curve() = default;
@@ -49,7 +52,7 @@ protected:
 // -------------------------------------------------------------------
 // --- LINEAR CURVE --------------------------------------------------
 //
-template <CurveValueType T> class LinearCurve : public Curve<T> {
+template <CurveFormType T> class LinearCurve : public Curve<T> {
 public:
   LinearCurve(const CurveInfoLinearForm<T> &curveInfo)
       : m_curveInfo(curveInfo) {};
@@ -88,7 +91,7 @@ private:
 // -------------------------------------------------------------------
 // --- BEZIER CURVE --------------------------------------------------
 //
-template <CurveValueType T> class BezierCurve : public Curve<T> {
+template <CurveFormType T> class BezierCurve : public Curve<T> {
 public:
   BezierCurve(const CurveInfoBezierForm<T> &info)
       : // Bezier control points
@@ -178,7 +181,7 @@ private:
 // -------------------------------------------------------------------
 // --- HERMITE CURVE -------------------------------------------------
 //
-template <CurveValueType T> class HermiteCurve : public Curve<T> {
+template <CurveFormType T> class HermiteCurve : public Curve<T> {
 public:
   HermiteCurve(const CurveInfoHermiteForm<T> &curveInfo)
       : // Hermite values (p0, v0, v1, p1)

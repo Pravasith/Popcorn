@@ -11,7 +11,7 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-template <CurveValueType T> class CurveBank {
+template <CurveFormType T> class CurveBank {
 public:
   CurveBank() = default;
 
@@ -142,15 +142,15 @@ public:
     return m_vec4Curves.GetCurvePtr(curveInfo);                                \
   }
 
-  template <CurveValueType T>
+  template <CurveFormType T>
   const LinearCurve<T> *GetCurvePtr(const CurveInfoLinearForm<T> &curveInfo) {
     GET_PTR_FROM_CURVE_BANK
   }
-  template <CurveValueType T>
+  template <CurveFormType T>
   const BezierCurve<T> *GetCurvePtr(const CurveInfoBezierForm<T> &curveInfo) {
     GET_PTR_FROM_CURVE_BANK
   }
-  template <CurveValueType T>
+  template <CurveFormType T>
   const HermiteCurve<T> *GetCurvePtr(const CurveInfoHermiteForm<T> &curveInfo) {
     GET_PTR_FROM_CURVE_BANK
   }

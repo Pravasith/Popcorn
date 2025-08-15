@@ -18,7 +18,10 @@ concept IsFloatDoubleInt = std::is_same_v<T, float> || std::is_same_v<T, int> ||
                            std::is_same_v<T, double>;
 
 // Owned by classes like GameObject & Material
-template <CurveValueType T> class AnimationProperty {
+template <CurveFormType T> class AnimationProperty {
+public:
+  using value_type = T;
+
 public:
   explicit AnimationProperty(const T &value) : m_value(value) {};
   template <IsFloatDoubleInt... Args>
@@ -88,6 +91,7 @@ public:
   T GetInstValue() const { return m_value; }
   T GetValueAtAt_Slow(double t) const {
     assert(m_curveOrSplinePtr && "Curve/spline not defined");
+
     return std::visit(
         [&t](const auto &curveOrSpline) {
           return curveOrSpline->GetValueAtAt_Slow(t);
@@ -121,6 +125,10 @@ public:
 
 public:
   using CurveOrSplinePtr = std::variant<const Curve<T> *, const Spline<T> *>;
+  void SetCurvePtr(const Curve<T> *curvePtr) { m_curveOrSplinePtr = curvePtr; }
+  void SetSplinePtr(const Spline<T> *splinePtr) {
+    m_curveOrSplinePtr = splinePtr;
+  }
 
 private:
   CurveOrSplinePtr m_curveOrSplinePtr;

@@ -8,6 +8,8 @@
 #include "TimeEvent.h"
 #include <algorithm>
 #include <cstddef>
+#include <stdexcept>
+#include <type_traits>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -21,19 +23,75 @@ using AnimationPropertyPtr =
                  AnimationProperty<glm::vec4> *>;
 
 using CurvePtr =
-    std::variant<Curve<float> *, Curve<double> *, Curve<glm::vec2> *,
-                 Curve<glm::vec3> *, Curve<glm::vec4> *>;
-
+    std::variant<const Curve<float> *, const Curve<double> *,
+                 const Curve<glm::vec2> *, const Curve<glm::vec3> *,
+                 const Curve<glm::vec4> *>;
 using SplinePtr =
-    std::variant<Spline<float> *, Spline<double> *, Spline<glm::vec2> *,
-                 Spline<glm::vec3> *, Spline<glm::vec4> *>;
+    std::variant<const Spline<float> *, const Spline<double> *,
+                 const Spline<glm::vec2> *, const Spline<glm::vec3> *,
+                 const Spline<glm::vec4> *>;
 
-struct TimeTrain {
-  AnimationPropertyPtr passenger;
-  float boardStn = 0.0f;
-  float destStn = 1.0f;
-  TimeTrain(CurvePtr) {}
-  TimeTrain(SplinePtr) {}
+class TimeTrain {
+  friend class AnimationTrack;
+
+  TimeTrain(AnimationPropertyPtr passengerPtr, CurvePtr curvePtr,
+            float boardStation, float destStation) {
+    std::visit(
+        [&](auto *curvePtrVal) {
+          std::visit(
+              [&](auto *passengerPtrVal) {
+                using PassengerValueType = typename std::decay_t<
+                    decltype(*passengerPtrVal)>::value_type;
+                using CurveValueType =
+                    typename std::decay_t<decltype(*curvePtrVal)>::value_type;
+                if constexpr (std::is_same_v<PassengerValueType,
+                                             CurveValueType>) {
+                  passengerPtrVal->SetCurvePtr(curvePtrVal);
+                  m_passengerPtr = passengerPtr;
+                  m_boardStation = boardStation;
+                  m_destStation = destStation;
+                } else {
+                  throw std::runtime_error(
+                      "trying to bind a Curve to an AnimationProperty that are "
+                      "of different types");
+                }
+              },
+              passengerPtr);
+        },
+        curvePtr);
+  }
+  TimeTrain(AnimationPropertyPtr passengerPtr, SplinePtr splinePtr,
+            float boardStation, float destStation) {
+    std::visit(
+        [&](auto *splinePtrVal) {
+          std::visit(
+              [&](auto *passengerPtrVal) {
+                using PassengerValueType = typename std::decay_t<
+                    decltype(*passengerPtrVal)>::value_type;
+                using SplineValueType =
+                    typename std::decay_t<decltype(*splinePtrVal)>::value_type;
+                if constexpr (std::is_same_v<PassengerValueType,
+                                             SplineValueType>) {
+                  passengerPtrVal->SetSplinePtr(splinePtrVal);
+                  m_passengerPtr = passengerPtr;
+                  m_boardStation = boardStation;
+                  m_destStation = destStation;
+                } else {
+                  throw std::runtime_error("trying to bind a Spline to an "
+                                           "AnimationProperty that are "
+                                           "of different types");
+                }
+              },
+              passengerPtr);
+        },
+        splinePtr);
+  }
+  TimeTrain() = delete;
+
+private:
+  AnimationPropertyPtr m_passengerPtr;
+  float m_boardStation = 0.0f;
+  float m_destStation = 1.0f;
 };
 
 class AnimationTrack : public Subscriber {
@@ -47,10 +105,10 @@ public:
   void Insert(TimeTrain timeTrain) {
     // list is already sorted at this point
     auto cmp = [](const TimeTrain &a, const TimeTrain &b) {
-      if (a.boardStn != b.boardStn)
-        return a.boardStn < b.boardStn;
+      if (a.m_boardStation != b.m_boardStation)
+        return a.m_boardStation < b.m_boardStation;
       else
-        return a.destStn < b.destStn;
+        return a.m_destStation < b.m_destStation;
     };
     auto pos = std::upper_bound(m_timeTrains.begin(), m_timeTrains.end(),
                                 timeTrain, cmp);
@@ -81,12 +139,12 @@ private:
   void Sort() {
     std::sort(m_timeTrains.begin(), m_timeTrains.end(),
               [](const TimeTrain &a, const TimeTrain &b) {
-                if (a.boardStn < b.boardStn)
+                if (a.m_boardStation < b.m_boardStation)
                   return true;
-                else if (a.boardStn > b.boardStn)
+                else if (a.m_boardStation > b.m_boardStation)
                   return false;
                 else
-                  return a.destStn < b.destStn;
+                  return a.m_destStation < b.m_destStation;
               });
   }
 
@@ -111,8 +169,8 @@ private:
   bool OnUpdate(TimeEvent &e) {
     if ((m_elapsedTimeS += e.GetDeltaS()) < m_durationS) {
       for (const TimeTrain &tt : m_timeTrains) {
-        auto &board = tt.boardStn;
-        auto &dest = tt.destStn;
+        auto &board = tt.m_boardStation;
+        auto &dest = tt.m_destStation;
 
         double t = GetNormalizedElapsedSecs();
 

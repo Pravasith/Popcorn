@@ -28,7 +28,7 @@ PcRenderFlowCmdBuffersMap RendererVk::s_renderFlowCmdBuffers;
 
 void RendererVk::DrawFrame(const Scene &scene) {
   ContextVk::Frame()->Draw(
-      [&]() {
+      [&]() { // swapchain invalid cb
         vkDeviceWaitIdle(ContextVk::Device()->GetDevice());
 
         RenderFlowVk::AllocShaders();
@@ -36,10 +36,11 @@ void RendererVk::DrawFrame(const Scene &scene) {
           renderFlow->OnSwapchainInvalidCb();
         }
       },
-      [&](const uint32_t currentFrame) {
+      [&](const uint32_t currentFrame) { // update scene cb
         RenderFlowVk::CopyDynamicUniformsToMemory(currentFrame);
       },
-      [&](const uint32_t frameIndex, const uint32_t currentFrame) {
+      [&](const uint32_t frameIndex,
+          const uint32_t currentFrame) { // record draw commands cb
         int i = 0;
         for (auto &renderFlow : s_renderFlows) {
           renderFlow->RecordCommandBuffer(frameIndex, currentFrame);

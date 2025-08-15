@@ -19,12 +19,12 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-template <CurveValueType T> struct Knot {
+template <CurveFormType T> struct Knot {
   T valueAtT;
   float t = .0f; // [0, 1]
 };
 
-template <CurveValueType T> struct SplineSegment {
+template <CurveFormType T> struct SplineSegment {
   // TODO: just degree 3 for now bc curves are currently designed as cubic, add
   // quadratic & others later.
   const Curve<T> *curve;
@@ -46,7 +46,10 @@ template <CurveValueType T> struct SplineSegment {
 // --- SPLINE --------------------------------------------------------
 //
 //
-template <CurveValueType T> class Spline {
+template <CurveFormType T> class Spline {
+public:
+  using value_type = T;
+
 protected:
   // Default ctor not for making base Spline objects, but only for the derived
   // classes to use so they can build the custom segments from m_knots.
@@ -201,7 +204,7 @@ protected:
 //
 
 // TODO: Later
-template <CurveValueType T> class BSpline : public Spline<T> {
+template <CurveFormType T> class BSpline : public Spline<T> {
 public:
   BSpline() {}
 
@@ -214,7 +217,7 @@ private:
 // --- CATMULL-ROM-SPLINE --------------------------------------------
 //
 
-template <CurveValueType T> class CatmullRomSpline : public Spline<T> {
+template <CurveFormType T> class CatmullRomSpline : public Spline<T> {
   using Spline<T>::m_segments;
 
 public:
