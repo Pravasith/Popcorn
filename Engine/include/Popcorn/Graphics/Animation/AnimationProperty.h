@@ -7,7 +7,6 @@
 #include "Splines.h"
 #include <cassert>
 #include <type_traits>
-#include <variant>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -16,6 +15,8 @@ enum class Axes { X = 0, Y = 1, Z = 2, W = 3 };
 template <typename T>
 concept IsFloatDoubleInt = std::is_same_v<T, float> || std::is_same_v<T, int> ||
                            std::is_same_v<T, double>;
+
+enum class SelectedCurveSplineType { None = 0, Curve, Spline };
 
 // Owned by classes like GameObject & Material
 template <CurveFormType T> class AnimationProperty {
@@ -88,50 +89,45 @@ public:
   }
 #undef BLOCK_IF_ANIMATING_ALREADY
 
-  T GetInstValue() const { return m_value; }
-  T GetValueAtAt_Slow(double t) const {
-    assert(m_curveOrSplinePtr && "Curve/spline not defined");
-
-    return std::visit(
-        [&t](const auto &curveOrSpline) {
-          return curveOrSpline->GetValueAtAt_Slow(t);
-        },
-        m_curveOrSplinePtr);
+  T GetValueAt_Fast(float t) const {
+    assert((m_curvePtr || m_splinePtr) && "Curve/spline not defined");
+    if (m_splinePtr)
+      return m_splinePtr->GetValueAt_Fast(t);
+    return m_curvePtr->GetValueAt_Fast(t);
   }
-  T GetValueAtAt_Fast(float t) const {
-    assert(m_curveOrSplinePtr && "Curve/spline not defined");
-    return std::visit(
-        [&t](const auto &curveOrSpline) {
-          return curveOrSpline->GetValueAtAt_Fast(t);
-        },
-        m_curveOrSplinePtr);
-  }
-  T GetFirstDerivativeAt_Slow(double t) const {
-    assert(m_curveOrSplinePtr && "Curve/spline not defined");
-    return std::visit(
-        [&t](const auto &curveOrSpline) {
-          return curveOrSpline->GetFirstDerivativeAt_Slow(t);
-        },
-        m_curveOrSplinePtr);
+  T GetValueAt_Slow(double t) const {
+    assert((m_curvePtr || m_splinePtr) && "Curve/spline not defined");
+    if (m_splinePtr)
+      return m_splinePtr->GetValueAt_Slow(t);
+    return m_curvePtr->GetValueAt_Slow(t);
   }
   T GetFirstDerivativeAt_Fast(float t) const {
-    assert(m_curveOrSplinePtr && "Curve/spline not defined");
-    return std::visit(
-        [&t](const auto &curveOrSpline) {
-          return curveOrSpline->GetFirstDerivativeAt_Fast(t);
-        },
-        m_curveOrSplinePtr);
+    assert((m_curvePtr || m_splinePtr) && "Curve/spline not defined");
+    if (m_splinePtr)
+      return m_splinePtr->GetFirstDerivativeAt_Fast(t);
+    return m_curvePtr->GetFirstDerivativeAt_Fast(t);
+  }
+  T GetFirstDerivativeAt_Slow(double t) const {
+    assert((m_curvePtr || m_splinePtr) && "Curve/spline not defined");
+    if (m_splinePtr)
+      return m_splinePtr->GetFirstDerivativeAt_Slow(t);
+    return m_curvePtr->GetFirstDerivativeAt_Slow(t);
   }
 
 public:
-  using CurveOrSplinePtr = std::variant<const Curve<T> *, const Spline<T> *>;
-  void SetCurvePtr(const Curve<T> *curvePtr) { m_curveOrSplinePtr = curvePtr; }
-  void SetSplinePtr(const Spline<T> *splinePtr) {
-    m_curveOrSplinePtr = splinePtr;
+  void SetCurvePtr(const Curve<T> *c) {
+    m_curvePtr = c;
+    m_splinePtr = nullptr;
+  }
+  void SetSplinePtr(const Spline<T> *s) {
+    m_splinePtr = s;
+    m_curvePtr = nullptr;
   }
 
 private:
-  CurveOrSplinePtr m_curveOrSplinePtr;
+  const Curve<T> *m_curvePtr = nullptr;
+  const Spline<T> *m_splinePtr = nullptr;
+
   void SetIsAnimating(bool isAnimating) { m_isAnimating = isAnimating; }
 
 private:
