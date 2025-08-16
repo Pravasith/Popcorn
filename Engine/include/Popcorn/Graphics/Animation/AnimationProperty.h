@@ -11,6 +11,8 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+class TimeTrain;
+
 enum class Axes { X = 0, Y = 1, Z = 2, W = 3 };
 template <typename T>
 concept IsFloatDoubleInt = std::is_same_v<T, float> || std::is_same_v<T, int> ||
@@ -89,32 +91,35 @@ public:
   }
 #undef BLOCK_IF_ANIMATING_ALREADY
 
-  T GetValueAt_Fast(float t) const {
+  inline T GetValueAt_Fast(float t) const {
     assert((m_curvePtr || m_splinePtr) && "Curve/spline not defined");
     if (m_splinePtr)
       return m_splinePtr->GetValueAt_Fast(t);
     return m_curvePtr->GetValueAt_Fast(t);
   }
-  T GetValueAt_Slow(double t) const {
+  inline T GetValueAt_Slow(double t) const {
     assert((m_curvePtr || m_splinePtr) && "Curve/spline not defined");
     if (m_splinePtr)
       return m_splinePtr->GetValueAt_Slow(t);
     return m_curvePtr->GetValueAt_Slow(t);
   }
-  T GetFirstDerivativeAt_Fast(float t) const {
+  inline T GetFirstDerivativeAt_Fast(float t) const {
     assert((m_curvePtr || m_splinePtr) && "Curve/spline not defined");
     if (m_splinePtr)
       return m_splinePtr->GetFirstDerivativeAt_Fast(t);
     return m_curvePtr->GetFirstDerivativeAt_Fast(t);
   }
-  T GetFirstDerivativeAt_Slow(double t) const {
+  inline T GetFirstDerivativeAt_Slow(double t) const {
     assert((m_curvePtr || m_splinePtr) && "Curve/spline not defined");
     if (m_splinePtr)
       return m_splinePtr->GetFirstDerivativeAt_Slow(t);
     return m_curvePtr->GetFirstDerivativeAt_Slow(t);
   }
 
-public:
+private:
+  friend class TimeTrain;
+
+  void SetIsAnimating(bool isAnimating) { m_isAnimating = isAnimating; }
   void SetCurvePtr(const Curve<T> *c) {
     m_curvePtr = c;
     m_splinePtr = nullptr;
@@ -124,11 +129,11 @@ public:
     m_curvePtr = nullptr;
   }
 
+  void Morph(const T &passengerValue) { m_value = passengerValue; };
+
 private:
   const Curve<T> *m_curvePtr = nullptr;
   const Spline<T> *m_splinePtr = nullptr;
-
-  void SetIsAnimating(bool isAnimating) { m_isAnimating = isAnimating; }
 
 private:
   bool m_isAnimating = false;

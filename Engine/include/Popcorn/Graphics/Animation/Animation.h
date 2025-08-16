@@ -1,9 +1,12 @@
 #pragma once
 
 #include "AnimationProperty.h"
+#include "CurveDefs.h"
+#include "Curves.h"
 #include "Event.h"
 #include "GlobalMacros.h"
 #include "MathConstants.h"
+#include "Splines.h"
 #include "Subscriber.h"
 #include "TimeEvent.h"
 #include <algorithm>
@@ -31,6 +34,46 @@ using SplinePtr =
                  const Spline<glm::vec2> *, const Spline<glm::vec3> *,
                  const Spline<glm::vec4> *>;
 
+struct TrainExec {
+  void *animPropPtr = nullptr;
+  const void *crvSplPtr = nullptr;
+
+  void (*animateFast_Fptr)(void *animationPropertyPtr, void *curveOrSplinePtr,
+                           float &u) = nullptr;
+  void (*animateSlow_Fptr)(void *animationPropertyPtr, void *curveOrSplinePtr,
+                           double &u) = nullptr;
+};
+
+// Animate curve or spline thunks
+template <CurveFormType T>
+static void AnimateFast_Curve(void *animationPropertyPtr, const void *curvePtr,
+                              float &u) {
+  auto *p = static_cast<AnimationProperty<T> *>(animationPropertyPtr);
+  auto *c = static_cast<const Curve<T> *>(curvePtr);
+  p->Morph(c->GetValueAt_Fast(u));
+};
+template <CurveFormType T>
+static void AnimateSlow_Curve(void *animationPropertyPtr, const void *curvePtr,
+                              double &u) {
+  auto *p = static_cast<AnimationProperty<T> *>(animationPropertyPtr);
+  auto *c = static_cast<const Curve<T> *>(curvePtr);
+  p->Morph(c->GetValueAt_Slow(u));
+};
+template <CurveFormType T>
+static void AnimateFast_Spline(void *animationPropertyPtr,
+                               const void *splinePtr, float &u) {
+  auto *p = static_cast<AnimationProperty<T> *>(animationPropertyPtr);
+  auto *s = static_cast<const Spline<T> *>(splinePtr);
+  p->Morph(s->GetValueAt_Fast(u));
+};
+template <CurveFormType T>
+static void AnimateSlow_Spline(void *animationPropertyPtr,
+                               const void *splinePtr, double &u) {
+  auto *p = static_cast<AnimationProperty<T> *>(animationPropertyPtr);
+  auto *s = static_cast<const Spline<T> *>(splinePtr);
+  p->Morph(s->GetValueAt_Slow(u));
+};
+
 class TimeTrain {
   friend class AnimationTrack;
 
@@ -44,6 +87,7 @@ class TimeTrain {
                     decltype(*passengerPtrVal)>::value_type;
                 using CurveValueType =
                     typename std::decay_t<decltype(*curvePtrVal)>::value_type;
+
                 if constexpr (std::is_same_v<PassengerValueType,
                                              CurveValueType>) {
                   passengerPtrVal->SetCurvePtr(curvePtrVal);
@@ -153,8 +197,7 @@ private:
     if (m_elapsedTimeS - m_durationS < PC_EPS) {
       return 1.0;
     }
-
-    return m_elapsedTimeS / m_durationS;
+    return std::clamp(m_elapsedTimeS / m_durationS, 0.0, 1.0);
   }
 
 private:
@@ -173,11 +216,8 @@ private:
         auto &dest = tt.m_destStation;
 
         double t = GetNormalizedElapsedSecs();
-
         // TODO:
-        // auto &animatable = tt.timetrain->curveBinding.animatable;
-        // animatable->Animate<X>(
-        //      tt.keysCurve->ValueAt(m_elapsedTimeS));
+        // optimize visit
       }
     } else {
       if (m_onPlayFinishCb) {
