@@ -12,11 +12,12 @@
 #include <glm/glm.hpp>
 
 using namespace Popcorn;
-class BlenderScene : public Scene {};
+class BlenderScene : public Scene {}; // Game Objects are owned by Scene
 class GameLayer : public Layer {
 public:
   GameLayer() { PC_PRINT("CREATED", TagType::Constr, "GAME-LAYER") };
   ~GameLayer() { PC_PRINT("DESTROYED", TagType::Destr, "GAME-LAYER") };
+
   virtual void OnAttach() override {
     // Popcorn::Context::ConvertGltfToScene("../assets/models/light2.gltf",
     // scene);
@@ -26,6 +27,7 @@ public:
     //                                      scene);
     Popcorn::Context::RegisterScene(scene);
     building = scene.FindObjectByName("building");
+
     // building->Translate(100.f, Axes::Z);
     // building = scene.FindObjectByName("Point.003");
     // Animatable Objects ...
@@ -104,7 +106,11 @@ public:
   };
 
   virtual void OnUpdate(TimeEvent &e) override {
-    building->RotateEuler<Axes::Y>(glm::radians(20.f) * e.GetDeltaS());
+    // building->RotateEuler<Axes::Y>(glm::radians(20.f) * e.GetDeltaS());
+    //
+    // std::cout << building->GetPosition().x << "," <<
+    // building->GetPosition().y
+    //           << "," << building->GetPosition().z << "\n";
   };
 
   virtual void OnRender() override {

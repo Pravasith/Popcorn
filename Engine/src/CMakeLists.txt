@@ -46,6 +46,7 @@ add_library(
   # SCENE
   ${SCENE_IMPL_DIR}/GameObject.cpp
   ${SCENE_IMPL_DIR}/Scene.cpp
+  ${SCENE_IMPL_DIR}/Transforms.cpp
   #
   # OPENGL CLASSES
   ${PLATFORM_IMPL_DIR}/OpenGL/RendererOpenGL.cpp

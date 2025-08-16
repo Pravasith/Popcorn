@@ -647,6 +647,7 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
                           cameraSets.size(), cameraSets.data(), 1,
                           &cameraOffset);
 
+  // TODO: Optimize - currently iterates over a map, make it vector
   for (auto &[materialHash, submeshes] : s_basicMatSubmeshesMap) {
     uint32_t basicMatOffset = bufferOffsets.materialOffsets[materialHash];
 
@@ -689,6 +690,7 @@ void GBufferRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
                           cameraSets.size(), cameraSets.data(), 1,
                           &cameraOffset);
 
+  // TODO: Optimize - currently iterates over a map, make it vector
   for (auto &[materialHash, submeshes] : s_pbrMatSubmeshesMap) {
     uint32_t pbrMatOffset = bufferOffsets.materialOffsets[materialHash];
 

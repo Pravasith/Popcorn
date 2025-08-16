@@ -14,15 +14,23 @@ GFX_NAMESPACE_BEGIN
 class SceneLibrary {
 public:
   SceneLibrary() { PC_PRINT("CREATED", TagType::Constr, "SceneLibrary"); };
-  ~SceneLibrary() { PC_PRINT("DESTROYED", TagType::Destr, "SceneLibrary"); };
+  ~SceneLibrary() {
+    m_scenes.clear(); // scene deletes internal GameObjects
+    PC_PRINT("DESTROYED", TagType::Destr, "SceneLibrary");
+  };
 
   [[nodiscard]] inline const std::vector<Scene *> &GetScenes() const {
     return m_scenes;
   }
 
   void Add(Scene *scene) {
-    m_scenes.emplace_back(scene);
-    PC_PRINT("Scene added to library", TagType::Print, "SceneLibrary")
+    auto it = std::find(m_scenes.begin(), m_scenes.end(), scene);
+    if (it == m_scenes.end()) {
+      m_scenes.emplace_back(scene);
+      PC_PRINT("Scene added to library", TagType::Print, "SceneLibrary")
+    } else {
+      PC_WARN("Scene not added, it already exists in sceneLibrary")
+    };
   }
 
   void Remove(Scene *node) {

@@ -20,15 +20,16 @@ Publisher::~Publisher() {
 
 void Publisher::Subscribe(Subscriber *subscriber) {
   m_subscribers.push_back(subscriber);
-  PC_PRINT(subscriber->GetName() << " subscribed to " << m_name, TagType::Print,
-           "PUBLISHERS")
+  // PC_PRINT(subscriber->GetName() << " subscribed to " << m_name,
+  // TagType::Print,
+  //          "PUBLISHERS")
 };
 
 void Publisher::UnSubscribe(Subscriber *subscriber) {
   auto iter = std::find(m_subscribers.begin(), m_subscribers.end(), subscriber);
   if (iter != m_subscribers.end()) {
-    PC_PRINT(subscriber->GetName() << " un-subscribed from " << m_name,
-             TagType::Print, "PUBLISHERS")
+    // PC_PRINT(subscriber->GetName() << " un-subscribed from " << m_name,
+    //          TagType::Print, "PUBLISHERS")
     m_subscribers.erase(iter);
   };
 };

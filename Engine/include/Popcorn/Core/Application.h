@@ -50,7 +50,7 @@ private:
   virtual ~Application() override;
 
   virtual void OnEvent(Event &) override;
-  virtual bool OnUpdate(TimeEvent &) override;
+  // virtual bool OnUpdate(TimeEvent &) override;
 
   bool OnClockTick(TimeEvent &);
 
