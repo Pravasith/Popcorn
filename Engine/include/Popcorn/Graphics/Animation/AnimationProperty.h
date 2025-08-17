@@ -92,48 +92,53 @@ public:
 #undef BLOCK_IF_ANIMATING_ALREADY
 
   inline T GetValueAt_Fast(float t) const {
-    assert((m_curvePtr || m_splinePtr) && "Curve/spline not defined");
-    if (m_splinePtr)
-      return m_splinePtr->GetValueAt_Fast(t);
-    return m_curvePtr->GetValueAt_Fast(t);
+    assert(m_railVTable.IsValid() && "Curve/spline not defined");
+    return (*m_railVTable.valueAtFast_Fptr)(t);
   }
   inline T GetValueAt_Slow(double t) const {
-    assert((m_curvePtr || m_splinePtr) && "Curve/spline not defined");
-    if (m_splinePtr)
-      return m_splinePtr->GetValueAt_Slow(t);
-    return m_curvePtr->GetValueAt_Slow(t);
+    assert(m_railVTable.IsValid() && "Curve/spline not defined");
+    return (*m_railVTable.valueAtSlow_Fptr)(t);
   }
   inline T GetFirstDerivativeAt_Fast(float t) const {
-    assert((m_curvePtr || m_splinePtr) && "Curve/spline not defined");
-    if (m_splinePtr)
-      return m_splinePtr->GetFirstDerivativeAt_Fast(t);
-    return m_curvePtr->GetFirstDerivativeAt_Fast(t);
+    assert(m_railVTable.IsValid() && "Curve/spline not defined");
+    return (*m_railVTable.velocityAtFast_Fptr)(t);
   }
   inline T GetFirstDerivativeAt_Slow(double t) const {
-    assert((m_curvePtr || m_splinePtr) && "Curve/spline not defined");
-    if (m_splinePtr)
-      return m_splinePtr->GetFirstDerivativeAt_Slow(t);
-    return m_curvePtr->GetFirstDerivativeAt_Slow(t);
+    assert(m_railVTable.IsValid() && "Curve/spline not defined");
+    return (*m_railVTable.velocityAtSlow_Fptr)(t);
   }
 
 private:
   friend class TimeTrain;
 
-  void SetIsAnimating(bool isAnimating) { m_isAnimating = isAnimating; }
-  void SetCurvePtr(const Curve<T> *c) {
-    m_curvePtr = c;
-    m_splinePtr = nullptr;
-  }
-  void SetSplinePtr(const Spline<T> *s) {
-    m_splinePtr = s;
-    m_curvePtr = nullptr;
-  }
+  inline void SetIsAnimating(bool isAnimating) { m_isAnimating = isAnimating; }
+  inline void Morph(const T &passengerValue) { m_value = passengerValue; }
 
-  void Morph(const T &passengerValue) { m_value = passengerValue; };
+#define BIND_RAIL_STUFF                                                        \
+  m_railVTable.rail = r;                                                       \
+  m_railVTable.valueAtFast_Fptr = &r->GetValueAt_Fast;                         \
+  m_railVTable.valueAtSlow_Fptr = &r->GetValueAt_Slow;                         \
+  m_railVTable.velocityAtFast_Fptr = &r->GetFirstDerivativeAt_Fast;            \
+  m_railVTable.velocityAtSlow_Fptr = &r->GetFirstDerivativeAt_Slow;
+
+  inline void BindRail(const Curve<T> *r) { BIND_RAIL_STUFF }
+  inline void BindRail(const Spline<T> *r) { BIND_RAIL_STUFF }
+#undef BIND_RAIL_STUFF
 
 private:
-  const Curve<T> *m_curvePtr = nullptr;
-  const Spline<T> *m_splinePtr = nullptr;
+  template <CurveFormType U> struct RailVTable {
+    void *rail = nullptr;
+    U (*valueAtFast_Fptr)(float t) = nullptr;
+    U (*valueAtSlow_Fptr)(float t) = nullptr;
+    U (*velocityAtFast_Fptr)(float t) = nullptr;
+    U (*velocityAtSlow_Fptr)(float t) = nullptr;
+    bool IsValid() {
+      return rail && valueAtSlow_Fptr && valueAtFast_Fptr &&
+             velocityAtSlow_Fptr && velocityAtFast_Fptr;
+    }
+  };
+
+  RailVTable<T> m_railVTable{};
 
 private:
   bool m_isAnimating = false;

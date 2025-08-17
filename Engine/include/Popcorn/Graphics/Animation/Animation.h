@@ -5,7 +5,6 @@
 #include "Curves.h"
 #include "Event.h"
 #include "GlobalMacros.h"
-#include "MathConstants.h"
 #include "Splines.h"
 #include "Subscriber.h"
 #include "TimeEvent.h"
@@ -51,7 +50,7 @@ class TimeTrain {
 
                 if constexpr (std::is_same_v<PassengerValueType,
                                              CurveValueType>) {
-                  passengerPtrVal->SetCurvePtr(curvePtrVal);
+                  passengerPtrVal->BindRail(curvePtrVal);
 
                   m.trainExec.animPropPtr = passengerPtrVal;
                   m.trainExec.crvSplPtr = curvePtrVal;
@@ -85,7 +84,7 @@ class TimeTrain {
                     typename std::decay_t<decltype(*splinePtrVal)>::value_type;
                 if constexpr (std::is_same_v<PassengerValueType,
                                              SplineValueType>) {
-                  passengerPtrVal->SetSplinePtr(splinePtrVal);
+                  passengerPtrVal->BindRail(splinePtrVal);
 
                   m.trainExec.animPropPtr = passengerPtrVal;
                   m.trainExec.crvSplPtr = splinePtrVal;
