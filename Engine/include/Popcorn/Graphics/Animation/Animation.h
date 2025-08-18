@@ -10,6 +10,8 @@
 #include "TimeEvent.h"
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
+#include <cstdlib>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
@@ -34,10 +36,9 @@ using SplinePtr =
                  const Spline<glm::vec4> *>;
 
 class TimeTrain {
-  friend class AnimationTrack;
-
+public:
   TimeTrain(AnimationPropertyPtr passengerPtr, CurvePtr curvePtr,
-            float boardStation, float destStation) {
+            double boardStation, double destStation) {
 
     std::visit(
         [&](auto *curvePtrVal) {
@@ -60,8 +61,8 @@ class TimeTrain {
                       &AnimateSlow_Curve<CurveValueType>;
 
                   m_passengerPtr = passengerPtr;
-                  m_boardStation = boardStation;
-                  m_destStation = destStation;
+                  board = boardStation;
+                  dest = destStation;
                 } else {
                   throw std::runtime_error(
                       "trying to bind a Curve to an AnimationProperty that are "
@@ -73,7 +74,7 @@ class TimeTrain {
         curvePtr);
   }
   TimeTrain(AnimationPropertyPtr passengerPtr, SplinePtr splinePtr,
-            float boardStation, float destStation) {
+            double boardStation, double destStation) {
     std::visit(
         [&](auto *splinePtrVal) {
           std::visit(
@@ -94,8 +95,8 @@ class TimeTrain {
                       &AnimateSlow_Spline<SplineValueType>;
 
                   m_passengerPtr = passengerPtr;
-                  m_boardStation = boardStation;
-                  m_destStation = destStation;
+                  board = boardStation;
+                  dest = destStation;
                 } else {
                   throw std::runtime_error("trying to bind a Spline to an "
                                            "AnimationProperty that are "
@@ -108,6 +109,17 @@ class TimeTrain {
   }
   TimeTrain() = delete;
 
+  void AnimateFast(float u) {
+    m.trainExec.animateFast_Fptr(m.trainExec.animPropPtr, m.trainExec.crvSplPtr,
+                                 u);
+  }
+
+  void AnimateSlow(double u) {
+    m.trainExec.animateFast_Fptr(m.trainExec.animPropPtr, m.trainExec.crvSplPtr,
+                                 u);
+  }
+
+private:
   // Animate curve or spline thunks
   template <CurveFormType T>
   static void AnimateFast_Curve(void *animationPropertyPtr,
@@ -138,10 +150,12 @@ class TimeTrain {
     p->Morph(s->GetValueAt_Slow(u));
   };
 
+public:
+  double board;
+  double dest;
+
 private:
   AnimationPropertyPtr m_passengerPtr;
-  float m_boardStation = 0.0f;
-  float m_destStation = 1.0f;
 
   // --- perf stuff -----------------------------------------------------------
   struct TrainExec {
@@ -163,20 +177,22 @@ public:
   AnimationTrack(std::vector<TimeTrain> &&timetrains)
       : m_timeTrains(std::move(timetrains)) {
     Sort();
+    // TODO: Fill the boardTimeMarkers vector
   }
   ~AnimationTrack() = default;
 
   void Insert(TimeTrain timeTrain) {
     // list is already sorted at this point
     auto cmp = [](const TimeTrain &a, const TimeTrain &b) {
-      if (a.m_boardStation != b.m_boardStation)
-        return a.m_boardStation < b.m_boardStation;
+      if (a.board != b.board)
+        return a.board < b.board;
       else
-        return a.m_destStation < b.m_destStation;
+        return a.dest < b.dest;
     };
     auto pos = std::upper_bound(m_timeTrains.begin(), m_timeTrains.end(),
                                 timeTrain, cmp);
     m_timeTrains.insert(pos, timeTrain);
+    // TODO: Adjust the boardTimeMarkers vector
   }
 
   void Play(double durationInSecs) {
@@ -203,12 +219,12 @@ private:
   void Sort() {
     std::sort(m_timeTrains.begin(), m_timeTrains.end(),
               [](const TimeTrain &a, const TimeTrain &b) {
-                if (a.m_boardStation < b.m_boardStation)
+                if (a.board < b.board)
                   return true;
-                else if (a.m_boardStation > b.m_boardStation)
+                else if (a.board > b.board)
                   return false;
                 else
-                  return a.m_destStation < b.m_destStation;
+                  return a.dest < b.dest;
               });
   }
 
@@ -228,13 +244,36 @@ private:
 
   bool OnUpdate(TimeEvent &e) {
     if ((m_elapsedTimeS += e.GetDeltaS()) < m_durationS) {
-      for (const TimeTrain &tt : m_timeTrains) {
-        auto &board = tt.m_boardStation;
-        auto &dest = tt.m_destStation;
+      double t = GetNormalizedElapsedSecs();
 
-        double t = GetNormalizedElapsedSecs();
-        // TODO:
-        // animation stuff
+      for (size_t i = 0; i < m_boardDestMarkers.size(); ++i) {
+        auto &[l, r] = m_boardDestMarkers[i];
+        if (l == 0 && r == 0) {
+          // single element case
+          auto &tt = m_timeTrains[0];
+          if (t < tt.dest) {
+            double u = (t - tt.board) / (tt.dest - tt.board);
+            tt.AnimateFast(u);
+          }
+          continue;
+        }
+
+        if (r - l < 1)
+          continue;
+
+        for (size_t j = l; j < r; ++j) {
+          auto &tt = m_timeTrains[j];
+          auto &board = tt.board;
+          auto &dest = tt.dest;
+
+          if (dest < t) {
+            ++l;
+            continue;
+          }
+
+          double u = (t - board) / (dest - board);
+          tt.AnimateFast(u);
+        }
       }
     } else {
       if (m_onPlayFinishCb) {
@@ -258,7 +297,13 @@ private:
 
   // TODO: parent stuff
   std::vector<AnimationTrack *> m_children;
-  std::unordered_map<float, size_t> m_boardStnIndicesMap;
+
+  struct BoardDestMarkers {
+    size_t l;
+    size_t r;
+  };
+
+  std::vector<BoardDestMarkers> m_boardDestMarkers;
 };
 
 GFX_NAMESPACE_END
