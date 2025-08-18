@@ -93,19 +93,19 @@ public:
 
   inline T GetValueAt_Fast(float t) const {
     assert(m_railVTable.IsValid() && "Curve/spline not defined");
-    return (*m_railVTable.valueAtFast_Fptr)(t);
+    return m_railVTable.valueAtFast_Fptr(m_railVTable.rail, t);
   }
   inline T GetValueAt_Slow(double t) const {
     assert(m_railVTable.IsValid() && "Curve/spline not defined");
-    return (*m_railVTable.valueAtSlow_Fptr)(t);
+    return m_railVTable.valueAtSlow_Fptr(m_railVTable.rail, t);
   }
   inline T GetFirstDerivativeAt_Fast(float t) const {
     assert(m_railVTable.IsValid() && "Curve/spline not defined");
-    return (*m_railVTable.velocityAtFast_Fptr)(t);
+    return m_railVTable.velocityAtFast_Fptr(m_railVTable.rail, t);
   }
   inline T GetFirstDerivativeAt_Slow(double t) const {
     assert(m_railVTable.IsValid() && "Curve/spline not defined");
-    return (*m_railVTable.velocityAtSlow_Fptr)(t);
+    return m_railVTable.velocityAtSlow_Fptr(m_railVTable.rail, t);
   }
 
 private:
@@ -114,25 +114,55 @@ private:
   inline void SetIsAnimating(bool isAnimating) { m_isAnimating = isAnimating; }
   inline void Morph(const T &passengerValue) { m_value = passengerValue; }
 
-#define BIND_RAIL_STUFF                                                        \
-  m_railVTable.rail = r;                                                       \
-  m_railVTable.valueAtFast_Fptr = &r->GetValueAt_Fast;                         \
-  m_railVTable.valueAtSlow_Fptr = &r->GetValueAt_Slow;                         \
-  m_railVTable.velocityAtFast_Fptr = &r->GetFirstDerivativeAt_Fast;            \
-  m_railVTable.velocityAtSlow_Fptr = &r->GetFirstDerivativeAt_Slow;
+  inline void BindRail(const Curve<T> *r) {
+    m_railVTable.rail = r;
+    m_railVTable.valueAtFast_Fptr = &ValueAtFast_Curve;
+    m_railVTable.valueAtSlow_Fptr = &ValueAtSlow_Curve;
+    m_railVTable.velocityAtFast_Fptr = &VelocityAtFast_Curve;
+    m_railVTable.velocityAtSlow_Fptr = &VelocityAtSlow_Curve;
+  }
+  inline void BindRail(const Spline<T> *r) {
+    m_railVTable.rail = r;
+    m_railVTable.valueAtFast_Fptr = &ValueAtFast_Spline;
+    m_railVTable.valueAtSlow_Fptr = &ValueAtSlow_Spline;
+    m_railVTable.velocityAtFast_Fptr = &VelocityAtFast_Spline;
+    m_railVTable.velocityAtSlow_Fptr = &VelocityAtSlow_Spline;
+  }
 
-  inline void BindRail(const Curve<T> *r) { BIND_RAIL_STUFF }
-  inline void BindRail(const Spline<T> *r) { BIND_RAIL_STUFF }
-#undef BIND_RAIL_STUFF
+  // thunks for rails (curve & spline)
+  static inline T ValueAtFast_Curve(const void *r, float t) noexcept {
+    return static_cast<const Curve<T> *>(r)->GetValueAt_Fast(t);
+  }
+  static inline T ValueAtSlow_Curve(const void *r, double t) noexcept {
+    return static_cast<const Curve<T> *>(r)->GetValueAt_Slow(t);
+  }
+  static inline T VelocityAtFast_Curve(const void *r, float t) noexcept {
+    return static_cast<const Curve<T> *>(r)->GetFirstDerivativeAt_Fast(t);
+  }
+  static inline T VelocityAtSlow_Curve(const void *r, double t) noexcept {
+    return static_cast<const Curve<T> *>(r)->GetFirstDerivativeAt_Slow(t);
+  }
+  static inline T ValueAtFast_Spline(const void *r, float t) noexcept {
+    return static_cast<const Spline<T> *>(r)->GetValueAt_Fast(t);
+  }
+  static inline T ValueAtSlow_Spline(const void *r, double t) noexcept {
+    return static_cast<const Spline<T> *>(r)->GetValueAt_Slow(t);
+  }
+  static inline T VelocityAtFast_Spline(const void *r, float t) noexcept {
+    return static_cast<const Spline<T> *>(r)->GetFirstDerivativeAt_Fast(t);
+  }
+  static inline T VelocityAtSlow_Spline(const void *r, double t) noexcept {
+    return static_cast<const Spline<T> *>(r)->GetFirstDerivativeAt_Slow(t);
+  }
 
 private:
   template <CurveFormType U> struct RailVTable {
-    void *rail = nullptr;
-    U (*valueAtFast_Fptr)(float t) = nullptr;
-    U (*valueAtSlow_Fptr)(float t) = nullptr;
-    U (*velocityAtFast_Fptr)(float t) = nullptr;
-    U (*velocityAtSlow_Fptr)(float t) = nullptr;
-    bool IsValid() {
+    const void *rail = nullptr;
+    U (*valueAtFast_Fptr)(const void *rail, float t) noexcept = nullptr;
+    U (*valueAtSlow_Fptr)(const void *rail, double t) noexcept = nullptr;
+    U (*velocityAtFast_Fptr)(const void *rail, float t) noexcept = nullptr;
+    U (*velocityAtSlow_Fptr)(const void *rail, double t) noexcept = nullptr;
+    bool IsValid() const noexcept {
       return rail && valueAtSlow_Fptr && valueAtFast_Fptr &&
              velocityAtSlow_Fptr && velocityAtFast_Fptr;
     }
