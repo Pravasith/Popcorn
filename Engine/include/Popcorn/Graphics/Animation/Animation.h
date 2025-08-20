@@ -126,7 +126,8 @@ public:
 private:
   inline void SetInvLen() {
     const double len = dest - board;
-    invLen = (len > 0.0) ? 1.0 / std::max(len, PC_EPS_D) : 0.0;
+    // Treat tiny spans as instant (avoid 1/very-small blowing up)
+    invLen = (len > PC_EPS_D) ? 1.0 / len : 0.0;
   }
 
   // Animate curve or spline thunks
