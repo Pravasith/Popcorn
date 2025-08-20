@@ -1,0 +1,60 @@
+
+
+
+--- one time -------------------------------------------------------------------
+
+std::vector<uint32_t> starts(N), ends(N);
+std::iota(starts.begin(), starts.end(), 0);
+std::iota(ends.begin(),   ends.end(),   0);
+
+auto byBoard = [&](uint32_t a, uint32_t b){ return tt[a].board < tt[b].board; };
+auto byDest  = [&](uint32_t a, uint32_t b){ return tt[a].dest  < tt[b].dest;  };
+
+std::sort(starts.begin(), starts.end(), byBoard);
+std::sort(ends.begin(),   ends.end(),   byDest);
+
+// O(1) removal support
+std::vector<uint32_t> active; active.reserve(N);
+std::vector<int32_t>  loc(N, -1);
+
+// cursors
+size_t iStart = 0, iEnd = 0;
+
+// in TimeTrain ctor:
+tt.invLen = 1.0f / std::max(tt.dest - tt.board, PC_MIN_LEN<float>);
+
+
+
+--- per frame ---
+const double t = GetNormalizedElapsedSecs();
+
+// activate newly-started
+while (iStart < starts.size() && tt[starts[iStart]].board <= t) {
+  uint32_t idx = starts[iStart++];
+  loc[idx] = (int)active.size();
+  active.push_back(idx);
+}
+
+// deactivate newly-ended (swap-erase)
+while (iEnd < ends.size() && tt[ends[iEnd]].dest <= t) {
+  uint32_t idx = ends[iEnd++];
+  int p = loc[idx];
+  if (p >= 0) {
+    loc[idx] = -1;
+    uint32_t last = active.back();
+    active[p] = last;
+    loc[last] = p;
+    active.pop_back();
+  }
+}
+
+// animate only active
+for (uint32_t idx : active) {
+  auto& tr = tt[idx];
+  float u = float((t - double(tr.board)) * tr.invLen);   // board/dest in float
+  if constexpr (true) {                                   // light clamp
+    if (u < 0.f) u = 0.f; else if (u > 1.f) u = 1.f;
+  }
+  tr.AnimateFast(u); // your thunk call
+}
+

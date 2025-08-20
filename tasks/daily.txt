@@ -1,8 +1,18 @@
 
---- WEEK ------ TASK --------------------------------------------------------------
+
+--- WEEK ------ TASK ---------------------------------------------- TIME ---------
  :: Aug 18
-             :: Animation system OnUpdate algorithm
-             :: SplineFactory
-             :: GltfLoader interfacing w animation system
-             :: JSON parser for splines
-             :: Catmull-rom usage for dynamic splines - LATER
+             :: Animation system OnUpdate algorithm              :: 40 mins
+                :: Implement sweep-line algorithm, timetrains
+                :: Edge cases in group algorithm + testing
+             :: Make SplineFactory + pooling                     :: 10 mins
+             :: GltfLoader interfacing w animation system        :: 2 hrs
+             :: JSON parser for Blender exp. splines             :: 1 hr
+             :: Catmull-rom usage for dynamic splines            :: TBD
+             :: Animations testing - yayy!
+
+--- WEEK ------ TASK ---------------------------------------------- TIME ---------
+ :: Aug 25
+
+--- WEEK ------ TASK ---------------------------------------------- TIME ---------
+ :: Sep 01

@@ -5,13 +5,15 @@
 #include "Curves.h"
 #include "Event.h"
 #include "GlobalMacros.h"
+#include "MathConstants.h"
 #include "Splines.h"
 #include "Subscriber.h"
 #include "TimeEvent.h"
 #include <algorithm>
-#include <cstddef>
+#include <cassert>
 #include <cstdint>
 #include <cstdlib>
+#include <numeric>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
@@ -63,6 +65,7 @@ public:
                   m_passengerPtr = passengerPtr;
                   board = boardStation;
                   dest = destStation;
+                  SetInvLen();
                 } else {
                   throw std::runtime_error(
                       "trying to bind a Curve to an AnimationProperty that are "
@@ -97,6 +100,7 @@ public:
                   m_passengerPtr = passengerPtr;
                   board = boardStation;
                   dest = destStation;
+                  SetInvLen();
                 } else {
                   throw std::runtime_error("trying to bind a Spline to an "
                                            "AnimationProperty that are "
@@ -115,11 +119,16 @@ public:
   }
 
   void AnimateSlow(double u) {
-    m.trainExec.animateFast_Fptr(m.trainExec.animPropPtr, m.trainExec.crvSplPtr,
+    m.trainExec.animateSlow_Fptr(m.trainExec.animPropPtr, m.trainExec.crvSplPtr,
                                  u);
   }
 
 private:
+  inline void SetInvLen() {
+    const double len = dest - board;
+    invLen = (len > 0.0) ? 1.0 / std::max(len, PC_EPS_D) : 0.0;
+  }
+
   // Animate curve or spline thunks
   template <CurveFormType T>
   static void AnimateFast_Curve(void *animationPropertyPtr,
@@ -153,6 +162,7 @@ private:
 public:
   double board;
   double dest;
+  double invLen;
 
 private:
   AnimationPropertyPtr m_passengerPtr;
@@ -176,36 +186,36 @@ class AnimationTrack : public Subscriber {
 public:
   AnimationTrack(std::vector<TimeTrain> &&timetrains)
       : m_timeTrains(std::move(timetrains)) {
-    Sort();
-    // TODO: Fill the boardTimeMarkers vector
+    SweepLineSetUp();
   }
   ~AnimationTrack() = default;
 
   void Insert(TimeTrain timeTrain) {
-    // list is already sorted at this point
-    auto cmp = [](const TimeTrain &a, const TimeTrain &b) {
-      if (a.board != b.board)
-        return a.board < b.board;
-      else
-        return a.dest < b.dest;
-    };
-    auto pos = std::upper_bound(m_timeTrains.begin(), m_timeTrains.end(),
-                                timeTrain, cmp);
-    m_timeTrains.insert(pos, timeTrain);
-    // TODO: Adjust the boardTimeMarkers vector
+    m_timeTrains.push_back(timeTrain);
+    SweepLineSetUp();
   }
 
+#define RESET_SWEEP_LINE_SETS                                                  \
+  m_startSlider = m_endSlider = 0;                                             \
+  m_active.clear();                                                            \
+  std::fill(m_locInActive.begin(), m_locInActive.end(), -1);
+
   void Play(double durationInSecs) {
+    m_elapsedTimeS = 0.0;
     m_durationS = durationInSecs;
     m_isPlaying = true;
+    RESET_SWEEP_LINE_SETS
   }
 
   void Play(double durationInSecs,
             std::function<void(AnimationTrack *)> onFinishCb) {
+    m_elapsedTimeS = 0.0;
     m_durationS = durationInSecs;
     m_isPlaying = true;
     m_onPlayFinishCb = std::move(onFinishCb);
+    RESET_SWEEP_LINE_SETS
   }
+#undef RESET_SWEEP_LINE_SETS
 
   void OnEvent(Event &e) override {
     if (!m_isPlaying) {
@@ -216,16 +226,30 @@ public:
   }
 
 private:
-  void Sort() {
-    std::sort(m_timeTrains.begin(), m_timeTrains.end(),
-              [](const TimeTrain &a, const TimeTrain &b) {
-                if (a.board < b.board)
-                  return true;
-                else if (a.board > b.board)
-                  return false;
-                else
-                  return a.dest < b.dest;
-              });
+  void SweepLineSetUp() {
+    const size_t N = m_timeTrains.size();
+    m_starts.resize(N);
+    m_ends.resize(N);
+
+    // Note: iota writes a sequence STARTING from 0u (like 0u, 1u, 2u, ... Nu)
+    std::iota(m_starts.begin(), m_starts.end(), 0u);
+    std::iota(m_ends.begin(), m_ends.end(), 0u);
+
+    auto byBoardCb = [&](uint32_t a, uint32_t b) {
+      return m_timeTrains[a].board < m_timeTrains[b].board;
+    };
+    auto byDestCb = [&](uint32_t a, uint32_t b) {
+      return m_timeTrains[a].dest < m_timeTrains[b].dest;
+    };
+
+    std::sort(m_starts.begin(), m_starts.end(), byBoardCb);
+    std::sort(m_ends.begin(), m_ends.end(), byDestCb);
+
+    m_active.clear();
+    m_active.reserve(N);
+    m_locInActive.assign(N, -1);
+
+    m_startSlider = m_endSlider = 0;
   }
 
   inline double GetNormalizedElapsedSecs() const {
@@ -246,35 +270,56 @@ private:
     if ((m_elapsedTimeS += e.GetDeltaS()) < m_durationS) {
       double t = GetNormalizedElapsedSecs();
 
-      for (size_t i = 0; i < m_boardDestMarkers.size(); ++i) {
-        auto &[l, r] = m_boardDestMarkers[i];
-        if (l == 0 && r == 0) {
-          // single element case
-          auto &tt = m_timeTrains[0];
-          if (t < tt.dest) {
-            double u = (t - tt.board) / (tt.dest - tt.board);
-            tt.AnimateFast(u);
-          }
-          continue;
-        }
+      // activate timetrains from m_starts
+      while (m_startSlider < m_starts.size() &&
+             m_timeTrains[m_starts[m_startSlider]].board <= t) {
+        auto tt_idx = m_starts[m_startSlider++];
 
-        if (r - l < 1)
-          continue;
+        const auto &tr = m_timeTrains[tt_idx];
+        assert(tr.dest > tr.board);
 
-        for (size_t j = l; j < r; ++j) {
-          auto &tt = m_timeTrains[j];
-          auto &board = tt.board;
-          auto &dest = tt.dest;
+        m_locInActive[tt_idx] = (int32_t)m_active.size();
+        m_active.push_back(tt_idx);
+      }
 
-          if (dest < t) {
-            ++l;
-            continue;
-          }
+      // deactivate timetrains from m_ends
+      while (m_endSlider < m_ends.size() &&
+             m_timeTrains[m_ends[m_endSlider]].dest <= t) {
+        auto tt_idx = m_ends[m_endSlider++];
 
-          double u = (t - board) / (dest - board);
-          tt.AnimateFast(u);
+        if (m_locInActive[tt_idx] >= 0) {
+          // element exists in m_active
+          auto back = m_active.back();
+          m_active[m_locInActive[tt_idx]] = back; // swap with back
+          m_locInActive[back] =
+              m_locInActive[tt_idx]; // update prior-"back" new locInActive
+          m_active.pop_back();       // delete
+          m_locInActive[tt_idx] = -1;
         }
       }
+
+      // animate active timetrains
+      for (uint32_t idx : m_active) {
+        auto &train = m_timeTrains[idx];
+        float u = float((t - train.board) * train.invLen);
+
+        // clamp to 0.0 -> 1.0
+        if (u < 0.f)
+          u = 0.f;
+        else if (u > 1.f)
+          u = 1.f;
+        train.AnimateFast(u);
+
+        // double u = double((t - train.board) * train.invLen);
+        //
+        // // clamp to 0.0 -> 1.0
+        // if (u < 0.f)
+        //   u = 0.f;
+        // else if (u > 1.f)
+        //   u = 1.f;
+        // train.AnimateSlow(u);
+      }
+
     } else {
       if (m_onPlayFinishCb) {
         (m_onPlayFinishCb)(this);
@@ -295,15 +340,18 @@ private:
 private:
   std::vector<TimeTrain> m_timeTrains;
 
+  size_t m_startSlider = 0;
+  size_t m_endSlider = 0;
+
+  std::vector<uint32_t> m_starts;
+  std::vector<uint32_t> m_ends;
+  std::vector<uint32_t>
+      m_active; // active trains list during a "t" of the current frame
+  std::vector<int32_t> m_locInActive; // for swap-deleting the deactivated ones
+                                      // from m_active queue
+
   // TODO: parent stuff
   std::vector<AnimationTrack *> m_children;
-
-  struct BoardDestMarkers {
-    size_t l;
-    size_t r;
-  };
-
-  std::vector<BoardDestMarkers> m_boardDestMarkers;
 };
 
 GFX_NAMESPACE_END
