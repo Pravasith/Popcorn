@@ -17,6 +17,11 @@ GFX_NAMESPACE_BEGIN
 TimeTrain::TimeTrain(AnimationTrackPtr passengerPtr, double boardStation,
                      double destStation) {
   m_isPsgrAnimTrack = true;
+
+  m_animTrackPtr = passengerPtr;
+  board = boardStation;
+  dest = destStation;
+
   // TODO: Rest of the thunks fuckery
 }
 
@@ -40,7 +45,7 @@ TimeTrain::TimeTrain(AnimationPropertyPtr passengerPtr, CurvePtr curvePtr,
                 m.ttExec.animateFast_Fptr = &AnimateFast_Curve<CurveValueType>;
                 m.ttExec.animateSlow_Fptr = &AnimateSlow_Curve<CurveValueType>;
 
-                m_passengerPtr = passengerPtr;
+                m_animPropPtr = passengerPtr;
                 board = boardStation;
                 dest = destStation;
                 SetInvLen();
@@ -76,7 +81,7 @@ TimeTrain::TimeTrain(AnimationPropertyPtr passengerPtr, SplinePtr splinePtr,
                 m.ttExec.animateSlow_Fptr =
                     &AnimateSlow_Spline<SplineValueType>;
 
-                m_passengerPtr = passengerPtr;
+                m_animPropPtr = passengerPtr;
                 board = boardStation;
                 dest = destStation;
                 SetInvLen();

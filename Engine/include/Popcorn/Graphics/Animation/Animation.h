@@ -93,7 +93,9 @@ public:
   double invLen;
 
 private:
-  AnimationPropertyPtr m_passengerPtr;
+  AnimationPropertyPtr m_animPropPtr;
+  AnimationTrackPtr m_animTrackPtr;
+
   bool m_isPsgrAnimTrack = false;
 
   // --- perf stuff -----------------------------------------------------------
