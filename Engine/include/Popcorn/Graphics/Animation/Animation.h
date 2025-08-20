@@ -1,12 +1,9 @@
 #pragma once
 
 #include "AnimationProperty.h"
-#include "CurveDefs.h"
-#include "Curves.h"
 #include "Event.h"
 #include "GlobalMacros.h"
 #include "MathConstants.h"
-#include "Splines.h"
 #include "Subscriber.h"
 #include "TimeEvent.h"
 #include <algorithm>
@@ -21,22 +18,12 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 class AnimationTrack;
-
-using AnimationTrackPtr = const AnimationTrack *;
+using AnimationTrackPtr = AnimationTrack *;
 
 using AnimationPropertyPtr =
     std::variant<AnimationProperty<float> *, AnimationProperty<double> *,
                  AnimationProperty<glm::vec2> *, AnimationProperty<glm::vec3> *,
                  AnimationProperty<glm::vec4> *>;
-
-using CurvePtr =
-    std::variant<const Curve<float> *, const Curve<double> *,
-                 const Curve<glm::vec2> *, const Curve<glm::vec3> *,
-                 const Curve<glm::vec4> *>;
-using SplinePtr =
-    std::variant<const Spline<float> *, const Spline<double> *,
-                 const Spline<glm::vec2> *, const Spline<glm::vec3> *,
-                 const Spline<glm::vec4> *>;
 
 class TimeTrain {
 public:
@@ -49,11 +36,13 @@ public:
   TimeTrain() = delete;
 
   inline void Animate_Fast(float u) {
-    // switch here
+    // TODO: Think of a fancy bitwise op here to switch btw overloaded funcs
     m.ttExec.animateFast_Fptr(m.ttExec.psgrPtr, m.ttExec.railPtr, u);
+    // if psgr is an AnimationTrack instead of a rail
+    // m.ttExec.animateFast_Fptr(m.ttExec.psgrPtr, u);
   }
   inline void Animate_Slow(double u) {
-    // switch here
+    // TODO: Think of a fancy bitwise op here to switch btw overloaded funcs
     m.ttExec.animateSlow_Fptr(m.ttExec.psgrPtr, m.ttExec.railPtr, u);
   }
 
@@ -93,7 +82,9 @@ private:
     auto *s = static_cast<const Spline<T> *>(splinePtr);
     p->Morph(s->GetValueAt_Slow(u));
   }
-  static void AnimateFast_ChildTrack(void *animationTrackPtr, float u) {}
+  static void AnimateFast_ChildTrack(void *animationTrackPtr, float u) {
+    auto *t = static_cast<AnimationTrack *>(animationTrackPtr);
+  }
   static void AnimateSlow_ChildTrack(void *animationTrackPtr, double u) {}
 
 public:
@@ -103,6 +94,7 @@ public:
 
 private:
   AnimationPropertyPtr m_passengerPtr;
+  bool m_isPsgrAnimTrack = false;
 
   // --- perf stuff -----------------------------------------------------------
   struct TrainExec {
@@ -137,7 +129,7 @@ public:
   void Play(double durationInSecs,
             std::function<void(AnimationTrack *)> onFinishCb);
 
-  // void Morph();
+  void Animate(double t, bool useSlowAlgo = false);
 
   void OnEvent(Event &e) override {
     if (!m_isPlaying) {
@@ -165,8 +157,6 @@ private:
   std::function<void(AnimationTrack *)> m_onPlayFinishCb;
 
 private:
-  //
-
 private:
   // For morphing either animProps or childTracks
   std::vector<TimeTrain> m_timeTrains;

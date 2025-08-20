@@ -1,24 +1,17 @@
 #pragma once
 
+#include "AnimationDefs.h"
 #include "CurveDefs.h"
 #include "Curves.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include "Splines.h"
 #include <cassert>
-#include <type_traits>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 class TimeTrain;
-
-enum class Axes { X = 0, Y = 1, Z = 2, W = 3 };
-template <typename T>
-concept IsFloatDoubleInt = std::is_same_v<T, float> || std::is_same_v<T, int> ||
-                           std::is_same_v<T, double>;
-
-enum class SelectedCurveSplineType { None = 0, Curve, Spline };
 
 // Owned by classes like GameObject & Material
 template <CurveFormType T> class AnimationProperty {

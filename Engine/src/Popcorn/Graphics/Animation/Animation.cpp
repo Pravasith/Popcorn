@@ -15,7 +15,10 @@ GFX_NAMESPACE_BEGIN
 // --- TIME TRAIN STUFF --------------------------------------------------------
 //
 TimeTrain::TimeTrain(AnimationTrackPtr passengerPtr, double boardStation,
-                     double destStation) {}
+                     double destStation) {
+  m_isPsgrAnimTrack = true;
+  // TODO: Rest of the thunks fuckery
+}
 
 TimeTrain::TimeTrain(AnimationPropertyPtr passengerPtr, CurvePtr curvePtr,
                      double boardStation, double destStation) {
@@ -127,7 +130,6 @@ void AnimationTrack::SweepLineSetUp() {
     m_active.clear();                                                          \
     std::fill(m_locInActive.begin(), m_locInActive.end(), -1);                 \
   } while (0);
-
 //
 // --- Play --------------------------------------------------------------------
 void AnimationTrack::Play(double durationInSecs) {
@@ -154,62 +156,61 @@ void AnimationTrack::Play(double durationInSecs,
     m_onPlayFinishCb = nullptr;                                                \
   } while (0);
 
+void AnimationTrack::Animate(double t, bool useSlowAlgo) {
+  // activate timetrains from m_starts
+  while (m_startSlider < m_starts.size() &&
+         m_timeTrains[m_starts[m_startSlider]].board <= t) {
+    auto tt_idx = m_starts[m_startSlider++];
+
+    const auto &tr = m_timeTrains[tt_idx];
+    assert(tr.dest > tr.board);
+
+    m_locInActive[tt_idx] = (int32_t)m_active.size();
+    m_active.push_back(tt_idx);
+  }
+
+  // deactivate timetrains from m_ends
+  while (m_endSlider < m_ends.size() &&
+         m_timeTrains[m_ends[m_endSlider]].dest <= t) {
+    auto tt_idx = m_ends[m_endSlider++];
+
+    if (m_locInActive[tt_idx] >= 0) {
+      // element exists in m_active
+      auto back = m_active.back();
+      m_active[m_locInActive[tt_idx]] = back; // swap with back
+      m_locInActive[back] =
+          m_locInActive[tt_idx]; // update prior-"back" new locInActive
+      m_active.pop_back();       // delete
+      m_locInActive[tt_idx] = -1;
+    }
+  }
+
+  // animate active timetrains
+  for (uint32_t idx : m_active) {
+    auto &train = m_timeTrains[idx];
+    double u = double((t - train.board) * train.invLen);
+
+    // clamp to 0.0 -> 1.0
+    if (u < 0.0)
+      u = 0.0;
+    else if (u > 1.0)
+      u = 1.0;
+
+    if (useSlowAlgo) {
+      train.Animate_Slow(u);
+    } else
+      train.Animate_Fast(u);
+  }
+}
+
 //
 // --- Update ------------------------------------------------------------------
 bool AnimationTrack::OnUpdate(TimeEvent &e) {
   if ((m_elapsedTimeS += e.GetDeltaS()) < m_durationS) {
     double t = GetNormalizedElapsedSecs();
 
-    // activate timetrains from m_starts
-    while (m_startSlider < m_starts.size() &&
-           m_timeTrains[m_starts[m_startSlider]].board <= t) {
-      auto tt_idx = m_starts[m_startSlider++];
-
-      const auto &tr = m_timeTrains[tt_idx];
-      assert(tr.dest > tr.board);
-
-      m_locInActive[tt_idx] = (int32_t)m_active.size();
-      m_active.push_back(tt_idx);
-    }
-
-    // deactivate timetrains from m_ends
-    while (m_endSlider < m_ends.size() &&
-           m_timeTrains[m_ends[m_endSlider]].dest <= t) {
-      auto tt_idx = m_ends[m_endSlider++];
-
-      if (m_locInActive[tt_idx] >= 0) {
-        // element exists in m_active
-        auto back = m_active.back();
-        m_active[m_locInActive[tt_idx]] = back; // swap with back
-        m_locInActive[back] =
-            m_locInActive[tt_idx]; // update prior-"back" new locInActive
-        m_active.pop_back();       // delete
-        m_locInActive[tt_idx] = -1;
-      }
-    }
-
-    // animate active timetrains
-    for (uint32_t idx : m_active) {
-      auto &train = m_timeTrains[idx];
-      float u = float((t - train.board) * train.invLen);
-
-      // clamp to 0.0 -> 1.0
-      if (u < 0.f)
-        u = 0.f;
-      else if (u > 1.f)
-        u = 1.f;
-      train.Animate_Fast(u);
-
-      // double u = double((t - train.board) * train.invLen);
-      //
-      // // clamp to 0.0 -> 1.0
-      // if (u < 0.f)
-      //   u = 0.f;
-      // else if (u > 1.f)
-      //   u = 1.f;
-      // train.Animate_Slow(u);
-    }
-
+    Animate(t); // default fast
+    // Animate(t, true); // for slow
   } else {
     if (m_onPlayFinishCb) {
       (m_onPlayFinishCb)(this);
