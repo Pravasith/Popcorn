@@ -14,6 +14,9 @@ GFX_NAMESPACE_BEGIN
 // -----------------------------------------------------------------------------
 // --- TIME TRAIN STUFF --------------------------------------------------------
 //
+TimeTrain::TimeTrain(AnimationTrackPtr passengerPtr, double boardStation,
+                     double destStation) {}
+
 TimeTrain::TimeTrain(AnimationPropertyPtr passengerPtr, CurvePtr curvePtr,
                      double boardStation, double destStation) {
   std::visit(
@@ -29,8 +32,8 @@ TimeTrain::TimeTrain(AnimationPropertyPtr passengerPtr, CurvePtr curvePtr,
                                            CurveValueType>) {
                 passengerPtrVal->BindRail(curvePtrVal);
 
-                m.ttExec.animPropPtr = passengerPtrVal;
-                m.ttExec.crvSplPtr = curvePtrVal;
+                m.ttExec.psgrPtr = passengerPtrVal;
+                m.ttExec.railPtr = curvePtrVal;
                 m.ttExec.animateFast_Fptr = &AnimateFast_Curve<CurveValueType>;
                 m.ttExec.animateSlow_Fptr = &AnimateSlow_Curve<CurveValueType>;
 
@@ -63,8 +66,8 @@ TimeTrain::TimeTrain(AnimationPropertyPtr passengerPtr, SplinePtr splinePtr,
                                            SplineValueType>) {
                 passengerPtrVal->BindRail(splinePtrVal);
 
-                m.ttExec.animPropPtr = passengerPtrVal;
-                m.ttExec.crvSplPtr = splinePtrVal;
+                m.ttExec.psgrPtr = passengerPtrVal;
+                m.ttExec.railPtr = splinePtrVal;
                 m.ttExec.animateFast_Fptr =
                     &AnimateFast_Spline<SplineValueType>;
                 m.ttExec.animateSlow_Fptr =
@@ -118,6 +121,31 @@ void AnimationTrack::SweepLineSetUp() {
   m_startSlider = m_endSlider = 0;
 }
 
+#define RESET_SWEEP_LINE_SETS                                                  \
+  do {                                                                         \
+    m_startSlider = m_endSlider = 0;                                           \
+    m_active.clear();                                                          \
+    std::fill(m_locInActive.begin(), m_locInActive.end(), -1);                 \
+  } while (0);
+
+//
+// --- Play --------------------------------------------------------------------
+void AnimationTrack::Play(double durationInSecs) {
+  m_elapsedTimeS = 0.0;
+  m_durationS = durationInSecs;
+  m_isPlaying = true;
+  RESET_SWEEP_LINE_SETS
+}
+void AnimationTrack::Play(double durationInSecs,
+                          std::function<void(AnimationTrack *)> onFinishCb) {
+  m_elapsedTimeS = 0.0;
+  m_durationS = durationInSecs;
+  m_isPlaying = true;
+  m_onPlayFinishCb = std::move(onFinishCb);
+  RESET_SWEEP_LINE_SETS
+}
+#undef RESET_SWEEP_LINE_SETS
+
 #define RESET_PROPS                                                            \
   do {                                                                         \
     m_isPlaying = false;                                                       \
@@ -126,6 +154,8 @@ void AnimationTrack::SweepLineSetUp() {
     m_onPlayFinishCb = nullptr;                                                \
   } while (0);
 
+//
+// --- Update ------------------------------------------------------------------
 bool AnimationTrack::OnUpdate(TimeEvent &e) {
   if ((m_elapsedTimeS += e.GetDeltaS()) < m_durationS) {
     double t = GetNormalizedElapsedSecs();
@@ -168,7 +198,7 @@ bool AnimationTrack::OnUpdate(TimeEvent &e) {
         u = 0.f;
       else if (u > 1.f)
         u = 1.f;
-      train.AnimateFast(u);
+      train.Animate_Fast(u);
 
       // double u = double((t - train.board) * train.invLen);
       //
@@ -177,7 +207,7 @@ bool AnimationTrack::OnUpdate(TimeEvent &e) {
       //   u = 0.f;
       // else if (u > 1.f)
       //   u = 1.f;
-      // train.AnimateSlow(u);
+      // train.Animate_Slow(u);
     }
 
   } else {

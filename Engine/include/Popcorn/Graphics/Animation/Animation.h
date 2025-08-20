@@ -20,6 +20,10 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+class AnimationTrack;
+
+using AnimationTrackPtr = const AnimationTrack *;
+
 using AnimationPropertyPtr =
     std::variant<AnimationProperty<float> *, AnimationProperty<double> *,
                  AnimationProperty<glm::vec2> *, AnimationProperty<glm::vec3> *,
@@ -36,17 +40,21 @@ using SplinePtr =
 
 class TimeTrain {
 public:
+  TimeTrain(AnimationTrackPtr passengerPtr, double boardStation,
+            double destStation);
   TimeTrain(AnimationPropertyPtr passengerPtr, CurvePtr curvePtr,
             double boardStation, double destStation);
   TimeTrain(AnimationPropertyPtr passengerPtr, SplinePtr splinePtr,
             double boardStation, double destStation);
   TimeTrain() = delete;
 
-  inline void AnimateFast(float u) {
-    m.ttExec.animateFast_Fptr(m.ttExec.animPropPtr, m.ttExec.crvSplPtr, u);
+  inline void Animate_Fast(float u) {
+    // switch here
+    m.ttExec.animateFast_Fptr(m.ttExec.psgrPtr, m.ttExec.railPtr, u);
   }
-  inline void AnimateSlow(double u) {
-    m.ttExec.animateSlow_Fptr(m.ttExec.animPropPtr, m.ttExec.crvSplPtr, u);
+  inline void Animate_Slow(double u) {
+    // switch here
+    m.ttExec.animateSlow_Fptr(m.ttExec.psgrPtr, m.ttExec.railPtr, u);
   }
 
 private:
@@ -63,28 +71,30 @@ private:
     auto *p = static_cast<AnimationProperty<T> *>(animationPropertyPtr);
     auto *c = static_cast<const Curve<T> *>(curvePtr);
     p->Morph(c->GetValueAt_Fast(u));
-  };
+  }
   template <CurveFormType T>
   static void AnimateSlow_Curve(void *animationPropertyPtr,
                                 const void *curvePtr, double u) {
     auto *p = static_cast<AnimationProperty<T> *>(animationPropertyPtr);
     auto *c = static_cast<const Curve<T> *>(curvePtr);
     p->Morph(c->GetValueAt_Slow(u));
-  };
+  }
   template <CurveFormType T>
   static void AnimateFast_Spline(void *animationPropertyPtr,
                                  const void *splinePtr, float u) {
     auto *p = static_cast<AnimationProperty<T> *>(animationPropertyPtr);
     auto *s = static_cast<const Spline<T> *>(splinePtr);
     p->Morph(s->GetValueAt_Fast(u));
-  };
+  }
   template <CurveFormType T>
   static void AnimateSlow_Spline(void *animationPropertyPtr,
                                  const void *splinePtr, double u) {
     auto *p = static_cast<AnimationProperty<T> *>(animationPropertyPtr);
     auto *s = static_cast<const Spline<T> *>(splinePtr);
     p->Morph(s->GetValueAt_Slow(u));
-  };
+  }
+  static void AnimateFast_ChildTrack(void *animationTrackPtr, float u) {}
+  static void AnimateSlow_ChildTrack(void *animationTrackPtr, double u) {}
 
 public:
   double board;
@@ -96,12 +106,12 @@ private:
 
   // --- perf stuff -----------------------------------------------------------
   struct TrainExec {
-    void *animPropPtr = nullptr;
-    const void *crvSplPtr = nullptr;
-    void (*animateFast_Fptr)(void *animationPropertyPtr,
-                             const void *curveOrSplinePtr, float u) = nullptr;
-    void (*animateSlow_Fptr)(void *animationPropertyPtr,
-                             const void *curveOrSplinePtr, double u) = nullptr;
+    void *psgrPtr = nullptr;
+    const void *railPtr = nullptr;
+    void (*animateFast_Fptr)(void *psgrPtr, const void *railPtr,
+                             float u) = nullptr;
+    void (*animateSlow_Fptr)(void *psgrPtr, const void *railPtr,
+                             double u) = nullptr;
   };
 
   struct {
@@ -118,34 +128,16 @@ public:
   }
   ~AnimationTrack() = default;
 
-  void Insert(TimeTrain timeTrain) {
+  void Insert_Slow(TimeTrain timeTrain) {
     m_timeTrains.push_back(timeTrain);
     SweepLineSetUp();
   }
 
-#define RESET_SWEEP_LINE_SETS                                                  \
-  do {                                                                         \
-    m_startSlider = m_endSlider = 0;                                           \
-    m_active.clear();                                                          \
-    std::fill(m_locInActive.begin(), m_locInActive.end(), -1);                 \
-  } while (0);
-
-  void Play(double durationInSecs) {
-    m_elapsedTimeS = 0.0;
-    m_durationS = durationInSecs;
-    m_isPlaying = true;
-    RESET_SWEEP_LINE_SETS
-  }
-
+  void Play(double durationInSecs);
   void Play(double durationInSecs,
-            std::function<void(AnimationTrack *)> onFinishCb) {
-    m_elapsedTimeS = 0.0;
-    m_durationS = durationInSecs;
-    m_isPlaying = true;
-    m_onPlayFinishCb = std::move(onFinishCb);
-    RESET_SWEEP_LINE_SETS
-  }
-#undef RESET_SWEEP_LINE_SETS
+            std::function<void(AnimationTrack *)> onFinishCb);
+
+  // void Morph();
 
   void OnEvent(Event &e) override {
     if (!m_isPlaying) {
@@ -166,13 +158,17 @@ private:
   bool OnUpdate(TimeEvent &e);
 
 private:
+  // Play stuff (not allowed if this is a parent)
   bool m_isPlaying = false;
   double m_durationS = 0.0;
   double m_elapsedTimeS = 0.0;
-
   std::function<void(AnimationTrack *)> m_onPlayFinishCb;
 
 private:
+  //
+
+private:
+  // For morphing either animProps or childTracks
   std::vector<TimeTrain> m_timeTrains;
 
   size_t m_startSlider = 0;
@@ -184,9 +180,6 @@ private:
       m_active; // active trains list during a "t" of the current frame
   std::vector<int32_t> m_locInActive; // for swap-deleting the deactivated ones
                                       // from m_active queue
-
-  // TODO: parent stuff
-  std::vector<AnimationTrack *> m_children;
 };
 
 GFX_NAMESPACE_END
