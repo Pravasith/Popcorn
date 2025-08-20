@@ -10,6 +10,6 @@ constexpr glm::vec3 PC_ZERO_VEC3 = glm::vec3(0.f);
 
 // Epsilon for error-free float comparisions
 constexpr float PC_EPS = 1e-6f;
-constexpr double PC_EPS_D = 1e-12;
+constexpr double PC_EPS_D = 1e-9;
 
 ENGINE_NAMESPACE_END
