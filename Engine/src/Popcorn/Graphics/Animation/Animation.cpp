@@ -16,8 +16,6 @@ GFX_NAMESPACE_BEGIN
 //
 TimeTrain::TimeTrain(AnimationTrackPtr passengerPtr, double boardStation,
                      double destStation) {
-
-  // TODO: Rest of the thunks fuckery
   m.ttExec.psgrPtr = passengerPtr;
   m.ttExec.railPtr = nullptr;
   m.ttExec.animateFast_Fptr = &AnimateFast_ChildTrack;
