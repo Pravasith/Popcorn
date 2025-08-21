@@ -17,13 +17,17 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-class AnimationTrack;
-using AnimationTrackPtr = AnimationTrack *;
-
 using AnimationPropertyPtr =
     std::variant<AnimationProperty<float> *, AnimationProperty<double> *,
                  AnimationProperty<glm::vec2> *, AnimationProperty<glm::vec3> *,
                  AnimationProperty<glm::vec4> *>;
+
+struct AnimationTrackBase {
+  virtual ~AnimationTrackBase() = default;
+  virtual void MorphPassengers(double t, bool useSlowAlgo = false) = 0;
+};
+
+using AnimationTrackPtr = AnimationTrackBase *;
 
 class TimeTrain {
 public:
@@ -36,13 +40,11 @@ public:
   TimeTrain() = delete;
 
   inline void Animate_Fast(float u) {
-    // TODO: Think of a fancy bitwise op here to switch btw overloaded funcs
+    assert(m.ttExec.animateFast_Fptr);
     m.ttExec.animateFast_Fptr(m.ttExec.psgrPtr, m.ttExec.railPtr, u);
-    // if psgr is an AnimationTrack instead of a rail
-    // m.ttExec.animateFast_Fptr(m.ttExec.psgrPtr, u);
   }
   inline void Animate_Slow(double u) {
-    // TODO: Think of a fancy bitwise op here to switch btw overloaded funcs
+    assert(m.ttExec.animateSlow_Fptr);
     m.ttExec.animateSlow_Fptr(m.ttExec.psgrPtr, m.ttExec.railPtr, u);
   }
 
@@ -82,10 +84,17 @@ private:
     auto *s = static_cast<const Spline<T> *>(splinePtr);
     p->Morph(s->GetValueAt_Slow(u));
   }
-  static void AnimateFast_ChildTrack(void *animationTrackPtr, float u) {
-    auto *t = static_cast<AnimationTrack *>(animationTrackPtr);
+
+  static void AnimateFast_ChildTrack(void *animationTrackPtr, const void *,
+                                     float u) {
+    auto *t = static_cast<AnimationTrackBase *>(animationTrackPtr);
+    t->MorphPassengers(u);
   }
-  static void AnimateSlow_ChildTrack(void *animationTrackPtr, double u) {}
+  static void AnimateSlow_ChildTrack(void *animationTrackPtr, const void *,
+                                     double u) {
+    auto *t = static_cast<AnimationTrackBase *>(animationTrackPtr);
+    t->MorphPassengers(u, true);
+  }
 
 public:
   double board;
@@ -113,7 +122,7 @@ private:
   } m;
 };
 
-class AnimationTrack : public Subscriber {
+class AnimationTrack : public Subscriber, public AnimationTrackBase {
 public:
   AnimationTrack(std::vector<TimeTrain> &&timetrains)
       : m_timeTrains(std::move(timetrains)) {
@@ -127,11 +136,11 @@ public:
     SweepLineSetUp();
   }
 
+  virtual void MorphPassengers(double t, bool useSlowAlgo = false) override;
+
   void Play(double durationInSecs);
   void Play(double durationInSecs,
             std::function<void(AnimationTrack *)> onFinishCb);
-
-  void Animate(double t, bool useSlowAlgo = false);
 
   void OnEvent(Event &e) override {
     if (!m_isPlaying) {

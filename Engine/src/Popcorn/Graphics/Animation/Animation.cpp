@@ -16,13 +16,19 @@ GFX_NAMESPACE_BEGIN
 //
 TimeTrain::TimeTrain(AnimationTrackPtr passengerPtr, double boardStation,
                      double destStation) {
-  m_isPsgrAnimTrack = true;
 
+  // TODO: Rest of the thunks fuckery
+  m.ttExec.psgrPtr = passengerPtr;
+  m.ttExec.railPtr = nullptr;
+  m.ttExec.animateFast_Fptr = &AnimateFast_ChildTrack;
+  m.ttExec.animateSlow_Fptr = &AnimateSlow_ChildTrack;
+
+  m_isPsgrAnimTrack = true;
   m_animTrackPtr = passengerPtr;
   board = boardStation;
   dest = destStation;
 
-  // TODO: Rest of the thunks fuckery
+  SetInvLen();
 }
 
 TimeTrain::TimeTrain(AnimationPropertyPtr passengerPtr, CurvePtr curvePtr,
@@ -161,7 +167,7 @@ void AnimationTrack::Play(double durationInSecs,
     m_onPlayFinishCb = nullptr;                                                \
   } while (0);
 
-void AnimationTrack::Animate(double t, bool useSlowAlgo) {
+void AnimationTrack::MorphPassengers(double t, bool useSlowAlgo) {
   // activate timetrains from m_starts
   while (m_startSlider < m_starts.size() &&
          m_timeTrains[m_starts[m_startSlider]].board <= t) {
@@ -176,7 +182,7 @@ void AnimationTrack::Animate(double t, bool useSlowAlgo) {
 
   // deactivate timetrains from m_ends
   while (m_endSlider < m_ends.size() &&
-         m_timeTrains[m_ends[m_endSlider]].dest <= t) {
+         m_timeTrains[m_ends[m_endSlider]].dest < t) {
     auto tt_idx = m_ends[m_endSlider++];
 
     if (m_locInActive[tt_idx] >= 0) {
@@ -214,9 +220,11 @@ bool AnimationTrack::OnUpdate(TimeEvent &e) {
   if ((m_elapsedTimeS += e.GetDeltaS()) < m_durationS) {
     double t = GetNormalizedElapsedSecs();
 
-    Animate(t); // default fast
-    // Animate(t, true); // for slow
+    MorphPassengers(t); // default fast
+    // MorphPassengers(t, true); // for slow
   } else {
+    MorphPassengers(1.0);
+    // MorphPassengers(1.0, true); // for slow
     if (m_onPlayFinishCb) {
       (m_onPlayFinishCb)(this);
     }
