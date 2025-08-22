@@ -16,28 +16,28 @@ template <CurveFormType T> class CurveBank {
 public:
   CurveBank() = default;
 
-#define GET_INSERT_CURVE_PTR(CURVE_CONTAINER)                                  \
+#define GET_CREATE_CURVE_PTR(CURVE_CONTAINER)                                  \
   do {                                                                         \
     const CurveHashType curveHash = HashCurveInfo(curveInfo);                  \
     auto [it, _isInserted] =                                                   \
         (CURVE_CONTAINER).try_emplace(curveHash, curveInfo);                   \
     return &it->second;                                                        \
-  } while (0); // it is an iterator of std::pair<Key, Val>s}
+  } while (0); // (it) is an iterator of std::pair<Key, Val>s
 
   // Creates curve if it doesn't exist
   const LinearCurve<T> *GetCurvePtr(const CurveInfoLinearForm<T> &curveInfo) {
-    GET_INSERT_CURVE_PTR(m_linearCurves)
+    GET_CREATE_CURVE_PTR(m_linearCurves)
   }
   // Creates curve if it doesn't exist
   const BezierCurve<T> *GetCurvePtr(const CurveInfoBezierForm<T> &curveInfo) {
-    GET_INSERT_CURVE_PTR(m_bezierCurves)
+    GET_CREATE_CURVE_PTR(m_bezierCurves)
   }
   // Creates curve if it doesn't exist
   const HermiteCurve<T> *GetCurvePtr(const CurveInfoHermiteForm<T> &curveInfo) {
-    GET_INSERT_CURVE_PTR(m_hermiteCurves)
+    GET_CREATE_CURVE_PTR(m_hermiteCurves)
   }
 
-#undef GET_INSERT_CURVE_PTR
+#undef GET_CREATE_CURVE_PTR
 
   static CurveHashType HashCurveInfo(const CurveInfoLinearForm<T> &curveInfo) {
     return PC_HashCurveInfo_Linear(curveInfo);
@@ -48,7 +48,6 @@ public:
   static CurveHashType HashCurveInfo(const CurveInfoHermiteForm<T> &curveInfo) {
     return PC_HashCurveInfo_Hermite(curveInfo);
   }
-#undef HASH_CURVE_BODY
 
   void CleanUp() {
     m_linearCurves.clear();
@@ -98,14 +97,17 @@ public:
   }
 
   template <CurveFormType T>
+  // Creates curve if it doesn't exist
   const LinearCurve<T> *GetCurvePtr(const CurveInfoLinearForm<T> &curveInfo) {
     GET_PTR_FROM_CURVE_BANK
   }
   template <CurveFormType T>
+  // Creates curve if it doesn't exist
   const BezierCurve<T> *GetCurvePtr(const CurveInfoBezierForm<T> &curveInfo) {
     GET_PTR_FROM_CURVE_BANK
   }
   template <CurveFormType T>
+  // Creates curve if it doesn't exist
   const HermiteCurve<T> *GetCurvePtr(const CurveInfoHermiteForm<T> &curveInfo) {
     GET_PTR_FROM_CURVE_BANK
   }
