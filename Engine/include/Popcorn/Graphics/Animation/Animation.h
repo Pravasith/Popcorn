@@ -56,28 +56,28 @@ private:
   }
 
   // Animate curve or spline thunks
-  template <CurveFormType T>
+  template <CurveValueType T>
   static void AnimateFast_Curve(void *animationPropertyPtr,
                                 const void *curvePtr, float u) {
     auto *p = static_cast<AnimationProperty<T> *>(animationPropertyPtr);
     auto *c = static_cast<const Curve<T> *>(curvePtr);
     p->Morph(c->GetValueAt_Fast(u));
   }
-  template <CurveFormType T>
+  template <CurveValueType T>
   static void AnimateSlow_Curve(void *animationPropertyPtr,
                                 const void *curvePtr, double u) {
     auto *p = static_cast<AnimationProperty<T> *>(animationPropertyPtr);
     auto *c = static_cast<const Curve<T> *>(curvePtr);
     p->Morph(c->GetValueAt_Slow(u));
   }
-  template <CurveFormType T>
+  template <CurveValueType T>
   static void AnimateFast_Spline(void *animationPropertyPtr,
                                  const void *splinePtr, float u) {
     auto *p = static_cast<AnimationProperty<T> *>(animationPropertyPtr);
     auto *s = static_cast<const Spline<T> *>(splinePtr);
     p->Morph(s->GetValueAt_Fast(u));
   }
-  template <CurveFormType T>
+  template <CurveValueType T>
   static void AnimateSlow_Spline(void *animationPropertyPtr,
                                  const void *splinePtr, double u) {
     auto *p = static_cast<AnimationProperty<T> *>(animationPropertyPtr);

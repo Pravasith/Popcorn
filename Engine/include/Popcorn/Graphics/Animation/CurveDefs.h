@@ -6,73 +6,65 @@
 #include <glm/ext/vector_float2.hpp>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/ext/vector_float4.hpp>
+#include <vector>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-enum CurveInfoForms {
-  LinearForm,
-  HermiteForm,
-  BezierForm,
-};
-//
-// enum SplineForm {
-//   CatmullRomType,
-//   BSplineType,
-// };
-
 template <typename U>
-concept CurveFormType =
+concept CurveValueType =
     std::same_as<U, float> || std::same_as<U, double> ||
     std::same_as<U, glm::vec2> || std::same_as<U, glm::vec3> ||
     std::same_as<U, glm::vec4>;
 
-// template <typename T>
-// concept ParametericFunctionOutputType =
-//     std::copyable<T> && requires(T a, T b, float c) {
-//       // a & b 'type' requirements
-//       { a + b } -> std::convertible_to<T>;
-//       { a - b } -> std::convertible_to<T>;
-//       { a * b } -> std::convertible_to<T>;
-//     };
-
-template <CurveFormType T> struct CurveInfoLinearForm {
+template <CurveValueType T> struct CurveInfoLinearForm {
   T p0;
   T p1;
 };
 
-template <CurveFormType T> struct CurveInfoBezierForm {
+template <CurveValueType T> struct CurveInfoBezierForm {
   T b0;
   T b1;
   T b2;
   T b3;
 };
 
-template <CurveFormType T> struct CurveInfoHermiteForm {
+template <CurveValueType T> struct CurveInfoHermiteForm {
   T p0;
   T v0;
   T v1;
   T p1;
 };
 
-template <CurveInfoForms T, CurveFormType P> struct DeriveCurveInfoType;
-
-template <CurveFormType P>
-struct DeriveCurveInfoType<CurveInfoForms::LinearForm, P> {
-  using type = CurveInfoLinearForm<P>;
-};
-
-template <CurveFormType P>
-struct DeriveCurveInfoType<CurveInfoForms::BezierForm, P> {
-  using type = CurveInfoBezierForm<P>;
-};
-
-template <CurveFormType P>
-struct DeriveCurveInfoType<CurveInfoForms::HermiteForm, P> {
-  using type = CurveInfoHermiteForm<P>;
-};
-
 using CurveHashType = uint64_t;
+
+template <CurveValueType T> struct HermiteKnot {
+  T vIn;
+  T val;
+  T vOut;
+  double t; // [0, 1)
+};
+
+template <CurveValueType T> struct SimpleKnot {
+  T val;
+  double t; // [0, 1)
+};
+
+// For splines made of cubic hermite curves
+template <CurveValueType T> struct SplineInfoHermiteForm {
+  std::vector<HermiteKnot<T>> knots;
+};
+
+// For splines made of linear curves
+template <CurveValueType T> struct SplineInfoSimpleForm {
+  std::vector<SimpleKnot<T>> knots;
+};
+
+// For physical representation of curves (ex. camera rails)
+template <CurveValueType T> struct SplineInfoBezierForm {
+  std::vector<CurveInfoBezierForm<T>> bezierCurveInfoValues;
+  std::vector<double> tValues; // 't' or 'u' values of p(t) or p(u)
+};
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

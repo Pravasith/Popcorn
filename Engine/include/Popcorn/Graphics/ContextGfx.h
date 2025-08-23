@@ -3,6 +3,7 @@
 #include "Animation/CurveFactory.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include "SplineFactory.h"
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -37,23 +38,23 @@ public:
   };
 
   const CurveFactory *AppCurves = s_curveFactory;
+  const SplineFactory *AppSplines = s_splineFactory;
 
 private:
+  // For the future - empty func for now
   void GraphicsInit();
   void GraphicsCleanUp();
 
 private:
-  // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
   ContextGfx(const ContextGfx &) = delete;
   ContextGfx &operator=(const ContextGfx &) = delete;
-
-  // DELETE THE MOVE CONSTRUCTOR AND MOVE ASSIGNMENT OPERATOR
   ContextGfx(ContextGfx &&) = delete;
   ContextGfx &operator=(ContextGfx &&) = delete;
 
 private:
   ContextGfx() {
     s_curveFactory = CurveFactory::Get();
+    s_splineFactory = SplineFactory::Get();
 
     PC_PRINT("CREATED", TagType::Constr, "ContextGfx.h")
   };
@@ -63,6 +64,7 @@ private:
   static ContextGfx *s_instance;
 
   static CurveFactory *s_curveFactory;
+  static SplineFactory *s_splineFactory;
 };
 
 GFX_NAMESPACE_END

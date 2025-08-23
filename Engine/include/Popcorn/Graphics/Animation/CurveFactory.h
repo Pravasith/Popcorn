@@ -12,7 +12,14 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-template <CurveFormType T> class CurveBank {
+//
+//
+//
+//
+// -------------------------------------------------------------------
+// --- CURVE BANK ----------------------------------------------------
+//
+template <CurveValueType T> class CurveBank {
 public:
   CurveBank() = default;
 
@@ -23,7 +30,6 @@ public:
         (CURVE_CONTAINER).try_emplace(curveHash, curveInfo);                   \
     return &it->second;                                                        \
   } while (0); // (it) is an iterator of std::pair<Key, Val>s
-
   // Creates curve if it doesn't exist
   const LinearCurve<T> *GetCurvePtr(const CurveInfoLinearForm<T> &curveInfo) {
     GET_CREATE_CURVE_PTR(m_linearCurves)
@@ -36,16 +42,18 @@ public:
   const HermiteCurve<T> *GetCurvePtr(const CurveInfoHermiteForm<T> &curveInfo) {
     GET_CREATE_CURVE_PTR(m_hermiteCurves)
   }
-
 #undef GET_CREATE_CURVE_PTR
 
-  static CurveHashType HashCurveInfo(const CurveInfoLinearForm<T> &curveInfo) {
+  static inline CurveHashType
+  HashCurveInfo(const CurveInfoLinearForm<T> &curveInfo) {
     return PC_HashCurveInfo_Linear(curveInfo);
   }
-  static CurveHashType HashCurveInfo(const CurveInfoBezierForm<T> &curveInfo) {
+  static inline CurveHashType
+  HashCurveInfo(const CurveInfoBezierForm<T> &curveInfo) {
     return PC_HashCurveInfo_Bezier(curveInfo);
   }
-  static CurveHashType HashCurveInfo(const CurveInfoHermiteForm<T> &curveInfo) {
+  static inline CurveHashType
+  HashCurveInfo(const CurveInfoHermiteForm<T> &curveInfo) {
     return PC_HashCurveInfo_Hermite(curveInfo);
   }
 
@@ -62,8 +70,44 @@ private:
   std::map<CurveHashType, HermiteCurve<T>> m_hermiteCurves;
 };
 
+//
+//
+//
+//
+// -------------------------------------------------------------------
+// --- CURVE FACTORY -------------------------------------------------
+//
 class CurveFactory {
 public:
+#define GET_PTR_FROM_CURVE_BANK                                                \
+  if constexpr (std::is_same_v<T, float>) {                                    \
+    return m_floatCurves.GetCurvePtr(curveInfo);                               \
+  } else if constexpr (std::is_same_v<T, double>) {                            \
+    return m_doubleCurves.GetCurvePtr(curveInfo);                              \
+  } else if constexpr (std::is_same_v<T, glm::vec2>) {                         \
+    return m_vec2Curves.GetCurvePtr(curveInfo);                                \
+  } else if constexpr (std::is_same_v<T, glm::vec3>) {                         \
+    return m_vec3Curves.GetCurvePtr(curveInfo);                                \
+  } else if constexpr (std::is_same_v<T, glm::vec4>) {                         \
+    return m_vec4Curves.GetCurvePtr(curveInfo);                                \
+  }
+
+  template <CurveValueType T>
+  // Creates curve if it doesn't exist
+  const LinearCurve<T> *GetCurvePtr(const CurveInfoLinearForm<T> &curveInfo) {
+    GET_PTR_FROM_CURVE_BANK
+  }
+  template <CurveValueType T>
+  // Creates curve if it doesn't exist
+  const BezierCurve<T> *GetCurvePtr(const CurveInfoBezierForm<T> &curveInfo) {
+    GET_PTR_FROM_CURVE_BANK
+  }
+  template <CurveValueType T>
+  // Creates curve if it doesn't exist
+  const HermiteCurve<T> *GetCurvePtr(const CurveInfoHermiteForm<T> &curveInfo) {
+    GET_PTR_FROM_CURVE_BANK
+  }
+
 public:
   [[nodiscard]] inline static CurveFactory *Get() {
     if (s_instance) {
@@ -83,35 +127,6 @@ public:
     }
   }
 
-#define GET_PTR_FROM_CURVE_BANK                                                \
-  if constexpr (std::is_same_v<T, float>) {                                    \
-    return m_floatCurves.GetCurvePtr(curveInfo);                               \
-  } else if constexpr (std::is_same_v<T, double>) {                            \
-    return m_doubleCurves.GetCurvePtr(curveInfo);                              \
-  } else if constexpr (std::is_same_v<T, glm::vec2>) {                         \
-    return m_vec2Curves.GetCurvePtr(curveInfo);                                \
-  } else if constexpr (std::is_same_v<T, glm::vec3>) {                         \
-    return m_vec3Curves.GetCurvePtr(curveInfo);                                \
-  } else if constexpr (std::is_same_v<T, glm::vec4>) {                         \
-    return m_vec4Curves.GetCurvePtr(curveInfo);                                \
-  }
-
-  template <CurveFormType T>
-  // Creates curve if it doesn't exist
-  const LinearCurve<T> *GetCurvePtr(const CurveInfoLinearForm<T> &curveInfo) {
-    GET_PTR_FROM_CURVE_BANK
-  }
-  template <CurveFormType T>
-  // Creates curve if it doesn't exist
-  const BezierCurve<T> *GetCurvePtr(const CurveInfoBezierForm<T> &curveInfo) {
-    GET_PTR_FROM_CURVE_BANK
-  }
-  template <CurveFormType T>
-  // Creates curve if it doesn't exist
-  const HermiteCurve<T> *GetCurvePtr(const CurveInfoHermiteForm<T> &curveInfo) {
-    GET_PTR_FROM_CURVE_BANK
-  }
-
 private:
   CurveFactory() { PC_PRINT("CREATED", TagType::Constr, "CurveFactory") }
   ~CurveFactory() {
@@ -123,11 +138,8 @@ private:
     PC_PRINT("DESTROYED", TagType::Destr, "CurveFactory")
   }
 
-  // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
   CurveFactory(const CurveFactory &) = delete;
   CurveFactory &operator=(const CurveFactory &) = delete;
-
-  // DELETE THE MOVE CONSTRUCTOR AND MOVE ASSIGNMENT OPERATOR
   CurveFactory(CurveFactory &&) = delete;
   CurveFactory &operator=(CurveFactory &&) = delete;
 

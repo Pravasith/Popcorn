@@ -14,7 +14,7 @@ GFX_NAMESPACE_BEGIN
 class TimeTrain;
 
 // Owned by classes like GameObject & Material
-template <CurveFormType T> class AnimationProperty {
+template <CurveValueType T> class AnimationProperty {
 public:
   using value_type = T;
 
@@ -149,7 +149,7 @@ private:
   }
 
 private:
-  template <CurveFormType U> struct RailVTable {
+  template <CurveValueType U> struct RailVTable {
     const void *rail = nullptr;
     U (*valueAtFast_Fptr)(const void *rail, float t) noexcept = nullptr;
     U (*valueAtSlow_Fptr)(const void *rail, double t) noexcept = nullptr;

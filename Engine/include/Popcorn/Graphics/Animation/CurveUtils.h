@@ -6,7 +6,7 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-template <CurveFormType T>
+template <CurveValueType T>
 inline static CurveHashType
 PC_HashCurveInfo_Linear(const CurveInfoLinearForm<T> &curveInfo) {
   uint64_t hash = 0;
@@ -37,7 +37,7 @@ PC_HashCurveInfo_Linear(const CurveInfoLinearForm<T> &curveInfo) {
   return hash * 2654435761ull;
 }
 
-template <CurveFormType T>
+template <CurveValueType T>
 inline static CurveHashType
 PC_HashCurveInfo_Bezier(const CurveInfoBezierForm<T> &curveInfo) {
   uint64_t hash = 0;
@@ -78,7 +78,7 @@ PC_HashCurveInfo_Bezier(const CurveInfoBezierForm<T> &curveInfo) {
   return hash * 2654435761ull;
 }
 
-template <CurveFormType T>
+template <CurveValueType T>
 inline static CurveHashType
 PC_HashCurveInfo_Hermite(const CurveInfoHermiteForm<T> &curveInfo) {
   uint64_t hash = 0;

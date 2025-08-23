@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Animation/CurveDefs.h"
-#include "ContextGfx.h"
+#include "CurveFactory.h"
 #include "Curves.h"
 #include "GlobalMacros.h"
 #include "MathConstants.h"
@@ -19,14 +19,14 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-template <CurveFormType T> struct Knot {
+template <CurveValueType T> struct Knot {
   T valueAtT;
   double t = 0.0; // [0, 1]
 };
 
 // TODO: just degree 3 for now bc curves are currently designed as cubic, add
 // quadratic & others later.
-template <CurveFormType T> struct SplineSegment {
+template <CurveValueType T> struct SplineSegment {
   const Curve<T> *curve;
   const Curve<double> *reparameterizationCurve = nullptr;
   double t = 0.0; // [0, 1)
@@ -42,7 +42,6 @@ inline double PC_GetInvLen(double board, double dest) {
   // Treat tiny spans as instant (avoids 1/very-small blowing up)
   double invLen = (len > PC_EPS_D) ? 1.0 / len : 0.0;
   return invLen;
-  // return
 }
 
 inline float PC_GetInvLen(float board, float dest) {
@@ -73,7 +72,7 @@ static inline void PC_Clamp_01(double &n) {
 // --- SPLINE --------------------------------------------------------
 //
 //
-template <CurveFormType T> class Spline {
+template <CurveValueType T> class Spline {
 public:
   using value_type = T;
 
@@ -192,24 +191,10 @@ protected:
 
 //
 // -------------------------------------------------------------------
-// --- B-SPLINE ------------------------------------------------------
-//
-
-// TODO: Later
-template <CurveFormType T> class BSpline : public Spline<T> {
-public:
-  BSpline() {}
-
-private:
-  std::vector<T> m_knots;
-};
-
-//
-// -------------------------------------------------------------------
 // --- CATMULL-ROM-SPLINE --------------------------------------------
 //
 
-template <CurveFormType T> class CatmullRomSpline : public Spline<T> {
+template <CurveValueType T> class CatmullRomSpline : public Spline<T> {
   using Spline<T>::m_segments;
 
 public:
@@ -276,7 +261,8 @@ public:
       curveInfoHermite.v1 = inVelocityAt_k_i_plus1;
       curveInfoHermite.p1 = k_i_plus1;
 
-      const Curve<T> *curve = ContextGfx::AppCurves->GetCurvePtr(
+      // const Curve<T> *curve = ContextGfx::AppCurves->GetCurvePtr(
+      const Curve<T> *curve = CurveFactory::Get()->GetCurvePtr(
           // splineName + "_span" + std::to_string(i),
           curveInfoHermite);
 
