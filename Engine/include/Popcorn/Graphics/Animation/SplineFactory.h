@@ -13,11 +13,22 @@ template <CurveValueType T> class SplineBank {};
 class SplineFactory {
 public:
   template <CurveValueType T>
-  const Spline<T> *GetSpline(const SplineInfoBezierForm<T> &splineInfo) {}
+  // for rails
+  const Spline<T> *
+  GetSpline(const SplineInfo_BlenderJSONExport_BezierForm<T> &splineInfo) {}
+
+  // for animations
   template <CurveValueType T>
-  const Spline<T> *GetSpline(const SplineInfoHermiteForm<T> &splineInfo) {}
+  const Spline<T> *
+  GetSpline(const SplineInfo_BlenderAnimations_HermiteForm<T> &splineInfo) {}
   template <CurveValueType T>
-  const Spline<T> *GetSpline(const SplineInfoSimpleForm<T> &splineInfo) {}
+  const Spline<T> *
+  GetSpline(const SplineInfo_BlenderAnimations_LinearForm<T> &splineInfo) {}
+
+  // real-time splines (for compute shader)
+  template <CurveValueType T>
+  const Spline<T> *
+  GetSpline(const SplineInfo_Automatic_CatmullRom<T> &splineInfo) {}
 
 public:
   [[nodiscard]] inline static SplineFactory *Get() {

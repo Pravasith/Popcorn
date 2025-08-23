@@ -50,20 +50,25 @@ template <CurveValueType T> struct SimpleKnot {
   double t; // [0, 1)
 };
 
-// For splines made of cubic hermite curves
-template <CurveValueType T> struct SplineInfoHermiteForm {
-  std::vector<HermiteKnot<T>> knots;
-};
+//
+// For splines made of cubic hermite curves (e.g. animations - gltf cubicspline
+// sampler type)
+template <CurveValueType T>
+using SplineInfo_BlenderAnimations_HermiteForm = std::vector<HermiteKnot<T>>;
+//
+// For splines made of linear curves (e.g. animations - linear sampler type)
+template <CurveValueType T>
+using SplineInfo_BlenderAnimations_LinearForm = std::vector<SimpleKnot<T>>;
 
-// For splines made of linear curves
-template <CurveValueType T> struct SplineInfoSimpleForm {
-  std::vector<SimpleKnot<T>> knots;
-};
-
-// For physical representation of curves (ex. camera rails)
-template <CurveValueType T> struct SplineInfoBezierForm {
+// For physical representation of curves (e.g. rails)
+template <CurveValueType T> struct SplineInfo_BlenderJSONExport_BezierForm {
   std::vector<CurveInfoBezierForm<T>> bezierCurveInfoValues;
   std::vector<double> tValues; // 't' or 'u' values of p(t) or p(u)
+};
+
+// Real-time splines (offload to compute pipeline in the future)
+template <CurveValueType T> struct SplineInfo_Automatic_CatmullRom {
+  std::vector<SimpleKnot<T>> knots;
 };
 
 GFX_NAMESPACE_END
