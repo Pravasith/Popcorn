@@ -10,7 +10,7 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 template <CurveValueType T>
-static inline constexpr T PC_Lerp(const T &p0, const T &p1, float t) {
+static inline constexpr T PC_Lerp(const T &p0, const T &p1, double t) {
   return p0 + (p1 - p0) * t;
 };
 

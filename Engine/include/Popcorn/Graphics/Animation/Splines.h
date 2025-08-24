@@ -58,20 +58,6 @@ static inline void PC_Clamp_01(double &n) {
   n = n < 0.0 ? 0.0 : (n >= 1.0 ? std::nextafter(1.0, 0.0) : n);
 }
 
-//
-//
-// -------------------------------------------------------------------
-// --- MANUAL SPLINES ------------------------------------------------
-// --- MANUAL SPLINES ------------------------------------------------
-// --- MANUAL SPLINES ------------------------------------------------
-// -------------------------------------------------------------------
-//
-
-//
-// -------------------------------------------------------------------
-// --- SPLINE --------------------------------------------------------
-//
-//
 template <CurveValueType T> class Spline {
 public:
   using value_type = T;
@@ -133,7 +119,7 @@ public:
     return segmentPtr->curve->GetFirstDerivativeAt_Slow(u);
   }
 
-protected:
+public:
   void CreateSegments(std::initializer_list<SplineSegment<T>> segs) {
     assert(segs.size() > 1 && "Use a Curve if you only need 1 segment");
 
@@ -183,17 +169,10 @@ protected:
 
 //
 //
-// -------------------------------------------------------------------
-// --- AUTOMATIC SPLINES ---------------------------------------------
-// --- AUTOMATIC SPLINES ---------------------------------------------
-// --- AUTOMATIC SPLINES ---------------------------------------------
-// -------------------------------------------------------------------
-
 //
 // -------------------------------------------------------------------
 // --- CATMULL-ROM-SPLINE --------------------------------------------
 //
-
 template <CurveValueType T> class CatmullRomSpline : public Spline<T> {
   using Spline<T>::m_segments;
 
