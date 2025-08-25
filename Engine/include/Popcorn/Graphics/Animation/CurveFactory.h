@@ -22,6 +22,7 @@ GFX_NAMESPACE_BEGIN
 template <CurveValueType T> class CurveBank {
 public:
   CurveBank() = default;
+  ~CurveBank() = default;
 
 #define GET_CREATE_CURVE_PTR(CURVE_CONTAINER)                                  \
   do {                                                                         \

@@ -16,8 +16,6 @@ template <typename T>
 concept IsFloatDoubleInt = std::is_same_v<T, float> || std::is_same_v<T, int> ||
                            std::is_same_v<T, double>;
 
-enum class SelectedCurveSplineType { None = 0, Curve, Spline };
-
 //
 // --- AnimationTrack & TimeTrain stuff ----------------------------------------
 using CurvePtr =
