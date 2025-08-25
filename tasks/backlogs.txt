@@ -33,7 +33,12 @@
  :: Spline default ctor should take in Knots by default, not spline
     segments - low priority
 
+--- DEDICATED C++ & VULKAN LEARNING -----------------------------------------------
+ :: Compute pipeline
+ :: Raytracing pipeline
+
 --- DEDICATED MATHS THOROUGH READING ----------------------------------------------
+ :: Complete calculus series
  :: 3D Rotations - gamemath
  :: Homogeneous coords full derivation from scratch
  :: 3b1b linear algebra - post cross product vids

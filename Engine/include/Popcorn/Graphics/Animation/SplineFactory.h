@@ -5,9 +5,11 @@
 #include "Curves.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include "RailsUtils.h"
 #include "SplineDefs.h"
 #include "Splines.h"
 #include <cassert>
+#include <map>
 #include <stdexcept>
 #include <vector>
 
@@ -33,13 +35,44 @@ public:
   template <CurveValueType T>
   // for rails
   const Spline<T> *
-  MakeSpline(const SplineInfo_BlenderJSONExport_BezierForm<T> &splineInfo) {}
+  MakeSpline(const SplineInfo_BlenderJSONExport_BezierForm<T> &splineInfo) {
+    // TODO: Finish this
+  }
 
   // For splines made of cubic hermite curves (e.g. animations - gltf
   // cubicspline sampler type)
   template <CurveValueType T>
   const Spline<T> *MakeSpline(const std::vector<HermiteKnot<T>> &knots,
-                              const ReparameterizationCurves &rpCurves = {}) {}
+                              const ReparameterizationCurves &rpCurves = {}) {
+
+    assert(knots.size() > 1 && "atleast 2 knots expected");
+    KNOT_ASSERTIONS(knots, rpCurves)
+
+    std::vector<SplineSegment<T>> segments;
+
+    for (size_t i = 1; i < knots.size(); ++i) {
+      const HermiteKnot<T> &prev = knots[i - 1];
+      const HermiteKnot<T> &curr = knots[i];
+
+      CurveInfoHermiteForm<T> cInfo;
+      cInfo.p0 = prev.val;
+      cInfo.v0 = prev.vOut;
+      cInfo.v1 = curr.vIn;
+      cInfo.p1 = curr.val;
+
+      const Curve<T> *c = CurveFactory::Get()->GetCurvePtr(cInfo);
+
+      SplineSegment<T> seg{};
+      seg.t = curr.t;
+      seg.curve = c;
+      seg.reparameterizationCurve =
+          rpCurves.empty() ? nullptr : rpCurves[i - 1];
+
+      segments.emplace_back(seg);
+    }
+
+    AddSplineToBank(std::move(segments));
+  }
 
   // For splines made of linear curves (e.g. animations - gltf linear sampler
   // type)
@@ -69,6 +102,8 @@ public:
 
       segments.emplace_back(seg);
     }
+
+    AddSplineToBank(std::move(segments));
   }
 
   // Real-time splines (offload to compute pipeline in the future)
@@ -144,19 +179,37 @@ public:
       segments.emplace_back(seg);
     }
 
-    Spline<T> s{segments};
+    AddSplineToBank(std::move(segments));
   }
 #undef KNOT_ASSERTIONS
+
+private:
+  template <CurveValueType T>
+  void AddSplineToBank(std::vector<SplineSegment<T>> &&segments) {
+    SplineHashType hash = PC_HashSplineSegment(segments);
+
+    if constexpr (std::is_same_v<T, float>) {
+      auto [it, _isInserted] = m_floatSplines.try_emplace(hash, segments);
+    } else if constexpr (std::is_same_v<T, double>) {
+      auto [it, _isInserted] = m_doubleSplines.try_emplace(hash, segments);
+    } else if constexpr (std::is_same_v<T, glm::vec2>) {
+      auto [it, _isInserted] = m_vec2Splines.try_emplace(hash, segments);
+    } else if constexpr (std::is_same_v<T, glm::vec3>) {
+      auto [it, _isInserted] = m_vec3Splines.try_emplace(hash, segments);
+    } else if constexpr (std::is_same_v<T, glm::vec4>) {
+      auto [it, _isInserted] = m_vec4Splines.try_emplace(hash, segments);
+    }
+  }
 
 public:
   [[nodiscard]] inline static SplineFactory *Get() {
     if (s_instance) {
       return s_instance;
-    };
+    }
 
     s_instance = new SplineFactory();
     return s_instance;
-  };
+  }
 
   static void Destroy() {
     if (s_instance) {
@@ -165,11 +218,14 @@ public:
     } else {
       PC_WARN("Trying to destroy a non-existant instance of SplineFactory")
     };
-  };
+  }
 
 private:
   SplineFactory() { PC_PRINT("CREATED", TagType::Constr, "SplineFactory") };
-  ~SplineFactory() { PC_PRINT("DESTROYED", TagType::Destr, "SplineFactory") };
+  ~SplineFactory() {
+    CleanUp();
+    PC_PRINT("DESTROYED", TagType::Destr, "SplineFactory")
+  };
 
   SplineFactory(const SplineFactory &) = delete;
   SplineFactory &operator=(const SplineFactory &) = delete;
@@ -177,7 +233,22 @@ private:
   SplineFactory &operator=(SplineFactory &&) = delete;
 
 private:
+  void CleanUp() {
+    m_floatSplines.clear();
+    m_doubleSplines.clear();
+    m_vec2Splines.clear();
+    m_vec3Splines.clear();
+    m_vec4Splines.clear();
+  }
+
+private:
   static SplineFactory *s_instance;
+
+  std::map<SplineHashType, Spline<float>> m_floatSplines;
+  std::map<SplineHashType, Spline<double>> m_doubleSplines;
+  std::map<SplineHashType, Spline<glm::vec2>> m_vec2Splines;
+  std::map<SplineHashType, Spline<glm::vec3>> m_vec3Splines;
+  std::map<SplineHashType, Spline<glm::vec4>> m_vec4Splines;
 };
 
 GFX_NAMESPACE_END

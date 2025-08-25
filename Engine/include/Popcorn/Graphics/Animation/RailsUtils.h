@@ -2,6 +2,11 @@
 
 #include "CurveDefs.h"
 #include "GlobalMacros.h"
+#include "Popcorn/Core/Base.h"
+#include "SplineDefs.h"
+#include <cassert>
+#include <cstdint>
+#include <vector>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -114,6 +119,24 @@ PC_HashCurveInfo_Hermite(const CurveInfoHermiteForm<T> &curveInfo) {
       hash ^= (PC_FloatToUint64(curveInfo.v1[i]) << i);
       hash ^= (PC_FloatToUint64(curveInfo.p1[i]) >> i);
     }
+  }
+
+  return hash * 2654435761ull;
+}
+
+template <CurveValueType T>
+inline static SplineHashType
+PC_HashSplineSegment(const std::vector<SplineSegment<T>> &segments) {
+  assert(!segments.empty());
+
+  uint64_t hash = 0;
+
+  for (const SplineSegment<T> &seg : segments) {
+    if (seg.reparameterizationCurve) {
+      hash ^= reinterpret_cast<uintptr_t>(seg.reparameterizationCurve) >> 3;
+    }
+    hash ^= reinterpret_cast<uintptr_t>(seg.curve) << 2;
+    hash ^= PC_DoubleToUint64(seg.t) >> 3;
   }
 
   return hash * 2654435761ull;

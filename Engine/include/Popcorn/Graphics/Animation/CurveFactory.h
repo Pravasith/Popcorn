@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CurveDefs.h"
-#include "CurveUtils.h"
+#include "RailsUtils.h"
 #include "Curves.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"

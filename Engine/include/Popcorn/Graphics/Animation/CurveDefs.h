@@ -36,5 +36,6 @@ template <CurveValueType T> struct CurveInfoHermiteForm {
 };
 
 using CurveHashType = uint64_t;
+using SplineHashType = uint64_t;
 
 GFX_NAMESPACE_END ENGINE_NAMESPACE_END
