@@ -27,14 +27,14 @@ public:
   T GetValueAt_Fast(float t) const {
     PC_Clamp_01(t);
     const SplineSegment<T> *segmentPtr = GetLocalSegment(t);
-    float u = (t - (float)segmentPtr->t) * (float)segmentPtr->invLen;
+    double u = (t - segmentPtr->t) * segmentPtr->invLen;
 
     if (segmentPtr->reparameterizationCurve) {
       PC_Clamp_01(u);
       u = segmentPtr->reparameterizationCurve->GetValueAt_Fast(u);
     }
     PC_Clamp_01(u);
-    return segmentPtr->curve->GetValueAt_Fast(u);
+    return segmentPtr->curve->GetValueAt_Fast((float)u);
   }
   T GetValueAt_Slow(double t) const {
     PC_Clamp_01(t);
@@ -46,7 +46,7 @@ public:
       u = segmentPtr->reparameterizationCurve->GetValueAt_Slow(u);
     }
     PC_Clamp_01(u);
-    return segmentPtr->curve->GetValueAt_Slow(u);
+    return segmentPtr->curve->GetValueAt_Slow((float)u);
   }
 
   T GetFirstDerivativeAt_Fast(float t) const {
@@ -64,7 +64,7 @@ public:
     PC_Clamp_01(u);
     // TODO: Learn about chain rule
     return segmentPtr->curve->GetFirstDerivativeAt_Fast(u) *
-           (segmentPtr->invLen * r_du);
+           ((float)segmentPtr->invLen * (float)r_du);
   }
   T GetFirstDerivativeAt_Slow(double t) const {
     PC_Clamp_01(t);
@@ -81,7 +81,7 @@ public:
     PC_Clamp_01(u);
     // TODO: Learn about chain rule
     return segmentPtr->curve->GetFirstDerivativeAt_Slow(u) *
-           (segmentPtr->invLen * r_du);
+           ((float)segmentPtr->invLen * (float)r_du);
   }
 
 public:

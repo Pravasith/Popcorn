@@ -55,7 +55,6 @@ private:
   ContextGfx() {
     s_curveFactory = CurveFactory::Get();
     s_splineFactory = SplineFactory::Get();
-
     PC_PRINT("CREATED", TagType::Constr, "ContextGfx.h")
   };
   ~ContextGfx() { PC_PRINT("DESTROYED", TagType::Destr, "ContextGfx.h") };

@@ -3,6 +3,9 @@
 #include "GlobalMacros.h"
 #include <concepts>
 #include <cstdint>
+#include <glm/ext/vector_double2.hpp>
+#include <glm/ext/vector_double3.hpp>
+#include <glm/ext/vector_double4.hpp>
 #include <glm/ext/vector_float2.hpp>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/ext/vector_float4.hpp>
@@ -12,9 +15,8 @@ GFX_NAMESPACE_BEGIN
 
 template <typename U>
 concept CurveValueType =
-    std::same_as<U, float> || std::same_as<U, double> ||
-    std::same_as<U, glm::vec2> || std::same_as<U, glm::vec3> ||
-    std::same_as<U, glm::vec4>;
+    std::same_as<U, float> || std::same_as<U, glm::vec2> ||
+    std::same_as<U, glm::vec3> || std::same_as<U, glm::vec4>;
 
 template <CurveValueType T> struct CurveInfoLinearForm {
   T p0;

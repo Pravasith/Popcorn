@@ -8,9 +8,9 @@ GFX_NAMESPACE_BEGIN
 ContextGfx *ContextGfx::s_instance = nullptr;
 
 CurveFactory *ContextGfx::s_curveFactory = nullptr;
+SplineFactory *ContextGfx::s_splineFactory = nullptr;
 
 void ContextGfx::GraphicsInit() {}
-
 void ContextGfx::GraphicsCleanUp() {}
 
 GFX_NAMESPACE_END

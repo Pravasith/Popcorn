@@ -226,10 +226,6 @@ private:
       auto [it, _isInserted] =
           m_floatSplines.try_emplace(hash, std::move(segments));
       return &it->second;
-    } else if constexpr (std::is_same_v<T, double>) {
-      auto [it, _isInserted] =
-          m_doubleSplines.try_emplace(hash, std::move(segments));
-      return &it->second;
     } else if constexpr (std::is_same_v<T, glm::vec2>) {
       auto [it, _isInserted] =
           m_vec2Splines.try_emplace(hash, std::move(segments));
@@ -279,7 +275,6 @@ private:
 private:
   void CleanUp() {
     m_floatSplines.clear();
-    m_doubleSplines.clear();
     m_vec2Splines.clear();
     m_vec3Splines.clear();
     m_vec4Splines.clear();
@@ -289,7 +284,6 @@ private:
   static SplineFactory *s_instance;
 
   std::map<SplineHashType, Spline<float>> m_floatSplines;
-  std::map<SplineHashType, Spline<double>> m_doubleSplines;
   std::map<SplineHashType, Spline<glm::vec2>> m_vec2Splines;
   std::map<SplineHashType, Spline<glm::vec3>> m_vec3Splines;
   std::map<SplineHashType, Spline<glm::vec4>> m_vec4Splines;

@@ -19,13 +19,11 @@ concept IsFloatDoubleInt = std::is_same_v<T, float> || std::is_same_v<T, int> ||
 //
 // --- AnimationTrack & TimeTrain stuff ----------------------------------------
 using CurvePtr =
-    std::variant<const Curve<float> *, const Curve<double> *,
-                 const Curve<glm::vec2> *, const Curve<glm::vec3> *,
-                 const Curve<glm::vec4> *>;
+    std::variant<const Curve<float> *, const Curve<glm::vec2> *,
+                 const Curve<glm::vec3> *, const Curve<glm::vec4> *>;
 using SplinePtr =
-    std::variant<const Spline<float> *, const Spline<double> *,
-                 const Spline<glm::vec2> *, const Spline<glm::vec3> *,
-                 const Spline<glm::vec4> *>;
+    std::variant<const Spline<float> *, const Spline<glm::vec2> *,
+                 const Spline<glm::vec3> *, const Spline<glm::vec4> *>;
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

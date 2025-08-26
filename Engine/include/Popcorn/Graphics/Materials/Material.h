@@ -15,8 +15,12 @@ class Mesh;
 
 template <MaterialTypes T> class Material {
 public:
-  Material() { PC_PRINT("CREATED", TagType::Constr, "Material.h"); };
-  virtual ~Material() { PC_PRINT("DESTROYED", TagType::Destr, "Material.h"); };
+  Material() { 
+      // PC_PRINT("CREATED", TagType::Constr, "Material.h"); 
+  }
+  virtual ~Material() { 
+      // PC_PRINT("DESTROYED", TagType::Destr, "Material.h"); 
+  }
 
   static constexpr MaterialTypes type_value = T;
 

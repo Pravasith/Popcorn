@@ -1,10 +1,10 @@
 #pragma once
 
 #include "CurveDefs.h"
-#include "RailsUtils.h"
 #include "Curves.h"
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
+#include "RailsUtils.h"
 #include <glm/ext/vector_float2.hpp>
 #include <map>
 #include <type_traits>
@@ -83,8 +83,6 @@ public:
 #define GET_PTR_FROM_CURVE_BANK                                                \
   if constexpr (std::is_same_v<T, float>) {                                    \
     return m_floatCurves.GetCurvePtr(curveInfo);                               \
-  } else if constexpr (std::is_same_v<T, double>) {                            \
-    return m_doubleCurves.GetCurvePtr(curveInfo);                              \
   } else if constexpr (std::is_same_v<T, glm::vec2>) {                         \
     return m_vec2Curves.GetCurvePtr(curveInfo);                                \
   } else if constexpr (std::is_same_v<T, glm::vec3>) {                         \
@@ -132,7 +130,6 @@ private:
   CurveFactory() { PC_PRINT("CREATED", TagType::Constr, "CurveFactory") }
   ~CurveFactory() {
     m_floatCurves.CleanUp();
-    m_doubleCurves.CleanUp();
     m_vec2Curves.CleanUp();
     m_vec3Curves.CleanUp();
     m_vec4Curves.CleanUp();
@@ -148,7 +145,6 @@ private:
   static CurveFactory *s_instance;
 
   CurveBank<float> m_floatCurves;
-  CurveBank<double> m_doubleCurves;
   CurveBank<glm::vec2> m_vec2Curves;
   CurveBank<glm::vec3> m_vec3Curves;
   CurveBank<glm::vec4> m_vec4Curves;

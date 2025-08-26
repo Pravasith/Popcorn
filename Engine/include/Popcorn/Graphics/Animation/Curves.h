@@ -5,14 +5,20 @@
 #include <cassert>
 #include <glm/detail/qualifier.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
+#include <glm/ext/vector_float2.hpp>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 template <CurveValueType T>
+static inline constexpr T PC_Lerp(const T &p0, const T &p1, float t) {
+  return p0 + (p1 - p0) * t;
+}
+
+template <CurveValueType T>
 static inline constexpr T PC_Lerp(const T &p0, const T &p1, double t) {
   return p0 + (p1 - p0) * t;
-};
+}
 
 //
 // -------------------------------------------------------------------

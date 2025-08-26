@@ -1,4 +1,4 @@
-#include "Animation/CurveFactory.h"
+#include "CurveFactory.h"
 #include "GlobalMacros.h"
 
 ENGINE_NAMESPACE_BEGIN

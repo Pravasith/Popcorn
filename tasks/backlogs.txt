@@ -8,6 +8,7 @@
  :: Fix the ones marked - TEMP_DEBUG
  :: Test minimization logic -
     https://vulkan-tutorial.com/Drawing_a_triangle/Swap_chain_recreation
+ :: Make high precision computation system since glm::vecs don't support doubles
 
 --- OPTIMIZATION ------------------------------------------------------------------
  :: GBufferRenderFlow - iterating a map rn, make it vector based (2-3 times faster)

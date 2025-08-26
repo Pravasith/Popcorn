@@ -118,10 +118,10 @@ BUFFER_DEFS_NAMESPACE_END
 class VertexBuffer {
 public:
   VertexBuffer() {
-    PC_PRINT("CREATED(DEFAULT)", TagType::Constr, "VERTEX-BUFFER");
+    // PC_PRINT("CREATED(DEFAULT)", TagType::Constr, "VERTEX-BUFFER");
   };
   virtual ~VertexBuffer() {
-    PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER")
+    // PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER")
   };
 
   template <BufferDefs::AttrTypes... E> inline void SetLayout() {
@@ -222,8 +222,12 @@ concept Is_Uint16_Or_Uint32_t =
 
 template <Is_Uint16_Or_Uint32_t T> class IndexBuffer {
 public:
-  IndexBuffer() { PC_PRINT("CREATED", TagType::Constr, "IndexBuffer") };
-  ~IndexBuffer() { PC_PRINT("DESTROYED", TagType::Destr, "IndexBuffer") };
+  IndexBuffer() { 
+      // PC_PRINT("CREATED", TagType::Constr, "IndexBuffer") 
+  };
+  ~IndexBuffer() { 
+      // PC_PRINT("DESTROYED", TagType::Destr, "IndexBuffer") 
+  };
 
   const uint64_t GetSize() const { return m_buffer.GetSize(); };
   const uint64_t GetCount() const { return m_buffer.GetCount(sizeof(T)); };

@@ -18,8 +18,8 @@ ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
 using AnimationPropertyPtr =
-    std::variant<AnimationProperty<float> *, AnimationProperty<double> *,
-                 AnimationProperty<glm::vec2> *, AnimationProperty<glm::vec3> *,
+    std::variant<AnimationProperty<float> *, AnimationProperty<glm::vec2> *,
+                 AnimationProperty<glm::vec3> *,
                  AnimationProperty<glm::vec4> *>;
 
 struct AnimationTrackBase {

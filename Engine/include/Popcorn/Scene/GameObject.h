@@ -30,15 +30,16 @@ enum class GameObjectTypes {
 
 class GameObject {
 public:
-  GameObject() { PC_PRINT("CREATED", TagType::Constr, "GameObject"); }
+  GameObject() {
+    // PC_PRINT("CREATED", TagType::Constr, "GameObject");
+  }
   virtual ~GameObject() noexcept {
     for (auto *child : m_children) {
       child->m_parent = nullptr;
       delete child; // Recursive
     }
     m_children.clear();
-
-    PC_PRINT("DESTROYED", TagType::Destr, "GameObject");
+    // PC_PRINT("DESTROYED", TagType::Destr, "GameObject");
   };
 
   virtual constexpr GameObjectTypes GetGameObjectType() const = 0;

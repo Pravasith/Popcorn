@@ -20,13 +20,13 @@ template <CurveValueType T> struct LinearKnot {
   double t; // [0, 1]
 };
 
-using ReparameterizationCurves = std::vector<const Curve<double> *>;
+using ReparameterizationCurves = std::vector<const Curve<float> *>;
 
 // TODO: just degree 3 for now bc curves are currently designed as cubic, add
 // quadratic & others later.
 template <CurveValueType T> struct SplineSegment {
   const Curve<T> *curve;
-  const Curve<double> *reparameterizationCurve = nullptr;
+  const Curve<float> *reparameterizationCurve = nullptr;
   double t = 0.0; // [0, 1)
   double invLen = 0.0;
   void AssertInvariants() const {

@@ -35,9 +35,11 @@ public:
   };
   // clang-format on
 
-  VertexBufferVk() { PC_PRINT("CREATED", TagType::Constr, "VERTEX-BUFFER-VK") };
+  VertexBufferVk() { 
+      // PC_PRINT("CREATED", TagType::Constr, "VERTEX-BUFFER-VK") 
+  };
   ~VertexBufferVk() {
-    PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER-VK")
+    // PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER-VK")
   };
 
   //
