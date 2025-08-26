@@ -27,7 +27,7 @@ public:
   T GetValueAt_Fast(float t) const {
     PC_Clamp_01(t);
     const SplineSegment<T> *segmentPtr = GetLocalSegment(t);
-    float u = (t - segmentPtr->t) * segmentPtr->invLen;
+    float u = (t - (float)segmentPtr->t) * (float)segmentPtr->invLen;
 
     if (segmentPtr->reparameterizationCurve) {
       PC_Clamp_01(u);
@@ -52,7 +52,7 @@ public:
   T GetFirstDerivativeAt_Fast(float t) const {
     PC_Clamp_01(t);
     const SplineSegment<T> *segmentPtr = GetLocalSegment(t);
-    float u = (t - segmentPtr->t) * segmentPtr->invLen;
+    float u = (t - (float)segmentPtr->t) * (float)segmentPtr->invLen;
     float r_du = 1.f; // reparameterization curve derivative at u
 
     if (segmentPtr->reparameterizationCurve) {

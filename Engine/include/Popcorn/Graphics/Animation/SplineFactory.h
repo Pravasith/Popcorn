@@ -23,20 +23,56 @@ public:
     assert((REPARAMETERIZATION_CURVES).empty() ||                              \
            (REPARAMETERIZATION_CURVES).size() == ((KNOTS_NAME).size() - 1));   \
     assert((KNOTS_NAME).front().t == 0.0 && "First knot must start at t = 0"); \
+    assert((KNOTS_NAME).back().t == 1.0 && "Last knot must end at t = 1");     \
     for (size_t i = 1; i < (KNOTS_NAME).size(); ++i) {                         \
       auto &prev = (KNOTS_NAME)[i - 1];                                        \
       auto &curr = (KNOTS_NAME)[i];                                            \
-      assert(prev.t >= 0.0 && prev.t < 1.0);                                   \
-      assert(curr.t >= 0.0 && curr.t < 1.0);                                   \
+      assert(prev.t >= 0.0 && prev.t <= 1.0);                                  \
+      assert(curr.t >= 0.0 && curr.t <= 1.0);                                  \
       assert(prev.t < curr.t && "Knot 't's must be strictly increasing");      \
     }                                                                          \
   } while (0);
 
+  // For physical representation of curves (e.g. rails)
   template <CurveValueType T>
-  // for rails
   const Spline<T> *
-  MakeSpline(const SplineInfo_BlenderJSONExport_BezierForm<T> &splineInfo) {
-    // TODO: Finish this
+  MakeSpline(const std::vector<CurveInfoBezierForm<T>> &bezierCurveInfoValues,
+             const std::vector<double> &keyframeTs,
+             const ReparameterizationCurves &rpCurves = {}) {
+    assert(bezierCurveInfoValues.size() > 1 && keyframeTs.size() > 1 &&
+           "atleast 2 knots expected");
+    assert(bezierCurveInfoValues.size() == keyframeTs.size());
+    assert(rpCurves.empty() || bezierCurveInfoValues.size() == rpCurves.size());
+
+    assert(keyframeTs.front() == 0.0 && "First knot must start at t = 0");
+    assert(keyframeTs.back() < 1.0 && "Last segment start must be < 1.0");
+
+    for (size_t i = 1; i < keyframeTs.size(); ++i) {
+      auto prev = keyframeTs[i - 1];
+      auto curr = keyframeTs[i];
+      assert(prev < curr && "Knot 't's must be strictly increasing");
+      assert(prev >= 0.0 && prev <= 1.0);
+      assert(curr >= 0.0 && curr <= 1.0);
+    }
+
+    std::vector<SplineSegment<T>> segments;
+
+    for (size_t i = 0; i < bezierCurveInfoValues.size(); ++i) {
+      CurveInfoBezierForm<T> cInfo;
+      cInfo.b0 = bezierCurveInfoValues[i].b0;
+      cInfo.b1 = bezierCurveInfoValues[i].b1;
+      cInfo.b2 = bezierCurveInfoValues[i].b2;
+      cInfo.b3 = bezierCurveInfoValues[i].b3;
+
+      const Curve<T> *c = CurveFactory::Get()->GetCurvePtr(cInfo);
+      SplineSegment<T> seg{};
+      seg.t = keyframeTs[i];
+      seg.curve = c;
+      seg.reparameterizationCurve = rpCurves.empty() ? nullptr : rpCurves[i];
+      segments.emplace_back(seg);
+    }
+
+    return AddSplineToBank(std::move(segments));
   }
 
   // For splines made of cubic hermite curves (e.g. animations - gltf
@@ -44,7 +80,6 @@ public:
   template <CurveValueType T>
   const Spline<T> *MakeSpline(const std::vector<HermiteKnot<T>> &knots,
                               const ReparameterizationCurves &rpCurves = {}) {
-
     assert(knots.size() > 1 && "atleast 2 knots expected");
     KNOT_ASSERTIONS(knots, rpCurves)
 
@@ -63,7 +98,7 @@ public:
       const Curve<T> *c = CurveFactory::Get()->GetCurvePtr(cInfo);
 
       SplineSegment<T> seg{};
-      seg.t = curr.t;
+      seg.t = prev.t;
       seg.curve = c;
       seg.reparameterizationCurve =
           rpCurves.empty() ? nullptr : rpCurves[i - 1];
@@ -71,7 +106,7 @@ public:
       segments.emplace_back(seg);
     }
 
-    AddSplineToBank(std::move(segments));
+    return AddSplineToBank(std::move(segments));
   }
 
   // For splines made of linear curves (e.g. animations - gltf linear sampler
@@ -95,7 +130,7 @@ public:
       const Curve<T> *c = CurveFactory::Get()->GetCurvePtr(cInfo);
 
       SplineSegment<T> seg{};
-      seg.t = curr.t;
+      seg.t = prev.t;
       seg.curve = c;
       seg.reparameterizationCurve =
           rpCurves.empty() ? nullptr : rpCurves[i - 1];
@@ -103,7 +138,7 @@ public:
       segments.emplace_back(seg);
     }
 
-    AddSplineToBank(std::move(segments));
+    return AddSplineToBank(std::move(segments));
   }
 
   // Real-time splines (offload to compute pipeline in the future)
@@ -179,25 +214,34 @@ public:
       segments.emplace_back(seg);
     }
 
-    AddSplineToBank(std::move(segments));
+    return AddSplineToBank(std::move(segments));
   }
 #undef KNOT_ASSERTIONS
 
 private:
   template <CurveValueType T>
-  void AddSplineToBank(std::vector<SplineSegment<T>> &&segments) {
+  const Spline<T> *AddSplineToBank(std::vector<SplineSegment<T>> &&segments) {
     SplineHashType hash = PC_HashSplineSegment(segments);
-
     if constexpr (std::is_same_v<T, float>) {
-      auto [it, _isInserted] = m_floatSplines.try_emplace(hash, segments);
+      auto [it, _isInserted] =
+          m_floatSplines.try_emplace(hash, std::move(segments));
+      return &it->second;
     } else if constexpr (std::is_same_v<T, double>) {
-      auto [it, _isInserted] = m_doubleSplines.try_emplace(hash, segments);
+      auto [it, _isInserted] =
+          m_doubleSplines.try_emplace(hash, std::move(segments));
+      return &it->second;
     } else if constexpr (std::is_same_v<T, glm::vec2>) {
-      auto [it, _isInserted] = m_vec2Splines.try_emplace(hash, segments);
+      auto [it, _isInserted] =
+          m_vec2Splines.try_emplace(hash, std::move(segments));
+      return &it->second;
     } else if constexpr (std::is_same_v<T, glm::vec3>) {
-      auto [it, _isInserted] = m_vec3Splines.try_emplace(hash, segments);
+      auto [it, _isInserted] =
+          m_vec3Splines.try_emplace(hash, std::move(segments));
+      return &it->second;
     } else if constexpr (std::is_same_v<T, glm::vec4>) {
-      auto [it, _isInserted] = m_vec4Splines.try_emplace(hash, segments);
+      auto [it, _isInserted] =
+          m_vec4Splines.try_emplace(hash, std::move(segments));
+      return &it->second;
     }
   }
 

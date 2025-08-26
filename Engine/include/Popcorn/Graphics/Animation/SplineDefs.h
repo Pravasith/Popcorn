@@ -12,23 +12,12 @@ template <CurveValueType T> struct HermiteKnot {
   T vIn;
   T val;
   T vOut;
-  double t; // [0, 1)
+  double t; // [0, 1]
 };
 
 template <CurveValueType T> struct LinearKnot {
   T val;
-  double t; // [0, 1)
-};
-
-//
-template <CurveValueType T>
-using SplineInfo_BlenderAnimations_HermiteKnots = std::vector<HermiteKnot<T>>;
-//
-
-// For physical representation of curves (e.g. rails)
-template <CurveValueType T> struct SplineInfo_BlenderJSONExport_BezierForm {
-  std::vector<CurveInfoBezierForm<T>> bezierCurveInfoValues;
-  std::vector<double> tValues; // 't' or 'u' values of p(t) or p(u)
+  double t; // [0, 1]
 };
 
 using ReparameterizationCurves = std::vector<const Curve<double> *>;
