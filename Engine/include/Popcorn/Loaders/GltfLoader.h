@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Animation.h"
 #include "BufferObjects.h"
 #include "GameObject.h"
 #include "GlobalMacros.h"
@@ -17,6 +18,12 @@ GFX_NAMESPACE_BEGIN
 
 class GltfLoader {
 public:
+  struct AnimTrackBounds {
+    uint32_t startFrame;
+    uint32_t endFrame;
+  };
+
+public:
   // File -> tinygltf Model
   static bool LoadFromFile(const std::string &filename, tinygltf::Model &model);
 
@@ -24,6 +31,12 @@ public:
   static void ExtractModelData(const tinygltf::Model &model,
                                std::vector<GameObject *> &gameObjects);
 
+  static void ExtractAnimationsToAnimationTracks(
+      const tinygltf::Model &model,
+      std::vector<AnimationTrack> &animationTracks,
+      std::vector<AnimTrackBounds> &bounds);
+
+private:
 private:
   GltfLoader() { PC_PRINT("CREATED", TagType::Constr, "GltfLoader.h"); };
   ~GltfLoader() { PC_PRINT("DESTROYED", TagType::Destr, "GltfLoader.h"); };
@@ -61,6 +74,9 @@ private:
 
   [[nodiscard]] static MaterialTypes
   GetGltfMaterialType(const tinygltf::Material &material);
+
+  //
+  // --- ANIMATION UTILS -------------------------------------------------------
 };
 
 GFX_NAMESPACE_END

@@ -46,7 +46,7 @@ static void StartGame() {
   s_renderer->CreateRenderFlowResources(); // Renderflow submeshes converted and
                                            // copied to vulkan memory objects
 #ifdef PC_DEBUG
-  s_renderer->PrintScenes();
+  // s_renderer->PrintScenes();
   // s_renderer->DebugPreGameLoop();
 #endif
 
@@ -95,6 +95,12 @@ static void ConvertGltfToScene(const std::string &filename, Scene &scene) {
   tinygltf::Model model;
   GltfLoader::LoadFromFile(filename, model);
   GltfLoader::ExtractModelData(model, scene.GetGameObjects());
+
+  std::vector<AnimationTrack> animationTracks{};
+  std::vector<GltfLoader::AnimTrackBounds> bounds{};
+
+  GltfLoader::ExtractAnimationsToAnimationTracks(model, animationTracks,
+                                                 bounds);
 
   for (GameObject *gameObj : scene.GetGameObjects()) {
     FillNamedLookUpMap(scene, gameObj);

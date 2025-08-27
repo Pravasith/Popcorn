@@ -21,7 +21,7 @@ enum class EulerOrder { XYZ = 1, XZY, YXZ, YZX, ZXY, ZYX };
 class Transformations {
 public:
   // --- animations -----------------------------------------------------------
-  void LinkAnimatableProperty();
+  void LinkAnimationProperty() {};
 
   // --- positioning ----------------------------------------------------------
   void TranslateLocal(const glm::vec3 &targetPos);

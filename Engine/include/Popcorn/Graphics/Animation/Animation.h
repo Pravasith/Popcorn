@@ -48,6 +48,12 @@ public:
     m.ttExec.animateSlow_Fptr(m.ttExec.psgrPtr, m.ttExec.railPtr, u);
   }
 
+  void SetIsAnimating(bool a) {
+    assert(!m_isPsgrAnimTrack);
+    // auto *p = static_cast<AnimationProperty<T> *>(animationPropertyPtr);
+    // (m.ttExec.psgrPtr)->SetIsAnimating(a);
+  }
+
 private:
   inline void SetInvLen() {
     const double len = dest - board;

@@ -1,6 +1,7 @@
 
 #include "Animation.h"
 #include "GlobalMacros.h"
+#include "MathConstants.h"
 #include <numeric>
 #include <stdexcept>
 #include <type_traits>
@@ -173,7 +174,7 @@ void AnimationTrack::MorphPassengers(double t, bool useSlowAlgo) {
     auto tt_idx = m_starts[m_startSlider++];
 
     const auto &tr = m_timeTrains[tt_idx];
-    assert(tr.dest > tr.board);
+    assert(tr.dest >= tr.board);
 
     m_locInActive[tt_idx] = (int32_t)m_active.size();
     m_active.push_back(tt_idx);
@@ -198,7 +199,9 @@ void AnimationTrack::MorphPassengers(double t, bool useSlowAlgo) {
   // animate active timetrains
   for (uint32_t idx : m_active) {
     auto &train = m_timeTrains[idx];
-    double u = double((t - train.board) * train.invLen);
+    // double u = double((t - train.board) * train.invLen);
+    double u =
+        (train.invLen <= PC_EPS_D) ? 1.0 : (t - train.board) * train.invLen;
 
     // clamp to 0.0 -> 1.0
     if (u < 0.0)

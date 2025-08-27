@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <cstring>
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -335,12 +336,6 @@ void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
             new Material<MaterialTypes::PbrMat>();
         mat->SetData(
             ExtractMaterialData<MaterialTypes::PbrMat>(model, gltfMaterial));
-        // mat->SetShader(ShaderStages::VertexBit,
-        //                GfxContext::Shaders()
-        //                    ->GetInbuiltShader<ShaderFiles::PbrMat_Vert>());
-        // mat->SetShader(ShaderStages::FragmentBit,
-        //                GfxContext::Shaders()
-        //                    ->GetInbuiltShader<ShaderFiles::PbrMat_Frag>());
         mesh.AddSubmesh(vbo, ibo, mat);
         break;
       }
@@ -349,12 +344,6 @@ void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
             new Material<MaterialTypes::BasicMat>();
         mat->SetData(
             ExtractMaterialData<MaterialTypes::BasicMat>(model, gltfMaterial));
-        // mat->SetShader(ShaderStages::VertexBit,
-        //                GfxContext::Shaders()
-        //                    ->GetInbuiltShader<ShaderFiles::BasicMat_Vert>());
-        // mat->SetShader(ShaderStages::FragmentBit,
-        //                GfxContext::Shaders()
-        //                    ->GetInbuiltShader<ShaderFiles::BasicMat_Frag>());
         mesh.AddSubmesh(vbo, ibo, mat);
         break;
       }
@@ -434,10 +423,6 @@ GltfLoader::GetGltfMaterialType(const tinygltf::Material &material) {
     return MaterialTypes::BasicMat;
   }
 }
-
-//
-// Random thought: Valora is a sick name for a videogame character
-//
 
 //
 //
@@ -644,6 +629,83 @@ GltfLoader::ExtractIndexBuffer(const tinygltf::Model &model,
   }
 
   return indices;
+}
+
+void GltfLoader::ExtractAnimationsToAnimationTracks(
+    const tinygltf::Model &model, std::vector<AnimationTrack> &animationTracks,
+    std::vector<AnimTrackBounds> &bounds) {
+  PC_PRINT(model.animations.size(), TagType::Print, "AnimationDebug")
+
+  for (const tinygltf::Animation &gltfAnim : model.animations) {
+    PC_PRINT("NAME " << gltfAnim.name << '\n', TagType::Print, "");
+
+    const std::vector<tinygltf::AnimationSampler> &samplers = gltfAnim.samplers;
+
+    for (const tinygltf::AnimationChannel &ch : gltfAnim.channels) {
+      PC_PRINT("CHANNEL PATH " << ch.target_path << '\n', TagType::Print, "");
+
+      const tinygltf::AnimationSampler &sampler = samplers[ch.sampler];
+      PC_PRINT("SAMPLER INTERP " << sampler.interpolation << '\n',
+               TagType::Print, "");
+
+      // --- Input: Keyframe times ---
+      const tinygltf::Accessor &inputAccessor = model.accessors[sampler.input];
+      const tinygltf::BufferView &inputView =
+          model.bufferViews[inputAccessor.bufferView];
+      const tinygltf::Buffer &inputBuffer = model.buffers[inputView.buffer];
+
+      const float *inputData = reinterpret_cast<const float *>(
+          &inputBuffer.data[inputView.byteOffset + inputAccessor.byteOffset]);
+
+      PC_PRINT("Keyframe Times: ", TagType::Print, "");
+      for (size_t i = 0; i < inputAccessor.count; ++i) {
+        PC_PRINT("  t[" << i << "] = " << inputData[i], TagType::Print, "");
+      }
+
+      // --- Output: Values (translation / rotation / scale / weights) ---
+      const tinygltf::Accessor &outputAccessor =
+          model.accessors[sampler.output];
+      const tinygltf::BufferView &outputView =
+          model.bufferViews[outputAccessor.bufferView];
+      const tinygltf::Buffer &outputBuffer = model.buffers[outputView.buffer];
+
+      const float *outputData = reinterpret_cast<const float *>(
+          &outputBuffer
+               .data[outputView.byteOffset + outputAccessor.byteOffset]);
+
+      int elemsPerKeyframe = 1;
+      switch (outputAccessor.type) {
+      case TINYGLTF_TYPE_SCALAR:
+        elemsPerKeyframe = 1;
+        break;
+      case TINYGLTF_TYPE_VEC2:
+        elemsPerKeyframe = 2;
+        break;
+      case TINYGLTF_TYPE_VEC3:
+        elemsPerKeyframe = 3;
+        break;
+      case TINYGLTF_TYPE_VEC4:
+        elemsPerKeyframe = 4;
+        break;
+      default:
+        break;
+      }
+
+      PC_PRINT("KEYFRAME VALUES: ", TagType::Print, "");
+      for (size_t i = 0; i < outputAccessor.count; ++i) {
+        std::ostringstream oss;
+        oss << "  v[" << i << "] = (";
+        for (int j = 0; j < elemsPerKeyframe; ++j) {
+          oss << outputData[i * elemsPerKeyframe + j];
+          if (j < elemsPerKeyframe - 1)
+            oss << ", ";
+        }
+        oss << ")";
+        // PC_PRINT(oss.str(), TagType::Print, "");
+        std::cout << oss.str() << "\n";
+      }
+    }
+  }
 }
 
 GFX_NAMESPACE_END

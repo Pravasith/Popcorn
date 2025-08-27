@@ -23,6 +23,7 @@ public:
     // scene);
     Popcorn::Context::ConvertGltfToScene("../assets/models/planet-scene.gltf",
                                          scene);
+
     // Popcorn::Context::ConvertGltfToScene("../assets/models/light-test.gltf",
     //                                      scene);
     Popcorn::Context::RegisterScene(scene);
