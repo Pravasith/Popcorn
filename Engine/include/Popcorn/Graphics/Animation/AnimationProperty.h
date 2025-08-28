@@ -7,6 +7,7 @@
 #include "Popcorn/Core/Base.h"
 #include "Splines.h"
 #include <cassert>
+#include <cstddef>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -20,9 +21,14 @@ public:
 
 public:
   explicit AnimationProperty(const T &value) : m_value(value) {};
-  template <IsFloatDoubleInt... Args>
+
+  template <IsFloatDouble... Args>
   explicit AnimationProperty(Args &&...args)
       : m_value(std::forward<Args>(args)...){};
+
+  // template <IsFloatDouble... Args, typename F>
+  // explicit AnimationProperty(Args &&...args, F &&afterMorphCb)
+  //     : m_value(std::forward<Args>(args)...){};
 
   [[nodiscard]] const T &GetValue() const { return m_value; };
 
@@ -46,6 +52,10 @@ public:
     std::forward<F>(onSet)();
   }
 
+  //
+  //
+  // --- TRANSFORMATIONS CLASS METHODS ----------------------------------------
+  //
   template <Axes A> void AddComponent(float value) noexcept {
     static_assert(!std::is_same_v<T, float> && !std::is_same_v<T, double> &&
                   "Cannot add component on a scalar value");
@@ -84,6 +94,10 @@ public:
   }
 #undef BLOCK_IF_ANIMATING_ALREADY
 
+  // Note: Right now, there is only one single rail binding to each
+  // AnimationProperty. In the future make it so we can bind multiple rails for
+  // animation blending with weights
+
   inline T GetValueAt_Fast(float t) const {
     assert(m_railVTable.IsValid() && "Curve/spline not defined");
     return m_railVTable.valueAtFast_Fptr(m_railVTable.rail, t);
@@ -104,6 +118,10 @@ public:
 private:
   friend class TimeTrain;
 
+  //
+  //
+  // --- TIME TRAIN CLASS METHODS ---------------------------------------------
+  //
   inline void SetIsAnimating(bool isAnimating) { m_isAnimating = isAnimating; }
   inline void Morph(const T &passengerValue) { m_value = passengerValue; }
 

@@ -13,8 +13,7 @@ GFX_NAMESPACE_BEGIN
 // --- AnimationPropery stuff  -------------------------------------------------
 enum class Axes { X = 0, Y = 1, Z = 2, W = 3 };
 template <typename T>
-concept IsFloatDoubleInt = std::is_same_v<T, float> || std::is_same_v<T, int> ||
-                           std::is_same_v<T, double>;
+concept IsFloatDouble = std::is_same_v<T, float> || std::is_same_v<T, double>;
 
 //
 // --- AnimationTrack & TimeTrain stuff ----------------------------------------

@@ -21,7 +21,10 @@ enum class EulerOrder { XYZ = 1, XZY, YXZ, YZX, ZXY, ZYX };
 class Transformations {
 public:
   // --- animations -----------------------------------------------------------
-  void LinkAnimationProperty() {};
+  void LinkAnimationProperty() {
+    // TODO: Link AnimationProperty with transform methods, so that when Morph
+    // is called on TimeTrain, it fires the cb. Like UpdateRotMatrix()
+  };
 
   // --- positioning ----------------------------------------------------------
   void TranslateLocal(const glm::vec3 &targetPos);
@@ -62,9 +65,9 @@ public:
 public:
   EulerOrder m_eulerOrder = EulerOrder::XYZ;
 
-  AnimationProperty<glm::vec3> m_position{0, 0, 0};
-  AnimationProperty<glm::vec3> m_rotationEuler{0, 0, 0};
-  AnimationProperty<glm::vec3> m_scale{1, 1, 1};
+  AnimationProperty<glm::vec3> m_position{0.f, 0.f, 0.f};
+  AnimationProperty<glm::vec3> m_rotationEuler{0.f, 0.f, 0.f};
+  AnimationProperty<glm::vec3> m_scale{1.f, 1.f, 1.f};
 
   glm::mat4 m_translationMatrix = PC_IDENTITY_MAT4;
   glm::mat4 m_rotationMatrix = PC_IDENTITY_MAT4;
