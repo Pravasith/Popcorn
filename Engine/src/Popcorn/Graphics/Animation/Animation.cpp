@@ -154,7 +154,7 @@ void AnimationTrack::Play(double durationInSecs,
   m_elapsedTimeS = 0.0;
   m_durationS = durationInSecs;
   m_isPlaying = true;
-  m_onPlayFinishCb = std::move(onFinishCb);
+  m_afterPlayCb = std::move(onFinishCb);
   RESET_SWEEP_LINE_SETS
 }
 #undef RESET_SWEEP_LINE_SETS
@@ -164,7 +164,7 @@ void AnimationTrack::Play(double durationInSecs,
     m_isPlaying = false;                                                       \
     m_elapsedTimeS = 0.0;                                                      \
     m_durationS = 0.0;                                                         \
-    m_onPlayFinishCb = nullptr;                                                \
+    m_afterPlayCb = nullptr;                                                \
   } while (0);
 
 void AnimationTrack::MorphPassengers(double t, bool useSlowAlgo) {
@@ -227,8 +227,8 @@ bool AnimationTrack::OnUpdate(TimeEvent &e) {
   } else {
     MorphPassengers(1.0);
     // MorphPassengers(1.0, true); // for slow
-    if (m_onPlayFinishCb) {
-      (m_onPlayFinishCb)(this);
+    if (m_afterPlayCb) {
+      (m_afterPlayCb)(this);
     }
     RESET_PROPS
   }

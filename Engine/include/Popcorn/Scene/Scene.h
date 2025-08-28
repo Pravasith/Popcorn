@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Animation.h"
 #include "GameObject.h"
 #include "GlobalMacros.h"
 #include <cstdint>
@@ -25,6 +26,11 @@ public:
   // Update nodes
   void Update();
 
+  // Animation tracks - for GltfLoader only
+  void SetAnimationTracks(std::vector<AnimationTrack> tracks) {
+      m_animationTracks = std::move(tracks);
+  }
+
   GameObject *FindObjectByName(const std::string &name) {
     auto it = m_gameObjectsByName.find(name); // O(1) time
     if (it != m_gameObjectsByName.end()) {
@@ -47,6 +53,7 @@ private:
   std::vector<GameObject *> m_nodes;
 
   std::unordered_map<std::string, GameObject *> m_gameObjectsByName;
+  std::vector<AnimationTrack> m_animationTracks;
 };
 
 GFX_NAMESPACE_END

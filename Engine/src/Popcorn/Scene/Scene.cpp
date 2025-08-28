@@ -26,6 +26,8 @@ Scene::~Scene() {
   m_gameObjectsByName.clear();
   --s_sceneId;
 
+  m_animationTracks.clear();
+
   PC_PRINT("DESTROYED", TagType::Destr, "Scene");
 };
 
