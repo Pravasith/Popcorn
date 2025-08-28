@@ -19,8 +19,8 @@ GFX_NAMESPACE_BEGIN
 class GltfLoader {
 public:
   struct AnimTrackBounds {
-    uint32_t startFrame;
-    uint32_t endFrame;
+    uint32_t startTimeS;
+    uint32_t endTimeS;
   };
 
 public:
@@ -37,15 +37,17 @@ public:
       std::vector<AnimTrackBounds> &bounds);
 
 private:
-private:
-  GltfLoader() { PC_PRINT("CREATED", TagType::Constr, "GltfLoader.h"); };
-  ~GltfLoader() { PC_PRINT("DESTROYED", TagType::Destr, "GltfLoader.h"); };
+  GltfLoader() = delete;
+  ~GltfLoader() = delete;
+  GltfLoader(const GltfLoader &) = delete;
+  GltfLoader &operator=(const GltfLoader &) = delete;
+  GltfLoader(GltfLoader &&) = delete;
+  GltfLoader &operator=(GltfLoader &&) = delete;
 
   //
   // --- UTILS -----------------------------------------------------------------
-  static GameObject *
-  ConvertGltfNodeToGameObject(const tinygltf::Model &model,
-                              const tinygltf::Node &gltfNode);
+  static GameObject *ConvertGltfNodeToGameObject(const tinygltf::Model &model,
+                                                 int nodeIndex);
   static GameObject *CreateGameObjectByType(const tinygltf::Model &model,
                                             const tinygltf::Node &node);
   static void SetTransformData(const tinygltf::Node &node,
@@ -77,6 +79,9 @@ private:
 
   //
   // --- ANIMATION UTILS -------------------------------------------------------
+
+private:
+  static std::vector<const GameObject *> s_nodeIndexToGameObjectPtrs;
 };
 
 GFX_NAMESPACE_END

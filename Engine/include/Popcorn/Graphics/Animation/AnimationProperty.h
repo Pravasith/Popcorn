@@ -8,6 +8,8 @@
 #include "Splines.h"
 #include <cassert>
 #include <cstddef>
+#include <functional>
+#include <utility>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -24,11 +26,11 @@ public:
 
   template <IsFloatDouble... Args>
   explicit AnimationProperty(Args &&...args)
-      : m_value(std::forward<Args>(args)...){};
+      : m_value(std::forward<Args>(args)...) {}
 
-  // template <IsFloatDouble... Args, typename F>
-  // explicit AnimationProperty(Args &&...args, F &&afterMorphCb)
-  //     : m_value(std::forward<Args>(args)...){};
+  template <typename F> void SetAfterMorphCb(F &&afterMorphCb) {
+    m_afterMorphCb = std::forward<F>(afterMorphCb);
+  }
 
   [[nodiscard]] const T &GetValue() const { return m_value; };
 
@@ -98,19 +100,19 @@ public:
   // AnimationProperty. In the future make it so we can bind multiple rails for
   // animation blending with weights
 
-  inline T GetValueAt_Fast(float t) const {
+  T GetValueAt_Fast(float t) const {
     assert(m_railVTable.IsValid() && "Curve/spline not defined");
     return m_railVTable.valueAtFast_Fptr(m_railVTable.rail, t);
   }
-  inline T GetValueAt_Slow(double t) const {
+  T GetValueAt_Slow(double t) const {
     assert(m_railVTable.IsValid() && "Curve/spline not defined");
     return m_railVTable.valueAtSlow_Fptr(m_railVTable.rail, t);
   }
-  inline T GetFirstDerivativeAt_Fast(float t) const {
+  T GetFirstDerivativeAt_Fast(float t) const {
     assert(m_railVTable.IsValid() && "Curve/spline not defined");
     return m_railVTable.velocityAtFast_Fptr(m_railVTable.rail, t);
   }
-  inline T GetFirstDerivativeAt_Slow(double t) const {
+  T GetFirstDerivativeAt_Slow(double t) const {
     assert(m_railVTable.IsValid() && "Curve/spline not defined");
     return m_railVTable.velocityAtSlow_Fptr(m_railVTable.rail, t);
   }
@@ -122,17 +124,21 @@ private:
   //
   // --- TIME TRAIN CLASS METHODS ---------------------------------------------
   //
-  inline void SetIsAnimating(bool isAnimating) { m_isAnimating = isAnimating; }
-  inline void Morph(const T &passengerValue) { m_value = passengerValue; }
+  void SetIsAnimating(bool isAnimating) { m_isAnimating = isAnimating; }
+  void Morph(const T &passengerValue) {
+    m_value = passengerValue;
+    if (m_afterMorphCb)
+      m_afterMorphCb();
+  }
 
-  inline void BindRail(const Curve<T> *r) {
+  void BindRail(const Curve<T> *r) {
     m_railVTable.rail = r;
     m_railVTable.valueAtFast_Fptr = &ValueAtFast_Curve;
     m_railVTable.valueAtSlow_Fptr = &ValueAtSlow_Curve;
     m_railVTable.velocityAtFast_Fptr = &VelocityAtFast_Curve;
     m_railVTable.velocityAtSlow_Fptr = &VelocityAtSlow_Curve;
   }
-  inline void BindRail(const Spline<T> *r) {
+  void BindRail(const Spline<T> *r) {
     m_railVTable.rail = r;
     m_railVTable.valueAtFast_Fptr = &ValueAtFast_Spline;
     m_railVTable.valueAtSlow_Fptr = &ValueAtSlow_Spline;
@@ -141,28 +147,28 @@ private:
   }
 
   // thunks for rails (curve & spline)
-  static inline T ValueAtFast_Curve(const void *r, float t) noexcept {
+  static T ValueAtFast_Curve(const void *r, float t) noexcept {
     return static_cast<const Curve<T> *>(r)->GetValueAt_Fast(t);
   }
-  static inline T ValueAtSlow_Curve(const void *r, double t) noexcept {
+  static T ValueAtSlow_Curve(const void *r, double t) noexcept {
     return static_cast<const Curve<T> *>(r)->GetValueAt_Slow(t);
   }
-  static inline T VelocityAtFast_Curve(const void *r, float t) noexcept {
+  static T VelocityAtFast_Curve(const void *r, float t) noexcept {
     return static_cast<const Curve<T> *>(r)->GetFirstDerivativeAt_Fast(t);
   }
-  static inline T VelocityAtSlow_Curve(const void *r, double t) noexcept {
+  static T VelocityAtSlow_Curve(const void *r, double t) noexcept {
     return static_cast<const Curve<T> *>(r)->GetFirstDerivativeAt_Slow(t);
   }
-  static inline T ValueAtFast_Spline(const void *r, float t) noexcept {
+  static T ValueAtFast_Spline(const void *r, float t) noexcept {
     return static_cast<const Spline<T> *>(r)->GetValueAt_Fast(t);
   }
-  static inline T ValueAtSlow_Spline(const void *r, double t) noexcept {
+  static T ValueAtSlow_Spline(const void *r, double t) noexcept {
     return static_cast<const Spline<T> *>(r)->GetValueAt_Slow(t);
   }
-  static inline T VelocityAtFast_Spline(const void *r, float t) noexcept {
+  static T VelocityAtFast_Spline(const void *r, float t) noexcept {
     return static_cast<const Spline<T> *>(r)->GetFirstDerivativeAt_Fast(t);
   }
-  static inline T VelocityAtSlow_Spline(const void *r, double t) noexcept {
+  static T VelocityAtSlow_Spline(const void *r, double t) noexcept {
     return static_cast<const Spline<T> *>(r)->GetFirstDerivativeAt_Slow(t);
   }
 
@@ -182,6 +188,7 @@ private:
   RailVTable<T> m_railVTable{};
 
 private:
+  std::function<void()> m_afterMorphCb = nullptr;
   bool m_isAnimating = false;
   T m_value;
 };

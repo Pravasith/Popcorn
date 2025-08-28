@@ -24,14 +24,14 @@ public:
   void LinkAnimationProperty() {
     // TODO: Link AnimationProperty with transform methods, so that when Morph
     // is called on TimeTrain, it fires the cb. Like UpdateRotMatrix()
-  };
+  }
 
   // --- positioning ----------------------------------------------------------
   void TranslateLocal(const glm::vec3 &targetPos);
   template <Axes T> void TranslateLocal(float signedDistance);
 
   // --- rotations ------------------------------------------------------------
-  void SetEulerOrder(EulerOrder order) { m_eulerOrder = order; };
+  void SetEulerOrder(EulerOrder order) { m_eulerOrder = order; }
   void RotateLocalEuler(const glm::vec3 &rotationEuler);
   template <Axes T> void RotateLocalEuler(float radians);
 
@@ -54,13 +54,17 @@ public:
   void UpdateLookAtDirection();
 
 public:
-  Transformations() = default;
+  Transformations() {
+    m_position.SetAfterMorphCb([this] { UpdatePositionMatrix(); });
+    m_rotationEuler.SetAfterMorphCb([this] { UpdateRotationMatrix(); });
+    m_scale.SetAfterMorphCb([this] { UpdateScaleMatrix(); });
+  }
   ~Transformations() = default;
 
   Transformations(const Transformations &) = delete;
   Transformations &operator=(const Transformations &) = delete;
-  Transformations(Transformations &&other) = default;
-  Transformations &operator=(Transformations &&other) = default;
+  Transformations(Transformations &&other) = delete;
+  Transformations &operator=(Transformations &&other) = delete;
 
 public:
   EulerOrder m_eulerOrder = EulerOrder::XYZ;

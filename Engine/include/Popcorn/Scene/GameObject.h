@@ -149,74 +149,11 @@ public:
 
 public:
   // Prevent accidental copies (dangerous due to raw pointers)
-  // TODO: Decide to even allow moves
+  // TODO: Add a "Clone" method later
   GameObject(const GameObject &) = delete;
   GameObject &operator=(const GameObject &) = delete;
-
-  // MOVE CONSTRUCTOR
-  GameObject(GameObject &&other) noexcept {
-    // Delete existing children(if any)
-    for (GameObject *child : m_children)
-      delete child;
-    m_children.clear();
-
-    // Move on children obj, copy parent ptr
-    if (other.m_parent) { // replace parent's old child ptr with new child ptr
-      auto &siblings = other.m_parent->m_children;
-      auto it = std::find(siblings.begin(), siblings.end(), &other);
-      if (it != siblings.end()) {
-        *it = this;
-      }
-    }
-    m_parent = other.m_parent;
-    m_children = std::move(other.m_children);
-
-    // Update children's parent
-    for (GameObject *child : m_children)
-      child->m_parent = this;
-
-    m_name = std::move(other.m_name);
-
-    // Transform data
-    m_transformData = std::move(other.m_transformData);
-
-    other.m_parent = nullptr;
-    other.m_children.clear();
-  }
-
-  // MOVE ASSIGNMENT
-  GameObject &operator=(GameObject &&other) noexcept {
-    if (this != &other) {
-      // Delete existing children(if any)
-      for (GameObject *child : m_children)
-        delete child;
-      m_children.clear();
-
-      // Move on children obj, copy parent ptr
-      if (other.m_parent) { // replace parent's old child ptr with new child ptr
-        auto &siblings = other.m_parent->m_children;
-        auto it = std::find(siblings.begin(), siblings.end(), &other);
-        if (it != siblings.end()) {
-          *it = this;
-        }
-      }
-      m_parent = other.m_parent;
-      m_children = std::move(other.m_children);
-
-      // Update children's parent
-      for (GameObject *child : m_children)
-        child->m_parent = this;
-
-      m_name = std::move(other.m_name);
-
-      // Transform data
-      m_transformData = std::move(other.m_transformData);
-
-      other.m_parent = nullptr;
-      other.m_children.clear();
-    }
-    return *this;
-  }
+  GameObject(GameObject &&other) = delete;
+  GameObject &operator=(GameObject &&other) = delete;
 
 protected:
   std::string m_name;

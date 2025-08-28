@@ -21,6 +21,8 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
+std::vector<const GameObject *> GltfLoader::s_nodeIndexToGameObjectPtrs;
+
 //
 //
 //
@@ -59,24 +61,17 @@ bool GltfLoader::LoadFromFile(const std::string &filename,
   return ret;
 }
 
-// void GltfLoader::ExtractModelData(const tinygltf::Model &model,
-//                                   std::vector<GameObject *> &gameObjects) {
-//   for (auto &node : model.nodes) {
-//     GameObject *gameObject = ConvertGltfNodeToGameObject(model, node);
-//     gameObjects.push_back(gameObject);
-//   }
-// };
-
 void GltfLoader::ExtractModelData(const tinygltf::Model &model,
                                   std::vector<GameObject *> &gameObjects) {
-  // pick the default scene (or fall back to scene 0)
+  // pick the default scene (or fallback to scene 0)
   int sceneIndex = model.defaultScene >= 0 ? model.defaultScene : 0;
   const tinygltf::Scene &scene = model.scenes[sceneIndex];
 
+  s_nodeIndexToGameObjectPtrs.resize(model.nodes.size());
+
   // only iterate root nodes
   for (int nodeIndex : scene.nodes) {
-    GameObject *gameObject =
-        ConvertGltfNodeToGameObject(model, model.nodes[nodeIndex]);
+    GameObject *gameObject = ConvertGltfNodeToGameObject(model, nodeIndex);
     gameObjects.push_back(gameObject);
   }
 }
@@ -91,19 +86,24 @@ void GltfLoader::ExtractModelData(const tinygltf::Model &model,
 //
 GameObject *
 GltfLoader::ConvertGltfNodeToGameObject(const tinygltf::Model &model,
-                                        const tinygltf::Node &gltfNode) {
-  GameObject *gameObject = CreateGameObjectByType(model, gltfNode);
-  gameObject->SetName(gltfNode.name);
+                                        int nodeIndex) {
+  const tinygltf::Node &gltfNode = model.nodes[nodeIndex];
 
-  SetTransformData(gltfNode, *gameObject);
+  GameObject *gameObjectPtr = CreateGameObjectByType(model, gltfNode);
+  gameObjectPtr->SetName(gltfNode.name);
 
-  for (int child : gltfNode.children) {
-    GameObject *childGameObj =
-        ConvertGltfNodeToGameObject(model, model.nodes[child]);
-    gameObject->AddChild(childGameObj);
+  // transforms
+  SetTransformData(gltfNode, *gameObjectPtr);
+
+  // build gltfNode : gameObjPtr map for animations
+  s_nodeIndexToGameObjectPtrs[nodeIndex] = gameObjectPtr;
+
+  for (int childIndex : gltfNode.children) {
+    GameObject *childGameObj = ConvertGltfNodeToGameObject(model, childIndex);
+    gameObjectPtr->AddChild(childGameObj);
   }
 
-  return gameObject;
+  return gameObjectPtr;
 }
 
 void GltfLoader::SetTransformData(const tinygltf::Node &node,
