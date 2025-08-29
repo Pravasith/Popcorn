@@ -5,6 +5,7 @@
 #include "Base.h"
 #include "BufferObjects.h"
 #include "Camera.h"
+#include "CurveDefs.h"
 #include "Empty.h"
 #include "GameObject.h"
 #include "GlobalMacros.h"
@@ -14,11 +15,14 @@
 #include "Material.h"
 #include "Mesh.h"
 #include "Shader.h"
+#include "SplineDefs.h"
 #include "SplineFactory.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <glm/ext/vector_float2.hpp>
 #include <glm/ext/vector_float3.hpp>
+#include <glm/ext/vector_float4.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <limits>
@@ -676,19 +680,19 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
           &outputBuffer
                .data[outputView.byteOffset + outputAccessor.byteOffset]);
 
-      int elemsPerKeyframe = 1;
+      int keyframeValueType = 1;
       switch (outputAccessor.type) {
       case TINYGLTF_TYPE_SCALAR:
-        elemsPerKeyframe = 1;
+        keyframeValueType = 1;
         break;
       case TINYGLTF_TYPE_VEC2:
-        elemsPerKeyframe = 2;
+        keyframeValueType = 2;
         break;
       case TINYGLTF_TYPE_VEC3:
-        elemsPerKeyframe = 3;
+        keyframeValueType = 3;
         break;
       case TINYGLTF_TYPE_VEC4:
-        elemsPerKeyframe = 4;
+        keyframeValueType = 4;
         break;
       default:
         break;
@@ -714,11 +718,22 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
       // TimeTrain tt;
       // timeTrains.emplace_back({posPtr, 0.0, 0.1});
 
-      assert(inputAccessor.count ==
-             outputAccessor.count); // kinda pointless but eh
       int keyframesCount = inputAccessor.count;
-      assert(inputData[keyframesCount] - inputData[0] <= 1.0 &&
+      assert(inputData[keyframesCount - 1] - inputData[0] <= 1.0 &&
              "Length of individual 'Actions' cannot be more than 1");
+
+      for (size_t i = 0; i < keyframesCount; ++i) {
+        // PC_PRINT("  t[" << i << "] = " << inputData[i], TagType::Print,
+        // "");
+
+        float t = inputData[i];
+        assert(t >= 0.0);
+        // min t & max t (for calculating size of the AnimationTracks array)
+        if (t < minKeyFrameTime)
+          minKeyFrameTime = t;
+        if (t > maxKeyFrameTime)
+          maxKeyFrameTime = t;
+      }
 
       if (keyframesCount < 2) {
         PC_WARN("Number of keyframes data provided for "
@@ -730,43 +745,47 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
         if (keyframesCount > 2) {
           // Create SplinePtr
           if (interpType == "CUBICSPLINE") {
+            switch (keyframeValueType) {
+            case 1: {
+              std::vector<HermiteKnot<float>> hermiteKnots;
+            } break;
+            case 2: {
+              std::vector<HermiteKnot<glm::vec4>> hermiteKnots;
+            } break;
+            case 3: {
+              std::vector<HermiteKnot<glm::vec4>> hermiteKnots;
+            } break;
+            case 4: {
+              std::vector<HermiteKnot<glm::vec4>> hermiteKnots;
+              for (size_t i = 0; i < outputAccessor.count; i += 3) {
+                size_t vIn_idx = i + 0;
+                size_t val_idx = i + 1;
+                size_t vOut_idx = i + 2;
+
+                glm::vec4 vIn = glm::vec4(
+                    outputData[vIn_idx * 4 + 0], outputData[vIn_idx * 4 + 1],
+                    outputData[vIn_idx * 4 + 2], outputData[vIn_idx * 4 + 3]);
+
+                glm::vec4 val = glm::vec4(
+                    outputData[val_idx * 4 + 0], outputData[val_idx * 4 + 1],
+                    outputData[val_idx * 4 + 2], outputData[val_idx * 4 + 3]);
+
+                glm::vec4 vOut = glm::vec4(
+                    outputData[vOut_idx * 4 + 0], outputData[vOut_idx * 4 + 1],
+                    outputData[vOut_idx * 4 + 2], outputData[vOut_idx * 4 + 3]);
+
+                hermiteKnots.emplace_back(vIn, val, vOut, inputData[i / 3]);
+              }
+
+            } break;
+            }
           } else {
+
             // make it linear anyway
           }
 
         } else {
           // Create CurvePtr
-        }
-
-        for (size_t i = 0; i < keyframesCount; ++i) {
-          // PC_PRINT("  t[" << i << "] = " << inputData[i], TagType::Print,
-          // "");
-
-          float t = inputData[i];
-          assert(t >= 0.0);
-          // min t & max t (for calculating size of the AnimationTracks array)
-          if (t < minKeyFrameTime)
-            minKeyFrameTime = t;
-          if (t > maxKeyFrameTime)
-            maxKeyFrameTime = t;
-
-          // t belongs to [0, infinitity]
-          // map [0, infinity] -> [0,]
-        }
-
-        PC_PRINT("KEYFRAME VALUES: ", TagType::Print, "")
-        for (size_t i = 0; i < outputAccessor.count; ++i) {
-
-          // Extract curves/splines here
-          std::ostringstream oss;
-          oss << "  v[" << i << "] = (";
-          for (int j = 0; j < elemsPerKeyframe; ++j) {
-            oss << outputData[i * elemsPerKeyframe + j];
-            if (j < elemsPerKeyframe - 1)
-              oss << ", ";
-          }
-          oss << ")";
-          std::cout << oss.str() << "\n";
         }
       }
     }
