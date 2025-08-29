@@ -1,4 +1,6 @@
 #include "GltfLoader.h"
+#include "Animation.h"
+#include "AnimationProperty.h"
 #include "Assert.h"
 #include "Base.h"
 #include "BufferObjects.h"
@@ -15,13 +17,15 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <glm/ext/vector_float3.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include <vector>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-std::vector<const GameObject *> GltfLoader::s_nodeIndexToGameObjectPtrs;
+std::vector<GameObject *> GltfLoader::s_nodeIndexToGameObjectPtrs;
 
 //
 //
@@ -643,6 +647,21 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
 
     for (const tinygltf::AnimationChannel &ch : gltfAnim.channels) {
       PC_PRINT("CHANNEL PATH " << ch.target_path << '\n', TagType::Print, "");
+      GameObject *gameObj = s_nodeIndexToGameObjectPtrs[ch.target_node];
+
+      std::vector<TimeTrain> timeTrains;
+
+      AnimationProperty<glm::vec3> *posPtr =
+          gameObj->GetAnimationProperty_Pos();
+      AnimationProperty<glm::vec3> *rotEulerPtr =
+          gameObj->GetAnimationProperty_RotEuler();
+      AnimationProperty<glm::vec3> *scalePtr =
+          gameObj->GetAnimationProperty_Scale();
+
+      // double startTime = 
+
+      // TimeTrain tt;
+      // timeTrains.emplace_back({posPtr, 0.0, 0.1});
 
       const tinygltf::AnimationSampler &sampler = samplers[ch.sampler];
       PC_PRINT("SAMPLER INTERP " << sampler.interpolation << '\n',

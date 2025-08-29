@@ -10,7 +10,6 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
-#include <string>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -173,9 +172,6 @@ private:
   double m_durationS = 0.0;
   double m_elapsedTimeS = 0.0;
   std::function<void(AnimationTrack *)> m_afterPlayCb;
-
-private:
-  std::string m_name;
 
 private:
   // For morphing either animProps or childTracks

@@ -20,12 +20,6 @@ enum class EulerOrder { XYZ = 1, XZY, YXZ, YZX, ZXY, ZYX };
 
 class Transformations {
 public:
-  // --- animations -----------------------------------------------------------
-  void LinkAnimationProperty() {
-    // TODO: Link AnimationProperty with transform methods, so that when Morph
-    // is called on TimeTrain, it fires the cb. Like UpdateRotMatrix()
-  }
-
   // --- positioning ----------------------------------------------------------
   void TranslateLocal(const glm::vec3 &targetPos);
   template <Axes T> void TranslateLocal(float signedDistance);
@@ -65,6 +59,27 @@ public:
   Transformations &operator=(const Transformations &) = delete;
   Transformations(Transformations &&other) = delete;
   Transformations &operator=(Transformations &&other) = delete;
+
+private:
+  friend class GameObject;
+
+  // --- animations -----------------------------------------------------------
+
+  // Warning: To be modified by the GameObject class only
+  [[nodiscard]] AnimationProperty<glm::vec3> *
+  GetAnimationProperty_Pos() noexcept {
+    return &m_position;
+  }
+  // Warning: To be modified by the GameObject class only
+  [[nodiscard]] AnimationProperty<glm::vec3> *
+  GetAnimationProperty_RotEuler() noexcept {
+    return &m_rotationEuler;
+  }
+  // Warning: To be modified by the GameObject class only
+  [[nodiscard]] AnimationProperty<glm::vec3> *
+  GetAnimationProperty_Scale() noexcept {
+    return &m_scale;
+  }
 
 public:
   EulerOrder m_eulerOrder = EulerOrder::XYZ;

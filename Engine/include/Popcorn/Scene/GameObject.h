@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AnimationProperty.h"
 #include "GlobalMacros.h"
 #include "MathConstants.h"
 #include "Popcorn/Core/Base.h"
@@ -7,6 +8,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <glm/ext/vector_float3.hpp>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -94,14 +96,6 @@ public:
   };
 
   //
-  // Warning: only to be used in GltfLoader(internally). Shouldn't be used
-  // directly by the user. Unless the user knows what they're doing.
-  void SetLocalMatrix(const glm::mat4 &mat) {
-    m_transformData.SetLocalMatrix(mat);
-    UpdateChildrenWorldMatrixNeedsUpdateFlag();
-  };
-
-  //
   // GetWorldMatrix() mutates internal cache.
   [[nodiscard]] const glm::mat4 &GetWorldMatrix() {
     glm::mat4 parentWorldMatrix = PC_IDENTITY_MAT4;
@@ -145,6 +139,27 @@ public:
       throw std::runtime_error("GameObject name not set");
     }
     return m_name;
+  }
+
+  const Transformations &GetTransformData() { return m_transformData; }
+
+  //
+  // --- GLTF LOADER CLASS METHODS -------------------------------------------
+private:
+  friend class GltfLoader;
+
+  void SetLocalMatrix(const glm::mat4 &mat) {
+    m_transformData.SetLocalMatrix(mat);
+    UpdateChildrenWorldMatrixNeedsUpdateFlag();
+  }
+  AnimationProperty<glm::vec3> *GetAnimationProperty_Pos() {
+    return m_transformData.GetAnimationProperty_Pos();
+  }
+  AnimationProperty<glm::vec3> *GetAnimationProperty_RotEuler() {
+    return m_transformData.GetAnimationProperty_RotEuler();
+  }
+  AnimationProperty<glm::vec3> *GetAnimationProperty_Scale() {
+    return m_transformData.GetAnimationProperty_Scale();
   }
 
 public:

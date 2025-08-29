@@ -26,11 +26,6 @@ public:
   // Update nodes
   void Update();
 
-  // Animation tracks - for GltfLoader only
-  void SetAnimationTracks(std::vector<AnimationTrack> tracks) {
-      m_animationTracks = std::move(tracks);
-  }
-
   GameObject *FindObjectByName(const std::string &name) {
     auto it = m_gameObjectsByName.find(name); // O(1) time
     if (it != m_gameObjectsByName.end()) {
@@ -44,6 +39,12 @@ public:
   void AddGameObjectToNamedLookUp(const std::string &name,
                                   GameObject *gameObj) {
     m_gameObjectsByName[name] = gameObj;
+  }
+
+  // Animation tracks - for GltfLoader only
+  void SetAnimationTracks(std::vector<AnimationTrack> tracks) {
+    assert(!tracks.empty());
+    m_animationTracks = std::move(tracks);
   }
 
 private:

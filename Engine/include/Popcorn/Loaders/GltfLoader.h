@@ -81,7 +81,7 @@ private:
   // --- ANIMATION UTILS -------------------------------------------------------
 
 private:
-  static std::vector<const GameObject *> s_nodeIndexToGameObjectPtrs;
+  static std::vector<GameObject *> s_nodeIndexToGameObjectPtrs;
 };
 
 GFX_NAMESPACE_END
