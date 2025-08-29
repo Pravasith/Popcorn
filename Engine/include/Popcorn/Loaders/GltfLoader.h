@@ -18,12 +18,6 @@ GFX_NAMESPACE_BEGIN
 
 class GltfLoader {
 public:
-  struct AnimTrackBounds {
-    uint32_t startTimeS;
-    uint32_t endTimeS;
-  };
-
-public:
   // File -> tinygltf Model
   static bool LoadFromFile(const std::string &filename, tinygltf::Model &model);
 
@@ -33,8 +27,7 @@ public:
 
   static void ExtractAnimationsToAnimationTracks(
       const tinygltf::Model &model,
-      std::vector<AnimationTrack> &animationTracks,
-      std::vector<AnimTrackBounds> &bounds);
+      std::vector<AnimationTrack> &animationTracks);
 
 private:
   GltfLoader() = delete;

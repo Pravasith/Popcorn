@@ -14,12 +14,15 @@
 #include "Material.h"
 #include "Mesh.h"
 #include "Shader.h"
+#include "SplineFactory.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include <limits>
+#include <string>
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
@@ -636,58 +639,39 @@ GltfLoader::ExtractIndexBuffer(const tinygltf::Model &model,
 }
 
 void GltfLoader::ExtractAnimationsToAnimationTracks(
-    const tinygltf::Model &model, std::vector<AnimationTrack> &animationTracks,
-    std::vector<AnimTrackBounds> &bounds) {
+    const tinygltf::Model &model,
+    std::vector<AnimationTrack> &animationTracks) {
   PC_PRINT(model.animations.size(), TagType::Print, "AnimationDebug")
+
+  SplineFactory *splineFactory = SplineFactory::Get();
+  CurveFactory *curveFactory = CurveFactory::Get();
+
+  std::vector<TimeTrain> timeTrains;
+
+  float minKeyFrameTime = std::numeric_limits<float>::max();
+  float maxKeyFrameTime = 0.0;
 
   for (const tinygltf::Animation &gltfAnim : model.animations) {
     PC_PRINT("NAME " << gltfAnim.name << '\n', TagType::Print, "");
-
     const std::vector<tinygltf::AnimationSampler> &samplers = gltfAnim.samplers;
 
     for (const tinygltf::AnimationChannel &ch : gltfAnim.channels) {
-      PC_PRINT("CHANNEL PATH " << ch.target_path << '\n', TagType::Print, "");
-      GameObject *gameObj = s_nodeIndexToGameObjectPtrs[ch.target_node];
-
-      std::vector<TimeTrain> timeTrains;
-
-      AnimationProperty<glm::vec3> *posPtr =
-          gameObj->GetAnimationProperty_Pos();
-      AnimationProperty<glm::vec3> *rotEulerPtr =
-          gameObj->GetAnimationProperty_RotEuler();
-      AnimationProperty<glm::vec3> *scalePtr =
-          gameObj->GetAnimationProperty_Scale();
-
-      // double startTime = 
-
-      // TimeTrain tt;
-      // timeTrains.emplace_back({posPtr, 0.0, 0.1});
-
+      //
+      // --- Extract input data begin() ----------------------------------------
       const tinygltf::AnimationSampler &sampler = samplers[ch.sampler];
-      PC_PRINT("SAMPLER INTERP " << sampler.interpolation << '\n',
-               TagType::Print, "");
-
-      // --- Input: Keyframe times ---
       const tinygltf::Accessor &inputAccessor = model.accessors[sampler.input];
       const tinygltf::BufferView &inputView =
           model.bufferViews[inputAccessor.bufferView];
       const tinygltf::Buffer &inputBuffer = model.buffers[inputView.buffer];
-
       const float *inputData = reinterpret_cast<const float *>(
           &inputBuffer.data[inputView.byteOffset + inputAccessor.byteOffset]);
-
-      PC_PRINT("Keyframe Times: ", TagType::Print, "");
-      for (size_t i = 0; i < inputAccessor.count; ++i) {
-        PC_PRINT("  t[" << i << "] = " << inputData[i], TagType::Print, "");
-      }
-
-      // --- Output: Values (translation / rotation / scale / weights) ---
+      //
+      // --- Extract output data begin() ---------------------------------------
       const tinygltf::Accessor &outputAccessor =
           model.accessors[sampler.output];
       const tinygltf::BufferView &outputView =
           model.bufferViews[outputAccessor.bufferView];
       const tinygltf::Buffer &outputBuffer = model.buffers[outputView.buffer];
-
       const float *outputData = reinterpret_cast<const float *>(
           &outputBuffer
                .data[outputView.byteOffset + outputAccessor.byteOffset]);
@@ -710,18 +694,80 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
         break;
       }
 
-      PC_PRINT("KEYFRAME VALUES: ", TagType::Print, "");
-      for (size_t i = 0; i < outputAccessor.count; ++i) {
-        std::ostringstream oss;
-        oss << "  v[" << i << "] = (";
-        for (int j = 0; j < elemsPerKeyframe; ++j) {
-          oss << outputData[i * elemsPerKeyframe + j];
-          if (j < elemsPerKeyframe - 1)
-            oss << ", ";
+      //
+      // --- Make AnimationTracks and TimeTrains  ------------------------------
+      PC_PRINT("SAMPLER INTERP " << sampler.interpolation << '\n',
+               TagType::Print, "");
+      PC_PRINT("CHANNEL PATH " << ch.target_path << '\n', TagType::Print, "");
+
+      GameObject *gameObj = s_nodeIndexToGameObjectPtrs[ch.target_node];
+
+      AnimationProperty<glm::vec3> *posPtr =
+          gameObj->GetAnimationProperty_Pos();
+      AnimationProperty<glm::vec3> *rotEulerPtr =
+          gameObj->GetAnimationProperty_RotEuler();
+      AnimationProperty<glm::vec3> *scalePtr =
+          gameObj->GetAnimationProperty_Scale();
+
+      std::string interpType = sampler.interpolation;
+
+      // TimeTrain tt;
+      // timeTrains.emplace_back({posPtr, 0.0, 0.1});
+
+      assert(inputAccessor.count ==
+             outputAccessor.count); // kinda pointless but eh
+      int keyframesCount = inputAccessor.count;
+      assert(inputData[keyframesCount] - inputData[0] <= 1.0 &&
+             "Length of individual 'Actions' cannot be more than 1");
+
+      if (keyframesCount < 2) {
+        PC_WARN("Number of keyframes data provided for "
+                << gltfAnim.name << " for property " << ch.target_path
+                << " is just 1, skipping conversion to timeTrain.")
+      } else {
+        // PC_PRINT("KEYFRAME TIMES: ", TagType::Print, "")
+
+        if (keyframesCount > 2) {
+          // Create SplinePtr
+          if (interpType == "CUBICSPLINE") {
+          } else {
+            // make it linear anyway
+          }
+
+        } else {
+          // Create CurvePtr
         }
-        oss << ")";
-        // PC_PRINT(oss.str(), TagType::Print, "");
-        std::cout << oss.str() << "\n";
+
+        for (size_t i = 0; i < keyframesCount; ++i) {
+          // PC_PRINT("  t[" << i << "] = " << inputData[i], TagType::Print,
+          // "");
+
+          float t = inputData[i];
+          assert(t >= 0.0);
+          // min t & max t (for calculating size of the AnimationTracks array)
+          if (t < minKeyFrameTime)
+            minKeyFrameTime = t;
+          if (t > maxKeyFrameTime)
+            maxKeyFrameTime = t;
+
+          // t belongs to [0, infinitity]
+          // map [0, infinity] -> [0,]
+        }
+
+        PC_PRINT("KEYFRAME VALUES: ", TagType::Print, "")
+        for (size_t i = 0; i < outputAccessor.count; ++i) {
+
+          // Extract curves/splines here
+          std::ostringstream oss;
+          oss << "  v[" << i << "] = (";
+          for (int j = 0; j < elemsPerKeyframe; ++j) {
+            oss << outputData[i * elemsPerKeyframe + j];
+            if (j < elemsPerKeyframe - 1)
+              oss << ", ";
+          }
+          oss << ")";
+          std::cout << oss.str() << "\n";
+        }
       }
     }
   }
