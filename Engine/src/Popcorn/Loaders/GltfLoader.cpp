@@ -11,12 +11,14 @@
 #include "GlobalMacros.h"
 #include "Helpers.h"
 #include "Light.h"
+#include "LoaderUtils.h"
 #include "LoadersDefs.h"
 #include "Material.h"
 #include "Mesh.h"
 #include "Shader.h"
 #include "SplineDefs.h"
 #include "SplineFactory.h"
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -645,7 +647,6 @@ GltfLoader::ExtractIndexBuffer(const tinygltf::Model &model,
 void GltfLoader::ExtractAnimationsToAnimationTracks(
     const tinygltf::Model &model,
     std::vector<AnimationTrack> &animationTracks) {
-  PC_PRINT(model.animations.size(), TagType::Print, "AnimationDebug")
 
   SplineFactory *splineFactory = SplineFactory::Get();
   CurveFactory *curveFactory = CurveFactory::Get();
@@ -679,24 +680,6 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
       const float *outputData = reinterpret_cast<const float *>(
           &outputBuffer
                .data[outputView.byteOffset + outputAccessor.byteOffset]);
-
-      int keyframeValueType = 1;
-      switch (outputAccessor.type) {
-      case TINYGLTF_TYPE_SCALAR:
-        keyframeValueType = 1;
-        break;
-      case TINYGLTF_TYPE_VEC2:
-        keyframeValueType = 2;
-        break;
-      case TINYGLTF_TYPE_VEC3:
-        keyframeValueType = 3;
-        break;
-      case TINYGLTF_TYPE_VEC4:
-        keyframeValueType = 4;
-        break;
-      default:
-        break;
-      }
 
       //
       // --- Make AnimationTracks and TimeTrains  ------------------------------
@@ -735,58 +718,66 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
           maxKeyFrameTime = t;
       }
 
+      assert(minKeyFrameTime = 0.0);
+      const size_t maxKeyframeTimeUint = PC_FloatToUint64(maxKeyFrameTime);
+
+      // n belongs to [0, inf]
+      // 0->1, 2->3, 4->5, .... // time-train boards, dests
+      // 2n->2n+1   // 0, 1     // n = 0
+      //            // 2, 3     // n = 1
+      //            // 4, 5     // n = 2
+      // y = 2n + 1             // y is dest time
+      // n = (y - 1) / 2
+      animationTracks.reserve(((maxKeyframeTimeUint - 1) / 2) + 1);
+
+      // input = timeTrain.board, timeTrain.dest
+      // output = timeTrains array -- sorted
+      // for (size_t i = 0; i < maxTimeTrains; ++i) {
+      // }
+
       if (keyframesCount < 2) {
         PC_WARN("Number of keyframes data provided for "
                 << gltfAnim.name << " for property " << ch.target_path
                 << " is just 1, skipping conversion to timeTrain.")
       } else {
-        // PC_PRINT("KEYFRAME TIMES: ", TagType::Print, "")
-
         if (keyframesCount > 2) {
           // Create SplinePtr
           if (interpType == "CUBICSPLINE") {
-            switch (keyframeValueType) {
-            case 1: {
-              std::vector<HermiteKnot<float>> hermiteKnots;
-            } break;
-            case 2: {
-              std::vector<HermiteKnot<glm::vec4>> hermiteKnots;
-            } break;
-            case 3: {
-              std::vector<HermiteKnot<glm::vec4>> hermiteKnots;
-            } break;
-            case 4: {
-              std::vector<HermiteKnot<glm::vec4>> hermiteKnots;
-              for (size_t i = 0; i < outputAccessor.count; i += 3) {
-                size_t vIn_idx = i + 0;
-                size_t val_idx = i + 1;
-                size_t vOut_idx = i + 2;
-
-                glm::vec4 vIn = glm::vec4(
-                    outputData[vIn_idx * 4 + 0], outputData[vIn_idx * 4 + 1],
-                    outputData[vIn_idx * 4 + 2], outputData[vIn_idx * 4 + 3]);
-
-                glm::vec4 val = glm::vec4(
-                    outputData[val_idx * 4 + 0], outputData[val_idx * 4 + 1],
-                    outputData[val_idx * 4 + 2], outputData[val_idx * 4 + 3]);
-
-                glm::vec4 vOut = glm::vec4(
-                    outputData[vOut_idx * 4 + 0], outputData[vOut_idx * 4 + 1],
-                    outputData[vOut_idx * 4 + 2], outputData[vOut_idx * 4 + 3]);
-
-                hermiteKnots.emplace_back(vIn, val, vOut, inputData[i / 3]);
-              }
-
-            } break;
+            switch (outputAccessor.type) {
+            case TINYGLTF_TYPE_SCALAR:
+              PC_HermiteKnotToSpline_Helper<1>(outputAccessor.count, inputData,
+                                               outputData);
+              break;
+            case TINYGLTF_TYPE_VEC2:
+              PC_HermiteKnotToSpline_Helper<2>(outputAccessor.count, inputData,
+                                               outputData);
+              break;
+            case TINYGLTF_TYPE_VEC3:
+              PC_HermiteKnotToSpline_Helper<3>(outputAccessor.count, inputData,
+                                               outputData);
+              break;
+            case TINYGLTF_TYPE_VEC4:
+              PC_HermiteKnotToSpline_Helper<4>(outputAccessor.count, inputData,
+                                               outputData);
+              break;
+            default:
+              PC_ERROR("Wrong dimension type", "");
+              break;
             }
           } else {
-
             // make it linear anyway
           }
 
         } else {
           // Create CurvePtr
         }
+
+        // PC_PRINT("ANIMATIONS SIZE : " << model.animations.size()
+        //                               << "MIN KF TIME: " << minKeyFrameTime
+        //                               << "MAX KF TIME: " << maxKeyFrameTime,
+        //          TagType::Print, "AnimationDebug")
+        // Make TimeTrains
+        // Sort threads
       }
     }
   }

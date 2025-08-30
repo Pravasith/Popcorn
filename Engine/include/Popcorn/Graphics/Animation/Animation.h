@@ -31,12 +31,17 @@ using AnimationTrackPtr = AnimationTrackBase *;
 
 class TimeTrain {
 public:
+  // AnimationProperty ctor -- for splines & curves
   TimeTrain(AnimationPropertyPtr passengerPtr, CurvePtr curvePtr,
             double boardStation, double destStation);
+  // AnimationProperty ctor -- for splines & curves
   TimeTrain(AnimationPropertyPtr passengerPtr, SplinePtr splinePtr,
             double boardStation, double destStation);
+
+  // AnimationTrack ctor -- for nested animations
   TimeTrain(AnimationTrackPtr passengerPtr, double boardStation,
             double destStation);
+
   TimeTrain() = delete;
 
   inline void Animate_Fast(float u) {

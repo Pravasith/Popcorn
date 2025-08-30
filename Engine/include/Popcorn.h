@@ -97,10 +97,9 @@ static void ConvertGltfToScene(const std::string &filename, Scene &scene) {
   GltfLoader::ExtractModelData(model, scene.GetGameObjects());
 
   std::vector<AnimationTrack> animationTracks{};
-  std::vector<GltfLoader::AnimTrackBounds> bounds{};
+  // std::vector<GltfLoader::AnimTrackBounds> bounds{};
 
-  GltfLoader::ExtractAnimationsToAnimationTracks(model, animationTracks,
-                                                 bounds);
+  GltfLoader::ExtractAnimationsToAnimationTracks(model, animationTracks);
 
   for (GameObject *gameObj : scene.GetGameObjects()) {
     FillNamedLookUpMap(scene, gameObj);
