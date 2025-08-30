@@ -5,7 +5,6 @@
 #include "Base.h"
 #include "BufferObjects.h"
 #include "Camera.h"
-#include "CurveDefs.h"
 #include "Empty.h"
 #include "GameObject.h"
 #include "GlobalMacros.h"
@@ -16,7 +15,6 @@
 #include "Material.h"
 #include "Mesh.h"
 #include "Shader.h"
-#include "SplineDefs.h"
 #include "SplineFactory.h"
 #include <cassert>
 #include <cstddef>
@@ -718,8 +716,8 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
           maxKeyFrameTime = t;
       }
 
-      assert(minKeyFrameTime = 0.0);
-      const size_t maxKeyframeTimeUint = PC_FloatToUint64(maxKeyFrameTime);
+      assert(minKeyFrameTime == 0.0);
+      const size_t maxKeyframeTimeUint = (uint64_t)maxKeyFrameTime;
 
       // n belongs to [0, inf]
       // 0->1, 2->3, 4->5, .... // time-train boards, dests
@@ -728,7 +726,8 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
       //            // 4, 5     // n = 2
       // y = 2n + 1             // y is dest time
       // n = (y - 1) / 2
-      animationTracks.reserve(((maxKeyframeTimeUint - 1) / 2) + 1);
+      size_t totalAnimationTracksLength = ((maxKeyframeTimeUint - 1) / 2) + 1;
+      // animationTracks.reserve(totalAnimationTracksLength);
 
       // input = timeTrain.board, timeTrain.dest
       // output = timeTrains array -- sorted
@@ -772,10 +771,12 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
           // Create CurvePtr
         }
 
-        // PC_PRINT("ANIMATIONS SIZE : " << model.animations.size()
-        //                               << "MIN KF TIME: " << minKeyFrameTime
-        //                               << "MAX KF TIME: " << maxKeyFrameTime,
-        //          TagType::Print, "AnimationDebug")
+        PC_PRINT("ANIMATIONS SIZE : " << model.animations.size()
+                                      << "MIN KF TIME: " << minKeyFrameTime
+                                      << "MAX KF TIME: " << maxKeyFrameTime
+                                      << "TOTAL ANIMATION TRACKS: "
+                                      << totalAnimationTracksLength,
+                 TagType::Print, "AnimationDebug")
         // Make TimeTrains
         // Sort threads
       }
