@@ -13,6 +13,9 @@
 #include <glm/ext/vector_float2.hpp>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/ext/vector_float4.hpp>
+#include <glm/fwd.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <type_traits>
 #include <vector>
 
@@ -61,6 +64,7 @@ PC_HermiteKnotToSpline_Helper(
   static_assert(Dims >= 1 && Dims <= 4);
   using CurveType = DimensionType<Dims>::type;
   std::vector<HermiteKnot<CurveType>> hermiteKnots;
+  const Spline<CurveValType<Dims, QuatToEuler>> *splinePtr;
 
   size_t keyframeCount = outputAccessorCount /
                          3; // Hermite output has 3 components - vIn, val, vOut
@@ -93,13 +97,36 @@ PC_HermiteKnotToSpline_Helper(
         vOut[j] = outputTripletsData[vOut_idx * Dims + j];
       }
     }
-    // TODO: Convert quats to Eulers before emplace
 
     hermiteKnots.emplace_back(vIn, val, vOut, inputData[i / 3]);
   }
 
-  const Spline<typename DimensionType<Dims>::type> *splinePtr =
-      SplineFactory::Get()->MakeSpline(hermiteKnots);
+  // TODO: Convert quats to Eulers
+  if constexpr (Dims == 4 && QuatToEuler) {
+    std::vector<HermiteKnot<glm::vec3>> eulerHermiteKnots;
+
+    for (HermiteKnot<glm::vec4> &knot : hermiteKnots) {
+      HermiteKnot<glm::vec3> eulerHermiteKnot;
+
+      glm::quat quatHermiteKnot_vIn(knot.vIn[3], knot.vIn[0], knot.vIn[1],
+                                    knot.vIn[2]);
+      glm::quat quatHermiteKnot_val(knot.val[3], knot.val[0], knot.val[1],
+                                    knot.val[2]);
+      glm::quat quatHermiteKnot_vOut(knot.vOut[3], knot.vOut[0], knot.vOut[1],
+                                     knot.vOut[2]);
+
+      eulerHermiteKnot.vIn = glm::eulerAngles(quatHermiteKnot_vIn);
+      eulerHermiteKnot.val = glm::eulerAngles(quatHermiteKnot_val);
+      eulerHermiteKnot.vOut = glm::eulerAngles(quatHermiteKnot_vOut);
+      eulerHermiteKnot.t = knot.t;
+
+      eulerHermiteKnots.push_back(eulerHermiteKnot);
+    }
+
+    splinePtr = SplineFactory::Get()->MakeSpline(eulerHermiteKnots);
+  } else {
+    splinePtr = SplineFactory::Get()->MakeSpline(hermiteKnots);
+  }
 
   float boardTime = inputData[0];                // unnormalized
   float destTime = inputData[keyframeCount - 1]; // unnormalized

@@ -16,7 +16,6 @@
 #include "Mesh.h"
 #include "Shader.h"
 #include "SplineFactory.h"
-#include <array>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>

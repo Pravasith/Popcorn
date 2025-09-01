@@ -35,7 +35,7 @@ public:
 
   // For physical representation of curves (e.g. rails)
   template <CurveValueType T>
-  const Spline<T> *
+  [[nodiscard]] const Spline<T> *
   MakeSpline(const std::vector<CurveInfoBezierForm<T>> &bezierCurveInfoValues,
              const std::vector<double> &keyframeTs,
              const ReparameterizationCurves &rpCurves = {}) {
@@ -78,8 +78,9 @@ public:
   // For splines made of cubic hermite curves (e.g. animations - gltf
   // cubicspline sampler type)
   template <CurveValueType T>
-  const Spline<T> *MakeSpline(const std::vector<HermiteKnot<T>> &knots,
-                              const ReparameterizationCurves &rpCurves = {}) {
+  [[nodiscard]] const Spline<T> *
+  MakeSpline(const std::vector<HermiteKnot<T>> &knots,
+             const ReparameterizationCurves &rpCurves = {}) {
     assert(knots.size() > 1 && "atleast 2 knots expected");
     KNOT_ASSERTIONS(knots, rpCurves)
 
@@ -112,8 +113,9 @@ public:
   // For splines made of linear curves (e.g. animations - gltf linear sampler
   // type)
   template <CurveValueType T>
-  const Spline<T> *MakeSpline(const std::vector<LinearKnot<T>> &knots,
-                              const ReparameterizationCurves &rpCurves = {}) {
+  [[nodiscard]] const Spline<T> *
+  MakeSpline(const std::vector<LinearKnot<T>> &knots,
+             const ReparameterizationCurves &rpCurves = {}) {
     assert(knots.size() > 1 && "atleast 2 knots expected");
     KNOT_ASSERTIONS(knots, rpCurves)
 
