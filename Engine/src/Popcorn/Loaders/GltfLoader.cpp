@@ -699,14 +699,9 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
       // TimeTrain tt;
       // timeTrains.emplace_back({posPtr, 0.0, 0.1});
 
-      int keyframesCount = inputAccessor.count;
-      assert(inputData[keyframesCount - 1] - inputData[0] <= 1.0 &&
-             "Length of individual 'Actions' cannot be more than 1");
+      int keyframeCount = inputAccessor.count;
 
-      for (size_t i = 0; i < keyframesCount; ++i) {
-        // PC_PRINT("  t[" << i << "] = " << inputData[i], TagType::Print,
-        // "");
-
+      for (size_t i = 0; i < keyframeCount; ++i) {
         float t = inputData[i];
         assert(t >= 0.0);
         // min t & max t (for calculating size of the AnimationTracks array)
@@ -716,17 +711,6 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
           maxKeyFrameTime = t;
       }
 
-      assert(minKeyFrameTime == 0.0);
-      const size_t maxKeyframeTimeUint = (uint64_t)maxKeyFrameTime;
-
-      // n belongs to [0, inf]
-      // 0->1, 2->3, 4->5, .... // time-train boards, dests
-      // 2n->2n+1   // 0, 1     // n = 0
-      //            // 2, 3     // n = 1
-      //            // 4, 5     // n = 2
-      // y = 2n + 1             // y is dest time
-      // n = (y - 1) / 2
-      size_t totalAnimationTracksLength = ((maxKeyframeTimeUint - 1) / 2) + 1;
       // animationTracks.reserve(totalAnimationTracksLength);
 
       // input = timeTrain.board, timeTrain.dest
@@ -734,12 +718,14 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
       // for (size_t i = 0; i < maxTimeTrains; ++i) {
       // }
 
-      if (keyframesCount < 2) {
+      // 2.5->3
+
+      if (keyframeCount < 2) {
         PC_WARN("Number of keyframes data provided for "
                 << gltfAnim.name << " for property " << ch.target_path
                 << " is just 1, skipping conversion to timeTrain.")
       } else {
-        if (keyframesCount > 2) {
+        if (keyframeCount > 2) {
           // Create SplinePtr
           if (interpType == "CUBICSPLINE") {
             switch (outputAccessor.type) {
@@ -763,25 +749,62 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
               PC_ERROR("Wrong dimension type", "");
               break;
             }
+          } else if (interpType == "LINEAR") {
+            switch (outputAccessor.type) {
+            case TINYGLTF_TYPE_SCALAR:
+              PC_LinearKnotToSpline_Helper<1>(outputAccessor.count, inputData,
+                                              outputData);
+              break;
+            case TINYGLTF_TYPE_VEC2:
+              PC_LinearKnotToSpline_Helper<2>(outputAccessor.count, inputData,
+                                              outputData);
+              break;
+            case TINYGLTF_TYPE_VEC3:
+              PC_LinearKnotToSpline_Helper<3>(outputAccessor.count, inputData,
+                                              outputData);
+              break;
+            case TINYGLTF_TYPE_VEC4:
+              PC_LinearKnotToSpline_Helper<4>(outputAccessor.count, inputData,
+                                              outputData);
+              break;
+            default:
+              PC_ERROR("Wrong dimension type", "");
+              break;
+            }
           } else {
-            // make it linear anyway
+            PC_WARN("Spline not built for 'STEP' interp types: "
+                    << gltfAnim.name << " for property " << ch.target_path)
           }
-
         } else {
+          // Keyframe count == 2
           // Create CurvePtr
         }
 
-        PC_PRINT("ANIMATIONS SIZE : " << model.animations.size()
-                                      << "MIN KF TIME: " << minKeyFrameTime
-                                      << "MAX KF TIME: " << maxKeyFrameTime
-                                      << "TOTAL ANIMATION TRACKS: "
-                                      << totalAnimationTracksLength,
-                 TagType::Print, "AnimationDebug")
         // Make TimeTrains
         // Sort threads
       }
-    }
-  }
+    } // channels loop end
+  } // animations loop end
+
+  assert(minKeyFrameTime == 0.0);
+  const size_t maxKeyframeTimeUint = (uint64_t)maxKeyFrameTime;
+
+  // n belongs to [0, inf]
+  // 0->1, 2->3, 4->5, .... // time-train boards, dests
+  // 2n->2n+1   // 0, 1     // n = 0
+  //            // 2, 3     // n = 1
+  //            // 4, 5     // n = 2
+  // board = 2n
+  // dest = 2n + 1
+  // n = (dest - 1) / 2
+  // n = board / 2
+  size_t totalAnimationTracks = ((maxKeyframeTimeUint - 1) / 2) + 1;
+
+  PC_PRINT("ANIMATIONS SIZE : "
+               << model.animations.size() << "MIN KF TIME: " << minKeyFrameTime
+               << "MAX KF TIME: " << maxKeyFrameTime
+               << "TOTAL ANIMATION TRACKS: " << totalAnimationTracks,
+           TagType::Print, "AnimationDebug")
 }
 
 GFX_NAMESPACE_END
