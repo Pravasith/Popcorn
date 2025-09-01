@@ -16,6 +16,7 @@
 #include "Mesh.h"
 #include "Shader.h"
 #include "SplineFactory.h"
+#include <array>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -685,20 +686,7 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
                TagType::Print, "");
       PC_PRINT("CHANNEL PATH " << ch.target_path << '\n', TagType::Print, "");
 
-      GameObject *gameObj = s_nodeIndexToGameObjectPtrs[ch.target_node];
-
-      AnimationProperty<glm::vec3> *posPtr =
-          gameObj->GetAnimationProperty_Pos();
-      AnimationProperty<glm::vec3> *rotEulerPtr =
-          gameObj->GetAnimationProperty_RotEuler();
-      AnimationProperty<glm::vec3> *scalePtr =
-          gameObj->GetAnimationProperty_Scale();
-
-      std::string interpType = sampler.interpolation;
-
-      // TimeTrain tt;
-      // timeTrains.emplace_back({posPtr, 0.0, 0.1});
-
+      std::string targetPath = ch.target_path;
       int keyframeCount = inputAccessor.count;
 
       for (size_t i = 0; i < keyframeCount; ++i) {
@@ -711,14 +699,16 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
           maxKeyFrameTime = t;
       }
 
-      // animationTracks.reserve(totalAnimationTracksLength);
+      GameObject *gameObj = s_nodeIndexToGameObjectPtrs[ch.target_node];
 
-      // input = timeTrain.board, timeTrain.dest
-      // output = timeTrains array -- sorted
-      // for (size_t i = 0; i < maxTimeTrains; ++i) {
-      // }
+      AnimationProperty<glm::vec3> *posPtr =
+          gameObj->GetAnimationProperty_Pos();
+      AnimationProperty<glm::vec3> *rotEulerPtr =
+          gameObj->GetAnimationProperty_RotEuler();
+      AnimationProperty<glm::vec3> *scalePtr =
+          gameObj->GetAnimationProperty_Scale();
 
-      // 2.5->3
+      std::string interpType = sampler.interpolation;
 
       if (keyframeCount < 2) {
         PC_WARN("Number of keyframes data provided for "
@@ -728,49 +718,7 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
         if (keyframeCount > 2) {
           // Create SplinePtr
           if (interpType == "CUBICSPLINE") {
-            switch (outputAccessor.type) {
-            case TINYGLTF_TYPE_SCALAR:
-              PC_HermiteKnotToSpline_Helper<1>(outputAccessor.count, inputData,
-                                               outputData);
-              break;
-            case TINYGLTF_TYPE_VEC2:
-              PC_HermiteKnotToSpline_Helper<2>(outputAccessor.count, inputData,
-                                               outputData);
-              break;
-            case TINYGLTF_TYPE_VEC3:
-              PC_HermiteKnotToSpline_Helper<3>(outputAccessor.count, inputData,
-                                               outputData);
-              break;
-            case TINYGLTF_TYPE_VEC4:
-              PC_HermiteKnotToSpline_Helper<4>(outputAccessor.count, inputData,
-                                               outputData);
-              break;
-            default:
-              PC_ERROR("Wrong dimension type", "");
-              break;
-            }
           } else if (interpType == "LINEAR") {
-            switch (outputAccessor.type) {
-            case TINYGLTF_TYPE_SCALAR:
-              PC_LinearKnotToSpline_Helper<1>(outputAccessor.count, inputData,
-                                              outputData);
-              break;
-            case TINYGLTF_TYPE_VEC2:
-              PC_LinearKnotToSpline_Helper<2>(outputAccessor.count, inputData,
-                                              outputData);
-              break;
-            case TINYGLTF_TYPE_VEC3:
-              PC_LinearKnotToSpline_Helper<3>(outputAccessor.count, inputData,
-                                              outputData);
-              break;
-            case TINYGLTF_TYPE_VEC4:
-              PC_LinearKnotToSpline_Helper<4>(outputAccessor.count, inputData,
-                                              outputData);
-              break;
-            default:
-              PC_ERROR("Wrong dimension type", "");
-              break;
-            }
           } else {
             PC_WARN("Spline not built for 'STEP' interp types: "
                     << gltfAnim.name << " for property " << ch.target_path)
@@ -779,10 +727,28 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
           // Keyframe count == 2
           // Create CurvePtr
         }
-
-        // Make TimeTrains
-        // Sort threads
       }
+
+      auto makeTimeTrainBinding_HermiteData = [&]() {
+        if (targetPath == "translation") {
+          PC_HermiteKnotToSpline_Helper<3>(posPtr, outputAccessor.count,
+                                           inputData, outputData);
+        } else if (targetPath == "rotation") {
+          PC_HermiteKnotToSpline_Helper<4, true>(
+              rotEulerPtr, outputAccessor.count, inputData, outputData);
+        } else if (targetPath == "scale") {
+          PC_HermiteKnotToSpline_Helper<3>(scalePtr, outputAccessor.count,
+                                           inputData, outputData);
+        } else if (targetPath == "weights") {
+          // PC_HermiteKnotToSpline_Helper<1>(weightsPtr, outputAccessor.count,
+          //                                  inputData, outputData);
+        } else {
+          PC_ERROR("Unknown channel target_path", "GltfLoader")
+        }
+      };
+
+      auto makeTimeTrainBinding_LinearData = [&]() {};
+
     } // channels loop end
   } // animations loop end
 

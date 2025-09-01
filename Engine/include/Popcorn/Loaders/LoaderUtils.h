@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Animation.h"
+#include "AnimationProperty.h"
 #include "GlobalMacros.h"
 #include "SplineDefs.h"
 #include "SplineFactory.h"
@@ -12,10 +13,16 @@
 #include <glm/ext/vector_float2.hpp>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/ext/vector_float4.hpp>
+#include <type_traits>
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
+
+struct TimeTrain_Binding {
+  TimeTrain tt;
+  size_t animationTrackIndex;
+};
 
 template <int T> struct DimensionType;
 template <> struct DimensionType<1> {
@@ -31,25 +38,38 @@ template <> struct DimensionType<4> {
   using type = glm::vec4;
 };
 
-template <int Dims>
+// template <int T>
+// using CurveValType = typename DimensionType<T>::type;
+
+// Use for Quaternion to Euler conversions - when you want to pass a vec3
+// AnimationProperty, and the outputData(from Blender) is Quaternion data(vec4),
+// set QuatToEuler flag
+template <int T, bool QuatToEuler>
+using CurveValType =
+    std::conditional_t<T == 4 && QuatToEuler, typename DimensionType<3>::type,
+                       typename DimensionType<T>::type>::type;
+
+template <int Dims, bool QuatToEuler = false>
 // [[nodiscard]]
-static inline const Spline<typename DimensionType<Dims>::type> *
+static inline const Spline<CurveValType<Dims, QuatToEuler>> *
 PC_HermiteKnotToSpline_Helper(
+    AnimationProperty<CurveValType<Dims, QuatToEuler>> *animationPropertyPtr,
     size_t outputAccessorCount, const float *inputData,
-    const float *outputTripletsData // triplets bc Blender exports Hermite
+    const float
+        *outputTripletsData // Hermite output has 3 components - vIn, val, vOut
 ) {
   static_assert(Dims >= 1 && Dims <= 4);
   using CurveType = DimensionType<Dims>::type;
   std::vector<HermiteKnot<CurveType>> hermiteKnots;
 
-  size_t keyframeCount = outputAccessorCount / 3;
+  size_t keyframeCount = outputAccessorCount /
+                         3; // Hermite output has 3 components - vIn, val, vOut
 
   assert(inputData[keyframeCount - 1] - inputData[0] <= 1.0 &&
          "Length (or journey time of time train after conversion) of "
          "individual 'Blender Actions' cannot be more than 1");
 
-  hermiteKnots.reserve(
-      keyframeCount); // keyframe count = outputTripletsData / 3
+  hermiteKnots.reserve(keyframeCount);
 
   // outputAccessorCount is 3 * keyframeCount
   for (size_t i = 0; i < outputAccessorCount; i += 3) {
@@ -73,6 +93,8 @@ PC_HermiteKnotToSpline_Helper(
         vOut[j] = outputTripletsData[vOut_idx * Dims + j];
       }
     }
+    // TODO: Convert quats to Eulers before emplace
+
     hermiteKnots.emplace_back(vIn, val, vOut, inputData[i / 3]);
   }
 
@@ -95,13 +117,9 @@ PC_HermiteKnotToSpline_Helper(
   float bT_norm = boardTime - bT_flr; // use this in time trains
   float dT_norm = destTime - bT_flr;  // use this in time trains
 
-  struct TimeTrainInSlot {
-    TimeTrain tt;
-    size_t animationTrackSlot;
-  };
-
-  TimeTrainInSlot ttSlot;
-  ttSlot.animationTrackSlot = bT_flr / 2;
+  TimeTrain_Binding ttBinding;
+  ttBinding.animationTrackIndex = bT_flr / 2;
+  // ttBinding.tt = TimeTrain(
 
   // Conversion
   //

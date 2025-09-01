@@ -42,7 +42,7 @@ public:
   TimeTrain(AnimationTrackPtr passengerPtr, double boardStation,
             double destStation);
 
-  TimeTrain() = delete;
+  TimeTrain() = default;
 
   inline void Animate_Fast(float u) {
     assert(m.ttExec.animateFast_Fptr);
@@ -135,12 +135,11 @@ private:
 
 class AnimationTrack : public Subscriber, public AnimationTrackBase {
 public:
-  AnimationTrack(std::vector<TimeTrain> &&timetrains)
+  AnimationTrack(std::vector<TimeTrain> &&timetrains) noexcept
       : m_timeTrains(std::move(timetrains)) {
     assert(!m_timeTrains.empty());
     SweepLineSetUp();
   }
-  ~AnimationTrack() = default;
 
   void Insert_Slow(TimeTrain timeTrain) {
     m_timeTrains.push_back(timeTrain);
