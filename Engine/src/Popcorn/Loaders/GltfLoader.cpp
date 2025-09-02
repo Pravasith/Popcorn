@@ -649,7 +649,7 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
   SplineFactory *splineFactory = SplineFactory::Get();
   CurveFactory *curveFactory = CurveFactory::Get();
 
-  std::vector<TimeTrain> timeTrains;
+  std::vector<TimeTrain_Binding> allTimeTrainBindings;
 
   float minKeyFrameTime = std::numeric_limits<float>::max();
   float maxKeyFrameTime = 0.0;
@@ -707,6 +707,48 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
       AnimationProperty<glm::vec3> *scalePtr =
           gameObj->GetAnimationProperty_Scale();
 
+      enum KnotTypes { HermiteKnotType = 1, LinearKnotType, StepKnotType };
+
+      auto makeTimeTrainBinding = [&](KnotTypes knotType) {
+        TimeTrain_Binding tt;
+        if (targetPath == "translation") {
+          if (knotType == HermiteKnotType) {
+            tt = PC_CreateTimeTrainBindingFromGltfActions_HermiteData<3>(
+                posPtr, outputAccessor.count, inputData, outputData);
+          } else if (knotType == LinearKnotType) {
+            tt = PC_CreateTimeTrainBindingFromGltfActions_LinearData<3>(
+                posPtr, outputAccessor.count, inputData, outputData);
+          }
+        } else if (targetPath == "rotation") {
+          if (knotType == HermiteKnotType) {
+            tt = PC_CreateTimeTrainBindingFromGltfActions_HermiteData<4, true>(
+                rotEulerPtr, outputAccessor.count, inputData, outputData);
+          } else if (knotType == LinearKnotType) {
+            tt = PC_CreateTimeTrainBindingFromGltfActions_LinearData<4, true>(
+                rotEulerPtr, outputAccessor.count, inputData, outputData);
+          }
+        } else if (targetPath == "scale") {
+          if (knotType == HermiteKnotType) {
+            tt = PC_CreateTimeTrainBindingFromGltfActions_HermiteData<3>(
+                scalePtr, outputAccessor.count, inputData, outputData);
+          } else if (knotType == LinearKnotType) {
+            tt = PC_CreateTimeTrainBindingFromGltfActions_LinearData<3>(
+                scalePtr, outputAccessor.count, inputData, outputData);
+          }
+        } else if (targetPath == "weights") {
+          // if (knotType == HermiteKnotType) {
+          //   tt = PC_CreateTimeTrainBindingFromGltfActions_HermiteData<1>(
+          //       weightsPtr, outputAccessor.count, inputData, outputData);
+          // } else if (knotType == LinearKnotType) {
+          //   tt = PC_CreateTimeTrainBindingFromGltfActions_LinearData<1>(
+          //       weightsPtr, outputAccessor.count, inputData, outputData);
+          // }
+        } else {
+          PC_ERROR("Unknown channel target_path", "GltfLoader")
+        }
+        allTimeTrainBindings.emplace_back(std::move(tt));
+      };
+
       std::string interpType = sampler.interpolation;
 
       if (keyframeCount < 2) {
@@ -716,32 +758,14 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
       } else {
         // Create TimeTrain
         if (interpType == "CUBICSPLINE") {
+          makeTimeTrainBinding(KnotTypes::HermiteKnotType);
         } else if (interpType == "LINEAR") {
+          makeTimeTrainBinding(KnotTypes::LinearKnotType);
         } else {
           PC_WARN("Spline not built for 'STEP' interp types: "
                   << gltfAnim.name << " for property " << ch.target_path)
         }
       }
-
-      auto makeTimeTrainBinding_HermiteData = [&]() {
-        if (targetPath == "translation") {
-          PC_CreateTimeTrainBindingFromGltfActions_HermiteData<3>(
-              posPtr, outputAccessor.count, inputData, outputData);
-        } else if (targetPath == "rotation") {
-          PC_CreateTimeTrainBindingFromGltfActions_HermiteData<4, true>(
-              rotEulerPtr, outputAccessor.count, inputData, outputData);
-        } else if (targetPath == "scale") {
-          PC_CreateTimeTrainBindingFromGltfActions_HermiteData<3>(
-              scalePtr, outputAccessor.count, inputData, outputData);
-        } else if (targetPath == "weights") {
-          // PC_CreateTimeTrainsFromGltfActions_HermiteData<1>(
-          //     weightPtr, outputAccessor.count, inputData, outputData);
-        } else {
-          PC_ERROR("Unknown channel target_path", "GltfLoader")
-        }
-      };
-
-      auto makeTimeTrainBinding_LinearData = [&]() {};
 
     } // channels loop end
   } // animations loop end
@@ -759,6 +783,15 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
   // n = (dest - 1) / 2
   // n = board / 2
   size_t totalAnimationTracks = ((maxKeyframeTimeUint - 1) / 2) + 1;
+
+  animationTracks.resize(totalAnimationTracks);
+  animationTracks.reserve(totalAnimationTracks);
+  // allTimeTrainBindings[0].animationTrackIndex
+
+  for (size_t i; i < allTimeTrainBindings.size(); ++i) {
+    TimeTrain_Binding &ttBinding = allTimeTrainBindings[i];
+    animationTracks[ttBinding.animationTrackIndex].Insert_Slow(ttBinding.tt);
+  };
 
   PC_PRINT("ANIMATIONS SIZE : "
                << model.animations.size() << "MIN KF TIME: " << minKeyFrameTime

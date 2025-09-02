@@ -43,6 +43,14 @@ template <> struct DimensionType<4> {
   using type = glm::vec4;
 };
 
+//
+//
+//
+//
+// --- HERMITE DATA PROCESSING ---------------------------------------------
+// --- HERMITE DATA PROCESSING ---------------------------------------------
+//
+
 // template <int T>
 // using CurveValType = typename DimensionType<T>::type;
 
@@ -55,8 +63,7 @@ using CurveValType =
                        typename DimensionType<T>::type>;
 
 template <int Dims, bool QuatToEuler = false>
-// [[nodiscard]]
-static inline TimeTrain_Binding
+[[nodiscard]] static inline TimeTrain_Binding
 PC_CreateTimeTrainBindingFromGltfActions_HermiteData(
     AnimationProperty<CurveValType<Dims, QuatToEuler>> *animationPropertyPtr,
     size_t outputAccessorCount, const float *inputData,
@@ -190,30 +197,129 @@ PC_CreateTimeTrainBindingFromGltfActions_HermiteData(
   return ttBinding;
 }
 
-template <int Dims>
-// [[nodiscard]]
-static inline const Spline<typename DimensionType<Dims>::type> *
-PC_LinearKnotToSpline_Helper(size_t outputAccessorCount, const float *inputData,
-                             const float *outputData) {
+//
+//
+//
+//
+// --- LINEAR DATA PROCESSING ----------------------------------------------
+// --- LINEAR DATA PROCESSING ----------------------------------------------
+//
+
+// Use for Quaternion to Euler conversions - when you want to pass a vec3
+// AnimationProperty, and the outputData(from Blender) is Quaternion data(vec4),
+// set QuatToEuler flag
+template <int Dims, bool QuatToEuler = false>
+[[nodiscard]] static inline TimeTrain_Binding
+PC_CreateTimeTrainBindingFromGltfActions_LinearData(
+    AnimationProperty<CurveValType<Dims, QuatToEuler>> *animationPropertyPtr,
+    size_t outputAccessorCount, const float *inputData,
+    const float *outputData // Linear output has 1 component - val
+) {
+
   static_assert(Dims >= 1 && Dims <= 4);
   using CurveType = DimensionType<Dims>::type;
   std::vector<LinearKnot<CurveType>> linearKnots;
-  linearKnots.reserve(outputAccessorCount);
+
+  size_t keyframeCount =
+      outputAccessorCount / 1; // Linear output has 1 components - val
+
+  const Spline<CurveValType<Dims, QuatToEuler>> *splinePtr = nullptr;
+  const Curve<CurveValType<Dims, QuatToEuler>> *curvePtr = nullptr;
+
+  bool isRailSpline = true;
+
+  if (keyframeCount == 2) {
+    isRailSpline = false;
+  }
+
+  assert(inputData[keyframeCount - 1] - inputData[0] <= 1.0 &&
+         "Length (or journey time of time train after conversion) of "
+         "individual 'Blender Actions' cannot be more than 1");
+
+  linearKnots.reserve(keyframeCount);
 
   for (size_t i = 0; i < outputAccessorCount; ++i) {
     CurveType val{};
+    size_t val_idx = i;
 
     for (size_t j = 0; j < Dims; ++j) {
       // Fill individual vectors (or floats), e.g. vec3[0], vec3[1], vec3[2]
       if constexpr (Dims == 1) {
-        val = outputData[i];
+        val = outputData[val_idx];
       } else {
-        val[j] = outputData[i * Dims + j];
+        val[j] = outputData[val_idx * Dims + j];
       }
     }
+
     linearKnots.emplace_back(val, inputData[i]);
   }
-  return SplineFactory::Get()->MakeSpline(linearKnots);
+
+  if constexpr (Dims == 4 && QuatToEuler) {
+    std::vector<LinearKnot<glm::vec3>> eulerLinearKnots;
+
+    for (LinearKnot<glm::vec4> &knot : linearKnots) {
+      LinearKnot<glm::vec3> eulerLinearKnot;
+
+      glm::quat quatLinearKnot_val(knot.val[3], knot.val[0], knot.val[1],
+                                   knot.val[2]);
+
+      eulerLinearKnot.val = glm::eulerAngles(quatLinearKnot_val);
+      eulerLinearKnot.t = knot.t;
+
+      eulerLinearKnots.push_back(eulerLinearKnot);
+    }
+
+    if (isRailSpline) {
+      splinePtr = SplineFactory::Get()->MakeSpline(eulerLinearKnots);
+    } else {
+      assert(eulerLinearKnots.size() == 2);
+
+      CurveInfoLinearForm<glm::vec3> cInfo;
+      cInfo.p0 = eulerLinearKnots[0].val;
+      cInfo.p1 = eulerLinearKnots[1].val;
+
+      curvePtr = CurveFactory::Get()->GetCurvePtr(cInfo);
+    }
+  } else {
+    if (isRailSpline) {
+      splinePtr = SplineFactory::Get()->MakeSpline(linearKnots);
+    } else {
+      assert(linearKnots.size() == 2);
+
+      CurveInfoLinearForm<CurveType> cInfo;
+      cInfo.p0 = linearKnots[0].val;
+      cInfo.p1 = linearKnots[1].val;
+
+      curvePtr = CurveFactory::Get()->GetCurvePtr(cInfo);
+    }
+  }
+
+  float boardTime = inputData[0];                // unnormalized
+  float destTime = inputData[keyframeCount - 1]; // unnormalized
+
+  uint32_t bT_flr = (uint32_t)floorf(boardTime);
+  uint32_t dT_ceil = (uint32_t)ceilf(destTime);
+
+  // n in terms of board & dest
+  // n = (dest - 1) / 2
+  // n = board / 2
+  assert(((dT_ceil - 1) / 2) == (bT_flr / 2) &&
+         "Board & dest times should belong to ranges 2n, 2n + 1 respectively, "
+         "i.e. in (0,1), (2,3), (4,5), ... (2n, 2n+1)");
+
+  float bT_norm = boardTime - bT_flr; // use this in time trains
+  float dT_norm = destTime - bT_flr;  // use this in time trains
+
+  TimeTrain tt =
+      isRailSpline
+          ? TimeTrain(animationPropertyPtr, splinePtr, bT_norm, dT_norm)
+          : TimeTrain(animationPropertyPtr, curvePtr, bT_norm, dT_norm);
+
+  TimeTrain_Binding ttBinding{};
+  ttBinding.animationTrackIndex = bT_flr / 2;
+  ttBinding.tt = tt;
+
+  return ttBinding;
 }
 
 GFX_NAMESPACE_END

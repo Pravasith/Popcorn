@@ -97,9 +97,10 @@ static void ConvertGltfToScene(const std::string &filename, Scene &scene) {
   GltfLoader::ExtractModelData(model, scene.GetGameObjects());
 
   std::vector<AnimationTrack> animationTracks{};
-  // std::vector<GltfLoader::AnimTrackBounds> bounds{};
 
+  PC_WARN("ANIMATION TRACK SIZE BEFORE: " << animationTracks.size())
   GltfLoader::ExtractAnimationsToAnimationTracks(model, animationTracks);
+  PC_WARN("ANIMATION TRACK SIZE AFTER: " << animationTracks.size())
 
   for (GameObject *gameObj : scene.GetGameObjects()) {
     FillNamedLookUpMap(scene, gameObj);

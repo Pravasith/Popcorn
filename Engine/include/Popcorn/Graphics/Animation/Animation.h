@@ -135,6 +135,9 @@ private:
 
 class AnimationTrack : public Subscriber, public AnimationTrackBase {
 public:
+  AnimationTrack() = default;
+
+public:
   AnimationTrack(std::vector<TimeTrain> &&timetrains) noexcept
       : m_timeTrains(std::move(timetrains)) {
     assert(!m_timeTrains.empty());
