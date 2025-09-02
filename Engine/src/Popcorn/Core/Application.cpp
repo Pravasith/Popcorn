@@ -51,7 +51,7 @@ void Application::Start() {
     s_window->Subscribe(s_instance);
 
     s_layerStack = new LayerStack();
-    s_time = Time::Create();
+    s_time = Time::Get();
     s_time->Subscribe(s_instance);
 
     // Init graphics

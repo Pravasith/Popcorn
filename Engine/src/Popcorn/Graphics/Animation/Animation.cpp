@@ -2,6 +2,8 @@
 #include "Animation.h"
 #include "GlobalMacros.h"
 #include "MathConstants.h"
+#include "Popcorn/Core/Base.h"
+#include "Popcorn/Core/Helpers.h"
 #include <numeric>
 #include <stdexcept>
 #include <type_traits>
@@ -147,6 +149,9 @@ void AnimationTrack::Play(double durationInSecs) {
   m_elapsedTimeS = 0.0;
   m_durationS = durationInSecs;
   m_isPlaying = true;
+
+  PC_PRINT(m_timeTrains.size() << " << timetrains", TagType::Print, "");
+
   RESET_SWEEP_LINE_SETS
 }
 void AnimationTrack::Play(double durationInSecs,
@@ -155,6 +160,9 @@ void AnimationTrack::Play(double durationInSecs,
   m_durationS = durationInSecs;
   m_isPlaying = true;
   m_afterPlayCb = std::move(onFinishCb);
+
+  PC_PRINT(m_timeTrains.size() << " << timetrains", TagType::Print, "");
+
   RESET_SWEEP_LINE_SETS
 }
 #undef RESET_SWEEP_LINE_SETS
@@ -164,7 +172,7 @@ void AnimationTrack::Play(double durationInSecs,
     m_isPlaying = false;                                                       \
     m_elapsedTimeS = 0.0;                                                      \
     m_durationS = 0.0;                                                         \
-    m_afterPlayCb = nullptr;                                                \
+    m_afterPlayCb = nullptr;                                                   \
   } while (0);
 
 void AnimationTrack::MorphPassengers(double t, bool useSlowAlgo) {
@@ -219,6 +227,10 @@ void AnimationTrack::MorphPassengers(double t, bool useSlowAlgo) {
 //
 // --- Update ------------------------------------------------------------------
 bool AnimationTrack::OnUpdate(TimeEvent &e) {
+  // m_elapsedTimeS += e.GetDeltaS();
+  // PC_WARN("ELAPSED: " << m_elapsedTimeS)
+  // PC_WARN("DURATION: " << m_durationS)
+
   if ((m_elapsedTimeS += e.GetDeltaS()) < m_durationS) {
     double t = GetNormalizedElapsedSecs();
 

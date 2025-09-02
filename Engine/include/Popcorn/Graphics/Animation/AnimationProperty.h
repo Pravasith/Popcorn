@@ -34,15 +34,17 @@ public:
 
   [[nodiscard]] const T &GetValue() const { return m_value; };
 
-#define BLOCK_IF_ANIMATING_ALREADY                                             \
-  do {                                                                         \
-    if (m_isAnimating) {                                                       \
-      PC_WARN(                                                                 \
-          "Operation not performed because an animation is already running "   \
-          "on this property")                                                  \
-      return;                                                                  \
-    }                                                                          \
-  } while (0);
+  // #define BLOCK_IF_ANIMATING_ALREADY                                             \
+//   do {                                                                         \
+//     if (m_isAnimating) {                                                       \
+//       PC_WARN(                                                                 \
+//           "Operation not performed because an animation is already running "   \
+//           "on this property")                                                  \
+//       return;                                                                  \
+//     }                                                                          \
+//   } while (0);
+
+#define BLOCK_IF_ANIMATING_ALREADY ;
 
   void Set(const T &value) noexcept {
     BLOCK_IF_ANIMATING_ALREADY
@@ -124,7 +126,7 @@ private:
   //
   // --- TIME TRAIN CLASS METHODS ---------------------------------------------
   //
-  void SetIsAnimating(bool isAnimating) { m_isAnimating = isAnimating; }
+  // void SetIsAnimating(bool isAnimating) { m_isAnimating = isAnimating; }
   void Morph(const T &passengerValue) {
     m_value = passengerValue;
     if (m_afterMorphCb)
@@ -189,7 +191,7 @@ private:
 
 private:
   std::function<void()> m_afterMorphCb = nullptr;
-  bool m_isAnimating = false;
+  // bool m_isAnimating = false;
   T m_value;
 };
 

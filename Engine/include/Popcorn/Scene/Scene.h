@@ -3,6 +3,8 @@
 #include "Animation.h"
 #include "GameObject.h"
 #include "GlobalMacros.h"
+#include "Popcorn/Core/Base.h"
+#include "Popcorn/Core/Time.h"
 #include <cstdint>
 #include <unordered_map>
 #include <vector>
@@ -15,10 +17,11 @@ public:
   Scene();
   virtual ~Scene();
 
-  [[nodiscard]] inline std::vector<GameObject *> &GetGameObjects() {
-    return m_nodes;
-  };
+  [[nodiscard]] std::vector<GameObject *> &GetGameObjects() { return m_nodes; };
 
+  [[nodiscard]] const std::vector<AnimationTrack> &GetAnimationTracks() const {
+    return m_animationTracks;
+  }
   // Adds a node
   void AddGameObject(GameObject *node);
   void RemoveGameObject(GameObject *node);
@@ -45,6 +48,11 @@ public:
   void SetAnimationTracks(std::vector<AnimationTrack> tracks) {
     assert(!tracks.empty());
     m_animationTracks = std::move(tracks);
+
+    PC_WARN(m_animationTracks.size() << " TRACK SIZEEEEEEEEEEEEE")
+    Time::Get()->Subscribe(&m_animationTracks[0]);
+    // for (AnimationTrack &track : m_animationTracks) {
+    // }
   }
 
 private:

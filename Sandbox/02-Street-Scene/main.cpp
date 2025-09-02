@@ -1,5 +1,7 @@
+#include <Animation.h>
 #include <BufferObjects.h>
 #include <GameObject.h>
+#include <Helpers.h>
 #include <Material.h>
 #include <Mesh.h>
 #include <Popcorn.h>
@@ -24,12 +26,18 @@ public:
     Popcorn::Context::ConvertGltfToScene("../assets/models/planet-scene.gltf",
                                          scene);
 
-
-
     // Popcorn::Context::ConvertGltfToScene("../assets/models/light-test.gltf",
     //                                      scene);
     Popcorn::Context::RegisterScene(scene);
-    building = scene.FindObjectByName("building");
+    // building = scene.FindObjectByName("building");
+
+    AnimationTrack animTrack = scene.GetAnimationTracks()[0];
+
+    PC_PRINT(&animTrack << " COMPARE", TagType::Print, "")
+
+    animTrack.Play(1.0, [](AnimationTrack *) {
+      PC_PRINT("ANIMATION FINISHED!!!!!!!!!!!!!", TagType::Print, "")
+    });
   };
 
   virtual void OnDetach() override {

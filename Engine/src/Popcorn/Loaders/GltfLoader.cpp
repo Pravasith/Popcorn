@@ -788,7 +788,7 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
   animationTracks.reserve(totalAnimationTracks);
   // allTimeTrainBindings[0].animationTrackIndex
 
-  for (size_t i; i < allTimeTrainBindings.size(); ++i) {
+  for (size_t i = 0; i < allTimeTrainBindings.size(); ++i) {
     TimeTrain_Binding &ttBinding = allTimeTrainBindings[i];
     animationTracks[ttBinding.animationTrackIndex].Insert_Slow(ttBinding.tt);
   };

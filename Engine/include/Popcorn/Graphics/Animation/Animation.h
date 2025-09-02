@@ -4,6 +4,7 @@
 #include "Event.h"
 #include "GlobalMacros.h"
 #include "MathConstants.h"
+#include "Popcorn/Core/Base.h"
 #include "Subscriber.h"
 #include "TimeEvent.h"
 #include <algorithm>
@@ -156,6 +157,8 @@ public:
             std::function<void(AnimationTrack *)> onFinishCb);
 
   void OnEvent(Event &e) override {
+    PC_WARN("RUNNING")
+
     if (!m_isPlaying) {
       return;
     }

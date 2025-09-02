@@ -20,9 +20,8 @@ Publisher::~Publisher() {
 
 void Publisher::Subscribe(Subscriber *subscriber) {
   m_subscribers.push_back(subscriber);
-  // PC_PRINT(subscriber->GetName() << " subscribed to " << m_name,
-  // TagType::Print,
-  //          "PUBLISHERS")
+  PC_PRINT(subscriber << " Subscribed to " << m_name, TagType::Print,
+           "PUBLISHERS")
 };
 
 void Publisher::UnSubscribe(Subscriber *subscriber) {

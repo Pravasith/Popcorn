@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Animation.h"
 #include "Application.h"
 #include "Assert.h"
 #include "GameObject.h"
@@ -100,6 +101,8 @@ static void ConvertGltfToScene(const std::string &filename, Scene &scene) {
 
   PC_WARN("ANIMATION TRACK SIZE BEFORE: " << animationTracks.size())
   GltfLoader::ExtractAnimationsToAnimationTracks(model, animationTracks);
+  scene.SetAnimationTracks(animationTracks);
+
   PC_WARN("ANIMATION TRACK SIZE AFTER: " << animationTracks.size())
 
   for (GameObject *gameObj : scene.GetGameObjects()) {
