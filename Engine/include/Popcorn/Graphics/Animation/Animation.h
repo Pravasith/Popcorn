@@ -137,6 +137,7 @@ private:
 class AnimationTrack : public Subscriber, public AnimationTrackBase {
 public:
   AnimationTrack() = default;
+  virtual ~AnimationTrack() = default;
 
 public:
   AnimationTrack(std::vector<TimeTrain> &&timetrains) noexcept
@@ -156,9 +157,7 @@ public:
   void Play(double durationInSecs,
             std::function<void(AnimationTrack *)> onFinishCb);
 
-  void OnEvent(Event &e) override {
-    PC_WARN("RUNNING")
-
+  virtual void OnEvent(Event &e) override {
     if (!m_isPlaying) {
       return;
     }

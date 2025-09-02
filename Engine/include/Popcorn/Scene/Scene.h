@@ -5,7 +5,9 @@
 #include "GlobalMacros.h"
 #include "Popcorn/Core/Base.h"
 #include "Popcorn/Core/Time.h"
+#include <cstddef>
 #include <cstdint>
+#include <map>
 #include <unordered_map>
 #include <vector>
 
@@ -19,7 +21,7 @@ public:
 
   [[nodiscard]] std::vector<GameObject *> &GetGameObjects() { return m_nodes; };
 
-  [[nodiscard]] const std::vector<AnimationTrack> &GetAnimationTracks() const {
+  [[nodiscard]] std::map<uint32_t, AnimationTrack> &GetAnimationTracks() {
     return m_animationTracks;
   }
   // Adds a node
@@ -45,14 +47,14 @@ public:
   }
 
   // Animation tracks - for GltfLoader only
-  void SetAnimationTracks(std::vector<AnimationTrack> tracks) {
+  void SetAnimationTracks(const std::vector<AnimationTrack> &tracks) {
     assert(!tracks.empty());
-    m_animationTracks = std::move(tracks);
-
     PC_WARN(m_animationTracks.size() << " TRACK SIZEEEEEEEEEEEEE")
-    Time::Get()->Subscribe(&m_animationTracks[0]);
-    // for (AnimationTrack &track : m_animationTracks) {
-    // }
+    for (size_t i = 0; i < tracks.size(); ++i) {
+      m_animationTracks[i] = tracks[i];
+
+      Time::Get()->Subscribe(&m_animationTracks[i]);
+    }
   }
 
 private:
@@ -62,7 +64,7 @@ private:
   std::vector<GameObject *> m_nodes;
 
   std::unordered_map<std::string, GameObject *> m_gameObjectsByName;
-  std::vector<AnimationTrack> m_animationTracks;
+  std::map<uint32_t, AnimationTrack> m_animationTracks;
 };
 
 GFX_NAMESPACE_END

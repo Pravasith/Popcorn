@@ -34,6 +34,11 @@ void Publisher::UnSubscribe(Subscriber *subscriber) {
 };
 
 void Publisher::PublishEvent(Event &e) const {
+
+#ifdef PC_DEBUG
+  // PrintSubscribers();
+#endif
+
   for (Subscriber *s : m_subscribers) {
     s->OnEvent(e);
 

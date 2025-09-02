@@ -9,6 +9,7 @@
 #include <Renderer.h>
 #include <Scene.h>
 #include <Sources.h>
+#include <Time.h>
 #include <TimeEvent.h>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
@@ -31,13 +32,14 @@ public:
     Popcorn::Context::RegisterScene(scene);
     // building = scene.FindObjectByName("building");
 
-    AnimationTrack animTrack = scene.GetAnimationTracks()[0];
-
+    AnimationTrack &animTrack = scene.GetAnimationTracks()[0];
     PC_PRINT(&animTrack << " COMPARE", TagType::Print, "")
 
-    animTrack.Play(1.0, [](AnimationTrack *) {
+    animTrack.Play(10.0, [](AnimationTrack *) {
       PC_PRINT("ANIMATION FINISHED!!!!!!!!!!!!!", TagType::Print, "")
     });
+
+    // Time::Get()->PrintSubscribers();
   };
 
   virtual void OnDetach() override {

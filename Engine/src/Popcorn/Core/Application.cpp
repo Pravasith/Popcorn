@@ -120,7 +120,8 @@ bool Application::OnClockTick(TimeEvent &e) {
   // ---------------------------------------------------------------------
   //
 
-  return true;
+  // false bc we need AnimationTracks in Scene to catch time events
+  return false;
 };
 
 void Application::OnEvent(Event &e) {
