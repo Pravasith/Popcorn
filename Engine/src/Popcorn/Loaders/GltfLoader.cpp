@@ -714,33 +714,28 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
                 << gltfAnim.name << " for property " << ch.target_path
                 << " is just 1, skipping conversion to timeTrain.")
       } else {
-        if (keyframeCount > 2) {
-          // Create SplinePtr
-          if (interpType == "CUBICSPLINE") {
-          } else if (interpType == "LINEAR") {
-          } else {
-            PC_WARN("Spline not built for 'STEP' interp types: "
-                    << gltfAnim.name << " for property " << ch.target_path)
-          }
+        // Create TimeTrain
+        if (interpType == "CUBICSPLINE") {
+        } else if (interpType == "LINEAR") {
         } else {
-          // Keyframe count == 2
-          // Create CurvePtr
+          PC_WARN("Spline not built for 'STEP' interp types: "
+                  << gltfAnim.name << " for property " << ch.target_path)
         }
       }
 
       auto makeTimeTrainBinding_HermiteData = [&]() {
         if (targetPath == "translation") {
-          PC_HermiteKnotToSpline_Helper<3>(posPtr, outputAccessor.count,
-                                           inputData, outputData);
+          PC_CreateTimeTrainBindingFromGltfActions_HermiteData<3>(
+              posPtr, outputAccessor.count, inputData, outputData);
         } else if (targetPath == "rotation") {
-          PC_HermiteKnotToSpline_Helper<4, true>(
+          PC_CreateTimeTrainBindingFromGltfActions_HermiteData<4, true>(
               rotEulerPtr, outputAccessor.count, inputData, outputData);
         } else if (targetPath == "scale") {
-          PC_HermiteKnotToSpline_Helper<3>(scalePtr, outputAccessor.count,
-                                           inputData, outputData);
+          PC_CreateTimeTrainBindingFromGltfActions_HermiteData<3>(
+              scalePtr, outputAccessor.count, inputData, outputData);
         } else if (targetPath == "weights") {
-          // PC_HermiteKnotToSpline_Helper<1>(weightsPtr, outputAccessor.count,
-          //                                  inputData, outputData);
+          // PC_CreateTimeTrainsFromGltfActions_HermiteData<1>(
+          //     weightPtr, outputAccessor.count, inputData, outputData);
         } else {
           PC_ERROR("Unknown channel target_path", "GltfLoader")
         }

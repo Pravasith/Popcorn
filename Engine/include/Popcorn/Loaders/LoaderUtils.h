@@ -2,6 +2,8 @@
 
 #include "Animation.h"
 #include "AnimationProperty.h"
+#include "CurveDefs.h"
+#include "CurveFactory.h"
 #include "GlobalMacros.h"
 #include "SplineDefs.h"
 #include "SplineFactory.h"
@@ -50,24 +52,33 @@ template <> struct DimensionType<4> {
 template <int T, bool QuatToEuler>
 using CurveValType =
     std::conditional_t<T == 4 && QuatToEuler, typename DimensionType<3>::type,
-                       typename DimensionType<T>::type>::type;
+                       typename DimensionType<T>::type>;
 
 template <int Dims, bool QuatToEuler = false>
 // [[nodiscard]]
-static inline const Spline<CurveValType<Dims, QuatToEuler>> *
-PC_HermiteKnotToSpline_Helper(
+static inline TimeTrain_Binding
+PC_CreateTimeTrainBindingFromGltfActions_HermiteData(
     AnimationProperty<CurveValType<Dims, QuatToEuler>> *animationPropertyPtr,
     size_t outputAccessorCount, const float *inputData,
     const float
         *outputTripletsData // Hermite output has 3 components - vIn, val, vOut
 ) {
+
   static_assert(Dims >= 1 && Dims <= 4);
   using CurveType = DimensionType<Dims>::type;
   std::vector<HermiteKnot<CurveType>> hermiteKnots;
-  const Spline<CurveValType<Dims, QuatToEuler>> *splinePtr;
 
   size_t keyframeCount = outputAccessorCount /
                          3; // Hermite output has 3 components - vIn, val, vOut
+
+  const Spline<CurveValType<Dims, QuatToEuler>> *splinePtr = nullptr;
+  const Curve<CurveValType<Dims, QuatToEuler>> *curvePtr = nullptr;
+
+  bool isRailSpline = true;
+
+  if (keyframeCount == 2) {
+    isRailSpline = false;
+  }
 
   assert(inputData[keyframeCount - 1] - inputData[0] <= 1.0 &&
          "Length (or journey time of time train after conversion) of "
@@ -101,7 +112,6 @@ PC_HermiteKnotToSpline_Helper(
     hermiteKnots.emplace_back(vIn, val, vOut, inputData[i / 3]);
   }
 
-  // TODO: Convert quats to Eulers
   if constexpr (Dims == 4 && QuatToEuler) {
     std::vector<HermiteKnot<glm::vec3>> eulerHermiteKnots;
 
@@ -123,9 +133,33 @@ PC_HermiteKnotToSpline_Helper(
       eulerHermiteKnots.push_back(eulerHermiteKnot);
     }
 
-    splinePtr = SplineFactory::Get()->MakeSpline(eulerHermiteKnots);
+    if (isRailSpline) {
+      splinePtr = SplineFactory::Get()->MakeSpline(eulerHermiteKnots);
+    } else {
+      assert(eulerHermiteKnots.size() == 2);
+
+      CurveInfoHermiteForm<glm::vec3> cInfo;
+      cInfo.p0 = eulerHermiteKnots[0].val;
+      cInfo.v0 = eulerHermiteKnots[0].vOut;
+      cInfo.v1 = eulerHermiteKnots[1].vIn;
+      cInfo.p1 = eulerHermiteKnots[1].val;
+
+      curvePtr = CurveFactory::Get()->GetCurvePtr(cInfo);
+    }
   } else {
-    splinePtr = SplineFactory::Get()->MakeSpline(hermiteKnots);
+    if (isRailSpline) {
+      splinePtr = SplineFactory::Get()->MakeSpline(hermiteKnots);
+    } else {
+      assert(hermiteKnots.size() == 2);
+
+      CurveInfoHermiteForm<CurveType> cInfo;
+      cInfo.p0 = hermiteKnots[0].val;
+      cInfo.v0 = hermiteKnots[0].vOut;
+      cInfo.v1 = hermiteKnots[1].vIn;
+      cInfo.p1 = hermiteKnots[1].val;
+
+      curvePtr = CurveFactory::Get()->GetCurvePtr(cInfo);
+    }
   }
 
   float boardTime = inputData[0];                // unnormalized
@@ -144,17 +178,16 @@ PC_HermiteKnotToSpline_Helper(
   float bT_norm = boardTime - bT_flr; // use this in time trains
   float dT_norm = destTime - bT_flr;  // use this in time trains
 
-  TimeTrain_Binding ttBinding;
+  TimeTrain tt =
+      isRailSpline
+          ? TimeTrain(animationPropertyPtr, splinePtr, bT_norm, dT_norm)
+          : TimeTrain(animationPropertyPtr, curvePtr, bT_norm, dT_norm);
+
+  TimeTrain_Binding ttBinding{};
   ttBinding.animationTrackIndex = bT_flr / 2;
-  // ttBinding.tt = TimeTrain(
+  ttBinding.tt = tt;
 
-  // Conversion
-  //
-  // 3.5 -> 3.8
-  //  .5 ->  .8
-  //
-
-  return splinePtr;
+  return ttBinding;
 }
 
 template <int Dims>
