@@ -5,6 +5,7 @@
 #include <cassert>
 #include <glm/detail/qualifier.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
+#include <glm/ext/vector_float2.hpp>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -12,13 +13,21 @@ GFX_NAMESPACE_BEGIN
 template <CurveValueType T>
 static inline constexpr T PC_Lerp(const T &p0, const T &p1, float t) {
   return p0 + (p1 - p0) * t;
-};
+}
+
+template <CurveValueType T>
+static inline constexpr T PC_Lerp(const T &p0, const T &p1, double t) {
+  return p0 + (p1 - p0) * t;
+}
 
 //
 // -------------------------------------------------------------------
 // --- CURVE ---------------------------------------------------------
 //
 template <CurveValueType T> class Curve {
+public:
+  using value_type = T;
+
 public:
   Curve() = default;
   virtual ~Curve() = default;
@@ -29,16 +38,19 @@ public:
   virtual T GetFirstDerivativeAt_Fast(float t) const = 0;
   virtual T GetFirstDerivativeAt_Slow(float t) const = 0;
 
-  template <CurveInfoForms F> DeriveCurveInfoType<F, T> GetCurveInfoAs() const {
-    if constexpr (F == CurveInfoForms::LinearForm) {
-      // Convert to linear
-    } else if constexpr (F == CurveInfoForms::BezierForm) {
-      // Convert to Bezier
-    } else if constexpr (F == CurveInfoForms::HermiteForm) {
-      // Convert to Hermite
-    }
-  };
+  // template <CurveInfoForms F> DeriveCurveInfoType<F, T> GetCurveInfoAs()
+  // const {
+  //   if constexpr (F == CurveInfoForms::LinearForm) {
+  //     // Convert to linear
+  //   } else if constexpr (F == CurveInfoForms::BezierForm) {
+  //     // Convert to Bezier
+  //   } else if constexpr (F == CurveInfoForms::HermiteForm) {
+  //     // Convert to Hermite
+  //   }
+  // };
 
+protected:
+  CurveHashType m_curveId;
   // virtual T GetSecondDerivativeAt_Fast(float t) const = 0;
   // virtual T GetSecondDerivativeAt_Slow(float t) const = 0;
 };

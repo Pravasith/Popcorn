@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include <cstring>
 #include <sys/types.h>
 
 ENGINE_NAMESPACE_BEGIN
@@ -50,5 +51,26 @@ ENGINE_NAMESPACE_BEGIN
 // #define PC_BIND_EVENT_FUNC(eventType) \
       // [this](auto &&...args) -> decltype(auto) {
 //   return this->eventType(std::forward<decltype(args)>(args)...); }
+
+static_assert(sizeof(float) == 4, "Requires 32-bit float");
+static_assert(sizeof(double) == 8, "Requires 64-bit double");
+
+static inline uint32_t PC_FloatToUint32(float a) {
+  uint32_t i;
+  memcpy(&i, &a, sizeof a);
+  return i;
+}
+
+static inline uint64_t PC_FloatToUint64(float a) {
+  uint32_t i;
+  memcpy(&i, &a, sizeof a);
+  return (uint64_t)i;
+}
+
+static inline uint64_t PC_DoubleToUint64(double a) {
+  uint64_t i;
+  memcpy(&i, &a, sizeof a);
+  return i;
+}
 
 ENGINE_NAMESPACE_END

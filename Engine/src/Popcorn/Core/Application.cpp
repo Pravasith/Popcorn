@@ -12,7 +12,7 @@ Time *Application::s_time = nullptr;
 Renderer *Application::s_renderer = nullptr;
 DebugUIOverlay *Application::s_debugUIOverlay = nullptr;
 
-Application::Application() : Subscriber("Application") {
+Application::Application() {
   PC_PRINT("APPLICATION STARTED", TagType::Constr, "APP");
 };
 
@@ -51,7 +51,7 @@ void Application::Start() {
     s_window->Subscribe(s_instance);
 
     s_layerStack = new LayerStack();
-    s_time = Time::Create();
+    s_time = Time::Get();
     s_time->Subscribe(s_instance);
 
     // Init graphics
@@ -108,14 +108,6 @@ bool Application::OnWindowClose(WindowCloseEvent &e) const {
   return true;
 };
 
-bool Application::OnUpdate(TimeEvent &e) {
-  // Window::OnUpdate(e);
-  // // RENDER LAYER UPDATES HERE
-  // s_layerStack->UpdateLayerStack();
-  // // s_Renderer->DrawFrame();
-  return true;
-};
-
 bool Application::OnClockTick(TimeEvent &e) {
   Window::OnUpdate(e);
 
@@ -128,7 +120,8 @@ bool Application::OnClockTick(TimeEvent &e) {
   // ---------------------------------------------------------------------
   //
 
-  return true;
+  // false bc we need AnimationTracks in Scene to catch time events
+  return false;
 };
 
 void Application::OnEvent(Event &e) {
@@ -137,6 +130,7 @@ void Application::OnEvent(Event &e) {
   dispatcher.Dispatch<WindowResizeEvent>(
       PC_BIND_EVENT_FUNC(WindowResizeEvent, OnWindowResize));
 
+  assert(s_renderer);
   if (s_renderer) {
     dispatcher.Dispatch<FrameBfrResizeEvent>(PC_BIND_EVENT_FUNC(
         FrameBfrResizeEvent, s_renderer->OnFrameBufferResize));

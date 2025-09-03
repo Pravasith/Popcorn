@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Animation.h"
 #include "Application.h"
 #include "Assert.h"
 #include "GameObject.h"
@@ -34,7 +35,7 @@ static void AddLayer(Layer *layer) {
 };
 
 static void RegisterScene(Scene &scene) { s_renderer->AddScene(&scene); };
-static void DisposeScene(Scene &scene) { s_renderer->RemoveScene(&scene); };
+static void UnregisterScene(Scene &scene) { s_renderer->RemoveScene(&scene); };
 
 static void StartGame() {
   // TODO: Move the ownership of commandbuffers to Renderflow base class
@@ -46,7 +47,7 @@ static void StartGame() {
   s_renderer->CreateRenderFlowResources(); // Renderflow submeshes converted and
                                            // copied to vulkan memory objects
 #ifdef PC_DEBUG
-  s_renderer->PrintScenes();
+  // s_renderer->PrintScenes();
   // s_renderer->DebugPreGameLoop();
 #endif
 
@@ -84,7 +85,7 @@ static void FillNamedLookUpMap(Scene &scene, GameObject *node) {
     PC_WARN("node is nullptr")
     return;
   }
-  scene.AddGameObjectToNamedLookUp(node->name, node);
+  scene.AddGameObjectToNamedLookUp(node->GetName(), node);
 
   for (GameObject *child : node->GetChildren()) {
     FillNamedLookUpMap(scene, child);
@@ -95,6 +96,14 @@ static void ConvertGltfToScene(const std::string &filename, Scene &scene) {
   tinygltf::Model model;
   GltfLoader::LoadFromFile(filename, model);
   GltfLoader::ExtractModelData(model, scene.GetGameObjects());
+
+  std::vector<AnimationTrack> animationTracks{};
+
+  PC_WARN("ANIMATION TRACK SIZE BEFORE: " << animationTracks.size())
+  GltfLoader::ExtractAnimationsToAnimationTracks(model, animationTracks);
+  scene.SetAnimationTracks(animationTracks);
+
+  PC_WARN("ANIMATION TRACK SIZE AFTER: " << animationTracks.size())
 
   for (GameObject *gameObj : scene.GetGameObjects()) {
     FillNamedLookUpMap(scene, gameObj);

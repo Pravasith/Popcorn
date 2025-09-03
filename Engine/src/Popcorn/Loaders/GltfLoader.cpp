@@ -1,4 +1,6 @@
 #include "GltfLoader.h"
+#include "Animation.h"
+#include "AnimationProperty.h"
 #include "Assert.h"
 #include "Base.h"
 #include "BufferObjects.h"
@@ -8,17 +10,29 @@
 #include "GlobalMacros.h"
 #include "Helpers.h"
 #include "Light.h"
+#include "LoaderUtils.h"
 #include "LoadersDefs.h"
 #include "Material.h"
 #include "Mesh.h"
 #include "Shader.h"
+#include "SplineFactory.h"
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <glm/ext/vector_float2.hpp>
+#include <glm/ext/vector_float3.hpp>
+#include <glm/ext/vector_float4.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
+#include <limits>
+#include <string>
+#include <vector>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
+
+std::vector<GameObject *> GltfLoader::s_nodeIndexToGameObjectPtrs;
 
 //
 //
@@ -58,24 +72,17 @@ bool GltfLoader::LoadFromFile(const std::string &filename,
   return ret;
 }
 
-// void GltfLoader::ExtractModelData(const tinygltf::Model &model,
-//                                   std::vector<GameObject *> &gameObjects) {
-//   for (auto &node : model.nodes) {
-//     GameObject *gameObject = ConvertGltfNodeToGameObject(model, node);
-//     gameObjects.push_back(gameObject);
-//   }
-// };
-
 void GltfLoader::ExtractModelData(const tinygltf::Model &model,
                                   std::vector<GameObject *> &gameObjects) {
-  // pick the default scene (or fall back to scene 0)
+  // pick the default scene (or fallback to scene 0)
   int sceneIndex = model.defaultScene >= 0 ? model.defaultScene : 0;
   const tinygltf::Scene &scene = model.scenes[sceneIndex];
 
+  s_nodeIndexToGameObjectPtrs.resize(model.nodes.size());
+
   // only iterate root nodes
   for (int nodeIndex : scene.nodes) {
-    GameObject *gameObject =
-        ConvertGltfNodeToGameObject(model, model.nodes[nodeIndex]);
+    GameObject *gameObject = ConvertGltfNodeToGameObject(model, nodeIndex);
     gameObjects.push_back(gameObject);
   }
 }
@@ -90,19 +97,24 @@ void GltfLoader::ExtractModelData(const tinygltf::Model &model,
 //
 GameObject *
 GltfLoader::ConvertGltfNodeToGameObject(const tinygltf::Model &model,
-                                        const tinygltf::Node &gltfNode) {
-  GameObject *gameObject = CreateGameObjectByType(model, gltfNode);
-  gameObject->name = gltfNode.name;
+                                        int nodeIndex) {
+  const tinygltf::Node &gltfNode = model.nodes[nodeIndex];
 
-  SetTransformData(gltfNode, *gameObject);
+  GameObject *gameObjectPtr = CreateGameObjectByType(model, gltfNode);
+  gameObjectPtr->SetName(gltfNode.name);
 
-  for (int child : gltfNode.children) {
-    GameObject *childGameObj =
-        ConvertGltfNodeToGameObject(model, model.nodes[child]);
-    gameObject->AddChild(childGameObj);
+  // transforms
+  SetTransformData(gltfNode, *gameObjectPtr);
+
+  // build gltfNode : gameObjPtr map for animations
+  s_nodeIndexToGameObjectPtrs[nodeIndex] = gameObjectPtr;
+
+  for (int childIndex : gltfNode.children) {
+    GameObject *childGameObj = ConvertGltfNodeToGameObject(model, childIndex);
+    gameObjectPtr->AddChild(childGameObj);
   }
 
-  return gameObject;
+  return gameObjectPtr;
 }
 
 void GltfLoader::SetTransformData(const tinygltf::Node &node,
@@ -130,6 +142,7 @@ void GltfLoader::SetTransformData(const tinygltf::Node &node,
                               node.translation[2]);
     }
 
+    // TODO: Use Quaternion Angles
     if (!node.rotation.empty()) {
       glm::quat rotationQuat(node.rotation[3], node.rotation[0],
                              node.rotation[1], node.rotation[2]);
@@ -142,9 +155,9 @@ void GltfLoader::SetTransformData(const tinygltf::Node &node,
     }
 
     // Store TRS in the GameObject --- internally constructs a localMatrix
-    gameObject.SetPosition(translation);
-    gameObject.SetRotationEuler(eulerAngles);
-    gameObject.ScaleByValue(scale);
+    gameObject.TranslateLocal(translation);
+    gameObject.RotateLocalEuler(eulerAngles);
+    gameObject.ScaleLocal(scale);
   }
 }
 
@@ -334,12 +347,6 @@ void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
             new Material<MaterialTypes::PbrMat>();
         mat->SetData(
             ExtractMaterialData<MaterialTypes::PbrMat>(model, gltfMaterial));
-        // mat->SetShader(ShaderStages::VertexBit,
-        //                GfxContext::Shaders()
-        //                    ->GetInbuiltShader<ShaderFiles::PbrMat_Vert>());
-        // mat->SetShader(ShaderStages::FragmentBit,
-        //                GfxContext::Shaders()
-        //                    ->GetInbuiltShader<ShaderFiles::PbrMat_Frag>());
         mesh.AddSubmesh(vbo, ibo, mat);
         break;
       }
@@ -348,12 +355,6 @@ void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
             new Material<MaterialTypes::BasicMat>();
         mat->SetData(
             ExtractMaterialData<MaterialTypes::BasicMat>(model, gltfMaterial));
-        // mat->SetShader(ShaderStages::VertexBit,
-        //                GfxContext::Shaders()
-        //                    ->GetInbuiltShader<ShaderFiles::BasicMat_Vert>());
-        // mat->SetShader(ShaderStages::FragmentBit,
-        //                GfxContext::Shaders()
-        //                    ->GetInbuiltShader<ShaderFiles::BasicMat_Frag>());
         mesh.AddSubmesh(vbo, ibo, mat);
         break;
       }
@@ -433,10 +434,6 @@ GltfLoader::GetGltfMaterialType(const tinygltf::Material &material) {
     return MaterialTypes::BasicMat;
   }
 }
-
-//
-// Random thought: Valora is a sick name for a videogame character
-//
 
 //
 //
@@ -643,6 +640,164 @@ GltfLoader::ExtractIndexBuffer(const tinygltf::Model &model,
   }
 
   return indices;
+}
+
+void GltfLoader::ExtractAnimationsToAnimationTracks(
+    const tinygltf::Model &model,
+    std::vector<AnimationTrack> &animationTracks) {
+
+  SplineFactory *splineFactory = SplineFactory::Get();
+  CurveFactory *curveFactory = CurveFactory::Get();
+
+  std::vector<TimeTrain_Binding> allTimeTrainBindings;
+
+  float minKeyFrameTime = std::numeric_limits<float>::max();
+  float maxKeyFrameTime = 0.0;
+
+  for (const tinygltf::Animation &gltfAnim : model.animations) {
+    PC_PRINT("NAME " << gltfAnim.name << '\n', TagType::Print, "");
+    const std::vector<tinygltf::AnimationSampler> &samplers = gltfAnim.samplers;
+
+    for (const tinygltf::AnimationChannel &ch : gltfAnim.channels) {
+      //
+      // --- Extract input data begin() ----------------------------------------
+      const tinygltf::AnimationSampler &sampler = samplers[ch.sampler];
+      const tinygltf::Accessor &inputAccessor = model.accessors[sampler.input];
+      const tinygltf::BufferView &inputView =
+          model.bufferViews[inputAccessor.bufferView];
+      const tinygltf::Buffer &inputBuffer = model.buffers[inputView.buffer];
+      const float *inputData = reinterpret_cast<const float *>(
+          &inputBuffer.data[inputView.byteOffset + inputAccessor.byteOffset]);
+      //
+      // --- Extract output data begin() ---------------------------------------
+      const tinygltf::Accessor &outputAccessor =
+          model.accessors[sampler.output];
+      const tinygltf::BufferView &outputView =
+          model.bufferViews[outputAccessor.bufferView];
+      const tinygltf::Buffer &outputBuffer = model.buffers[outputView.buffer];
+      const float *outputData = reinterpret_cast<const float *>(
+          &outputBuffer
+               .data[outputView.byteOffset + outputAccessor.byteOffset]);
+
+      //
+      // --- Make AnimationTracks and TimeTrains  ------------------------------
+      PC_PRINT("SAMPLER INTERP " << sampler.interpolation << '\n',
+               TagType::Print, "");
+      PC_PRINT("CHANNEL PATH " << ch.target_path << '\n', TagType::Print, "");
+
+      std::string targetPath = ch.target_path;
+      int keyframeCount = inputAccessor.count;
+
+      for (size_t i = 0; i < keyframeCount; ++i) {
+        float t = inputData[i];
+        assert(t >= 0.0);
+        // min t & max t (for calculating size of the AnimationTracks array)
+        if (t < minKeyFrameTime)
+          minKeyFrameTime = t;
+        if (t > maxKeyFrameTime)
+          maxKeyFrameTime = t;
+      }
+
+      GameObject *gameObj = s_nodeIndexToGameObjectPtrs[ch.target_node];
+
+      AnimationProperty<glm::vec3> *posPtr =
+          gameObj->GetAnimationProperty_Pos();
+      AnimationProperty<glm::vec3> *rotEulerPtr =
+          gameObj->GetAnimationProperty_RotEuler();
+      AnimationProperty<glm::vec3> *scalePtr =
+          gameObj->GetAnimationProperty_Scale();
+
+      enum KnotTypes { HermiteKnotType = 1, LinearKnotType, StepKnotType };
+
+      auto makeTimeTrainBinding = [&](KnotTypes knotType) {
+        TimeTrain_Binding tt;
+        if (targetPath == "translation") {
+          if (knotType == HermiteKnotType) {
+            tt = PC_CreateTimeTrainBindingFromGltfActions_HermiteData<3>(
+                posPtr, outputAccessor.count, inputData, outputData);
+          } else if (knotType == LinearKnotType) {
+            tt = PC_CreateTimeTrainBindingFromGltfActions_LinearData<3>(
+                posPtr, outputAccessor.count, inputData, outputData);
+          }
+        } else if (targetPath == "rotation") {
+          if (knotType == HermiteKnotType) {
+            tt = PC_CreateTimeTrainBindingFromGltfActions_HermiteData<4, true>(
+                rotEulerPtr, outputAccessor.count, inputData, outputData);
+          } else if (knotType == LinearKnotType) {
+            tt = PC_CreateTimeTrainBindingFromGltfActions_LinearData<4, true>(
+                rotEulerPtr, outputAccessor.count, inputData, outputData);
+          }
+        } else if (targetPath == "scale") {
+          if (knotType == HermiteKnotType) {
+            tt = PC_CreateTimeTrainBindingFromGltfActions_HermiteData<3>(
+                scalePtr, outputAccessor.count, inputData, outputData);
+          } else if (knotType == LinearKnotType) {
+            tt = PC_CreateTimeTrainBindingFromGltfActions_LinearData<3>(
+                scalePtr, outputAccessor.count, inputData, outputData);
+          }
+        } else if (targetPath == "weights") {
+          // if (knotType == HermiteKnotType) {
+          //   tt = PC_CreateTimeTrainBindingFromGltfActions_HermiteData<1>(
+          //       weightsPtr, outputAccessor.count, inputData, outputData);
+          // } else if (knotType == LinearKnotType) {
+          //   tt = PC_CreateTimeTrainBindingFromGltfActions_LinearData<1>(
+          //       weightsPtr, outputAccessor.count, inputData, outputData);
+          // }
+        } else {
+          PC_ERROR("Unknown channel target_path", "GltfLoader")
+        }
+        allTimeTrainBindings.emplace_back(std::move(tt));
+      };
+
+      std::string interpType = sampler.interpolation;
+
+      if (keyframeCount < 2) {
+        PC_WARN("Number of keyframes data provided for "
+                << gltfAnim.name << " for property " << ch.target_path
+                << " is just 1, skipping conversion to timeTrain.")
+      } else {
+        // Create TimeTrain
+        if (interpType == "CUBICSPLINE") {
+          makeTimeTrainBinding(KnotTypes::HermiteKnotType);
+        } else if (interpType == "LINEAR") {
+          makeTimeTrainBinding(KnotTypes::LinearKnotType);
+        } else {
+          PC_WARN("Spline not built for 'STEP' interp types: "
+                  << gltfAnim.name << " for property " << ch.target_path)
+        }
+      }
+
+    } // channels loop end
+  } // animations loop end
+
+  assert(minKeyFrameTime == 0.0);
+  const size_t maxKeyframeTimeUint = (uint64_t)maxKeyFrameTime;
+
+  // n belongs to [0, inf]
+  // 0->1, 2->3, 4->5, .... // time-train boards, dests
+  // 2n->2n+1   // 0, 1     // n = 0
+  //            // 2, 3     // n = 1
+  //            // 4, 5     // n = 2
+  // board = 2n
+  // dest = 2n + 1
+  // n = (dest - 1) / 2
+  // n = board / 2
+  size_t totalAnimationTracks = ((maxKeyframeTimeUint - 1) / 2) + 1;
+
+  animationTracks.resize(totalAnimationTracks);
+  animationTracks.reserve(totalAnimationTracks);
+  // allTimeTrainBindings[0].animationTrackIndex
+
+  for (size_t i = 0; i < allTimeTrainBindings.size(); ++i) {
+    TimeTrain_Binding &ttBinding = allTimeTrainBindings[i];
+    animationTracks[ttBinding.animationTrackIndex].Insert_Slow(ttBinding.tt);
+  };
+
+  PC_PRINT("ANIMATIONS SIZE : "
+               << model.animations.size() << "MIN KF TIME: " << minKeyFrameTime
+               << "MAX KF TIME: " << maxKeyFrameTime
+               << "TOTAL ANIMATION TRACKS: " << totalAnimationTracks,
+           TagType::Print, "AnimationDebug")
 }
 
 GFX_NAMESPACE_END

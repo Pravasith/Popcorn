@@ -8,17 +8,11 @@ ENGINE_NAMESPACE_BEGIN
 
 class Time : public Publisher {
 public:
-  Time(const Time &) = delete;
-  Time operator()(const Time &) = delete;
-
-  Time(const Time &&) = delete;
-  Time operator()(const Time &&) = delete;
-
   [[nodiscard]] inline bool IsGameLoopRunning() const {
     return m_isGameLoopRunning;
   };
 
-  [[nodiscard]] inline static Time *Create() {
+  [[nodiscard]] inline static Time *Get() {
     if (!s_instance) {
       s_instance = new Time();
     } else {
@@ -47,6 +41,10 @@ private:
           PC_PRINT("CREATED", TagType::Constr, "TIME")
         };
   ~Time() { PC_PRINT("DESTROYED", TagType::Destr, "TIME") };
+  Time(const Time &) = delete;
+  Time operator()(const Time &) = delete;
+  Time(const Time &&) = delete;
+  Time operator()(const Time &&) = delete;
 
   static Time *s_instance;
 

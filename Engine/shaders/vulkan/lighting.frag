@@ -40,6 +40,10 @@ vec3 ReconstructWorldSpace(vec2 uv, float depth) {
     return worldPosH.xyz / worldPosH.w;
 }
 
+// float FogFactorLinear(float d, float startD, float endD) {
+//     return clamp((d - startD) / max(endD - startD, 1e-6), 0.0, 1.0);
+// }
+
 void main() {
     float depth = texture(depthTex, fragUV).r;
 

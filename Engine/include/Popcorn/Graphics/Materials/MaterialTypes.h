@@ -1,10 +1,9 @@
 #pragma once
 
 #include "GlobalMacros.h"
+#include <cstdint>
 #include <cstring>
 #include <glm/glm.hpp>
-
-#include <cstddef>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -43,12 +42,6 @@ template <> struct DeriveMaterialDataType<MaterialTypes::PbrMat> {
 };
 
 using MaterialHashType = uint32_t;
-
-static size_t PC_HashFloat(float a) {
-  uint32_t i;
-  memcpy(&i, &a, sizeof(float));
-  return (size_t)i;
-};
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

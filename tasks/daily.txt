@@ -1,0 +1,14 @@
+
+
+--- WEEK ------ TASK ---------------------------------------------- TIME ---------
+ :: Aug 18
+             :: GltfLoader interfacing w animation system        :: 2 hrs
+             :: JSON parser for Blender exp. splines             :: 1 hr
+             :: Catmull-rom usage for dynamic splines            :: TBD
+             :: Animations testing - yayy!
+
+--- WEEK ------ TASK ---------------------------------------------- TIME ---------
+ :: Aug 25
+
+--- WEEK ------ TASK ---------------------------------------------- TIME ---------
+ :: Sep 01

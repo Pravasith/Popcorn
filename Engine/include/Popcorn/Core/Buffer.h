@@ -32,10 +32,12 @@ struct HasPrint<
 
 class Buffer {
 public:
-  Buffer() { PC_PRINT("CREATED(DEFAULT)", TagType::Constr, "BUFFER") };
+  Buffer() { 
+      // PC_PRINT("CREATED(DEFAULT)", TagType::Constr, "BUFFER") 
+  };
   ~Buffer() {
     FreeBytes();
-    PC_PRINT("DESTROYED", TagType::Destr, "BUFFER")
+    // PC_PRINT("DESTROYED", TagType::Destr, "BUFFER")
   };
 
   //
@@ -47,7 +49,7 @@ public:
   }
 
   Buffer(uint64_t size) {
-    PC_PRINT("CREATED(Fixed size runtime)", TagType::Constr, "BUFFER")
+    // PC_PRINT("CREATED(Fixed size runtime)", TagType::Constr, "BUFFER")
     AllocBytes(size);
   };
 
@@ -75,7 +77,7 @@ public:
   // -----------------------------------------------------------------------
   // --- COPY SEMANTICS ----------------------------------------------------
   Buffer(const Buffer &other) {
-    PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Constr, "BUFFER")
+    // PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Constr, "BUFFER")
     if (this == &other)
       return;
 
@@ -85,7 +87,7 @@ public:
   };
 
   Buffer &operator=(const Buffer &other) {
-    PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print, "BUFFER")
+    // PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print, "BUFFER")
 
     if (this == &other)
       return *this;
@@ -101,7 +103,7 @@ public:
   // -----------------------------------------------------------------------
   // --- MOVE SEMANTICS ----------------------------------------------------
   Buffer(Buffer &&other) {
-    PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Constr, "BUFFER")
+    // PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Constr, "BUFFER")
     if (this == &other) {
       return;
     };
@@ -114,7 +116,7 @@ public:
   };
 
   Buffer &operator=(Buffer &&other) {
-    PC_PRINT("MOVE ASSIGNMENT EVOKED", TagType::Print, "BUFFER")
+    // PC_PRINT("MOVE ASSIGNMENT EVOKED", TagType::Print, "BUFFER")
     if (this == &other) {
       return *this;
     };

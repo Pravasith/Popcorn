@@ -42,12 +42,12 @@ public:
           Material<T> *mat)
       : m_parentMesh(parentMesh), m_vertexBuffer(vbo), m_indexBuffer(ibo),
         m_material(mat) {
-    PC_PRINT("CREATED", TagType::Constr, "Submesh");
+    // PC_PRINT("CREATED", TagType::Constr, "Submesh");
     m_id = PC_GetHashedSubmeshId(vbo, ibo, mat);
   }
   ~Submesh() {
     Cleanup();
-    PC_PRINT("DESTROYED", TagType::Destr, "Submesh");
+    // PC_PRINT("DESTROYED", TagType::Destr, "Submesh");
   }
 
   [[nodiscard]] Material<T> *GetMaterial() const { return m_material; };
@@ -128,8 +128,12 @@ class Mesh : public GameObject {
 public:
   // TODO: Handle the case of duplicating meshes & materials
   // TODO: Make m_indexBuffer a variant
-  Mesh() { PC_PRINT("CREATED", TagType::Constr, "MESH"); };
-  virtual ~Mesh() { PC_PRINT("DESTROYED", TagType::Destr, "MESH"); };
+  Mesh() { 
+      // PC_PRINT("CREATED", TagType::Constr, "MESH"); 
+  }
+  virtual ~Mesh() { 
+      // PC_PRINT("DESTROYED", TagType::Destr, "MESH"); 
+  }
 
   virtual constexpr GameObjectTypes GetGameObjectType() const override {
     return GameObjectTypes::Mesh;

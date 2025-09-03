@@ -42,10 +42,13 @@ add_library(
   ${GRAPHICS_IMPL_DIR}/Shader.cpp
   ${GRAPHICS_IMPL_DIR}/ContextGfx.cpp
   ${GRAPHICS_IMPL_DIR}/Animation/CurveFactory.cpp
+  ${GRAPHICS_IMPL_DIR}/Animation/SplineFactory.cpp
+  ${GRAPHICS_IMPL_DIR}/Animation/Animation.cpp
   #
   # SCENE
   ${SCENE_IMPL_DIR}/GameObject.cpp
   ${SCENE_IMPL_DIR}/Scene.cpp
+  ${SCENE_IMPL_DIR}/Transforms.cpp
   #
   # OPENGL CLASSES
   ${PLATFORM_IMPL_DIR}/OpenGL/RendererOpenGL.cpp

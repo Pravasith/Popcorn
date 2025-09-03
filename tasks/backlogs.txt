@@ -1,0 +1,43 @@
+
+--- CORE --------------------------------------------------------------------------
+ :: Fix resize bugs - all framebuffers
+ :: Update camera(fov, aspect ratio, .etc) on FrameBufferResize
+ :: Write camera with dynamic data
+ :: Fix camera in GltfLoader
+ :: Work out the math for view proj matrix.
+ :: Fix the ones marked - TEMP_DEBUG
+ :: Test minimization logic -
+    https://vulkan-tutorial.com/Drawing_a_triangle/Swap_chain_recreation
+ :: Make RefCounting system & remove empty/useless ctors & dtors
+
+--- OPTIMIZATION ------------------------------------------------------------------
+ :: GBufferRenderFlow - iterating a map rn, make it vector based (2-3 times faster)
+ :: PrintScenes() in SceneLibrary() -- make sure it's only in debug mode
+ :: Valgrind sanity check & compatibility check across linux, windows:
+    BOTH RELEASE MODE & DEBUG MODE
+ :: Add precompiled headers to the project - cmake
+ :: Create a CommandBufferVk class (rn it's raw from CommandPoolsVk)
+ :: Optimise space by allocating one model matrix per mesh, not per submesh
+ :: Make some selected singletons stack allocated (with static local variables)
+    BE CAREFUL ABOUT THIS ONE ^^
+    Stack allocated local variables last until the end of the program.
+
+--- CLEAN UP ----------------------------------------------------------------------
+ :: Light refactor of ContextGfx, Renderer & Popcorn.h, make the API more
+    elegant to use, and make it more understandable. ContextGfx can be the
+    mvp instead of Renderer
+ :: Refactor Core classes (application, window) etc. to have a central access
+    point like ContextVk or PcContext
+ :: Update Readme for the project
+
+--- DEDICATED C++ & VULKAN LEARNING -----------------------------------------------
+ :: Compute pipeline
+ :: Raytracing pipeline
+
+--- DEDICATED MATHS THOROUGH READING ----------------------------------------------
+ :: Complete calculus series
+ :: 3D Rotations - gamemath
+ :: Homogeneous coords full derivation from scratch
+ :: 3b1b linear algebra - post cross product vids
+ :: Projection plane derivation - basic geometric algebra
+ :: Projective geometry basics & clifford algebra

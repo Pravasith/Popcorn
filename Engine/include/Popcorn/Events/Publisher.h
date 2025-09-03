@@ -2,6 +2,7 @@
 
 #include "Event.h"
 #include "GlobalMacros.h"
+#include "Popcorn/Core/Base.h"
 #include "Subscriber.h"
 #include <string>
 #include <vector>
@@ -15,6 +16,18 @@ public:
   void PublishEvent(Event &e) const;
   void Subscribe(Subscriber *s);
   void UnSubscribe(Subscriber *s);
+
+#ifdef PC_DEBUG
+  void PrintSubscribers() const {
+    PC_PRINT(m_subscribers.size()
+                 << " Subscribers subscribed to: " << m_name << ":",
+             TagType::Print, "PUBLISHER SUBSCRIBERS")
+    for (Subscriber *s : m_subscribers) {
+      PC_PRINT(s, TagType::Print, "PUBLISHER SUBSCRIBERS")
+    }
+  }
+
+#endif
 
 private:
   std::vector<Subscriber *> m_subscribers{};

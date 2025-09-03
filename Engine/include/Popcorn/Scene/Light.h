@@ -37,16 +37,18 @@ struct LightData {
 class Light : public GameObject {
 public:
   Light() {
-    PC_PRINT("CREATED", TagType::Constr, "Light");
+    // PC_PRINT("CREATED", TagType::Constr, "Light")
     // TEMP_DEBUG
     // m_lightData.intensity = 5.0f;
     // m_lightData.range = 5.0f;
   }
-  ~Light() { PC_PRINT("DESTROYED", TagType::Destr, "Light"); }
+  ~Light() {
+    // PC_PRINT("DESTROYED", TagType::Destr, "Light")
+  }
 
   virtual constexpr GameObjectTypes GetGameObjectType() const override {
     return GameObjectTypes::Light;
-  };
+  }
 
   [[nodiscard]] const LightData &GetLightData() const { return m_lightData; };
 
