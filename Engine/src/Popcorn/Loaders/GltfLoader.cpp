@@ -23,6 +23,7 @@
 #include <glm/ext/vector_float2.hpp>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/ext/vector_float4.hpp>
+#include <glm/fwd.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <limits>
@@ -135,19 +136,21 @@ void GltfLoader::SetTransformData(const tinygltf::Node &node,
     // Apply TRS components separately
     glm::vec3 translation(0.0f);
     glm::vec3 scale(1.0f);
-    glm::vec3 eulerAngles(0.0f); // Euler angles in radians
+    // glm::vec3 eulerAngles(0.0f); // Euler angles in radians
+    glm::quat rotQuat(1.0f, 0.0f, 0.0f, 0.0f);
 
     if (!node.translation.empty()) {
       translation = glm::vec3(node.translation[0], node.translation[1],
                               node.translation[2]);
     }
 
-    // TODO: Use Quaternion Angles
     if (!node.rotation.empty()) {
       glm::quat rotationQuat(node.rotation[3], node.rotation[0],
                              node.rotation[1], node.rotation[2]);
-      eulerAngles =
-          glm::eulerAngles(rotationQuat); // Convert quaternion to Euler angles
+      // eulerAngles =
+      //     glm::eulerAngles(rotationQuat); // Convert quaternion to Euler
+      //     angles
+      rotQuat = rotationQuat;
     }
 
     if (!node.scale.empty()) {
@@ -156,7 +159,7 @@ void GltfLoader::SetTransformData(const tinygltf::Node &node,
 
     // Store TRS in the GameObject --- internally constructs a localMatrix
     gameObject.TranslateLocal(translation);
-    gameObject.RotateLocalEuler(eulerAngles);
+    gameObject.SetRotationQuat(rotQuat);
     gameObject.ScaleLocal(scale);
   }
 }
@@ -702,6 +705,7 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
 
       AnimationProperty<glm::vec3> *posPtr =
           gameObj->GetAnimationProperty_Pos();
+      // TODO: Make quaternion anims
       AnimationProperty<glm::vec3> *rotEulerPtr =
           gameObj->GetAnimationProperty_RotEuler();
       AnimationProperty<glm::vec3> *scalePtr =
