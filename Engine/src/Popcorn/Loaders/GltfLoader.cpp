@@ -705,9 +705,8 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
 
       AnimationProperty<glm::vec3> *posPtr =
           gameObj->GetAnimationProperty_Pos();
-      // TODO: Make quaternion anims
-      AnimationProperty<glm::vec3> *rotEulerPtr =
-          gameObj->GetAnimationProperty_RotEuler();
+      AnimationProperty<glm::quat> *rotQuatPtr =
+          gameObj->GetAnimationProperty_RotQuat();
       AnimationProperty<glm::vec3> *scalePtr =
           gameObj->GetAnimationProperty_Scale();
 

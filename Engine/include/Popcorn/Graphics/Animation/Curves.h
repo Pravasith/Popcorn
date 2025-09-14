@@ -5,10 +5,18 @@
 #include <cassert>
 #include <glm/detail/qualifier.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
+#include <glm/ext/quaternion_common.hpp>
 #include <glm/ext/vector_float2.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
+
+static inline constexpr glm::quat PC_Slerp(const glm::quat &q0,
+                                           const glm::quat &q1, float t) {
+  assert(t >= 0.0 && t <= 1.0);
+  return glm::slerp(q0, q1, t);
+}
 
 template <CurveValueType T>
 static inline constexpr T PC_Lerp(const T &p0, const T &p1, float t) {
@@ -78,14 +86,24 @@ public:
   }
   virtual T GetValueAt_Slow(float t) const override final {
     assert(0.0f <= t && t <= 1.0f);
+
+    if constexpr (std::is_same_v<T, glm::quat>) {
+      return PC_Slerp(m_curveInfo.p0, m_curveInfo.p1, t);
+    }
+
     return PC_Lerp(m_curveInfo.p0, m_curveInfo.p1, t);
   }
 
   virtual T GetFirstDerivativeAt_Fast(float t) const override final {
     assert(0.0f <= t && t <= 1.0f);
+
     return GetFirstDerivativeAt_Slow(t);
   }
   virtual T GetFirstDerivativeAt_Slow(float t) const override final {
+    // TODO: Define derivatives for quaternions
+    static_assert(!std::is_same_v<T, glm::quat>,
+                  "Derivatives for Quaternions aren't defined yet");
+
     assert(0.0f <= t && t <= 1.0f);
     return m_curveInfo.p1 - m_curveInfo.p0;
   }
