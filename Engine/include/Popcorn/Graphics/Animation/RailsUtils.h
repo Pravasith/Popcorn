@@ -6,6 +6,7 @@
 #include "SplineDefs.h"
 #include <cassert>
 #include <cstdint>
+#include <glm/fwd.hpp>
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
@@ -30,6 +31,11 @@ PC_HashCurveInfo_Linear(const CurveInfoLinearForm<T> &curveInfo) {
       hash ^= (PC_FloatToUint64(curveInfo.p1[i]) >> (i * 3));
     }
   } else if constexpr (std::is_same_v<T, glm::vec4>) {
+    for (int i = 0; i < 4; ++i) {
+      hash ^= (PC_FloatToUint64(curveInfo.p0[i]) << (i * 2));
+      hash ^= (PC_FloatToUint64(curveInfo.p1[i]) >> (i * 3));
+    }
+  } else if constexpr (std::is_same_v<T, glm::quat>) {
     for (int i = 0; i < 4; ++i) {
       hash ^= (PC_FloatToUint64(curveInfo.p0[i]) << (i * 2));
       hash ^= (PC_FloatToUint64(curveInfo.p1[i]) >> (i * 3));
@@ -70,6 +76,13 @@ PC_HashCurveInfo_Bezier(const CurveInfoBezierForm<T> &curveInfo) {
       hash ^= (PC_FloatToUint64(curveInfo.b2[i]) << i);
       hash ^= (PC_FloatToUint64(curveInfo.b3[i]) >> i);
     }
+  } else if constexpr (std::is_same_v<T, glm::quat>) {
+    for (int i = 0; i < 4; ++i) {
+      hash ^= (PC_FloatToUint64(curveInfo.b0[i]) << (i * 2));
+      hash ^= (PC_FloatToUint64(curveInfo.b1[i]) >> (i * 3));
+      hash ^= (PC_FloatToUint64(curveInfo.b2[i]) << i);
+      hash ^= (PC_FloatToUint64(curveInfo.b3[i]) >> i);
+    }
   }
 
   return hash * 2654435761ull;
@@ -100,6 +113,13 @@ PC_HashCurveInfo_Hermite(const CurveInfoHermiteForm<T> &curveInfo) {
       hash ^= (PC_FloatToUint64(curveInfo.p1[i]) >> i);
     }
   } else if constexpr (std::is_same_v<T, glm::vec4>) {
+    for (int i = 0; i < 4; ++i) {
+      hash ^= (PC_FloatToUint64(curveInfo.p0[i]) << (i * 2));
+      hash ^= (PC_FloatToUint64(curveInfo.v0[i]) >> (i * 3));
+      hash ^= (PC_FloatToUint64(curveInfo.v1[i]) << i);
+      hash ^= (PC_FloatToUint64(curveInfo.p1[i]) >> i);
+    }
+  } else if constexpr (std::is_same_v<T, glm::quat>) {
     for (int i = 0; i < 4; ++i) {
       hash ^= (PC_FloatToUint64(curveInfo.p0[i]) << (i * 2));
       hash ^= (PC_FloatToUint64(curveInfo.v0[i]) >> (i * 3));

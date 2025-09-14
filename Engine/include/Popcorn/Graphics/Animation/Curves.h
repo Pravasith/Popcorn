@@ -7,6 +7,7 @@
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/quaternion_common.hpp>
 #include <glm/ext/vector_float2.hpp>
+#include <glm/fwd.hpp>
 #include <glm/gtc/quaternion.hpp>
 
 ENGINE_NAMESPACE_BEGIN
@@ -16,6 +17,15 @@ static inline constexpr glm::quat PC_Slerp(const glm::quat &q0,
                                            const glm::quat &q1, float t) {
   assert(t >= 0.0 && t <= 1.0);
   return glm::slerp(q0, q1, t);
+}
+
+static inline constexpr glm::quat PC_Squad(const glm::quat &q0,
+                                           const glm::quat &q1,
+                                           const glm::quat &s0,
+                                           const glm::quat &s1, float t) {
+  assert(t >= 0.0 && t <= 1.0);
+  return glm::slerp(glm::slerp(q0, q1, t), glm::slerp(s0, s1, t),
+                    2 * t * (1 - t));
 }
 
 template <CurveValueType T>
@@ -120,13 +130,17 @@ template <CurveValueType T> class BezierCurve : public Curve<T> {
 public:
   BezierCurve(const CurveInfoBezierForm<T> &info)
       : // Bezier control points
-        m_controlPoints{info.b0, info.b1, info.b2, info.b3},
-        // Coefficients (cubic monomial form)
-        // Cubic bezier -> monomial form conversion, ref -
-        // https://www.gamemath.com/book/curves.html#cubic_bezier_monomial_form
-        m_coefficients{info.b0, -3.f * info.b0 + 3.f * info.b1,
-                       3.f * info.b0 - 6.f * info.b1 + 3.f * info.b2,
-                       -info.b0 + 3.f * info.b1 - 3.f * info.b2 + info.b3} {};
+        m_controlPoints{info.b0, info.b1, info.b2, info.b3} {
+    if constexpr (!std::is_same_v<T, glm::quat>) {
+      // Coefficients (cubic monomial form)
+      // Cubic bezier -> monomial form conversion, ref -
+      // https://www.gamemath.com/book/curves.html#cubic_bezier_monomial_form
+      m_coefficients[0] = info.b0;
+      m_coefficients[1] = -3.f * info.b0 + 3.f * info.b1;
+      m_coefficients[2] = 3.f * info.b0 - 6.f * info.b1 + 3.f * info.b2;
+      m_coefficients[3] = -info.b0 + 3.f * info.b1 - 3.f * info.b2 + info.b3;
+    }
+  };
   //
   // NOTE: Removing custom destructor here bc:
   // 1. No need for one
@@ -139,6 +153,11 @@ public:
   // Berstein basis implementation
   virtual T GetValueAt_Fast(float t) const override final {
     assert(0.0f <= t && t <= 1.0f);
+
+    if constexpr (std::is_same_v<T, glm::quat>) {
+      return GetValueAt_Slow(t);
+    }
+
     // Power-basis conversion (in the c'tor) + Horner's rule (just a notational
     // trick sorta like dynamic programming)
     // Just Horner's rule applied to monomial form coefficients
@@ -159,8 +178,13 @@ public:
     while (n-- > 1) // 3 times (3 = degree = (no. of m_controlPoints) - 1)
     {
       for (int i = 0; i < n; ++i) {
-        controlPtsCopy[i] =
-            PC_Lerp(controlPtsCopy[i], controlPtsCopy[i + 1], t);
+        if constexpr (std::is_same_v<T, glm::quat>) {
+          controlPtsCopy[i] =
+              PC_Slerp(controlPtsCopy[i], controlPtsCopy[i + 1], t);
+        } else {
+          controlPtsCopy[i] =
+              PC_Lerp(controlPtsCopy[i], controlPtsCopy[i + 1], t);
+        }
       }
     }
 
@@ -170,6 +194,10 @@ public:
   virtual T GetFirstDerivativeAt_Fast(float t) const override final {
     assert(0.0f <= t && t <= 1.0f);
 
+    // TODO: Define derivatives for quaternions
+    static_assert(!std::is_same_v<T, glm::quat>,
+                  "Derivatives for Quaternions aren't defined yet");
+
     // simple derivative of the cubic equation (calculus power rule)
     T x = m_coefficients[3] * 3.0f;
     x = x * t + m_coefficients[2] * 2.0f;
@@ -177,6 +205,10 @@ public:
   }
   virtual T GetFirstDerivativeAt_Slow(float t) const override final {
     assert(0.0f <= t && t <= 1.0f);
+
+    // TODO: Define derivatives for quaternions
+    static_assert(!std::is_same_v<T, glm::quat>,
+                  "Derivatives for Quaternions aren't defined yet");
 
     // Derivative is a quadratic.
     // Build derivative control points of the quadratic from the control points
@@ -210,15 +242,20 @@ template <CurveValueType T> class HermiteCurve : public Curve<T> {
 public:
   HermiteCurve(const CurveInfoHermiteForm<T> &curveInfo)
       : // Hermite values (p0, v0, v1, p1)
-        m_hermiteValues{curveInfo.p0, curveInfo.v0, curveInfo.v1, curveInfo.p1},
-        // Coefficients (cubic monomial form)
-        // Cubic hermite -> monomial form conversion, ref -
-        // https://www.gamemath.com/book/curves.html#hermite_to_monomial_first
-        m_coefficients{curveInfo.p0, curveInfo.v0,
-                       -3.f * curveInfo.p0 - 2.f * curveInfo.v0 - curveInfo.v1 +
-                           3.f * curveInfo.p1,
-                       2.f * curveInfo.p0 + curveInfo.v0 + curveInfo.v1 -
-                           2.f * curveInfo.p1} {};
+        m_hermiteValues{curveInfo.p0, curveInfo.v0, curveInfo.v1,
+                        curveInfo.p1} {
+    if constexpr (!std::is_same_v<T, glm::quat>) {
+      // Coefficients (cubic monomial form)
+      // Cubic hermite -> monomial form conversion, ref -
+      // https://www.gamemath.com/book/curves.html#hermite_to_monomial_first
+      m_coefficients[0] = curveInfo.p0;
+      m_coefficients[1] = curveInfo.v0;
+      m_coefficients[2] = -3.f * curveInfo.p0 - 2.f * curveInfo.v0 -
+                          curveInfo.v1 + 3.f * curveInfo.p1;
+      m_coefficients[3] =
+          2.f * curveInfo.p0 + curveInfo.v0 + curveInfo.v1 - 2.f * curveInfo.p1;
+    }
+  };
   //
   // NOTE: Removing custom destructor here bc:
   // 1. No need for one
@@ -231,6 +268,11 @@ public:
   virtual T GetValueAt_Fast(float t) const override final {
     assert(0.0f <= t && t <= 1.0f);
 
+    if constexpr (std::is_same_v<T, glm::quat>) {
+      return PC_Squad(m_hermiteValues.p0, m_hermiteValues.p1,
+                      m_hermiteValues.v0, m_hermiteValues.v1, t);
+    }
+
     // Just Horner's rule applied to monomial form coefficients
     T x = m_coefficients[3];
     x = x * t + m_coefficients[2];
@@ -239,6 +281,11 @@ public:
   };
   virtual T GetValueAt_Slow(float t) const override final {
     assert(0.0f <= t && t <= 1.0f);
+
+    if constexpr (std::is_same_v<T, glm::quat>) {
+      return PC_Squad(m_hermiteValues.p0, m_hermiteValues.p1,
+                      m_hermiteValues.v0, m_hermiteValues.v1, t);
+    }
 
     // Hermite basis direct formula plug in (Hermite basis functions as
     // "weights" for barycentric coordinates) -- ref -
@@ -265,6 +312,10 @@ public:
   virtual T GetFirstDerivativeAt_Fast(float t) const override final {
     assert(0.0f <= t && t <= 1.0f);
 
+    // TODO: Define derivatives for quaternions
+    static_assert(!std::is_same_v<T, glm::quat>,
+                  "Derivatives for Quaternions aren't defined yet");
+
     T d = 3.f * m_coefficients[3];       // 3*c3
     d = d * t + 2.f * m_coefficients[2]; // 3*c3*t + 2*c2
     return d * t +                       // (3*c3*t + 2*c2)*t
@@ -272,6 +323,10 @@ public:
   };
   virtual T GetFirstDerivativeAt_Slow(float t) const override final {
     assert(t >= 0 && t <= 1);
+
+    // TODO: Define derivatives for quaternions
+    static_assert(!std::is_same_v<T, glm::quat>,
+                  "Derivatives for Quaternions aren't defined yet");
 
     // Derivating the Hermite basis functions and using them instead of the
     // exact Hermite basis functions (like in GetValueAt_Slow function above)

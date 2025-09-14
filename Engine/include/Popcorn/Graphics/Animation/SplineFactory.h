@@ -9,6 +9,7 @@
 #include "SplineDefs.h"
 #include "Splines.h"
 #include <cassert>
+#include <glm/fwd.hpp>
 #include <map>
 #include <stdexcept>
 #include <vector>
@@ -148,6 +149,9 @@ public:
   const Spline<T> *
   MakeAutomaticSpline(const std::vector<LinearKnot<T>> &knots,
                       const ReparameterizationCurves &rpCurves = {}) {
+    static_assert(!std::is_same_v<T, glm::quat>,
+                  "Automatic Splines not supported for Quaternions yet!");
+
     // TODO: Check if hashed value exists, if so, return it.
     assert(knots.size() > 2 && "Catmull-Rom requires atleast 3 knots");
     KNOT_ASSERTIONS(knots, rpCurves)
@@ -240,6 +244,10 @@ private:
       auto [it, _isInserted] =
           m_vec4Splines.try_emplace(hash, std::move(segments));
       return &it->second;
+    } else if constexpr (std::is_same_v<T, glm::quat>) {
+      auto [it, _isInserted] =
+          m_quatSplines.try_emplace(hash, std::move(segments));
+      return &it->second;
     }
   }
 
@@ -280,6 +288,7 @@ private:
     m_vec2Splines.clear();
     m_vec3Splines.clear();
     m_vec4Splines.clear();
+    m_quatSplines.clear();
   }
 
 private:
@@ -289,6 +298,7 @@ private:
   std::map<SplineHashType, Spline<glm::vec2>> m_vec2Splines;
   std::map<SplineHashType, Spline<glm::vec3>> m_vec3Splines;
   std::map<SplineHashType, Spline<glm::vec4>> m_vec4Splines;
+  std::map<SplineHashType, Spline<glm::quat>> m_quatSplines;
 };
 
 GFX_NAMESPACE_END

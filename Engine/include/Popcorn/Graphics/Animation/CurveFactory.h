@@ -6,6 +6,7 @@
 #include "Popcorn/Core/Base.h"
 #include "RailsUtils.h"
 #include <glm/ext/vector_float2.hpp>
+#include <glm/fwd.hpp>
 #include <map>
 #include <type_traits>
 
@@ -89,6 +90,8 @@ public:
     return m_vec3Curves.GetCurvePtr(curveInfo);                                \
   } else if constexpr (std::is_same_v<T, glm::vec4>) {                         \
     return m_vec4Curves.GetCurvePtr(curveInfo);                                \
+  } else if constexpr (std::is_same_v<T, glm::quat>) {                         \
+    return m_quatCurves.GetCurvePtr(curveInfo);                                \
   }
 
   template <CurveValueType T>
@@ -148,6 +151,7 @@ private:
   CurveBank<glm::vec2> m_vec2Curves;
   CurveBank<glm::vec3> m_vec3Curves;
   CurveBank<glm::vec4> m_vec4Curves;
+  CurveBank<glm::quat> m_quatCurves;
 };
 
 GFX_NAMESPACE_END
