@@ -35,7 +35,7 @@ public:
     AnimationTrack &animTrack = scene.GetAnimationTracks()[0];
     PC_PRINT(&animTrack << " COMPARE", TagType::Print, "")
 
-    animTrack.Play(10.0, [](AnimationTrack *) {
+    animTrack.Play(2.5, [](AnimationTrack *) {
       PC_PRINT("ANIMATION 1 FINISHED!", TagType::Print, "")
     });
 

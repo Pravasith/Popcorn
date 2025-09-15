@@ -111,11 +111,13 @@ void Transformations::UpdateScaleMatrix() {
 void Transformations::UpdateLocalMatrix() {
   m_localMatrix = m_translationMatrix * m_rotationMatrix * m_scaleMatrix;
   m_worldMatrixNeedsUpdate = true;
+  m_afterLocalMatrixUpdateCb();
 }
 
 void Transformations::SetLocalMatrix(const glm::mat4 &mat) {
   m_localMatrix = mat;
   m_worldMatrixNeedsUpdate = true;
+  m_afterLocalMatrixUpdateCb();
 };
 
 // update world matrix wrt parent

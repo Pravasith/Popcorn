@@ -3,6 +3,7 @@
 #include "AnimationProperty.h"
 #include "GlobalMacros.h"
 #include "MathConstants.h"
+#include <functional>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/quaternion_geometric.hpp>
@@ -10,6 +11,7 @@
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <utility>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -48,7 +50,7 @@ public:
 
   // --- matrix stuff ---------------------------------------------------------
   void SetLocalMatrix(const glm::mat4 &mat); // only for GltfLoader
-  void SetWorldMatrixNeedsUpdate(bool val) { m_worldMatrixNeedsUpdate = val; }
+
   //
   void UpdatePositionMatrix();
   void UpdateRotationMatrix();
@@ -60,7 +62,10 @@ public:
   void UpdateLookAtDirection();
 
 public:
-  Transformations() {
+  template <typename F>
+  Transformations(F &&afterLocalMatrixUpdateCb)
+      : m_afterLocalMatrixUpdateCb(std::forward<F>(afterLocalMatrixUpdateCb)) {
+
     m_position.SetAfterMorphCb([this] { UpdatePositionMatrix(); });
     m_rotationQuat.SetAfterMorphCb([this] { UpdateRotationMatrix(); });
     m_scale.SetAfterMorphCb([this] { UpdateScaleMatrix(); });
@@ -118,6 +123,7 @@ public:
   glm::vec3 m_lookAtDir{0.f, 0.f, -1.f}; // towards the screen
 
   bool m_worldMatrixNeedsUpdate = false;
+  std::function<void()> m_afterLocalMatrixUpdateCb = nullptr;
 };
 
 //

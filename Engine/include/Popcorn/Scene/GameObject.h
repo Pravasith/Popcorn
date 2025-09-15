@@ -33,7 +33,9 @@ enum class GameObjectTypes {
 
 class GameObject {
 public:
-  GameObject() {
+  GameObject()
+      : m_transformData(Transformations(
+            [this]() { UpdateChildrenWorldMatrixNeedsUpdateFlag(); })) {
     // PC_PRINT("CREATED", TagType::Constr, "GameObject");
   }
   virtual ~GameObject() noexcept {
