@@ -12,6 +12,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <glm/ext/quaternion_geometric.hpp>
 #include <glm/ext/vector_float2.hpp>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/ext/vector_float4.hpp>
@@ -54,23 +55,18 @@ template <> struct DimensionType<4> {
 // template <int T>
 // using CurveValType = typename DimensionType<T>::type;
 
-// Use for Quaternion to Euler conversions - when you want to pass a vec3
-// AnimationProperty, and the outputData(from Blender) is Quaternion data(vec4),
-// set QuatToEuler flag
-template <int T, bool QuatToEuler>
-using CurveValType =
-    std::conditional_t<T == 4 && QuatToEuler, typename DimensionType<3>::type,
-                       typename DimensionType<T>::type>;
+template <int T, bool IsQuat>
+using CurveValType = std::conditional_t<T == 4 && IsQuat, glm::quat,
+                                        typename DimensionType<T>::type>;
 
-template <int Dims, bool QuatToEuler = false>
+template <int Dims, bool IsQuat = false>
 [[nodiscard]] static inline TimeTrain_Binding
 PC_CreateTimeTrainBindingFromGltfActions_HermiteData(
-    AnimationProperty<CurveValType<Dims, QuatToEuler>> *animationPropertyPtr,
+    AnimationProperty<CurveValType<Dims, IsQuat>> *animationPropertyPtr,
     size_t outputAccessorCount, const float *inputData,
     const float
         *outputTripletsData // Hermite output has 3 components - vIn, val, vOut
 ) {
-
   static_assert(Dims >= 1 && Dims <= 4);
   using CurveType = DimensionType<Dims>::type;
   std::vector<HermiteKnot<CurveType>> hermiteKnots;
@@ -78,8 +74,8 @@ PC_CreateTimeTrainBindingFromGltfActions_HermiteData(
   size_t keyframeCount = outputAccessorCount /
                          3; // Hermite output has 3 components - vIn, val, vOut
 
-  const Spline<CurveValType<Dims, QuatToEuler>> *splinePtr = nullptr;
-  const Curve<CurveValType<Dims, QuatToEuler>> *curvePtr = nullptr;
+  const Spline<CurveValType<Dims, IsQuat>> *splinePtr = nullptr;
+  const Curve<CurveValType<Dims, IsQuat>> *curvePtr = nullptr;
 
   bool isRailSpline = true;
 
@@ -119,11 +115,12 @@ PC_CreateTimeTrainBindingFromGltfActions_HermiteData(
     hermiteKnots.emplace_back(vIn, val, vOut, inputData[i / 3]);
   }
 
-  if constexpr (Dims == 4 && QuatToEuler) {
-    std::vector<HermiteKnot<glm::vec3>> eulerHermiteKnots;
+  if constexpr (Dims == 4 && IsQuat) {
+    std::vector<HermiteKnot<glm::quat>> quatHermiteKnots;
 
+    // Just swizzling to convert gltf export -> glm format
     for (HermiteKnot<glm::vec4> &knot : hermiteKnots) {
-      HermiteKnot<glm::vec3> eulerHermiteKnot;
+      HermiteKnot<glm::quat> quatHermiteKnot;
 
       glm::quat quatHermiteKnot_vIn(knot.vIn[3], knot.vIn[0], knot.vIn[1],
                                     knot.vIn[2]);
@@ -132,28 +129,41 @@ PC_CreateTimeTrainBindingFromGltfActions_HermiteData(
       glm::quat quatHermiteKnot_vOut(knot.vOut[3], knot.vOut[0], knot.vOut[1],
                                      knot.vOut[2]);
 
-      eulerHermiteKnot.vIn = glm::eulerAngles(quatHermiteKnot_vIn);
-      eulerHermiteKnot.val = glm::eulerAngles(quatHermiteKnot_val);
-      eulerHermiteKnot.vOut = glm::eulerAngles(quatHermiteKnot_vOut);
-      eulerHermiteKnot.t = knot.t;
+      quatHermiteKnot.vIn = quatHermiteKnot_vIn;
+      quatHermiteKnot.val = glm::normalize(quatHermiteKnot_val);
+      quatHermiteKnot.vOut = quatHermiteKnot_vOut;
+      quatHermiteKnot.t = knot.t;
 
-      eulerHermiteKnots.push_back(eulerHermiteKnot);
+      quatHermiteKnots.push_back(quatHermiteKnot);
+    }
+
+    // Check if all knots are in the same "hemisphere" of the 4D Hypersphere, if
+    // not, we gotta bring the ones in the other hemisphere to the same
+    // hemisphere
+    for (size_t i = 1; i < quatHermiteKnots.size(); ++i) {
+      if (glm::dot(quatHermiteKnots[i - 1].val, quatHermiteKnots[i].val) <
+          0.0f) {
+        quatHermiteKnots[i].vIn = -quatHermiteKnots[i].vIn;
+        quatHermiteKnots[i].val = -quatHermiteKnots[i].val;
+        quatHermiteKnots[i].vOut = -quatHermiteKnots[i].vOut;
+      }
     }
 
     if (isRailSpline) {
-      splinePtr = SplineFactory::Get()->MakeSpline(eulerHermiteKnots);
+      splinePtr = SplineFactory::Get()->MakeSpline(quatHermiteKnots);
     } else {
-      assert(eulerHermiteKnots.size() == 2);
+      assert(quatHermiteKnots.size() == 2);
 
-      CurveInfoHermiteForm<glm::vec3> cInfo;
-      cInfo.p0 = eulerHermiteKnots[0].val;
-      cInfo.v0 = eulerHermiteKnots[0].vOut;
-      cInfo.v1 = eulerHermiteKnots[1].vIn;
-      cInfo.p1 = eulerHermiteKnots[1].val;
+      CurveInfoHermiteForm<glm::quat> cInfo;
+      cInfo.p0 = quatHermiteKnots[0].val;
+      cInfo.v0 = quatHermiteKnots[0].vOut;
+      cInfo.v1 = quatHermiteKnots[1].vIn;
+      cInfo.p1 = quatHermiteKnots[1].val;
 
       curvePtr = CurveFactory::Get()->GetCurvePtr(cInfo);
     }
   } else {
+    // Non Quaternions
     if (isRailSpline) {
       splinePtr = SplineFactory::Get()->MakeSpline(hermiteKnots);
     } else {
@@ -205,13 +215,10 @@ PC_CreateTimeTrainBindingFromGltfActions_HermiteData(
 // --- LINEAR DATA PROCESSING ----------------------------------------------
 //
 
-// Use for Quaternion to Euler conversions - when you want to pass a vec3
-// AnimationProperty, and the outputData(from Blender) is Quaternion data(vec4),
-// set QuatToEuler flag
-template <int Dims, bool QuatToEuler = false>
+template <int Dims, bool IsQuat = false>
 [[nodiscard]] static inline TimeTrain_Binding
 PC_CreateTimeTrainBindingFromGltfActions_LinearData(
-    AnimationProperty<CurveValType<Dims, QuatToEuler>> *animationPropertyPtr,
+    AnimationProperty<CurveValType<Dims, IsQuat>> *animationPropertyPtr,
     size_t outputAccessorCount, const float *inputData,
     const float *outputData // Linear output has 1 component - val
 ) {
@@ -223,8 +230,8 @@ PC_CreateTimeTrainBindingFromGltfActions_LinearData(
   size_t keyframeCount =
       outputAccessorCount / 1; // Linear output has 1 components - val
 
-  const Spline<CurveValType<Dims, QuatToEuler>> *splinePtr = nullptr;
-  const Curve<CurveValType<Dims, QuatToEuler>> *curvePtr = nullptr;
+  const Spline<CurveValType<Dims, IsQuat>> *splinePtr = nullptr;
+  const Curve<CurveValType<Dims, IsQuat>> *curvePtr = nullptr;
 
   bool isRailSpline = true;
 
@@ -254,29 +261,38 @@ PC_CreateTimeTrainBindingFromGltfActions_LinearData(
     linearKnots.emplace_back(val, inputData[i]);
   }
 
-  if constexpr (Dims == 4 && QuatToEuler) {
-    std::vector<LinearKnot<glm::vec3>> eulerLinearKnots;
+  if constexpr (Dims == 4 && IsQuat) {
+    std::vector<LinearKnot<glm::quat>> quatLinearKnots;
 
     for (LinearKnot<glm::vec4> &knot : linearKnots) {
-      LinearKnot<glm::vec3> eulerLinearKnot;
+      LinearKnot<glm::quat> quatLinearKnot;
 
       glm::quat quatLinearKnot_val(knot.val[3], knot.val[0], knot.val[1],
                                    knot.val[2]);
 
-      eulerLinearKnot.val = glm::eulerAngles(quatLinearKnot_val);
-      eulerLinearKnot.t = knot.t;
+      quatLinearKnot.val = glm::normalize(quatLinearKnot_val);
+      quatLinearKnot.t = knot.t;
 
-      eulerLinearKnots.push_back(eulerLinearKnot);
+      quatLinearKnots.push_back(quatLinearKnot);
+    }
+
+    // Check if all knots are in the same "hemisphere" of the 4D Hypersphere, if
+    // not, we gotta bring the ones in the other hemisphere to the same
+    // hemisphere
+    for (size_t i = 1; i < quatLinearKnots.size(); ++i) {
+      if (glm::dot(quatLinearKnots[i - 1].val, quatLinearKnots[i].val) < 0.0f) {
+        quatLinearKnots[i].val = -quatLinearKnots[i].val;
+      }
     }
 
     if (isRailSpline) {
-      splinePtr = SplineFactory::Get()->MakeSpline(eulerLinearKnots);
+      splinePtr = SplineFactory::Get()->MakeSpline(quatLinearKnots);
     } else {
-      assert(eulerLinearKnots.size() == 2);
+      assert(quatLinearKnots.size() == 2);
 
-      CurveInfoLinearForm<glm::vec3> cInfo;
-      cInfo.p0 = eulerLinearKnots[0].val;
-      cInfo.p1 = eulerLinearKnots[1].val;
+      CurveInfoLinearForm<glm::quat> cInfo;
+      cInfo.p0 = quatLinearKnots[0].val;
+      cInfo.p1 = quatLinearKnots[1].val;
 
       curvePtr = CurveFactory::Get()->GetCurvePtr(cInfo);
     }

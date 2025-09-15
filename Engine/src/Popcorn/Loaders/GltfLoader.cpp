@@ -725,10 +725,10 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
         } else if (targetPath == "rotation") {
           if (knotType == HermiteKnotType) {
             tt = PC_CreateTimeTrainBindingFromGltfActions_HermiteData<4, true>(
-                rotEulerPtr, outputAccessor.count, inputData, outputData);
+                rotQuatPtr, outputAccessor.count, inputData, outputData);
           } else if (knotType == LinearKnotType) {
             tt = PC_CreateTimeTrainBindingFromGltfActions_LinearData<4, true>(
-                rotEulerPtr, outputAccessor.count, inputData, outputData);
+                rotQuatPtr, outputAccessor.count, inputData, outputData);
           }
         } else if (targetPath == "scale") {
           if (knotType == HermiteKnotType) {
