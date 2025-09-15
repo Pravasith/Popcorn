@@ -6,6 +6,7 @@
 #include <glm/detail/qualifier.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/quaternion_common.hpp>
+#include <glm/ext/quaternion_geometric.hpp>
 #include <glm/ext/vector_float2.hpp>
 #include <glm/fwd.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -19,13 +20,13 @@ static inline glm::quat PC_Slerp(const glm::quat &q0, const glm::quat &q1,
   return glm::slerp(q0, q1, t);
 }
 
-static inline glm::quat PC_Squad(const glm::quat &q0, const glm::quat &q1,
-                                 const glm::quat &s0, const glm::quat &s1,
-                                 float t) {
-  assert(t >= 0.0 && t <= 1.0);
-  return glm::slerp(glm::slerp(q0, q1, t), glm::slerp(s0, s1, t),
-                    2 * t * (1 - t));
-}
+// static inline glm::quat PC_Squad(const glm::quat &q0, const glm::quat &q1,
+//                                  const glm::quat &v0, const glm::quat &v1,
+//                                  float t) {
+//   assert(t >= 0.0 && t <= 1.0);
+//   return glm::slerp(glm::slerp(q0, q1, t), glm::slerp(v0, v1, t),
+//                     2 * t * (1 - t));
+// }
 
 template <CurveValueType T>
 static inline constexpr T PC_Lerp(const T &p0, const T &p1, float t) {
@@ -271,11 +272,7 @@ public:
     assert(0.0f <= t && t <= 1.0f);
 
     if constexpr (std::is_same_v<T, glm::quat>) {
-      const T &p0 = m_hermiteValues[0];
-      const T &v0 = m_hermiteValues[1];
-      const T &v1 = m_hermiteValues[2];
-      const T &p1 = m_hermiteValues[3];
-      return PC_Squad(p0, p1, v0, v1, t);
+      return GetValueAt_Slow(t);
     }
 
     // Just Horner's rule applied to monomial form coefficients
@@ -286,14 +283,6 @@ public:
   };
   virtual T GetValueAt_Slow(float t) const override final {
     assert(0.0f <= t && t <= 1.0f);
-
-    if constexpr (std::is_same_v<T, glm::quat>) {
-      const T &p0 = m_hermiteValues[0];
-      const T &v0 = m_hermiteValues[1];
-      const T &v1 = m_hermiteValues[2];
-      const T &p1 = m_hermiteValues[3];
-      return PC_Squad(p0, p1, v0, v1, t);
-    }
 
     // Hermite basis direct formula plug in (Hermite basis functions as
     // "weights" for barycentric coordinates) -- ref -
@@ -313,6 +302,11 @@ public:
     const T &v0 = m_hermiteValues[1];
     const T &v1 = m_hermiteValues[2];
     const T &p1 = m_hermiteValues[3];
+
+    if constexpr (std::is_same_v<T, glm::quat>) {
+      glm::quat q = p0 * h00 + v0 * h10 + p1 * h01 + v1 * h11;
+      return glm::normalize(q);
+    }
 
     return p0 * h00 + v0 * h10 + p1 * h01 + v1 * h11;
   };
