@@ -164,6 +164,33 @@ PC_CreateTimeTrainBindingFromGltfActions_HermiteData(
     }
   } else {
     // Non Quaternions
+
+    // TODO: CHECK THIS OUT
+
+    // // Scale Hermite tangents by segment dt, as glTF tangents are derivatives
+    // // (units/sec)
+    // for (size_t k = 0; k < hermiteKnots.size(); ++k) {
+    //   // in-tangent uses previous segment
+    //   if (k > 0) {
+    //     float dt_prev = inputData[k] - inputData[k - 1];
+    //     // guard against degenerate keys
+    //     if (dt_prev > 0.0f) {
+    //       hermiteKnots[k].vIn *= dt_prev;
+    //     } else {
+    //       hermiteKnots[k].vIn = CurveType(0); // or leave as-is
+    //     }
+    //   }
+    //   // out-tangent uses next segment
+    //   if (k + 1 < hermiteKnots.size()) {
+    //     float dt_next = inputData[k + 1] - inputData[k];
+    //     if (dt_next > 0.0f) {
+    //       hermiteKnots[k].vOut *= dt_next;
+    //     } else {
+    //       hermiteKnots[k].vOut = CurveType(0);
+    //     }
+    //   }
+    // }
+
     if (isRailSpline) {
       splinePtr = SplineFactory::Get()->MakeSpline(hermiteKnots);
     } else {

@@ -45,14 +45,17 @@ void Transformations::RotateLocalEuler(const glm::vec3 &rotationEuler) {
 template <> void Transformations::RotateLocalEuler<Axes::X>(float radians) {
   glm::quat dq = glm::angleAxis(radians, glm::vec3{1.0, 0.0, 0.0});
   m_rotationQuat.Set(dq * m_rotationQuat.GetValue());
+  UpdateRotationMatrix();
 }
 template <> void Transformations::RotateLocalEuler<Axes::Y>(float radians) {
   glm::quat dq = glm::angleAxis(radians, glm::vec3{0.0, 1.0, 0.0});
   m_rotationQuat.Set(dq * m_rotationQuat.GetValue());
+  UpdateRotationMatrix();
 }
 template <> void Transformations::RotateLocalEuler<Axes::Z>(float radians) {
   glm::quat dq = glm::angleAxis(radians, glm::vec3{0.0, 0.0, 1.0});
   m_rotationQuat.Set(dq * m_rotationQuat.GetValue());
+  UpdateRotationMatrix();
 }
 
 //

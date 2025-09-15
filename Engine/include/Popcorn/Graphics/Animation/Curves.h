@@ -13,16 +13,15 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-static inline constexpr glm::quat PC_Slerp(const glm::quat &q0,
-                                           const glm::quat &q1, float t) {
+static inline glm::quat PC_Slerp(const glm::quat &q0, const glm::quat &q1,
+                                 float t) {
   assert(t >= 0.0 && t <= 1.0);
   return glm::slerp(q0, q1, t);
 }
 
-static inline constexpr glm::quat PC_Squad(const glm::quat &q0,
-                                           const glm::quat &q1,
-                                           const glm::quat &s0,
-                                           const glm::quat &s1, float t) {
+static inline glm::quat PC_Squad(const glm::quat &q0, const glm::quat &q1,
+                                 const glm::quat &s0, const glm::quat &s1,
+                                 float t) {
   assert(t >= 0.0 && t <= 1.0);
   return glm::slerp(glm::slerp(q0, q1, t), glm::slerp(s0, s1, t),
                     2 * t * (1 - t));
@@ -37,6 +36,9 @@ template <CurveValueType T>
 static inline constexpr T PC_Lerp(const T &p0, const T &p1, double t) {
   return p0 + (p1 - p0) * t;
 }
+
+template <typename T>
+concept IsNonQuaternion = !std::is_same_v<T, glm::quat>;
 
 //
 // -------------------------------------------------------------------
@@ -111,8 +113,8 @@ public:
   }
   virtual T GetFirstDerivativeAt_Slow(float t) const override final {
     // TODO: Define derivatives for quaternions
-    static_assert(!std::is_same_v<T, glm::quat>,
-                  "Derivatives for Quaternions aren't defined yet");
+    assert((!std::is_same_v<T, glm::quat>) &&
+           "Derivatives for Quaternions aren't defined yet");
 
     assert(0.0f <= t && t <= 1.0f);
     return m_curveInfo.p1 - m_curveInfo.p0;
@@ -195,8 +197,8 @@ public:
     assert(0.0f <= t && t <= 1.0f);
 
     // TODO: Define derivatives for quaternions
-    static_assert(!std::is_same_v<T, glm::quat>,
-                  "Derivatives for Quaternions aren't defined yet");
+    assert((!std::is_same_v<T, glm::quat>) &&
+           "Derivatives for Quaternions aren't defined yet");
 
     // simple derivative of the cubic equation (calculus power rule)
     T x = m_coefficients[3] * 3.0f;
@@ -207,8 +209,8 @@ public:
     assert(0.0f <= t && t <= 1.0f);
 
     // TODO: Define derivatives for quaternions
-    static_assert(!std::is_same_v<T, glm::quat>,
-                  "Derivatives for Quaternions aren't defined yet");
+    assert((!std::is_same_v<T, glm::quat>) &&
+           "Derivatives for Quaternions aren't defined yet");
 
     // Derivative is a quadratic.
     // Build derivative control points of the quadratic from the control points
@@ -269,8 +271,11 @@ public:
     assert(0.0f <= t && t <= 1.0f);
 
     if constexpr (std::is_same_v<T, glm::quat>) {
-      return PC_Squad(m_hermiteValues.p0, m_hermiteValues.p1,
-                      m_hermiteValues.v0, m_hermiteValues.v1, t);
+      const T &p0 = m_hermiteValues[0];
+      const T &v0 = m_hermiteValues[1];
+      const T &v1 = m_hermiteValues[2];
+      const T &p1 = m_hermiteValues[3];
+      return PC_Squad(p0, p1, v0, v1, t);
     }
 
     // Just Horner's rule applied to monomial form coefficients
@@ -283,8 +288,11 @@ public:
     assert(0.0f <= t && t <= 1.0f);
 
     if constexpr (std::is_same_v<T, glm::quat>) {
-      return PC_Squad(m_hermiteValues.p0, m_hermiteValues.p1,
-                      m_hermiteValues.v0, m_hermiteValues.v1, t);
+      const T &p0 = m_hermiteValues[0];
+      const T &v0 = m_hermiteValues[1];
+      const T &v1 = m_hermiteValues[2];
+      const T &p1 = m_hermiteValues[3];
+      return PC_Squad(p0, p1, v0, v1, t);
     }
 
     // Hermite basis direct formula plug in (Hermite basis functions as
@@ -313,8 +321,8 @@ public:
     assert(0.0f <= t && t <= 1.0f);
 
     // TODO: Define derivatives for quaternions
-    static_assert(!std::is_same_v<T, glm::quat>,
-                  "Derivatives for Quaternions aren't defined yet");
+    assert((!std::is_same_v<T, glm::quat>) &&
+           "Derivatives for Quaternions aren't defined yet");
 
     T d = 3.f * m_coefficients[3];       // 3*c3
     d = d * t + 2.f * m_coefficients[2]; // 3*c3*t + 2*c2
@@ -325,8 +333,8 @@ public:
     assert(t >= 0 && t <= 1);
 
     // TODO: Define derivatives for quaternions
-    static_assert(!std::is_same_v<T, glm::quat>,
-                  "Derivatives for Quaternions aren't defined yet");
+    assert((!std::is_same_v<T, glm::quat>) &&
+           "Derivatives for Quaternions aren't defined yet");
 
     // Derivating the Hermite basis functions and using them instead of the
     // exact Hermite basis functions (like in GetValueAt_Slow function above)

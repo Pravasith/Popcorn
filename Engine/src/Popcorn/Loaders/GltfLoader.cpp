@@ -20,6 +20,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <glm/ext/quaternion_geometric.hpp>
 #include <glm/ext/vector_float2.hpp>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/ext/vector_float4.hpp>
@@ -136,7 +137,6 @@ void GltfLoader::SetTransformData(const tinygltf::Node &node,
     // Apply TRS components separately
     glm::vec3 translation(0.0f);
     glm::vec3 scale(1.0f);
-    // glm::vec3 eulerAngles(0.0f); // Euler angles in radians
     glm::quat rotQuat(1.0f, 0.0f, 0.0f, 0.0f);
 
     if (!node.translation.empty()) {
@@ -150,7 +150,7 @@ void GltfLoader::SetTransformData(const tinygltf::Node &node,
       // eulerAngles =
       //     glm::eulerAngles(rotationQuat); // Convert quaternion to Euler
       //     angles
-      rotQuat = rotationQuat;
+      rotQuat = glm::normalize(rotationQuat);
     }
 
     if (!node.scale.empty()) {
