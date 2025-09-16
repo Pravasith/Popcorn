@@ -8,6 +8,7 @@
 #include "GltfLoader.h"
 #include "Layer.h"
 #include "Scene.h"
+#include <iostream>
 
 ENGINE_NAMESPACE_BEGIN
 CTX_NAMESPACE_BEGIN

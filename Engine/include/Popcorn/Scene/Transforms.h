@@ -3,12 +3,15 @@
 #include "AnimationProperty.h"
 #include "GlobalMacros.h"
 #include "MathConstants.h"
+#include <functional>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/quaternion_geometric.hpp>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <utility>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -25,9 +28,20 @@ public:
   template <Axes T> void TranslateLocal(float signedDistance);
 
   // --- rotations ------------------------------------------------------------
+  //
+  // Euler
   void SetEulerOrder(EulerOrder order) { m_eulerOrder = order; }
   void RotateLocalEuler(const glm::vec3 &rotationEuler);
   template <Axes T> void RotateLocalEuler(float radians);
+
+  // Quat
+  void RotateLocalQuat(const glm::quat &dq) {
+    m_rotationQuat.Set(glm::normalize(dq * m_rotationQuat.GetValue()),
+                       [&]() { UpdateRotationMatrix(); });
+  }
+  void SetRotationQuat(const glm::quat &q) {
+    m_rotationQuat.Set(glm::normalize(q), [&]() { UpdateRotationMatrix(); });
+  }
 
   // --- scaling --------------------------------------------------------------
   template <Axes T> void ScaleLocal(float scalarValue);
@@ -36,7 +50,7 @@ public:
 
   // --- matrix stuff ---------------------------------------------------------
   void SetLocalMatrix(const glm::mat4 &mat); // only for GltfLoader
-  void SetWorldMatrixNeedsUpdate(bool val) { m_worldMatrixNeedsUpdate = val; }
+
   //
   void UpdatePositionMatrix();
   void UpdateRotationMatrix();
@@ -48,9 +62,12 @@ public:
   void UpdateLookAtDirection();
 
 public:
-  Transformations() {
+  template <typename F>
+  Transformations(F &&afterLocalMatrixUpdateCb)
+      : m_afterLocalMatrixUpdateCb(std::forward<F>(afterLocalMatrixUpdateCb)) {
+
     m_position.SetAfterMorphCb([this] { UpdatePositionMatrix(); });
-    m_rotationEuler.SetAfterMorphCb([this] { UpdateRotationMatrix(); });
+    m_rotationQuat.SetAfterMorphCb([this] { UpdateRotationMatrix(); });
     m_scale.SetAfterMorphCb([this] { UpdateScaleMatrix(); });
   }
   ~Transformations() = default;
@@ -70,11 +87,19 @@ private:
   GetAnimationProperty_Pos() noexcept {
     return &m_position;
   }
+
   // Warning: To be modified by the GameObject class only
-  [[nodiscard]] AnimationProperty<glm::vec3> *
-  GetAnimationProperty_RotEuler() noexcept {
-    return &m_rotationEuler;
+  [[nodiscard]] AnimationProperty<glm::quat> *
+  GetAnimationProperty_RotQuat() noexcept {
+    return &m_rotationQuat;
   }
+
+  // Warning: To be modified by the GameObject class only
+  // [[nodiscard]] AnimationProperty<glm::vec3> *
+  // GetAnimationProperty_RotEuler() noexcept {
+  //   return &m_rotationEuler;
+  // }
+
   // Warning: To be modified by the GameObject class only
   [[nodiscard]] AnimationProperty<glm::vec3> *
   GetAnimationProperty_Scale() noexcept {
@@ -85,7 +110,7 @@ public:
   EulerOrder m_eulerOrder = EulerOrder::XYZ;
 
   AnimationProperty<glm::vec3> m_position{0.f, 0.f, 0.f};
-  AnimationProperty<glm::vec3> m_rotationEuler{0.f, 0.f, 0.f};
+  AnimationProperty<glm::quat> m_rotationQuat{1.0f, 0.0f, 0.0f, 0.0f};
   AnimationProperty<glm::vec3> m_scale{1.f, 1.f, 1.f};
 
   glm::mat4 m_translationMatrix = PC_IDENTITY_MAT4;
@@ -98,6 +123,7 @@ public:
   glm::vec3 m_lookAtDir{0.f, 0.f, -1.f}; // towards the screen
 
   bool m_worldMatrixNeedsUpdate = false;
+  std::function<void()> m_afterLocalMatrixUpdateCb = nullptr;
 };
 
 //

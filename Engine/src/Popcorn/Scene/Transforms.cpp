@@ -1,5 +1,9 @@
 #include "Transforms.h"
 #include "GlobalMacros.h"
+#include <glm/ext/quaternion_transform.hpp>
+#include <glm/ext/quaternion_trigonometric.hpp>
+#include <glm/fwd.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -33,20 +37,25 @@ void Transformations::TranslateLocal<Axes::Z>(float signedDistance) {
 // --- ROTATION -----------------------------------------------------------
 //
 void Transformations::RotateLocalEuler(const glm::vec3 &rotationEuler) {
-  m_rotationEuler.Set(rotationEuler, [&]() { UpdateRotationMatrix(); });
+  glm::quat dq = glm::quat(rotationEuler);
+  m_rotationQuat.Set(dq * m_rotationQuat.GetValue());
+  UpdateRotationMatrix();
 };
 
 template <> void Transformations::RotateLocalEuler<Axes::X>(float radians) {
-  m_rotationEuler.AddComponent<Axes::X>(radians,
-                                        [&]() { UpdateRotationMatrix(); });
+  glm::quat dq = glm::angleAxis(radians, glm::vec3{1.0, 0.0, 0.0});
+  m_rotationQuat.Set(dq * m_rotationQuat.GetValue());
+  UpdateRotationMatrix();
 }
 template <> void Transformations::RotateLocalEuler<Axes::Y>(float radians) {
-  m_rotationEuler.AddComponent<Axes::Y>(radians,
-                                        [&]() { UpdateRotationMatrix(); });
+  glm::quat dq = glm::angleAxis(radians, glm::vec3{0.0, 1.0, 0.0});
+  m_rotationQuat.Set(dq * m_rotationQuat.GetValue());
+  UpdateRotationMatrix();
 }
 template <> void Transformations::RotateLocalEuler<Axes::Z>(float radians) {
-  m_rotationEuler.AddComponent<Axes::Z>(radians,
-                                        [&]() { UpdateRotationMatrix(); });
+  glm::quat dq = glm::angleAxis(radians, glm::vec3{0.0, 0.0, 1.0});
+  m_rotationQuat.Set(dq * m_rotationQuat.GetValue());
+  UpdateRotationMatrix();
 }
 
 //
@@ -87,36 +96,7 @@ void Transformations::UpdatePositionMatrix() {
 }
 
 void Transformations::UpdateRotationMatrix() {
-  auto rotX =
-      glm::rotate(PC_IDENTITY_MAT4, m_rotationEuler.GetValue().x, {1, 0, 0});
-  auto rotY =
-      glm::rotate(PC_IDENTITY_MAT4, m_rotationEuler.GetValue().y, {0, 1, 0});
-  auto rotZ =
-      glm::rotate(PC_IDENTITY_MAT4, m_rotationEuler.GetValue().z, {0, 0, 1});
-
-  switch (m_eulerOrder) {
-  case EulerOrder::XYZ:
-    m_rotationMatrix = rotX * rotY * rotZ;
-    break;
-  case EulerOrder::XZY:
-    m_rotationMatrix = rotX * rotZ * rotY;
-    break;
-  case EulerOrder::YXZ:
-    m_rotationMatrix = rotY * rotX * rotZ;
-    break;
-  case EulerOrder::YZX:
-    m_rotationMatrix = rotY * rotZ * rotX;
-    break;
-  case EulerOrder::ZXY:
-    m_rotationMatrix = rotZ * rotX * rotY;
-    break;
-  case EulerOrder::ZYX:
-    m_rotationMatrix = rotZ * rotY * rotX;
-    break;
-  default: // XYZ
-    m_rotationMatrix = rotX * rotY * rotZ;
-    break;
-  }
+  m_rotationMatrix = glm::mat4_cast(m_rotationQuat.GetValue());
 
   UpdateLookAtDirection();
   UpdateLocalMatrix();
@@ -131,18 +111,20 @@ void Transformations::UpdateScaleMatrix() {
 void Transformations::UpdateLocalMatrix() {
   m_localMatrix = m_translationMatrix * m_rotationMatrix * m_scaleMatrix;
   m_worldMatrixNeedsUpdate = true;
+  m_afterLocalMatrixUpdateCb();
 }
 
 void Transformations::SetLocalMatrix(const glm::mat4 &mat) {
   m_localMatrix = mat;
   m_worldMatrixNeedsUpdate = true;
+  m_afterLocalMatrixUpdateCb();
 };
 
 // update world matrix wrt parent
 void Transformations::UpdateWorldMatrix(const glm::mat4 &parentWorldMatrix) {
   m_worldMatrix = parentWorldMatrix * m_localMatrix;
   m_worldMatrixNeedsUpdate = false;
-};
+}
 
 void Transformations::UpdateLookAtDirection() {
   // glm::mat4 rotMat = m_rotationMatrix;
@@ -151,7 +133,7 @@ void Transformations::UpdateLookAtDirection() {
   m_lookAtDir =
       // glm::normalize(glm::vec3(rotMat * glm::vec4(initialLookAt, 0.f)));
       glm::normalize(glm::mat3(m_rotationMatrix) * initialLookAt);
-};
+}
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

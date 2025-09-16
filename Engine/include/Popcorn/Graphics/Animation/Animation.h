@@ -11,6 +11,7 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
+#include <glm/fwd.hpp>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -20,8 +21,8 @@ GFX_NAMESPACE_BEGIN
 
 using AnimationPropertyPtr =
     std::variant<AnimationProperty<float> *, AnimationProperty<glm::vec2> *,
-                 AnimationProperty<glm::vec3> *,
-                 AnimationProperty<glm::vec4> *>;
+                 AnimationProperty<glm::vec3> *, AnimationProperty<glm::vec4> *,
+                 AnimationProperty<glm::quat> *>;
 
 struct AnimationTrackBase {
   virtual ~AnimationTrackBase() = default;

@@ -17,12 +17,15 @@
 #include "Shader.h"
 #include "SplineFactory.h"
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <glm/ext/quaternion_geometric.hpp>
 #include <glm/ext/vector_float2.hpp>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/ext/vector_float4.hpp>
+#include <glm/fwd.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <limits>
@@ -135,19 +138,20 @@ void GltfLoader::SetTransformData(const tinygltf::Node &node,
     // Apply TRS components separately
     glm::vec3 translation(0.0f);
     glm::vec3 scale(1.0f);
-    glm::vec3 eulerAngles(0.0f); // Euler angles in radians
+    glm::quat rotQuat(1.0f, 0.0f, 0.0f, 0.0f);
 
     if (!node.translation.empty()) {
       translation = glm::vec3(node.translation[0], node.translation[1],
                               node.translation[2]);
     }
 
-    // TODO: Use Quaternion Angles
     if (!node.rotation.empty()) {
       glm::quat rotationQuat(node.rotation[3], node.rotation[0],
                              node.rotation[1], node.rotation[2]);
-      eulerAngles =
-          glm::eulerAngles(rotationQuat); // Convert quaternion to Euler angles
+      // eulerAngles =
+      //     glm::eulerAngles(rotationQuat); // Convert quaternion to Euler
+      //     angles
+      rotQuat = glm::normalize(rotationQuat);
     }
 
     if (!node.scale.empty()) {
@@ -156,7 +160,7 @@ void GltfLoader::SetTransformData(const tinygltf::Node &node,
 
     // Store TRS in the GameObject --- internally constructs a localMatrix
     gameObject.TranslateLocal(translation);
-    gameObject.RotateLocalEuler(eulerAngles);
+    gameObject.SetRotationQuat(rotQuat);
     gameObject.ScaleLocal(scale);
   }
 }
@@ -682,8 +686,11 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
       //
       // --- Make AnimationTracks and TimeTrains  ------------------------------
       PC_PRINT("SAMPLER INTERP " << sampler.interpolation << '\n',
-               TagType::Print, "");
-      PC_PRINT("CHANNEL PATH " << ch.target_path << '\n', TagType::Print, "");
+               TagType::Print, "")
+      PC_PRINT("CHANNEL PATH " << ch.target_path << '\n', TagType::Print, "")
+      for (size_t j = 0; j < inputAccessor.count; ++j) {
+        PC_PRINT("INPUT TIMES " << inputData[j] << '\n', TagType::Print, "")
+      }
 
       std::string targetPath = ch.target_path;
       int keyframeCount = inputAccessor.count;
@@ -702,8 +709,8 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
 
       AnimationProperty<glm::vec3> *posPtr =
           gameObj->GetAnimationProperty_Pos();
-      AnimationProperty<glm::vec3> *rotEulerPtr =
-          gameObj->GetAnimationProperty_RotEuler();
+      AnimationProperty<glm::quat> *rotQuatPtr =
+          gameObj->GetAnimationProperty_RotQuat();
       AnimationProperty<glm::vec3> *scalePtr =
           gameObj->GetAnimationProperty_Scale();
 
@@ -722,10 +729,10 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
         } else if (targetPath == "rotation") {
           if (knotType == HermiteKnotType) {
             tt = PC_CreateTimeTrainBindingFromGltfActions_HermiteData<4, true>(
-                rotEulerPtr, outputAccessor.count, inputData, outputData);
+                rotQuatPtr, outputAccessor.count, inputData, outputData);
           } else if (knotType == LinearKnotType) {
             tt = PC_CreateTimeTrainBindingFromGltfActions_LinearData<4, true>(
-                rotEulerPtr, outputAccessor.count, inputData, outputData);
+                rotQuatPtr, outputAccessor.count, inputData, outputData);
           }
         } else if (targetPath == "scale") {
           if (knotType == HermiteKnotType) {
@@ -771,7 +778,7 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
   } // animations loop end
 
   assert(minKeyFrameTime == 0.0);
-  const size_t maxKeyframeTimeUint = (uint64_t)maxKeyFrameTime;
+  const size_t maxKeyframeTimeUint = (uint64_t)(ceilf(maxKeyFrameTime));
 
   // n belongs to [0, inf]
   // 0->1, 2->3, 4->5, .... // time-train boards, dests
@@ -787,6 +794,8 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
   animationTracks.resize(totalAnimationTracks);
   animationTracks.reserve(totalAnimationTracks);
   // allTimeTrainBindings[0].animationTrackIndex
+
+  PC_WARN(totalAnimationTracks << " TOTAL ANIMATION TRACKS SIZE")
 
   for (size_t i = 0; i < allTimeTrainBindings.size(); ++i) {
     TimeTrain_Binding &ttBinding = allTimeTrainBindings[i];

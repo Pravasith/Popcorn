@@ -4,7 +4,6 @@
 #include "CurveDefs.h"
 #include "Curves.h"
 #include "GlobalMacros.h"
-#include "Popcorn/Core/Base.h"
 #include "Splines.h"
 #include <cassert>
 #include <cstddef>

@@ -6,6 +6,7 @@
 #include <glm/ext/vector_float2.hpp>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/ext/vector_float4.hpp>
+#include <glm/fwd.hpp>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -13,7 +14,8 @@ GFX_NAMESPACE_BEGIN
 template <typename U>
 concept CurveValueType =
     std::same_as<U, float> || std::same_as<U, glm::vec2> ||
-    std::same_as<U, glm::vec3> || std::same_as<U, glm::vec4>;
+    std::same_as<U, glm::vec3> || std::same_as<U, glm::vec4> ||
+    std::same_as<U, glm::quat>;
 
 template <CurveValueType T> struct CurveInfoLinearForm {
   T p0;

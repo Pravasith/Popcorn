@@ -9,6 +9,7 @@
 #include <cmath>
 #include <cstdint>
 #include <glm/ext/vector_float3.hpp>
+#include <glm/fwd.hpp>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -32,7 +33,9 @@ enum class GameObjectTypes {
 
 class GameObject {
 public:
-  GameObject() {
+  GameObject()
+      : m_transformData(Transformations(
+            [this]() { UpdateChildrenWorldMatrixNeedsUpdateFlag(); })) {
     // PC_PRINT("CREATED", TagType::Constr, "GameObject");
   }
   virtual ~GameObject() noexcept {
@@ -81,6 +84,13 @@ public:
   }
   template <Axes T> void RotateLocalEuler(float radians) {
     m_transformData.RotateLocalEuler<T>(radians);
+  }
+
+  void SetRotationQuat(const glm::quat &quat) {
+    m_transformData.SetRotationQuat(quat);
+  }
+  void RotateLocalQuat(const glm::quat &dq) {
+    m_transformData.RotateLocalQuat(dq);
   }
 
   //
@@ -155,8 +165,8 @@ private:
   AnimationProperty<glm::vec3> *GetAnimationProperty_Pos() {
     return m_transformData.GetAnimationProperty_Pos();
   }
-  AnimationProperty<glm::vec3> *GetAnimationProperty_RotEuler() {
-    return m_transformData.GetAnimationProperty_RotEuler();
+  AnimationProperty<glm::quat> *GetAnimationProperty_RotQuat() {
+    return m_transformData.GetAnimationProperty_RotQuat();
   }
   AnimationProperty<glm::vec3> *GetAnimationProperty_Scale() {
     return m_transformData.GetAnimationProperty_Scale();
