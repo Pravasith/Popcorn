@@ -72,6 +72,8 @@ PC_CreateTimeTrainBindingFromGltfActions_HermiteData(
   using CurveType = DimensionType<Dims>::type;
   std::vector<HermiteKnot<CurveType>> hermiteKnots;
 
+  std::cout << "KEYFRAME COUNT : " << outputAccessorCount << '\n';
+
   size_t keyframeCount = outputAccessorCount /
                          3; // Hermite output has 3 components - vIn, val, vOut
 

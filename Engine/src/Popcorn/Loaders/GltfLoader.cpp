@@ -17,6 +17,7 @@
 #include "Shader.h"
 #include "SplineFactory.h"
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -685,8 +686,11 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
       //
       // --- Make AnimationTracks and TimeTrains  ------------------------------
       PC_PRINT("SAMPLER INTERP " << sampler.interpolation << '\n',
-               TagType::Print, "");
-      PC_PRINT("CHANNEL PATH " << ch.target_path << '\n', TagType::Print, "");
+               TagType::Print, "")
+      PC_PRINT("CHANNEL PATH " << ch.target_path << '\n', TagType::Print, "")
+      for (size_t j = 0; j < inputAccessor.count; ++j) {
+        PC_PRINT("INPUT TIMES " << inputData[j] << '\n', TagType::Print, "")
+      }
 
       std::string targetPath = ch.target_path;
       int keyframeCount = inputAccessor.count;
@@ -774,7 +778,7 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
   } // animations loop end
 
   assert(minKeyFrameTime == 0.0);
-  const size_t maxKeyframeTimeUint = (uint64_t)maxKeyFrameTime;
+  const size_t maxKeyframeTimeUint = (uint64_t)(ceilf(maxKeyFrameTime));
 
   // n belongs to [0, inf]
   // 0->1, 2->3, 4->5, .... // time-train boards, dests
@@ -790,6 +794,8 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
   animationTracks.resize(totalAnimationTracks);
   animationTracks.reserve(totalAnimationTracks);
   // allTimeTrainBindings[0].animationTrackIndex
+
+  PC_WARN(totalAnimationTracks << " TOTAL ANIMATION TRACKS SIZE")
 
   for (size_t i = 0; i < allTimeTrainBindings.size(); ++i) {
     TimeTrain_Binding &ttBinding = allTimeTrainBindings[i];

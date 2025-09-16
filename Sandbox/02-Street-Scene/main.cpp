@@ -24,8 +24,11 @@ public:
   virtual void OnAttach() override {
     // Popcorn::Context::ConvertGltfToScene("../assets/models/light2.gltf",
     // scene);
-    Popcorn::Context::ConvertGltfToScene("../assets/models/planet-scene.gltf",
-                                         scene);
+    // Popcorn::Context::ConvertGltfToScene("../assets/models/planet-scene.gltf",
+    //                                      scene);
+
+    Popcorn::Context::ConvertGltfToScene(
+        "../assets/models/planet-scene-new.gltf", scene);
 
     // Popcorn::Context::ConvertGltfToScene("../assets/models/light-test.gltf",
     //                                      scene);
@@ -33,10 +36,14 @@ public:
     // building = scene.FindObjectByName("building");
 
     AnimationTrack &animTrack = scene.GetAnimationTracks()[0];
+    AnimationTrack &animTrack2 = scene.GetAnimationTracks()[1];
     PC_PRINT(&animTrack << " COMPARE", TagType::Print, "")
 
-    animTrack.Play(5, [](AnimationTrack *) {
-      PC_PRINT("ANIMATION 1 FINISHED!", TagType::Print, "")
+    animTrack.Play(1.5, [&](AnimationTrack *) {
+      PC_PRINT("ANIMATION 1 FINISHED YAYY!", TagType::Print, "")
+      animTrack2.Play(1.0, [](AnimationTrack *) {
+        PC_PRINT("ANIMATION 2 FINISHED YAYY!", TagType::Print, "")
+      });
     });
 
     // Time::Get()->PrintSubscribers();
