@@ -719,54 +719,65 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
       enum KnotTypes { HermiteKnotType = 1, LinearKnotType, StepKnotType };
 
       auto makeTimeTrainBinding = [&](KnotTypes knotType) {
-        TimeTrain_Binding ttBinding;
+        // TimeTrain_Binding ttBinding;
         if (targetPath == "translation") {
           if (knotType == HermiteKnotType) {
-            ttBinding = PC_CreateTimeTrainBindingFromGltfActions_HermiteData<3>(
-                posPtr, keyframeCount, inputData, outputData);
+            // ttBinding =
+            // PC_CreateTimeTrainBindingFromGltfActions_HermiteData<3>(
+            //     posPtr, keyframeCount, inputData, outputData);
           } else if (knotType == LinearKnotType) {
-            ttBinding = PC_CreateTimeTrainBindingFromGltfActions_LinearData<3>(
-                posPtr, keyframeCount, inputData, outputData);
+            // ttBinding =
+            // PC_CreateTimeTrainBindingFromGltfActions_LinearData<3>(
+            //     posPtr, keyframeCount, inputData, outputData);
           }
         } else if (targetPath == "rotation") {
           if (knotType == HermiteKnotType) {
-            TimeTrain_Binding tt_Binding;
+            uint32_t beginIdx = 0;
+            uint32_t endIdx = 0;
+            uint32_t n = floorf(inputData[beginIdx]) / 2;
 
-            size_t n = 0;
+            // Example keyframe input data
+            // 0, 0.3, 0.6. 1
+            // 2, 2.3, 3
+            // 2n, ..., 2n+1
 
-            size_t tOffset = 0;
+            while (beginIdx < keyframeCount) {
+              while (endIdx < keyframeCount && inputData[endIdx] >= 2 * n &&
+                     inputData[endIdx] <= 2 * n + 1) {
+                ++endIdx;
+              }
 
-            // for (size_t i = 0; i < keyframeCount; ++i) {
-            //   // [0, 0.3, 0.6. 1]
-            //   // [2, 2.3, 3]
-            //   // [2n, ..., 2n+1]
-            //   const float inputTime = inputData[i];
-            //
-            //   if (inputTime >= 2 * n && inputTime <= 2 * n + 1) {
-            //   } else {
-            //     ++n;
-            //   }
-            // }
+              // create the train binding from prev bytes (begin -> end(end is
+              // excl.))
+              allTimeTrainBindings.emplace_back(
+                  PC_CreateTimeTrainBindingFromGltfActions_HermiteData<4, true>(
+                      rotQuatPtr, beginIdx, endIdx, inputData,
+                      outputData)); // endIdx is excl.
+
+              if (endIdx >= keyframeCount)
+                break;
+
+              beginIdx = endIdx;
+              n = floorf(inputData[beginIdx]) / 2;
+            }
 
             PC_PRINT("TEST N: " << n << "\nKeyframe count :" << keyframeCount,
                      TagType::Print, "")
 
-            ttBinding =
-                PC_CreateTimeTrainBindingFromGltfActions_HermiteData<4, true>(
-                    rotQuatPtr, keyframeCount, inputData, outputData);
-
           } else if (knotType == LinearKnotType) {
-            ttBinding =
-                PC_CreateTimeTrainBindingFromGltfActions_LinearData<4, true>(
-                    rotQuatPtr, keyframeCount, inputData, outputData);
+            // ttBinding =
+            //     PC_CreateTimeTrainBindingFromGltfActions_LinearData<4, true>(
+            //         rotQuatPtr, keyframeCount, inputData, outputData);
           }
         } else if (targetPath == "scale") {
           if (knotType == HermiteKnotType) {
-            ttBinding = PC_CreateTimeTrainBindingFromGltfActions_HermiteData<3>(
-                scalePtr, keyframeCount, inputData, outputData);
+            // ttBinding =
+            // PC_CreateTimeTrainBindingFromGltfActions_HermiteData<3>(
+            //     scalePtr, keyframeCount, inputData, outputData);
           } else if (knotType == LinearKnotType) {
-            ttBinding = PC_CreateTimeTrainBindingFromGltfActions_LinearData<3>(
-                scalePtr, keyframeCount, inputData, outputData);
+            // ttBinding =
+            // PC_CreateTimeTrainBindingFromGltfActions_LinearData<3>(
+            //     scalePtr, keyframeCount, inputData, outputData);
           }
         } else if (targetPath == "weights") {
           // if (knotType == HermiteKnotType) {
@@ -780,7 +791,7 @@ void GltfLoader::ExtractAnimationsToAnimationTracks(
           PC_ERROR("Unknown channel target_path", "GltfLoader")
         }
 
-        allTimeTrainBindings.emplace_back(std::move(ttBinding));
+        // allTimeTrainBindings.emplace_back(std::move(ttBinding));
       };
 
       std::string interpType = sampler.interpolation;

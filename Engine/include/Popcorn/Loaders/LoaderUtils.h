@@ -60,7 +60,7 @@ template <int Dims, bool IsQuat = false>
 [[nodiscard]] static inline TimeTrain_Binding
 PC_CreateTimeTrainBindingFromGltfActions_HermiteData(
     AnimationProperty<CurveValType<Dims, IsQuat>> *animationPropertyPtr,
-    size_t keyframeCount, const float *inputData,
+    uint32_t beginIdx, uint32_t endIdx, const float *inputData,
     const float *outputData // Hermite output has 3 components -
                             // vIn, val, vOut
 ) {
@@ -73,18 +73,20 @@ PC_CreateTimeTrainBindingFromGltfActions_HermiteData(
 
   bool isRailSpline = true;
 
+  uint32_t keyframeCount = endIdx - beginIdx;
+
   if (keyframeCount == 2) {
     isRailSpline = false;
   }
 
-  assert(inputData[keyframeCount - 1] - inputData[0] <= 1.0 &&
+  assert(inputData[endIdx - 1] - inputData[beginIdx] <= 1.0 &&
          "Length (or journey time of time train after conversion) of "
          "individual 'Blender Actions' cannot be more than 1");
 
   hermiteKnots.reserve(keyframeCount);
 
   // outputAccessorCount is 3 * keyframeCount
-  for (size_t i = 0; i < keyframeCount; ++i) {
+  for (size_t i = beginIdx; i < endIdx; ++i) {
     CurveType vIn{};
     CurveType val{};
     CurveType vOut{};
@@ -106,7 +108,7 @@ PC_CreateTimeTrainBindingFromGltfActions_HermiteData(
       }
     }
 
-    float inputDataNorm = inputData[i] - inputData[0];
+    float inputDataNorm = inputData[i] - inputData[beginIdx];
     hermiteKnots.emplace_back(vIn, val, vOut, inputDataNorm);
   }
 
@@ -175,8 +177,8 @@ PC_CreateTimeTrainBindingFromGltfActions_HermiteData(
     }
   }
 
-  float boardTime = inputData[0];                // unnormalized
-  float destTime = inputData[keyframeCount - 1]; // unnormalized
+  float boardTime = inputData[beginIdx];  // unnormalized
+  float destTime = inputData[endIdx - 1]; // unnormalized
 
   uint32_t bT_flr = (uint32_t)floorf(boardTime);
   uint32_t dT_ceil = (uint32_t)ceilf(destTime);
