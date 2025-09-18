@@ -19,7 +19,6 @@
 #include <glm/fwd.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <iostream>
 #include <type_traits>
 #include <vector>
 
@@ -53,9 +52,6 @@ template <> struct DimensionType<4> {
 // --- HERMITE DATA PROCESSING ---------------------------------------------
 //
 
-// template <int T>
-// using CurveValType = typename DimensionType<T>::type;
-
 template <int T, bool IsQuat>
 using CurveValType = std::conditional_t<T == 4 && IsQuat, glm::quat,
                                         typename DimensionType<T>::type>;
@@ -64,18 +60,13 @@ template <int Dims, bool IsQuat = false>
 [[nodiscard]] static inline TimeTrain_Binding
 PC_CreateTimeTrainBindingFromGltfActions_HermiteData(
     AnimationProperty<CurveValType<Dims, IsQuat>> *animationPropertyPtr,
-    size_t outputAccessorCount, const float *inputData,
-    const float
-        *outputTripletsData // Hermite output has 3 components - vIn, val, vOut
+    size_t keyframeCount, const float *inputData,
+    const float *outputData // Hermite output has 3 components -
+                            // vIn, val, vOut
 ) {
   static_assert(Dims >= 1 && Dims <= 4);
   using CurveType = DimensionType<Dims>::type;
   std::vector<HermiteKnot<CurveType>> hermiteKnots;
-
-  std::cout << "KEYFRAME COUNT : " << outputAccessorCount << '\n';
-
-  size_t keyframeCount = outputAccessorCount /
-                         3; // Hermite output has 3 components - vIn, val, vOut
 
   const Spline<CurveValType<Dims, IsQuat>> *splinePtr = nullptr;
   const Curve<CurveValType<Dims, IsQuat>> *curvePtr = nullptr;
@@ -93,29 +84,30 @@ PC_CreateTimeTrainBindingFromGltfActions_HermiteData(
   hermiteKnots.reserve(keyframeCount);
 
   // outputAccessorCount is 3 * keyframeCount
-  for (size_t i = 0; i < outputAccessorCount; i += 3) {
+  for (size_t i = 0; i < keyframeCount; ++i) {
     CurveType vIn{};
     CurveType val{};
     CurveType vOut{};
 
-    size_t vIn_idx = i + 0;
-    size_t val_idx = i + 1;
-    size_t vOut_idx = i + 2;
+    size_t vIn_idx = i * 3 + 0;
+    size_t val_idx = i * 3 + 1;
+    size_t vOut_idx = i * 3 + 2;
 
     for (size_t j = 0; j < Dims; ++j) {
       // Fill individual vectors (or floats), e.g. vec3[0], vec3[1], vec3[2]
       if constexpr (Dims == 1) {
-        vIn = outputTripletsData[vIn_idx];
-        val = outputTripletsData[val_idx];
-        vOut = outputTripletsData[vOut_idx];
+        vIn = outputData[vIn_idx];
+        val = outputData[val_idx];
+        vOut = outputData[vOut_idx];
       } else {
-        vIn[j] = outputTripletsData[vIn_idx * Dims + j];
-        val[j] = outputTripletsData[val_idx * Dims + j];
-        vOut[j] = outputTripletsData[vOut_idx * Dims + j];
+        vIn[j] = outputData[vIn_idx * Dims + j];
+        val[j] = outputData[val_idx * Dims + j];
+        vOut[j] = outputData[vOut_idx * Dims + j];
       }
     }
 
-    hermiteKnots.emplace_back(vIn, val, vOut, inputData[i / 3]);
+    float inputDataNorm = inputData[i] - inputData[0];
+    hermiteKnots.emplace_back(vIn, val, vOut, inputDataNorm);
   }
 
   if constexpr (Dims == 4 && IsQuat) {
@@ -223,16 +215,13 @@ template <int Dims, bool IsQuat = false>
 [[nodiscard]] static inline TimeTrain_Binding
 PC_CreateTimeTrainBindingFromGltfActions_LinearData(
     AnimationProperty<CurveValType<Dims, IsQuat>> *animationPropertyPtr,
-    size_t outputAccessorCount, const float *inputData,
+    size_t keyframeCount, const float *inputData,
     const float *outputData // Linear output has 1 component - val
 ) {
 
   static_assert(Dims >= 1 && Dims <= 4);
   using CurveType = DimensionType<Dims>::type;
   std::vector<LinearKnot<CurveType>> linearKnots;
-
-  size_t keyframeCount =
-      outputAccessorCount / 1; // Linear output has 1 components - val
 
   const Spline<CurveValType<Dims, IsQuat>> *splinePtr = nullptr;
   const Curve<CurveValType<Dims, IsQuat>> *curvePtr = nullptr;
@@ -249,7 +238,7 @@ PC_CreateTimeTrainBindingFromGltfActions_LinearData(
 
   linearKnots.reserve(keyframeCount);
 
-  for (size_t i = 0; i < outputAccessorCount; ++i) {
+  for (size_t i = 0; i < keyframeCount; ++i) {
     CurveType val{};
     size_t val_idx = i;
 
@@ -262,7 +251,8 @@ PC_CreateTimeTrainBindingFromGltfActions_LinearData(
       }
     }
 
-    linearKnots.emplace_back(val, inputData[i]);
+    float inputDataNorm = inputData[i] - inputData[0];
+    linearKnots.emplace_back(val, inputDataNorm);
   }
 
   if constexpr (Dims == 4 && IsQuat) {
