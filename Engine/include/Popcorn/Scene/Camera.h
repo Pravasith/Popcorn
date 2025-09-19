@@ -14,7 +14,6 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-// TODO: Complete this class
 class Camera : public GameObject {
 public:
   struct CameraData {
@@ -25,15 +24,10 @@ public:
   };
 
 public:
-  Camera(const CameraData &data = {45.f, 1.0f, .1f, 1000.0f}) {
-    float x = 0.8f;
+  Camera() = default;
 
-    m_viewMatrix = glm::lookAt(
-        glm::vec3(0, 0.2,
-                  x),                // Eye position(camera/object world pos)
-        glm::vec3(0.0f, 0.0f, 0.0f), // Target point to look at(world pos)
-        glm::vec3(0.0f, 1.0f, 0.0f)  // Up direction (world up -- Y+)
-    );
+  void SetCameraData(const CameraData &data) {
+    m_cameraData = data;
 
     /**
      * Projection matrix info from learnOpenGl.com
@@ -45,24 +39,23 @@ public:
      *    so that during perspective division, they (further away vertices)
      *    shrink their coords more!
      * */
-
-    m_projMatrix = glm::perspectiveRH_ZO(glm::radians(45.0f), data.aspectRatio,
-                                         data.near, data.far);
+    m_projMatrix =
+        glm::perspectiveRH_ZO(m_cameraData.fov, m_cameraData.aspectRatio,
+                              m_cameraData.near, m_cameraData.far);
     m_projMatrix[1][1] *= -1;
 
-    PC_PRINT("CREATED", TagType::Constr, "Camera");
-  };
-  ~Camera() { PC_PRINT("DESTROYED", TagType::Destr, "Camera"); };
+    UpdateViewMatrix();
+  }
 
-  [[nodiscard]] const glm::mat4 &GetViewMatrix() const { return m_viewMatrix; };
+  [[nodiscard]] const glm::mat4 &GetViewMatrix() const { return m_viewMatrix; }
   [[nodiscard]] const glm::mat4 &GetProjectionMatrix() const {
     return m_projMatrix;
-  };
+  }
 
   void UpdateViewMatrix() {
     m_viewMatrix = glm::lookAt(
-        m_transformData.m_position.GetValue(), // Camera world pos
-        m_transformData.m_position.GetValue() +
+        GetPosition(), // Camera world pos
+        GetPosition() +
             GetLookAtDirection(), // Target point to look at(world pos)
         s_upDir                   // Up direction (world up -- Y+)
     );
@@ -71,19 +64,21 @@ public:
     // data.aspectRatio,
     //                                      data.near, data.far);
     // m_projMatrix[1][1] *= -1;
-  };
+  }
 
   virtual constexpr GameObjectTypes GetGameObjectType() const override {
     return GameObjectTypes::Camera;
-  };
+  }
 
-  virtual void OnAttach() {};
+  virtual void OnAttach() {}
   // virtual void OnUpdate() {};
   // virtual void OnRender() {};
 
 private:
   glm::mat4 m_viewMatrix{1.f};
   glm::mat4 m_projMatrix{1.f};
+
+  CameraData m_cameraData;
 
   bool m_viewProjMatrixNeedsUpdate = false;
 };

@@ -174,8 +174,7 @@ GameObject *GltfLoader::CreateGameObjectByType(const tinygltf::Model &model,
   } else if (node.camera >= 0) {
     // Make this abstract
     Camera *camera = new Camera();
-    // ExtractCameraData(model, node, camera);
-    // TODO: Handle camera later
+    ExtractCameraData(model, node, *camera);
     return camera;
   } else if (node.extensions.find("KHR_lights_punctual") !=
              node.extensions.end()) {
@@ -288,6 +287,40 @@ void GltfLoader::ExtractLightsData(const tinygltf::Model &model,
   }
 
   light->SetLightData(data);
+}
+
+void GltfLoader::ExtractCameraData(const tinygltf::Model &model,
+                                   const tinygltf::Node &gltfNode,
+                                   Camera &camera) {
+  if (gltfNode.camera < 0 || gltfNode.camera >= model.cameras.size()) {
+    return; // no camera
+  }
+
+  const tinygltf::Camera &gltfCamera = model.cameras[gltfNode.camera];
+
+  Camera::CameraData data;
+
+  if (gltfCamera.type == "perspective") {
+    const auto &p = gltfCamera.perspective;
+
+    if (p.aspectRatio > 0.0) {
+      data.aspectRatio = static_cast<float>(p.aspectRatio);
+    } else {
+      // glTF spec says if aspectRatio is missing, you should compute it from
+      // viewport
+      data.aspectRatio = 1.0f; // fallback
+    }
+
+    data.fov = static_cast<float>(p.yfov); // radians
+    data.near = static_cast<float>(p.znear);
+    data.far = (p.zfar > 0.0)
+                   ? static_cast<float>(p.zfar)
+                   : 1000.0f; // if zfar not provided, assume large value
+  } else if (gltfCamera.type == "orthographic") {
+    PC_WARN("Orthographic camera not supported yet!")
+  }
+
+  camera.SetCameraData(data);
 }
 
 //

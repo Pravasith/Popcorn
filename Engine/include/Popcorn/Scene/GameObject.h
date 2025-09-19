@@ -35,6 +35,7 @@ class GameObject {
 public:
   GameObject()
       : m_transformData(Transformations(
+            // AfterLocalMatrixUpdate Cb
             [this]() { UpdateChildrenWorldMatrixNeedsUpdateFlag(); })) {
     // PC_PRINT("CREATED", TagType::Constr, "GameObject");
   }

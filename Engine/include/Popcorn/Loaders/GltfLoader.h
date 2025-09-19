@@ -2,6 +2,7 @@
 
 #include "Animation.h"
 #include "BufferObjects.h"
+#include "Camera.h"
 #include "GameObject.h"
 #include "GlobalMacros.h"
 #include "Light.h"
@@ -38,13 +39,18 @@ private:
   GltfLoader &operator=(GltfLoader &&) = delete;
 
   //
-  // --- UTILS -----------------------------------------------------------------
+  // --- GAME OBJECT UTILS -----------------------------------------------------
   static GameObject *ConvertGltfNodeToGameObject(const tinygltf::Model &model,
                                                  int nodeIndex);
   static GameObject *CreateGameObjectByType(const tinygltf::Model &model,
                                             const tinygltf::Node &node);
   static void SetTransformData(const tinygltf::Node &node,
                                GameObject &gameObject);
+
+  //
+  // --- CAMERA UTILS ----------------------------------------------------------
+  static void ExtractCameraData(const tinygltf::Model &model,
+                                const tinygltf::Node &gltfNode, Camera &camera);
 
   //
   // --- MESH UTILS ------------------------------------------------------------
