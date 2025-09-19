@@ -36,14 +36,18 @@ public:
     // building = scene.FindObjectByName("building");
 
     AnimationTrack &animTrack = scene.GetAnimationTrack(0);
-    // AnimationTrack &animTrack2 = scene.GetAnimationTrack(1);
-    AnimationTrack &animTrack3 = scene.GetAnimationTrack(1);
+    AnimationTrack &animTrack2 = scene.GetAnimationTrack(1);
+    AnimationTrack &animTrack3 = scene.GetAnimationTrack(2);
 
     animTrack.Play(2.5, [&](AnimationTrack *) {
       PC_PRINT("ANIMATION 1 FINISHED YAYY!", TagType::Print, "")
 
-      animTrack3.Play(10, [&](AnimationTrack *) {
-        PC_PRINT("ANIMATION 3 FINISHED YAYY!", TagType::Print, "")
+      animTrack2.Play(2.5, [&](AnimationTrack *) {
+        PC_PRINT("ANIMATION 2 FINISHED YAYY!", TagType::Print, "")
+
+        animTrack3.Play(2.5, [&](AnimationTrack *) {
+          PC_PRINT("ANIMATION 3 FINISHED YAYY!", TagType::Print, "")
+        });
       });
     });
 
