@@ -42,7 +42,7 @@ public:
     animTrack.Play(2.5, [&](AnimationTrack *) {
       PC_PRINT("ANIMATION 1 FINISHED YAYY!", TagType::Print, "")
 
-      animTrack3.Play(2.5, [&](AnimationTrack *) {
+      animTrack3.Play(10, [&](AnimationTrack *) {
         PC_PRINT("ANIMATION 3 FINISHED YAYY!", TagType::Print, "")
       });
     });

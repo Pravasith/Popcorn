@@ -72,7 +72,6 @@ PC_CreateTimeTrainBindingFromGltfActions_HermiteData(
   const Curve<CurveValType<Dims, IsQuat>> *curvePtr = nullptr;
 
   bool isRailSpline = true;
-
   uint32_t keyframeCount = endIdx - beginIdx;
 
   if (keyframeCount == 2) {
@@ -217,7 +216,7 @@ template <int Dims, bool IsQuat = false>
 [[nodiscard]] static inline TimeTrain_Binding
 PC_CreateTimeTrainBindingFromGltfActions_LinearData(
     AnimationProperty<CurveValType<Dims, IsQuat>> *animationPropertyPtr,
-    size_t keyframeCount, const float *inputData,
+    uint32_t beginIdx, uint32_t endIdx, const float *inputData,
     const float *outputData // Linear output has 1 component - val
 ) {
 
@@ -229,18 +228,19 @@ PC_CreateTimeTrainBindingFromGltfActions_LinearData(
   const Curve<CurveValType<Dims, IsQuat>> *curvePtr = nullptr;
 
   bool isRailSpline = true;
+  uint32_t keyframeCount = endIdx - beginIdx;
 
   if (keyframeCount == 2) {
     isRailSpline = false;
   }
 
-  assert(inputData[keyframeCount - 1] - inputData[0] <= 1.0 &&
+  assert(inputData[endIdx - 1] - inputData[beginIdx] <= 1.0 &&
          "Length (or journey time of time train after conversion) of "
          "individual 'Blender Actions' cannot be more than 1");
 
   linearKnots.reserve(keyframeCount);
 
-  for (size_t i = 0; i < keyframeCount; ++i) {
+  for (size_t i = beginIdx; i < endIdx; ++i) {
     CurveType val{};
     size_t val_idx = i;
 
@@ -253,7 +253,7 @@ PC_CreateTimeTrainBindingFromGltfActions_LinearData(
       }
     }
 
-    float inputDataNorm = inputData[i] - inputData[0];
+    float inputDataNorm = inputData[i] - inputData[beginIdx];
     linearKnots.emplace_back(val, inputDataNorm);
   }
 
@@ -306,8 +306,8 @@ PC_CreateTimeTrainBindingFromGltfActions_LinearData(
     }
   }
 
-  float boardTime = inputData[0];                // unnormalized
-  float destTime = inputData[keyframeCount - 1]; // unnormalized
+  float boardTime = inputData[beginIdx];  // unnormalized
+  float destTime = inputData[endIdx - 1]; // unnormalized
 
   uint32_t bT_flr = (uint32_t)floorf(boardTime);
   uint32_t dT_ceil = (uint32_t)ceilf(destTime);
@@ -332,6 +332,63 @@ PC_CreateTimeTrainBindingFromGltfActions_LinearData(
   ttBinding.tt = tt;
 
   return ttBinding;
+}
+
+//
+//
+//
+//
+// --- MAKE TIME TRAIN BINDINGS --------------------------------------------
+// --- MAKE TIME TRAIN BINDINGS --------------------------------------------
+// --- MAKE TIME TRAIN BINDINGS --------------------------------------------
+//
+
+enum GltfKnotTypes { HermiteKnotType = 1, LinearKnotType, StepKnotType };
+
+template <int Dims, bool IsQuat = false>
+static void PC_MakeTimeTrainBindings(
+    AnimationProperty<CurveValType<Dims, IsQuat>> *animationPropertyPtr,
+    GltfKnotTypes knotType, size_t keyframeCount, const float *inputData,
+    const float *outputData, // Linear output has 1 component - val
+    std::vector<TimeTrain_Binding> &allTimeTrainBindings) {
+  uint32_t beginIdx = 0;
+  uint32_t endIdx = 0;
+  uint32_t n = floorf(inputData[beginIdx]) / 2;
+
+  // Example keyframe input data
+  // 0, 0.3, 0.6. 1
+  // 2, 2.3, 3
+  // 2n, ..., 2n+1
+
+  while (beginIdx < keyframeCount) {
+    while (endIdx < keyframeCount && inputData[endIdx] >= 2 * n &&
+           inputData[endIdx] <= 2 * n + 1) {
+      ++endIdx;
+    }
+
+    // create the train binding from prev bytes (begin -> end(end is
+    // excl.))
+    if (knotType == HermiteKnotType) {
+      allTimeTrainBindings.emplace_back(
+          PC_CreateTimeTrainBindingFromGltfActions_HermiteData<Dims, true>(
+              animationPropertyPtr, beginIdx, endIdx, inputData,
+              outputData)); // endIdx is excl.
+    } else if (knotType == LinearKnotType) {
+      allTimeTrainBindings.emplace_back(
+          PC_CreateTimeTrainBindingFromGltfActions_LinearData<Dims, true>(
+              animationPropertyPtr, beginIdx, endIdx, inputData,
+              outputData)); // endIdx is excl.
+    }
+
+    if (endIdx >= keyframeCount)
+      break;
+
+    beginIdx = endIdx;
+    n = floorf(inputData[beginIdx]) / 2;
+  }
+
+  PC_PRINT("TEST N: " << n << "\nKeyframe count :" << keyframeCount,
+           TagType::Print, "")
 }
 
 GFX_NAMESPACE_END
