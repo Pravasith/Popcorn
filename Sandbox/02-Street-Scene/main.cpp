@@ -37,7 +37,7 @@ public:
 
     AnimationTrack &animTrack = scene.GetAnimationTrack(0);
     // AnimationTrack &animTrack2 = scene.GetAnimationTrack(1);
-    AnimationTrack &animTrack3 = scene.GetAnimationTrack(2);
+    AnimationTrack &animTrack3 = scene.GetAnimationTrack(1);
 
     animTrack.Play(2.5, [&](AnimationTrack *) {
       PC_PRINT("ANIMATION 1 FINISHED YAYY!", TagType::Print, "")

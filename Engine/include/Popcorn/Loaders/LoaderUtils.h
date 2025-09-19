@@ -2,6 +2,7 @@
 
 #include "Animation.h"
 #include "AnimationProperty.h"
+#include "Base.h"
 #include "CurveDefs.h"
 #include "CurveFactory.h"
 #include "GlobalMacros.h"
@@ -368,16 +369,20 @@ static void PC_MakeTimeTrainBindings(
 
     // create the train binding from prev bytes (begin -> end(end is
     // excl.))
-    if (knotType == HermiteKnotType) {
-      allTimeTrainBindings.emplace_back(
-          PC_CreateTimeTrainBindingFromGltfActions_HermiteData<Dims, true>(
-              animationPropertyPtr, beginIdx, endIdx, inputData,
-              outputData)); // endIdx is excl.
-    } else if (knotType == LinearKnotType) {
-      allTimeTrainBindings.emplace_back(
-          PC_CreateTimeTrainBindingFromGltfActions_LinearData<Dims, true>(
-              animationPropertyPtr, beginIdx, endIdx, inputData,
-              outputData)); // endIdx is excl.
+    if (endIdx - beginIdx > 1) {
+      if (knotType == HermiteKnotType) {
+        allTimeTrainBindings.emplace_back(
+            PC_CreateTimeTrainBindingFromGltfActions_HermiteData<Dims, true>(
+                animationPropertyPtr, beginIdx, endIdx, inputData,
+                outputData)); // endIdx is excl.
+      } else if (knotType == LinearKnotType) {
+        allTimeTrainBindings.emplace_back(
+            PC_CreateTimeTrainBindingFromGltfActions_LinearData<Dims, true>(
+                animationPropertyPtr, beginIdx, endIdx, inputData,
+                outputData)); // endIdx is excl.
+      }
+    } else {
+      PC_WARN("One keyframe detected, skipping to the next section")
     }
 
     if (endIdx >= keyframeCount)
