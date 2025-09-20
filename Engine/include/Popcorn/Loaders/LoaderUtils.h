@@ -2,6 +2,7 @@
 
 #include "Animation.h"
 #include "AnimationProperty.h"
+#include "Base.h"
 #include "CurveDefs.h"
 #include "CurveFactory.h"
 #include "GlobalMacros.h"
@@ -19,7 +20,6 @@
 #include <glm/fwd.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <iostream>
 #include <type_traits>
 #include <vector>
 
@@ -53,9 +53,6 @@ template <> struct DimensionType<4> {
 // --- HERMITE DATA PROCESSING ---------------------------------------------
 //
 
-// template <int T>
-// using CurveValType = typename DimensionType<T>::type;
-
 template <int T, bool IsQuat>
 using CurveValType = std::conditional_t<T == 4 && IsQuat, glm::quat,
                                         typename DimensionType<T>::type>;
@@ -64,58 +61,55 @@ template <int Dims, bool IsQuat = false>
 [[nodiscard]] static inline TimeTrain_Binding
 PC_CreateTimeTrainBindingFromGltfActions_HermiteData(
     AnimationProperty<CurveValType<Dims, IsQuat>> *animationPropertyPtr,
-    size_t outputAccessorCount, const float *inputData,
-    const float
-        *outputTripletsData // Hermite output has 3 components - vIn, val, vOut
+    uint32_t beginIdx, uint32_t endIdx, const float *inputData,
+    const float *outputData // Hermite output has 3 components -
+                            // vIn, val, vOut
 ) {
   static_assert(Dims >= 1 && Dims <= 4);
   using CurveType = DimensionType<Dims>::type;
   std::vector<HermiteKnot<CurveType>> hermiteKnots;
 
-  std::cout << "KEYFRAME COUNT : " << outputAccessorCount << '\n';
-
-  size_t keyframeCount = outputAccessorCount /
-                         3; // Hermite output has 3 components - vIn, val, vOut
-
   const Spline<CurveValType<Dims, IsQuat>> *splinePtr = nullptr;
   const Curve<CurveValType<Dims, IsQuat>> *curvePtr = nullptr;
 
   bool isRailSpline = true;
+  uint32_t keyframeCount = endIdx - beginIdx;
 
   if (keyframeCount == 2) {
     isRailSpline = false;
   }
 
-  assert(inputData[keyframeCount - 1] - inputData[0] <= 1.0 &&
+  assert(inputData[endIdx - 1] - inputData[beginIdx] <= 1.0 &&
          "Length (or journey time of time train after conversion) of "
          "individual 'Blender Actions' cannot be more than 1");
 
   hermiteKnots.reserve(keyframeCount);
 
   // outputAccessorCount is 3 * keyframeCount
-  for (size_t i = 0; i < outputAccessorCount; i += 3) {
+  for (size_t i = beginIdx; i < endIdx; ++i) {
     CurveType vIn{};
     CurveType val{};
     CurveType vOut{};
 
-    size_t vIn_idx = i + 0;
-    size_t val_idx = i + 1;
-    size_t vOut_idx = i + 2;
+    size_t vIn_idx = i * 3 + 0;
+    size_t val_idx = i * 3 + 1;
+    size_t vOut_idx = i * 3 + 2;
 
     for (size_t j = 0; j < Dims; ++j) {
       // Fill individual vectors (or floats), e.g. vec3[0], vec3[1], vec3[2]
       if constexpr (Dims == 1) {
-        vIn = outputTripletsData[vIn_idx];
-        val = outputTripletsData[val_idx];
-        vOut = outputTripletsData[vOut_idx];
+        vIn = outputData[vIn_idx];
+        val = outputData[val_idx];
+        vOut = outputData[vOut_idx];
       } else {
-        vIn[j] = outputTripletsData[vIn_idx * Dims + j];
-        val[j] = outputTripletsData[val_idx * Dims + j];
-        vOut[j] = outputTripletsData[vOut_idx * Dims + j];
+        vIn[j] = outputData[vIn_idx * Dims + j];
+        val[j] = outputData[val_idx * Dims + j];
+        vOut[j] = outputData[vOut_idx * Dims + j];
       }
     }
 
-    hermiteKnots.emplace_back(vIn, val, vOut, inputData[i / 3]);
+    float inputDataNorm = inputData[i] - inputData[beginIdx];
+    hermiteKnots.emplace_back(vIn, val, vOut, inputDataNorm);
   }
 
   if constexpr (Dims == 4 && IsQuat) {
@@ -183,8 +177,8 @@ PC_CreateTimeTrainBindingFromGltfActions_HermiteData(
     }
   }
 
-  float boardTime = inputData[0];                // unnormalized
-  float destTime = inputData[keyframeCount - 1]; // unnormalized
+  float boardTime = inputData[beginIdx];  // unnormalized
+  float destTime = inputData[endIdx - 1]; // unnormalized
 
   uint32_t bT_flr = (uint32_t)floorf(boardTime);
   uint32_t dT_ceil = (uint32_t)ceilf(destTime);
@@ -223,7 +217,7 @@ template <int Dims, bool IsQuat = false>
 [[nodiscard]] static inline TimeTrain_Binding
 PC_CreateTimeTrainBindingFromGltfActions_LinearData(
     AnimationProperty<CurveValType<Dims, IsQuat>> *animationPropertyPtr,
-    size_t outputAccessorCount, const float *inputData,
+    uint32_t beginIdx, uint32_t endIdx, const float *inputData,
     const float *outputData // Linear output has 1 component - val
 ) {
 
@@ -231,25 +225,23 @@ PC_CreateTimeTrainBindingFromGltfActions_LinearData(
   using CurveType = DimensionType<Dims>::type;
   std::vector<LinearKnot<CurveType>> linearKnots;
 
-  size_t keyframeCount =
-      outputAccessorCount / 1; // Linear output has 1 components - val
-
   const Spline<CurveValType<Dims, IsQuat>> *splinePtr = nullptr;
   const Curve<CurveValType<Dims, IsQuat>> *curvePtr = nullptr;
 
   bool isRailSpline = true;
+  uint32_t keyframeCount = endIdx - beginIdx;
 
   if (keyframeCount == 2) {
     isRailSpline = false;
   }
 
-  assert(inputData[keyframeCount - 1] - inputData[0] <= 1.0 &&
+  assert(inputData[endIdx - 1] - inputData[beginIdx] <= 1.0 &&
          "Length (or journey time of time train after conversion) of "
          "individual 'Blender Actions' cannot be more than 1");
 
   linearKnots.reserve(keyframeCount);
 
-  for (size_t i = 0; i < outputAccessorCount; ++i) {
+  for (size_t i = beginIdx; i < endIdx; ++i) {
     CurveType val{};
     size_t val_idx = i;
 
@@ -262,7 +254,8 @@ PC_CreateTimeTrainBindingFromGltfActions_LinearData(
       }
     }
 
-    linearKnots.emplace_back(val, inputData[i]);
+    float inputDataNorm = inputData[i] - inputData[beginIdx];
+    linearKnots.emplace_back(val, inputDataNorm);
   }
 
   if constexpr (Dims == 4 && IsQuat) {
@@ -314,8 +307,8 @@ PC_CreateTimeTrainBindingFromGltfActions_LinearData(
     }
   }
 
-  float boardTime = inputData[0];                // unnormalized
-  float destTime = inputData[keyframeCount - 1]; // unnormalized
+  float boardTime = inputData[beginIdx];  // unnormalized
+  float destTime = inputData[endIdx - 1]; // unnormalized
 
   uint32_t bT_flr = (uint32_t)floorf(boardTime);
   uint32_t dT_ceil = (uint32_t)ceilf(destTime);
@@ -340,6 +333,67 @@ PC_CreateTimeTrainBindingFromGltfActions_LinearData(
   ttBinding.tt = tt;
 
   return ttBinding;
+}
+
+//
+//
+//
+//
+// --- MAKE TIME TRAIN BINDINGS --------------------------------------------
+// --- MAKE TIME TRAIN BINDINGS --------------------------------------------
+// --- MAKE TIME TRAIN BINDINGS --------------------------------------------
+//
+
+enum GltfKnotTypes { HermiteKnotType = 1, LinearKnotType, StepKnotType };
+
+template <int Dims, bool IsQuat = false>
+static void PC_MakeTimeTrainBindings(
+    AnimationProperty<CurveValType<Dims, IsQuat>> *animationPropertyPtr,
+    GltfKnotTypes knotType, size_t keyframeCount, const float *inputData,
+    const float *outputData, // Linear output has 1 component - val
+    std::vector<TimeTrain_Binding> &allTimeTrainBindings) {
+  uint32_t beginIdx = 0;
+  uint32_t endIdx = 0;
+  uint32_t n = floorf(inputData[beginIdx]) / 2;
+
+  // Example keyframe input data
+  // 0, 0.3, 0.6. 1
+  // 2, 2.3, 3
+  // 2n, ..., 2n+1
+
+  while (beginIdx < keyframeCount) {
+    while (endIdx < keyframeCount && inputData[endIdx] >= 2 * n &&
+           inputData[endIdx] <= 2 * n + 1) {
+      ++endIdx;
+    }
+
+    // create the train binding from prev bytes (begin -> end(end is
+    // excl.))
+    if (endIdx - beginIdx > 1) {
+      if (knotType == HermiteKnotType) {
+        allTimeTrainBindings.emplace_back(
+            PC_CreateTimeTrainBindingFromGltfActions_HermiteData<Dims, true>(
+                animationPropertyPtr, beginIdx, endIdx, inputData,
+                outputData)); // endIdx is excl.
+      } else if (knotType == LinearKnotType) {
+        allTimeTrainBindings.emplace_back(
+            PC_CreateTimeTrainBindingFromGltfActions_LinearData<Dims, true>(
+                animationPropertyPtr, beginIdx, endIdx, inputData,
+                outputData)); // endIdx is excl.
+      }
+    } else {
+      PC_WARN("One keyframe detected, skipping to the next section")
+    }
+
+    if (endIdx >= keyframeCount)
+      break;
+
+    beginIdx = endIdx;
+    n = floorf(inputData[beginIdx]) / 2;
+  }
+
+  PC_PRINT("TEST N: " << n << "\nKeyframe count :" << keyframeCount,
+           TagType::Print, "")
 }
 
 GFX_NAMESPACE_END

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "AnimationProperty.h"
+#include <glm/ext/vector_float4.hpp>
 #include <glm/gtc/quaternion.hpp>
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -14,27 +16,60 @@
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 
-// TODO: Complete this class
+struct CameraData {
+  float fov = 45.f;
+  float aspectRatio = 1.0f;
+  float near = 0.1f;
+  float far = 1000.0f;
+};
+
 class Camera : public GameObject {
-public:
-  struct CameraData {
-    float fov = 45.f;
-    float aspectRatio = 1.0f;
-    float near = 0.1f;
-    float far = 1000.0f;
-  };
+
+  // TODO: Add viewProj & invViewProj matrices evaluation here for caching
+  // before copying into Vulkan buffers
+  //
+  // TODO: Change callbacks to observer pattern
 
 public:
-  Camera(const CameraData &data = {45.f, 1.0f, .1f, 1000.0f}) {
-    float x = 0.8f;
+  Camera() {
+    m_transformData.SetCameraViewMatrixUpdateCb(
+        [this]() { UpdateViewMatrix(); });
+  }
 
+public:
+  void SetCameraData(const CameraData &data) {
+    m_cameraData.Set(glm::vec4{
+        data.fov,         // fov
+        data.aspectRatio, // aspectRatio
+        data.near,        // near
+        data.far          // far
+    });
+
+    UpdateViewMatrix();
+    UpdateProjMatrix();
+  }
+
+  [[nodiscard]] const glm::mat4 &GetViewMatrix() const { return m_viewMatrix; }
+  [[nodiscard]] const glm::mat4 &GetProjectionMatrix() const {
+    return m_projMatrix;
+  }
+
+  virtual constexpr GameObjectTypes GetGameObjectType() const override {
+    return GameObjectTypes::Camera;
+  }
+
+private:
+  void UpdateViewMatrix() {
+    // Note: lookAt is not that expensive
     m_viewMatrix = glm::lookAt(
-        glm::vec3(0, 0.2,
-                  x),                // Eye position(camera/object world pos)
-        glm::vec3(0.0f, 0.0f, 0.0f), // Target point to look at(world pos)
-        glm::vec3(0.0f, 1.0f, 0.0f)  // Up direction (world up -- Y+)
+        GetPosition(), // Camera world pos
+        GetPosition() +
+            GetLookAtDirection(), // Target point to look at(world pos)
+        s_upDir                   // Up direction (world up -- Y+)
     );
+  }
 
+  void UpdateProjMatrix() {
     /**
      * Projection matrix info from learnOpenGl.com
      * -----------------------------------------------------------------------
@@ -45,45 +80,24 @@ public:
      *    so that during perspective division, they (further away vertices)
      *    shrink their coords more!
      * */
-
-    m_projMatrix = glm::perspectiveRH_ZO(glm::radians(45.0f), data.aspectRatio,
-                                         data.near, data.far);
+    m_projMatrix =
+        glm::perspectiveRH_ZO(m_cameraData.GetValue()[0], // fov
+                              m_cameraData.GetValue()[1], // aspectRatio
+                              m_cameraData.GetValue()[2], // near
+                              m_cameraData.GetValue()[3]  // far
+        );
     m_projMatrix[1][1] *= -1;
+  }
 
-    PC_PRINT("CREATED", TagType::Constr, "Camera");
-  };
-  ~Camera() { PC_PRINT("DESTROYED", TagType::Destr, "Camera"); };
-
-  [[nodiscard]] const glm::mat4 &GetViewMatrix() const { return m_viewMatrix; };
-  [[nodiscard]] const glm::mat4 &GetProjectionMatrix() const {
-    return m_projMatrix;
-  };
-
-  void UpdateViewMatrix() {
-    m_viewMatrix = glm::lookAt(
-        m_transformData.m_position.GetValue(), // Camera world pos
-        m_transformData.m_position.GetValue() +
-            GetLookAtDirection(), // Target point to look at(world pos)
-        s_upDir                   // Up direction (world up -- Y+)
-    );
-
-    // m_projMatrix = glm::perspectiveRH_ZO(glm::radians(45.0f),
-    // data.aspectRatio,
-    //                                      data.near, data.far);
-    // m_projMatrix[1][1] *= -1;
-  };
-
-  virtual constexpr GameObjectTypes GetGameObjectType() const override {
-    return GameObjectTypes::Camera;
-  };
-
-  virtual void OnAttach() {};
+  virtual void OnAttach() {}
   // virtual void OnUpdate() {};
   // virtual void OnRender() {};
 
 private:
   glm::mat4 m_viewMatrix{1.f};
   glm::mat4 m_projMatrix{1.f};
+
+  AnimationProperty<glm::vec4> m_cameraData;
 
   bool m_viewProjMatrixNeedsUpdate = false;
 };

@@ -35,14 +35,19 @@ public:
     Popcorn::Context::RegisterScene(scene);
     // building = scene.FindObjectByName("building");
 
-    AnimationTrack &animTrack = scene.GetAnimationTracks()[0];
-    AnimationTrack &animTrack2 = scene.GetAnimationTracks()[1];
-    PC_PRINT(&animTrack << " COMPARE", TagType::Print, "")
+    AnimationTrack &animTrack = scene.GetAnimationTrack(0);
+    AnimationTrack &animTrack2 = scene.GetAnimationTrack(1);
+    AnimationTrack &animTrack3 = scene.GetAnimationTrack(2);
 
-    animTrack.Play(1.5, [&](AnimationTrack *) {
+    animTrack.Play(2.5, [&](AnimationTrack *) {
       PC_PRINT("ANIMATION 1 FINISHED YAYY!", TagType::Print, "")
-      animTrack2.Play(1.0, [](AnimationTrack *) {
+
+      animTrack2.Play(2.5, [&](AnimationTrack *) {
         PC_PRINT("ANIMATION 2 FINISHED YAYY!", TagType::Print, "")
+
+        animTrack3.Play(2.5, [&](AnimationTrack *) {
+          PC_PRINT("ANIMATION 3 FINISHED YAYY!", TagType::Print, "")
+        });
       });
     });
 

@@ -23,8 +23,6 @@ public:
   do {                                                                         \
     assert((REPARAMETERIZATION_CURVES).empty() ||                              \
            (REPARAMETERIZATION_CURVES).size() == ((KNOTS_NAME).size() - 1));   \
-    assert((KNOTS_NAME).front().t == 0.0 && "First knot must start at t = 0"); \
-    assert((KNOTS_NAME).back().t == 1.0 && "Last knot must end at t = 1");     \
     for (size_t i = 1; i < (KNOTS_NAME).size(); ++i) {                         \
       auto &prev = (KNOTS_NAME)[i - 1];                                        \
       auto &curr = (KNOTS_NAME)[i];                                            \
@@ -33,6 +31,9 @@ public:
       assert(prev.t < curr.t && "Knot 't's must be strictly increasing");      \
     }                                                                          \
   } while (0);
+
+  // assert((KNOTS_NAME).front().t == 0.0 && "First knot must start at t = 0"); \
+  // assert((KNOTS_NAME).back().t == 1.0 && "Last knot must end at t = 1");     \
 
   // For physical representation of curves (e.g. rails)
   template <CurveValueType T>

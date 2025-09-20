@@ -21,8 +21,8 @@ public:
 
   [[nodiscard]] std::vector<GameObject *> &GetGameObjects() { return m_nodes; };
 
-  [[nodiscard]] std::map<uint32_t, AnimationTrack> &GetAnimationTracks() {
-    return m_animationTracks;
+  [[nodiscard]] AnimationTrack &GetAnimationTrack(uint32_t trackIndex) {
+    return m_animationTracks.at(trackIndex);
   }
   // Adds a node
   void AddGameObject(GameObject *node);

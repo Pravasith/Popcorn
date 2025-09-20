@@ -1,5 +1,6 @@
 #include "Transforms.h"
 #include "GlobalMacros.h"
+#include <cassert>
 #include <glm/ext/quaternion_transform.hpp>
 #include <glm/ext/quaternion_trigonometric.hpp>
 #include <glm/fwd.hpp>
@@ -92,7 +93,13 @@ template <> void Transformations::ScaleLocal<Axes::Z>(float scalarValue) {
 //
 void Transformations::UpdatePositionMatrix() {
   m_translationMatrix = glm::translate(PC_IDENTITY_MAT4, m_position.GetValue());
+
   UpdateLocalMatrix();
+
+  // For camera, update view matrix
+  if (m_cameraViewMatrixUpdate_Cb) {
+    m_cameraViewMatrixUpdate_Cb();
+  }
 }
 
 void Transformations::UpdateRotationMatrix() {
@@ -100,25 +107,33 @@ void Transformations::UpdateRotationMatrix() {
 
   UpdateLookAtDirection();
   UpdateLocalMatrix();
+
+  // For camera, update view matrix
+  if (m_cameraViewMatrixUpdate_Cb) {
+    m_cameraViewMatrixUpdate_Cb();
+  }
 }
 
 void Transformations::UpdateScaleMatrix() {
   m_scaleMatrix = glm::scale(PC_IDENTITY_MAT4, m_scale.GetValue());
-  UpdateLookAtDirection();
   UpdateLocalMatrix();
-};
+}
 
 void Transformations::UpdateLocalMatrix() {
   m_localMatrix = m_translationMatrix * m_rotationMatrix * m_scaleMatrix;
   m_worldMatrixNeedsUpdate = true;
-  m_afterLocalMatrixUpdateCb();
+
+  assert(m_gameObjChildWorldMatUpdateFlag_Cb);
+  m_gameObjChildWorldMatUpdateFlag_Cb();
 }
 
 void Transformations::SetLocalMatrix(const glm::mat4 &mat) {
   m_localMatrix = mat;
   m_worldMatrixNeedsUpdate = true;
-  m_afterLocalMatrixUpdateCb();
-};
+
+  assert(m_gameObjChildWorldMatUpdateFlag_Cb);
+  m_gameObjChildWorldMatUpdateFlag_Cb();
+}
 
 // update world matrix wrt parent
 void Transformations::UpdateWorldMatrix(const glm::mat4 &parentWorldMatrix) {
@@ -127,12 +142,8 @@ void Transformations::UpdateWorldMatrix(const glm::mat4 &parentWorldMatrix) {
 }
 
 void Transformations::UpdateLookAtDirection() {
-  // glm::mat4 rotMat = m_rotationMatrix;
   glm::vec3 initialLookAt{0.f, 0.f, -1.f}; // facing the world -Z
-
-  m_lookAtDir =
-      // glm::normalize(glm::vec3(rotMat * glm::vec4(initialLookAt, 0.f)));
-      glm::normalize(glm::mat3(m_rotationMatrix) * initialLookAt);
+  m_lookAtDir = glm::normalize(glm::mat3(m_rotationMatrix) * initialLookAt);
 }
 
 GFX_NAMESPACE_END
