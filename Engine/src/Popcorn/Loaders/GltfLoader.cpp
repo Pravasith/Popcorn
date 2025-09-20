@@ -298,7 +298,7 @@ void GltfLoader::ExtractCameraData(const tinygltf::Model &model,
 
   const tinygltf::Camera &gltfCamera = model.cameras[gltfNode.camera];
 
-  Camera::CameraData data;
+  CameraData data;
 
   if (gltfCamera.type == "perspective") {
     const auto &p = gltfCamera.perspective;

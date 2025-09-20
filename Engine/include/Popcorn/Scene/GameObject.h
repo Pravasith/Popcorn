@@ -33,19 +33,17 @@ enum class GameObjectTypes {
 
 class GameObject {
 public:
-  GameObject()
-      : m_transformData(Transformations(
-            // AfterLocalMatrixUpdate Cb
-            [this]() { UpdateChildrenWorldMatrixNeedsUpdateFlag(); })) {
-    // PC_PRINT("CREATED", TagType::Constr, "GameObject");
+  GameObject() {
+    m_transformData.SetGameObjChildWorldMatUpdateFlagCb(
+        [this]() { UpdateChildrenWorldMatrixNeedsUpdateFlag(); });
   }
+
   virtual ~GameObject() noexcept {
     for (auto *child : m_children) {
       child->m_parent = nullptr;
       delete child; // Recursive
     }
     m_children.clear();
-    // PC_PRINT("DESTROYED", TagType::Destr, "GameObject");
   };
 
   virtual constexpr GameObjectTypes GetGameObjectType() const = 0;
@@ -124,11 +122,11 @@ public:
   void UpdateLocalMatrix() {
     m_transformData.UpdateLocalMatrix();
     UpdateChildrenWorldMatrixNeedsUpdateFlag();
-  };
+  }
 
   [[nodiscard]] const glm::vec3 &GetLookAtDirection() const {
     return m_transformData.m_lookAtDir;
-  };
+  }
 
   void UpdateChildrenWorldMatrixNeedsUpdateFlag() {
     for (auto *child : m_children) {

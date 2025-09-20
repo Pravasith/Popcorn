@@ -62,10 +62,7 @@ public:
   void UpdateLookAtDirection();
 
 public:
-  template <typename F>
-  Transformations(F &&afterLocalMatrixUpdateCb)
-      : m_afterLocalMatrixUpdateCb(std::forward<F>(afterLocalMatrixUpdateCb)) {
-
+  Transformations() {
     m_position.SetAfterMorphCb([this] { UpdatePositionMatrix(); });
     m_rotationQuat.SetAfterMorphCb([this] { UpdateRotationMatrix(); });
     m_scale.SetAfterMorphCb([this] { UpdateScaleMatrix(); });
@@ -76,6 +73,19 @@ public:
   Transformations &operator=(const Transformations &) = delete;
   Transformations(Transformations &&other) = delete;
   Transformations &operator=(Transformations &&other) = delete;
+
+public:
+  template <typename F>
+  void SetCameraViewMatrixUpdateCb(F &&cameraViewMatrixUpdate_Cb) {
+    m_cameraViewMatrixUpdate_Cb = std::forward<F>(cameraViewMatrixUpdate_Cb);
+  }
+
+  template <typename F>
+  void
+  SetGameObjChildWorldMatUpdateFlagCb(F &&gameObjChildWorldMatUpdateFlag_Cb) {
+    m_gameObjChildWorldMatUpdateFlag_Cb =
+        std::forward<F>(gameObjChildWorldMatUpdateFlag_Cb);
+  }
 
 private:
   friend class GameObject;
@@ -123,7 +133,11 @@ public:
   glm::vec3 m_lookAtDir{0.f, 0.f, -1.f}; // towards the screen
 
   bool m_worldMatrixNeedsUpdate = false;
-  std::function<void()> m_afterLocalMatrixUpdateCb = nullptr;
+
+  // TODO: Change callbacks to observer pattern
+  // Callbacks (for game objects -- camera, lights etc.)
+  std::function<void()> m_gameObjChildWorldMatUpdateFlag_Cb = nullptr;
+  std::function<void()> m_cameraViewMatrixUpdate_Cb = nullptr;
 };
 
 //
