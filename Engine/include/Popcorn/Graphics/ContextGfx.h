@@ -37,8 +37,8 @@ public:
     };
   };
 
-  const CurveFactory *AppCurves = s_curveFactory;
-  const SplineFactory *AppSplines = s_splineFactory;
+  static CurveFactory *AppCurves() { return s_curveFactory; }
+  static SplineFactory *AppSplines() { return s_splineFactory; }
 
 private:
   // For the future - empty func for now

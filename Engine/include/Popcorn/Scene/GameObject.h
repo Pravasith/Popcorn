@@ -127,6 +127,10 @@ public:
   [[nodiscard]] const glm::vec3 &GetLookAtDirection() const {
     return m_transformData.m_lookAtDir;
   }
+  // void SetLookAtDirection(const glm::vec3 &lookAtDir) {
+  //   m_transformData.m_lookAtDir = lookAtDir;
+  //   m_transformData.UpdateRotationMatrix();
+  // }
 
   void UpdateChildrenWorldMatrixNeedsUpdateFlag() {
     for (auto *child : m_children) {
@@ -143,6 +147,7 @@ public:
     }
     m_name = name;
   }
+
   const std::string &GetName() const {
     if (m_name.length() == 0) {
       throw std::runtime_error("GameObject name not set");
@@ -153,14 +158,7 @@ public:
   const Transformations &GetTransformData() { return m_transformData; }
 
   //
-  // --- GLTF LOADER CLASS METHODS -------------------------------------------
-private:
-  friend class GltfLoader;
-
-  void SetLocalMatrix(const glm::mat4 &mat) {
-    m_transformData.SetLocalMatrix(mat);
-    UpdateChildrenWorldMatrixNeedsUpdateFlag();
-  }
+  // --- FOR TIMETRAIN ANIMATIONS --------------------------------------------
   AnimationProperty<glm::vec3> *GetAnimationProperty_Pos() {
     return m_transformData.GetAnimationProperty_Pos();
   }
@@ -169,6 +167,16 @@ private:
   }
   AnimationProperty<glm::vec3> *GetAnimationProperty_Scale() {
     return m_transformData.GetAnimationProperty_Scale();
+  }
+
+  //
+  // --- GLTF LOADER CLASS METHODS -------------------------------------------
+private:
+  friend class GltfLoader;
+
+  void SetLocalMatrix(const glm::mat4 &mat) {
+    m_transformData.SetLocalMatrix(mat);
+    UpdateChildrenWorldMatrixNeedsUpdateFlag();
   }
 
 public:

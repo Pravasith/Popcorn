@@ -1,5 +1,6 @@
 #include <Animation.h>
 #include <BufferObjects.h>
+#include <Camera.h>
 #include <GameObject.h>
 #include <Helpers.h>
 #include <Material.h>
@@ -9,6 +10,8 @@
 #include <Renderer.h>
 #include <Scene.h>
 #include <Sources.h>
+#include <SplineDefs.h>
+#include <Splines.h>
 #include <Time.h>
 #include <TimeEvent.h>
 #include <glm/fwd.hpp>
@@ -18,8 +21,7 @@ using namespace Popcorn;
 class BlenderScene : public Scene {}; // Game Objects are owned by Scene
 class GameLayer : public Layer {
 public:
-  GameLayer() { PC_PRINT("CREATED", TagType::Constr, "GAME-LAYER") };
-  ~GameLayer() { PC_PRINT("DESTROYED", TagType::Destr, "GAME-LAYER") };
+  GameLayer() = default;
 
   virtual void OnAttach() override {
     // Popcorn::Context::ConvertGltfToScene("../assets/models/light2.gltf",
@@ -39,10 +41,44 @@ public:
     AnimationTrack &animTrack2 = scene.GetAnimationTrack(1);
     AnimationTrack &animTrack3 = scene.GetAnimationTrack(2);
 
+    float x = 1.f;
+
+    const std::vector<LinearKnot<glm::vec3>> knots{
+        {{-x, -x, x}, 0},   {{x, -x, x}, 0.25}, {{x, x, x}, 0.50},
+        {{-x, x, x}, 0.75}, {{-x, -x, x}, 1.0},
+    };
+
+    auto *splineFactory = Popcorn::Context::GetSplineFactory();
+    auto *curveFactory = Popcorn::Context::GetCurveFactory();
+
+    const Spline<glm::vec3> *cmr_Spl =
+        splineFactory->MakeAutomaticSpline(knots);
+
+    // GameObject *cylinder =
+    //     static_cast<Camera *>(scene.FindObjectByName("Camera"));
+
+    GameObject *cylinder = scene.FindObjectByName("Cylinder");
+
+    if (cylinder) {
+      TimeTrain tt(cylinder->GetAnimationProperty_Pos(), cmr_Spl, 0.0, 1.0);
+      // animTrack2.Insert_Slow(tt);
+
+      AnimationTrack catmullRom;
+      catmullRom.Insert_Slow(tt);
+
+      scene.AddAnimationTrack(std::move(catmullRom));
+
+      auto &animTrack4 = scene.GetAnimationTrack(3);
+
+      animTrack4.Play(5, [&](AnimationTrack *) {
+        PC_PRINT("ANIMATION 0 FINISHED YAYY!", TagType::Print, "")
+      });
+    }
+
     animTrack.Play(2.5, [&](AnimationTrack *) {
       PC_PRINT("ANIMATION 1 FINISHED YAYY!", TagType::Print, "")
 
-      animTrack2.Play(2.5, [&](AnimationTrack *) {
+      animTrack2.Play(5, [&](AnimationTrack *) {
         PC_PRINT("ANIMATION 2 FINISHED YAYY!", TagType::Print, "")
 
         animTrack3.Play(2.5, [&](AnimationTrack *) {
@@ -52,11 +88,11 @@ public:
     });
 
     // Time::Get()->PrintSubscribers();
-  };
+  }
 
   virtual void OnDetach() override {
     // Popcorn::Context::DisposeScene(scene);
-  };
+  }
 
   virtual void OnUpdate(TimeEvent &e) override {
     // building->RotateEuler<Axes::Y>(glm::radians(20.f) * e.GetDeltaS());
@@ -64,13 +100,13 @@ public:
     // std::cout << building->GetPosition().x << "," <<
     // building->GetPosition().y
     //           << "," << building->GetPosition().z << "\n";
-  };
+  }
 
   virtual void OnRender() override {
     // Draws all scenes
     Popcorn::Context::RenderScenes(scene);
-  };
-  virtual bool OnEvent(Event &e) override { return false; };
+  }
+  virtual bool OnEvent(Event &e) override { return false; }
 
 private:
   BlenderScene scene;

@@ -46,15 +46,27 @@ public:
     m_gameObjectsByName[name] = gameObj;
   }
 
+  void AddAnimationTrack(AnimationTrack &&track) {
+    auto [it, _] =
+        m_animationTracks.emplace(m_animTrackSize++, std::move(track));
+    Time::Get()->Subscribe(&it->second);
+
+    PC_WARN(m_animationTracks.size() << " TRACK SIZE AFTER SETTING IN SCENE")
+  }
+
   // Animation tracks - for GltfLoader only
   void SetAnimationTracks(const std::vector<AnimationTrack> &tracks) {
     assert(!tracks.empty());
-    PC_WARN(m_animationTracks.size() << " TRACK SIZEEEEEEEEEEEEE")
-    for (size_t i = 0; i < tracks.size(); ++i) {
-      m_animationTracks[i] = tracks[i];
 
-      Time::Get()->Subscribe(&m_animationTracks[i]);
+    m_animationTracks.clear();
+    m_animTrackSize = 0;
+
+    for (const auto &track : tracks) {
+      auto [it, _] = m_animationTracks.emplace(m_animTrackSize++, track);
+      Time::Get()->Subscribe(&it->second);
     }
+
+    PC_WARN(m_animationTracks.size() << " TRACK SIZE AFTER SETTING IN SCENE")
   }
 
 private:
@@ -65,6 +77,7 @@ private:
 
   std::unordered_map<std::string, GameObject *> m_gameObjectsByName;
   std::map<uint32_t, AnimationTrack> m_animationTracks;
+  uint32_t m_animTrackSize = 0;
 };
 
 GFX_NAMESPACE_END
