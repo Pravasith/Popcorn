@@ -120,7 +120,8 @@ bool Application::OnClockTick(TimeEvent &e) {
   // ---------------------------------------------------------------------
   //
 
-  // false bc we need AnimationTracks in Scene to catch time events
+  // Note: Returning true for OnUpdate is meaningless since we want it to
+  // propagate for the next subscriber (usually) inside the same frame return
   return false;
 };
 

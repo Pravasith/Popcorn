@@ -37,7 +37,7 @@ public:
     Popcorn::Context::RegisterScene(scene);
     // building = scene.FindObjectByName("building");
 
-    AnimationTrack &animTrack = scene.GetAnimationTrack(0);
+    AnimationTrack &animTrack1 = scene.GetAnimationTrack(0);
     AnimationTrack &animTrack2 = scene.GetAnimationTrack(1);
     AnimationTrack &animTrack3 = scene.GetAnimationTrack(2);
 
@@ -61,24 +61,21 @@ public:
 
     if (cylinder) {
       TimeTrain tt(cylinder->GetAnimationProperty_Pos(), cmr_Spl, 0.0, 1.0);
-      // animTrack2.Insert_Slow(tt);
 
       AnimationTrack catmullRom;
       catmullRom.Insert_Slow(tt);
-
       scene.AddAnimationTrack(std::move(catmullRom));
+      auto &animTrack0 = scene.GetAnimationTrack(3);
 
-      auto &animTrack4 = scene.GetAnimationTrack(3);
-
-      animTrack4.Play(5, [&](AnimationTrack *) {
+      animTrack0.Play(7.5, [&](AnimationTrack *) {
         PC_PRINT("ANIMATION 0 FINISHED YAYY!", TagType::Print, "")
       });
     }
 
-    animTrack.Play(2.5, [&](AnimationTrack *) {
+    animTrack1.Play(2.5, [&](AnimationTrack *) {
       PC_PRINT("ANIMATION 1 FINISHED YAYY!", TagType::Print, "")
 
-      animTrack2.Play(5, [&](AnimationTrack *) {
+      animTrack2.Play(2.5, [&](AnimationTrack *) {
         PC_PRINT("ANIMATION 2 FINISHED YAYY!", TagType::Print, "")
 
         animTrack3.Play(2.5, [&](AnimationTrack *) {

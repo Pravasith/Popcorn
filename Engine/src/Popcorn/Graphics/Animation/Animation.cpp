@@ -244,8 +244,11 @@ bool AnimationTrack::OnUpdate(TimeEvent &e) {
     }
     RESET_PROPS
   }
-  return true;
-};
+
+  // Note: Returning true for OnUpdate is meaningless since we want it to
+  // propagate for the next subscriber (usually) inside the same frame return
+  return false;
+}
 #undef RESET_PROPS
 
 GFX_NAMESPACE_END

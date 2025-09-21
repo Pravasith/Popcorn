@@ -29,7 +29,10 @@ void Time::Start() {
     // ---------------------------------------------------------------------
     // --- Frame render ----------------------------------------------------
     TimeEvent event{m_elapsed, m_delta};
-    this->PublishEvent(event);
+    this->PublishEvent(
+        event,
+        true); // true = Broadcast event (doesn't stop propogation to next
+               // subscribers even if event is handled)
     // --- Frame render ----------------------------------------------------
     // ---------------------------------------------------------------------
     //

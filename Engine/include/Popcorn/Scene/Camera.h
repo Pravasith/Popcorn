@@ -61,7 +61,6 @@ public:
 private:
   void UpdateViewMatrix() {
     glm::vec3 lookAtPoint = GetPosition() + GetLookAtDirection();
-
     PC_WARN(lookAtPoint.x << ", " << lookAtPoint.y << ", " << lookAtPoint.z);
 
     // Note: lookAt is not that expensive
