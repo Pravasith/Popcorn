@@ -1,7 +1,9 @@
 #pragma once
 
 #include "AnimationProperty.h"
+#include "SceneDefs.h"
 #include <glm/ext/vector_float4.hpp>
+#include <glm/geometric.hpp>
 #include <glm/gtc/quaternion.hpp>
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -61,14 +63,15 @@ public:
 private:
   void UpdateViewMatrix() {
     glm::vec3 lookAtPoint = GetPosition() + GetLookAtDirection();
-    PC_WARN(lookAtPoint.x << ", " << lookAtPoint.y << ", " << lookAtPoint.z);
+    PC_WARN("LOOK-AT POINT: " << lookAtPoint.x << ", " << lookAtPoint.y << ", "
+                              << lookAtPoint.z);
 
     // Note: lookAt is not that expensive
     m_viewMatrix = glm::lookAt(
         GetPosition(), // Camera world pos
         GetPosition() +
             GetLookAtDirection(), // Target point to look at(world pos)
-        s_upDir                   // Up direction (world up -- Y+)
+        PC_WORLD_UP_DIR           // Up direction (world up -- Y+)
     );
   }
 

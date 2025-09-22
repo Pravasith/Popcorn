@@ -124,13 +124,14 @@ public:
     UpdateChildrenWorldMatrixNeedsUpdateFlag();
   }
 
+  //
+  // --- lookAt stuff ------------------------------------------------------
   [[nodiscard]] const glm::vec3 &GetLookAtDirection() const {
     return m_transformData.m_lookAtDir;
   }
-  // void SetLookAtDirection(const glm::vec3 &lookAtDir) {
-  //   m_transformData.m_lookAtDir = lookAtDir;
-  //   m_transformData.UpdateRotationMatrix();
-  // }
+  void SetLookAtDirection(glm::vec3 &&lookAtDir) {
+    m_transformData.SetLookAtDirection(std::move(lookAtDir));
+  }
 
   void UpdateChildrenWorldMatrixNeedsUpdateFlag() {
     for (auto *child : m_children) {
@@ -195,7 +196,6 @@ protected:
   Transformations m_transformData;
 
 protected:
-  static constexpr glm::vec3 s_upDir{0.f, 1.f, 0.f}; // +Y up
 };
 
 template <typename T>

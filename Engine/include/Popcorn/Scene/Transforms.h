@@ -60,6 +60,7 @@ public:
 
   // --- lookAt stuff ---------------------------------------------------------
   void UpdateLookAtDirection();
+  void SetLookAtDirection(glm::vec3 &&);
 
 public:
   Transformations() {
@@ -103,12 +104,6 @@ private:
   GetAnimationProperty_RotQuat() noexcept {
     return &m_rotationQuat;
   }
-
-  // Warning: To be modified by the GameObject class only
-  // [[nodiscard]] AnimationProperty<glm::vec3> *
-  // GetAnimationProperty_RotEuler() noexcept {
-  //   return &m_rotationEuler;
-  // }
 
   // Warning: To be modified by the GameObject class only
   [[nodiscard]] AnimationProperty<glm::vec3> *

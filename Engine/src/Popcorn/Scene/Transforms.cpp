@@ -1,5 +1,6 @@
 #include "Transforms.h"
 #include "GlobalMacros.h"
+#include "SceneDefs.h"
 #include <cassert>
 #include <glm/ext/quaternion_transform.hpp>
 #include <glm/ext/quaternion_trigonometric.hpp>
@@ -102,6 +103,11 @@ void Transformations::UpdatePositionMatrix() {
   }
 }
 
+void Transformations::SetLookAtDirection(glm::vec3 &&lookAtDir) {
+  glm::quat newOrientation = glm::quatLookAtRH(lookAtDir, PC_WORLD_UP_DIR);
+  SetRotationQuat(newOrientation);
+}
+
 void Transformations::UpdateRotationMatrix() {
   m_rotationMatrix = glm::mat4_cast(m_rotationQuat.GetValue());
 
@@ -143,7 +149,7 @@ void Transformations::UpdateWorldMatrix(const glm::mat4 &parentWorldMatrix) {
 
 void Transformations::UpdateLookAtDirection() {
   glm::vec3 initialLookAt{0.f, 0.f, -1.f}; // facing the world -Z
-  m_lookAtDir = glm::normalize(glm::mat3(m_rotationMatrix) * initialLookAt);
+  m_lookAtDir = glm::normalize(m_rotationQuat.GetValue() * initialLookAt);
 }
 
 GFX_NAMESPACE_END

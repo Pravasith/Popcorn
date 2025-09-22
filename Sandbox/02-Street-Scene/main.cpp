@@ -16,6 +16,7 @@
 #include <TimeEvent.h>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 using namespace Popcorn;
 class BlenderScene : public Scene {}; // Game Objects are owned by Scene
@@ -41,11 +42,11 @@ public:
     AnimationTrack &animTrack2 = scene.GetAnimationTrack(1);
     AnimationTrack &animTrack3 = scene.GetAnimationTrack(2);
 
-    float x = 1.f;
+    float x = 1.f, y = 1.f;
 
     const std::vector<LinearKnot<glm::vec3>> knots{
-        {{-x, -x, x}, 0},   {{x, -x, x}, 0.25}, {{x, x, x}, 0.50},
-        {{-x, x, x}, 0.75}, {{-x, -x, x}, 1.0},
+        {{-x, -x * y, x}, 0},   {{x, -x * y, x}, 0.25}, {{x, x * y, x}, 0.5},
+        {{-x, x * y, x}, 0.75}, {{-x, -x * y, x}, 1.0},
     };
 
     auto *splineFactory = Popcorn::Context::GetSplineFactory();
@@ -54,10 +55,13 @@ public:
     const Spline<glm::vec3> *cmr_Spl =
         splineFactory->MakeAutomaticSpline(knots);
 
-    // GameObject *cylinder =
-    //     static_cast<Camera *>(scene.FindObjectByName("Camera"));
-
+    GameObject *camera =
+        static_cast<Camera *>(scene.FindObjectByName("Camera"));
     GameObject *cylinder = scene.FindObjectByName("Cylinder");
+
+    double deltaStep = 4.0;
+
+    // camera->SetLookAtDirection(-camera->GetPosition());
 
     if (cylinder) {
       TimeTrain tt(cylinder->GetAnimationProperty_Pos(), cmr_Spl, 0.0, 1.0);
@@ -67,18 +71,18 @@ public:
       scene.AddAnimationTrack(std::move(catmullRom));
       auto &animTrack0 = scene.GetAnimationTrack(3);
 
-      animTrack0.Play(7.5, [&](AnimationTrack *) {
+      animTrack0.Play(12.0, [&](AnimationTrack *) {
         PC_PRINT("ANIMATION 0 FINISHED YAYY!", TagType::Print, "")
       });
     }
 
-    animTrack1.Play(2.5, [&](AnimationTrack *) {
+    animTrack1.Play(deltaStep, [&, deltaStep](AnimationTrack *) {
       PC_PRINT("ANIMATION 1 FINISHED YAYY!", TagType::Print, "")
 
-      animTrack2.Play(2.5, [&](AnimationTrack *) {
+      animTrack2.Play(deltaStep, [&, deltaStep](AnimationTrack *) {
         PC_PRINT("ANIMATION 2 FINISHED YAYY!", TagType::Print, "")
 
-        animTrack3.Play(2.5, [&](AnimationTrack *) {
+        animTrack3.Play(deltaStep, [&, deltaStep](AnimationTrack *) {
           PC_PRINT("ANIMATION 3 FINISHED YAYY!", TagType::Print, "")
         });
       });
