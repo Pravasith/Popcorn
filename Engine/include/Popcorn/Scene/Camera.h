@@ -1,7 +1,6 @@
 #pragma once
 
 #include "AnimationProperty.h"
-#include "SceneDefs.h"
 #include <glm/ext/vector_float4.hpp>
 #include <glm/geometric.hpp>
 #include <glm/gtc/quaternion.hpp>
