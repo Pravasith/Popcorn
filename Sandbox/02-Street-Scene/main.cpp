@@ -42,11 +42,11 @@ public:
     AnimationTrack &animTrack2 = scene.GetAnimationTrack(1);
     AnimationTrack &animTrack3 = scene.GetAnimationTrack(2);
 
-    float x = 1.f, y = 1.f;
+    float xy = .5f, z = 1.f;
 
     const std::vector<LinearKnot<glm::vec3>> knots{
-        {{-x, -x * y, x}, 0},   {{x, -x * y, x}, 0.25}, {{x, x * y, x}, 0.5},
-        {{-x, x * y, x}, 0.75}, {{-x, -x * y, x}, 1.0},
+        {{-xy, -xy, z}, 0},   {{xy, -xy, z}, 0.25}, {{xy, xy, z}, 0.5},
+        {{-xy, xy, z}, 0.75}, {{-xy, -xy, z}, 1.0},
     };
 
     auto *splineFactory = Popcorn::Context::GetSplineFactory();
@@ -55,27 +55,27 @@ public:
     const Spline<glm::vec3> *cmr_Spl =
         splineFactory->MakeAutomaticSpline(knots);
 
-    GameObject *camera =
-        static_cast<Camera *>(scene.FindObjectByName("Camera"));
+    // GameObject *cylinder =
+    //     static_cast<Camera *>(scene.FindObjectByName("Camera"));
     GameObject *cylinder = scene.FindObjectByName("Cylinder");
 
-    double deltaStep = 4.0;
+    double deltaStep = 2.0;
 
     // camera->SetLookAtDirection(-camera->GetPosition());
 
-    if (cylinder) {
-      TimeTrain tt(cylinder->GetAnimationProperty_Pos(), cmr_Spl, 0.0, 1.0);
+    // Animate camera
+    TimeTrain tt(cylinder->GetAnimationProperty_Pos(), cmr_Spl, 0.0, 1.0);
 
-      AnimationTrack catmullRom;
-      catmullRom.Insert_Slow(tt);
-      scene.AddAnimationTrack(std::move(catmullRom));
-      auto &animTrack0 = scene.GetAnimationTrack(3);
+    AnimationTrack catmullRom;
+    catmullRom.Insert_Slow(tt);
+    scene.AddAnimationTrack(std::move(catmullRom));
+    auto &animTrack0 = scene.GetAnimationTrack(3);
 
-      animTrack0.Play(12.0, [&](AnimationTrack *) {
-        PC_PRINT("ANIMATION 0 FINISHED YAYY!", TagType::Print, "")
-      });
-    }
+    animTrack0.Play(12.0, [&](AnimationTrack *) {
+      PC_PRINT("ANIMATION 0 FINISHED YAYY!", TagType::Print, "")
+    });
 
+    // Animate from Blender imported animations
     animTrack1.Play(deltaStep, [&, deltaStep](AnimationTrack *) {
       PC_PRINT("ANIMATION 1 FINISHED YAYY!", TagType::Print, "")
 

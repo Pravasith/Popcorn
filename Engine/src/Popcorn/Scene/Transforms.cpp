@@ -2,9 +2,11 @@
 #include "GlobalMacros.h"
 #include "SceneDefs.h"
 #include <cassert>
+#include <glm/ext/quaternion_geometric.hpp>
 #include <glm/ext/quaternion_transform.hpp>
 #include <glm/ext/quaternion_trigonometric.hpp>
 #include <glm/fwd.hpp>
+#include <glm/geometric.hpp>
 #include <glm/gtc/quaternion.hpp>
 
 ENGINE_NAMESPACE_BEGIN
@@ -103,9 +105,10 @@ void Transformations::UpdatePositionMatrix() {
   }
 }
 
-void Transformations::SetLookAtDirection(glm::vec3 &&lookAtDir) {
-  glm::quat newOrientation = glm::quatLookAtRH(lookAtDir, PC_WORLD_UP_DIR);
-  SetRotationQuat(newOrientation);
+void Transformations::SetLookAtDirection(const glm::vec3 &lookAtDir) {
+  glm::quat newOrientation =
+      glm::quatLookAtRH(glm::normalize(lookAtDir), PC_WORLD_UP_DIR);
+  SetRotationQuat(glm::normalize(newOrientation));
 }
 
 void Transformations::UpdateRotationMatrix() {

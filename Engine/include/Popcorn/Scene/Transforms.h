@@ -60,7 +60,7 @@ public:
 
   // --- lookAt stuff ---------------------------------------------------------
   void UpdateLookAtDirection();
-  void SetLookAtDirection(glm::vec3 &&);
+  void SetLookAtDirection(const glm::vec3 &lookAtDir);
 
 public:
   Transformations() {

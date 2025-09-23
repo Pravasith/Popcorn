@@ -59,11 +59,15 @@ public:
   virtual void OnRender() {};
   virtual void OnEvent() {};
 
+  // Getters
   [[nodiscard]] const glm::vec3 &GetPosition() const {
     return m_transformData.m_position.GetValue();
   }
   [[nodiscard]] const glm::mat4 &GetLocalMatrix() const {
     return m_transformData.m_localMatrix;
+  }
+  [[nodiscard]] const glm::quat &GetRotationQuat() const {
+    return m_transformData.m_rotationQuat.GetValue();
   }
 
   //
@@ -129,8 +133,8 @@ public:
   [[nodiscard]] const glm::vec3 &GetLookAtDirection() const {
     return m_transformData.m_lookAtDir;
   }
-  void SetLookAtDirection(glm::vec3 &&lookAtDir) {
-    m_transformData.SetLookAtDirection(std::move(lookAtDir));
+  void SetLookAtDirection(const glm::vec3 &lookAtDir) {
+    m_transformData.SetLookAtDirection(lookAtDir);
   }
 
   void UpdateChildrenWorldMatrixNeedsUpdateFlag() {
