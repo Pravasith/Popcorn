@@ -1,6 +1,8 @@
 #include <Animation.h>
 #include <BufferObjects.h>
 #include <Camera.h>
+#include <CurveDefs.h>
+#include <Curves.h>
 #include <GameObject.h>
 #include <Helpers.h>
 #include <Material.h>
@@ -9,6 +11,7 @@
 #include <Popcorn/Core/Base.h>
 #include <Renderer.h>
 #include <Scene.h>
+#include <SceneDefs.h>
 #include <Sources.h>
 #include <SplineDefs.h>
 #include <Splines.h>
@@ -42,7 +45,7 @@ public:
     AnimationTrack &animTrack2 = scene.GetAnimationTrack(1);
     AnimationTrack &animTrack3 = scene.GetAnimationTrack(2);
 
-    float xy = .5f, z = 1.f;
+    float xy = .5f, z = 2.f;
 
     const std::vector<LinearKnot<glm::vec3>> knots{
         {{-xy, -xy, z}, 0},   {{xy, -xy, z}, 0.25}, {{xy, xy, z}, 0.5},
@@ -55,11 +58,10 @@ public:
     const Spline<glm::vec3> *cmr_Spl =
         splineFactory->MakeAutomaticSpline(knots);
 
-    // GameObject *cylinder =
-    //     static_cast<Camera *>(scene.FindObjectByName("Camera"));
+    // GameObject *cylinder = scene.FindObjectByName("Camera");
     GameObject *cylinder = scene.FindObjectByName("Cylinder");
 
-    double deltaStep = 2.0;
+    double deltaStep = 3.0;
 
     // camera->SetLookAtDirection(-camera->GetPosition());
 
@@ -71,7 +73,23 @@ public:
     scene.AddAnimationTrack(std::move(catmullRom));
     auto &animTrack0 = scene.GetAnimationTrack(3);
 
-    animTrack0.Play(12.0, [&](AnimationTrack *) {
+    // Animate cylinder (rotation)
+    glm::vec3 target{0, 0, 0};
+
+    std::vector<LinearKnot<glm::quat>> quatKnots;
+    quatKnots.reserve(knots.size());
+
+    for (const LinearKnot<glm::vec3> &posKnot : knots) {
+      glm::quat orientationQ =
+          glm::quatLookAtRH(target - posKnot.val, PC_WORLD_UP_DIR);
+      quatKnots.emplace_back(LinearKnot<glm::quat>{orientationQ, posKnot.t});
+    }
+
+    const Spline<glm::quat> *rotSpl = splineFactory->MakeSpline(quatKnots);
+    TimeTrain ttRot(cylinder->GetAnimationProperty_RotQuat(), rotSpl, 0.0, 1.0);
+    animTrack0.Insert_Slow(ttRot);
+
+    animTrack0.Play(9.0, [&](AnimationTrack *) {
       PC_PRINT("ANIMATION 0 FINISHED YAYY!", TagType::Print, "")
     });
 
