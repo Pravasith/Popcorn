@@ -58,13 +58,16 @@ public:
   void UpdatePositionDependents();
   void UpdateRotationDependents();
   void UpdateScaleDependents();
-  void UpdateLookAtDirDependents();
 
 public:
   Transformations() {
-    m_position.SetAfterMorphCb([this] { UpdatePositionDependents(); });
-    m_rotationQuat.SetAfterMorphCb([this] { UpdateRotationDependents(); });
-    m_scale.SetAfterMorphCb([this] { UpdateScaleDependents(); });
+    m_position.AddAfterMorphCbs([this] {
+      // TODO: If camera, then update lookAtDir(w.r.t. the lookAt point) -->
+      // updates quat --> updates rotMatrix --> updates camera viewMatrix
+      UpdatePositionDependents();
+    });
+    m_rotationQuat.AddAfterMorphCbs([this] { UpdateRotationDependents(); });
+    m_scale.AddAfterMorphCbs([this] { UpdateScaleDependents(); });
   }
   ~Transformations() = default;
 
@@ -74,10 +77,10 @@ public:
   Transformations &operator=(Transformations &&other) = delete;
 
 public:
-  template <typename F>
-  void SetCameraViewMatrixUpdateCb(F &&cameraViewMatrixUpdate_Cb) {
-    m_cameraViewMatrixUpdate_Cb = std::forward<F>(cameraViewMatrixUpdate_Cb);
-  }
+  // template <typename F>
+  // void SetCameraViewMatrixUpdateCb(F &&cameraViewMatrixUpdate_Cb) {
+  //   m_cameraViewMatrixUpdate_Cb = std::forward<F>(cameraViewMatrixUpdate_Cb);
+  // }
 
   template <typename F>
   void
@@ -131,7 +134,7 @@ public:
   // TODO: Change callbacks to observer pattern
   // Callbacks (for game objects -- camera, lights etc.)
   std::function<void()> m_gameObjChildWorldMatUpdateFlag_Cb = nullptr;
-  std::function<void()> m_cameraViewMatrixUpdate_Cb = nullptr;
+  // std::function<void()> m_cameraViewMatrixUpdate_Cb = nullptr;
 };
 
 //

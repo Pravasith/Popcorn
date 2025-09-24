@@ -27,8 +27,13 @@ public:
   explicit AnimationProperty(Args &&...args)
       : m_value(std::forward<Args>(args)...) {}
 
-  template <typename F> void SetAfterMorphCb(F &&afterMorphCb) {
-    m_afterMorphCb = std::forward<F>(afterMorphCb);
+  template <typename... F> void SetAfterMorphCbs(F &&...afterMorphCbs) {
+    m_afterMorphCbs.clear();
+    (m_afterMorphCbs.emplace_back(std::forward<F>(afterMorphCbs)), ...);
+  }
+
+  template <typename... F> void AddAfterMorphCbs(F &&...afterMorphCbs) {
+    (m_afterMorphCbs.emplace_back(std::forward<F>(afterMorphCbs)), ...);
   }
 
   [[nodiscard]] const T &GetValue() const { return m_value; };
@@ -48,10 +53,12 @@ public:
   void Set(const T &value) noexcept {
     BLOCK_IF_ANIMATING_ALREADY
     m_value = value;
+    CallAfterMorphCbs();
   }
   template <typename F> void Set(const T &value, F &&onSet) {
     BLOCK_IF_ANIMATING_ALREADY
     m_value = value;
+    CallAfterMorphCbs();
     std::forward<F>(onSet)();
   }
 
@@ -65,7 +72,9 @@ public:
     constexpr size_t I = (size_t)A;
     static_assert(I < T::length(), "component index out of range for this T");
     BLOCK_IF_ANIMATING_ALREADY
+
     m_value[I] += value;
+    CallAfterMorphCbs();
   }
   template <Axes A, typename F> void AddComponent(float value, F &&afterAdd) {
     static_assert(!std::is_same_v<T, float> && !std::is_same_v<T, double> &&
@@ -74,6 +83,8 @@ public:
     static_assert(I < T::length(), "component index out of range for this T");
     BLOCK_IF_ANIMATING_ALREADY
     m_value[I] += value;
+
+    CallAfterMorphCbs();
     std::forward<F>(afterAdd)();
   }
 
@@ -83,7 +94,9 @@ public:
     constexpr size_t I = (size_t)A;
     static_assert(I < T::length(), "component index out of range for this T");
     BLOCK_IF_ANIMATING_ALREADY
+
     m_value[I] *= value;
+    CallAfterMorphCbs();
   }
   template <Axes A, typename F>
   void MultiplyComponent(float value, F &&afterMultiply) {
@@ -93,6 +106,8 @@ public:
     static_assert(I < T::length(), "component index out of range for this T");
     BLOCK_IF_ANIMATING_ALREADY
     m_value[I] *= value;
+
+    CallAfterMorphCbs();
     std::forward<F>(afterMultiply)();
   }
 #undef BLOCK_IF_ANIMATING_ALREADY
@@ -128,8 +143,13 @@ private:
   // void SetIsAnimating(bool isAnimating) { m_isAnimating = isAnimating; }
   void Morph(const T &passengerValue) {
     m_value = passengerValue;
-    if (m_afterMorphCb)
-      m_afterMorphCb();
+    CallAfterMorphCbs();
+  }
+
+  void CallAfterMorphCbs() {
+    for (auto &cb : m_afterMorphCbs) {
+      cb();
+    }
   }
 
   void BindRail(const Curve<T> *r) {
@@ -189,7 +209,7 @@ private:
   RailVTable<T> m_railVTable{};
 
 private:
-  std::function<void()> m_afterMorphCb = nullptr;
+  std::vector<std::function<void()>> m_afterMorphCbs;
   // bool m_isAnimating = false;
   T m_value;
 };

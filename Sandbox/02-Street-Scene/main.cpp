@@ -18,6 +18,7 @@
 #include <Time.h>
 #include <TimeEvent.h>
 #include <glm/fwd.hpp>
+#include <glm/geometric.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -63,8 +64,6 @@ public:
 
     double deltaStep = 3.0;
 
-    // camera->SetLookAtDirection(-camera->GetPosition());
-
     // Animate camera
     TimeTrain tt(cylinder->GetAnimationProperty_Pos(), cmr_Spl, 0.0, 1.0);
 
@@ -80,8 +79,8 @@ public:
     quatKnots.reserve(knots.size());
 
     for (const LinearKnot<glm::vec3> &posKnot : knots) {
-      glm::quat orientationQ =
-          glm::quatLookAtRH(target - posKnot.val, PC_WORLD_UP_DIR);
+      glm::quat orientationQ = glm::quatLookAtRH(
+          glm::normalize(target - posKnot.val), PC_WORLD_UP_DIR);
       quatKnots.emplace_back(LinearKnot<glm::quat>{orientationQ, posKnot.t});
     }
 

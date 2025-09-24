@@ -19,26 +19,26 @@ GFX_NAMESPACE_BEGIN
 void Transformations::TranslateLocal(const glm::vec3 &targetPos) {
   m_position.Set(targetPos);
 
-  UpdatePositionDependents();
+  // UpdatePositionDependents();
 }
 
 template <>
 void Transformations::TranslateLocal<Axes::X>(float signedDistance) {
   m_position.AddComponent<Axes::X>(signedDistance);
 
-  UpdatePositionDependents();
+  // UpdatePositionDependents();
 }
 template <>
 void Transformations::TranslateLocal<Axes::Y>(float signedDistance) {
   m_position.AddComponent<Axes::Y>(signedDistance);
 
-  UpdatePositionDependents();
+  // UpdatePositionDependents();
 }
 template <>
 void Transformations::TranslateLocal<Axes::Z>(float signedDistance) {
   m_position.AddComponent<Axes::Z>(signedDistance);
 
-  UpdatePositionDependents();
+  // UpdatePositionDependents();
 }
 
 //
@@ -49,37 +49,37 @@ void Transformations::RotateLocalEuler(const glm::vec3 &rotationEuler) {
   glm::quat dq = glm::quat(rotationEuler);
   m_rotationQuat.Set(dq * m_rotationQuat.GetValue());
 
-  UpdateRotationDependents();
-};
+  // UpdateRotationDependents();
+}
 
 template <> void Transformations::RotateLocalEuler<Axes::X>(float radians) {
   glm::quat dq = glm::angleAxis(radians, glm::vec3{1.0, 0.0, 0.0});
   m_rotationQuat.Set(dq * m_rotationQuat.GetValue());
 
-  UpdateRotationDependents();
+  // UpdateRotationDependents();
 }
 template <> void Transformations::RotateLocalEuler<Axes::Y>(float radians) {
   glm::quat dq = glm::angleAxis(radians, glm::vec3{0.0, 1.0, 0.0});
   m_rotationQuat.Set(dq * m_rotationQuat.GetValue());
 
-  UpdateRotationDependents();
+  // UpdateRotationDependents();
 }
 template <> void Transformations::RotateLocalEuler<Axes::Z>(float radians) {
   glm::quat dq = glm::angleAxis(radians, glm::vec3{0.0, 0.0, 1.0});
   m_rotationQuat.Set(dq * m_rotationQuat.GetValue());
 
-  UpdateRotationDependents();
+  // UpdateRotationDependents();
 }
 
 void Transformations::RotateLocalQuat(const glm::quat &dq) {
   m_rotationQuat.Set(glm::normalize(dq * m_rotationQuat.GetValue()));
 
-  UpdateRotationDependents();
+  // UpdateRotationDependents();
 }
 void Transformations::SetRotationQuat(const glm::quat &q) {
   m_rotationQuat.Set(glm::normalize(q));
 
-  UpdateRotationDependents();
+  // UpdateRotationDependents();
 }
 
 //
@@ -91,29 +91,29 @@ void Transformations::ScaleLocal(float scalarValue) {
   m_scale.MultiplyComponent<Axes::Y>(scalarValue);
   m_scale.MultiplyComponent<Axes::Z>(scalarValue);
 
-  UpdateScaleDependents();
+  // UpdateScaleDependents();
 }
 
 void Transformations::ScaleLocal(const glm::vec3 &scaleVector) {
   m_scale.Set(scaleVector);
 
-  UpdateScaleDependents();
+  // UpdateScaleDependents();
 }
 
 template <> void Transformations::ScaleLocal<Axes::X>(float scalarValue) {
   m_scale.MultiplyComponent<Axes::X>(scalarValue);
 
-  UpdateScaleDependents();
+  // UpdateScaleDependents();
 }
 template <> void Transformations::ScaleLocal<Axes::Y>(float scalarValue) {
   m_scale.MultiplyComponent<Axes::Y>(scalarValue);
 
-  UpdateScaleDependents();
+  // UpdateScaleDependents();
 }
 template <> void Transformations::ScaleLocal<Axes::Z>(float scalarValue) {
   m_scale.MultiplyComponent<Axes::Z>(scalarValue);
 
-  UpdateScaleDependents();
+  // UpdateScaleDependents();
 }
 
 //
@@ -165,7 +165,11 @@ void Transformations::SetLookAtDirection(const glm::vec3 &lookAtDir) {
   // Sets new quat --> sets new rot matrix --> sets new lookAtDir
   m_lookAtDir = lookAtDir;
 
-  UpdateLookAtDirDependents();
+  glm::quat newOrientation =
+      glm::quatLookAtRH(glm::normalize(m_lookAtDir), PC_WORLD_UP_DIR);
+  SetRotationQuat(
+      glm::normalize(newOrientation)); // sets rot matrix which sets m_lookAtDir
+                                       // again (no harm)
 }
 
 void Transformations::UpdateLookAtDirection() {
@@ -179,35 +183,31 @@ void Transformations::UpdateLookAtDirection() {
 // --- DEPENDENTS STUFF ---------------------------------------------------
 // --- DEPENDENTS STUFF ---------------------------------------------------
 //
+// Fires as an AfterMorphCb for position animation property
 void Transformations::UpdatePositionDependents() {
   UpdatePositionMatrix();
   UpdateLocalMatrix();
 
   // For camera, update view matrix
-  if (m_cameraViewMatrixUpdate_Cb) {
-    m_cameraViewMatrixUpdate_Cb();
-  }
+  // if (m_cameraViewMatrixUpdate_Cb) {
+  //   m_cameraViewMatrixUpdate_Cb();
+  // }
 }
+// Fires as an AfterMorphCb for rotation animation property
 void Transformations::UpdateRotationDependents() {
   UpdateRotationMatrix();
   UpdateLookAtDirection();
   UpdateLocalMatrix();
 
   // For camera, update view matrix
-  if (m_cameraViewMatrixUpdate_Cb) {
-    m_cameraViewMatrixUpdate_Cb();
-  }
+  // if (m_cameraViewMatrixUpdate_Cb) {
+  //   m_cameraViewMatrixUpdate_Cb();
+  // }
 }
+// Fires as an AfterMorphCb for scale animation property
 void Transformations::UpdateScaleDependents() {
   UpdateScaleMatrix();
   UpdateLocalMatrix();
-}
-void Transformations::UpdateLookAtDirDependents() {
-  glm::quat newOrientation =
-      glm::quatLookAtRH(glm::normalize(m_lookAtDir), PC_WORLD_UP_DIR);
-  SetRotationQuat(
-      glm::normalize(newOrientation)); // sets rot matrix which sets m_lookAtDir
-                                       // again (no harm)
 }
 
 GFX_NAMESPACE_END

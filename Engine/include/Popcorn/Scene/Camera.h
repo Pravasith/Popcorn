@@ -49,7 +49,9 @@ class Camera : public GameObject {
 
 public:
   Camera() {
-    m_transformData.SetCameraViewMatrixUpdateCb(
+    m_transformData.m_position.AddAfterMorphCbs(
+        [this]() { UpdateViewMatrix(); });
+    m_transformData.m_rotationQuat.AddAfterMorphCbs(
         [this]() { UpdateViewMatrix(); });
   }
 
