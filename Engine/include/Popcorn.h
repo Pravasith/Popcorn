@@ -3,11 +3,13 @@
 #include "Animation.h"
 #include "Application.h"
 #include "Assert.h"
+#include "ContextGfx.h"
 #include "GameObject.h"
 #include "GlobalMacros.h"
 #include "GltfLoader.h"
 #include "Layer.h"
 #include "Scene.h"
+#include "SplineFactory.h"
 #include <iostream>
 
 ENGINE_NAMESPACE_BEGIN
@@ -54,6 +56,9 @@ static void StartGame() {
 
   s_application->StartGameLoop(); // Starts game loop
 };
+
+static SplineFactory *GetSplineFactory() { return ContextGfx::AppSplines(); }
+static CurveFactory *GetCurveFactory() { return ContextGfx::AppCurves(); }
 
 static void RenderScenes(Scene &scene) {
   // FrameVk Draw

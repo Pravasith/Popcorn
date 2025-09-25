@@ -59,11 +59,15 @@ public:
   virtual void OnRender() {};
   virtual void OnEvent() {};
 
+  // Getters
   [[nodiscard]] const glm::vec3 &GetPosition() const {
     return m_transformData.m_position.GetValue();
   }
   [[nodiscard]] const glm::mat4 &GetLocalMatrix() const {
     return m_transformData.m_localMatrix;
+  }
+  [[nodiscard]] const glm::quat &GetRotationQuat() const {
+    return m_transformData.m_rotationQuat.GetValue();
   }
 
   //
@@ -124,8 +128,13 @@ public:
     UpdateChildrenWorldMatrixNeedsUpdateFlag();
   }
 
+  //
+  // --- lookAt stuff ------------------------------------------------------
   [[nodiscard]] const glm::vec3 &GetLookAtDirection() const {
     return m_transformData.m_lookAtDir;
+  }
+  void SetLookAtDirection(const glm::vec3 &lookAtDir) {
+    m_transformData.SetLookAtDirection(lookAtDir);
   }
 
   void UpdateChildrenWorldMatrixNeedsUpdateFlag() {
@@ -143,6 +152,7 @@ public:
     }
     m_name = name;
   }
+
   const std::string &GetName() const {
     if (m_name.length() == 0) {
       throw std::runtime_error("GameObject name not set");
@@ -153,14 +163,7 @@ public:
   const Transformations &GetTransformData() { return m_transformData; }
 
   //
-  // --- GLTF LOADER CLASS METHODS -------------------------------------------
-private:
-  friend class GltfLoader;
-
-  void SetLocalMatrix(const glm::mat4 &mat) {
-    m_transformData.SetLocalMatrix(mat);
-    UpdateChildrenWorldMatrixNeedsUpdateFlag();
-  }
+  // --- FOR TIMETRAIN ANIMATIONS --------------------------------------------
   AnimationProperty<glm::vec3> *GetAnimationProperty_Pos() {
     return m_transformData.GetAnimationProperty_Pos();
   }
@@ -169,6 +172,16 @@ private:
   }
   AnimationProperty<glm::vec3> *GetAnimationProperty_Scale() {
     return m_transformData.GetAnimationProperty_Scale();
+  }
+
+  //
+  // --- GLTF LOADER CLASS METHODS -------------------------------------------
+private:
+  friend class GltfLoader;
+
+  void SetLocalMatrix(const glm::mat4 &mat) {
+    m_transformData.SetLocalMatrix(mat);
+    UpdateChildrenWorldMatrixNeedsUpdateFlag();
   }
 
 public:
@@ -187,7 +200,6 @@ protected:
   Transformations m_transformData;
 
 protected:
-  static constexpr glm::vec3 s_upDir{0.f, 1.f, 0.f}; // +Y up
 };
 
 template <typename T>

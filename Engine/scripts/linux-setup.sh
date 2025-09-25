@@ -140,7 +140,7 @@ glad_sm_dir="$submodules_dir/glad"
 # COPY GLAD FILES FROM SUBMODULES TO VENDOR
 #
 # -----------------------------------------------------------------------
-cp -r "$glad_sm_dir" "$vendor_platform_agnostic_dir"
+# cp -r "$glad_sm_dir" "$vendor_platform_agnostic_dir"
 
 echo "Installing GLAD complete"
 # -----------------------------------------------------------------------

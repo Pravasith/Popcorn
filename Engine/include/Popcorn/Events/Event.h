@@ -95,9 +95,8 @@ public:
 
   template <typename T, typename F> bool Dispatch(const F &eventCb) {
     if (T::GetValueType() == m_event.GetEventType()) {
-      m_event.SetIsHandled(
-          // m_event.IsHandled() |
-          eventCb(static_cast<T &>(m_event)));
+      m_event.SetIsHandled(m_event.IsHandled() |
+                           eventCb(static_cast<T &>(m_event)));
       return true;
     }
 

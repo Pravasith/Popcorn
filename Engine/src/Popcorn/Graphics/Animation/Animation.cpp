@@ -227,10 +227,6 @@ void AnimationTrack::MorphPassengers(double t, bool useSlowAlgo) {
 //
 // --- Update ------------------------------------------------------------------
 bool AnimationTrack::OnUpdate(TimeEvent &e) {
-  // m_elapsedTimeS += e.GetDeltaS();
-  // PC_WARN("ELAPSED: " << m_elapsedTimeS)
-  // PC_WARN("DURATION: " << m_durationS)
-
   if ((m_elapsedTimeS += e.GetDeltaS()) < m_durationS) {
     double t = GetNormalizedElapsedSecs();
 
@@ -244,8 +240,11 @@ bool AnimationTrack::OnUpdate(TimeEvent &e) {
     }
     RESET_PROPS
   }
-  return true;
-};
+
+  // Note: Returning true for OnUpdate is meaningless since we want it to
+  // propagate for the next subscriber (usually) inside the same frame return
+  return false;
+}
 #undef RESET_PROPS
 
 GFX_NAMESPACE_END

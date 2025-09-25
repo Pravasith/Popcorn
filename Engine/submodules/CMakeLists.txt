@@ -1,6 +1,6 @@
 set(PLATFORM_AGNOSTIC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/platform-agnostic)
 
-add_library(glad ${PLATFORM_AGNOSTIC_DIR}/glad/src/glad.c)
+# add_library(glad ${PLATFORM_AGNOSTIC_DIR}/glad/src/glad.c)
 
 add_library(
   ImGui

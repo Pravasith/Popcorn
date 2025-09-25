@@ -33,7 +33,7 @@ void Publisher::UnSubscribe(Subscriber *subscriber) {
   };
 };
 
-void Publisher::PublishEvent(Event &e) const {
+void Publisher::PublishEvent(Event &e, bool isBroadcastEvent) const {
 
 #ifdef PC_DEBUG
   // PrintSubscribers();
@@ -42,7 +42,10 @@ void Publisher::PublishEvent(Event &e) const {
   for (Subscriber *s : m_subscribers) {
     s->OnEvent(e);
 
-    if (e.IsHandled()) {
+    // Only stop propagation if the Published event isn't
+    // intended to be a 'broadcast' event and when the
+    // event is handled.
+    if (!isBroadcastEvent && e.IsHandled()) {
       break;
     };
   }

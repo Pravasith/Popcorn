@@ -13,7 +13,7 @@ public:
   Publisher(std::string name);
   virtual ~Publisher() = 0;
 
-  void PublishEvent(Event &e) const;
+  void PublishEvent(Event &e, bool isBroadcast = false) const;
   void Subscribe(Subscriber *s);
   void UnSubscribe(Subscriber *s);
 

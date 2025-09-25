@@ -28,20 +28,13 @@ public:
   template <Axes T> void TranslateLocal(float signedDistance);
 
   // --- rotations ------------------------------------------------------------
-  //
   // Euler
   void SetEulerOrder(EulerOrder order) { m_eulerOrder = order; }
   void RotateLocalEuler(const glm::vec3 &rotationEuler);
   template <Axes T> void RotateLocalEuler(float radians);
-
   // Quat
-  void RotateLocalQuat(const glm::quat &dq) {
-    m_rotationQuat.Set(glm::normalize(dq * m_rotationQuat.GetValue()),
-                       [&]() { UpdateRotationMatrix(); });
-  }
-  void SetRotationQuat(const glm::quat &q) {
-    m_rotationQuat.Set(glm::normalize(q), [&]() { UpdateRotationMatrix(); });
-  }
+  void RotateLocalQuat(const glm::quat &dq);
+  void SetRotationQuat(const glm::quat &q);
 
   // --- scaling --------------------------------------------------------------
   template <Axes T> void ScaleLocal(float scalarValue);
@@ -51,7 +44,6 @@ public:
   // --- matrix stuff ---------------------------------------------------------
   void SetLocalMatrix(const glm::mat4 &mat); // only for GltfLoader
 
-  //
   void UpdatePositionMatrix();
   void UpdateRotationMatrix();
   void UpdateScaleMatrix();
@@ -60,12 +52,22 @@ public:
 
   // --- lookAt stuff ---------------------------------------------------------
   void UpdateLookAtDirection();
+  void SetLookAtDirection(const glm::vec3 &lookAtDir);
+
+  // --- dependents update ---------------------------------------------------
+  void UpdatePositionDependents();
+  void UpdateRotationDependents();
+  void UpdateScaleDependents();
 
 public:
   Transformations() {
-    m_position.SetAfterMorphCb([this] { UpdatePositionMatrix(); });
-    m_rotationQuat.SetAfterMorphCb([this] { UpdateRotationMatrix(); });
-    m_scale.SetAfterMorphCb([this] { UpdateScaleMatrix(); });
+    m_position.AddAfterMorphCbs([this] {
+      // TODO: If camera, then update lookAtDir(w.r.t. the lookAt point) -->
+      // updates quat --> updates rotMatrix --> updates camera viewMatrix
+      UpdatePositionDependents();
+    });
+    m_rotationQuat.AddAfterMorphCbs([this] { UpdateRotationDependents(); });
+    m_scale.AddAfterMorphCbs([this] { UpdateScaleDependents(); });
   }
   ~Transformations() = default;
 
@@ -75,10 +77,10 @@ public:
   Transformations &operator=(Transformations &&other) = delete;
 
 public:
-  template <typename F>
-  void SetCameraViewMatrixUpdateCb(F &&cameraViewMatrixUpdate_Cb) {
-    m_cameraViewMatrixUpdate_Cb = std::forward<F>(cameraViewMatrixUpdate_Cb);
-  }
+  // template <typename F>
+  // void SetCameraViewMatrixUpdateCb(F &&cameraViewMatrixUpdate_Cb) {
+  //   m_cameraViewMatrixUpdate_Cb = std::forward<F>(cameraViewMatrixUpdate_Cb);
+  // }
 
   template <typename F>
   void
@@ -105,12 +107,6 @@ private:
   }
 
   // Warning: To be modified by the GameObject class only
-  // [[nodiscard]] AnimationProperty<glm::vec3> *
-  // GetAnimationProperty_RotEuler() noexcept {
-  //   return &m_rotationEuler;
-  // }
-
-  // Warning: To be modified by the GameObject class only
   [[nodiscard]] AnimationProperty<glm::vec3> *
   GetAnimationProperty_Scale() noexcept {
     return &m_scale;
@@ -123,6 +119,9 @@ public:
   AnimationProperty<glm::quat> m_rotationQuat{1.0f, 0.0f, 0.0f, 0.0f};
   AnimationProperty<glm::vec3> m_scale{1.f, 1.f, 1.f};
 
+  AnimationProperty<glm::vec3> m_lookAt{0.f, 0.f, -1.f}; // towards the screen
+  glm::vec3 m_lookAtDir{0.f, 0.f, -1.f};                 // towards the screen
+
   glm::mat4 m_translationMatrix = PC_IDENTITY_MAT4;
   glm::mat4 m_rotationMatrix = PC_IDENTITY_MAT4;
   glm::mat4 m_scaleMatrix = PC_IDENTITY_MAT4;
@@ -130,14 +129,12 @@ public:
   glm::mat4 m_localMatrix = PC_IDENTITY_MAT4; // Local -> Parent
   glm::mat4 m_worldMatrix = PC_IDENTITY_MAT4; // Local -> World
 
-  glm::vec3 m_lookAtDir{0.f, 0.f, -1.f}; // towards the screen
-
   bool m_worldMatrixNeedsUpdate = false;
 
   // TODO: Change callbacks to observer pattern
   // Callbacks (for game objects -- camera, lights etc.)
   std::function<void()> m_gameObjChildWorldMatUpdateFlag_Cb = nullptr;
-  std::function<void()> m_cameraViewMatrixUpdate_Cb = nullptr;
+  // std::function<void()> m_cameraViewMatrixUpdate_Cb = nullptr;
 };
 
 //
