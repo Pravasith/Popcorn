@@ -74,15 +74,15 @@ public:
     auto &animTrack0 = scene.GetAnimationTrack(3);
 
     CurveInfoLinearForm<glm::vec3> lookAtTargetCInfo;
-    lookAtTargetCInfo.p0 = {0.f, 0.f, 0.f};
-    lookAtTargetCInfo.p1 = cylinder->GetPosition();
+    lookAtTargetCInfo.p0 = cylinder->GetPosition();
+    lookAtTargetCInfo.p1 = {0.f, 0.f, 0.f};
 
     const LinearCurve<glm::vec3> *lookAtCurve =
         curveFactory->GetCurvePtr(lookAtTargetCInfo);
 
-    TimeTrain ttRot(camera->GetAnimationProperty_LookAtTarget(), lookAtCurve,
-                    0.0, 1.0);
-    animTrack0.Insert_Slow(ttRot);
+    TimeTrain ttLookAt(camera->GetAnimationProperty_LookAtTarget(), lookAtCurve,
+                       0.0, .75);
+    animTrack0.Insert_Slow(ttLookAt);
 
     camera->ActivateLookAtTarget(true);
     // cylinder->SetLookAtTargetPoint()

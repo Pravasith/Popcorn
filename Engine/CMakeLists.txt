@@ -78,14 +78,6 @@ find_package(glm CONFIG REQUIRED)
 # TARGETS
 # -----------------------------------------------------------------------
 
-# GLAD
-target_include_directories(
-  glad
-  PUBLIC $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}/glad/include>
-  PRIVATE $<INSTALL_INTERFACE:third-party>)
-target_precompile_headers(
-  glad PRIVATE ${PLATFORM_AGNOSTIC_VENDOR_DIR}/glad/include/glad/glad.h)
-
 # VMA
 target_include_directories(
   vma
@@ -209,11 +201,11 @@ target_link_libraries(Graphics PRIVATE Events Vulkan::Headers Vulkan::Loader
                                        glfw vma)
 target_link_libraries(Graphics PUBLIC glm::glm)
 
-target_link_libraries(Window PRIVATE glad glfw)
+target_link_libraries(Window PRIVATE glfw)
 target_link_libraries(Window PRIVATE Events)
 
 target_link_libraries(Popcorn PUBLIC tinygltf)
-target_link_libraries(Popcorn PRIVATE glad glfw)
+target_link_libraries(Popcorn PRIVATE glfw)
 target_link_libraries(Popcorn PUBLIC Graphics)
 target_link_libraries(Popcorn PRIVATE Window ImGui)
 
@@ -270,7 +262,6 @@ install(
           tinygltf
           ImGui
           Graphics
-          glad
           Events
           vma
   EXPORT PopcornTargets
