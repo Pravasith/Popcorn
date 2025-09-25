@@ -227,10 +227,6 @@ void AnimationTrack::MorphPassengers(double t, bool useSlowAlgo) {
 //
 // --- Update ------------------------------------------------------------------
 bool AnimationTrack::OnUpdate(TimeEvent &e) {
-  // m_elapsedTimeS += e.GetDeltaS();
-  // PC_WARN("ELAPSED: " << m_elapsedTimeS)
-  // PC_WARN("DURATION: " << m_durationS)
-
   if ((m_elapsedTimeS += e.GetDeltaS()) < m_durationS) {
     double t = GetNormalizedElapsedSecs();
 

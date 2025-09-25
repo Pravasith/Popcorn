@@ -41,16 +41,26 @@ static glm::mat4 PC_BuildViewMatrix(const glm::quat &orientationQuat,
 };
 
 class Camera : public GameObject {
-
+  //
   // TODO: Add viewProj & invViewProj matrices evaluation here for caching
   // before copying into Vulkan buffers
   //
-  // TODO: Change callbacks to observer pattern
 
 public:
   Camera() {
-    m_transformData.m_position.AddAfterMorphCbs(
-        [this]() { UpdateViewMatrix(); });
+    m_transformData.m_position.AddAfterMorphCbs([this]() {
+      if (m_activateLookAtTarget) {
+        SetLookAtDirection(glm::normalize(
+            m_lookAtTarget.GetValue() -
+            GetPosition())); // Note: This eventually sets rotationQuat, which
+                             // eventually fires the callback below that
+                             // contains UpdateViewMatrix. So view matrix is
+                             // indirectly updated here too.
+      } else {
+        UpdateViewMatrix();
+      }
+    });
+
     m_transformData.m_rotationQuat.AddAfterMorphCbs(
         [this]() { UpdateViewMatrix(); });
   }
@@ -71,6 +81,17 @@ public:
   [[nodiscard]] const glm::mat4 &GetViewMatrix() const { return m_viewMatrix; }
   [[nodiscard]] const glm::mat4 &GetProjectionMatrix() const {
     return m_projMatrix;
+  }
+
+  // When m_lookAtTarget is animated, it only updates the Quaternion orientation
+  // (and eventually the rotMatrix --> lookAtDirection --> viewMatrix (via the
+  // above m_rotationQuat.afterMorphCb)) when m_activateLookAtTarget is true.
+  AnimationProperty<glm::vec3> *GetAnimationProperty_LookAtTarget() {
+    return &m_lookAtTarget;
+  }
+
+  void ActivateLookAtTarget(bool activateLookAtTarget) {
+    m_activateLookAtTarget = activateLookAtTarget;
   }
 
   virtual constexpr GameObjectTypes GetGameObjectType() const override {
@@ -129,8 +150,9 @@ private:
   glm::mat4 m_projMatrix{1.f};
 
   AnimationProperty<glm::vec4> m_cameraData;
+  AnimationProperty<glm::vec3> m_lookAtTarget{0.f, 0.f, 0.f};
 
-  bool m_viewProjMatrixNeedsUpdate = false;
+  bool m_activateLookAtTarget = false;
 };
 
 GFX_NAMESPACE_END

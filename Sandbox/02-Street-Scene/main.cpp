@@ -17,6 +17,7 @@
 #include <Splines.h>
 #include <Time.h>
 #include <TimeEvent.h>
+#include <functional>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
 #include <glm/glm.hpp>
@@ -59,34 +60,32 @@ public:
     const Spline<glm::vec3> *cmr_Spl =
         splineFactory->MakeAutomaticSpline(knots);
 
-    // GameObject *cylinder = scene.FindObjectByName("Camera");
+    Camera *camera = static_cast<Camera *>(scene.FindObjectByName("Camera"));
     GameObject *cylinder = scene.FindObjectByName("Cylinder");
 
     double deltaStep = 3.0;
 
     // Animate camera
-    TimeTrain tt(cylinder->GetAnimationProperty_Pos(), cmr_Spl, 0.0, 1.0);
+    TimeTrain tt(camera->GetAnimationProperty_Pos(), cmr_Spl, 0.0, 1.0);
 
     AnimationTrack catmullRom;
     catmullRom.Insert_Slow(tt);
     scene.AddAnimationTrack(std::move(catmullRom));
     auto &animTrack0 = scene.GetAnimationTrack(3);
 
-    // Animate cylinder (rotation)
-    glm::vec3 target{0, 0, 0};
+    CurveInfoLinearForm<glm::vec3> lookAtTargetCInfo;
+    lookAtTargetCInfo.p0 = {0.f, 0.f, 0.f};
+    lookAtTargetCInfo.p1 = cylinder->GetPosition();
 
-    std::vector<LinearKnot<glm::quat>> quatKnots;
-    quatKnots.reserve(knots.size());
+    const LinearCurve<glm::vec3> *lookAtCurve =
+        curveFactory->GetCurvePtr(lookAtTargetCInfo);
 
-    for (const LinearKnot<glm::vec3> &posKnot : knots) {
-      glm::quat orientationQ = glm::quatLookAtRH(
-          glm::normalize(target - posKnot.val), PC_WORLD_UP_DIR);
-      quatKnots.emplace_back(LinearKnot<glm::quat>{orientationQ, posKnot.t});
-    }
-
-    const Spline<glm::quat> *rotSpl = splineFactory->MakeSpline(quatKnots);
-    TimeTrain ttRot(cylinder->GetAnimationProperty_RotQuat(), rotSpl, 0.0, 1.0);
+    TimeTrain ttRot(camera->GetAnimationProperty_LookAtTarget(), lookAtCurve,
+                    0.0, 1.0);
     animTrack0.Insert_Slow(ttRot);
+
+    camera->ActivateLookAtTarget(true);
+    // cylinder->SetLookAtTargetPoint()
 
     animTrack0.Play(9.0, [&](AnimationTrack *) {
       PC_PRINT("ANIMATION 0 FINISHED YAYY!", TagType::Print, "")
