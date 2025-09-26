@@ -317,10 +317,10 @@ void GltfLoader::ExtractCameraData(const tinygltf::Model &model,
     }
 
     data.fov = static_cast<float>(p.yfov); // radians
-    data.near = static_cast<float>(p.znear);
-    data.far = (p.zfar > 0.0)
-                   ? static_cast<float>(p.zfar)
-                   : 1000.0f; // if zfar not provided, assume large value
+    data.zNear = static_cast<float>(p.znear);
+    data.zFar = (p.zfar > 0.0)
+                    ? static_cast<float>(p.zfar)
+                    : 1000.0f; // if zfar not provided, assume large value
   } else if (gltfCamera.type == "orthographic") {
     PC_WARN("Orthographic camera not supported yet!")
   }

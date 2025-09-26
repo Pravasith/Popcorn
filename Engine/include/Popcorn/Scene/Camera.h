@@ -20,8 +20,8 @@ GFX_NAMESPACE_BEGIN
 struct CameraData {
   float fov = 45.f;
   float aspectRatio = 1.0f;
-  float near = 0.1f;
-  float far = 1000.0f;
+  float zNear = 0.1f;
+  float zFar = 1000.0f;
 };
 
 static glm::mat4 PC_BuildViewMatrix(const glm::quat &orientationQuat,
@@ -70,8 +70,8 @@ public:
     m_cameraData.Set(glm::vec4{
         data.fov,         // fov
         data.aspectRatio, // aspectRatio
-        data.near,        // near
-        data.far          // far
+        data.zNear,       // near
+        data.zFar         // far
     });
 
     UpdateViewMatrix();
