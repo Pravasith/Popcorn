@@ -97,8 +97,8 @@ else
     echo "Invalid input. Please enter 'L' for Linux or 'W' for Windows."
 fi
 
-
 # Compile shaders
 cd $src_dir
 echo "Compiling shaders..."
 ./scripts/compile-shaders.sh
+echo "Compiling shaders done"

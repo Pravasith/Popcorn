@@ -137,6 +137,7 @@ echo "Building GLFW complete"
 echo "Installing GLAD..."
 glad_sm_dir="$submodules_dir/glad"
 
+
 # COPY GLAD FILES FROM SUBMODULES TO VENDOR
 #
 # -----------------------------------------------------------------------
@@ -163,6 +164,8 @@ vma_sm_dir="$submodules_dir/vma"
 # -----------------------------------------------------------------------
 cp -r "$vma_sm_dir" "$vendor_platform_agnostic_dir"
 
+cd "$curr_dir"
+
 echo "Installing VMA complete"
 # -----------------------------------------------------------------------
 # LIBRARY INSTALL - VMA --- END
@@ -188,6 +191,8 @@ mkdir -p "$imgui_vendor_platform_agnostic_dir"
 cp -a "$imgui_sm_dir/."  \
       "$imgui_vendor_platform_agnostic_dir"
 
+cd "$curr_dir"
+
 
 echo "Installing ImGui complete"
 
@@ -205,18 +210,14 @@ echo "Installing ImGui complete"
 
 echo "Installing tinyGltf..."
 tiny_gltf_sm_dir="$submodules_dir/tiny-gltf"
-tiny_gltf_sm_backends_dir="$tiny_gltf_sm_dir/backends"
-
-tiny_gltf_vendor_platform_agnostic_dir="$vendor_platform_agnostic_dir/tiny-gltf"
-mkdir -p "$tiny_gltf_vendor_platform_agnostic_dir"
 
 # COPY TINYGLTF FILES FROM SUBMODULES TO VENDOR
 #
 # LINUX & WINDOWS
 # -----------------------------------------------------------------------
-cp -a "$tiny_gltf_sm_dir/."  \
-      "$tiny_gltf_vendor_platform_agnostic_dir"
+cp -r "$tiny_gltf_sm_dir" "$vendor_platform_agnostic_dir"
 
+cd "$curr_dir"
 
 echo "Installing tinyGltf complete"
 
@@ -224,6 +225,37 @@ echo "Installing tinyGltf complete"
 # SUBMODULE INSTALL - TINYGLTF --- END
 # -----------------------------------------------------------------------
 
+#
+#
+#
+#
+#
+
+# -----------------------------------------------------------------------
+# SUBMODULE INSTALL - NLOHMANN-JSON --- START
+# -----------------------------------------------------------------------
+
+echo "Installing Nlohmann Json..."
+nlohmann_json_sm_dir="$submodules_dir/nlohmann-json"
+
+# COPY NLOHMANN-JSON FILES FROM SUBMODULES TO VENDOR
+#
+# LINUX & WINDOWS
+# -----------------------------------------------------------------------
+cp -r "$nlohmann_json_sm_dir" "$vendor_platform_agnostic_dir"
+
+cd "$curr_dir"
+
+echo "Installing Nlohmann Json complete"
+
+# -----------------------------------------------------------------------
+# SUBMODULE INSTALL - NLOHMANN-JSON --- END
+# -----------------------------------------------------------------------
+
+#
+#
+#
+#
 #
 
 # -----------------------------------------------------------------------

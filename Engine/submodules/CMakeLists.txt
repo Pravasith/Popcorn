@@ -15,5 +15,3 @@ add_library(
   ${PLATFORM_AGNOSTIC_DIR}/imgui/backends/imgui_impl_glfw.cpp)
 
 add_library(vma ${PLATFORM_AGNOSTIC_DIR}/vma/vk_mem_alloc.cpp)
-
-add_library(tinygltf ${PLATFORM_AGNOSTIC_DIR}/tiny-gltf/tiny_gltf.cc)

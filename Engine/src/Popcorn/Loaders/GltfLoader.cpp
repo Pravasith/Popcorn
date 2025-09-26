@@ -32,6 +32,11 @@
 #include <string>
 #include <vector>
 
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define TINYGLTF_IMPLEMENTATION
+#include "tiny_gltf.h"
+
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
 

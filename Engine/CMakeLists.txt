@@ -87,14 +87,6 @@ target_include_directories(
 target_precompile_headers(vma PRIVATE
                           ${PLATFORM_AGNOSTIC_VENDOR_DIR}/vma/vk_mem_alloc.h)
 
-# tinygltf
-target_include_directories(
-  tinygltf
-  PUBLIC $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}>
-         $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}/tiny-gltf>
-  INTERFACE $<INSTALL_INTERFACE:third-party>
-            $<INSTALL_INTERFACE:third-party/tiny-gltf>)
-
 # ImGui
 target_include_directories(
   ImGui
@@ -140,6 +132,9 @@ target_include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Memory>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/Pipelines>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Platform/Vulkan/RenderFlows>
+    # tinygltf
+    $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}>
+    $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}/tiny-gltf>
   INTERFACE $<INSTALL_INTERFACE:include>
             $<INSTALL_INTERFACE:include/Popcorn/Graphics>
             $<INSTALL_INTERFACE:include/Popcorn/Graphics/Materials>
@@ -151,7 +146,10 @@ target_include_directories(
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Descriptors>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Memory>
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/Pipelines>
-            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/RenderFlows>)
+            $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/RenderFlows>
+            # tinygltf
+            $<INSTALL_INTERFACE:third-party>
+            $<INSTALL_INTERFACE:third-party/tiny-gltf>)
 
 target_include_directories(
   Popcorn
@@ -159,10 +157,16 @@ target_include_directories(
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core>
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Loaders>
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Layers>
+         # Nlohmann Json
+         $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}>
+         $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}/nlohmann-json>
   INTERFACE $<INSTALL_INTERFACE:include>
             $<INSTALL_INTERFACE:include/Popcorn/Core>
             $<INSTALL_INTERFACE:include/Popcorn/Loaders>
-            $<INSTALL_INTERFACE:include/Popcorn/Layers>)
+            $<INSTALL_INTERFACE:include/Popcorn/Layers>
+            # Nlohmann Json
+            $<INSTALL_INTERFACE:third-party>
+            $<INSTALL_INTERFACE:third-party/nlohmann-json>)
 
 # DEBUG FLAGS
 option(PC_DEBUG "USE DEBUG MODE FOR COMPILING" ON)
@@ -204,7 +208,6 @@ target_link_libraries(Graphics PUBLIC glm::glm)
 target_link_libraries(Window PRIVATE glfw)
 target_link_libraries(Window PRIVATE Events)
 
-target_link_libraries(Popcorn PUBLIC tinygltf)
 target_link_libraries(Popcorn PRIVATE glfw)
 target_link_libraries(Popcorn PUBLIC Graphics)
 target_link_libraries(Popcorn PRIVATE Window ImGui)
@@ -257,13 +260,7 @@ install(
   PATTERN "*.spv")
 
 install(
-  TARGETS Popcorn
-          Window
-          tinygltf
-          ImGui
-          Graphics
-          Events
-          vma
+  TARGETS Popcorn Window ImGui Graphics Events vma
   EXPORT PopcornTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

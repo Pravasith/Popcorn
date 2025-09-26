@@ -7,6 +7,12 @@ read -p "Are you compiling for Linux or Windows? (Enter 'L' for Linux or 'W' for
 platform=$(echo "$platform" | tr '[:upper:]' '[:lower:]')
 src_dir="$PWD"
 
+# Make asset dirs
+cd $src_dir
+echo "Making asset folders..."
+mkdir -p "$src_dir/assets/models" "$src_dir/assets/shaders"
+echo "Making asset folders done"
+
 # Check the user input and print a message accordingly
 if [ "$platform" = "l" ]; then
     echo "You are compiling for Linux."
