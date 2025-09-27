@@ -135,6 +135,9 @@ target_include_directories(
     # tinygltf
     $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}>
     $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}/tiny-gltf>
+    # Nlohmann Json
+    $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}>
+    $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}/nlohmann-json>
   INTERFACE $<INSTALL_INTERFACE:include>
             $<INSTALL_INTERFACE:include/Popcorn/Graphics>
             $<INSTALL_INTERFACE:include/Popcorn/Graphics/Materials>
@@ -149,7 +152,10 @@ target_include_directories(
             $<INSTALL_INTERFACE:include/Popcorn/Platform/Vulkan/RenderFlows>
             # tinygltf
             $<INSTALL_INTERFACE:third-party>
-            $<INSTALL_INTERFACE:third-party/tiny-gltf>)
+            $<INSTALL_INTERFACE:third-party/tiny-gltf>
+            # Nlohmann Json
+            $<INSTALL_INTERFACE:third-party>
+            $<INSTALL_INTERFACE:third-party/nlohmann-json>)
 
 target_include_directories(
   Popcorn
@@ -157,16 +163,10 @@ target_include_directories(
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core>
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Loaders>
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Layers>
-         # Nlohmann Json
-         $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}>
-         $<BUILD_INTERFACE:${PLATFORM_AGNOSTIC_VENDOR_DIR}/nlohmann-json>
   INTERFACE $<INSTALL_INTERFACE:include>
             $<INSTALL_INTERFACE:include/Popcorn/Core>
             $<INSTALL_INTERFACE:include/Popcorn/Loaders>
-            $<INSTALL_INTERFACE:include/Popcorn/Layers>
-            # Nlohmann Json
-            $<INSTALL_INTERFACE:third-party>
-            $<INSTALL_INTERFACE:third-party/nlohmann-json>)
+            $<INSTALL_INTERFACE:include/Popcorn/Layers>)
 
 # DEBUG FLAGS
 option(PC_DEBUG "USE DEBUG MODE FOR COMPILING" ON)
