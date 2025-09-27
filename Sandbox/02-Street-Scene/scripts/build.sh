@@ -1,140 +1,150 @@
 #!/bin/bash
 
-# Ask the user for the target platform
-read -p "Are you compiling for Linux or Windows? (Enter 'L' for Linux or 'W' for Windows): " platform
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m'
 
-# Convert the input to lowercase for case-insensitive comparison
-platform=$(echo "$platform" | tr '[:upper:]' '[:lower:]')
-src_dir="$PWD"
+ask_which_platform() {
+    read -p "Are you compiling for Linux or Windows? \
+(Enter 'L' for Linux or 'W' for Windows): " platform
 
-# Make asset dirs
-cd $src_dir
-echo "Making asset folders..."
-mkdir -p "$src_dir/assets/models" "$src_dir/assets/shaders"
-echo "Making asset folders done"
+    # Lower case convert
+    platform=$(echo -e "$platform" | tr '[:upper:]' '[:lower:]')
 
-# Check the user input and print a message accordingly
-if [ "$platform" = "l" ]; then
-    echo "You are compiling for Linux."
-
-    build_dir="$src_dir/build/linux"
-    install_dir="$src_dir/dist/linux"
-
-    mkdir -p "$build_dir"
-    mkdir -p "$install_dir"
-
-    read -p "Clean build? y/N " clean_build_prompt
-    clean_build_prompt=$(echo "$clean_build_prompt" | tr '[:upper:]' '[:lower:]')
-
-    if [ "$clean_build_prompt" = 'y' ]; then
-        echo "Performing a clean build..."
-        rm -rf "$build_dir"
-        rm -rf "$install_dir"
-    elif [ "$clean_build_prompt" = 'n' ]; then
-        echo "Performing a non-clean build..."
+    if [ "$platform" = "l" ]; then
+        :
+    elif [ "$platform" = "w" ]; then
+        :
     else
-        echo "Performing a non-clean build..."
+        echo -e "${RED}Invalid input. Please enter 'L' for Linux or \
+'W' for Windows.${NC}"
+        exit 1
+    fi
+}
+
+make_required_dirs() {
+    src_dir="$PWD"
+
+    if [ "$platform" = "l" ]; then
+        build_dir="$src_dir/build/linux"
+        install_dir="$src_dir/dist/linux"
+    else
+        build_dir="$src_dir"/build/windows
+        install_dir="$src_dir/dist/windows"
     fi
 
+    # Build & install dirs
     mkdir -p "$build_dir"
     mkdir -p "$install_dir"
-    cd "$build_dir"
 
-    cmake \
-        -D CMAKE_INSTALL_PREFIX="$install_dir" \
-        -D CMAKE_EXPORT_COMPILE_COMMANDS=ON \
-        -D CMAKE_BUILD_TYPE=Debug \
-        -S ../../ \
-        -B .
+    # Make asset dirs
+    echo -e "${YELLOW}Making asset folders...${NC}"
+    mkdir -p "$src_dir/assets/models" "$src_dir/assets/shaders" \
+        "$src_dir/assets/curves"
+    echo -e "${GREEN}Making asset folders done${NC}"
+}
 
-    cp compile_commands.json "$src_dir"/compile_commands.json
-    cmake --build . --target install
+ask_if_clean_build_needed() {
+    read -p "Do you want a clean build? y/N " clean_build_prompt
+    clean_build_prompt=$(echo -e "$clean_build_prompt" \
+        | tr '[:upper:]' '[:lower:]')
 
-    # Copy shaders from Popcorn dist to Sandbox bin
-    shader_src="$src_dir/../../Engine/dist/linux/assets/shaders"
+    if [ "$clean_build_prompt" = 'y' ]; then
+        echo -e "Performing a clean build..."
+        # Nuke shit and remake
+        rm -rf "$build_dir"
+        rm -rf "$install_dir"
+        make_required_dirs
+    elif [ "$clean_build_prompt" = 'n' ]; then
+        echo -e "${YELLOW}Performing a non-clean build...${NC}"
+    else
+        echo -e "${YELLOW}Performing a non-clean build...${NC}"
+    fi
+}
+
+compile_game() {
+    if [ "$platform" = "l" ]; then
+        echo -e "${YELLOW}Compiling your game for Linux machines...${NC}"
+
+        cd "$build_dir"
+
+        cmake \
+            -D CMAKE_INSTALL_PREFIX="$install_dir" \
+            -D CMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -D CMAKE_BUILD_TYPE=Debug \
+            -S ../../ \
+            -B .
+
+        cp compile_commands.json "$src_dir"/compile_commands.json
+        cmake --build . --target install
+        echo -e "${GREEN}Compiling your game for Linux machines done${NC}"
+    else
+        echo -e "${YELLOW}Compiling your game for Windows machines...${NC}"
+
+        cd "$build_dir"
+
+        cmake \
+            -D CMAKE_INSTALL_PREFIX="$install_dir" \
+            -D CMAKE_TOOLCHAIN_FILE=../../toolchain-win.cmake \
+            -D CMAKE_BUILD_TYPE=Release \
+            -S ../../ \
+            -B .
+            # ADD BELOW FLAG FOR RELEASE BUILDS
+            # -D CMAKE_BUILD_TYPE=Release \
+
+        cmake --build . --target install
+        echo -e "${GREEN}Compiling your game for Windows machines done${NC}"
+    fi
+}
+
+copy_assets() {
+    echo -e "${YELLOW}Copying assets to dist...${NC}"
+
+    # Engine shaders
+    if [ "$platform" = "l" ]; then
+        engine_shaders_src="$src_dir/../../Engine/dist/linux/assets/shaders"
+    else
+        engine_shaders_src="$src_dir/../../Engine/dist/windows/assets/shaders"
+    fi
+
+    # Custom shaders
+    custom_shaders_src="$src_dir/assets/shaders"
+
     shader_dest="$install_dir/assets/shaders"
-
-    echo "Copying shaders from $shader_src to $shader_dest"
     mkdir -p "$shader_dest"
-    cp -r "$shader_src/"* "$shader_dest/"
 
-    echo -e "\033[36mShaders copied to Sandbox assets directory (Linux)\033[0m"
+    cp -r "$engine_shaders_src/." "$custom_shaders_src/." "$shader_dest/"
 
     # Copy models to dist folder
     models_src="$src_dir/assets/models"
     models_dest="$install_dir/assets/models"
 
-    echo "Copying models from $models_src to $models_dest"
     mkdir -p "$models_dest"
-    cp -r "$models_src/"* "$models_dest/"
+    cp -r "$models_src/." "$models_dest"
 
-    echo -e "\033[36mModels copied to Sandbox assets directory (Linux)\033[0m"
+    # Copy curves to dist folder
+    curves_src="$src_dir/assets/curves"
+    curves_dest="$install_dir/assets/curves"
 
-    echo $PWD
+    mkdir -p "$curves_dest"
+    cp -r "$curves_src/." "$curves_dest"
 
-    echo -e "\033[32mProgram compiled successfully for linux\033[0m"
+    echo -e "${GREEN}Copying assets to dist done${NC}"
+}
 
-elif [ "$platform" = "w" ]; then
-    echo "You are compiling for Windows."
+run_script() {
+    echo -e "${YELLOW}Running script...${NC}"
 
-    build_dir="$src_dir"/build/windows
-    install_dir="$src_dir/dist/windows"
+    ask_which_platform
+    make_required_dirs
+    ask_if_clean_build_needed
+    compile_game
+    copy_assets
 
-    mkdir -p "$build_dir"
-    mkdir -p "$install_dir"
+    echo -e "${GREEN}Running script done${NC}"
+}
 
-    read -p "Clean build? y/N " clean_build_prompt
-    clean_build_prompt=$(echo "$clean_build_prompt" | tr '[:upper:]' '[:lower:]')
+run_script
 
-    if [ "$clean_build_prompt" = 'y' ]; then
-        echo "Performing a clean build..."
-        rm -rf "$build_dir"
-        rm -rf "$install_dir"
-    elif [ "$clean_build_prompt" = 'n' ]; then
-        echo "Performing a non-clean build..."
-    else
-        echo "Performing a non-clean build..."
-    fi
-
-    mkdir -p "$build_dir"
-    mkdir -p "$install_dir"
-    cd "$build_dir"
-
-    cmake \
-        -D CMAKE_INSTALL_PREFIX="$install_dir" \
-        -D CMAKE_TOOLCHAIN_FILE=../../toolchain-win.cmake \
-        -D CMAKE_BUILD_TYPE=Release \
-        -S ../../ \
-        -B .
-        # ADD BELOW FLAG FOR RELEASE BUILDS
-        # -D CMAKE_BUILD_TYPE=Release \
-
-    cmake --build . --target install
-
-    # Copy shaders from Popcorn dist to Sandbox bin
-    shader_src="$src_dir/../../Engine/dist/windows/assets/shaders"
-    shader_dest="$install_dir/assets/shaders"
-
-    echo "Copying shaders from $shader_src to $shader_dest"
-    mkdir -p "$shader_dest"
-    cp -r "$shader_src/"* "$shader_dest/"
-
-    echo -e "\033[36mShaders copied to Sandbox assets directory (Windows)\033[0m"
-
-    # Copy models to dist folder
-    models_src="$src_dir/assets/models"
-    models_dest="$install_dir/assets/models"
-    mkdir -p "$models_dest"
-    cp -r "$models_src/"* "$models_dest/"
-
-    echo -e "\033[36mModels copied to Sandbox assets directory (Windows)\033[0m"
-
-    echo $PWD
-
-    echo -e "\033[32mProgram compiled successfully for windows\033[0m"
-
-else
-    echo "Invalid input. Please enter 'L' for Linux or 'W' for Windows."
-fi
-
-cd $src_dir
+cd "$src_dir" || exit 1
