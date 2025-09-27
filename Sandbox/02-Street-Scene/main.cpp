@@ -1,3 +1,4 @@
+#include "SplineUtils.h"
 #include <Animation.h>
 #include <BufferObjects.h>
 #include <Camera.h>
@@ -58,7 +59,8 @@ public:
     auto *curveFactory = Popcorn::Context::GetCurveFactory();
 
     const Spline<glm::vec3> *cmr_Spl =
-        splineFactory->MakeAutomaticSpline(knots);
+        // splineFactory->MakeAutomaticSpline(knots);
+        PC_MakeBezierSplineFromBlenderJson("../assets/curves/curve.json");
 
     Camera *camera = static_cast<Camera *>(scene.FindObjectByName("Camera"));
     GameObject *cylinder = scene.FindObjectByName("Cylinder");
