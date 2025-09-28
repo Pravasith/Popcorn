@@ -117,20 +117,14 @@ BUFFER_DEFS_NAMESPACE_END
 //
 class VertexBuffer {
 public:
-  VertexBuffer() {
-    // PC_PRINT("CREATED(DEFAULT)", TagType::Constr, "VERTEX-BUFFER");
-  };
-  virtual ~VertexBuffer() {
-    // PC_PRINT("DESTROYED", TagType::Destr, "VERTEX-BUFFER")
-  };
+  VertexBuffer() {}
+  virtual ~VertexBuffer() {}
 
   template <BufferDefs::AttrTypes... E> inline void SetLayout() {
     m_layout.Set<E...>();
-  };
+  }
 
-  inline void SetLayout(const BufferDefs::Layout &layout) {
-    m_layout = layout;
-  };
+  inline void SetLayout(const BufferDefs::Layout &layout) { m_layout = layout; }
 
   [[nodiscard]] inline const BufferDefs::Layout &GetLayout() const {
     PC_ASSERT(m_layout.countValue != 0, "BufferDefs::Layout is empty!");
@@ -146,18 +140,18 @@ public:
 
   template <typename T> void Fill(std::initializer_list<T> list) {
     m_buffer.SetData(list);
-  };
+  }
 
   void Fill(const void *data, uint64_t size, uint64_t offset = 0) {
     m_buffer.WriteBytes(data, size, offset);
-  };
+  }
 
-  template <typename T> void PrintBuffer() { Buffer::Print<T>(m_buffer); };
+  template <typename T> void PrintBuffer() { Buffer::Print<T>(m_buffer); }
 
   static VertexBuffer *Create();
   static void Destroy(VertexBuffer *);
 
-  void Allocate(uint64_t size) { m_buffer.Resize(size); };
+  void Allocate(uint64_t size) { m_buffer.Resize(size); }
 
   // COPY CONSTRUCTOR
   VertexBuffer(const VertexBuffer &other) {
@@ -165,7 +159,7 @@ public:
              "VERTEX-BUFFER(INHERITED)")
     m_buffer = other.m_buffer;
     m_layout = other.m_layout;
-  };
+  }
   virtual VertexBuffer &operator=(const VertexBuffer &other) {
     PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print,
              "VERTEX-BUFFER(INHERITED)")
@@ -176,7 +170,7 @@ public:
     m_buffer = other.m_buffer;
     m_layout = other.m_layout;
     return *this;
-  };
+  }
 
   // MOVE CONSTRUCTOR
   VertexBuffer(VertexBuffer &&other) {
@@ -189,7 +183,7 @@ public:
     m_buffer = std::move(other.m_buffer);
     m_layout = other.m_layout;
     // other.m_layout.Reset();
-  };
+  }
   virtual VertexBuffer &operator=(VertexBuffer &&other) {
     PC_PRINT("MOVE ASSIGNMENT EVOKED", TagType::Print,
              "VERTEX-BUFFER(INHERITED)")
@@ -203,7 +197,7 @@ public:
     // other.m_layout.Reset();
 
     return *this;
-  };
+  }
 
 protected:
   Buffer m_buffer;
@@ -222,23 +216,19 @@ concept Is_Uint16_Or_Uint32_t =
 
 template <Is_Uint16_Or_Uint32_t T> class IndexBuffer {
 public:
-  IndexBuffer() { 
-      // PC_PRINT("CREATED", TagType::Constr, "IndexBuffer") 
-  };
-  ~IndexBuffer() { 
-      // PC_PRINT("DESTROYED", TagType::Destr, "IndexBuffer") 
-  };
+  IndexBuffer() {}
+  ~IndexBuffer() {}
 
-  const uint64_t GetSize() const { return m_buffer.GetSize(); };
-  const uint64_t GetCount() const { return m_buffer.GetCount(sizeof(T)); };
+  const uint64_t GetSize() const { return m_buffer.GetSize(); }
+  const uint64_t GetCount() const { return m_buffer.GetCount(sizeof(T)); }
 
-  void Allocate(uint64_t size) { m_buffer.Resize(size); };
+  void Allocate(uint64_t size) { m_buffer.Resize(size); }
 
-  void Fill(std::initializer_list<T> elements) { m_buffer.SetData(elements); };
+  void Fill(std::initializer_list<T> elements) { m_buffer.SetData(elements); }
 
   void Fill(const void *data, uint64_t size, uint64_t offset = 0) {
     m_buffer.WriteBytes(data, size, offset);
-  };
+  }
 
   [[nodiscard]] inline byte_t *GetBufferData() const {
     return m_buffer.GetData();
@@ -248,7 +238,7 @@ public:
   IndexBuffer(const IndexBuffer &other) {
     PC_PRINT("COPY CONSTRUCTOR EVOKED", TagType::Constr, "IndexBuffer")
     m_buffer = other.m_buffer;
-  };
+  }
   virtual IndexBuffer &operator=(const IndexBuffer &other) {
     PC_PRINT("COPY ASSIGNMENT EVOKED", TagType::Print, "IndexBuffer")
 
@@ -257,30 +247,30 @@ public:
 
     m_buffer = other.m_buffer;
     return *this;
-  };
+  }
 
   // MOVE CONSTRUCTOR
   IndexBuffer(IndexBuffer &&other) {
     PC_PRINT("MOVE CONSTRUCTOR EVOKED", TagType::Constr, "INDEX-BUFFER")
     if (this == &other) {
       return;
-    };
+    }
 
     m_buffer = std::move(other.m_buffer);
     // other.m_layout.Reset();
-  };
+  }
   virtual IndexBuffer &operator=(IndexBuffer &&other) {
     PC_PRINT("MOVE ASSIGNMENT EVOKED", TagType::Print, "INDEX-BUFFER")
 
     if (this == &other) {
       return *this;
-    };
+    }
 
     m_buffer = std::move(other.m_buffer);
     // other.m_layout.Reset();
 
     return *this;
-  };
+  }
 
 private:
   Buffer m_buffer;

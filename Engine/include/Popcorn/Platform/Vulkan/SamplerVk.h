@@ -11,8 +11,8 @@ GFX_NAMESPACE_BEGIN
 
 class SamplerVk {
 public:
-  SamplerVk() { PC_PRINT("CREATED", TagType::Constr, "SamplerVk.h") };
-  ~SamplerVk() { PC_PRINT("DESTROYED", TagType::Destr, "SamplerVk.h") };
+  SamplerVk() { PC_PRINT("CREATED", TagType::Constr, "SamplerVk.h") }
+  ~SamplerVk() { PC_PRINT("DESTROYED", TagType::Destr, "SamplerVk.h") }
 
   static void
   GetDefaultSamplerCreateInfoValues(VkSamplerCreateInfo &createInfo) {

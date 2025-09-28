@@ -139,7 +139,7 @@ void CompositeRenderFlowVk::CreateRenderPass() {
   renderPassInfo.pDependencies = &dependency;
 
   m_renderPass.Create(renderPassInfo, ContextVk::Device()->GetDevice());
-};
+}
 
 //
 //
@@ -175,7 +175,7 @@ void CompositeRenderFlowVk::CreateFramebuffers() {
       throw std::runtime_error("failed to create swapchain framebuffer!");
     }
   };
-};
+}
 
 //
 //
@@ -194,7 +194,7 @@ void CompositeRenderFlowVk::CreateCommandBuffers() {
   allocInfo.commandBufferCount = MAX_FRAMES_IN_FLIGHT;
 
   cmdPool->AllocCommandBuffers(allocInfo, m_commandBuffers.data());
-};
+}
 
 //
 //
@@ -226,7 +226,7 @@ void CompositeRenderFlowVk::AllocDescriptorsLocal() {
       compositePool.AllocateDescriptorSets<DescriptorSets::PresentSet,
                                            MAX_FRAMES_IN_FLIGHT>(
           ContextVk::Device()->GetDevice(), compositeLayouts);
-};
+}
 
 void CompositeRenderFlowVk::UpdateDescriptorSetsLocal() {
   auto *device = ContextVk::Device();
@@ -254,7 +254,7 @@ void CompositeRenderFlowVk::UpdateDescriptorSetsLocal() {
     vkUpdateDescriptorSets(device->GetDevice(), writes.size(), writes.data(), 0,
                            nullptr);
   }
-};
+}
 
 //
 //
@@ -271,11 +271,11 @@ void CompositeRenderFlowVk::CreatePipelines() {
   // for a triangle
   layout.Set<AttrTypes::Float2>();
   m_compositePipelineVk.Create(layout, m_renderPass.GetVkRenderPass());
-};
+}
 
 void CompositeRenderFlowVk::DestroyPipelines() {
   m_compositePipelineVk.Destroy();
-};
+}
 
 //
 //
@@ -300,7 +300,7 @@ void CompositeRenderFlowVk::OnSwapchainInvalidCb() {
 
   UpdateDescriptorSetsLocal();
   CreatePipelines();
-};
+}
 
 //
 //
@@ -311,7 +311,6 @@ void CompositeRenderFlowVk::OnSwapchainInvalidCb() {
 // --- PAINT -------------------------------------------------------------------
 void CompositeRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
                                                 const uint32_t currentFrame) {
-
   // TODO: Optimize draw loop - heap allocations -> stack
   auto &cmdBfr = m_commandBuffers[currentFrame];
 
@@ -376,7 +375,7 @@ void CompositeRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   //
   // --- End command buffer ----------------------------------------------------
   ContextVk::CommandPool()->EndCommandBuffer(cmdBfr);
-};
+}
 
 //
 //
@@ -396,13 +395,13 @@ void CompositeRenderFlowVk::DestroyFramebuffers() {
   }
 
   m_framebuffers.clear();
-};
+}
 
 void CompositeRenderFlowVk::DestroyRenderPass() {
   if (m_renderPass.GetVkRenderPass() != VK_NULL_HANDLE) {
     m_renderPass.Destroy(ContextVk::Device()->GetDevice());
   }
-};
+}
 
 void CompositeRenderFlowVk::DestroyAttachments() {
   uint32_t swapchainImageCount =
@@ -411,7 +410,7 @@ void CompositeRenderFlowVk::DestroyAttachments() {
   for (size_t i = 0; i < swapchainImageCount; ++i) {
     m_imagesVk.swapchainImages[i].Destroy();
   }
-};
+}
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

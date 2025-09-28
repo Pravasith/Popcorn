@@ -27,6 +27,8 @@ enum DescriptorSets {
                  // 1 Sampler - normal image & sampler
                  //
   PresentSet     // 1 Sampler - light image & sampler
+                 // 1 Sampler - depth image & sampler (for depth fx)
+                 // 1 Sampler - normal image & sampler (for depth fx)
 };
 
 class DescriptorLayoutsVk {

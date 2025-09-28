@@ -83,7 +83,7 @@ public:
         curveFactory->GetCurvePtr(lookAtTargetCInfo);
 
     TimeTrain ttLookAt(camera->GetAnimationProperty_LookAtTarget(), lookAtCurve,
-                       0.0, .75);
+                       0.0, .4);
     animTrack0.Insert_Slow(ttLookAt);
 
     camera->ActivateLookAtTarget(true);
