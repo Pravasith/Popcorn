@@ -101,10 +101,11 @@ void GBufferRenderFlowVk::CreateAttachments() {
                                                      VMA_MEMORY_USAGE_AUTO};
 
   for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-    ImageVk &albedoImage = m_imagesVk.albedoImages[i];
-    ImageVk &depthImage = m_imagesVk.depthImages[i];
-    ImageVk &normalImage = m_imagesVk.normalImages[i];
-    ImageVk &roughnessMetallicImage = m_imagesVk.roughnessMetallicImages[i];
+    ImageVk &albedoImage = s_gBufferImages.albedoImages[i];
+    ImageVk &depthImage = s_gBufferImages.depthImages[i];
+    ImageVk &normalImage = s_gBufferImages.normalImages[i];
+    ImageVk &roughnessMetallicImage =
+        s_gBufferImages.roughnessMetallicImages[i];
 
     albedoImage.CreateVmaImage(albedoImageInfo, albedoAlloc);
     depthImage.CreateVmaImage(depthImageInfo, depthAlloc);
@@ -234,10 +235,10 @@ void GBufferRenderFlowVk::CreateImageBarriers() {
     ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead> &
         roughnessMetallicBarrier = m_imageBarriers.roughnessMetallicBarriers[i];
 
-    albedoBarrier.Init(&m_imagesVk.albedoImages[i]);
-    depthBarrier.Init(&m_imagesVk.depthImages[i]);
-    normalBarrier.Init(&m_imagesVk.normalImages[i]);
-    roughnessMetallicBarrier.Init(&m_imagesVk.roughnessMetallicImages[i]);
+    albedoBarrier.Init(&s_gBufferImages.albedoImages[i]);
+    depthBarrier.Init(&s_gBufferImages.depthImages[i]);
+    normalBarrier.Init(&s_gBufferImages.normalImages[i]);
+    roughnessMetallicBarrier.Init(&s_gBufferImages.roughnessMetallicImages[i]);
   }
 }
 
@@ -266,7 +267,7 @@ void GBufferRenderFlowVk::CreateRenderPass() {
           .GetAttachmentDescription()};
 
   bool depthHasStencilComponent =
-      m_imagesVk.depthImages[arbitrarilyChosenFrameIndex]
+      s_gBufferImages.depthImages[arbitrarilyChosenFrameIndex]
           .FormatHasStencilComponent();
 
   //
@@ -346,10 +347,10 @@ void GBufferRenderFlowVk::CreateFramebuffers() {
 
   for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
     std::vector<VkImageView> attachments = {
-        m_imagesVk.albedoImages[i].GetVkImageView(),
-        m_imagesVk.depthImages[i].GetVkImageView(),
-        m_imagesVk.normalImages[i].GetVkImageView(),
-        m_imagesVk.roughnessMetallicImages[i].GetVkImageView(),
+        s_gBufferImages.albedoImages[i].GetVkImageView(),
+        s_gBufferImages.depthImages[i].GetVkImageView(),
+        s_gBufferImages.normalImages[i].GetVkImageView(),
+        s_gBufferImages.roughnessMetallicImages[i].GetVkImageView(),
     };
 
     VkFramebufferCreateInfo createInfo{};
@@ -816,22 +817,22 @@ void GBufferRenderFlowVk::DestroyFramebuffers() {
       m_framebuffers[i] = VK_NULL_HANDLE;
     }
   }
-};
+}
 
 void GBufferRenderFlowVk::DestroyRenderPass() {
   if (m_renderPass.GetVkRenderPass() != VK_NULL_HANDLE) {
     m_renderPass.Destroy(ContextVk::Device()->GetDevice());
   }
-};
+}
 
 void GBufferRenderFlowVk::DestroyAttachments() {
   for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-    m_imagesVk.albedoImages[i].Destroy();
-    m_imagesVk.depthImages[i].Destroy();
-    m_imagesVk.normalImages[i].Destroy();
-    m_imagesVk.roughnessMetallicImages[i].Destroy();
+    s_gBufferImages.albedoImages[i].Destroy();
+    s_gBufferImages.depthImages[i].Destroy();
+    s_gBufferImages.normalImages[i].Destroy();
+    s_gBufferImages.roughnessMetallicImages[i].Destroy();
   }
-};
+}
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

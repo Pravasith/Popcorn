@@ -13,15 +13,14 @@ GFX_NAMESPACE_BEGIN
 
 class LightingRenderFlowVk : public RenderFlowVk {
 public:
-  LightingRenderFlowVk()
-      : m_imagesVk(s_lightingImages), m_dependencyImages(s_gBufferImages) {
+  LightingRenderFlowVk() {
     m_isFirstTimeInFrame.fill(true);
     PC_PRINT("CREATED", TagType::Constr, "LightingRenderFlowVk")
-  };
+  }
 
   virtual ~LightingRenderFlowVk() override {
     PC_PRINT("DESTROYED", TagType::Destr, "LightingRenderflowVk")
-  };
+  }
 
 private:
   virtual void CreateAttachments() override;
@@ -52,26 +51,22 @@ private:
 
 private:
   struct AttachmentsVk {
-    PcFramesAttachments<MAX_FRAMES_IN_FLIGHT> lightAttachments{};
+    PcFramesAttachments_Bundle<MAX_FRAMES_IN_FLIGHT> lightAttachments{};
   };
 
   struct DescriptorSetsVk {
-    PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> lightingSets{};
+    PcFramesDescriptorSets_Bundle<MAX_FRAMES_IN_FLIGHT> lightingSets{};
   };
 
   struct ImageBarriersVk {
     PcFramesColorImageBarriers lightBarriers;
   };
 
-  PcRenderFlowImages<RenderFlows::Lighting, MAX_FRAMES_IN_FLIGHT> &m_imagesVk;
-  PcRenderFlowImages<RenderFlows::GBuffer, MAX_FRAMES_IN_FLIGHT>
-      &m_dependencyImages;
-
   AttachmentsVk m_attachmentsVk{};
   DescriptorSetsVk m_descriptorSetsVk{};
 
   RenderPassVk m_renderPass;
-  PcFramesFramebuffers<MAX_FRAMES_IN_FLIGHT> m_framebuffers;
+  PcFramesFramebuffers_Bundle<MAX_FRAMES_IN_FLIGHT> m_framebuffers;
 
   // Pipelines
   LightingPipelineVk m_lightingPipelineVk;

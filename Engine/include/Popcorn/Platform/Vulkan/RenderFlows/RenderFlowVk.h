@@ -122,7 +122,7 @@ public:
   };
 
   struct DescriptorSetsVkStatic {
-    PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> cameraSets{};
+    PcFramesDescriptorSets_Bundle<MAX_FRAMES_IN_FLIGHT> cameraSets{};
   };
 
 protected:

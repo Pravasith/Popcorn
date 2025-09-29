@@ -8,13 +8,15 @@
  :: Make RefCounting system & remove empty/useless ctors & dtors
 
 --- OPTIMIZATION ------------------------------------------------------------------
+ :: Remove Camera dSet from presentLayout (in CompositePipelinesVk) instead, add
+    a fog uniform buffer (fog: color, density, near, far)
  :: GBufferRenderFlow - iterating a map rn, make it vector based (2-3 times faster)
+ :: Optimise space by allocating one model matrix per mesh, not per submesh
  :: PrintScenes() in SceneLibrary() -- make sure it's only in debug mode
  :: Valgrind sanity check & compatibility check across linux, windows:
     BOTH RELEASE MODE & DEBUG MODE
  :: Add precompiled headers to the project - cmake
  :: Create a CommandBufferVk class (rn it's raw from CommandPoolsVk)
- :: Optimise space by allocating one model matrix per mesh, not per submesh
  :: Make some selected singletons stack allocated (with static local variables)
     BE CAREFUL ABOUT THIS ONE ^^
     Stack allocated local variables last until the end of the program.

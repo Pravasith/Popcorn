@@ -30,13 +30,13 @@ void CompositeRenderFlowVk::CreateAttachments() {
   auto &swapchainImageViews = swapchain->GetSwapchainImageViews();
   const auto &format = swapchain->GetSwapchainImageFormat();
 
-  m_imagesVk.swapchainImages.resize(swapchainImages.size());
+  s_compositeImages.swapchainImages.resize(swapchainImages.size());
   m_attachmentsVk.presentAttachments.resize(swapchainImages.size());
 
   for (size_t i = 0; i < swapchainImages.size(); ++i) {
     //
     // --- Images -------------------------------------------------------------
-    m_imagesVk.swapchainImages[i].SetSwapchainImageData(
+    s_compositeImages.swapchainImages[i].SetSwapchainImageData(
         swapchainImages[i], swapchainImageViews[i], format);
 
     //
@@ -51,7 +51,7 @@ void CompositeRenderFlowVk::CreateAttachments() {
     presentImageAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
     m_attachmentsVk.presentAttachments[i].SetImageVk(
-        &m_imagesVk.swapchainImages[i]);
+        &s_compositeImages.swapchainImages[i]);
     m_attachmentsVk.presentAttachments[i].SetAttachmentDescription(
         presentImageAttachment);
   }
@@ -76,7 +76,7 @@ void CompositeRenderFlowVk::CreateImageBarriers() {
     ImageBarrierVk<LayoutTransitions::ColorAttachmentToPresentSrc>
         &presentBarrier = m_imageBarriers.presentBarriers[i];
 
-    presentBarrier.Init(&m_imagesVk.swapchainImages[i]);
+    presentBarrier.Init(&s_compositeImages.swapchainImages[i]);
   }
 }
 
@@ -233,10 +233,26 @@ void CompositeRenderFlowVk::UpdateDescriptorSetsLocal() {
 
   for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
     VkDescriptorImageInfo lightImageInfo{};
-    lightImageInfo.imageView =
-        m_dependencyImages.lightImages[i].GetVkImageView();
+    lightImageInfo.imageView = s_lightingImages.lightImages[i].GetVkImageView();
     lightImageInfo.sampler = s_samplersVk.colorSampler.GetVkSampler();
     lightImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+    VkDescriptorImageInfo depthImageInfo{};
+    depthImageInfo.imageView = s_gBufferImages.depthImages[i].GetVkImageView();
+    depthImageInfo.sampler = s_samplersVk.depthSampler.GetVkSampler();
+    depthImageInfo.imageLayout =
+        s_gBufferImages.depthImages[i].FormatHasStencilComponent()
+            ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+            : VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+
+    VkDescriptorImageInfo normalImageInfo{};
+    normalImageInfo.imageView =
+        s_gBufferImages.normalImages[i].GetVkImageView();
+    normalImageInfo.sampler = s_samplersVk.colorSampler.GetVkSampler();
+    normalImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+    std::vector<VkWriteDescriptorSet> writes{};
+    writes.reserve(3);
 
     VkWriteDescriptorSet lightWrite{};
     lightWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -248,8 +264,31 @@ void CompositeRenderFlowVk::UpdateDescriptorSetsLocal() {
     lightWrite.pBufferInfo = nullptr;
     lightWrite.pImageInfo = &lightImageInfo;
     lightWrite.pTexelBufferView = nullptr;
+    writes.emplace_back(lightWrite);
 
-    std::vector<VkWriteDescriptorSet> writes{lightWrite};
+    VkWriteDescriptorSet depthWrite{};
+    depthWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    depthWrite.dstSet = m_descriptorSetsVk.presentSets[i];
+    depthWrite.dstBinding = 1;
+    depthWrite.dstArrayElement = 0;
+    depthWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    depthWrite.descriptorCount = 1;
+    depthWrite.pBufferInfo = nullptr;
+    depthWrite.pImageInfo = &depthImageInfo;
+    depthWrite.pTexelBufferView = nullptr;
+    writes.emplace_back(depthWrite);
+
+    VkWriteDescriptorSet normalWrite{};
+    normalWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    normalWrite.dstSet = m_descriptorSetsVk.presentSets[i];
+    normalWrite.dstBinding = 2;
+    normalWrite.dstArrayElement = 0;
+    normalWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    normalWrite.descriptorCount = 1;
+    normalWrite.pBufferInfo = nullptr;
+    normalWrite.pImageInfo = &normalImageInfo;
+    normalWrite.pTexelBufferView = nullptr;
+    writes.emplace_back(normalWrite);
 
     vkUpdateDescriptorSets(device->GetDevice(), writes.size(), writes.data(), 0,
                            nullptr);
@@ -321,6 +360,12 @@ void CompositeRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   auto &bufferViews = deviceMemory->GetBufferViews();
   auto &bufferOffsets = deviceMemory->GetBufferOffsets();
 
+  VkDescriptorSet &cameraSet = s_commonDescriptorSets.cameraSets[currentFrame];
+  VkDescriptorSet &presentSet = m_descriptorSetsVk.presentSets[currentFrame];
+
+  std::array<VkDescriptorSet, 1> cameraSets{
+      s_commonDescriptorSets.cameraSets[currentFrame],
+  };
   std::array<VkDescriptorSet, 1> compositeSets{
       m_descriptorSetsVk.presentSets[currentFrame]};
 
@@ -355,11 +400,32 @@ void CompositeRenderFlowVk::RecordCommandBuffer(const uint32_t frameIndex,
   // --- Paint :D --------------------------------------------------------------
   m_compositePipelineVk.BindPipeline(cmdBfr);
 
-  // Descriptor set 0 - Present set
+  // Hardcoding 0 for camera index for now
+  // TODO: Make it dynamic later
+  uint32_t cameraOffset = bufferOffsets.camerasOffsets[0];
+
+  std::array<VkDescriptorSet, 2> allSets = {cameraSet, presentSet};
+  std::array<uint32_t, 1> dynamicOffsets = {cameraOffset};
+
+  // Binding 2 sets in one go. Same as doing separately (commented code
+  // below)
   vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
                           m_compositePipelineVk.GetVkPipelineLayout(), 0,
-                          compositeSets.size(), compositeSets.data(), 0,
-                          nullptr);
+                          allSets.size(), allSets.data(), dynamicOffsets.size(),
+                          dynamicOffsets.data());
+
+  // // Descriptor set 0 - Camera set
+  // vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
+  //                         m_lightingPipelineVk.GetVkPipelineLayout(), 0,
+  //                         cameraSets.size(), cameraSets.data(), 1,
+  //                         &cameraOffset);
+  //
+
+  // // Descriptor set 1 - Present set(light + depth & normal textures)
+  // vkCmdBindDescriptorSets(cmdBfr, VK_PIPELINE_BIND_POINT_GRAPHICS,
+  //                         m_compositePipelineVk.GetVkPipelineLayout(), 1,
+  //                         compositeSets.size(), compositeSets.data(), 0,
+  //                         nullptr);
 
   // Full screen triangle
   vkCmdDraw(cmdBfr, 3, 1, 0, 0);
@@ -408,7 +474,7 @@ void CompositeRenderFlowVk::DestroyAttachments() {
       ContextVk::Swapchain()->GetSwapchainImages().size();
 
   for (size_t i = 0; i < swapchainImageCount; ++i) {
-    m_imagesVk.swapchainImages[i].Destroy();
+    s_compositeImages.swapchainImages[i].Destroy();
   }
 }
 
