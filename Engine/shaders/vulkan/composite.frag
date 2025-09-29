@@ -15,11 +15,19 @@ layout(set = 1, binding = 1) uniform sampler2D depthTex;
 layout(set = 1, binding = 2) uniform sampler2D normalTex;
 
 // Reconstruct view-space position from depth
-vec3 ReconstructViewPos(vec2 uv, float depth, mat4 invViewProj) {
-    // NDC coords in [-1, 1]
-    vec4 ndc = vec4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
-    vec4 viewPos = invViewProj * ndc;
-    return viewPos.xyz / viewPos.w;
+// vec3 ReconstructViewPos(vec2 uv, float depth, mat4 invViewProj) {
+//     // NDC coords in [-1, 1]
+//     vec4 ndc = vec4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
+//     vec4 viewPos = invViewProj * ndc;
+//     return viewPos.xyz / viewPos.w;
+// }
+
+
+vec3 ReconstructWorldSpace(vec2 uv, float depth) {
+    // Depth is 0->1 enforced
+    vec4 clipPos = vec4(uv * 2.0 - 1.0, depth, 1.0);
+    vec4 worldPosH = camera.invViewProj * clipPos;
+    return worldPosH.xyz / worldPosH.w;
 }
 
 void main() {
@@ -30,14 +38,17 @@ void main() {
     float depth = texture(depthTex, fragUV).r;
 
     // Reconstruct view-space position + distance
-    vec3 viewPos = ReconstructViewPos(fragUV, depth, camera.invViewProj);
+    vec3 worldPos = ReconstructWorldSpace(fragUV, depth);
+    vec3 viewPos  = (camera.view * vec4(worldPos, 1.0)).xyz;
+
+
     float distance = length(viewPos);
 
     // Hardcoded fog params
     const vec3 fogColor   = vec3(0.6, 0.7, 0.8); // light bluish-gray fog
-    const float fogDensity = 0.0025;             // tweak for intensity
-    const float fogNear = 3.0;   // fog starts here
-    const float fogFar  = 20.0;  // fully fogged here
+    // const float fogDensity = 0.0025;             // tweak for intensity
+    const float fogNear = 7.5;   // fog starts here
+    const float fogFar  = 80.0;  // fully fogged here
 
     // // Exponential fog
     // float fogFactor = 1.0 - exp(-pow(distance * fogDensity, 2.0));
@@ -50,4 +61,5 @@ void main() {
     // Blend scene with fog
     vec3 finalColor = mix(sceneColor, fogColor, fogFactor);
     outColor = vec4(finalColor, 1.0);
+    // outColor = vec4(sceneColor, 1.0);
 }

@@ -35,6 +35,7 @@ layout(location = 0) out vec4 outColor;
     // vec4 clipPos = vec4(uv * 2.0 - 1.0, ndcZ, 1.0);
 
 vec3 ReconstructWorldSpace(vec2 uv, float depth) {
+    // Depth is 0->1 enforced
     vec4 clipPos = vec4(uv * 2.0 - 1.0, depth, 1.0);
     vec4 worldPosH = camera.invViewProj * clipPos;
     return worldPosH.xyz / worldPosH.w;

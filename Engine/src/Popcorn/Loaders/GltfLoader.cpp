@@ -687,6 +687,10 @@ GltfLoader::ExtractIndexBuffer(const tinygltf::Model &model,
 void GltfLoader::ExtractAnimationsToAnimationTracks(
     const tinygltf::Model &model,
     std::vector<AnimationTrack> &animationTracks) {
+  if (model.animations.empty()) {
+    PC_WARN("GltfLoader: Scene has no animation tracks, so skipping")
+    return;
+  }
 
   SplineFactory *splineFactory = SplineFactory::Get();
   CurveFactory *curveFactory = CurveFactory::Get();
