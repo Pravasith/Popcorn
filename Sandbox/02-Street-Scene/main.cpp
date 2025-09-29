@@ -48,7 +48,7 @@ public:
     AnimationTrack &animTrack2 = scene.GetAnimationTrack(1);
     AnimationTrack &animTrack3 = scene.GetAnimationTrack(2);
 
-    float xy = .5f, z = 2.f;
+    float xy = .5f, z = 5.f;
 
     const std::vector<LinearKnot<glm::vec3>> knots{
         {{-xy, -xy, z}, 0},   {{xy, -xy, z}, 0.25}, {{xy, xy, z}, 0.5},
@@ -59,8 +59,8 @@ public:
     auto *curveFactory = Popcorn::Context::GetCurveFactory();
 
     const Spline<glm::vec3> *cmr_Spl =
-        // splineFactory->MakeAutomaticSpline(knots);
-        PC_MakeBezierSplineFromBlenderJson("../assets/curves/curve.json");
+        splineFactory->MakeAutomaticSpline(knots);
+    // PC_MakeBezierSplineFromBlenderJson("../assets/curves/curve.json");
 
     Camera *camera = static_cast<Camera *>(scene.FindObjectByName("Camera"));
     GameObject *cylinder = scene.FindObjectByName("Cylinder");
