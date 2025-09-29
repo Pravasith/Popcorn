@@ -40,10 +40,6 @@ vec3 ReconstructWorldSpace(vec2 uv, float depth) {
     return worldPosH.xyz / worldPosH.w;
 }
 
-// float FogFactorLinear(float d, float startD, float endD) {
-//     return clamp((d - startD) / max(endD - startD, 1e-6), 0.0, 1.0);
-// }
-
 void main() {
     float depth = texture(depthTex, fragUV).r;
 
@@ -97,25 +93,3 @@ void main() {
     finalColor += albedo * 0.05; // Ambient
     outColor = vec4(finalColor, 1.0);
 }
-
-// float near = 0.1;
-// float far = 1000.0;
-//
-// float d = texture(depthTex, fragUV).r;
-// float linearDepth = (near * far) /
-//     (far - d * (far - near));
-// float dVis = clamp(linearDepth / far, 0.0, 1.0);
-// outColor = vec4(vec3(1.0 - dVis), 1.0);  // Near = white
-
-// float d = texture(depthTex, fragUV).r;
-// float c = pow(1.0 - d, 40.0); // exaggerates contrast near the camera
-// outColor = vec4(vec3(c), 1.0);
-
-// vec3 testPos = ReconstructWorldSpace(fragUV, depth);
-// outColor = vec4((testPos + vec3(10.0)) / 20.0, 1.0); // Normalized for view
-
-// float NdotL = max(dot(normal, lightVec), 0.0);
-// outColor = vec4(vec3(NdotL), 1.0);
-
-// outColor = vec4(vec3(texture(depthTex, fragUV).r), 1.0);
-// outColor = vec4(vec3(texture(albedoTex, fragUV)), 1.0);

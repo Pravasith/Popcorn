@@ -44,7 +44,7 @@ void LightingRenderFlowVk::CreateAttachments() {
   VmaAllocationCreateInfo lightImageAlloc{.usage = VMA_MEMORY_USAGE_AUTO};
 
   for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-    ImageVk &lightImageRef = m_imagesVk.lightImages[i];
+    ImageVk &lightImageRef = s_lightingImages.lightImages[i];
     lightImageRef.CreateVmaImage(lightImageInfo, lightImageAlloc);
 
     //
@@ -91,7 +91,7 @@ void LightingRenderFlowVk::CreateImageBarriers() {
     ImageBarrierVk<LayoutTransitions::ColorAttachmentToShaderRead>
         &lightBarrier = m_imageBarriers.lightBarriers[i];
 
-    lightBarrier.Init(&m_imagesVk.lightImages[i]);
+    lightBarrier.Init(&s_lightingImages.lightImages[i]);
   }
 }
 
@@ -171,7 +171,7 @@ void LightingRenderFlowVk::CreateFramebuffers() {
   for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
 
     std::vector<VkImageView> attachments{
-        m_imagesVk.lightImages[i].GetVkImageView()};
+        s_lightingImages.lightImages[i].GetVkImageView()};
 
     VkFramebufferCreateInfo createInfo{};
     FramebufferVk::GetDefaultFramebufferState(createInfo);
@@ -243,28 +243,27 @@ void LightingRenderFlowVk::UpdateDescriptorSetsLocal() {
 
     VkDescriptorImageInfo albedoImageInfo{};
     albedoImageInfo.imageView =
-        m_dependencyImages.albedoImages[i].GetVkImageView();
+        s_gBufferImages.albedoImages[i].GetVkImageView();
     albedoImageInfo.sampler = s_samplersVk.colorSampler.GetVkSampler();
     albedoImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
     VkDescriptorImageInfo depthImageInfo{};
-    depthImageInfo.imageView =
-        m_dependencyImages.depthImages[i].GetVkImageView();
+    depthImageInfo.imageView = s_gBufferImages.depthImages[i].GetVkImageView();
     depthImageInfo.sampler = s_samplersVk.depthSampler.GetVkSampler();
     depthImageInfo.imageLayout =
-        m_dependencyImages.depthImages[i].FormatHasStencilComponent()
+        s_gBufferImages.depthImages[i].FormatHasStencilComponent()
             ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
             : VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
 
     VkDescriptorImageInfo normalImageInfo{};
     normalImageInfo.imageView =
-        m_dependencyImages.normalImages[i].GetVkImageView();
+        s_gBufferImages.normalImages[i].GetVkImageView();
     normalImageInfo.sampler = s_samplersVk.colorSampler.GetVkSampler();
     normalImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
     VkDescriptorImageInfo roughnessMetallicImageInfo{};
     roughnessMetallicImageInfo.imageView =
-        m_dependencyImages.roughnessMetallicImages[i].GetVkImageView();
+        s_gBufferImages.roughnessMetallicImages[i].GetVkImageView();
     roughnessMetallicImageInfo.sampler =
         s_samplersVk.colorSampler.GetVkSampler();
     roughnessMetallicImageInfo.imageLayout =
@@ -336,7 +335,7 @@ void LightingRenderFlowVk::UpdateDescriptorSetsLocal() {
 
     vkUpdateDescriptorSets(device->GetDevice(), writes.size(), writes.data(), 0,
                            nullptr);
-  };
+  }
 }
 
 //
@@ -496,19 +495,19 @@ void LightingRenderFlowVk::DestroyFramebuffers() {
       m_framebuffers[i] = VK_NULL_HANDLE;
     }
   }
-};
+}
 
 void LightingRenderFlowVk::DestroyRenderPass() {
   if (m_renderPass.GetVkRenderPass() != VK_NULL_HANDLE) {
     m_renderPass.Destroy(ContextVk::Device()->GetDevice());
   }
-};
+}
 
 void LightingRenderFlowVk::DestroyAttachments() {
   for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-    m_imagesVk.lightImages[i].Destroy();
+    s_lightingImages.lightImages[i].Destroy();
   }
-};
+}
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

@@ -55,10 +55,13 @@ void CompositePipelineVk::Create(const BufferDefs::Layout &vertexBufferLayout,
   pipelineState.vertexInputState.pVertexAttributeDescriptions = VK_NULL_HANDLE;
 
   auto *layouts = ContextVk::DescriptorLayouts();
+  VkDescriptorSetLayout &cameraLayout =
+      layouts->GetLayout<DescriptorSets::CameraSet>();
   VkDescriptorSetLayout &presentLayout =
       layouts->GetLayout<DescriptorSets::PresentSet>();
 
-  std::array<VkDescriptorSetLayout, 1> dSetLayouts = {presentLayout};
+  std::array<VkDescriptorSetLayout, 2> dSetLayouts = {cameraLayout,
+                                                      presentLayout};
   pipelineState.pipelineLayout.setLayoutCount = dSetLayouts.size();
   pipelineState.pipelineLayout.pSetLayouts = dSetLayouts.data();
 

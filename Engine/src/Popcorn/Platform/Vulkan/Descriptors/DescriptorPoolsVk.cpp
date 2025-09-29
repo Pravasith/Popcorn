@@ -147,7 +147,8 @@ DescriptorPoolsVk::GetPool<DescriptorPools::CompositePool>(uint32_t count) {
 
     VkDescriptorPoolSize poolSize0 = {
         .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-        .descriptorCount = 1 * count}; // Lights image + sampler
+        .descriptorCount =
+            3 * count}; // 1 Lights image + 2 samplers (depth + normals)
 
     VkDescriptorPoolSize poolSizes[1]{poolSize0};
 

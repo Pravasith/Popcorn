@@ -14,14 +14,13 @@ GFX_NAMESPACE_BEGIN
 
 class GBufferRenderFlowVk : public RenderFlowVk {
 public:
-  GBufferRenderFlowVk()
-      : m_imagesVk(s_gBufferImages) {
-          PC_PRINT("CREATED", TagType::Constr, "GBufferRenderFlowVk")
-        };
+  GBufferRenderFlowVk() {
+    PC_PRINT("CREATED", TagType::Constr, "GBufferRenderFlowVk")
+  }
 
   virtual ~GBufferRenderFlowVk() override {
     PC_PRINT("DESTROYED", TagType::Destr, "GBufferRenderflowVk")
-  };
+  }
 
 #ifdef PC_DEBUG
   virtual void PrintVboIbo() override;
@@ -56,16 +55,17 @@ private:
 
 private:
   struct AttachmentsVk {
-    PcFramesAttachments<MAX_FRAMES_IN_FLIGHT> albedoAttachments{};
-    PcFramesAttachments<MAX_FRAMES_IN_FLIGHT> depthAttachments{};
-    PcFramesAttachments<MAX_FRAMES_IN_FLIGHT> normalAttachments{};
-    PcFramesAttachments<MAX_FRAMES_IN_FLIGHT> roughnessMetallicAttachments{};
+    PcFramesAttachments_Bundle<MAX_FRAMES_IN_FLIGHT> albedoAttachments{};
+    PcFramesAttachments_Bundle<MAX_FRAMES_IN_FLIGHT> depthAttachments{};
+    PcFramesAttachments_Bundle<MAX_FRAMES_IN_FLIGHT> normalAttachments{};
+    PcFramesAttachments_Bundle<MAX_FRAMES_IN_FLIGHT>
+        roughnessMetallicAttachments{};
   };
 
   struct DescriptorSetsVk {
-    PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> submeshSets{};
-    PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> basicMatSets{};
-    PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> pbrMatSets{};
+    PcFramesDescriptorSets_Bundle<MAX_FRAMES_IN_FLIGHT> submeshSets{};
+    PcFramesDescriptorSets_Bundle<MAX_FRAMES_IN_FLIGHT> basicMatSets{};
+    PcFramesDescriptorSets_Bundle<MAX_FRAMES_IN_FLIGHT> pbrMatSets{};
   };
 
   struct ImageBarriersVk {
@@ -75,13 +75,11 @@ private:
     PcFramesColorImageBarriers roughnessMetallicBarriers;
   };
 
-  PcRenderFlowImages<RenderFlows::GBuffer, MAX_FRAMES_IN_FLIGHT> &m_imagesVk;
-
   AttachmentsVk m_attachmentsVk{};
   DescriptorSetsVk m_descriptorSetsVk{};
 
   RenderPassVk m_renderPass;
-  PcFramesFramebuffers<MAX_FRAMES_IN_FLIGHT> m_framebuffers;
+  PcFramesFramebuffers_Bundle<MAX_FRAMES_IN_FLIGHT> m_framebuffers;
 
   BasicMatPipelineVk m_basicMatPipelineVk;
   PbrMatPipelineVk m_pbrMatPipelineVk;

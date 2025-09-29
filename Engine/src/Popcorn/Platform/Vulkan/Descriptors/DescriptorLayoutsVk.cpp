@@ -18,7 +18,7 @@ DescriptorLayoutsVk::GetLayout<DescriptorSets::CameraSet>() {
     binding.binding = 0;
     binding.stageFlags =
         VK_SHADER_STAGE_VERTEX_BIT |  // Gbuffer pass vertex shader
-        VK_SHADER_STAGE_FRAGMENT_BIT; // Light pass frag shader
+        VK_SHADER_STAGE_FRAGMENT_BIT; // Light & composite pass frag shader
     binding.descriptorCount = 1;
     binding.pImmutableSamplers = nullptr;
 
@@ -27,11 +27,11 @@ DescriptorLayoutsVk::GetLayout<DescriptorSets::CameraSet>() {
 
     if (m_layouts[DescriptorSets::CameraSet] == VK_NULL_HANDLE) {
       throw std::runtime_error("Camera layout couldn't be created");
-    };
-  };
+    }
+  }
 
   return m_layouts[DescriptorSets::CameraSet];
-};
+}
 
 template <>
 VkDescriptorSetLayout &
@@ -54,7 +54,7 @@ DescriptorLayoutsVk::GetLayout<DescriptorSets::SubmeshSet>() {
   };
 
   return m_layouts[DescriptorSets::SubmeshSet];
-};
+}
 
 template <>
 VkDescriptorSetLayout &
@@ -78,7 +78,7 @@ DescriptorLayoutsVk::GetLayout<DescriptorSets::BasicMatSet>() {
   };
 
   return m_layouts[DescriptorSets::BasicMatSet];
-};
+}
 
 template <>
 VkDescriptorSetLayout &
@@ -102,7 +102,7 @@ DescriptorLayoutsVk::GetLayout<DescriptorSets::PbrMatSet>() {
   };
 
   return m_layouts[DescriptorSets::PbrMatSet];
-};
+}
 
 template <>
 VkDescriptorSetLayout &
@@ -115,48 +115,49 @@ DescriptorLayoutsVk::GetLayout<DescriptorSets::LightingSet>() {
     lightsBinding.descriptorCount = 1;
     lightsBinding.pImmutableSamplers = nullptr;
 
-    VkDescriptorSetLayoutBinding albedoBuffer{};
-    albedoBuffer.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    albedoBuffer.binding = 1;
-    albedoBuffer.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    albedoBuffer.descriptorCount = 1;
-    albedoBuffer.pImmutableSamplers = nullptr;
+    VkDescriptorSetLayoutBinding albedoBinding{};
+    albedoBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    albedoBinding.binding = 1;
+    albedoBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    albedoBinding.descriptorCount = 1;
+    albedoBinding.pImmutableSamplers = nullptr;
 
-    VkDescriptorSetLayoutBinding depthBuffer{};
-    depthBuffer.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    depthBuffer.binding = 2;
-    depthBuffer.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    depthBuffer.descriptorCount = 1;
-    depthBuffer.pImmutableSamplers = nullptr;
+    VkDescriptorSetLayoutBinding depthBinding{};
+    depthBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    depthBinding.binding = 2;
+    depthBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    depthBinding.descriptorCount = 1;
+    depthBinding.pImmutableSamplers = nullptr;
 
-    VkDescriptorSetLayoutBinding normalsBuffer{};
-    normalsBuffer.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    normalsBuffer.binding = 3;
-    normalsBuffer.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    normalsBuffer.descriptorCount = 1;
-    normalsBuffer.pImmutableSamplers = nullptr;
+    VkDescriptorSetLayoutBinding normalsBinding{};
+    normalsBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    normalsBinding.binding = 3;
+    normalsBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    normalsBinding.descriptorCount = 1;
+    normalsBinding.pImmutableSamplers = nullptr;
 
-    VkDescriptorSetLayoutBinding roughnessMetallicBuffer{};
-    roughnessMetallicBuffer.descriptorType =
+    VkDescriptorSetLayoutBinding roughnessMetallicBinding{};
+    roughnessMetallicBinding.descriptorType =
         VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    roughnessMetallicBuffer.binding = 4;
-    roughnessMetallicBuffer.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    roughnessMetallicBuffer.descriptorCount = 1;
-    roughnessMetallicBuffer.pImmutableSamplers = nullptr;
+    roughnessMetallicBinding.binding = 4;
+    roughnessMetallicBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    roughnessMetallicBinding.descriptorCount = 1;
+    roughnessMetallicBinding.pImmutableSamplers = nullptr;
 
-    std::vector<VkDescriptorSetLayoutBinding> lightsBindings{
-        lightsBinding, albedoBuffer, depthBuffer, normalsBuffer,
-        roughnessMetallicBuffer};
+    std::vector<VkDescriptorSetLayoutBinding> lightBufferLayoutBindings{
+        lightsBinding, albedoBinding, depthBinding, normalsBinding,
+        roughnessMetallicBinding};
 
-    m_layouts[DescriptorSets::LightingSet] = GetCachedLayout(lightsBindings);
+    m_layouts[DescriptorSets::LightingSet] =
+        GetCachedLayout(lightBufferLayoutBindings);
 
     if (m_layouts[DescriptorSets::LightingSet] == VK_NULL_HANDLE) {
       throw std::runtime_error("Lighting layout couldn't be created");
-    };
-  };
+    }
+  }
 
   return m_layouts[DescriptorSets::LightingSet];
-};
+}
 
 template <>
 VkDescriptorSetLayout &
@@ -169,17 +170,32 @@ DescriptorLayoutsVk::GetLayout<DescriptorSets::PresentSet>() {
     lightsBuffer.descriptorCount = 1;
     lightsBuffer.pImmutableSamplers = nullptr;
 
-    std::vector<VkDescriptorSetLayoutBinding> compositeBindings{lightsBuffer};
+    VkDescriptorSetLayoutBinding depthBinding{};
+    depthBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    depthBinding.binding = 1;
+    depthBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    depthBinding.descriptorCount = 1;
+    depthBinding.pImmutableSamplers = nullptr;
+
+    VkDescriptorSetLayoutBinding normalsBinding{};
+    normalsBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    normalsBinding.binding = 2;
+    normalsBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    normalsBinding.descriptorCount = 1;
+    normalsBinding.pImmutableSamplers = nullptr;
+
+    std::vector<VkDescriptorSetLayoutBinding> compositeBindings{
+        lightsBuffer, depthBinding, normalsBinding};
 
     m_layouts[DescriptorSets::PresentSet] = GetCachedLayout(compositeBindings);
 
     if (m_layouts[DescriptorSets::PresentSet] == VK_NULL_HANDLE) {
       throw std::runtime_error("Composite layout couldn't be created");
-    };
-  };
+    }
+  }
 
   return m_layouts[DescriptorSets::PresentSet];
-};
+}
 
 size_t DescriptorLayoutsVk::HashLayoutBindings(
     const std::vector<VkDescriptorSetLayoutBinding> &bindings) {
@@ -194,10 +210,10 @@ size_t DescriptorLayoutsVk::HashLayoutBindings(
 
     // Mixing function (to add more randomness)
     hash ^= bindingHash + 0x9e3779b9 + (hash << 6) + (hash >> 2);
-  };
+  }
 
   return hash;
-};
+}
 
 VkDescriptorSetLayout DescriptorLayoutsVk::CreateDescriptorSetLayout(
     const std::vector<VkDescriptorSetLayoutBinding> &bindings) {
@@ -215,7 +231,7 @@ VkDescriptorSetLayout DescriptorLayoutsVk::CreateDescriptorSetLayout(
   }
 
   return descriptorSetLayout;
-};
+}
 
 VkDescriptorSetLayout &DescriptorLayoutsVk::GetCachedLayout(
     const std::vector<VkDescriptorSetLayoutBinding> &bindings) {
@@ -228,10 +244,10 @@ VkDescriptorSetLayout &DescriptorLayoutsVk::GetCachedLayout(
     }
 
     m_layoutCache[bindingsHash] = layout;
-  };
+  }
 
   return m_layoutCache[bindingsHash];
-};
+}
 
 void DescriptorLayoutsVk::CleanUp() {
   m_layouts.clear();
@@ -242,7 +258,7 @@ void DescriptorLayoutsVk::CleanUp() {
   }
 
   m_layoutCache.clear();
-};
+}
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

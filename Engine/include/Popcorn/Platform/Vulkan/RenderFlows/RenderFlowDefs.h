@@ -23,16 +23,16 @@ enum RenderFlows { GBuffer = 1, Lighting, Composite };
 //
 // --------------------------------------------------------------------------
 template <uint32_t FrameCount>
-using PcFramesImages = std::array<ImageVk, FrameCount>;
+using PcFramesImages_Bundle = std::array<ImageVk, FrameCount>;
 
 template <uint32_t FrameCount>
-using PcFramesAttachments = std::array<AttachmentVk, FrameCount>;
+using PcFramesAttachments_Bundle = std::array<AttachmentVk, FrameCount>;
 
 template <uint32_t FrameCount>
-using PcFramesDescriptorSets = std::array<VkDescriptorSet, FrameCount>;
+using PcFramesDescriptorSets_Bundle = std::array<VkDescriptorSet, FrameCount>;
 
 template <uint32_t FrameCount>
-using PcFramesFramebuffers = std::array<VkFramebuffer, FrameCount>;
+using PcFramesFramebuffers_Bundle = std::array<VkFramebuffer, FrameCount>;
 
 //
 // --------------------------------------------------------------------------
@@ -48,23 +48,21 @@ template <RenderFlows T, uint32_t Count = 0> struct PcRenderFlowImages {
 
 template <uint32_t Count>
 struct PcRenderFlowImages<RenderFlows::GBuffer, Count> {
-  PcRenderFlowImages() {
-    PC_PRINT("PcRenderFlowImages", TagType::Print, "RenderFlowDefs")
-  };
+  PcRenderFlowImages() {}
 
   PC_STATIC_ASSERT(Count == MAX_FRAMES_IN_FLIGHT,
                    "Count must be equal to MAX_FRAMES_IN_FLIGHT for Gbuffer");
-  PcFramesImages<Count> albedoImages{};
-  PcFramesImages<Count> depthImages{};
-  PcFramesImages<Count> normalImages{};
-  PcFramesImages<Count> roughnessMetallicImages{};
+  PcFramesImages_Bundle<Count> albedoImages{};
+  PcFramesImages_Bundle<Count> depthImages{};
+  PcFramesImages_Bundle<Count> normalImages{};
+  PcFramesImages_Bundle<Count> roughnessMetallicImages{};
 };
 
 template <uint32_t Count>
 struct PcRenderFlowImages<RenderFlows::Lighting, Count> {
   PC_STATIC_ASSERT(Count == MAX_FRAMES_IN_FLIGHT,
                    "Count must be equal to MAX_FRAMES_IN_FLIGHT for Lighting");
-  PcFramesImages<Count> lightImages{};
+  PcFramesImages_Bundle<Count> lightImages{};
 };
 
 template <> struct PcRenderFlowImages<RenderFlows::Composite> {

@@ -12,14 +12,13 @@ GFX_NAMESPACE_BEGIN
 
 class CompositeRenderFlowVk : public RenderFlowVk {
 public:
-  CompositeRenderFlowVk()
-      : m_imagesVk(s_compositeImages), m_dependencyImages(s_lightingImages) {
-          PC_PRINT("CREATED", TagType::Constr, "CompositeRenderFlowVk")
-        };
+  CompositeRenderFlowVk() {
+    PC_PRINT("CREATED", TagType::Constr, "CompositeRenderFlowVk")
+  }
 
   virtual ~CompositeRenderFlowVk() override {
     PC_PRINT("DESTROYED", TagType::Destr, "CompositeRenderflowVk")
-  };
+  }
 
 private:
   virtual void CreateAttachments() override;
@@ -54,16 +53,12 @@ private:
   };
 
   struct DescriptorSetsVk {
-    PcFramesDescriptorSets<MAX_FRAMES_IN_FLIGHT> presentSets{};
+    PcFramesDescriptorSets_Bundle<MAX_FRAMES_IN_FLIGHT> presentSets{};
   };
 
   struct ImageBarriersVk {
     PcPresentationImageBarriers presentBarriers;
   };
-
-  PcRenderFlowImages<RenderFlows::Composite> &m_imagesVk;
-  PcRenderFlowImages<RenderFlows::Lighting, MAX_FRAMES_IN_FLIGHT>
-      &m_dependencyImages;
 
   AttachmentsVk m_attachmentsVk{};
   DescriptorSetsVk m_descriptorSetsVk{};

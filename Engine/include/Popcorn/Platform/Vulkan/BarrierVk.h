@@ -10,10 +10,10 @@ GFX_NAMESPACE_BEGIN
 
 class BarrierUtilsVk {
 public:
-  BarrierUtilsVk() { PC_PRINT("CREATED", TagType::Constr, "BarrierUtilsVk.h") };
+  BarrierUtilsVk() { PC_PRINT("CREATED", TagType::Constr, "BarrierUtilsVk.h") }
   ~BarrierUtilsVk() {
     PC_PRINT("DESTROYED", TagType::Destr, "BarrierUtilsVk.h")
-  };
+  }
 
   static void GetDefaultImageBarrierInfo(const VkImage &image,
                                          const VkImageLayout &oldLayout,
@@ -33,7 +33,7 @@ public:
     barrier.subresourceRange.levelCount = 1;
     barrier.subresourceRange.baseArrayLayer = 0;
     barrier.subresourceRange.layerCount = 1;
-  };
+  }
 };
 
 enum LayoutTransitions {
