@@ -36,8 +36,8 @@ void main() {
     // Hardcoded fog params
     const vec3 fogColor   = vec3(0.6, 0.7, 0.8); // light bluish-gray fog
     const float fogDensity = 0.0025;             // tweak for intensity
-    const float fogNear = 5.0;   // fog starts here
-    const float fogFar  = 10.0;  // fully fogged here
+    const float fogNear = 3.0;   // fog starts here
+    const float fogFar  = 20.0;  // fully fogged here
 
     // // Exponential fog
     // float fogFactor = 1.0 - exp(-pow(distance * fogDensity, 2.0));
