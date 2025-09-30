@@ -31,14 +31,17 @@ layout(set = 1, binding = 4) uniform sampler2D roughMetalTex;
 layout(location = 0) in vec2 fragUV;
 layout(location = 0) out vec4 outColor;
 
-    // float ndcZ = depth * 2.0 - 1.0; // Convert to NDC z
-    // vec4 clipPos = vec4(uv * 2.0 - 1.0, ndcZ, 1.0);
-
 vec3 ReconstructWorldSpace(vec2 uv, float depth) {
-    // Depth is 0->1 enforced
+    // Depth is 0->1 enforced (NDC is [0, 1])
     vec4 clipPos = vec4(uv * 2.0 - 1.0, depth, 1.0);
     vec4 worldPosH = camera.invViewProj * clipPos;
     return worldPosH.xyz / worldPosH.w;
+}
+
+float PointLightAttenuation(float dist) {
+    float x = dist, x2 = x*x, x3 = x2*x;
+    // return 1. / (x2 + 1.); // +1 to avoid div by 0
+    return 1. / (.4*x3 + (-.8)*x2 + .3*x + 1.1);
 }
 
 void main() {
@@ -55,11 +58,6 @@ void main() {
 
     vec3 finalColor = vec3(0.0);
 
-    // // tweak these to suit your 1000×1000 scene
-    // const float c = 1.0;
-    // const float l = 0.01;
-    // const float q = 0.00002;
-
     for (uint i = 0; i < lights.length(); ++i) {
         LightUniform light = lights[i];
         vec3 lightVec;
@@ -69,28 +67,29 @@ void main() {
             // Point light
             lightVec = light.position - worldPos;
             float dist = length(lightVec);
-            // if (dist > 50.0)      // dead outside your desired radius
-            //     continue;
-            attenuation = 1.0 / (dist * dist + 1.0); // Avoid div by zero
+            attenuation = PointLightAttenuation(dist);
             lightVec = normalize(lightVec);
-        } else if (light.lightType == 1.0) {
-            // Directional light
+        } else if (light.lightType == 1.) {
+            // Spot light
             lightVec = normalize(-light.direction);
-        } else if (light.lightType == 2.0) {
-            // Simplified spotlight for now
+        } else if (light.lightType == 2.) {
+            // Directional light
             lightVec = normalize(-light.direction);
         }
 
         float NdotL = max(dot(normal, lightVec), 0.0);
 
-
         vec3 lightColor = light.color * light.intensity;
         vec3 diffuse = albedo * lightColor * NdotL;
-        // vec3 diffuse = albedo * lightColor;
 
-        finalColor += diffuse * attenuation * 0.1;
+        finalColor += diffuse * attenuation;
     }
 
-    finalColor += albedo * 0.05; // Ambient
+    float ambient = 0.0005;
+
+
+    finalColor += albedo * ambient; // Ambient
+
+    float nonGlowPixelsCap = 0.9;
     outColor = vec4(finalColor, 1.0);
 }

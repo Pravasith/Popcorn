@@ -258,13 +258,11 @@ void GltfLoader::ExtractLightsData(const tinygltf::Model &model,
                               : glm::radians(30.0f);
   }
 
+  const float intensityFactor = 1e-4;
+
   // Type
   if (gltfLight.type == "point") {
-    constexpr float PC_POINT_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR =
-        54.3514f;
-    // 1.0f;
-    // TEMP_DEBUG -
-    data.intensity /= PC_POINT_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR;
+    data.intensity *= intensityFactor * 15;
     data.type = Lights::PointLight;
     data.range = 50.0f;
     PC_WARN("POINT INTENSITY " << data.intensity)
@@ -277,11 +275,10 @@ void GltfLoader::ExtractLightsData(const tinygltf::Model &model,
   } else if (gltfLight.type == "directional") {
     data.type = Lights::DirectionalLight;
     // TEMP_DEBUG -
-    constexpr float PC_DIR_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR =
-        // 100.0f * 6.83f;
-        100.0f;
-    // 1.0f;
-    data.intensity /= PC_DIR_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR;
+    constexpr float PC_DIR_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR = 800.0f;
+    data.intensity *=
+        // PC_DIR_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR *
+        intensityFactor;
     PC_WARN("DIR LIGHT INTENSITY " << data.intensity)
     PC_WARN("DIR LIGHT POS " << light->GetPosition().x << ", "
                              << light->GetPosition().y << ", "

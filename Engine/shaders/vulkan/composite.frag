@@ -41,14 +41,20 @@ void main() {
     vec3 worldPos = ReconstructWorldSpace(fragUV, depth);
     vec3 viewPos  = (camera.view * vec4(worldPos, 1.0)).xyz;
 
-
     float distance = length(viewPos);
 
+    const float fogDimmer = 0.8;
+
     // Hardcoded fog params
-    const vec3 fogColor   = vec3(0.6, 0.7, 0.8); // light bluish-gray fog
+    const vec3 fogColor  = fogDimmer *
+        // vec3(0.6 , 0.7, 0.8); // light bluish-gray fog
+        // vec3(0.9 , 0.2, 0.3); // light bluish-gray fog
+        vec3(0.043, 0.106, 0.188); // dark cyan-blue
+        // vec3(0.039, 0.098, 0.141); // darker cyan-blue
+
     // const float fogDensity = 0.0025;             // tweak for intensity
-    const float fogNear = 7.5;   // fog starts here
-    const float fogFar  = 80.0;  // fully fogged here
+    const float fogNear = 12;   // fog starts here
+    const float fogFar  = 330.0;  // fully fogged here
 
     // // Exponential fog
     // float fogFactor = 1.0 - exp(-pow(distance * fogDensity, 2.0));
