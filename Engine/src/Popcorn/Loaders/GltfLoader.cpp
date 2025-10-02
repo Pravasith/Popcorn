@@ -247,42 +247,27 @@ void GltfLoader::ExtractLightsData(const tinygltf::Model &model,
     data.range = static_cast<float>(gltfLight.range);
   }
 
-  // Spot angles (only if spot light)
-  if (data.type == Lights::SpotLight) {
+  const float intensityFactor = 1e-4;
+  // const float intensityFactor = 1;
+
+  // Type
+  if (gltfLight.type == "point") {
+    data.intensity *= intensityFactor * 15;
+    data.type = Lights::PointLight;
+    data.range = data.range >= 0.0 ? data.range : 50.0f;
+  } else if (gltfLight.type == "spot") {
+    // data.intensity *= intensityFactor * 15;
     const auto &spot = gltfLight.spot;
+    data.type = Lights::SpotLight;
     data.innerConeAngle = spot.innerConeAngle >= 0.0
                               ? static_cast<float>(spot.innerConeAngle)
                               : glm::radians(15.0f);
     data.outerConeAngle = spot.outerConeAngle >= 0.0
                               ? static_cast<float>(spot.outerConeAngle)
                               : glm::radians(30.0f);
-  }
-
-  const float intensityFactor = 1e-4;
-
-  // Type
-  if (gltfLight.type == "point") {
-    data.intensity *= intensityFactor * 15;
-    data.type = Lights::PointLight;
-    data.range = 50.0f;
-    PC_WARN("POINT INTENSITY " << data.intensity)
-    PC_WARN("POINT RANGE" << data.range << " " << gltfLight.range)
-    PC_WARN("POINT LIGHT POS " << light->GetPosition().x << ", "
-                               << light->GetPosition().y << ", "
-                               << light->GetPosition().z << "\n ")
-  } else if (gltfLight.type == "spot") {
-    data.type = Lights::SpotLight;
   } else if (gltfLight.type == "directional") {
     data.type = Lights::DirectionalLight;
-    // TEMP_DEBUG -
-    constexpr float PC_DIR_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR = 800.0f;
-    data.intensity *=
-        // PC_DIR_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR *
-        intensityFactor;
-    PC_WARN("DIR LIGHT INTENSITY " << data.intensity)
-    PC_WARN("DIR LIGHT POS " << light->GetPosition().x << ", "
-                             << light->GetPosition().y << ", "
-                             << light->GetPosition().z << "\n ")
+    data.intensity *= intensityFactor;
   } else {
     PC_WARN("Unknown light type: " << gltfLight.type);
     data.type = Lights::PointLight; // default fallback

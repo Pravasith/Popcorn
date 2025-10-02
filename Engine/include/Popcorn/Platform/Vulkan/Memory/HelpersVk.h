@@ -145,6 +145,7 @@ public:
     uniform.projMatrix = proj;
     uniform.viewProjMatrix = viewProj;
     uniform.invViewProjMatrix = glm::inverse(viewProj);
+    uniform.position = camera->GetPosition();
   }
 
   void operator()(void *uboMapping, size_t index) {

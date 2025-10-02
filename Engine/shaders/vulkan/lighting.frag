@@ -18,6 +18,7 @@ layout(set = 0, binding = 0) uniform CameraUBO {
     mat4 proj;
     mat4 viewProj;
     mat4 invViewProj;
+    vec3 camPos;
 } camera;
 
 layout(set = 1, binding = 0) readonly buffer LightBuffer {
@@ -60,36 +61,56 @@ void main() {
 
     for (uint i = 0; i < lights.length(); ++i) {
         LightUniform light = lights[i];
-        vec3 lightVec;
         float attenuation = 1.0;
+        vec3 lightColor = light.color * light.intensity;
+        vec3 lightVec = light.position - worldPos;
+        float dist = length(lightVec);
 
         if (light.lightType == 0.0) {
             // Point light
-            lightVec = light.position - worldPos;
-            float dist = length(lightVec);
             attenuation = PointLightAttenuation(dist);
-            lightVec = normalize(lightVec);
         } else if (light.lightType == 1.) {
             // Spot light
-            lightVec = normalize(-light.direction);
+            attenuation = PointLightAttenuation(dist);
+
+            // Angle between fragment direction and spotlight axis
+            float cosTheta = dot(normalize(lightVec),
+                    normalize(-light.direction));
+            float cosInner = cos(light.innerConeAngle);
+            float cosOuter = cos(light.outerConeAngle);
+
+            // Smooth interpolation between inner/outer cone
+            float spotEffect = clamp((cosTheta - cosOuter) /
+                    (cosInner - cosOuter), 0.0, 1.0);
+
+            attenuation *= spotEffect;
         } else if (light.lightType == 2.) {
             // Directional light
-            lightVec = normalize(-light.direction);
+            lightVec = -light.direction;
+            // take N dot L for Dir light
         }
 
-        float NdotL = max(dot(normal, lightVec), 0.0);
+        // Blinn-Phong
+        vec3 viewVec = camera.camPos - worldPos;
+        vec3 halfVec = lightVec + viewVec;
 
-        vec3 lightColor = light.color * light.intensity;
+        // worldPos
+        float NdotL = max(dot(normal, normalize(lightVec)), 0.0);
+        float NdotH = max(dot(normal, normalize(halfVec)), 0.0);
+
         vec3 diffuse = albedo * lightColor * NdotL;
 
-        finalColor += diffuse * attenuation;
+        // Blinn–Phong specular
+        float shininess = 32.0 * 2.0;  // tweak for sharper/broader highlights
+        float specularStrength = 0.4;  // tweak intensity
+        vec3 specular = lightColor * pow(NdotH, shininess) * specularStrength;
+
+        finalColor += (diffuse + specular) * attenuation;
     }
 
-    float ambient = 0.0005;
-
+    float ambient = 0.01;
 
     finalColor += albedo * ambient; // Ambient
 
-    float nonGlowPixelsCap = 0.9;
     outColor = vec4(finalColor, 1.0);
 }

@@ -27,12 +27,15 @@ template <Uniforms L, size_t S> struct Uniform {
 
 struct alignas(16) CameraUniform
     : public Uniform<Uniforms::Camera,
-                     256> {          // aligned to 256B (of 256)
+                     272> {          // aligned to 272B (of 512)
                                      //
   glm::mat4 viewMatrix{1.0f};        // 64B
   glm::mat4 projMatrix{1.0f};        // 64B
   glm::mat4 viewProjMatrix{1.0f};    // 64B
   glm::mat4 invViewProjMatrix{1.0f}; // 64B
+                                     //
+  glm::vec3 position;                // 12B (aligns to 16B actually)
+  float pad0;                        // 4B (optional padding)
 };
 
 struct alignas(16) SubmeshUniform

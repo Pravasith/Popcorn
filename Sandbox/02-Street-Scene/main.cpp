@@ -33,9 +33,7 @@ public:
   virtual void OnAttach() override {
     Popcorn::Context::ConvertGltfToScene("../assets/models/test-scene.gltf",
                                          scene);
-
     Popcorn::Context::RegisterScene(scene);
-
     auto *curveFactory = Popcorn::Context::GetCurveFactory();
 
     const Spline<glm::vec3> *camSpline =
