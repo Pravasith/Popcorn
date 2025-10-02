@@ -54,6 +54,11 @@ public:
     uniform.hasBaseColorTexture = data.hasBaseColorTexture;
     uniform.hasNormalTexture = data.hasNormalTexture;
     uniform.hasMetallicRoughnessTexture = data.hasMetallicRoughnessTexture;
+
+    // PC_WARN("---")
+    // PC_WARN("COPYING ROUGHNESS FACTOR: " << data.roughnessFactor)
+    // PC_WARN("COPYING METALLIC FACTOR: " << data.metallicFactor)
+    // PC_WARN("---")
   }
 
   void operator()(void *uboMapping, MaterialHashType matId) {

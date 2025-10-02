@@ -90,26 +90,26 @@ void main() {
             // take N dot L for Dir light
         }
 
-        // Blinn-Phong
-        vec3 viewVec = camera.camPos - worldPos;
-        vec3 halfVec = lightVec + viewVec;
+        //
+        // Blinn–Phong specular -----------------------------------------------
+        vec3 V = normalize(camera.camPos - worldPos); // View vec
+        vec3 L = normalize(lightVec); // Light vec
+        vec3 H = normalize(L + V); // Half vec
 
-        // worldPos
-        float NdotL = max(dot(normal, normalize(lightVec)), 0.0);
-        float NdotH = max(dot(normal, normalize(halfVec)), 0.0);
-
+        // Diffuse
+        float NdotL = max(dot(normal, L), 0.0);
         vec3 diffuse = albedo * lightColor * NdotL;
 
-        // Blinn–Phong specular
-        float shininess = 32.0 * 2.0;  // tweak for sharper/broader highlights
-        float specularStrength = 0.4;  // tweak intensity
+        // Blinn–Phong specular using roughness/metallic
+        float NdotH = max(dot(normal, H), 0.0);
+        float shininess = (1.0 - roughness) * 256.0 + 1.0;
+        float specularStrength = mix(0.04, 1.0, metallic);
         vec3 specular = lightColor * pow(NdotH, shininess) * specularStrength;
 
         finalColor += (diffuse + specular) * attenuation;
     }
 
     float ambient = 0.01;
-
     finalColor += albedo * ambient; // Ambient
 
     outColor = vec4(finalColor, 1.0);
