@@ -35,11 +35,12 @@ void main() {
 
     float distance = length(viewPos);
 
-    vec3 fogColor = vec3(0.012, 0.055, 0.110); // cyan
+    vec3 fogColor = vec3(0.020, 0.067, 0.102); // cyan
+    // vec3 fogColor = vec3(0.004, 0.020, 0.031); // cyan
 
     // const float fogDensity = 0.0025;             // tweak for intensity
-    const float fogNear = 20;   // fog starts here
-    const float fogFar  = 750.0;  // fully fogged here
+    const float fogNear = 5.0;   // fog starts here
+    const float fogFar  = 650.0;  // fully fogged here
 
     // // Exponential fog
     // float fogFactor = 1.0 - exp(-pow(distance * fogDensity, 2.0));
@@ -49,7 +50,7 @@ void main() {
     float fogFactor = (distance - fogNear) / (fogFar - fogNear);
     fogFactor = clamp(fogFactor, 0.0, 1.0);
 
-    const float fogDimmer = 0.25;
+    const float fogDimmer = 1.0;
     fogColor *= fogDimmer;
 
     // Blend scene with fog

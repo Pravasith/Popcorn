@@ -247,16 +247,15 @@ void GltfLoader::ExtractLightsData(const tinygltf::Model &model,
     data.range = static_cast<float>(gltfLight.range);
   }
 
-  const float intensityFactor = 1e-4;
-  // const float intensityFactor = 1;
+  const float dimFactor = 1e-3;
 
   // Type
   if (gltfLight.type == "point") {
-    data.intensity *= intensityFactor * 15;
+    // data.intensity *= intensityFactor;
     data.type = Lights::PointLight;
     data.range = data.range >= 0.0 ? data.range : 50.0f;
   } else if (gltfLight.type == "spot") {
-    // data.intensity *= intensityFactor * 15;
+    // data.intensity *= intensityFactor;
     const auto &spot = gltfLight.spot;
     data.type = Lights::SpotLight;
     data.innerConeAngle = spot.innerConeAngle >= 0.0
@@ -267,7 +266,7 @@ void GltfLoader::ExtractLightsData(const tinygltf::Model &model,
                               : glm::radians(30.0f);
   } else if (gltfLight.type == "directional") {
     data.type = Lights::DirectionalLight;
-    data.intensity *= intensityFactor;
+    data.intensity *= dimFactor;
   } else {
     PC_WARN("Unknown light type: " << gltfLight.type);
     data.type = Lights::PointLight; // default fallback

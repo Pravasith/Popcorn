@@ -1,5 +1,6 @@
 #include "SplineUtils.h"
 #include <Animation.h>
+#include <AnimationDefs.h>
 #include <BufferObjects.h>
 #include <Camera.h>
 #include <CurveDefs.h>
@@ -33,14 +34,36 @@ public:
   virtual void OnAttach() override {
     Popcorn::Context::ConvertGltfToScene("../assets/models/test-scene.gltf",
                                          scene);
+
     Popcorn::Context::RegisterScene(scene);
+
+    const Spline<glm::vec3> *camSpline =
+        PC_MakeBezierSplineFromBlenderJson("../assets/curves/rail.json");
+
+    camera = static_cast<Camera *>(scene.FindObjectByName("Camera"));
+    // rock = scene.FindObjectByName("rock");
+    rock = scene.FindObjectByName("Cylinder.009");
+    rotor = scene.FindObjectByName("Cylinder.005");
+    TimeTrain tt(camera->GetAnimationProperty_Pos(), camSpline, 0.0, 1.0);
+
+    AnimationTrack cameraAnimTrack;
+    cameraAnimTrack.Insert_Slow(tt);
+
+    scene.AddAnimationTrack(std::move(cameraAnimTrack));
+    camera->ActivateLookAtTarget(true);
+
+    scene.GetAnimationTrack(0).Play(10);
   }
 
   virtual void OnDetach() override {
     // Popcorn::Context::DisposeScene(scene);
   }
 
-  virtual void OnUpdate(TimeEvent &e) override {}
+  virtual void OnUpdate(TimeEvent &e) override {
+    camera->SetLookAtDirection(
+        glm::normalize(rock->GetPosition() - camera->GetPosition()));
+    rotor->RotateLocalEuler<Axes::Y>(glm::radians(20.0) * e.GetDeltaS());
+  }
 
   virtual void OnRender() override {
     // Draws all scenes
@@ -50,6 +73,9 @@ public:
 
 private:
   BlenderScene scene;
+  Camera *camera;
+  GameObject *rock;
+  GameObject *rotor;
 };
 
 int main(int argc, char **argv) {
