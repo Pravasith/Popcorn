@@ -35,19 +35,11 @@ void main() {
 
     float distance = length(viewPos);
 
-    const float fogDimmer = 0.8;
-
-    // Hardcoded fog params
-    const vec3 fogColor  = fogDimmer *
-        // vec3(0.6 , 0.7, 0.8); // light bluish-gray fog
-        // vec3(0.9 , 0.2, 0.3); // light bluish-gray fog
-        // vec3(0.043, 0.106, 0.188); // dark cyan-blue
-        // vec3(0.039, 0.098, 0.141); // darker cyan-blue
-        vec3(0.000, 0.059, 0.110); // darkest cyan
+    vec3 fogColor = vec3(0.012, 0.055, 0.110); // cyan
 
     // const float fogDensity = 0.0025;             // tweak for intensity
-    const float fogNear = 12;   // fog starts here
-    const float fogFar  = 330.0;  // fully fogged here
+    const float fogNear = 20;   // fog starts here
+    const float fogFar  = 750.0;  // fully fogged here
 
     // // Exponential fog
     // float fogFactor = 1.0 - exp(-pow(distance * fogDensity, 2.0));
@@ -57,9 +49,11 @@ void main() {
     float fogFactor = (distance - fogNear) / (fogFar - fogNear);
     fogFactor = clamp(fogFactor, 0.0, 1.0);
 
+    const float fogDimmer = 0.25;
+    fogColor *= fogDimmer;
+
     // Blend scene with fog
     vec3 finalColor = mix(sceneColor, fogColor, fogFactor);
-
 
     // Typical brightness cap flow in engines:
     //

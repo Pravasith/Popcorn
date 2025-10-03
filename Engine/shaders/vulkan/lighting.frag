@@ -109,7 +109,7 @@ void main() {
         finalColor += (diffuse + specular) * attenuation;
     }
 
-    float ambient = 0.01;
+    float ambient = 0.001;
     finalColor += albedo * ambient; // Ambient
 
     outColor = vec4(finalColor, 1.0);
