@@ -62,7 +62,7 @@ public:
   virtual void OnUpdate(TimeEvent &e) override {
     camera->SetLookAtDirection(
         glm::normalize(rock->GetPosition() - camera->GetPosition()));
-    rotor->RotateLocalEuler<Axes::Y>(glm::radians(20.0) * e.GetDeltaS());
+    // rotor->RotateLocalEuler<Axes::Y>(glm::radians(20.0) * e.GetDeltaS());
   }
 
   virtual void OnRender() override {

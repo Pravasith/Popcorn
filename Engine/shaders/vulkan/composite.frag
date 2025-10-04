@@ -35,8 +35,10 @@ void main() {
 
     float distance = length(viewPos);
 
-    vec3 fogColor = vec3(0.020, 0.067, 0.102); // cyan
-    // vec3 fogColor = vec3(0.004, 0.020, 0.031); // cyan
+    // vec3 fogColor = vec3(0.020, 0.067, 0.102); // cyan
+    // vec3 fogColor = vec3(0.122, 0.122, 0.027); // cyan
+    // vec3 fogColor = vec3(0.090, 0.020, 0.039); // cyan
+    vec3 fogColor = vec3(0.004, 0.020, 0.051); // cyan
 
     // const float fogDensity = 0.0025;             // tweak for intensity
     const float fogNear = 5.0;   // fog starts here
