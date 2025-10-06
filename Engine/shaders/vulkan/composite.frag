@@ -50,7 +50,7 @@ void main() {
 
     // const float fogDensity = 0.0025;             // tweak for intensity
     const float fogNear = 5.0;   // fog starts here
-    const float fogFar  = 650.0;  // fully fogged here
+    const float fogFar  = 500.0;  // fully fogged here
 
     // // Exponential fog
     // float fogFactor = 1.0 - exp(-pow(distance * fogDensity, 2.0));
@@ -60,7 +60,7 @@ void main() {
     float fogFactor = (distance - fogNear) / (fogFar - fogNear);
     fogFactor = clamp(fogFactor, 0.0, 1.0);
 
-    const float fogDimmer = .9;
+    const float fogDimmer = 1.;
     fogColor *= fogDimmer;
 
     // Blend scene with fog

@@ -68,6 +68,9 @@ void main() {
 
         if (light.lightType == 0.0) {
             // Point light
+            if(dist > 20.) {
+                continue;
+            }
             attenuation = PointLightAttenuation(dist);
         } else if (light.lightType == 1.) {
             // Spot light

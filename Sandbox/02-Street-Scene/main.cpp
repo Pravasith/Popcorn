@@ -52,7 +52,7 @@ public:
     scene.AddAnimationTrack(std::move(cameraAnimTrack));
     camera->ActivateLookAtTarget(true);
 
-    scene.GetAnimationTrack(0).Play(10);
+    // scene.GetAnimationTrack(0).Play(10);
   }
 
   virtual void OnDetach() override {
@@ -60,8 +60,8 @@ public:
   }
 
   virtual void OnUpdate(TimeEvent &e) override {
-    camera->SetLookAtDirection(
-        glm::normalize(rock->GetPosition() - camera->GetPosition()));
+    // camera->SetLookAtDirection(
+    //     glm::normalize(rock->GetPosition() - camera->GetPosition()));
     // rotor->RotateLocalEuler<Axes::Y>(glm::radians(20.0) * e.GetDeltaS());
   }
 
