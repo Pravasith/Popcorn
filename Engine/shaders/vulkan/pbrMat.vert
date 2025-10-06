@@ -13,6 +13,7 @@ layout(set = 0, binding = 0) uniform CameraUBO {
     mat4 proj;
     mat4 viewProj;
     mat4 invViewProj;
+    vec3 camPos;
 } camera;
 
 layout(set = 2, binding = 0) uniform ObjectUBO {

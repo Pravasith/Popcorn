@@ -247,45 +247,26 @@ void GltfLoader::ExtractLightsData(const tinygltf::Model &model,
     data.range = static_cast<float>(gltfLight.range);
   }
 
-  // Spot angles (only if spot light)
-  if (data.type == Lights::SpotLight) {
+  const float dimFactor = 1e-3;
+
+  // Type
+  if (gltfLight.type == "point") {
+    // data.intensity *= intensityFactor;
+    data.type = Lights::PointLight;
+    data.range = data.range >= 0.0 ? data.range : 50.0f;
+  } else if (gltfLight.type == "spot") {
+    // data.intensity *= intensityFactor;
     const auto &spot = gltfLight.spot;
+    data.type = Lights::SpotLight;
     data.innerConeAngle = spot.innerConeAngle >= 0.0
                               ? static_cast<float>(spot.innerConeAngle)
                               : glm::radians(15.0f);
     data.outerConeAngle = spot.outerConeAngle >= 0.0
                               ? static_cast<float>(spot.outerConeAngle)
                               : glm::radians(30.0f);
-  }
-
-  // Type
-  if (gltfLight.type == "point") {
-    constexpr float PC_POINT_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR =
-        54.3514f;
-    // 1.0f;
-    // TEMP_DEBUG -
-    data.intensity /= PC_POINT_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR;
-    data.type = Lights::PointLight;
-    data.range = 50.0f;
-    PC_WARN("POINT INTENSITY " << data.intensity)
-    PC_WARN("POINT RANGE" << data.range << " " << gltfLight.range)
-    PC_WARN("POINT LIGHT POS " << light->GetPosition().x << ", "
-                               << light->GetPosition().y << ", "
-                               << light->GetPosition().z << "\n ")
-  } else if (gltfLight.type == "spot") {
-    data.type = Lights::SpotLight;
   } else if (gltfLight.type == "directional") {
     data.type = Lights::DirectionalLight;
-    // TEMP_DEBUG -
-    constexpr float PC_DIR_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR =
-        // 100.0f * 6.83f;
-        100.0f;
-    // 1.0f;
-    data.intensity /= PC_DIR_LIGHTS_BLENDER_POWER_TO_INTENSITY_FACTOR;
-    PC_WARN("DIR LIGHT INTENSITY " << data.intensity)
-    PC_WARN("DIR LIGHT POS " << light->GetPosition().x << ", "
-                             << light->GetPosition().y << ", "
-                             << light->GetPosition().z << "\n ")
+    data.intensity *= dimFactor;
   } else {
     PC_WARN("Unknown light type: " << gltfLight.type);
     data.type = Lights::PointLight; // default fallback
@@ -687,6 +668,10 @@ GltfLoader::ExtractIndexBuffer(const tinygltf::Model &model,
 void GltfLoader::ExtractAnimationsToAnimationTracks(
     const tinygltf::Model &model,
     std::vector<AnimationTrack> &animationTracks) {
+  if (model.animations.empty()) {
+    PC_WARN("GltfLoader: Scene has no animation tracks, so skipping")
+    return;
+  }
 
   SplineFactory *splineFactory = SplineFactory::Get();
   CurveFactory *curveFactory = CurveFactory::Get();

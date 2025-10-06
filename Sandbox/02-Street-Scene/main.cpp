@@ -1,5 +1,6 @@
 #include "SplineUtils.h"
 #include <Animation.h>
+#include <AnimationDefs.h>
 #include <BufferObjects.h>
 #include <Camera.h>
 #include <CurveDefs.h>
@@ -31,82 +32,27 @@ public:
   GameLayer() = default;
 
   virtual void OnAttach() override {
-    // Popcorn::Context::ConvertGltfToScene("../assets/models/light2.gltf",
-    // scene);
-    // Popcorn::Context::ConvertGltfToScene("../assets/models/planet-scene.gltf",
-    //                                      scene);
+    Popcorn::Context::ConvertGltfToScene("../assets/models/test-scene.gltf",
+                                         scene);
 
-    Popcorn::Context::ConvertGltfToScene(
-        "../assets/models/planet-scene-new.gltf", scene);
-
-    // Popcorn::Context::ConvertGltfToScene("../assets/models/light-test.gltf",
-    //                                      scene);
     Popcorn::Context::RegisterScene(scene);
-    // building = scene.FindObjectByName("building");
 
-    AnimationTrack &animTrack1 = scene.GetAnimationTrack(0);
-    AnimationTrack &animTrack2 = scene.GetAnimationTrack(1);
-    AnimationTrack &animTrack3 = scene.GetAnimationTrack(2);
+    const Spline<glm::vec3> *camSpline =
+        PC_MakeBezierSplineFromBlenderJson("../assets/curves/rail.json");
 
-    float xy = .5f, z = 5.f;
+    camera = static_cast<Camera *>(scene.FindObjectByName("Camera"));
+    // rock = scene.FindObjectByName("rock");
+    rock = scene.FindObjectByName("Cylinder.009");
+    rotor = scene.FindObjectByName("Cylinder.005");
+    TimeTrain tt(camera->GetAnimationProperty_Pos(), camSpline, 0.0, 1.0);
 
-    const std::vector<LinearKnot<glm::vec3>> knots{
-        {{-xy, -xy, z}, 0},   {{xy, -xy, z}, 0.25}, {{xy, xy, z}, 0.5},
-        {{-xy, xy, z}, 0.75}, {{-xy, -xy, z}, 1.0},
-    };
+    AnimationTrack cameraAnimTrack;
+    cameraAnimTrack.Insert_Slow(tt);
 
-    auto *splineFactory = Popcorn::Context::GetSplineFactory();
-    auto *curveFactory = Popcorn::Context::GetCurveFactory();
-
-    const Spline<glm::vec3> *cmr_Spl =
-        splineFactory->MakeAutomaticSpline(knots);
-    // PC_MakeBezierSplineFromBlenderJson("../assets/curves/curve.json");
-
-    Camera *camera = static_cast<Camera *>(scene.FindObjectByName("Camera"));
-    GameObject *cylinder = scene.FindObjectByName("Cylinder");
-
-    double deltaStep = 3.0;
-
-    // Animate camera
-    TimeTrain tt(camera->GetAnimationProperty_Pos(), cmr_Spl, 0.0, 1.0);
-
-    AnimationTrack catmullRom;
-    catmullRom.Insert_Slow(tt);
-    scene.AddAnimationTrack(std::move(catmullRom));
-    auto &animTrack0 = scene.GetAnimationTrack(3);
-
-    CurveInfoLinearForm<glm::vec3> lookAtTargetCInfo;
-    lookAtTargetCInfo.p0 = cylinder->GetPosition();
-    lookAtTargetCInfo.p1 = {0.f, 0.f, 0.f};
-
-    const LinearCurve<glm::vec3> *lookAtCurve =
-        curveFactory->GetCurvePtr(lookAtTargetCInfo);
-
-    TimeTrain ttLookAt(camera->GetAnimationProperty_LookAtTarget(), lookAtCurve,
-                       0.0, .4);
-    animTrack0.Insert_Slow(ttLookAt);
-
+    scene.AddAnimationTrack(std::move(cameraAnimTrack));
     camera->ActivateLookAtTarget(true);
-    // cylinder->SetLookAtTargetPoint()
 
-    animTrack0.Play(9.0, [&](AnimationTrack *) {
-      PC_PRINT("ANIMATION 0 FINISHED YAYY!", TagType::Print, "")
-    });
-
-    // Animate from Blender imported animations
-    animTrack1.Play(deltaStep, [&, deltaStep](AnimationTrack *) {
-      PC_PRINT("ANIMATION 1 FINISHED YAYY!", TagType::Print, "")
-
-      animTrack2.Play(deltaStep, [&, deltaStep](AnimationTrack *) {
-        PC_PRINT("ANIMATION 2 FINISHED YAYY!", TagType::Print, "")
-
-        animTrack3.Play(deltaStep, [&, deltaStep](AnimationTrack *) {
-          PC_PRINT("ANIMATION 3 FINISHED YAYY!", TagType::Print, "")
-        });
-      });
-    });
-
-    // Time::Get()->PrintSubscribers();
+    // scene.GetAnimationTrack(0).Play(10);
   }
 
   virtual void OnDetach() override {
@@ -114,11 +60,9 @@ public:
   }
 
   virtual void OnUpdate(TimeEvent &e) override {
-    // building->RotateEuler<Axes::Y>(glm::radians(20.f) * e.GetDeltaS());
-    //
-    // std::cout << building->GetPosition().x << "," <<
-    // building->GetPosition().y
-    //           << "," << building->GetPosition().z << "\n";
+    // camera->SetLookAtDirection(
+    //     glm::normalize(rock->GetPosition() - camera->GetPosition()));
+    // rotor->RotateLocalEuler<Axes::Y>(glm::radians(20.0) * e.GetDeltaS());
   }
 
   virtual void OnRender() override {
@@ -129,7 +73,9 @@ public:
 
 private:
   BlenderScene scene;
-  GameObject *building = nullptr;
+  Camera *camera;
+  GameObject *rock;
+  GameObject *rotor;
 };
 
 int main(int argc, char **argv) {

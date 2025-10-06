@@ -56,7 +56,10 @@ public:
 
   // Animation tracks - for GltfLoader only
   void SetAnimationTracks(const std::vector<AnimationTrack> &tracks) {
-    assert(!tracks.empty());
+    if (tracks.empty()) {
+      PC_WARN("Scene: Scene has no animation tracks, so skipping")
+      return;
+    }
 
     m_animationTracks.clear();
     m_animTrackSize = 0;
