@@ -251,7 +251,7 @@ void GltfLoader::ExtractLightsData(const tinygltf::Model &model,
 
   // Type
   if (gltfLight.type == "point") {
-    // data.intensity *= intensityFactor;
+    // data.intensity *= dimFactor;
     data.type = Lights::PointLight;
     data.range = data.range >= 0.0 ? data.range : 50.0f;
   } else if (gltfLight.type == "spot") {

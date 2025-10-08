@@ -73,6 +73,7 @@ void FrameVk::Draw(
   // In case of resize (or invalid swapchain to be precise), we return and
   // continue from the next frame
   if (!isImageAcquired) {
+    // PC_WARN("SWAPCHAIN INVALID")
     vkDeviceWaitIdle(device); // Wait for all operations to finish before
                               // recreating swapchain
     vkResetFences(device, 1, &m_inFlightFences[m_currentFrame]);

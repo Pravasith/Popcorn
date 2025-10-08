@@ -99,12 +99,14 @@ void main() {
         vec3 L = normalize(lightVec); // Light vec
         vec3 H = normalize(L + V); // Half vec
 
+        // Dot products
+        float NdotL = max(dot(normal, L), .0);
+        float NdotH = max(dot(normal, H), 0.0);
+
         // Diffuse
-        float NdotL = max(dot(normal, L), 0.0);
         vec3 diffuse = albedo * lightColor * NdotL;
 
         // Blinn–Phong specular using roughness/metallic
-        float NdotH = max(dot(normal, H), 0.0);
         float shininess = (1.0 - roughness) * 256.0 + 1.0;
         float specularStrength = mix(0.04, 1.0, metallic);
         vec3 specular = lightColor * pow(NdotH, shininess) * specularStrength;

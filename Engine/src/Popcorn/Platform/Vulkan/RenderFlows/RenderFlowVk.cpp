@@ -222,6 +222,7 @@ void RenderFlowVk::CreateSamplers() {
   depthSamplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
   depthSamplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
   depthSamplerInfo.unnormalizedCoordinates = VK_FALSE;
+
   s_samplersVk.depthSampler.Create(depthSamplerInfo);
 };
 
