@@ -24,6 +24,7 @@
 #include <glm/geometric.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/trigonometric.hpp>
 
 using namespace Popcorn;
 class BlenderScene : public Scene {}; // Game Objects are owned by Scene
@@ -43,7 +44,7 @@ public:
     camera = static_cast<Camera *>(scene.FindObjectByName("Camera"));
     // rock = scene.FindObjectByName("rock");
     rock = scene.FindObjectByName("Cylinder.009");
-    rotor = scene.FindObjectByName("Cylinder.005");
+    rotor = scene.FindObjectByName("blue");
     TimeTrain tt(camera->GetAnimationProperty_Pos(), camSpline, 0.0, 1.0);
 
     AnimationTrack cameraAnimTrack;
@@ -61,7 +62,11 @@ public:
 
   virtual void OnUpdate(TimeEvent &e) override {
     // camera->SetLookAtDirection(glm::normalize(-camera->GetPosition()));
-    // rotor->RotateLocalEuler<Axes::Y>(glm::radians(20.0) * e.GetDeltaS());
+    PC_WARN(rotor->GetPosition().x << ' ' << rotor->GetPosition().y << ' '
+                                   << rotor->GetPosition().z)
+
+    PC_WARN(e.GetDeltaS())
+    rotor->RotateLocalEuler<Axes::Y>(glm::radians(20.0) * e.GetDeltaS());
   }
 
   virtual void OnRender() override {

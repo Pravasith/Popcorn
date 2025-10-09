@@ -29,13 +29,14 @@ public:
   static void AddLayer(Layer *);
 
   Window &GetAppWindow() const;
-  LayerStack &GetLayerStack() const { return *s_layerStack; };
   static bool IsGameLoopRunning();
+
+  LayerStack &GetLayerStack() const { return *s_layerStack; }
 
   inline void SetRenderer(Renderer &renderer) {
     PC_ASSERT(!s_renderer, "A renderer already exists!");
     s_renderer = &renderer;
-  };
+  }
 
   // DELETE THE COPY CONSTRUCTOR AND COPY ASSIGNMENT OPERATOR
   Application(const Application &) = delete;

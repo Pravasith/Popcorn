@@ -139,6 +139,8 @@ private:
                               m_cameraData.GetValue()[3]  // far
         );
     m_projMatrix[1][1] *= -1;
+
+    PC_WARN("FOV " << m_cameraData.GetValue()[0])
   }
 
   virtual void OnAttach() {}
