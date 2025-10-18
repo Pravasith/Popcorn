@@ -62,10 +62,10 @@ public:
 
   virtual void OnUpdate(TimeEvent &e) override {
     // camera->SetLookAtDirection(glm::normalize(-camera->GetPosition()));
-    PC_WARN(rotor->GetPosition().x << ' ' << rotor->GetPosition().y << ' '
-                                   << rotor->GetPosition().z)
-
-    PC_WARN(e.GetDeltaS())
+    // PC_WARN(rotor->GetPosition().x << ' ' << rotor->GetPosition().y << ' '
+    //                                << rotor->GetPosition().z)
+    //
+    // PC_WARN(e.GetDeltaS())
     rotor->RotateLocalEuler<Axes::Y>(glm::radians(20.0) * e.GetDeltaS());
   }
 

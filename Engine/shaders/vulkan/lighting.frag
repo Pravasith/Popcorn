@@ -107,14 +107,16 @@ void main() {
         vec3 diffuse = albedo * lightColor * NdotL;
 
         // Blinn–Phong specular using roughness/metallic
-        float shininess = (1.0 - roughness) * 256.0 + 1.0;
+        // float shininess = (1.0 - roughness) * 256.0 + 1.0;
+        float shininess = 2.0 + pow(1.0 - roughness, 3.0) * 64.0;
         float specularStrength = mix(0.04, 1.0, metallic);
         vec3 specular = lightColor * pow(NdotH, shininess) * specularStrength;
 
         finalColor += (diffuse + specular) * attenuation;
     }
 
-    float ambient = 0.0025;
+    // float ambient = 0.0025;
+    float ambient = 0.01;
     finalColor += albedo * ambient; // Ambient
 
     outColor = vec4(finalColor, 1.0);
