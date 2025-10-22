@@ -19,6 +19,7 @@
 #include <Splines.h>
 #include <Time.h>
 #include <TimeEvent.h>
+#include <cmath>
 #include <functional>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
@@ -42,9 +43,12 @@ public:
         PC_MakeBezierSplineFromBlenderJson("../assets/curves/rail.json");
 
     camera = static_cast<Camera *>(scene.FindObjectByName("Camera"));
-    // rock = scene.FindObjectByName("rock");
-    rock = scene.FindObjectByName("Cylinder.009");
-    rotor = scene.FindObjectByName("blue");
+    blu = scene.FindObjectByName("blue");
+    rotorA = scene.FindObjectByName("rotor-a");
+    rotorB = scene.FindObjectByName("rotor-b");
+    rotorC = scene.FindObjectByName("rotor-c");
+    rotorD = scene.FindObjectByName("rotor-d");
+
     TimeTrain tt(camera->GetAnimationProperty_Pos(), camSpline, 0.0, 1.0);
 
     AnimationTrack cameraAnimTrack;
@@ -65,8 +69,28 @@ public:
     // PC_WARN(rotor->GetPosition().x << ' ' << rotor->GetPosition().y << ' '
     //                                << rotor->GetPosition().z)
     //
-    // PC_WARN(e.GetDeltaS())
-    rotor->RotateLocalEuler<Axes::Y>(glm::radians(20.0) * e.GetDeltaS());
+    // PC_WARN(sin(glm::radians(20.0) * e.GetDeltaS()))
+
+    float fullRotation = glm::radians(20.0) * e.GetDeltaS();
+    float angle = glm::radians(20.0) * sin(e.GetElapsedS()) * 0.02;
+
+    blu->RotateLocalEuler<Axes::Y>(angle * 0.8);
+
+    if (e.GetElapsedS() < 10.)
+      return;
+    rotorA->RotateLocalEuler<Axes::Z>(fullRotation);
+
+    if (e.GetElapsedS() < 14.)
+      return;
+    rotorB->RotateLocalEuler<Axes::Z>(angle * .6);
+
+    if (e.GetElapsedS() < 18.)
+      return;
+    rotorC->RotateLocalEuler<Axes::X>(angle * .5);
+
+    if (e.GetElapsedS() < 20.)
+      return;
+    rotorD->RotateLocalEuler<Axes::Y>(angle * .25);
   }
 
   virtual void OnRender() override {
@@ -78,8 +102,13 @@ public:
 private:
   BlenderScene scene;
   Camera *camera;
-  GameObject *rock;
-  GameObject *rotor;
+
+  GameObject *rotorA;
+  GameObject *rotorB;
+  GameObject *rotorC;
+  GameObject *rotorD;
+
+  GameObject *blu;
 };
 
 int main(int argc, char **argv) {
