@@ -2,19 +2,29 @@
 #
 
 # -----------------------------------------------------------------------
-# INSTALL THESE EXTERNAL DEPENDENCIES
+# INSTALL THESE EXTERNAL DEPENDENCIES FOR LINUX ONLY
 #
-# FOR GLFW:
+# RUN CMD TO INSTALL THESE DEPS FOR GLFW
+# --------------------------------------
 # sudo apt install libwayland-dev libxkbcommon-dev xorg-dev
 #
-# FOR VULKAN:
+# RUN CMD TO INSTALL THESE DEPS FOR VULKAN
+# -----------------------------------------
 # sudo apt-get install git build-essential libx11-xcb-dev \
 #     libxkbcommon-dev libwayland-dev libxrandr-dev
 #
-# ALSO INSTALL Vulkan-SDK
+# FIND & INSTALL THESE YOURSELF
+# ------------------------------
+# 1. Vulkan SDK
+#    - Easily found with a web search
+# 2. glslc
+#    - This comes with Vulkan SDK, so no need to install
+# 3. RenderDoc
+#    - Only if you want to use the profiling system. It is
+#      available on be installed from https://renderdoc.org/
+#      To use the profiling system turn on the flag
+#      in ../CMakeLists.txt
 #
-# SHADER COMPILERS:
-# glslc -- included in Vulkan-SDK
 # -----------------------------------------------------------------------
 
 echo "--- Starting environment setup for Linux based systems..."

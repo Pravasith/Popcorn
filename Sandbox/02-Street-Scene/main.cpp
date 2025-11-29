@@ -48,6 +48,7 @@ public:
     rotorB = scene.FindObjectByName("rotor-b");
     rotorC = scene.FindObjectByName("rotor-c");
     rotorD = scene.FindObjectByName("rotor-d");
+    eva = scene.FindObjectByName("Cube.033");
 
     TimeTrain tt(camera->GetAnimationProperty_Pos(), camSpline, 0.0, 1.0);
 
@@ -71,26 +72,19 @@ public:
     //
     // PC_WARN(sin(glm::radians(20.0) * e.GetDeltaS()))
 
-    float fullRotation = glm::radians(20.0) * e.GetDeltaS();
-    float angle = glm::radians(20.0) * sin(e.GetElapsedS()) * 0.02;
+    float fullRotation = glm::radians(10.0) * e.GetDeltaS();
+    float angle = glm::radians(10.0) * sin(e.GetElapsedS()) * 0.2;
 
-    blu->RotateLocalEuler<Axes::Y>(angle * 0.8);
+    blu->RotateLocalEuler<Axes::Y>(angle * .1);
 
-    if (e.GetElapsedS() < 10.)
-      return;
     rotorA->RotateLocalEuler<Axes::Z>(fullRotation);
+    eva->RotateLocalEuler<Axes::Y>(fullRotation);
 
-    if (e.GetElapsedS() < 14.)
-      return;
-    rotorB->RotateLocalEuler<Axes::Z>(angle * .6);
+    rotorB->RotateLocalEuler<Axes::Z>(angle);
 
-    if (e.GetElapsedS() < 18.)
-      return;
-    rotorC->RotateLocalEuler<Axes::X>(angle * .5);
+    rotorC->RotateLocalEuler<Axes::X>(angle);
 
-    if (e.GetElapsedS() < 20.)
-      return;
-    rotorD->RotateLocalEuler<Axes::Y>(angle * .25);
+    rotorD->RotateLocalEuler<Axes::Y>(angle);
   }
 
   virtual void OnRender() override {
@@ -109,6 +103,7 @@ private:
   GameObject *rotorD;
 
   GameObject *blu;
+  GameObject *eva;
 };
 
 int main(int argc, char **argv) {
