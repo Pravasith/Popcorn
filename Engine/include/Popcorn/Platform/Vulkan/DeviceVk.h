@@ -25,8 +25,16 @@ class DeviceVk {
 
 public:
   struct FeatureChain {
-    VkPhysicalDeviceFeatures2 features2{};
-    VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures depthStencilFeatures{};
+    VkBaseOutStructure *pHead = nullptr;
+
+    void AddToChain(VkBaseOutStructure *nextFeature) {
+      nextFeature->pNext = pHead;
+      pHead = nextFeature;
+    }
+
+    // Important: These need to persist until the device dies. So don't delete
+    VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures depthStencil{};
+    VkPhysicalDeviceDynamicRenderingFeatures dynamicRendering{};
   };
 
 public:
@@ -109,8 +117,8 @@ private:
 
   std::vector<const char *> GetRequiredExtensions();
   bool CheckDeviceExtensionSupport(const VkPhysicalDevice &);
-  bool
-  QueryAndEnableDepthStencilLayoutFeature(DeviceVk::FeatureChain &outFeatures);
+  bool QueryAndEnableNewerVkFeatures(VkPhysicalDeviceFeatures2 &outFeatures,
+                                     FeatureChain &featureChain);
 
   /** -------------------------------------------------------------------
    *  ------ VALIDATION LAYERS HELPERS ----------------------------------
@@ -157,8 +165,6 @@ private:
 
   VkQueue m_graphicsQueue = VK_NULL_HANDLE;
   VkQueue m_presentQueue = VK_NULL_HANDLE;
-
-  bool m_separateDepthStencilLayoutsSupported = false;
 
   const std::vector<const char *> m_validationLayers = {
       "VK_LAYER_KHRONOS_validation"};
