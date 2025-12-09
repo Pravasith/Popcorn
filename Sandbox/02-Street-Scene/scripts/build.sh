@@ -69,10 +69,24 @@ compile_game() {
 
         cd "$build_dir"
 
+        read -p "Release mode? y/N " release_build_prompt
+        release_build_prompt=$(echo "$release_build_prompt" | tr '[:upper:]' '[:lower:]')
+
+        build_type="Release"
+
+        if [ "$release_build_prompt" = 'y' ]; then
+            echo "Performing a release build..."
+        elif [ "$release_build_prompt" = 'n' ]; then
+            build_type="Debug"
+            echo "Performing a non-release build..."
+        else
+            echo "Performing a non-release build..."
+        fi
+
         cmake \
             -D CMAKE_INSTALL_PREFIX="$install_dir" \
             -D CMAKE_EXPORT_COMPILE_COMMANDS=ON \
-            -D CMAKE_BUILD_TYPE=Debug \
+            -D CMAKE_BUILD_TYPE="$build_type" \
             -S ../../ \
             -B .
 

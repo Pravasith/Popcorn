@@ -38,19 +38,19 @@ void main() {
     // vec3 fogColor = vec3(0.020, 0.067, 0.102); // cyan
     // vec3 fogColor = vec3(0.122, 0.122, 0.027); // cyan
     // vec3 fogColor = vec3(0.090, 0.020, 0.039); // cyan
-    vec3 darkCyan = vec3(0.004, 0.020, 0.051);
+    vec3 darkCyan = vec3(0.063, 0.200, 0.196);
     // vec3 darkCyan = vec3(0.024, 0.122, 0.149);
     // vec3 darkViolet = vec3(0.047, 0.004, 0.071);
     // vec3 darkViolet = vec3(0.043, 0.000, 0.078);
     // vec3 darkViolet = vec3(0.031, 0.000, 0.071);
     // vec3 darkViolet = vec3(0.000, 0.020, 0.090);
-    vec3 darkViolet = vec3(0.0);
+    vec3 darkViolet  = vec3(0.004, 0.020, 0.051);
 
     vec3 fogColor = mix(darkViolet, darkCyan, fragUV.y);
 
     // const float fogDensity = 0.0025;             // tweak for intensity
     const float fogNear = 5.0;   // fog starts here
-    const float fogFar  = 500.0;  // fully fogged here
+    const float fogFar  = 600.0;  // fully fogged here
 
     // // Exponential fog
     // float fogFactor = 1.0 - exp(-pow(distance * fogDensity, 2.0));
@@ -60,7 +60,7 @@ void main() {
     float fogFactor = (distance - fogNear) / (fogFar - fogNear);
     fogFactor = clamp(fogFactor, 0.0, 1.0);
 
-    const float fogDimmer = 1.;
+    const float fogDimmer = .9;
     fogColor *= fogDimmer;
 
     // Blend scene with fog

@@ -78,8 +78,11 @@ public:
 
     CreateAttachments();
     CreateImageBarriers();
+    //
     CreateRenderPass();
     CreateFramebuffers();
+    // Create Attachment Info
+
     CreateCommandBuffers();
   };
 

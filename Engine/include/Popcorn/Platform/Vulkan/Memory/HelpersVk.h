@@ -103,7 +103,9 @@ public:
   PcCopyUniformToMemory(Light *light, Camera *activeCamera,
                         PcBufferViews &bfrViews, PcBufferOffsets &bfrOffsets)
       : bufferViews(bfrViews), bufferOffsets(bfrOffsets) {
+
     const LightData &lightData = light->GetLightData();
+    // TODO: Fix this -- this is not actually world position
     const glm::vec3 &worldPos = light->GetPosition();
 
     // PC_WARN("LIGHT POSITION BEFORE COPY " << worldPos.x << ", " << worldPos.y

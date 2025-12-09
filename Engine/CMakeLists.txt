@@ -170,7 +170,9 @@ target_include_directories(
 
 # DEBUG FLAGS
 option(PC_DEBUG "USE DEBUG MODE FOR COMPILING" ON)
-# option(PC_DEBUG "USE DEBUG MODE FOR COMPILING" OFF)
+option(PC_USE_PROFILING "USE PROFILING MODE" ON) # Needs RenderDoc to be
+                                                 # installed in your machine
+                                                 # before using this
 
 if(PC_DEBUG)
   target_compile_definitions(Window PUBLIC "PC_DEBUG")

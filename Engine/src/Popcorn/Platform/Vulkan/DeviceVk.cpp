@@ -5,6 +5,7 @@
 #include <set>
 #include <stdexcept>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 ENGINE_NAMESPACE_BEGIN
 GFX_NAMESPACE_BEGIN
@@ -302,20 +303,46 @@ DeviceVk::FindQueueFamilies(const VkPhysicalDevice &device,
   return indices;
 }
 
-bool DeviceVk::QueryAndEnableDepthStencilLayoutFeature(
-    DeviceVk::FeatureChain &outFeatures) {
-  outFeatures.depthStencilFeatures.sType =
+bool DeviceVk::QueryAndEnableNewerVkFeatures(
+    VkPhysicalDeviceFeatures2 &outFeatures, FeatureChain &featureChain) {
+  //
+  // --- Query: Separate depth stencil layouts --------------------------------
+  VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures depthStencilQuery{};
+  depthStencilQuery.sType =
       VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SEPARATE_DEPTH_STENCIL_LAYOUTS_FEATURES;
-  outFeatures.features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-  outFeatures.features2.pNext = &outFeatures.depthStencilFeatures;
+  depthStencilQuery.pNext = nullptr;
 
-  vkGetPhysicalDeviceFeatures2(m_physicalDevice, &outFeatures.features2);
+  //
+  // --- Query: Dynamic rendering ---------------------------------------------
+  VkPhysicalDeviceDynamicRenderingFeatures dynamicRenderingQuery{};
+  dynamicRenderingQuery.sType =
+      VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
+  dynamicRenderingQuery.pNext = &depthStencilQuery;
 
-  if (outFeatures.depthStencilFeatures.separateDepthStencilLayouts) {
-    outFeatures.depthStencilFeatures.separateDepthStencilLayouts = VK_TRUE;
-    return true;
+  outFeatures.pNext = &dynamicRenderingQuery;
+
+  vkGetPhysicalDeviceFeatures2(m_physicalDevice, &outFeatures);
+
+  if (!depthStencilQuery.separateDepthStencilLayouts ||
+      !dynamicRenderingQuery.dynamicRendering) {
+    return false;
   }
-  return false;
+
+  featureChain.depthStencil.sType =
+      VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SEPARATE_DEPTH_STENCIL_LAYOUTS_FEATURES;
+  featureChain.depthStencil.separateDepthStencilLayouts = VK_TRUE;
+
+  featureChain.AddToChain(
+      reinterpret_cast<VkBaseOutStructure *>(&featureChain.depthStencil));
+
+  featureChain.dynamicRendering.sType =
+      VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
+  featureChain.dynamicRendering.dynamicRendering = VK_TRUE;
+
+  featureChain.AddToChain(
+      reinterpret_cast<VkBaseOutStructure *>(&featureChain.dynamicRendering));
+
+  return true;
 }
 
 /** -------------------------------------------------------------------
@@ -339,17 +366,11 @@ void DeviceVk::CreateLogicalDevice(const VkSurfaceKHR &surface) {
   }
   //
 
-  VkPhysicalDeviceFeatures deviceFeatures{};
-  deviceFeatures.samplerAnisotropy = VK_TRUE;
-
   VkDeviceCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
   createInfo.pQueueCreateInfos = queueCreateInfos.data();
   createInfo.queueCreateInfoCount =
       static_cast<uint32_t>(queueCreateInfos.size());
-
-  // createInfo.pEnabledFeatures = &deviceFeatures;
-  createInfo.pEnabledFeatures = nullptr;
 
   createInfo.enabledExtensionCount =
       static_cast<uint32_t>(m_deviceExtensions.size());
@@ -363,19 +384,29 @@ void DeviceVk::CreateLogicalDevice(const VkSurfaceKHR &surface) {
     createInfo.enabledLayerCount = 0;
   }
 
-  FeatureChain featureChain{};
-  bool separateDepthStencilLayoutsSupported =
-      QueryAndEnableDepthStencilLayoutFeature(featureChain);
+  // Features ----------------------------------------------------------
 
-  featureChain.features2.features = deviceFeatures;
-  createInfo.pNext = &featureChain.features2;
+  VkPhysicalDeviceFeatures2 features2{};
+  features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+  features2.pNext = nullptr;
+
+  // Enable old (vulkan 1.0) features here
+  features2.features.samplerAnisotropy = VK_TRUE;
+  // features2.features.wideLines = VK_TRUE;
+
+  // Enable the rest (newer features) by chaining them to a linked list
+  FeatureChain featureChain{};
+  if (!QueryAndEnableNewerVkFeatures(features2, featureChain)) {
+    throw std::runtime_error("Could not create device because it lacks some "
+                             "features required by the engine");
+  };
+
+  createInfo.pNext = &features2;
 
   if (vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device) !=
       VK_SUCCESS) {
     throw std::runtime_error("failed to create logical device!");
   }
-
-  m_separateDepthStencilLayoutsSupported = separateDepthStencilLayoutsSupported;
 
   vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0,
                    &m_graphicsQueue);

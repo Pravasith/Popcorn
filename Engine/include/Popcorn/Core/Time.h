@@ -10,16 +10,17 @@ class Time : public Publisher {
 public:
   [[nodiscard]] inline bool IsGameLoopRunning() const {
     return m_isGameLoopRunning;
-  };
+  }
 
   [[nodiscard]] inline static Time *Get() {
     if (!s_instance) {
       s_instance = new Time();
     } else {
       PC_WARN("Time class instance exists!");
-    };
+    }
+
     return s_instance;
-  };
+  }
 
   inline static void Destroy() {
     if (!s_instance) {
@@ -27,8 +28,8 @@ public:
     } else {
       delete s_instance;
       s_instance = nullptr;
-    };
-  };
+    }
+  }
 
   void Start();
   void Stop();
@@ -38,13 +39,15 @@ private:
       : Publisher("Time"), m_elapsed(0.0),
         // Assumption: First frame took 16.66 ms
         m_delta(0.01666), m_isGameLoopRunning(true) {
-          PC_PRINT("CREATED", TagType::Constr, "TIME")
-        };
-  ~Time() { PC_PRINT("DESTROYED", TagType::Destr, "TIME") };
+    PC_PRINT("CREATED", TagType::Constr, "TIME")
+  }
+
+  ~Time(){PC_PRINT("DESTROYED", TagType::Destr, "TIME")}
+
   Time(const Time &) = delete;
-  Time operator()(const Time &) = delete;
+  Time &operator=(const Time &) = delete;
   Time(const Time &&) = delete;
-  Time operator()(const Time &&) = delete;
+  Time &operator()(const Time &&) = delete;
 
   static Time *s_instance;
 

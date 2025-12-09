@@ -31,7 +31,9 @@ void RendererVk::DrawFrame(const Scene &scene) {
       [&]() { // swapchain invalid cb
         vkDeviceWaitIdle(ContextVk::Device()->GetDevice());
 
+        RenderFlowVk::FreeShaders();
         RenderFlowVk::AllocShaders();
+
         for (auto &renderFlow : s_renderFlows) {
           renderFlow->OnSwapchainInvalidCb();
         }
@@ -47,12 +49,12 @@ void RendererVk::DrawFrame(const Scene &scene) {
         }
       },
       s_renderFlowCmdBuffers);
-};
+}
 
 bool RendererVk::OnFrameBufferResize(FrameBfrResizeEvent &) {
   ContextVk::Frame()->SetFrameBufferResized(true);
   return true;
-};
+}
 
 //
 // -------------------------------------------------------------------------
@@ -61,23 +63,23 @@ bool RendererVk::OnFrameBufferResize(FrameBfrResizeEvent &) {
 RendererVk::RendererVk(const Window &appWin) : Renderer(appWin) {
   PC_PRINT("CREATED", TagType::Constr, "RendererVk");
   CreateVulkanContext();
-};
+}
 
 RendererVk::~RendererVk() {
   DestroyVulkanContext();
   PC_PRINT("DESTROYED", TagType::Destr, "RendererVk");
-};
+}
 
 void RendererVk::CreateVulkanContext() {
   s_vulkanContext = ContextVk::Get();
   s_vulkanContext->VulkanInit(m_AppWin);
-};
+}
 
 void RendererVk::DestroyVulkanContext() {
   s_vulkanContext->VulkanCleanUp();
   ContextVk::Destroy();
   s_vulkanContext = nullptr;
-};
+}
 
 //
 // ---------------------------------------------------------------------------
@@ -86,7 +88,7 @@ void RendererVk::CreateRenderFlows() {
   s_renderFlows.emplace_back(new GBufferRenderFlowVk());
   s_renderFlows.emplace_back(new LightingRenderFlowVk());
   s_renderFlows.emplace_back(new CompositeRenderFlowVk());
-};
+}
 
 void RendererVk::DestroyRenderFlows() {
   vkDeviceWaitIdle(ContextVk::Device()->GetDevice());
@@ -106,7 +108,7 @@ void RendererVk::DestroyRenderFlows() {
     renderFlow = nullptr;
   }
   s_renderFlows.clear();
-};
+}
 
 void RendererVk::PrepareRenderFlows() {
   // Create VMA Allocator
@@ -130,7 +132,7 @@ void RendererVk::PrepareRenderFlows() {
 
   s_renderFlowCmdBuffers[RenderFlows::Composite] =
       &s_renderFlows[2]->GetCommandBuffers();
-};
+}
 
 void RendererVk::CreateRenderFlowResources() {
   //
@@ -158,7 +160,7 @@ void RendererVk::CreateRenderFlowResources() {
   //
   // Unload shaders in the shader library
   RenderFlowVk::FreeShaders();
-};
+}
 
 #ifdef PC_DEBUG
 void RendererVk::DebugPreGameLoop() {
@@ -172,9 +174,9 @@ void RendererVk::AssignSceneObjectsToRenderFlows() {
   for (auto &scene : m_sceneLibrary.GetScenes()) {
     for (auto &node : scene->GetGameObjects()) {
       ProcessGameObjectNode(node); // Recursive
-    };
-  };
-};
+    }
+  }
+}
 
 void RendererVk::ProcessGameObjectNode(GameObject *node) { // Recursive
   switch (node->GetGameObjectType()) {
@@ -183,10 +185,10 @@ void RendererVk::ProcessGameObjectNode(GameObject *node) { // Recursive
     auto *mesh = static_cast<Mesh *>(node);
     for (auto &basicSubmesh : mesh->GetSubmeshes<MaterialTypes::BasicMat>()) {
       RenderFlowVk::RegisterMaterialAndSubmesh(&basicSubmesh);
-    };
+    }
     for (auto &pbrSubmesh : mesh->GetSubmeshes<MaterialTypes::PbrMat>()) {
       RenderFlowVk::RegisterMaterialAndSubmesh(&pbrSubmesh);
-    };
+    }
   } break;
 
   case Popcorn::Gfx::GameObjectTypes::Camera: //
@@ -219,7 +221,7 @@ void RendererVk::ProcessGameObjectNode(GameObject *node) { // Recursive
   for (auto &child : node->GetChildren()) {
     ProcessGameObjectNode(child); // Recursive
   }
-};
+}
 
 GFX_NAMESPACE_END
 ENGINE_NAMESPACE_END

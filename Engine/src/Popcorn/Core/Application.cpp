@@ -14,7 +14,7 @@ DebugUIOverlay *Application::s_debugUIOverlay = nullptr;
 
 Application::Application() {
   PC_PRINT("APPLICATION STARTED", TagType::Constr, "APP");
-};
+}
 
 Application::~Application() {
   ContextGfx::Destroy();
@@ -34,7 +34,7 @@ Application::~Application() {
   Popcorn::Window::Destroy();
 
   PC_PRINT("APPLICATION STOPPED", TagType::Destr, "APP");
-};
+}
 
 Application &Application::Get() { return *s_instance; }
 Window &Application::GetAppWindow() const { return *s_window; }
@@ -73,14 +73,14 @@ void Application::Start() {
   }
 }
 
-void Application::StartGameLoop() { s_time->Start(); };
+void Application::StartGameLoop() { s_time->Start(); }
 
-bool Application::IsGameLoopRunning() { return s_time->IsGameLoopRunning(); };
+bool Application::IsGameLoopRunning() { return s_time->IsGameLoopRunning(); }
 
 void Application::AddLayer(Layer *layer) {
   s_layerStack->PushLayer(layer);
   layer->OnAttach();
-};
+}
 
 void Application::Stop() {
   if (s_instance) {
@@ -101,12 +101,12 @@ bool Application::OnWindowResize(WindowResizeEvent &e) const {
   // });
 
   return true;
-};
+}
 
 bool Application::OnWindowClose(WindowCloseEvent &e) const {
   s_time->Stop();
   return true;
-};
+}
 
 bool Application::OnClockTick(TimeEvent &e) {
   Window::OnUpdate(e);
@@ -123,11 +123,17 @@ bool Application::OnClockTick(TimeEvent &e) {
   // Note: Returning true for OnUpdate is meaningless since we want it to
   // propagate for the next subscriber (usually) inside the same frame return
   return false;
-};
+}
 
 void Application::OnEvent(Event &e) {
   EventDispatcher dispatcher{e};
 
+  //
+  // Broadcast events ---------------------------------------------------
+  dispatcher.Dispatch<TimeEvent>(PC_BIND_EVENT_FUNC(TimeEvent, OnClockTick));
+
+  //
+  // Non-broadcast events -----------------------------------------------
   dispatcher.Dispatch<WindowResizeEvent>(
       PC_BIND_EVENT_FUNC(WindowResizeEvent, OnWindowResize));
 
@@ -140,8 +146,6 @@ void Application::OnEvent(Event &e) {
   dispatcher.Dispatch<WindowCloseEvent>(
       PC_BIND_EVENT_FUNC(WindowCloseEvent, OnWindowClose));
 
-  dispatcher.Dispatch<TimeEvent>(PC_BIND_EVENT_FUNC(TimeEvent, OnClockTick));
-
   // auto layerStack = Application::GetLayerStack();
   // layerStack.IterateBackwards([&](Event &e) {
   //   // auto x = e.PrintDebugData();
@@ -150,11 +154,11 @@ void Application::OnEvent(Event &e) {
 
   if (e.BelongsToCategory(EventCategory::MouseEvent)) {
     // e.PrintDebugData();
-  };
+  }
 
   if (e.BelongsToCategory(EventCategory::KeyboardEvent)) {
     // e.PrintDebugData();
-  };
-};
+  }
+}
 
 ENGINE_NAMESPACE_END
