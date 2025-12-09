@@ -34,8 +34,7 @@ public:
   GameLayer() = default;
 
   virtual void OnAttach() override {
-    Popcorn::Context::ConvertGltfToScene("../assets/models/test-scene.gltf",
-                                         scene);
+    Popcorn::Context::ConvertGltfToScene("../assets/models/gold.gltf", scene);
 
     Popcorn::Context::RegisterScene(scene);
 
@@ -56,9 +55,10 @@ public:
     cameraAnimTrack.Insert_Slow(tt);
 
     scene.AddAnimationTrack(std::move(cameraAnimTrack));
+    // camera->SetLookAtDirection(camera.-eva->GetPosition());
     camera->ActivateLookAtTarget(true);
 
-    // scene.GetAnimationTrack(0).Play(20);
+    scene.GetAnimationTrack(0).Play(45);
   }
 
   virtual void OnDetach() override {
@@ -66,25 +66,35 @@ public:
   }
 
   virtual void OnUpdate(TimeEvent &e) override {
-    // camera->SetLookAtDirection(glm::normalize(-camera->GetPosition()));
-    // PC_WARN(rotor->GetPosition().x << ' ' << rotor->GetPosition().y << ' '
-    //                                << rotor->GetPosition().z)
+    camera->SetLookAtDirection(
+        glm::normalize(eva->GetWorldPosition() - camera->GetWorldPosition()));
+    // PC_WARN(camera->GetPosition().x << ' ' << camera->GetPosition().y << ' '
+    //                                 << camera->GetPosition().z)
+    //
+    // PC_WARN("-------")
+    // PC_WARN(eva->GetPosition().x << ' ' << eva->GetPosition().y << ' '
+    //                              << eva->GetPosition().z)
+    //
+    // PC_WARN("-------")
+    // PC_WARN(eva->GetWorldPosition().x << ' ' << eva->GetWorldPosition().y <<
+    // ' '
+    //                                   << eva->GetWorldPosition().z)
     //
     // PC_WARN(sin(glm::radians(20.0) * e.GetDeltaS()))
 
-    float fullRotation = glm::radians(10.0) * e.GetDeltaS();
-    float angle = glm::radians(10.0) * sin(e.GetElapsedS()) * 0.2;
-
-    blu->RotateLocalEuler<Axes::Y>(angle * .1);
-
-    rotorA->RotateLocalEuler<Axes::Z>(fullRotation);
-    eva->RotateLocalEuler<Axes::Y>(fullRotation);
-
-    rotorB->RotateLocalEuler<Axes::Z>(angle);
-
-    rotorC->RotateLocalEuler<Axes::X>(angle);
-
-    rotorD->RotateLocalEuler<Axes::Y>(angle);
+    // float fullRotation = glm::radians(10.0) * e.GetDeltaS();
+    // float angle = glm::radians(10.0) * sin(e.GetElapsedS()) * 0.2;
+    //
+    // blu->RotateLocalEuler<Axes::Y>(angle * .1);
+    //
+    // rotorA->RotateLocalEuler<Axes::Z>(fullRotation);
+    // eva->RotateLocalEuler<Axes::Y>(fullRotation);
+    //
+    // rotorB->RotateLocalEuler<Axes::Z>(angle);
+    //
+    // rotorC->RotateLocalEuler<Axes::X>(angle);
+    //
+    // rotorD->RotateLocalEuler<Axes::Y>(angle);
   }
 
   virtual void OnRender() override {

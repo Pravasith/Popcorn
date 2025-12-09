@@ -59,6 +59,7 @@ void GBufferRenderFlowVk::CreateAttachments() {
   VkFormat normalFormat =
       ImageVk::FindSupportedFormat(normalCandidates, VK_IMAGE_TILING_OPTIMAL,
                                    VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT);
+
   VkFormat roughnessMetallicFormat = ImageVk::FindSupportedFormat(
       roughnessMetallicCandidates, VK_IMAGE_TILING_OPTIMAL,
       VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT);
@@ -331,6 +332,16 @@ void GBufferRenderFlowVk::CreateRenderPass() {
   renderPassInfo.pDependencies = &dependency;
 
   m_renderPass.Create(renderPassInfo, ContextVk::Device()->GetDevice());
+
+  // --- NEW CODE --------------------------------------------------------------
+  // VkRenderingAttachmentInfo albedoAttachmentInfo{};
+  // albedoAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+  // albedoAttachmentInfo.imageLayout =
+  // VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL; albedoAttachmentInfo.clearValue =
+  // {{0.0f, 0.0f, 0.0f, 1.0f}}; albedoAttachmentInfo.loadOp =
+  // VK_ATTACHMENT_LOAD_OP_CLEAR; albedoAttachmentInfo.storeOp =
+  // VK_ATTACHMENT_STORE_OP_STORE; albedoAttachmentInfo.imageView =
+  //     s_gBufferImages.albedoImages[0].GetVkImageView();
 };
 
 //

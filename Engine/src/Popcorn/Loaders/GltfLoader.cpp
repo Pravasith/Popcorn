@@ -247,7 +247,7 @@ void GltfLoader::ExtractLightsData(const tinygltf::Model &model,
     data.range = static_cast<float>(gltfLight.range);
   }
 
-  const float dimFactor = 1e-3;
+  const float dimFactor = 1e-4;
 
   // Type
   if (gltfLight.type == "point") {
@@ -255,8 +255,8 @@ void GltfLoader::ExtractLightsData(const tinygltf::Model &model,
     data.type = Lights::PointLight;
     data.range = data.range >= 0.0 ? data.range : 50.0f;
   } else if (gltfLight.type == "spot") {
-    // data.intensity *= intensityFactor;
     const auto &spot = gltfLight.spot;
+    data.intensity *= 1e-2;
     data.type = Lights::SpotLight;
     data.innerConeAngle = spot.innerConeAngle >= 0.0
                               ? static_cast<float>(spot.innerConeAngle)

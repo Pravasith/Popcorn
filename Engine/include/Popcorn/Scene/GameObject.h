@@ -63,6 +63,10 @@ public:
   [[nodiscard]] const glm::vec3 &GetPosition() const {
     return m_transformData.m_position.GetValue();
   }
+  [[nodiscard]] const glm::vec3 GetWorldPosition() {
+    const glm::mat4 &wm = GetWorldMatrix();
+    return glm::vec3(wm * glm::vec4(0, 0, 0, 1));
+  }
   [[nodiscard]] const glm::mat4 &GetLocalMatrix() const {
     return m_transformData.m_localMatrix;
   }
