@@ -38,8 +38,8 @@ void GBufferRenderFlowVk::CreateAttachments() {
   const auto &width = swapchainExtent.width;
   const auto &height = swapchainExtent.height;
 
-  std::vector<VkFormat> albedoCandidates = {VK_FORMAT_R8G8B8A8_UNORM,
-                                            VK_FORMAT_B8G8R8A8_UNORM};
+  std::vector<VkFormat> albedoCandidates = {VK_FORMAT_R8G8B8A8_SRGB,
+                                            VK_FORMAT_B8G8R8A8_SRGB};
   std::vector<VkFormat> depthCandidates = {VK_FORMAT_D32_SFLOAT,
                                            VK_FORMAT_D32_SFLOAT_S8_UINT,
                                            VK_FORMAT_D24_UNORM_S8_UINT};

@@ -401,6 +401,15 @@ void GltfLoader::ExtractMeshData(const tinygltf::Model &model,
 // -----------------------------------------------------------------------------
 // --- MATERIAL UTILS ----------------------------------------------------------
 //
+inline float PC_ConvertSrgbToLinear(float srgbColor) {
+  float linearColor = pow(srgbColor, 2.2);
+  return linearColor;
+};
+inline float PC_ConvertLinearToSrgb(float linearColor) {
+  float srgbColor = pow(linearColor, 1. / 2.2);
+  return srgbColor;
+};
+
 template <MaterialTypes T>
 DeriveMaterialDataType<T>::type
 GltfLoader::ExtractMaterialData(const tinygltf::Model &model,
@@ -416,9 +425,11 @@ GltfLoader::ExtractMaterialData(const tinygltf::Model &model,
 
   if constexpr (T == MaterialTypes::PbrMat) {
     // Add shader byte code
-    materialData.baseColorFactor = glm::vec4(
-        gltfMatData.baseColorFactor[0], gltfMatData.baseColorFactor[1],
-        gltfMatData.baseColorFactor[2], gltfMatData.baseColorFactor[3]);
+    materialData.baseColorFactor =
+        glm::vec4(PC_ConvertSrgbToLinear(gltfMatData.baseColorFactor[0]),
+                  PC_ConvertSrgbToLinear(gltfMatData.baseColorFactor[1]),
+                  PC_ConvertSrgbToLinear(gltfMatData.baseColorFactor[2]),
+                  PC_ConvertSrgbToLinear(gltfMatData.baseColorFactor[3]));
     materialData.metallicFactor = gltfMatData.metallicFactor;
     materialData.roughnessFactor = gltfMatData.roughnessFactor;
     materialData.hasNormalTexture = material.normalTexture.index != -1;
@@ -444,10 +455,12 @@ MaterialTypes
 GltfLoader::GetGltfMaterialType(const tinygltf::Material &material) {
   const auto &pbr = material.pbrMetallicRoughness;
 
-  // Determine material type
-  bool isPBR = pbr.metallicFactor > 0.0f || pbr.roughnessFactor > 0.0f ||
-               material.normalTexture.index != -1 ||
-               material.occlusionTexture.index != -1;
+  // // Determine material type
+  // bool isPBR = pbr.metallicFactor > 0.0f || pbr.roughnessFactor > 0.0f ||
+  //              material.normalTexture.index != -1 ||
+  //              material.occlusionTexture.index != -1;
+
+  bool isPBR = true;
 
   if (isPBR) {
     PC_PRINT("PBR Mat", TagType::Print, "GltfLoader.cpp")
