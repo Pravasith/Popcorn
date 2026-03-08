@@ -1,6 +1,7 @@
 set(CORE_IMPL_DIR Popcorn/Core)
 set(EVENTS_IMPL_DIR Popcorn/Events)
 set(GRAPHICS_IMPL_DIR Popcorn/Graphics)
+set(ANIMATION_IMPL_DIR Popcorn/Animation)
 set(LAYERS_IMPL_DIR Popcorn/Layers)
 set(LOADERS_IMPL_DIR Popcorn/Loaders)
 set(PLATFORM_IMPL_DIR Popcorn/Platform)
@@ -30,6 +31,13 @@ add_library(Events ${EVENTS_IMPL_DIR}/Publisher.cpp)
 add_library(Window ${CORE_IMPL_DIR}/Window.cpp
                    ${PLATFORM_IMPL_DIR}/Agnostic/WindowAgnostic.cpp)
 
+# --- ANIMATION LIB -------------------------------------------
+add_library(
+  Animation
+  #
+  ${ANIMATION_IMPL_DIR}/CurveFactory.cpp
+  ${ANIMATION_IMPL_DIR}/SplineFactory.cpp ${ANIMATION_IMPL_DIR}/Animation.cpp)
+
 # --- GRAPHICS LIB --------------------------------------------------
 add_library(
   Graphics
@@ -41,9 +49,6 @@ add_library(
   ${GRAPHICS_IMPL_DIR}/Renderer.cpp
   ${GRAPHICS_IMPL_DIR}/Shader.cpp
   ${GRAPHICS_IMPL_DIR}/ContextGfx.cpp
-  ${GRAPHICS_IMPL_DIR}/Animation/CurveFactory.cpp
-  ${GRAPHICS_IMPL_DIR}/Animation/SplineFactory.cpp
-  ${GRAPHICS_IMPL_DIR}/Animation/Animation.cpp
   #
   # SCENE
   ${SCENE_IMPL_DIR}/GameObject.cpp

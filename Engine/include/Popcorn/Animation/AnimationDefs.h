@@ -7,7 +7,7 @@
 #include <variant>
 
 ENGINE_NAMESPACE_BEGIN
-GFX_NAMESPACE_BEGIN
+ANIM_NAMESPACE_BEGIN
 
 //
 // --- AnimationPropery stuff  -------------------------------------------------
@@ -26,5 +26,5 @@ using SplinePtr =
                  const Spline<glm::vec3> *, const Spline<glm::vec4> *,
                  const Spline<glm::quat> *>;
 
-GFX_NAMESPACE_END
+ANIM_NAMESPACE_END
 ENGINE_NAMESPACE_END

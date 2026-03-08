@@ -9,6 +9,9 @@
 #define GFX_NAMESPACE_BEGIN namespace Gfx {
 #define GFX_NAMESPACE_END }
 
+#define ANIM_NAMESPACE_BEGIN namespace Anim {
+#define ANIM_NAMESPACE_END }
+
 #define KEY_NAMESPACE_BEGIN namespace Key {
 #define KEY_NAMESPACE_END }
 

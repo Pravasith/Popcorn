@@ -12,7 +12,7 @@
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
-GFX_NAMESPACE_BEGIN
+ANIM_NAMESPACE_BEGIN
 
 [[nodiscard]] static const Spline<glm::vec3> *
 PC_MakeBezierSplineFromBlenderJson(const std::string &filename) {
@@ -60,5 +60,5 @@ PC_MakeBezierSplineFromBlenderJson(const std::string &filename) {
   return SplineFactory::Get()->MakeSpline(bezierCurveInfos, keyframeTs, {});
 }
 
-GFX_NAMESPACE_END
+ANIM_NAMESPACE_END
 ENGINE_NAMESPACE_END

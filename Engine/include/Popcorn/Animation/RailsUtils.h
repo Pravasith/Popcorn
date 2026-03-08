@@ -10,7 +10,7 @@
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
-GFX_NAMESPACE_BEGIN
+ANIM_NAMESPACE_BEGIN
 
 template <CurveValueType T>
 inline static CurveHashType
@@ -149,5 +149,5 @@ PC_HashSplineSegment(const std::vector<SplineSegment<T>> &segments) {
   return hash * 2654435761ull;
 }
 
-GFX_NAMESPACE_END
+ANIM_NAMESPACE_END
 ENGINE_NAMESPACE_END

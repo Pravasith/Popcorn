@@ -12,7 +12,7 @@
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
-GFX_NAMESPACE_BEGIN
+ANIM_NAMESPACE_BEGIN
 
 template <CurveValueType T> class Spline {
 public:
@@ -132,5 +132,5 @@ protected:
   std::vector<SplineSegment<T>> m_segments{};
 };
 
-GFX_NAMESPACE_END
+ANIM_NAMESPACE_END
 ENGINE_NAMESPACE_END

@@ -11,7 +11,7 @@
 #include <type_traits>
 
 ENGINE_NAMESPACE_BEGIN
-GFX_NAMESPACE_BEGIN
+ANIM_NAMESPACE_BEGIN
 
 //
 //
@@ -154,5 +154,5 @@ private:
   CurveBank<glm::quat> m_quatCurves;
 };
 
-GFX_NAMESPACE_END
+ANIM_NAMESPACE_END
 ENGINE_NAMESPACE_END

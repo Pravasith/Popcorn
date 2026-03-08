@@ -58,7 +58,7 @@ public:
     // camera->SetLookAtDirection(camera.-eva->GetPosition());
     camera->ActivateLookAtTarget(true);
 
-    scene.GetAnimationTrack(0).Play(45);
+    scene.GetAnimationTrack(0).Play(20);
   }
 
   virtual void OnDetach() override {

@@ -6,7 +6,7 @@
 #include "MathConstants.h"
 
 ENGINE_NAMESPACE_BEGIN
-GFX_NAMESPACE_BEGIN
+ANIM_NAMESPACE_BEGIN
 
 template <CurveValueType T> struct HermiteKnot {
   T vIn;
@@ -56,5 +56,5 @@ static inline void PC_Clamp_01(double &n) {
   n = n < 0.0 ? 0.0 : (n >= 1.0 ? std::nextafter(1.0, 0.0) : n);
 }
 
-GFX_NAMESPACE_END
+ANIM_NAMESPACE_END
 ENGINE_NAMESPACE_END

@@ -21,6 +21,8 @@ GFX_NAMESPACE_BEGIN
 enum class EulerOrder { XYZ = 1, XZY, YXZ, YZX, ZXY, ZYX };
 // clang-format on
 
+using namespace Anim;
+
 class Transformations {
 public:
   // --- positioning ----------------------------------------------------------

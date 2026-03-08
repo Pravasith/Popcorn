@@ -15,7 +15,7 @@
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
-GFX_NAMESPACE_BEGIN
+ANIM_NAMESPACE_BEGIN
 
 class SplineFactory {
 public:
@@ -32,8 +32,9 @@ public:
     }                                                                          \
   } while (0);
 
-  // assert((KNOTS_NAME).front().t == 0.0 && "First knot must start at t = 0"); \
-  // assert((KNOTS_NAME).back().t == 1.0 && "Last knot must end at t = 1");     \
+  // assert((KNOTS_NAME).front().t == 0.0 && "First knot must start at t = 0");
+  // \
+  // assert((KNOTS_NAME).back().t == 1.0 && "Last knot must end at t = 1"); \
 
   // For physical representation of curves (e.g. rails)
   template <CurveValueType T>
@@ -302,5 +303,5 @@ private:
   std::map<SplineHashType, Spline<glm::quat>> m_quatSplines;
 };
 
-GFX_NAMESPACE_END
+ANIM_NAMESPACE_END
 ENGINE_NAMESPACE_END

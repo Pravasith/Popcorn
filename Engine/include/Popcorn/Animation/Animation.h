@@ -17,7 +17,7 @@
 #include <vector>
 
 ENGINE_NAMESPACE_BEGIN
-GFX_NAMESPACE_BEGIN
+ANIM_NAMESPACE_BEGIN
 
 using AnimationPropertyPtr =
     std::variant<AnimationProperty<float> *, AnimationProperty<glm::vec2> *,
@@ -199,5 +199,5 @@ private:
                                       // from m_active queue
 };
 
-GFX_NAMESPACE_END
+ANIM_NAMESPACE_END
 ENGINE_NAMESPACE_END

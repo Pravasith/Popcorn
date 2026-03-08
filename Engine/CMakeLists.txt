@@ -158,6 +158,14 @@ target_include_directories(
             $<INSTALL_INTERFACE:third-party/nlohmann-json>)
 
 target_include_directories(
+  Animation
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Animation>
+  INTERFACE $<INSTALL_INTERFACE:include>
+            $<INSTALL_INTERFACE:include/Popcorn/Animation>)
+
+target_include_directories(
   Popcorn
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Popcorn/Core>
@@ -205,7 +213,7 @@ target_link_libraries(Events PRIVATE Vulkan::Headers)
 
 target_link_libraries(Graphics PRIVATE Events Vulkan::Headers Vulkan::Loader
                                        glfw vma)
-target_link_libraries(Graphics PUBLIC glm::glm)
+target_link_libraries(Graphics PUBLIC glm::glm Animation)
 
 target_link_libraries(Window PRIVATE glfw)
 target_link_libraries(Window PRIVATE Events)

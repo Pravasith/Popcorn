@@ -11,7 +11,7 @@
 #include <utility>
 
 ENGINE_NAMESPACE_BEGIN
-GFX_NAMESPACE_BEGIN
+ANIM_NAMESPACE_BEGIN
 
 class TimeTrain;
 
@@ -38,15 +38,16 @@ public:
 
   [[nodiscard]] const T &GetValue() const { return m_value; };
 
-  // #define BLOCK_IF_ANIMATING_ALREADY                                             \
-//   do {                                                                         \
-//     if (m_isAnimating) {                                                       \
-//       PC_WARN(                                                                 \
-//           "Operation not performed because an animation is already running "   \
-//           "on this property")                                                  \
-//       return;                                                                  \
-//     }                                                                          \
-//   } while (0);
+  // #define BLOCK_IF_ANIMATING_ALREADY \
+  //   do { \
+  //     if (m_isAnimating) { \
+  //       PC_WARN( \
+  //           "Operation not performed because an animation is already running
+  //           "   \
+  //           "on this property") \
+  //       return; \
+  //     } \
+  //   } while (0);
 
 #define BLOCK_IF_ANIMATING_ALREADY ;
 
@@ -214,5 +215,5 @@ private:
   T m_value;
 };
 
-GFX_NAMESPACE_END
+ANIM_NAMESPACE_END
 ENGINE_NAMESPACE_END

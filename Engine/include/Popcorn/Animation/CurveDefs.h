@@ -9,7 +9,7 @@
 #include <glm/fwd.hpp>
 
 ENGINE_NAMESPACE_BEGIN
-GFX_NAMESPACE_BEGIN
+ANIM_NAMESPACE_BEGIN
 
 template <typename U>
 concept CurveValueType =
@@ -39,4 +39,4 @@ template <CurveValueType T> struct CurveInfoHermiteForm {
 using CurveHashType = uint64_t;
 using SplineHashType = uint64_t;
 
-GFX_NAMESPACE_END ENGINE_NAMESPACE_END
+ANIM_NAMESPACE_END ENGINE_NAMESPACE_END

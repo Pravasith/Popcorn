@@ -12,7 +12,7 @@
 #include <glm/gtc/quaternion.hpp>
 
 ENGINE_NAMESPACE_BEGIN
-GFX_NAMESPACE_BEGIN
+ANIM_NAMESPACE_BEGIN
 
 static inline glm::quat PC_Slerp(const glm::quat &q0, const glm::quat &q1,
                                  float t) {
@@ -357,5 +357,5 @@ private:
   T m_coefficients[4];  // cubic polynomial co-efficients
 };
 
-GFX_NAMESPACE_END
+ANIM_NAMESPACE_END
 ENGINE_NAMESPACE_END
