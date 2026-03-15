@@ -1,24 +1,26 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(
-  Popcorn
-  VERSION 1.0.0
-  LANGUAGES CXX)
+set(PROJECT Popcorn)
+project(${PROJECT} VERSION 1.0.0)
 message("Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+set(GLFW_BUILD_DOCS
+    OFF
+    CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS
+    OFF
+    CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES
+    OFF
+    CACHE BOOL "" FORCE)
 
 # -----------------------------------------------------------------------
 # OS FLAGS
 # -----------------------------------------------------------------------
-
-# -----------------------------------------------------------------------
-# APP FLAGS
-# -----------------------------------------------------------------------
-option(PC_DEBUG "USE DEBUG MODE FOR COMPILING" ON)
-option(PC_PROFILING "USE PROFILING MODE" ON)
-
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set(BUILD_FOR_LINUX TRUE)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
@@ -173,6 +175,12 @@ target_include_directories(
             $<INSTALL_INTERFACE:include/Popcorn/Core>
             $<INSTALL_INTERFACE:include/Popcorn/Loaders>
             $<INSTALL_INTERFACE:include/Popcorn/Layers>)
+
+# DEBUG FLAGS
+option(PC_DEBUG "USE DEBUG MODE FOR COMPILING" ON)
+option(PC_USE_PROFILING "USE PROFILING MODE" ON) # Needs RenderDoc to be
+                                                 # installed in your machine
+                                                 # before using this
 
 if(PC_DEBUG)
   target_compile_definitions(Window PUBLIC "PC_DEBUG")

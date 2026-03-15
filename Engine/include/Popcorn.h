@@ -10,6 +10,34 @@
 #include "Layer.h"
 #include "Scene.h"
 #include "SplineFactory.h"
+#include "SplineUtils.h"
+#include <Animation.h>
+#include <AnimationDefs.h>
+#include <BufferObjects.h>
+#include <Camera.h>
+#include <CurveDefs.h>
+#include <Curves.h>
+#include <GameObject.h>
+#include <Helpers.h>
+#include <Material.h>
+#include <Mesh.h>
+#include <Popcorn.h>
+#include <Popcorn/Core/Base.h>
+#include <Renderer.h>
+#include <Scene.h>
+#include <SceneDefs.h>
+#include <Sources.h>
+#include <SplineDefs.h>
+#include <Splines.h>
+#include <Time.h>
+#include <TimeEvent.h>
+#include <cmath>
+#include <functional>
+#include <glm/fwd.hpp>
+#include <glm/geometric.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/trigonometric.hpp>
 #include <iostream>
 
 ENGINE_NAMESPACE_BEGIN
