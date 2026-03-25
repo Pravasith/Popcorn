@@ -39,14 +39,6 @@ mkdir -p "$submodules_dir"
 vendor_dir="$curr_dir/third-party"
 mkdir -p "$vendor_dir"
 
-# DIR -- PLATFORM SPECIFIC -- INCL. FILES
-include_platform_dir="$curr_dir/include/Popcorn/Platform"
-mkdir -p "$include_platform_dir"
-
-# DIR -- PLATFORM SPECIFIC -- IMPL. FILES
-src_platform_dir="$curr_dir/src/Popcorn/Platform"
-mkdir -p "$src_platform_dir"
-
 # DIR -- PLATFORM SPECIFIC 3RD PARTY INCL & SRC FILES
 vendor_windows_dir="$vendor_dir/windows"
 mkdir -p "$vendor_windows_dir"

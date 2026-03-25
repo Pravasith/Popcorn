@@ -1,0 +1,54 @@
+**/third-party/
+
+**/build/
+**/dist/
+
+**/.cache/
+
+# Logs
+Engine/common_logs.txt
+
+# Triangle - so fuzzy finder does not find it
+/Sandbox/01-Triangle/
+
+# tasks
+tasks.txt
+
+# Assets
+**/assets/
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Compressed files
+*.tar.xz
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app

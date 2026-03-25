@@ -57,7 +57,7 @@ add_subdirectory(src/Graphics)
 add_subdirectory(src/Popcorn)
 
 # -----------------------------------------------------------------------
-# INSTALL CONFIG
+# INSTALL CONFIG - When user runs cmake --install command
 # -----------------------------------------------------------------------
 include(CMakePackageConfigHelpers)
 

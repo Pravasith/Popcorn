@@ -1,0 +1,19 @@
+
+// --- LINUX SET UP ---
+
+setup-linux.sh
+ - set up for linux - installs submodules & copies thirdparty for engine development
+
+
+// --- BUILD ENGINE ---
+
+build-engine.sh
+ - builds and compiles popcorn engine, creates popcorn library
+
+
+// --- BUILD EDITOR ---
+
+build-editor.sh
+ - builds and compiles editor for popcorn
+
+package.sh
