@@ -195,7 +195,6 @@ cp -a "$imgui_sm_dir/."  \
 
 cd "$curr_dir"
 
-
 echo "Installing ImGui complete"
 
 # -----------------------------------------------------------------------

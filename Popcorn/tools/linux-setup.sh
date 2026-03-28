@@ -3,23 +3,8 @@
 # -----------------------------------------------------------------------
 # IMPORTANT NOTE BEFORE YOU RUN THIS SCRIPT
 # -----------------------------------------------------------------------
-# -----------------------------------------------------------------------
-# INSTALL THESE EXTERNAL DEPENDENCIES FOR LINUX ONLY
+# 1. REAAAAD THE README!!!!!!!! IT TAKES 2 MINS
 #
-# Compilers and cross-compilers
-# 1. MingW compilers
-#       sudo apt install mingw-w64
-#
-# 2. Display server stuff - used by GLFW for Linux
-#       sudo apt install libwayland-dev libxkbcommon-dev xorg-dev
-#
-# RUN CMD TO INSTALL THESE DEPS FOR GLFW
-# --------------------------------------
-#
-# RUN CMD TO INSTALL THESE DEPS FOR VULKAN
-# -----------------------------------------
-#       sudo apt-get install git build-essential libx11-xcb-dev \
-#           libxkbcommon-dev libwayland-dev libxrandr-dev
 #
 # FIND & INSTALL THESE YOURSELF
 # ------------------------------
@@ -35,38 +20,49 @@
 #
 # -----------------------------------------------------------------------
 
-echo "--- Starting environment setup for Linux based systems..."
+
+
+echo ""
+echo "------------------------------------------------------------------"
+echo "--- STARTING ENVIRONMENT SETUP FOR LINUX BASED SYSTEMS..."
+echo "------------------------------------------------------------------"
+echo ""
 
 # -----------------------------------------------------------------------
-# DIRS
+# MAKE DIRS
 # -----------------------------------------------------------------------
 #
 curr_dir="${PWD}"
 engine_dir="$curr_dir/Engine"
 editor_dir="$curr_dir/Editor"
-#
-# raw github cloned submodules
 submodules_dir="$curr_dir/submodules" && mkdir -p "$submodules_dir"
 #
-# third party root dirs
+# --- third party root dirs ---------------------------------------------
 vendor_dir="$curr_dir/third-party" && mkdir -p "$vendor_dir"
 vendor_linux_dir="$vendor_dir/linux" && mkdir -p "$vendor_linux_dir"
 vendor_windows_dir="$vendor_dir/windows" && mkdir -p "$vendor_windows_dir"
 vendor_mac_os_dir="$vendor_dir/mac-os" && mkdir -p "$vendor_mac_os_dir"
-vendor_platform_agnostic_dir="$vendor_dir/platform-agnostic" &&
+vendor_platform_agnostic_dir="$vendor_dir/platform-agnostic" &&         \
     mkdir -p "$vendor_platform_agnostic_dir"
 #
-# glfw specific dirs
+# --- GLFW specific dirs ------------------------------------------------
 glfw_sm_dir="$submodules_dir/glfw" && mkdir -p "$glfw_sm_dir"
 glfw_sm_build_dir="$glfw_sm_dir/build" && mkdir -p "$glfw_sm_build_dir"
-glfw_sm_build_linux_dir="$glfw_sm_build_dir/linux" &&
+glfw_sm_build_linux_dir="$glfw_sm_build_dir/linux" &&                   \
     mkdir -p "$glfw_sm_build_linux_dir"
-glfw_sm_install_linux_dir="$vendor_linux_dir/glfw" &&
+glfw_sm_install_linux_dir="$vendor_linux_dir/glfw" &&                   \
     mkdir -p "$glfw_sm_install_linux_dir"
-glfw_sm_build_windows_dir="$glfw_sm_build_dir/windows" &&
+glfw_sm_build_windows_dir="$glfw_sm_build_dir/windows" &&               \
     mkdir -p "$glfw_sm_build_windows_dir"
-glfw_sm_install_windows_dir="$vendor_windows_dir/glfw" &&
+glfw_sm_install_windows_dir="$vendor_windows_dir/glfw" &&               \
     mkdir -p "$glfw_sm_install_windows_dir"
+imgui_sm_install_pfmagn_dir="$vendor_platform_agnostic_dir/imgui" &&  \
+    mkdir -p "$imgui_sm_install_pfmagn_dir"
+#
+# --- Submodules --------------------------------------------------------
+vma_sm_dir="$submodules_dir/vma"
+imgui_sm_dir="$submodules_dir/imgui"
+imgui_sm_backends_dir="$imgui_sm_dir/backends"
 
 # -----------------------------------------------------------------------
 # INSTALL SUBMODULES
@@ -78,6 +74,10 @@ echo "Initing submodules complete"
 
 echo "Installing GLFW for linux and windows..."
 
+
+#
+# --- GLFW -------------------------------------------------------------
+#
 # building glfw for linux
 cmake                                                           \
     -D CMAKE_INSTALL_PREFIX="$glfw_sm_install_linux_dir"        \
@@ -98,4 +98,31 @@ cmake                                                           \
     --build "$glfw_sm_build_linux_dir"                          \
     --target install
 
+# installing glfw for windows
+cmake                                                           \
+    --build "$glfw_sm_build_windows_dir"                        \
+    --target install
+
 echo "Installing GLFW for linux and windows complete"
+
+
+#
+# --- VMA ---------------------------------------------------------------
+#
+echo "Installing VMA..."
+cp -r "$vma_sm_dir" "$vendor_platform_agnostic_dir"
+# the rest of the cmake config is in third-party CML
+echo "Installing VMA complete"
+
+
+#
+# --- ImGui -------------------------------------------------------------
+#
+echo "Installing ImGui..."
+echo "Installing ImGui complete"
+
+echo ""
+echo "------------------------------------------------------------------"
+echo "--- ENVIRONMENT SETUP FOR LINUX BASED SYSTEMS COMPLETE"
+echo "------------------------------------------------------------------"
+echo ""
