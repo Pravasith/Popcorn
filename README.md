@@ -16,17 +16,21 @@ follow these steps
 
 - Clone the repo obviously. If you don't know how to do it then you should
   probably take my friendly advice above.
+
 - These steps are for Linux machines only. You can cross-compile for Windows
   though.
+
 - Install these dependencies (they're needed for Vulkan and GLFW build step)
 
-```sudo apt-get install git build-essential libx11-xcb-dev                  \
-           libxkbcommon-dev libwayland-dev libxrandr-dev xorg-dev
+```
+sudo apt-get install git build-essential libx11-xcb-dev \
+libxkbcommon-dev libwayland-dev libxrandr-dev xorg-dev
 ```
 
 - Install the cross compiler (needed for cross-compiling your game to windows)
 
-```sudo apt install mingw-w64
+```
+sudo apt install mingw-w64
 ```
 
 - Then run the bash script `/tools/linux-setup.sh`. Again, if you need help with
