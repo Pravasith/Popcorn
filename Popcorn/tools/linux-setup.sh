@@ -105,13 +105,12 @@ cmake                                                           \
 
 echo "Installing GLFW for linux and windows complete"
 
-
 #
 # --- VMA ---------------------------------------------------------------
 #
 echo "Installing VMA..."
 cp -r "$vma_sm_dir" "$vendor_platform_agnostic_dir"
-# the rest of the cmake config is in third-party CML
+# the cmake config is in third-party CML
 echo "Installing VMA complete"
 
 
@@ -119,6 +118,7 @@ echo "Installing VMA complete"
 # --- ImGui -------------------------------------------------------------
 #
 echo "Installing ImGui..."
+# the cmake config is in third-party CML
 echo "Installing ImGui complete"
 
 echo ""

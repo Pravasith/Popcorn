@@ -56,6 +56,12 @@ add_subdirectory(src/Animation)
 add_subdirectory(src/Graphics)
 add_subdirectory(src/Popcorn)
 
+add_library(
+  Popcorn STATIC
+  $<TARGET_OBJECTS:CoreObj> $<TARGET_OBJECTS:EventsObj>
+  $<TARGET_OBJECTS:WindowObj> $<TARGET_OBJECTS:AnimationObj>
+  $<TARGET_OBJECTS:GraphicsObj>)
+
 # -----------------------------------------------------------------------
 # INSTALL CONFIG - When user runs cmake --install command
 # -----------------------------------------------------------------------
