@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.22)
 # -----------------------------------------------------------------------
 # Read - This is main project's CML, builds and installs different projects like
-# -
+# Engine, and Editor
+#
 # -----------------------------------------------------------------------
 
 # -----------------------------------------------------------------------
@@ -13,17 +14,21 @@ project(
   LANGUAGES CXX)
 message("Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
 
-# make cache variables for install destinations
-include(GNUInstallDirs)
-
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # -----------------------------------------------------------------------
-# BUILD & COMPILE STUFF
+# OPTIONS & STUFF
 # -----------------------------------------------------------------------
+set(PC_ENGINE_SRC_DIR ${CMAKE_SOURCE_DIR}/Engine)
+set(PC_EDITOR_SRC_DIR ${CMAKE_SOURCE_DIR}/Editor)
+
 option(PC_DEBUG "USE PROFILING MODE" OFF)
 option(PC_PROFILING "USE PROFILING MODE" OFF)
+
+# -----------------------------------------------------------------------
+# BUILD & COMPILE STUFF
+# -----------------------------------------------------------------------
 
 if(WIN32)
   add_compile_definitions(PC_OS_WINDOWS)
@@ -44,8 +49,7 @@ set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/third-party)
 set(BUILD_SHARED_LIBS OFF)
 
 # -----------------------------------------------------------------------
-# DEPENDENCIES
+# INSTALLATION STUFF - WE DO PORTABLE IN HERE
 # -----------------------------------------------------------------------
-# find_package(OpenGL REQUIRED) find_package(glfw3 REQUIRED)
-# find_package(VulkanLoader REQUIRED) find_package(VulkanHeaders REQUIRED
-# CONFIG) find_package(glm CONFIG REQUIRED)
+# make cache variables for install destinations
+include(GNUInstallDirs)
