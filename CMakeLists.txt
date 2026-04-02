@@ -23,7 +23,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(PC_ENGINE_SRC_DIR ${CMAKE_SOURCE_DIR}/Engine)
 set(PC_EDITOR_SRC_DIR ${CMAKE_SOURCE_DIR}/Editor)
 
-option(PC_DEBUG "USE PROFILING MODE" OFF)
+option(PC_DEBUG "USE DEBUG MODE" ON)
 option(PC_PROFILING "USE PROFILING MODE" OFF)
 
 # -----------------------------------------------------------------------
@@ -47,6 +47,12 @@ set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/third-party)
 
 # No shared libs, we do static in here
 set(BUILD_SHARED_LIBS OFF)
+
+if(PC_PROFILING)
+  # Link profilers
+endif()
+
+add_subdirectory(./Engine/src)
 
 # -----------------------------------------------------------------------
 # INSTALLATION STUFF - WE DO PORTABLE IN HERE
