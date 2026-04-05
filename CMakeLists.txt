@@ -1,4 +1,9 @@
 cmake_minimum_required(VERSION 3.22)
+# -----------------------------------------------------------------------
+# Read - This is main project's CML, builds and installs different projects like
+# Engine, and Editor
+#
+# -----------------------------------------------------------------------
 
 # -----------------------------------------------------------------------
 # PROJECT INFO
@@ -13,9 +18,17 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # -----------------------------------------------------------------------
-# OS FLAGS & GLOBAL FLAGS
+# OPTIONS & STUFF
 # -----------------------------------------------------------------------
-option(PC_PROFILING "USE PROFILING MODE" ON)
+set(PC_ENGINE_SRC_DIR ${CMAKE_SOURCE_DIR}/Engine)
+set(PC_EDITOR_SRC_DIR ${CMAKE_SOURCE_DIR}/Editor)
+
+option(PC_DEBUG "USE DEBUG MODE" ON)
+option(PC_PROFILING "USE PROFILING MODE" OFF)
+
+# -----------------------------------------------------------------------
+# BUILD & COMPILE STUFF
+# -----------------------------------------------------------------------
 
 if(WIN32)
   add_compile_definitions(PC_OS_WINDOWS)
@@ -32,11 +45,19 @@ set(PROJECT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(POPCORN_INCLUDE_DIR ${PROJECT_INCLUDE_DIR}/Popcorn)
 set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/third-party)
 
+# No shared libs, we do static in here
+set(BUILD_SHARED_LIBS OFF)
+
+if(PC_PROFILING)
+  # Link profilers
+endif()
+
+add_subdirectory(./third-party)
+add_subdirectory(./Editor/src)
+add_subdirectory(./Engine/src)
+
 # -----------------------------------------------------------------------
-# DEPENDENCIES
+# INSTALLATION STUFF - WE DO PORTABLE IN HERE
 # -----------------------------------------------------------------------
-find_package(OpenGL REQUIRED)
-find_package(glfw3 REQUIRED)
-find_package(VulkanLoader REQUIRED)
-find_package(VulkanHeaders REQUIRED CONFIG)
-find_package(glm CONFIG REQUIRED)
+# make cache variables for install destinations
+include(GNUInstallDirs)
