@@ -1,15 +1,12 @@
-[submodule "submodules/glfw"]
-	path = submodules/glfw
+[submodule "third-party/glfw"]
+	path = third-party/glfw
 	url = git@github.com:glfw/glfw.git
-[submodule "submodules/imgui"]
-	path = submodules/imgui
+[submodule "third-party/imgui"]
+	path = third-party/imgui
 	url = git@github.com:ocornut/imgui.git
-[submodule "submodules/vulkan-loader"]
-	path = submodules/vulkan-loader
-	url = git@github.com:KhronosGroup/Vulkan-Loader.git
-[submodule "submodules/vulkan-headers"]
-	path = submodules/vulkan-headers
-	url = git@github.com:KhronosGroup/Vulkan-Headers.git
-[submodule "submodules/glm"]
-	path = submodules/glm
+[submodule "third-party/glm"]
+	path = third-party/glm
 	url = git@github.com:g-truc/glm.git
+[submodule "third-party/vma"]
+	path = third-party/vma
+	url = git@github.com:GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git

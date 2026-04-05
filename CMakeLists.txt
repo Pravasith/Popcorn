@@ -52,6 +52,8 @@ if(PC_PROFILING)
   # Link profilers
 endif()
 
+add_subdirectory(./third-party)
+add_subdirectory(./Editor/src)
 add_subdirectory(./Engine/src)
 
 # -----------------------------------------------------------------------
