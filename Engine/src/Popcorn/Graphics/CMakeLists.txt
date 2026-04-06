@@ -1,10 +1,10 @@
-add_library(Graphics)
+add_library(Graphics STATIC)
 
 target_sources(
   Graphics
   PRIVATE Graphics.cpp # used for BUILD
   PUBLIC BASE_DIRS ${ENGINE_INCLUDE_DIR} FILE_SET HEADERS
-         # used for INSTALL BASE_DIRS ${ENGINE_INCLUDE_DIR}
+         # used for INSTALL BASE_DIRS ${PC_ENGINE_INCLUDE_DIR}
          FILES include/Popcorn/Graphics/Graphics.h)
 
 target_include_directories(
