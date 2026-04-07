@@ -1,4 +1,5 @@
-#include "Graphics.h"
+#include "Popcorn/Graphics/Graphics.h"
+#include <iostream>
 
 namespace Popcorn {
 Graphics *Graphics::s_instance = nullptr;

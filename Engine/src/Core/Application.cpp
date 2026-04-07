@@ -1,4 +1,5 @@
-#include "Application.h"
+#include "Popcorn/Core/Application.h"
+#include <iostream>
 
 namespace Popcorn {
 Application *Application::s_instance = nullptr;
