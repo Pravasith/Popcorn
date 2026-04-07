@@ -1,11 +1,9 @@
-#pragma once
-
-#include <Popcorn/Application.h>
-#include <Popcorn/Graphics.h>
+#include <Popcorn/Core/Application.h>
+#include <Popcorn/Graphics/Graphics.h>
 #include <iostream>
 
 namespace Popcorn {
-void Popcorn::Start() {
+void Start() {
   // test
   std::cout << "Popcorn start" << '\n';
   Application *app = Application::Get();
@@ -15,7 +13,7 @@ void Popcorn::Start() {
 #endif
 }
 
-void Popcorn::InitGraphics() {
+void InitGraphics() {
   // test
   Graphics *gfx = Graphics::Get();
 }
