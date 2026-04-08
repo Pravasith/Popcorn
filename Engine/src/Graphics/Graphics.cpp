@@ -11,10 +11,14 @@ Graphics *Graphics::Get() {
   return new Graphics();
 }
 
-Graphics::Graphics() { std::cout << "GRAPHICS CREATED" << '\n'; }
-Graphics::~Graphics() {
+void Graphics::Destroy() {
   if (s_instance) {
     delete s_instance;
+    return;
   }
+  std::cout << "Warning: Singleton already destroyed" << '\n';
 }
+
+Graphics::Graphics() { std::cout << "GRAPHICS CREATED" << '\n'; }
+Graphics::~Graphics() {}
 } // namespace Popcorn
