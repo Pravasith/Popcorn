@@ -1,4 +1,4 @@
-add_library(Core STATIC)
+add_library(Core OBJECT)
 
 target_sources(
   Core

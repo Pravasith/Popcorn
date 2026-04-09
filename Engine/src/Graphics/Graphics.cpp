@@ -1,4 +1,5 @@
 #include "Popcorn/Graphics/Graphics.h"
+#include "Popcorn/Graphics/Secret.h"
 #include <iostream>
 
 namespace Popcorn {
@@ -19,6 +20,9 @@ void Graphics::Destroy() {
   std::cout << "Warning: Singleton already destroyed" << '\n';
 }
 
-Graphics::Graphics() { std::cout << "GRAPHICS CREATED" << '\n'; }
+Graphics::Graphics() {
+  Secret secret;
+  std::cout << "GRAPHICS CREATED" << '\n';
+}
 Graphics::~Graphics() {}
 } // namespace Popcorn
