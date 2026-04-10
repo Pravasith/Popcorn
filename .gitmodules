@@ -10,3 +10,6 @@
 [submodule "third-party/vma"]
 	path = third-party/vma
 	url = git@github.com:GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+[submodule "third-party/vulkan-loader"]
+	path = third-party/vulkan-loader
+	url = git@github.com:KhronosGroup/Vulkan-Loader.git
