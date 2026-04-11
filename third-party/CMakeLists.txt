@@ -5,7 +5,7 @@ if(NOT GLFW_DIR)
   set(GLFW_DIR ${CMAKE_SOURCE_DIR}/third-party/glfw)
 endif()
 
-set(GLFW_LIBRARY_TYPE OBJECT)
+# set(GLFW_LIBRARY_TYPE OBJECT)
 option(GLFW_BUILD_EXAMPLES "Build the GLFW example programs" OFF)
 option(GLFW_BUILD_TESTS "Build the GLFW test programs" OFF)
 option(GLFW_BUILD_DOCS "Build the GLFW documentation" OFF)
@@ -21,7 +21,8 @@ if(NOT VULKAN_LOADER_DIR)
   set(VULKAN_LOADER_DIR ${CMAKE_SOURCE_DIR}/third-party/vulkan-loader)
 endif()
 
-set(UPDATE_DEPS ON)
+set(UPDATE_DEPS ON) # automatically installs vulkanheaders inside
+                    # vulkan-loaders, so no need for adding below line
 # set(VULKAN_HEADERS_INSTALL_DIR "/usr/share/cmake/VulkanHeaders")
 
-add_subdirectory(${VULKAN_LOADER_DIR} vulkan_loader/binary_dir EXCLUDE_FROM_ALL)
+add_subdirectory(${VULKAN_LOADER_DIR} vulkan-loader/binary_dir EXCLUDE_FROM_ALL)
