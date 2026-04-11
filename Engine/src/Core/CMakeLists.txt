@@ -1,4 +1,4 @@
-add_library(Core STATIC)
+add_library(Core OBJECT)
 
 target_sources(
   Core
@@ -11,6 +11,9 @@ target_sources(
          FILES
          ${PC_ENGINE_INCLUDE_DIR}/Popcorn/Core/Application.h)
 
-target_include_directories(
-  Core INTERFACE $<BUILD_INTERFACE:${PC_ENGINE_INCLUDE_DIR}>
-                 $<INSTALL_INTERFACE:include>)
+# third party stuff
+#
+target_link_libraries(Core PRIVATE glfw)
+
+# target_include_directories( Core INTERFACE
+# $<BUILD_INTERFACE:${PC_ENGINE_INCLUDE_DIR}> $<INSTALL_INTERFACE:include>)

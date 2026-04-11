@@ -50,16 +50,6 @@ add_subdirectory(./third-party)
 # add_subdirectory($PC_EDITOR_DIR/src)
 add_subdirectory(${PC_ENGINE_DIR})
 
-find_package(Vulkan REQUIRED)
-
-list(APPEND PC_LIBS_LIST glfw Vulkan::Vulkan)
-
-# -----------------------------------------------------------------------
-# LINKING STUFF
-# -----------------------------------------------------------------------
-target_link_libraries(Graphics PRIVATE Vulkan::Vulkan)
-target_link_libraries(Core PRIVATE ${PC_LIBS_LIST})
-
 # -----------------------------------------------------------------------
 # INSTALLATION STUFF
 # -----------------------------------------------------------------------

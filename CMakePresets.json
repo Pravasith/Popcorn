@@ -2,16 +2,27 @@
     "version": 4,
     "configurePresets": [
         {
-            "name": "Popcorn",
+            "name": "PopcornBase",
             "displayName": "Popcorn Preset",
             "description": "Preset to use with Popcorn",
-            "binaryDir": "${sourceDir}/build",
             "cacheVariables": {
               "CMAKE_CXX_STANDARD": "20",
               "CMAKE_CXX_STANDARD_REQUIRED": "ON",
-              "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-              "CMAKE_INSTALL_PREFIX": "install"
+              "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
             }
+        },
+        {
+            "name": "PopcornLinux",
+            "inherits": "PopcornBase",
+            "binaryDir": "${sourceDir}/build/linux",
+            "installDir": "install/linux"
+        },
+        {
+            "name": "PopcornWindowsCross",
+            "inherits": "PopcornBase",
+            "binaryDir": "${sourceDir}/build/windows",
+            "installDir": "install/windows",
+            "toolchainFile": "cmake/x86_64-w64-mingw32.cmake"
         }
     ]
 }

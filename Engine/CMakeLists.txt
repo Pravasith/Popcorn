@@ -13,9 +13,8 @@ target_sources(
   PUBLIC FILE_SET HEADERS BASE_DIRS ${PC_ENGINE_INCLUDE_DIR} FILES
          ${PC_ENGINE_INCLUDE_DIR}/Popcorn/Popcorn.h)
 
-target_include_directories(
-  ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PC_ENGINE_INCLUDE_DIR}>
-                         $<INSTALL_INTERFACE:include>)
+# target_include_directories( ${PROJECT_NAME} PUBLIC
+# $<BUILD_INTERFACE:${PC_ENGINE_INCLUDE_DIR}> $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(
   ${PROJECT_NAME}

@@ -4,6 +4,7 @@ namespace Popcorn {
 class Application {
 public:
   static Application *Get();
+  static void Destroy();
 
 private:
   Application();
