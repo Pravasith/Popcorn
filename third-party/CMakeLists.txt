@@ -12,5 +12,16 @@ option(GLFW_BUILD_DOCS "Build the GLFW documentation" OFF)
 option(GLFW_INSTALL "Generate installation target" OFF)
 option(GLFW_DOCUMENT_INTERNALS "Include internals in documentation" OFF)
 
-add_subdirectory(${GLFW_DIR} binary_dir EXCLUDE_FROM_ALL)
+add_subdirectory(${GLFW_DIR} glfw/binary_dir EXCLUDE_FROM_ALL)
 include_directories(${GLFW_DIR}/include)
+
+#
+# -------------------------- Vulkan Loader -------------------------------
+if(NOT VULKAN_LOADER_DIR)
+  set(VULKAN_LOADER_DIR ${CMAKE_SOURCE_DIR}/third-party/vulkan-loader)
+endif()
+
+set(UPDATE_DEPS ON)
+# set(VULKAN_HEADERS_INSTALL_DIR "/usr/share/cmake/VulkanHeaders")
+
+add_subdirectory(${VULKAN_LOADER_DIR} vulkan_loader/binary_dir EXCLUDE_FROM_ALL)

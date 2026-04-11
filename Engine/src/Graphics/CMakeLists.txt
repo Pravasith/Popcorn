@@ -19,9 +19,8 @@ target_sources(
           FILES
           ${PC_ENGINE_INCLUDE_DIR}/Popcorn/Graphics/Secret.h)
 
-# third party stuff
-find_package(Vulkan REQUIRED)
-target_link_libraries(Graphics PRIVATE Vulkan::Vulkan)
+# third party stuff find_package(Vulkan REQUIRED)
+target_link_libraries(Graphics PRIVATE Vulkan::Loader)
 
 # target_include_directories( Graphics INTERFACE
 # $<BUILD_INTERFACE:${PC_ENGINE_INCLUDE_DIR}> $<INSTALL_INTERFACE:include>)

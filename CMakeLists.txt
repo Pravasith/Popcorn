@@ -50,8 +50,6 @@ add_subdirectory(./third-party)
 # add_subdirectory($PC_EDITOR_DIR/src)
 add_subdirectory(${PC_ENGINE_DIR})
 
-list(APPEND PC_LIBS_LIST glfw Vulkan::Vulkan)
-
 # -----------------------------------------------------------------------
 # INSTALLATION STUFF
 # -----------------------------------------------------------------------
