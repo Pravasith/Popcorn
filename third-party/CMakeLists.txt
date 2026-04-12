@@ -12,8 +12,10 @@ option(GLFW_BUILD_DOCS "Build the GLFW documentation" OFF)
 option(GLFW_INSTALL "Generate installation target" OFF)
 option(GLFW_DOCUMENT_INTERNALS "Include internals in documentation" OFF)
 
-add_subdirectory(${GLFW_DIR} glfw/binary_dir EXCLUDE_FROM_ALL)
+add_subdirectory(${GLFW_DIR} glfw/binary_dir # EXCLUDE_FROM_ALL
+)
 include_directories(${GLFW_DIR}/include)
+# include_directories(${GLFW_DIR}/deps)
 
 #
 # -------------------------- Vulkan Loader -------------------------------
@@ -25,4 +27,6 @@ set(UPDATE_DEPS ON) # automatically installs vulkanheaders inside
                     # vulkan-loaders, so no need for adding below line
 # set(VULKAN_HEADERS_INSTALL_DIR "/usr/share/cmake/VulkanHeaders")
 
-add_subdirectory(${VULKAN_LOADER_DIR} vulkan-loader/binary_dir EXCLUDE_FROM_ALL)
+add_subdirectory(
+  ${VULKAN_LOADER_DIR} vulkan-loader/binary_dir # EXCLUDE_FROM_ALL
+)

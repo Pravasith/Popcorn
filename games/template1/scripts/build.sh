@@ -24,6 +24,6 @@ else
     cmake --preset GameLinux -DCMAKE_BUILD_TYPE="$build_type"
 fi
 
-cmake -S . -B "$build_dir"
+cmake --debug-find -S . -B "$build_dir"
 cmake --build "$build_dir"
 cmake --install "$build_dir"
