@@ -18,11 +18,15 @@ option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 # BUILD INFO
 # -----------------------------------------------------------------------
 if(WIN32)
-  list(APPEND CMAKE_PREFIX_PATH ../../install/windows) # to find Popcorn lib
+  list(APPEND CMAKE_PREFIX_PATH
+       # to find Popcorn lib
+       ../../install/windows)
 elseif(APPLE)
 
 elseif(UNIX)
-  list(APPEND CMAKE_PREFIX_PATH ../../install/linux) # to find Popcorn lib
+  list(APPEND CMAKE_PREFIX_PATH
+       # to find Popcorn lib
+       ../../install/linux)
 endif()
 find_package(Popcorn REQUIRED)
 

@@ -27,3 +27,8 @@ fi
 cmake --debug-find -S . -B "$build_dir"
 cmake --build "$build_dir"
 cmake --install "$build_dir"
+
+# TODO: Remove this, only need this for testing with wine.
+# Should work out of the box without this in actual windows machine
+cp /usr/lib/gcc/x86_64-w64-mingw32/13-win32/lib*.dll \
+   ./games/template1/dist/windows/bin
