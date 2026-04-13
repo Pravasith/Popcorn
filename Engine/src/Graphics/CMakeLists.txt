@@ -19,7 +19,7 @@ target_sources(
           FILES
           ${PC_ENGINE_INCLUDE_DIR}/Popcorn/Graphics/Secret.h)
 
-# third party stuff find_package(Vulkan REQUIRED)
+# Note: Vulkan loaders is an ext lib, means you gotta pull in from the game dir
 target_link_libraries(Graphics PRIVATE Vulkan::Loader)
 
 # target_include_directories( Graphics INTERFACE

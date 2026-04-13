@@ -1,0 +1,28 @@
+{
+    "version": 4,
+    "configurePresets": [
+        {
+            "name": "GameBase",
+            "displayName": "Game Presets",
+            "description": "Preset to use with Game",
+            "cacheVariables": {
+              "CMAKE_CXX_STANDARD": "20",
+              "CMAKE_CXX_STANDARD_REQUIRED": "ON",
+              "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
+        },
+        {
+            "name": "GameLinux",
+            "inherits": "GameBase",
+            "binaryDir": "${sourceDir}/build/linux",
+            "installDir": "dist/linux"
+        },
+        {
+            "name": "GameWindowsCross",
+            "inherits": "GameBase",
+            "binaryDir": "${sourceDir}/build/windows",
+            "installDir": "dist/windows",
+            "toolchainFile": "cmake/x86_64-w64-mingw32.cmake"
+        }
+    ]
+}
