@@ -1,0 +1,290 @@
+[
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/context.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/context.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/context.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/context.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/init.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/init.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/init.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/init.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/input.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/input.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/input.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/input.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/monitor.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/monitor.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/monitor.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/monitor.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/platform.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/platform.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/platform.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/platform.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/vulkan.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/vulkan.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/vulkan.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/vulkan.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/window.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/window.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/window.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/window.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/egl_context.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/egl_context.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/egl_context.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/egl_context.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/osmesa_context.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/osmesa_context.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/osmesa_context.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/osmesa_context.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/null_init.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/null_init.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/null_init.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/null_init.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/null_monitor.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/null_monitor.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/null_monitor.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/null_monitor.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/null_window.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/null_window.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/null_window.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/null_window.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/null_joystick.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/null_joystick.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/null_joystick.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/null_joystick.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/posix_module.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/posix_module.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/posix_module.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/posix_module.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/posix_time.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/posix_time.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/posix_time.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/posix_time.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/posix_thread.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/posix_thread.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/posix_thread.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/posix_thread.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/x11_init.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/x11_init.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/x11_init.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/x11_init.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/x11_monitor.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/x11_monitor.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/x11_monitor.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/x11_monitor.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/x11_window.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/x11_window.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/x11_window.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/x11_window.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/xkb_unicode.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/xkb_unicode.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/xkb_unicode.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/xkb_unicode.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/glx_context.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/glx_context.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/glx_context.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/glx_context.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/wl_init.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/wl_init.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/wl_init.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/wl_init.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/wl_monitor.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/wl_monitor.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/wl_monitor.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/wl_monitor.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/wl_window.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/wl_window.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/wl_window.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/wl_window.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/linux_joystick.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/linux_joystick.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/linux_joystick.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/linux_joystick.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src",
+  "command": "/usr/bin/cc -DHAVE_MEMFD_CREATE -DPC_DEBUG -DPC_OS_LINUX -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11 -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/glfw/src -I/home/prav/personal/Popcorn/build/linux/third-party/glfw/binary_dir/src -g -std=c99 -fPIC -Wall -o CMakeFiles/glfw.dir/posix_poll.c.o -c /home/prav/personal/Popcorn/third-party/glfw/src/posix_poll.c",
+  "file": "/home/prav/personal/Popcorn/third-party/glfw/src/posix_poll.c",
+  "output": "third-party/glfw/binary_dir/src/CMakeFiles/glfw.dir/posix_poll.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader",
+  "command": "/usr/bin/cc -DDEBUG -DEXTRASYSCONFDIR=\\\"/etc\\\" -DFALLBACK_CONFIG_DIRS=\\\"/etc/xdg\\\" -DFALLBACK_DATA_DIRS=\\\"/usr/local/share:/usr/share\\\" -DGIT_BRANCH_NAME=\\\"--unknown--\\\" -DGIT_TAG_INFO=\\\"--unknown--\\\" -DHAVE_ALLOCA_H -DHAVE_CET_H -DHAVE_REALPATH -DHAVE_SECURE_GETENV -DLOADER_ENABLE_LINUX_SORT -DPC_DEBUG -DPC_OS_LINUX -DSYSCONFDIR=\\\"/home/prav/personal/Popcorn/install/linux/etc\\\" -DVK_ENABLE_BETA_EXTENSIONS -DVK_USE_PLATFORM_WAYLAND_KHR -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT -D_GNU_SOURCE -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/generated -I/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader -isystem /home/prav/personal/Popcorn/third-party/vulkan-loader/external/Debug/64/Vulkan-Headers/build/install/include -g -std=c99 -fvisibility=hidden -Wall -Wextra -Wno-missing-field-initializers -fno-strict-aliasing -Wno-stringop-truncation -Wno-stringop-overflow -Wshadow=local -Wpointer-arith -o CMakeFiles/asm_offset.dir/asm_offset.c.o -c /home/prav/personal/Popcorn/third-party/vulkan-loader/loader/asm_offset.c",
+  "file": "/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/asm_offset.c",
+  "output": "third-party/vulkan-loader/binary_dir/loader/CMakeFiles/asm_offset.dir/asm_offset.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader",
+  "command": "/usr/bin/cc -DDEBUG -DEXTRASYSCONFDIR=\\\"/etc\\\" -DFALLBACK_CONFIG_DIRS=\\\"/etc/xdg\\\" -DFALLBACK_DATA_DIRS=\\\"/usr/local/share:/usr/share\\\" -DGIT_BRANCH_NAME=\\\"--unknown--\\\" -DGIT_TAG_INFO=\\\"--unknown--\\\" -DHAVE_ALLOCA_H -DHAVE_CET_H -DHAVE_REALPATH -DHAVE_SECURE_GETENV -DLOADER_ENABLE_LINUX_SORT -DPC_DEBUG -DPC_OS_LINUX -DSYSCONFDIR=\\\"/home/prav/personal/Popcorn/install/linux/etc\\\" -DUNKNOWN_FUNCTIONS_SUPPORTED -DVK_ENABLE_BETA_EXTENSIONS -DVK_USE_PLATFORM_WAYLAND_KHR -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT -D_GNU_SOURCE -Dvulkan_EXPORTS -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/generated -I/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader -isystem /home/prav/personal/Popcorn/third-party/vulkan-loader/external/Debug/64/Vulkan-Headers/build/install/include -g -std=c99 -fPIC -fvisibility=hidden -Wall -Wextra -Wno-missing-field-initializers -fno-strict-aliasing -Wno-stringop-truncation -Wno-stringop-overflow -Wshadow=local -Wpointer-arith -o CMakeFiles/vulkan.dir/allocation.c.o -c /home/prav/personal/Popcorn/third-party/vulkan-loader/loader/allocation.c",
+  "file": "/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/allocation.c",
+  "output": "third-party/vulkan-loader/binary_dir/loader/CMakeFiles/vulkan.dir/allocation.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader",
+  "command": "/usr/bin/cc -DDEBUG -DEXTRASYSCONFDIR=\\\"/etc\\\" -DFALLBACK_CONFIG_DIRS=\\\"/etc/xdg\\\" -DFALLBACK_DATA_DIRS=\\\"/usr/local/share:/usr/share\\\" -DGIT_BRANCH_NAME=\\\"--unknown--\\\" -DGIT_TAG_INFO=\\\"--unknown--\\\" -DHAVE_ALLOCA_H -DHAVE_CET_H -DHAVE_REALPATH -DHAVE_SECURE_GETENV -DLOADER_ENABLE_LINUX_SORT -DPC_DEBUG -DPC_OS_LINUX -DSYSCONFDIR=\\\"/home/prav/personal/Popcorn/install/linux/etc\\\" -DUNKNOWN_FUNCTIONS_SUPPORTED -DVK_ENABLE_BETA_EXTENSIONS -DVK_USE_PLATFORM_WAYLAND_KHR -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT -D_GNU_SOURCE -Dvulkan_EXPORTS -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/generated -I/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader -isystem /home/prav/personal/Popcorn/third-party/vulkan-loader/external/Debug/64/Vulkan-Headers/build/install/include -g -std=c99 -fPIC -fvisibility=hidden -Wall -Wextra -Wno-missing-field-initializers -fno-strict-aliasing -Wno-stringop-truncation -Wno-stringop-overflow -Wshadow=local -Wpointer-arith -o CMakeFiles/vulkan.dir/cJSON.c.o -c /home/prav/personal/Popcorn/third-party/vulkan-loader/loader/cJSON.c",
+  "file": "/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/cJSON.c",
+  "output": "third-party/vulkan-loader/binary_dir/loader/CMakeFiles/vulkan.dir/cJSON.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader",
+  "command": "/usr/bin/cc -DDEBUG -DEXTRASYSCONFDIR=\\\"/etc\\\" -DFALLBACK_CONFIG_DIRS=\\\"/etc/xdg\\\" -DFALLBACK_DATA_DIRS=\\\"/usr/local/share:/usr/share\\\" -DGIT_BRANCH_NAME=\\\"--unknown--\\\" -DGIT_TAG_INFO=\\\"--unknown--\\\" -DHAVE_ALLOCA_H -DHAVE_CET_H -DHAVE_REALPATH -DHAVE_SECURE_GETENV -DLOADER_ENABLE_LINUX_SORT -DPC_DEBUG -DPC_OS_LINUX -DSYSCONFDIR=\\\"/home/prav/personal/Popcorn/install/linux/etc\\\" -DUNKNOWN_FUNCTIONS_SUPPORTED -DVK_ENABLE_BETA_EXTENSIONS -DVK_USE_PLATFORM_WAYLAND_KHR -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT -D_GNU_SOURCE -Dvulkan_EXPORTS -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/generated -I/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader -isystem /home/prav/personal/Popcorn/third-party/vulkan-loader/external/Debug/64/Vulkan-Headers/build/install/include -g -std=c99 -fPIC -fvisibility=hidden -Wall -Wextra -Wno-missing-field-initializers -fno-strict-aliasing -Wno-stringop-truncation -Wno-stringop-overflow -Wshadow=local -Wpointer-arith -o CMakeFiles/vulkan.dir/debug_utils.c.o -c /home/prav/personal/Popcorn/third-party/vulkan-loader/loader/debug_utils.c",
+  "file": "/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/debug_utils.c",
+  "output": "third-party/vulkan-loader/binary_dir/loader/CMakeFiles/vulkan.dir/debug_utils.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader",
+  "command": "/usr/bin/cc -DDEBUG -DEXTRASYSCONFDIR=\\\"/etc\\\" -DFALLBACK_CONFIG_DIRS=\\\"/etc/xdg\\\" -DFALLBACK_DATA_DIRS=\\\"/usr/local/share:/usr/share\\\" -DGIT_BRANCH_NAME=\\\"--unknown--\\\" -DGIT_TAG_INFO=\\\"--unknown--\\\" -DHAVE_ALLOCA_H -DHAVE_CET_H -DHAVE_REALPATH -DHAVE_SECURE_GETENV -DLOADER_ENABLE_LINUX_SORT -DPC_DEBUG -DPC_OS_LINUX -DSYSCONFDIR=\\\"/home/prav/personal/Popcorn/install/linux/etc\\\" -DUNKNOWN_FUNCTIONS_SUPPORTED -DVK_ENABLE_BETA_EXTENSIONS -DVK_USE_PLATFORM_WAYLAND_KHR -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT -D_GNU_SOURCE -Dvulkan_EXPORTS -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/generated -I/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader -isystem /home/prav/personal/Popcorn/third-party/vulkan-loader/external/Debug/64/Vulkan-Headers/build/install/include -g -std=c99 -fPIC -fvisibility=hidden -Wall -Wextra -Wno-missing-field-initializers -fno-strict-aliasing -Wno-stringop-truncation -Wno-stringop-overflow -Wshadow=local -Wpointer-arith -o CMakeFiles/vulkan.dir/extension_manual.c.o -c /home/prav/personal/Popcorn/third-party/vulkan-loader/loader/extension_manual.c",
+  "file": "/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/extension_manual.c",
+  "output": "third-party/vulkan-loader/binary_dir/loader/CMakeFiles/vulkan.dir/extension_manual.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader",
+  "command": "/usr/bin/cc -DDEBUG -DEXTRASYSCONFDIR=\\\"/etc\\\" -DFALLBACK_CONFIG_DIRS=\\\"/etc/xdg\\\" -DFALLBACK_DATA_DIRS=\\\"/usr/local/share:/usr/share\\\" -DGIT_BRANCH_NAME=\\\"--unknown--\\\" -DGIT_TAG_INFO=\\\"--unknown--\\\" -DHAVE_ALLOCA_H -DHAVE_CET_H -DHAVE_REALPATH -DHAVE_SECURE_GETENV -DLOADER_ENABLE_LINUX_SORT -DPC_DEBUG -DPC_OS_LINUX -DSYSCONFDIR=\\\"/home/prav/personal/Popcorn/install/linux/etc\\\" -DUNKNOWN_FUNCTIONS_SUPPORTED -DVK_ENABLE_BETA_EXTENSIONS -DVK_USE_PLATFORM_WAYLAND_KHR -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT -D_GNU_SOURCE -Dvulkan_EXPORTS -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/generated -I/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader -isystem /home/prav/personal/Popcorn/third-party/vulkan-loader/external/Debug/64/Vulkan-Headers/build/install/include -g -std=c99 -fPIC -fvisibility=hidden -Wall -Wextra -Wno-missing-field-initializers -fno-strict-aliasing -Wno-stringop-truncation -Wno-stringop-overflow -Wshadow=local -Wpointer-arith -o CMakeFiles/vulkan.dir/loader_environment.c.o -c /home/prav/personal/Popcorn/third-party/vulkan-loader/loader/loader_environment.c",
+  "file": "/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/loader_environment.c",
+  "output": "third-party/vulkan-loader/binary_dir/loader/CMakeFiles/vulkan.dir/loader_environment.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader",
+  "command": "/usr/bin/cc -DDEBUG -DEXTRASYSCONFDIR=\\\"/etc\\\" -DFALLBACK_CONFIG_DIRS=\\\"/etc/xdg\\\" -DFALLBACK_DATA_DIRS=\\\"/usr/local/share:/usr/share\\\" -DGIT_BRANCH_NAME=\\\"--unknown--\\\" -DGIT_TAG_INFO=\\\"--unknown--\\\" -DHAVE_ALLOCA_H -DHAVE_CET_H -DHAVE_REALPATH -DHAVE_SECURE_GETENV -DLOADER_ENABLE_LINUX_SORT -DPC_DEBUG -DPC_OS_LINUX -DSYSCONFDIR=\\\"/home/prav/personal/Popcorn/install/linux/etc\\\" -DUNKNOWN_FUNCTIONS_SUPPORTED -DVK_ENABLE_BETA_EXTENSIONS -DVK_USE_PLATFORM_WAYLAND_KHR -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT -D_GNU_SOURCE -Dvulkan_EXPORTS -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/generated -I/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader -isystem /home/prav/personal/Popcorn/third-party/vulkan-loader/external/Debug/64/Vulkan-Headers/build/install/include -g -std=c99 -fPIC -fvisibility=hidden -Wall -Wextra -Wno-missing-field-initializers -fno-strict-aliasing -Wno-stringop-truncation -Wno-stringop-overflow -Wshadow=local -Wpointer-arith -o CMakeFiles/vulkan.dir/gpa_helper.c.o -c /home/prav/personal/Popcorn/third-party/vulkan-loader/loader/gpa_helper.c",
+  "file": "/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/gpa_helper.c",
+  "output": "third-party/vulkan-loader/binary_dir/loader/CMakeFiles/vulkan.dir/gpa_helper.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader",
+  "command": "/usr/bin/cc -DDEBUG -DEXTRASYSCONFDIR=\\\"/etc\\\" -DFALLBACK_CONFIG_DIRS=\\\"/etc/xdg\\\" -DFALLBACK_DATA_DIRS=\\\"/usr/local/share:/usr/share\\\" -DGIT_BRANCH_NAME=\\\"--unknown--\\\" -DGIT_TAG_INFO=\\\"--unknown--\\\" -DHAVE_ALLOCA_H -DHAVE_CET_H -DHAVE_REALPATH -DHAVE_SECURE_GETENV -DLOADER_ENABLE_LINUX_SORT -DPC_DEBUG -DPC_OS_LINUX -DSYSCONFDIR=\\\"/home/prav/personal/Popcorn/install/linux/etc\\\" -DUNKNOWN_FUNCTIONS_SUPPORTED -DVK_ENABLE_BETA_EXTENSIONS -DVK_USE_PLATFORM_WAYLAND_KHR -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT -D_GNU_SOURCE -Dvulkan_EXPORTS -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/generated -I/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader -isystem /home/prav/personal/Popcorn/third-party/vulkan-loader/external/Debug/64/Vulkan-Headers/build/install/include -g -std=c99 -fPIC -fvisibility=hidden -Wall -Wextra -Wno-missing-field-initializers -fno-strict-aliasing -Wno-stringop-truncation -Wno-stringop-overflow -Wshadow=local -Wpointer-arith -o CMakeFiles/vulkan.dir/loader.c.o -c /home/prav/personal/Popcorn/third-party/vulkan-loader/loader/loader.c",
+  "file": "/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/loader.c",
+  "output": "third-party/vulkan-loader/binary_dir/loader/CMakeFiles/vulkan.dir/loader.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader",
+  "command": "/usr/bin/cc -DDEBUG -DEXTRASYSCONFDIR=\\\"/etc\\\" -DFALLBACK_CONFIG_DIRS=\\\"/etc/xdg\\\" -DFALLBACK_DATA_DIRS=\\\"/usr/local/share:/usr/share\\\" -DGIT_BRANCH_NAME=\\\"--unknown--\\\" -DGIT_TAG_INFO=\\\"--unknown--\\\" -DHAVE_ALLOCA_H -DHAVE_CET_H -DHAVE_REALPATH -DHAVE_SECURE_GETENV -DLOADER_ENABLE_LINUX_SORT -DPC_DEBUG -DPC_OS_LINUX -DSYSCONFDIR=\\\"/home/prav/personal/Popcorn/install/linux/etc\\\" -DUNKNOWN_FUNCTIONS_SUPPORTED -DVK_ENABLE_BETA_EXTENSIONS -DVK_USE_PLATFORM_WAYLAND_KHR -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT -D_GNU_SOURCE -Dvulkan_EXPORTS -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/generated -I/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader -isystem /home/prav/personal/Popcorn/third-party/vulkan-loader/external/Debug/64/Vulkan-Headers/build/install/include -g -std=c99 -fPIC -fvisibility=hidden -Wall -Wextra -Wno-missing-field-initializers -fno-strict-aliasing -Wno-stringop-truncation -Wno-stringop-overflow -Wshadow=local -Wpointer-arith -o CMakeFiles/vulkan.dir/log.c.o -c /home/prav/personal/Popcorn/third-party/vulkan-loader/loader/log.c",
+  "file": "/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/log.c",
+  "output": "third-party/vulkan-loader/binary_dir/loader/CMakeFiles/vulkan.dir/log.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader",
+  "command": "/usr/bin/cc -DDEBUG -DEXTRASYSCONFDIR=\\\"/etc\\\" -DFALLBACK_CONFIG_DIRS=\\\"/etc/xdg\\\" -DFALLBACK_DATA_DIRS=\\\"/usr/local/share:/usr/share\\\" -DGIT_BRANCH_NAME=\\\"--unknown--\\\" -DGIT_TAG_INFO=\\\"--unknown--\\\" -DHAVE_ALLOCA_H -DHAVE_CET_H -DHAVE_REALPATH -DHAVE_SECURE_GETENV -DLOADER_ENABLE_LINUX_SORT -DPC_DEBUG -DPC_OS_LINUX -DSYSCONFDIR=\\\"/home/prav/personal/Popcorn/install/linux/etc\\\" -DUNKNOWN_FUNCTIONS_SUPPORTED -DVK_ENABLE_BETA_EXTENSIONS -DVK_USE_PLATFORM_WAYLAND_KHR -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT -D_GNU_SOURCE -Dvulkan_EXPORTS -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/generated -I/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader -isystem /home/prav/personal/Popcorn/third-party/vulkan-loader/external/Debug/64/Vulkan-Headers/build/install/include -g -std=c99 -fPIC -fvisibility=hidden -Wall -Wextra -Wno-missing-field-initializers -fno-strict-aliasing -Wno-stringop-truncation -Wno-stringop-overflow -Wshadow=local -Wpointer-arith -o CMakeFiles/vulkan.dir/loader_json.c.o -c /home/prav/personal/Popcorn/third-party/vulkan-loader/loader/loader_json.c",
+  "file": "/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/loader_json.c",
+  "output": "third-party/vulkan-loader/binary_dir/loader/CMakeFiles/vulkan.dir/loader_json.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader",
+  "command": "/usr/bin/cc -DDEBUG -DEXTRASYSCONFDIR=\\\"/etc\\\" -DFALLBACK_CONFIG_DIRS=\\\"/etc/xdg\\\" -DFALLBACK_DATA_DIRS=\\\"/usr/local/share:/usr/share\\\" -DGIT_BRANCH_NAME=\\\"--unknown--\\\" -DGIT_TAG_INFO=\\\"--unknown--\\\" -DHAVE_ALLOCA_H -DHAVE_CET_H -DHAVE_REALPATH -DHAVE_SECURE_GETENV -DLOADER_ENABLE_LINUX_SORT -DPC_DEBUG -DPC_OS_LINUX -DSYSCONFDIR=\\\"/home/prav/personal/Popcorn/install/linux/etc\\\" -DUNKNOWN_FUNCTIONS_SUPPORTED -DVK_ENABLE_BETA_EXTENSIONS -DVK_USE_PLATFORM_WAYLAND_KHR -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT -D_GNU_SOURCE -Dvulkan_EXPORTS -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/generated -I/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader -isystem /home/prav/personal/Popcorn/third-party/vulkan-loader/external/Debug/64/Vulkan-Headers/build/install/include -g -std=c99 -fPIC -fvisibility=hidden -Wall -Wextra -Wno-missing-field-initializers -fno-strict-aliasing -Wno-stringop-truncation -Wno-stringop-overflow -Wshadow=local -Wpointer-arith -o CMakeFiles/vulkan.dir/settings.c.o -c /home/prav/personal/Popcorn/third-party/vulkan-loader/loader/settings.c",
+  "file": "/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/settings.c",
+  "output": "third-party/vulkan-loader/binary_dir/loader/CMakeFiles/vulkan.dir/settings.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader",
+  "command": "/usr/bin/cc -DDEBUG -DEXTRASYSCONFDIR=\\\"/etc\\\" -DFALLBACK_CONFIG_DIRS=\\\"/etc/xdg\\\" -DFALLBACK_DATA_DIRS=\\\"/usr/local/share:/usr/share\\\" -DGIT_BRANCH_NAME=\\\"--unknown--\\\" -DGIT_TAG_INFO=\\\"--unknown--\\\" -DHAVE_ALLOCA_H -DHAVE_CET_H -DHAVE_REALPATH -DHAVE_SECURE_GETENV -DLOADER_ENABLE_LINUX_SORT -DPC_DEBUG -DPC_OS_LINUX -DSYSCONFDIR=\\\"/home/prav/personal/Popcorn/install/linux/etc\\\" -DUNKNOWN_FUNCTIONS_SUPPORTED -DVK_ENABLE_BETA_EXTENSIONS -DVK_USE_PLATFORM_WAYLAND_KHR -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT -D_GNU_SOURCE -Dvulkan_EXPORTS -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/generated -I/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader -isystem /home/prav/personal/Popcorn/third-party/vulkan-loader/external/Debug/64/Vulkan-Headers/build/install/include -g -std=c99 -fPIC -fvisibility=hidden -Wall -Wextra -Wno-missing-field-initializers -fno-strict-aliasing -Wno-stringop-truncation -Wno-stringop-overflow -Wshadow=local -Wpointer-arith -o CMakeFiles/vulkan.dir/terminator.c.o -c /home/prav/personal/Popcorn/third-party/vulkan-loader/loader/terminator.c",
+  "file": "/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/terminator.c",
+  "output": "third-party/vulkan-loader/binary_dir/loader/CMakeFiles/vulkan.dir/terminator.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader",
+  "command": "/usr/bin/cc -DDEBUG -DEXTRASYSCONFDIR=\\\"/etc\\\" -DFALLBACK_CONFIG_DIRS=\\\"/etc/xdg\\\" -DFALLBACK_DATA_DIRS=\\\"/usr/local/share:/usr/share\\\" -DGIT_BRANCH_NAME=\\\"--unknown--\\\" -DGIT_TAG_INFO=\\\"--unknown--\\\" -DHAVE_ALLOCA_H -DHAVE_CET_H -DHAVE_REALPATH -DHAVE_SECURE_GETENV -DLOADER_ENABLE_LINUX_SORT -DPC_DEBUG -DPC_OS_LINUX -DSYSCONFDIR=\\\"/home/prav/personal/Popcorn/install/linux/etc\\\" -DUNKNOWN_FUNCTIONS_SUPPORTED -DVK_ENABLE_BETA_EXTENSIONS -DVK_USE_PLATFORM_WAYLAND_KHR -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT -D_GNU_SOURCE -Dvulkan_EXPORTS -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/generated -I/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader -isystem /home/prav/personal/Popcorn/third-party/vulkan-loader/external/Debug/64/Vulkan-Headers/build/install/include -g -std=c99 -fPIC -fvisibility=hidden -Wall -Wextra -Wno-missing-field-initializers -fno-strict-aliasing -Wno-stringop-truncation -Wno-stringop-overflow -Wshadow=local -Wpointer-arith -o CMakeFiles/vulkan.dir/trampoline.c.o -c /home/prav/personal/Popcorn/third-party/vulkan-loader/loader/trampoline.c",
+  "file": "/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/trampoline.c",
+  "output": "third-party/vulkan-loader/binary_dir/loader/CMakeFiles/vulkan.dir/trampoline.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader",
+  "command": "/usr/bin/cc -DDEBUG -DEXTRASYSCONFDIR=\\\"/etc\\\" -DFALLBACK_CONFIG_DIRS=\\\"/etc/xdg\\\" -DFALLBACK_DATA_DIRS=\\\"/usr/local/share:/usr/share\\\" -DGIT_BRANCH_NAME=\\\"--unknown--\\\" -DGIT_TAG_INFO=\\\"--unknown--\\\" -DHAVE_ALLOCA_H -DHAVE_CET_H -DHAVE_REALPATH -DHAVE_SECURE_GETENV -DLOADER_ENABLE_LINUX_SORT -DPC_DEBUG -DPC_OS_LINUX -DSYSCONFDIR=\\\"/home/prav/personal/Popcorn/install/linux/etc\\\" -DUNKNOWN_FUNCTIONS_SUPPORTED -DVK_ENABLE_BETA_EXTENSIONS -DVK_USE_PLATFORM_WAYLAND_KHR -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT -D_GNU_SOURCE -Dvulkan_EXPORTS -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/generated -I/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader -isystem /home/prav/personal/Popcorn/third-party/vulkan-loader/external/Debug/64/Vulkan-Headers/build/install/include -g -std=c99 -fPIC -fvisibility=hidden -Wall -Wextra -Wno-missing-field-initializers -fno-strict-aliasing -Wno-stringop-truncation -Wno-stringop-overflow -Wshadow=local -Wpointer-arith -o CMakeFiles/vulkan.dir/unknown_function_handling.c.o -c /home/prav/personal/Popcorn/third-party/vulkan-loader/loader/unknown_function_handling.c",
+  "file": "/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/unknown_function_handling.c",
+  "output": "third-party/vulkan-loader/binary_dir/loader/CMakeFiles/vulkan.dir/unknown_function_handling.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader",
+  "command": "/usr/bin/cc -DDEBUG -DEXTRASYSCONFDIR=\\\"/etc\\\" -DFALLBACK_CONFIG_DIRS=\\\"/etc/xdg\\\" -DFALLBACK_DATA_DIRS=\\\"/usr/local/share:/usr/share\\\" -DGIT_BRANCH_NAME=\\\"--unknown--\\\" -DGIT_TAG_INFO=\\\"--unknown--\\\" -DHAVE_ALLOCA_H -DHAVE_CET_H -DHAVE_REALPATH -DHAVE_SECURE_GETENV -DLOADER_ENABLE_LINUX_SORT -DPC_DEBUG -DPC_OS_LINUX -DSYSCONFDIR=\\\"/home/prav/personal/Popcorn/install/linux/etc\\\" -DUNKNOWN_FUNCTIONS_SUPPORTED -DVK_ENABLE_BETA_EXTENSIONS -DVK_USE_PLATFORM_WAYLAND_KHR -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT -D_GNU_SOURCE -Dvulkan_EXPORTS -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/generated -I/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader -isystem /home/prav/personal/Popcorn/third-party/vulkan-loader/external/Debug/64/Vulkan-Headers/build/install/include -g -std=c99 -fPIC -fvisibility=hidden -Wall -Wextra -Wno-missing-field-initializers -fno-strict-aliasing -Wno-stringop-truncation -Wno-stringop-overflow -Wshadow=local -Wpointer-arith -o CMakeFiles/vulkan.dir/wsi.c.o -c /home/prav/personal/Popcorn/third-party/vulkan-loader/loader/wsi.c",
+  "file": "/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/wsi.c",
+  "output": "third-party/vulkan-loader/binary_dir/loader/CMakeFiles/vulkan.dir/wsi.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader",
+  "command": "/usr/bin/cc -DDEBUG -DEXTRASYSCONFDIR=\\\"/etc\\\" -DFALLBACK_CONFIG_DIRS=\\\"/etc/xdg\\\" -DFALLBACK_DATA_DIRS=\\\"/usr/local/share:/usr/share\\\" -DGIT_BRANCH_NAME=\\\"--unknown--\\\" -DGIT_TAG_INFO=\\\"--unknown--\\\" -DHAVE_ALLOCA_H -DHAVE_CET_H -DHAVE_REALPATH -DHAVE_SECURE_GETENV -DLOADER_ENABLE_LINUX_SORT -DPC_DEBUG -DPC_OS_LINUX -DSYSCONFDIR=\\\"/home/prav/personal/Popcorn/install/linux/etc\\\" -DUNKNOWN_FUNCTIONS_SUPPORTED -DVK_ENABLE_BETA_EXTENSIONS -DVK_USE_PLATFORM_WAYLAND_KHR -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT -D_GNU_SOURCE -Dvulkan_EXPORTS -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/generated -I/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader -isystem /home/prav/personal/Popcorn/third-party/vulkan-loader/external/Debug/64/Vulkan-Headers/build/install/include -g -std=c99 -fPIC -fvisibility=hidden -Wall -Wextra -Wno-missing-field-initializers -fno-strict-aliasing -Wno-stringop-truncation -Wno-stringop-overflow -Wshadow=local -Wpointer-arith -o CMakeFiles/vulkan.dir/loader_linux.c.o -c /home/prav/personal/Popcorn/third-party/vulkan-loader/loader/loader_linux.c",
+  "file": "/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/loader_linux.c",
+  "output": "third-party/vulkan-loader/binary_dir/loader/CMakeFiles/vulkan.dir/loader_linux.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader",
+  "command": "/usr/bin/cc -DDEBUG -DEXTRASYSCONFDIR=\\\"/etc\\\" -DFALLBACK_CONFIG_DIRS=\\\"/etc/xdg\\\" -DFALLBACK_DATA_DIRS=\\\"/usr/local/share:/usr/share\\\" -DGIT_BRANCH_NAME=\\\"--unknown--\\\" -DGIT_TAG_INFO=\\\"--unknown--\\\" -DHAVE_ALLOCA_H -DHAVE_CET_H -DHAVE_REALPATH -DHAVE_SECURE_GETENV -DLOADER_ENABLE_LINUX_SORT -DPC_DEBUG -DPC_OS_LINUX -DSYSCONFDIR=\\\"/home/prav/personal/Popcorn/install/linux/etc\\\" -DUNKNOWN_FUNCTIONS_SUPPORTED -DVK_ENABLE_BETA_EXTENSIONS -DVK_USE_PLATFORM_WAYLAND_KHR -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT -D_GNU_SOURCE -Dvulkan_EXPORTS -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/generated -I/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader -isystem /home/prav/personal/Popcorn/third-party/vulkan-loader/external/Debug/64/Vulkan-Headers/build/install/include -g -std=c99 -fPIC -fvisibility=hidden -Wall -Wextra -Wno-missing-field-initializers -fno-strict-aliasing -Wno-stringop-truncation -Wno-stringop-overflow -Wshadow=local -Wpointer-arith -o CMakeFiles/vulkan.dir/dev_ext_trampoline.c.o -c /home/prav/personal/Popcorn/third-party/vulkan-loader/loader/dev_ext_trampoline.c",
+  "file": "/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/dev_ext_trampoline.c",
+  "output": "third-party/vulkan-loader/binary_dir/loader/CMakeFiles/vulkan.dir/dev_ext_trampoline.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader",
+  "command": "/usr/bin/cc -DDEBUG -DEXTRASYSCONFDIR=\\\"/etc\\\" -DFALLBACK_CONFIG_DIRS=\\\"/etc/xdg\\\" -DFALLBACK_DATA_DIRS=\\\"/usr/local/share:/usr/share\\\" -DGIT_BRANCH_NAME=\\\"--unknown--\\\" -DGIT_TAG_INFO=\\\"--unknown--\\\" -DHAVE_ALLOCA_H -DHAVE_CET_H -DHAVE_REALPATH -DHAVE_SECURE_GETENV -DLOADER_ENABLE_LINUX_SORT -DPC_DEBUG -DPC_OS_LINUX -DSYSCONFDIR=\\\"/home/prav/personal/Popcorn/install/linux/etc\\\" -DUNKNOWN_FUNCTIONS_SUPPORTED -DVK_ENABLE_BETA_EXTENSIONS -DVK_USE_PLATFORM_WAYLAND_KHR -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT -D_GNU_SOURCE -Dvulkan_EXPORTS -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/generated -I/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader -isystem /home/prav/personal/Popcorn/third-party/vulkan-loader/external/Debug/64/Vulkan-Headers/build/install/include -g -std=c99 -fPIC -fvisibility=hidden -Wall -Wextra -Wno-missing-field-initializers -fno-strict-aliasing -Wno-stringop-truncation -Wno-stringop-overflow -Wshadow=local -Wpointer-arith -o CMakeFiles/vulkan.dir/phys_dev_ext.c.o -c /home/prav/personal/Popcorn/third-party/vulkan-loader/loader/phys_dev_ext.c",
+  "file": "/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/phys_dev_ext.c",
+  "output": "third-party/vulkan-loader/binary_dir/loader/CMakeFiles/vulkan.dir/phys_dev_ext.c.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader",
+  "command": "/usr/bin/cc -DDEBUG -DEXTRASYSCONFDIR=\\\"/etc\\\" -DFALLBACK_CONFIG_DIRS=\\\"/etc/xdg\\\" -DFALLBACK_DATA_DIRS=\\\"/usr/local/share:/usr/share\\\" -DGIT_BRANCH_NAME=\\\"--unknown--\\\" -DGIT_TAG_INFO=\\\"--unknown--\\\" -DHAVE_ALLOCA_H -DHAVE_CET_H -DHAVE_REALPATH -DHAVE_SECURE_GETENV -DLOADER_ENABLE_LINUX_SORT -DPC_DEBUG -DPC_OS_LINUX -DSYSCONFDIR=\\\"/home/prav/personal/Popcorn/install/linux/etc\\\" -DUNKNOWN_FUNCTIONS_SUPPORTED -DVK_ENABLE_BETA_EXTENSIONS -DVK_USE_PLATFORM_WAYLAND_KHR -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT -D_GNU_SOURCE -Dvulkan_EXPORTS -I/home/prav/personal/Popcorn/third-party/glfw/include -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader -I/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/generated -I/home/prav/personal/Popcorn/build/linux/third-party/vulkan-loader/binary_dir/loader -I/usr/include -isystem /home/prav/personal/Popcorn/third-party/vulkan-loader/external/Debug/64/Vulkan-Headers/build/install/include -g -fPIC -o CMakeFiles/vulkan.dir/unknown_ext_chain_gas_x86.S.o -c /home/prav/personal/Popcorn/third-party/vulkan-loader/loader/unknown_ext_chain_gas_x86.S",
+  "file": "/home/prav/personal/Popcorn/third-party/vulkan-loader/loader/unknown_ext_chain_gas_x86.S",
+  "output": "third-party/vulkan-loader/binary_dir/loader/CMakeFiles/vulkan.dir/unknown_ext_chain_gas_x86.S.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/Engine",
+  "command": "/usr/bin/c++ -DPC_DEBUG -DPC_OS_LINUX -I/home/prav/personal/Popcorn/Engine/include -g -std=gnu++20 -o CMakeFiles/Popcorn.dir/src/Popcorn.cpp.o -c /home/prav/personal/Popcorn/Engine/src/Popcorn.cpp",
+  "file": "/home/prav/personal/Popcorn/Engine/src/Popcorn.cpp",
+  "output": "Engine/CMakeFiles/Popcorn.dir/src/Popcorn.cpp.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/Engine/src/Core",
+  "command": "/usr/bin/c++ -DPC_DEBUG -DPC_OS_LINUX -I/home/prav/personal/Popcorn/Engine/include -I/home/prav/personal/Popcorn/third-party/glfw/include -g -std=gnu++20 -o CMakeFiles/Core.dir/Application.cpp.o -c /home/prav/personal/Popcorn/Engine/src/Core/Application.cpp",
+  "file": "/home/prav/personal/Popcorn/Engine/src/Core/Application.cpp",
+  "output": "Engine/src/Core/CMakeFiles/Core.dir/Application.cpp.o"
+},
+{
+  "directory": "/home/prav/personal/Popcorn/build/linux/Engine/src/Graphics",
+  "command": "/usr/bin/c++ -DPC_DEBUG -DPC_OS_LINUX -I/home/prav/personal/Popcorn/Engine/include -g -std=gnu++20 -o CMakeFiles/Graphics.dir/Graphics.cpp.o -c /home/prav/personal/Popcorn/Engine/src/Graphics/Graphics.cpp",
+  "file": "/home/prav/personal/Popcorn/Engine/src/Graphics/Graphics.cpp",
+  "output": "Engine/src/Graphics/CMakeFiles/Graphics.dir/Graphics.cpp.o"
+}
+]

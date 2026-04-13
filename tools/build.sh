@@ -28,3 +28,6 @@ fi
 cmake -S . -B "$build_dir"
 cmake --build "$build_dir"
 cmake --install "$build_dir"
+
+# for neovim clangd lsp
+cp ./build/linux/compile_commands.json .

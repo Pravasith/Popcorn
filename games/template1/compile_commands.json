@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/prav/personal/Popcorn/games/template1/build/linux",
+  "command": "/usr/bin/c++  -isystem /home/prav/personal/Popcorn/install/linux/include -g -std=gnu++20 -o CMakeFiles/Game.dir/main.cpp.o -c /home/prav/personal/Popcorn/games/template1/main.cpp",
+  "file": "/home/prav/personal/Popcorn/games/template1/main.cpp",
+  "output": "CMakeFiles/Game.dir/main.cpp.o"
+}
+]

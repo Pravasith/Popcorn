@@ -28,7 +28,11 @@ cmake --debug-find -S . -B "$build_dir"
 cmake --build "$build_dir"
 cmake --install "$build_dir"
 
+# for neovim clangd lsp
+cp ./build/linux/compile_commands.json .
+
 # TODO: Remove this, only need this for testing with wine.
 # Should work out of the box without this in actual windows machine
+# mkdir -p ./dist/windows/bin
 cp /usr/lib/gcc/x86_64-w64-mingw32/13-win32/lib*.dll \
-   ./games/template1/dist/windows/bin
+   ./dist/windows/bin
